@@ -4,7 +4,8 @@
 
 Character::Character(uint id, QObject *parent) :
     GameObject("character", id, parent),
-    m_admin(false) {
+    m_admin(false),
+    m_session(0) {
 }
 
 Character::~Character() {
@@ -27,21 +28,37 @@ void Character::setName(const QString &name) {
 
 void Character::setPasswordHash(const QString &passwordHash) {
 
-    m_passwordHash = passwordHash;
+    if (m_passwordHash != passwordHash) {
+        m_passwordHash = passwordHash;
 
-    setModified();
+        setModified();
+    }
 }
 
 void Character::setCurrentArea(const GameObjectPtr &currentArea) {
 
-    m_currentArea = currentArea;
+    if (m_currentArea != currentArea) {
+        m_currentArea = currentArea;
 
-    setModified();
+        setModified();
+    }
 }
 
 void Character::setAdmin(bool admin) {
 
-    m_admin = admin;
+    if (m_admin != admin) {
+        m_admin = admin;
 
-    setModified();
+        setModified();
+    }
+}
+
+void Character::setSession(Session *session) {
+
+    m_session = session;
+}
+
+void Character::send(QString data) {
+
+    write(data);
 }

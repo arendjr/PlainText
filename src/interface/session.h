@@ -21,7 +21,7 @@ class Session : public QObject {
         void onUserInput(QString data);
 
     signals:
-        void write(QString data);
+        void write(const QString &data);
 
         void terminate();
 

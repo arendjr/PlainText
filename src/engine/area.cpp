@@ -12,39 +12,45 @@ Area::~Area() {
 
 void Area::setTitle(const QString &title) {
 
-    m_title = title;
+    if (m_title != title) {
+        m_title = title;
 
-    setModified();
+        setModified();
+    }
 }
 
 void Area::setDescription(const QString &description) {
 
-    m_description = description;
+    if (m_description != description) {
+        m_description = description;
 
-    setModified();
+        setModified();
+    }
 }
 
 void Area::addExit(const Exit &exit) {
 
     if (!m_exits.contains(exit)) {
         m_exits.append(exit);
-    }
 
-    setModified();
+        setModified();
+    }
 }
 
 void Area::removeExit(const Exit &exit) {
 
-    m_exits.removeAll(exit);
-
-    setModified();
+    if (m_exits.removeAll(exit) > 0) {
+        setModified();
+    }
 }
 
 void Area::setExits(const ExitList &exits) {
 
-    m_exits = exits;
+    if (m_exits != exits) {
+        m_exits = exits;
 
-    setModified();
+        setModified();
+    }
 }
 
 void Area::addPresentCharacter(const GameObjectPtr &character) {
@@ -52,20 +58,14 @@ void Area::addPresentCharacter(const GameObjectPtr &character) {
     if (!m_presentCharacters.contains(character)) {
         m_presentCharacters.append(character);
     }
-
-    setModified();
 }
 
 void Area::removePresentCharacter(const GameObjectPtr &character) {
 
     m_presentCharacters.removeAll(character);
-
-    setModified();
 }
 
 void Area::setPresentCharacters(const GameObjectPtrList &presentCharacters) {
 
     m_presentCharacters = presentCharacters;
-
-    setModified();
 }

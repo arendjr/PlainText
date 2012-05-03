@@ -36,6 +36,11 @@ class Character : public GameObject {
         Session *session() const { return m_session; }
         void setSession(Session *session);
 
+        void send(QString data);
+
+    signals:
+        void write(const QString &data);
+
     private:
         QString m_name;
         QString m_passwordHash;

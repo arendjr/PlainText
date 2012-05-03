@@ -51,24 +51,24 @@ GameObjectPtr &GameObjectPtr::operator=(GameObjectPtr other) {
 
 bool GameObjectPtr::operator==(const GameObjectPtr &other) const {
 
-    return m_id == other.m_id;
+    return m_id == other.m_id && m_gameObject == other.m_gameObject;
 }
 
 bool GameObjectPtr::operator==(const GameObject *other) const {
 
     Q_ASSERT(other);
-    return m_id == other->id();
+    return m_gameObject == other;
 }
 
 bool GameObjectPtr::operator!=(const GameObjectPtr &other) const {
 
-    return m_id != other.m_id;
+    return m_id != other.m_id || m_gameObject != other.m_gameObject;
 }
 
 bool GameObjectPtr::operator!=(const GameObject *other) const {
 
     Q_ASSERT(other);
-    return m_id != other->id();
+    return m_gameObject != other;
 }
 
 GameObject &GameObjectPtr::operator*() const {

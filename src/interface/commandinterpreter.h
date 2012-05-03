@@ -20,11 +20,14 @@ class CommandInterpreter : public QObject {
         void goExit(const QString &exitName);
 
         void enterArea(const GameObjectPtr &area);
+        void leaveArea(const GameObjectPtr &area, const QString &exitName = QString::null);
 
     signals:
-        void write(QString data);
-
         void exit();
+
+    protected:
+        void addExit(const QString &exitName, uint destinationAreaId, bool hidden);
+        void removeExit(const QString &exitName);
 
     private:
         Character *m_character;

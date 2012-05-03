@@ -25,6 +25,12 @@ Session::Session(QObject *parent) :
 
 Session::~Session() {
 
+    if (m_character) {
+        if (m_interpreter) {
+            m_interpreter->leaveArea(m_character->currentArea());
+        }
+        m_character->setSession(0);
+    }
     delete m_signUpData;
 }
 
@@ -137,9 +143,9 @@ void Session::processSignIn(const QString &data) {
                 break;
             }
             m_character->setSession(this);
+            connect(m_character, SIGNAL(write(QString)), this, SIGNAL(write(QString)));
 
             m_interpreter = new CommandInterpreter(m_character, this);
-            connect(m_interpreter, SIGNAL(write(QString)), this, SIGNAL(write(QString)));
             connect(m_interpreter, SIGNAL(exit()), this, SIGNAL(terminate()));
             m_interpreter->enterArea(m_character->currentArea());
             break;
