@@ -1,0 +1,25 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+
+.screen,.command-input {
+    display: block;
+
+    font-family: "Courier", monospace;
+    font-size: 10pt;
+    color: #fff;
+
+    outline: 0;
+    border: 2px inset #777;
+    padding: 0.5em;
+    background: #000;
+}
+
+.screen {
+    margin: 2em 2em 0;
+}
+
+.command-input {
+    margin: 0 2em 2em;
+}
