@@ -1,8 +1,7 @@
 #include "exit.h"
 
-#include <QDebug>
-
 #include "badgameobjectexception.h"
+#include "util.h"
 
 
 Exit::Exit() {
@@ -34,12 +33,19 @@ void Exit::resolvePointer() {
     m_destinationArea.resolve();
 }
 
+QString Exit::toString() const {
+
+    return "[ " + Util::jsString(m_name) + ", " +
+                  Util::jsString(m_destinationArea.toString()) + ", " +
+                  QString(m_hidden ? "true" : "false") + " ]";
+}
+
 QVariantList Exit::toVariantList() const {
 
     QVariantList list;
-    list.append(m_name);
-    list.append(m_destinationArea.toString());
-    list.append(m_hidden);
+    list << m_name;
+    list << m_destinationArea.toString();
+    list << m_hidden;
     return list;
 }
 

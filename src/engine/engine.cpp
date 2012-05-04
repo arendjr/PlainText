@@ -17,7 +17,7 @@ Engine::Engine(QObject *parent) :
     qRegisterMetaType<GameObjectPtr>();
     qRegisterMetaType<GameObjectPtrList>();
 
-    Realm::instance();
+    Realm::instantiate();
 }
 
 void Engine::start() {

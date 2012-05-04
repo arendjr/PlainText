@@ -13,7 +13,9 @@ class Realm : public GameObject {
     Q_OBJECT
 
     public:
-        static Realm *instance();
+        static Realm *instance() { Q_ASSERT(s_instance); return s_instance; };
+
+        static void instantiate();
         static void destroy();
 
         bool isInitialized() const { return m_initialized; }
@@ -42,8 +44,6 @@ class Realm : public GameObject {
 
         explicit Realm();
         virtual ~Realm();
-
-        void init();
 };
 
 #endif // REALM_H

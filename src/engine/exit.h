@@ -26,6 +26,8 @@ class Exit {
 
         void resolvePointer();
 
+        QString toString() const;
+
         QVariantList toVariantList() const;
 
         static Exit fromVariantList(const QVariantList &list);

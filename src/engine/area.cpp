@@ -31,7 +31,7 @@ void Area::setDescription(const QString &description) {
 void Area::addExit(const Exit &exit) {
 
     if (!m_exits.contains(exit)) {
-        m_exits.append(exit);
+        m_exits << exit;
 
         setModified();
     }
@@ -56,7 +56,7 @@ void Area::setExits(const ExitList &exits) {
 void Area::addPresentCharacter(const GameObjectPtr &character) {
 
     if (!m_presentCharacters.contains(character)) {
-        m_presentCharacters.append(character);
+        m_presentCharacters << character;
     }
 }
 

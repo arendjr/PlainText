@@ -10,14 +10,10 @@
 Realm *Realm::s_instance = 0;
 
 
-Realm *Realm::instance() {
+void Realm::instantiate() {
 
-    if (s_instance == 0) {
-        s_instance = new Realm();
-        s_instance->init();
-    }
-
-    return s_instance;
+    Q_ASSERT(s_instance == 0);
+    new Realm();
 }
 
 void Realm::destroy() {
@@ -100,20 +96,9 @@ Realm::Realm() :
     m_initialized(false),
     m_nextId(1) {
 
+    s_instance = this;
+
     load(saveObjectPath(objectType(), id()));
-}
-
-Realm::~Realm() {
-
-    foreach (GameObject *gameObject, m_objectMap) {
-        Q_ASSERT(gameObject);
-        delete gameObject;
-    }
-
-    save();
-}
-
-void Realm::init() {
 
     QDir dir(saveDirPath());
     foreach (QString fileName, dir.entryList(QDir::Files)) {
@@ -129,4 +114,14 @@ void Realm::init() {
     }
 
     m_initialized = true;
+}
+
+Realm::~Realm() {
+
+    foreach (GameObject *gameObject, m_objectMap) {
+        Q_ASSERT(gameObject);
+        delete gameObject;
+    }
+
+    save();
 }

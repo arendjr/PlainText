@@ -8,16 +8,19 @@ body {
 
     font-family: "Courier", monospace;
     font-size: 10pt;
-    color: #fff;
+    color: #c0c0c0;
 
     outline: 0;
     border: 2px inset #777;
     padding: 0.5em;
+    width: 640px;
     background: #000;
 }
 
 .screen {
     margin: 2em 2em 0;
+    height: 480px;
+    overflow: auto;
 }
 
 .command-input {

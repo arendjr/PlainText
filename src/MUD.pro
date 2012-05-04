@@ -23,7 +23,8 @@ SOURCES += \
     ../3rdparty/qjson/json_scanner.cpp \
     interface/session.cpp \
     engine/exit.cpp \
-    interface/commandinterpreter.cpp
+    interface/commandinterpreter.cpp \
+    engine/util.cpp
 
 HEADERS += \
     engine/area.h \
@@ -40,7 +41,8 @@ HEADERS += \
     ../3rdparty/qjson/json_scanner.h \
     interface/session.h \
     engine/exit.h \
-    interface/commandinterpreter.h
+    interface/commandinterpreter.h \
+    engine/util.h
 
 OTHER_FILES += \
     ../web/index.html \

@@ -18,12 +18,7 @@
 #include "exit.h"
 #include "gameobjectptr.h"
 #include "realm.h"
-
-
-static QString escape(QString string) {
-
-    return string.replace('\\', "\\\\").replace('"', "\\\"").replace('\n', "\\n");
-}
+#include "util.h"
 
 
 GameObject::GameObject(const char *objectType, uint id, QObject *parent) :
@@ -78,7 +73,7 @@ bool GameObject::save() {
         const char *name = metaProperty.name();
         file.write(QString("  \"%1\": ").arg(name).toUtf8());
 
-        bool first;
+        QStringList stringList;
         QVariantList variantList;
         switch (metaProperty.type()) {
             case QVariant::Bool:
@@ -88,55 +83,35 @@ bool GameObject::save() {
                 file.write(QString::number(property(name).toInt()).toUtf8());
                 break;
             case QVariant::String:
-                file.write("\"" + escape(property(name).toString()).toUtf8() + "\"");
+                file.write(Util::jsString(property(name).toString()).toUtf8());
                 break;
             case QVariant::StringList:
-                file.write("[ ");
-                first = true;
+                stringList.clear();
                 foreach (QString string, property(name).toStringList()) {
-                    if (first) {
-                        first = false;
-                    } else {
-                        file.write(", ");
-                    }
-                    file.write("\"" + escape(string).toUtf8() + "\"");
+                    stringList << Util::jsString(string);
                 }
-                file.write(" ]");
+                file.write("[ " + stringList.join(", ").toUtf8() + " ]");
                 break;
             case QVariant::UserType:
                 if (metaProperty.userType() == QMetaType::type("GameObjectPtr")) {
                     file.write("\"" + property(name).value<GameObjectPtr>().toString().toAscii() + "\"");
                     break;
                 } else if (metaProperty.userType() == QMetaType::type("GameObjectPtrList")) {
-                    file.write("[ ");
-                    first = true;
+                    stringList.clear();
                     foreach (GameObjectPtr pointer, property(name).value<GameObjectPtrList>()) {
-                        if (first) {
-                            first = false;
-                        } else {
-                            file.write(", ");
-                        }
-                        file.write("\"" + pointer.toString().toAscii() + "\"");
+                        stringList << Util::jsString(pointer.toString());
                     }
-                    file.write(" ]");
+                    file.write("[ " + stringList.join(", ").toAscii() + " ]");
                     break;
                 } else if (metaProperty.userType() == QMetaType::type("Exit")) {
-                    variantList = property(name).value<Exit>().toVariantList();
-                    file.write("[ \"" + escape(variantList[0].toString()).toUtf8() + "\", \"" + variantList[1].toString().toAscii() + "\", " + QByteArray(variantList[2].toBool() ? "true" : "false") + " ]");
+                    file.write(property(name).value<Exit>().toString().toUtf8());
                     break;
                 } else if (metaProperty.userType() == QMetaType::type("ExitList")) {
-                    file.write("[ ");
-                    first = true;
+                    stringList.clear();
                     foreach (Exit exit, property(name).value<ExitList>()) {
-                        if (first) {
-                            first = false;
-                        } else {
-                            file.write(", ");
-                        }
-                        variantList = exit.toVariantList();
-                        file.write("[ \"" + escape(variantList[0].toString()).toUtf8() + "\", \"" + variantList[1].toString().toAscii() + "\", " + QByteArray(variantList[2].toBool() ? "true" : "false") + " ]");
+                        stringList << exit.toString();
                     }
-                    file.write(" ]");
+                    file.write("[ " + stringList.join(", ").toUtf8() + " ]");
                     break;
                 }
                 // fall-through
@@ -191,7 +166,7 @@ bool GameObject::load(const QString &path) {
             case QVariant::StringList:
                 stringList.clear();
                 foreach (QVariant variant, map[name].toList()) {
-                    stringList.append(variant.toString());
+                    stringList << variant.toString();
                 }
                 setProperty(name, stringList);
                 break;
@@ -202,7 +177,7 @@ bool GameObject::load(const QString &path) {
                 } else if (metaProperty.userType() == QMetaType::type("GameObjectPtrList")) {
                     pointerList.clear();
                     foreach (QVariant variant, map[name].toList()) {
-                        pointerList.append(GameObjectPtr::fromString(variant.toString()));
+                        pointerList << GameObjectPtr::fromString(variant.toString());
                     }
                     setProperty(name, QVariant::fromValue(pointerList));
                     break;
@@ -212,7 +187,7 @@ bool GameObject::load(const QString &path) {
                 } else if (metaProperty.userType() == QMetaType::type("ExitList")) {
                     exitList.clear();
                     foreach (QVariant variant, map[name].toList()) {
-                        exitList.append(Exit::fromVariantList(variant.toList()));
+                        exitList << Exit::fromVariantList(variant.toList());
                     }
                     setProperty(name, QVariant::fromValue(exitList));
                     break;
@@ -294,5 +269,7 @@ GameObject *GameObject::createFromFile(const QString &path) {
 
 void GameObject::setModified() {
 
-    m_saved = false;
+    if (Realm::instance()->isInitialized()) {
+        m_saved = false;
+    }
 }

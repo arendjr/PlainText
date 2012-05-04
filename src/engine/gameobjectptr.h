@@ -6,12 +6,16 @@
 #include <QObject>
 #include <QString>
 
+#include "badgameobjectexception.h"
+
 
 class GameObject;
 
 class GameObjectPtr {
 
     public:
+        static GameObjectPtr null;
+
         GameObjectPtr();
         GameObjectPtr(GameObject *gameObject);
         GameObjectPtr(const char *objectType, uint id);
@@ -26,13 +30,13 @@ class GameObjectPtr {
         GameObject &operator*() const;
         GameObject *operator->() const;
 
-        template <class T> T *cast() const { Q_ASSERT(m_gameObject); return qobject_cast<T *>(m_gameObject); }
+        template <class T> T cast() const { Q_ASSERT(m_gameObject); return qobject_cast<T>(m_gameObject); }
 
-        void resolve();
+        void resolve() throw (BadGameObjectException);
 
         QString toString() const;
 
-        static GameObjectPtr fromString(const QString &string);
+        static GameObjectPtr fromString(const QString &string) throw (BadGameObjectException);
 
         friend void swap(GameObjectPtr &first, GameObjectPtr &second);
 

@@ -10,6 +10,8 @@
 #include "realm.h"
 
 
+GameObjectPtr GameObjectPtr::null = GameObjectPtr();
+
 GameObjectPtr::GameObjectPtr() :
     m_gameObject(0),
     m_objectType(0),
@@ -83,10 +85,10 @@ GameObject *GameObjectPtr::operator->() const {
     return m_gameObject;
 }
 
-void GameObjectPtr::resolve() {
+void GameObjectPtr::resolve() throw (BadGameObjectException) {
 
     if (m_id == 0) {
-        return; // nothing to resolve
+        throw BadGameObjectException(BadGameObjectException::InvalidGameObjectPointer);
     }
 
     m_gameObject = Realm::instance()->getObject(m_objectType, m_id);
@@ -104,7 +106,7 @@ QString GameObjectPtr::toString() const {
     return QString(m_objectType) + ":" + QString::number(m_id);
 }
 
-GameObjectPtr GameObjectPtr::fromString(const QString &string) {
+GameObjectPtr GameObjectPtr::fromString(const QString &string) throw (BadGameObjectException) {
 
     if (string == "0") {
         return GameObjectPtr();
