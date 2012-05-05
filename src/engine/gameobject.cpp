@@ -21,30 +21,80 @@
 #include "util.h"
 
 
-GameObject::GameObject(const char *objectType, uint id, QObject *parent) :
-    QObject(parent),
-    m_saved(false),
+GameObject::GameObject(const char *objectType, uint id, Options options) :
+    QObject(),
     m_objectType(objectType),
-    m_id(id) {
+    m_id(id),
+    m_options(options) {
 
     Q_ASSERT(objectType);
 
-    if (m_id) {
+    if (m_id && ~m_options & Copy) {
         Realm::instance()->registerObject(this);
     }
 }
 
 GameObject::~GameObject() {
 
-    if (m_id) {
+    if (m_id && ~m_options & Copy) {
         Realm::instance()->unregisterObject(this);
     }
 }
 
 bool GameObject::save() {
 
-    if (m_saved) {
-        return true;
+    QStringList dumpedProperties;
+    foreach (const QMetaProperty &metaProperty, storedMetaProperties()) {
+        const char *name = metaProperty.name();
+        QString dumpedProperty = QString("  \"%1\": ").arg(name);
+
+        QStringList stringList;
+        switch (metaProperty.type()) {
+            case QVariant::Bool:
+                dumpedProperty += property(name).toBool() ? "true" : "false";
+                break;
+            case QVariant::Int:
+                dumpedProperty += QString::number(property(name).toInt());
+                break;
+            case QVariant::String:
+                dumpedProperty += Util::jsString(property(name).toString());
+                break;
+            case QVariant::StringList:
+                stringList.clear();
+                foreach (QString string, property(name).toStringList()) {
+                    stringList << Util::jsString(string);
+                }
+                dumpedProperty += "[ " + stringList.join(", ") + " ]";
+                break;
+            case QVariant::UserType:
+                if (metaProperty.userType() == QMetaType::type("GameObjectPtr")) {
+                    dumpedProperty += Util::jsString(property(name).value<GameObjectPtr>().toString());
+                    break;
+                } else if (metaProperty.userType() == QMetaType::type("GameObjectPtrList")) {
+                    stringList.clear();
+                    foreach (GameObjectPtr pointer, property(name).value<GameObjectPtrList>()) {
+                        stringList << Util::jsString(pointer.toString());
+                    }
+                    dumpedProperty += "[ " + stringList.join(", ") + " ]";
+                    break;
+                } else if (metaProperty.userType() == QMetaType::type("Exit")) {
+                    dumpedProperty += property(name).value<Exit>().toString();
+                    break;
+                } else if (metaProperty.userType() == QMetaType::type("ExitList")) {
+                    stringList.clear();
+                    foreach (Exit exit, property(name).value<ExitList>()) {
+                        stringList << exit.toString();
+                    }
+                    dumpedProperty += "[ " + stringList.join(", ") + " ]";
+                    break;
+                }
+                // fall-through
+            default:
+                qDebug() << "Unknown type: " << metaProperty.type();
+                continue;
+        }
+
+        dumpedProperties << dumpedProperty;
     }
 
     QFile file(Realm::saveObjectPath(m_objectType, m_id));
@@ -53,77 +103,7 @@ bool GameObject::save() {
         return false;
     }
 
-    file.write("{\n");
-
-    bool firstProperty = true;
-    int count = metaObject()->propertyCount(),
-        offset = metaObject()->propertyOffset();
-    for (int i = offset; i < count; i++) {
-        QMetaProperty metaProperty = metaObject()->property(i);
-        if (!metaProperty.isStored()) {
-            continue;
-        }
-
-        if (firstProperty) {
-            firstProperty = false;
-        } else {
-            file.write(",\n");
-        }
-
-        const char *name = metaProperty.name();
-        file.write(QString("  \"%1\": ").arg(name).toUtf8());
-
-        QStringList stringList;
-        QVariantList variantList;
-        switch (metaProperty.type()) {
-            case QVariant::Bool:
-                file.write(property(name).toBool() ? "true" : "false");
-                break;
-            case QVariant::Int:
-                file.write(QString::number(property(name).toInt()).toUtf8());
-                break;
-            case QVariant::String:
-                file.write(Util::jsString(property(name).toString()).toUtf8());
-                break;
-            case QVariant::StringList:
-                stringList.clear();
-                foreach (QString string, property(name).toStringList()) {
-                    stringList << Util::jsString(string);
-                }
-                file.write("[ " + stringList.join(", ").toUtf8() + " ]");
-                break;
-            case QVariant::UserType:
-                if (metaProperty.userType() == QMetaType::type("GameObjectPtr")) {
-                    file.write("\"" + property(name).value<GameObjectPtr>().toString().toAscii() + "\"");
-                    break;
-                } else if (metaProperty.userType() == QMetaType::type("GameObjectPtrList")) {
-                    stringList.clear();
-                    foreach (GameObjectPtr pointer, property(name).value<GameObjectPtrList>()) {
-                        stringList << Util::jsString(pointer.toString());
-                    }
-                    file.write("[ " + stringList.join(", ").toAscii() + " ]");
-                    break;
-                } else if (metaProperty.userType() == QMetaType::type("Exit")) {
-                    file.write(property(name).value<Exit>().toString().toUtf8());
-                    break;
-                } else if (metaProperty.userType() == QMetaType::type("ExitList")) {
-                    stringList.clear();
-                    foreach (Exit exit, property(name).value<ExitList>()) {
-                        stringList << exit.toString();
-                    }
-                    file.write("[ " + stringList.join(", ").toUtf8() + " ]");
-                    break;
-                }
-                // fall-through
-            default:
-                qDebug() << "Unknown type: " << metaProperty.type();
-                break;
-        }
-    }
-
-    file.write("\n}\n");
-
-    m_saved = true;
+    file.write("{\n" + dumpedProperties.join(",\n").toUtf8() + "\n}\n");
     return true;
 }
 
@@ -141,14 +121,7 @@ bool GameObject::load(const QString &path) {
         throw BadGameObjectException(BadGameObjectException::CorruptGameObjectFile);
     }
 
-    int count = metaObject()->propertyCount(),
-        offset = metaObject()->propertyOffset();
-    for (int i = offset; i < count; i++) {
-        QMetaProperty metaProperty = metaObject()->property(i);
-        if (!metaProperty.isStored()) {
-            continue;
-        }
-
+    foreach (const QMetaProperty &metaProperty, storedMetaProperties()) {
         const char *name = metaProperty.name();
         if (!map.contains(name)) {
             continue;
@@ -195,20 +168,15 @@ bool GameObject::load(const QString &path) {
                 // fall-through
             default:
                 qDebug() << "Unknown type: " << metaProperty.type();
-                break;
         }
     }
 
-    m_saved = true;
     return true;
 }
 
 void GameObject::resolvePointers() {
 
-    int count = metaObject()->propertyCount(),
-        offset = metaObject()->propertyOffset();
-    for (int i = offset; i < count; i++) {
-        QMetaProperty metaProperty = metaObject()->property(i);
+    foreach (const QMetaProperty &metaProperty, storedMetaProperties()) {
         const char *name = metaProperty.name();
         if (metaProperty.type() == QVariant::UserType) {
             if (metaProperty.userType() == QMetaType::type("GameObjectPtr")) {
@@ -236,19 +204,32 @@ void GameObject::resolvePointers() {
     }
 }
 
-GameObject *GameObject::createByObjectType(const QString &objectType, uint id) {
+GameObject *GameObject::createByObjectType(const QString &objectType, uint id, Options options) {
 
     if (id == 0) {
         id = Realm::instance()->uniqueObjectId();
     }
 
     if (objectType == "area") {
-        return new Area(id);
+        return new Area(id, options);
     } else if (objectType == "character") {
-        return new Character(id);
+        return new Character(id, options);
     } else {
         throw BadGameObjectException(BadGameObjectException::UnknownGameObjectType);
     }
+}
+
+GameObject *GameObject::createCopy(const GameObject *other) {
+
+    Q_ASSERT(other);
+    GameObject *copy = createByObjectType(other->objectType(), other->id(), Copy);
+
+    foreach (const QMetaProperty &metaProperty, other->storedMetaProperties()) {
+        const char *name = metaProperty.name();
+        copy->setProperty(name, other->property(name));
+    }
+
+    return copy;
 }
 
 GameObject *GameObject::createFromFile(const QString &path) {
@@ -261,15 +242,27 @@ GameObject *GameObject::createFromFile(const QString &path) {
     }
 
     GameObject *gameObject = createByObjectType(components[0], components[1].toInt());
-
     gameObject->load(path);
-
     return gameObject;
 }
 
 void GameObject::setModified() {
 
-    if (Realm::instance()->isInitialized()) {
-        m_saved = false;
+    if (~m_options & Copy) {
+        Realm::instance()->syncObject(this);
     }
+}
+
+QList<QMetaProperty> GameObject::storedMetaProperties() const {
+
+    QList<QMetaProperty> properties;
+    int count = metaObject()->propertyCount(),
+        offset = metaObject()->propertyOffset();
+    for (int i = offset; i < count; i++) {
+        QMetaProperty metaProperty = metaObject()->property(i);
+        if (metaProperty.isStored()) {
+            properties << metaProperty;
+        }
+    }
+    return properties;
 }

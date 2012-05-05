@@ -7,6 +7,7 @@
 
 
 class Character;
+class GameObjectSyncThread;
 
 class Realm : public GameObject {
 
@@ -30,6 +31,8 @@ class Realm : public GameObject {
 
         uint uniqueObjectId();
 
+        void syncObject(GameObject *gameObject);
+
         static QString saveDirPath();
         static QString saveObjectPath(const char *objectType, uint id);
 
@@ -41,6 +44,8 @@ class Realm : public GameObject {
         uint m_nextId;
         QMap<uint, GameObject *> m_objectMap;
         QMap<QString, Character *> m_characterMap;
+
+        GameObjectSyncThread *m_syncThread;
 
         explicit Realm();
         virtual ~Realm();

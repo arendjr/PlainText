@@ -5,6 +5,7 @@
 #include <QDir>
 
 #include "character.h"
+#include "gameobjectsyncthread.h"
 
 
 Realm *Realm::s_instance = 0;
@@ -81,6 +82,15 @@ uint Realm::uniqueObjectId() {
     return m_nextId++;
 }
 
+void Realm::syncObject(GameObject *gameObject) {
+
+    if (!m_initialized) {
+        return;
+    }
+
+    m_syncThread->queueObject(gameObject);
+}
+
 QString Realm::saveDirPath() {
 
     return QDir::homePath() + "/.mud";
@@ -94,7 +104,8 @@ QString Realm::saveObjectPath(const char *objectType, uint id) {
 Realm::Realm() :
     GameObject("realm", 0),
     m_initialized(false),
-    m_nextId(1) {
+    m_nextId(1),
+    m_syncThread(0) {
 
     s_instance = this;
 
@@ -113,15 +124,20 @@ Realm::Realm() :
         gameObject->resolvePointers();
     }
 
+    m_syncThread = new GameObjectSyncThread(this);
+    m_syncThread->start(QThread::LowestPriority);
+
     m_initialized = true;
 }
 
 Realm::~Realm() {
+
+    m_syncThread->quit();
 
     foreach (GameObject *gameObject, m_objectMap) {
         Q_ASSERT(gameObject);
         delete gameObject;
     }
 
-    save();
+    m_syncThread->wait();
 }

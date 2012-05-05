@@ -1,13 +1,11 @@
 #include "area.h"
 
 
-Area::Area(uint id, QObject *parent) :
-    GameObject("area", id, parent) {
+Area::Area(uint id, Options options) :
+    GameObject("area", id, options) {
 }
 
 Area::~Area() {
-
-    save();
 }
 
 void Area::setTitle(const QString &title) {

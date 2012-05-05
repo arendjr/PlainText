@@ -2,17 +2,17 @@
 #include "realm.h"
 
 
-Character::Character(uint id, QObject *parent) :
-    GameObject("character", id, parent),
+Character::Character(uint id, Options options) :
+    GameObject("character", id, options),
     m_admin(false),
     m_session(0) {
 }
 
 Character::~Character() {
 
-    Realm::instance()->unregisterCharacter(this);
-
-    save();
+    if (~options() & Copy) {
+        Realm::instance()->unregisterCharacter(this);
+    }
 }
 
 void Character::setName(const QString &name) {
@@ -21,7 +21,9 @@ void Character::setName(const QString &name) {
 
     m_name = name;
 
-    Realm::instance()->registerCharacter(this);
+    if (~options() & Copy) {
+        Realm::instance()->registerCharacter(this);
+    }
 
     setModified();
 }

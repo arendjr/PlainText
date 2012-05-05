@@ -24,7 +24,8 @@ SOURCES += \
     interface/session.cpp \
     engine/exit.cpp \
     interface/commandinterpreter.cpp \
-    engine/util.cpp
+    engine/util.cpp \
+    engine/gameobjectsyncthread.cpp
 
 HEADERS += \
     engine/area.h \
@@ -42,7 +43,8 @@ HEADERS += \
     interface/session.h \
     engine/exit.h \
     interface/commandinterpreter.h \
-    engine/util.h
+    engine/util.h \
+    engine/gameobjectsyncthread.h
 
 OTHER_FILES += \
     ../web/index.html \

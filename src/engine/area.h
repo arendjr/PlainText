@@ -11,7 +11,7 @@ class Area : public GameObject {
     Q_OBJECT
 
     public:
-        explicit Area(uint id, QObject *parent = 0);
+        explicit Area(uint id, Options options = NoOptions);
         virtual ~Area();
 
         const QString &title() const { return m_title; }

@@ -14,7 +14,7 @@ class Character : public GameObject {
     Q_OBJECT
 
     public:
-        explicit Character(uint id, QObject *parent = 0);
+        explicit Character(uint id, Options options = NoOptions);
         virtual ~Character();
 
         const QString &name() const { return m_name; }
