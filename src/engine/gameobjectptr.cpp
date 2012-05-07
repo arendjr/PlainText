@@ -36,8 +36,12 @@ GameObjectPtr::GameObjectPtr(const char *objectType, uint id) :
 
 GameObjectPtr::GameObjectPtr(const GameObjectPtr &other) :
     m_gameObject(other.m_gameObject),
-    m_objectType(strdup(other.m_objectType)),
+    m_objectType(other.m_objectType),
     m_id(other.m_id) {
+
+    if (m_objectType) {
+        m_objectType = strdup(m_objectType);
+    }
 }
 
 GameObjectPtr::~GameObjectPtr() {

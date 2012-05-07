@@ -13,38 +13,38 @@ SOURCES += \
     engine/badgameobjectexception.cpp \
     engine/character.cpp \
     engine/engine.cpp \
+    engine/exit.cpp \
     engine/gameobject.cpp \
     engine/gameobjectptr.cpp \
+    engine/gameobjectsyncthread.cpp \
     engine/realm.cpp \
+    engine/util.cpp \
+    interface/commandinterpreter.cpp \
     interface/httpserver.cpp \
+    interface/session.cpp \
     interface/websocketserver.cpp \
     ../3rdparty/qjson/json_driver.cc \
     ../3rdparty/qjson/json_parser.cc \
-    ../3rdparty/qjson/json_scanner.cpp \
-    interface/session.cpp \
-    engine/exit.cpp \
-    interface/commandinterpreter.cpp \
-    engine/util.cpp \
-    engine/gameobjectsyncthread.cpp
+    ../3rdparty/qjson/json_scanner.cpp
 
 HEADERS += \
     engine/area.h \
     engine/badgameobjectexception.h \
     engine/character.h \
     engine/engine.h \
+    engine/exit.h \
     engine/gameobject.h \
     engine/gameobjectptr.h \
+    engine/gameobjectsyncthread.h \
     engine/realm.h \
+    engine/util.h \
+    interface/commandinterpreter.h \
     interface/httpserver.h \
+    interface/session.h \
     interface/websocketserver.h \
     ../3rdparty/qjson/json_driver.hh \
     ../3rdparty/qjson/json_parser.hh \
-    ../3rdparty/qjson/json_scanner.h \
-    interface/session.h \
-    engine/exit.h \
-    interface/commandinterpreter.h \
-    engine/util.h \
-    engine/gameobjectsyncthread.h
+    ../3rdparty/qjson/json_scanner.h
 
 OTHER_FILES += \
     ../web/index.html \

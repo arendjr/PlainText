@@ -59,9 +59,9 @@ void CommandInterpreter::execute(const QString &command) {
                 }
             } else if (words[0] == "add-exit") {
                 if (words.length() < 3) {
-                    m_character->send("Usage: add-exit <exit-name> <destination-area-id> [<hidden?>]");
+                    m_character->send("Usage: add-exit <exit-name> <destination-area-id>");
                 } else {
-                    addExit(words[1], words[2], words.length() > 3 ? (words[3] == "true") : false);
+                    addExit(words[1], words[2]);
                 }
             } else if (words[0] == "remove-exit") {
                 if (words.length() < 2) {
@@ -81,10 +81,10 @@ void CommandInterpreter::goExit(const QString &exitName) {
     Area *currentArea = m_character->currentArea().cast<Area *>();
     Q_ASSERT(currentArea);
 
-    foreach (Exit exit, currentArea->exits()) {
-        if (exit.name() == exitName) {
+    foreach (GameObjectPtr exit, currentArea->exits()) {
+        if (exit->name() == exitName) {
             leaveArea(m_character->currentArea(), exitName);
-            enterArea(exit.destinationArea());
+            enterArea(exit.cast<Exit *>()->destinationArea());
             return;
         }
     }
@@ -96,10 +96,7 @@ void CommandInterpreter::say(const QString &sentence) {
 
     GameObjectPtrList characters = m_character->currentArea().cast<Area *>()->presentCharacters();
     for (int i = 0; i < characters.length(); i++) {
-        Character *character = characters[i].cast<Character *>();
-        Q_ASSERT(character);
-
-        character->send(QString("%1 said: %2").arg(m_character->name(), sentence));
+        characters[i].cast<Character *>()->send(QString("%1 says, \"%2\".").arg(m_character->name(), sentence));
     }
 }
 
@@ -107,10 +104,7 @@ void CommandInterpreter::slashMe(const QString &sentence) {
 
     GameObjectPtrList characters = m_character->currentArea().cast<Area *>()->presentCharacters();
     for (int i = 0; i < characters.length(); i++) {
-        Character *character = characters[i].cast<Character *>();
-        Q_ASSERT(character);
-
-        character->send(Util::colorize("%1 %2", Purple).arg(m_character->name(), sentence));
+        characters[i].cast<Character *>()->send(Util::colorize("%1 %2", Purple).arg(m_character->name(), sentence));
     }
 }
 
@@ -121,15 +115,25 @@ void CommandInterpreter::enterArea(const GameObjectPtr &areaPtr) {
     Area *area = areaPtr.cast<Area *>();
     area->addPresentCharacter(m_character);
 
-    if (!area->title().isEmpty()) {
-        m_character->send(Util::colorize(area->title() + "\n\n", White));
+    if (!area->name().isEmpty()) {
+        m_character->send(Util::colorize("\n" + area->name() + "\n\n", Teal));
     }
 
     m_character->send(area->description());
 
+    GameObjectPtrList exits = area->exits();
+    int length = exits.length();
+    if (length > 0) {
+        QStringList exitNames;
+        for (int i = 0; i < length; i++) {
+            exitNames << exits[i]->name();
+        }
+        m_character->send(Util::colorize("Obvious exits: " + exitNames.join(", ") + ".", Green));
+    }
+
     GameObjectPtrList characters = area->presentCharacters();
     characters.removeOne(m_character);
-    int length = characters.length();
+    length = characters.length();
     if (length > 0) {
         QStringList characterNames;
         for (int i = 0; i < length; i++) {
@@ -140,17 +144,7 @@ void CommandInterpreter::enterArea(const GameObjectPtr &areaPtr) {
 
             character->send(QString("%1 arrived.").arg(m_character->name()));
         }
-        m_character->send("\n\nYou see " + Util::joinFancy(characterNames) + ".");
-    }
-
-    ExitList exits = area->exits();
-    length = exits.length();
-    if (length > 0) {
-        QStringList exitNames;
-        for (int i = 0; i < length; i++) {
-            exitNames << exits[i].name();
-        }
-        m_character->send("\n\nObvious exits: " + exitNames.join(", ") + ".");
+        m_character->send("You see " + Util::joinFancy(characterNames) + ".");
     }
 }
 
@@ -181,6 +175,16 @@ const GameObjectPtr &CommandInterpreter::localObjectByName(const QString &object
         }
     }
 
+    Area *currentArea = m_character->currentArea().cast<Area *>();
+    Q_ASSERT(currentArea);
+
+    const GameObjectPtrList &exits = currentArea->exits();
+    for (int i = 0; i < exits.length(); i++) {
+        if (exits[i]->name() == objectName) {
+            return exits[i];
+        }
+    }
+
     return GameObjectPtr::null;
 }
 
@@ -208,16 +212,6 @@ void CommandInterpreter::getProperty(const GameObjectPtr &object, const QString 
                     QStringList strings;
                     foreach (GameObjectPtr pointer, value.value<GameObjectPtrList>()) {
                         strings << pointer.toString();
-                    }
-                    m_character->send("[ " + strings.join(", ") + " ]");
-                    break;
-                } else if (value.userType() == QMetaType::type("Exit")) {
-                    m_character->send(value.value<Exit>().toString());
-                    break;
-                } else if (value.userType() == QMetaType::type("ExitList")) {
-                    QStringList strings;
-                    foreach (Exit exit, value.value<ExitList>()) {
-                        strings << exit.toString();
                     }
                     m_character->send("[ " + strings.join(", ") + " ]");
                     break;
@@ -268,7 +262,7 @@ void CommandInterpreter::setProperty(const GameObjectPtr &object, const QString 
     }
 }
 
-void CommandInterpreter::addExit(const QString &exitName, const QString &destinationAreaId, bool hidden) {
+void CommandInterpreter::addExit(const QString &exitName, const QString &destinationAreaId) {
 
     GameObject *destinationArea;
     if (destinationAreaId == "new") {
@@ -281,10 +275,9 @@ void CommandInterpreter::addExit(const QString &exitName, const QString &destina
         }
     }
 
-    Exit exit;
-    exit.setName(exitName);
-    exit.setDestinationArea(destinationArea);
-    exit.setHidden(hidden);
+    Exit *exit = qobject_cast<Exit *>(GameObject::createByObjectType("exit"));
+    exit->setName(exitName);
+    exit->setDestinationArea(destinationArea);
     m_character->currentArea().cast<Area *>()->addExit(exit);
 
     enterArea(m_character->currentArea());
@@ -295,8 +288,8 @@ void CommandInterpreter::removeExit(const QString &exitName) {
     Area *currentArea = m_character->currentArea().cast<Area *>();
     Q_ASSERT(currentArea);
 
-    foreach (Exit exit, currentArea->exits()) {
-        if (exit.name() == exitName) {
+    foreach (GameObjectPtr exit, currentArea->exits()) {
+        if (exit->name() == exitName) {
             currentArea->removeExit(exit);
 
             enterArea(m_character->currentArea());

@@ -22,10 +22,20 @@ class GameObject : public QObject {
         const char *objectType() const { return m_objectType; }
         const uint id() const { return m_id; }
 
+        const QString &name() const { return m_name; }
+        virtual void setName(const QString &name);
+        Q_PROPERTY(QString name READ name WRITE setName);
+
+        const QString &description() const { return m_description; }
+        virtual void setDescription(const QString &description);
+        Q_PROPERTY(QString description READ description WRITE setDescription);
+
         bool save();
         bool load(const QString &path);
 
         void resolvePointers();
+
+        void setDeleted();
 
         static GameObject *createByObjectType(const QString &objectType, uint id = 0,
                                               Options options = NoOptions);
@@ -43,6 +53,11 @@ class GameObject : public QObject {
         const char *m_objectType;
         uint m_id;
         Options m_options;
+
+        QString m_name;
+        QString m_description;
+
+        bool m_deleted;
 
         QList<QMetaProperty> storedMetaProperties() const;
 };

@@ -15,17 +15,15 @@ Character::~Character() {
     }
 }
 
-void Character::setName(const QString &name) {
+void Character::setName(const QString &newName) {
 
-    Q_ASSERT(m_name.isEmpty());
+    Q_ASSERT(name().isEmpty());
 
-    m_name = name;
+    GameObject::setName(newName);
 
     if (~options() & Copy) {
         Realm::instance()->registerCharacter(this);
     }
-
-    setModified();
 }
 
 void Character::setPasswordHash(const QString &passwordHash) {

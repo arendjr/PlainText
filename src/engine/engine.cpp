@@ -2,7 +2,6 @@
 
 #include <QMetaType>
 
-#include "exit.h"
 #include "gameobjectptr.h"
 #include "realm.h"
 #include "interface/httpserver.h"
@@ -12,8 +11,6 @@
 Engine::Engine(QObject *parent) :
     QObject(parent) {
 
-    qRegisterMetaType<Exit>();
-    qRegisterMetaType<ExitList>();
     qRegisterMetaType<GameObjectPtr>();
     qRegisterMetaType<GameObjectPtrList>();
 

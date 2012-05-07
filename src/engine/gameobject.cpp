@@ -25,7 +25,8 @@ GameObject::GameObject(const char *objectType, uint id, Options options) :
     QObject(),
     m_objectType(objectType),
     m_id(id),
-    m_options(options) {
+    m_options(options),
+    m_deleted(false) {
 
     Q_ASSERT(objectType);
 
@@ -41,7 +42,29 @@ GameObject::~GameObject() {
     }
 }
 
+void GameObject::setName(const QString &name) {
+
+    if (m_name != name) {
+        m_name = name;
+
+        setModified();
+    }
+}
+
+void GameObject::setDescription(const QString &description) {
+
+    if (m_description != description) {
+        m_description = description;
+
+        setModified();
+    }
+}
+
 bool GameObject::save() {
+
+    if (m_deleted) {
+        return QFile::remove(Realm::saveObjectPath(m_objectType, m_id));
+    }
 
     QStringList dumpedProperties;
     foreach (const QMetaProperty &metaProperty, storedMetaProperties()) {
@@ -55,6 +78,9 @@ bool GameObject::save() {
                 break;
             case QVariant::Int:
                 dumpedProperty += QString::number(property(name).toInt());
+                break;
+            case QVariant::Double:
+                dumpedProperty += QString::number(property(name).toDouble());
                 break;
             case QVariant::String:
                 dumpedProperty += Util::jsString(property(name).toString());
@@ -74,16 +100,6 @@ bool GameObject::save() {
                     stringList.clear();
                     foreach (GameObjectPtr pointer, property(name).value<GameObjectPtrList>()) {
                         stringList << Util::jsString(pointer.toString());
-                    }
-                    dumpedProperty += "[ " + stringList.join(", ") + " ]";
-                    break;
-                } else if (metaProperty.userType() == QMetaType::type("Exit")) {
-                    dumpedProperty += property(name).value<Exit>().toString();
-                    break;
-                } else if (metaProperty.userType() == QMetaType::type("ExitList")) {
-                    stringList.clear();
-                    foreach (Exit exit, property(name).value<ExitList>()) {
-                        stringList << exit.toString();
                     }
                     dumpedProperty += "[ " + stringList.join(", ") + " ]";
                     break;
@@ -127,12 +143,12 @@ bool GameObject::load(const QString &path) {
             continue;
         }
 
-        ExitList exitList;
         QStringList stringList;
         GameObjectPtrList pointerList;
         switch (metaProperty.type()) {
             case QVariant::Bool:
             case QVariant::Int:
+            case QVariant::Double:
             case QVariant::String:
                 setProperty(name, map[name]);
                 break;
@@ -153,16 +169,6 @@ bool GameObject::load(const QString &path) {
                         pointerList << GameObjectPtr::fromString(variant.toString());
                     }
                     setProperty(name, QVariant::fromValue(pointerList));
-                    break;
-                } else if (metaProperty.userType() == QMetaType::type("Exit")) {
-                    setProperty(name, QVariant::fromValue(Exit::fromVariantList(map[name].toList())));
-                    break;
-                } else if (metaProperty.userType() == QMetaType::type("ExitList")) {
-                    exitList.clear();
-                    foreach (QVariant variant, map[name].toList()) {
-                        exitList << Exit::fromVariantList(variant.toList());
-                    }
-                    setProperty(name, QVariant::fromValue(exitList));
                     break;
                 }
                 // fall-through
@@ -189,18 +195,19 @@ void GameObject::resolvePointers() {
                     pointerList[i].resolve();
                 }
                 setProperty(name, QVariant::fromValue(pointerList));
-            } else if (metaProperty.userType() == QMetaType::type("Exit")) {
-                Exit exit = property(name).value<Exit>();
-                exit.resolvePointer();
-                setProperty(name, QVariant::fromValue(exit));
-            } else if (metaProperty.userType() == QMetaType::type("ExitList")) {
-                ExitList exitList = property(name).value<ExitList>();
-                for (int i = 0; i < exitList.length(); i++) {
-                    exitList[i].resolvePointer();
-                }
-                setProperty(name, QVariant::fromValue(exitList));
             }
         }
+    }
+}
+
+void GameObject::setDeleted() {
+
+    if (~m_options & Copy) {
+        m_deleted = true;
+
+        Realm::instance()->syncObject(this);
+
+        deleteLater();
     }
 }
 
@@ -214,6 +221,8 @@ GameObject *GameObject::createByObjectType(const QString &objectType, uint id, O
         return new Area(id, options);
     } else if (objectType == "character") {
         return new Character(id, options);
+    } else if (objectType == "exit") {
+        return new Exit(id, options);
     } else {
         throw BadGameObjectException(BadGameObjectException::UnknownGameObjectType);
     }
@@ -223,6 +232,7 @@ GameObject *GameObject::createCopy(const GameObject *other) {
 
     Q_ASSERT(other);
     GameObject *copy = createByObjectType(other->objectType(), other->id(), Copy);
+    copy->m_deleted = other->m_deleted;
 
     foreach (const QMetaProperty &metaProperty, other->storedMetaProperties()) {
         const char *name = metaProperty.name();
@@ -257,7 +267,7 @@ QList<QMetaProperty> GameObject::storedMetaProperties() const {
 
     QList<QMetaProperty> properties;
     int count = metaObject()->propertyCount(),
-        offset = metaObject()->propertyOffset();
+        offset = GameObject::staticMetaObject.propertyOffset();
     for (int i = offset; i < count; i++) {
         QMetaProperty metaProperty = metaObject()->property(i);
         if (metaProperty.isStored()) {

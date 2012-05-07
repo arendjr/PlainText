@@ -8,25 +8,7 @@ Area::Area(uint id, Options options) :
 Area::~Area() {
 }
 
-void Area::setTitle(const QString &title) {
-
-    if (m_title != title) {
-        m_title = title;
-
-        setModified();
-    }
-}
-
-void Area::setDescription(const QString &description) {
-
-    if (m_description != description) {
-        m_description = description;
-
-        setModified();
-    }
-}
-
-void Area::addExit(const Exit &exit) {
+void Area::addExit(const GameObjectPtr &exit) {
 
     if (!m_exits.contains(exit)) {
         m_exits << exit;
@@ -35,14 +17,16 @@ void Area::addExit(const Exit &exit) {
     }
 }
 
-void Area::removeExit(const Exit &exit) {
+void Area::removeExit(const GameObjectPtr &exit) {
 
     if (m_exits.removeAll(exit) > 0) {
+        exit->setDeleted();
+
         setModified();
     }
 }
 
-void Area::setExits(const ExitList &exits) {
+void Area::setExits(const GameObjectPtrList &exits) {
 
     if (m_exits != exits) {
         m_exits = exits;

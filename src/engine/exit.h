@@ -1,46 +1,51 @@
 #ifndef EXIT_H
 #define EXIT_H
 
-#include <QMetaType>
-#include <QString>
-#include <QVariantList>
+#include <QBasicTimer>
 
+#include "gameobject.h"
 #include "gameobjectptr.h"
 
 
-class Exit {
+class Exit : public GameObject {
+
+    Q_OBJECT
 
     public:
-        Exit();
+        explicit Exit(uint id, Options options = NoOptions);
+        virtual ~Exit();
 
-        bool operator==(const Exit &other) const;
+        const GameObjectPtr &destinationArea() const { return m_destinationArea; }
+        virtual void setDestinationArea(const GameObjectPtr &destinationArea);
+        Q_PROPERTY(GameObjectPtr destinationArea READ destinationArea WRITE setDestinationArea);
 
-        const QString &name() const { return m_name; };
-        void setName(const QString &name);
+        double size() const { return m_size; }
+        virtual void setSize(double size);
+        Q_PROPERTY(double size READ size WRITE setSize);
 
-        const GameObjectPtr &destinationArea() const { return m_destinationArea; };
-        void setDestinationArea(const GameObjectPtr &destinationArea);
+        bool isDoor() const { return m_door; }
+        virtual void setDoor(bool door);
+        Q_PROPERTY(bool door READ isDoor WRITE setDoor);
 
-        bool isHidden() const { return m_hidden; };
-        void setHidden(bool hidden);
+        bool isOpen() const { return m_open; }
+        virtual void setOpen(bool open);
+        Q_PROPERTY(bool open READ isOpen WRITE setOpen STORED false);
 
-        void resolvePointer();
+        bool isHidden() const { return m_hidden; }
+        virtual void setHidden(bool hidden);
+        Q_PROPERTY(bool hidden READ isHidden WRITE setHidden);
 
-        QString toString() const;
-
-        QVariantList toVariantList() const;
-
-        static Exit fromVariantList(const QVariantList &list);
+    protected:
+        virtual void timerEvent(QTimerEvent *event);
 
     private:
-        QString m_name;
         GameObjectPtr m_destinationArea;
+        double m_size;
+        bool m_door;
+        bool m_open;
         bool m_hidden;
+
+        QBasicTimer m_doorTimer;
 };
-
-typedef QList<Exit> ExitList;
-
-Q_DECLARE_METATYPE(Exit);
-Q_DECLARE_METATYPE(ExitList);
 
 #endif // EXIT_H

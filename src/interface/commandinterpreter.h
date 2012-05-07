@@ -35,7 +35,7 @@ class CommandInterpreter : public QObject {
         void getProperty(const GameObjectPtr &object, const QString &propertyName);
         void setProperty(const GameObjectPtr &object, const QString &propertyName, const QString &value);
 
-        void addExit(const QString &exitName, const QString &destinationAreaId, bool hidden);
+        void addExit(const QString &exitName, const QString &destinationAreaId);
         void removeExit(const QString &exitName);
 
     private:

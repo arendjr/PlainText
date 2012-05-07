@@ -9,6 +9,7 @@ body {
     font-family: "Courier", monospace;
     font-size: 10pt;
     color: #c0c0c0;
+    white-space: pre-wrap;
 
     outline: 0;
     border: 2px inset #777;
