@@ -30,12 +30,17 @@ class Util {
                                  const QString &separator = ", ",
                                  const QString &last = " and ");
 
-        static QString fromIndex(const QStringList &list, int index,
-                                 const QString &separator = " ");
-
         static QString jsString(QString string);
 
         static QString colorize(const QString &string, Color color);
+
+        static bool isDirection(const QString &string);
+
+        static QString opposingDirection(const QString &direction);
+
+        static bool isDirectionAbbreviation(const QString &string);
+
+        static QString direction(const QString &abbreviation);
 
     private:
         Util();

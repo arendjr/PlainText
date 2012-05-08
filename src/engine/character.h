@@ -27,6 +27,12 @@ class Character : public GameObject {
         virtual void setCurrentArea(const GameObjectPtr &currentArea);
         Q_PROPERTY(GameObjectPtr currentArea READ currentArea WRITE setCurrentArea);
 
+        const GameObjectPtrList &inventory() const { return m_inventory; }
+        virtual void addInventoryItem(const GameObjectPtr &item);
+        virtual void removeInventoryItem(const GameObjectPtr &item);
+        virtual void setInventory(const GameObjectPtrList &inventory);
+        Q_PROPERTY(GameObjectPtrList inventory READ inventory WRITE setInventory);
+
         bool isAdmin() const { return m_admin; }
         virtual void setAdmin(bool admin);
         Q_PROPERTY(bool admin READ isAdmin WRITE setAdmin);
@@ -43,6 +49,8 @@ class Character : public GameObject {
         QString m_passwordHash;
 
         GameObjectPtr m_currentArea;
+
+        GameObjectPtrList m_inventory;
 
         bool m_admin;
 

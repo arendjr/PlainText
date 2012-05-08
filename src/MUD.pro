@@ -12,14 +12,26 @@ SOURCES += \
     engine/area.cpp \
     engine/badgameobjectexception.cpp \
     engine/character.cpp \
+    engine/commandinterpreter.cpp \
     engine/engine.cpp \
     engine/exit.cpp \
     engine/gameobject.cpp \
     engine/gameobjectptr.cpp \
     engine/gameobjectsyncthread.cpp \
+    engine/item.cpp \
     engine/realm.cpp \
     engine/util.cpp \
-    interface/commandinterpreter.cpp \
+    engine/commands/command.cpp \
+    engine/commands/gocommand.cpp \
+    engine/commands/quitcommand.cpp \
+    engine/commands/saycommand.cpp \
+    engine/commands/slashmecommand.cpp \
+    engine/commands/admin/addexitcommand.cpp \
+    engine/commands/admin/admincommand.cpp \
+    engine/commands/admin/getpropcommand.cpp \
+    engine/commands/admin/removeexitcommand.cpp \
+    engine/commands/admin/setpropcommand.cpp \
+    engine/commands/admin/stopservercommand.cpp \
     interface/httpserver.cpp \
     interface/session.cpp \
     interface/websocketserver.cpp \
@@ -31,19 +43,31 @@ HEADERS += \
     engine/area.h \
     engine/badgameobjectexception.h \
     engine/character.h \
+    engine/commandinterpreter.h \
     engine/engine.h \
     engine/exit.h \
     engine/gameobject.h \
     engine/gameobjectptr.h \
     engine/gameobjectsyncthread.h \
+    engine/item.h \
     engine/realm.h \
     engine/util.h \
-    interface/commandinterpreter.h \
+    engine/commands/command.h \
+    engine/commands/gocommand.h \
+    engine/commands/quitcommand.h \
+    engine/commands/saycommand.h \
+    engine/commands/slashmecommand.h \
+    engine/commands/admin/addexitcommand.h \
+    engine/commands/admin/admincommand.h \
+    engine/commands/admin/getpropcommand.h \
+    engine/commands/admin/removeexitcommand.h \
+    engine/commands/admin/setpropcommand.h \
+    engine/commands/admin/stopservercommand.h \
     interface/httpserver.h \
     interface/session.h \
     interface/websocketserver.h \
-    ../3rdparty/qjson/json_driver.hh \
     ../3rdparty/qjson/json_parser.hh \
+    ../3rdparty/qjson/json_driver.hh \
     ../3rdparty/qjson/json_scanner.h
 
 OTHER_FILES += \

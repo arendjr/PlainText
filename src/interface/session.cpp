@@ -3,9 +3,9 @@
 #include <QCryptographicHash>
 #include <QDebug>
 
-#include "commandinterpreter.h"
 #include "engine/area.h"
 #include "engine/character.h"
+#include "engine/commandinterpreter.h"
 #include "engine/realm.h"
 
 
@@ -27,7 +27,7 @@ Session::~Session() {
 
     if (m_character) {
         if (m_interpreter) {
-            m_interpreter->leaveArea(m_character->currentArea());
+            m_character->currentArea().cast<Area *>()->leave(m_character);
         }
         m_character->setSession(0);
     }
@@ -146,8 +146,8 @@ void Session::processSignIn(const QString &data) {
             connect(m_character, SIGNAL(write(QString)), this, SIGNAL(write(QString)));
 
             m_interpreter = new CommandInterpreter(m_character, this);
-            connect(m_interpreter, SIGNAL(exit()), this, SIGNAL(terminate()));
-            m_interpreter->enterArea(m_character->currentArea());
+            connect(m_interpreter, SIGNAL(quit()), this, SIGNAL(terminate()));
+            m_character->currentArea().cast<Area *>()->enter(m_character);
             break;
 
         case SignInAborted:

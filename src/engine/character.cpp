@@ -44,6 +44,31 @@ void Character::setCurrentArea(const GameObjectPtr &currentArea) {
     }
 }
 
+void Character::addInventoryItem(const GameObjectPtr &item) {
+
+    if (!m_inventory.contains(item)) {
+        m_inventory << item;
+
+        setModified();
+    }
+}
+
+void Character::removeInventoryItem(const GameObjectPtr &item) {
+
+    if (m_inventory.removeAll(item) > 0) {
+        setModified();
+    }
+}
+
+void Character::setInventory(const GameObjectPtrList &inventory) {
+
+    if (m_inventory != inventory) {
+        m_inventory = inventory;
+
+        setModified();
+    }
+}
+
 void Character::setAdmin(bool admin) {
 
     if (m_admin != admin) {

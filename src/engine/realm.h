@@ -1,7 +1,7 @@
 #ifndef REALM_H
 #define REALM_H
 
-#include <QMap>
+#include <QHash>
 
 #include "gameobject.h"
 
@@ -42,8 +42,8 @@ class Realm : public GameObject {
         bool m_initialized;
 
         uint m_nextId;
-        QMap<uint, GameObject *> m_objectMap;
-        QMap<QString, Character *> m_characterMap;
+        QHash<uint, GameObject *> m_objectMap;
+        QHash<QString, Character *> m_characterMap;
 
         GameObjectSyncThread *m_syncThread;
 
