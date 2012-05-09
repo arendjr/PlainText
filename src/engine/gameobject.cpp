@@ -17,6 +17,7 @@
 #include "character.h"
 #include "exit.h"
 #include "gameobjectptr.h"
+#include "item.h"
 #include "realm.h"
 #include "util.h"
 
@@ -66,51 +67,56 @@ bool GameObject::save() {
         return QFile::remove(Realm::saveObjectPath(m_objectType, m_id));
     }
 
+    const QString v("  \"%1\": %2");
+    const QString l("  \"%1\": [ %2 ]");
+
     QStringList dumpedProperties;
     foreach (const QMetaProperty &metaProperty, storedMetaProperties()) {
         const char *name = metaProperty.name();
-        QString dumpedProperty = QString("  \"%1\": ").arg(name);
 
         QStringList stringList;
         switch (metaProperty.type()) {
             case QVariant::Bool:
-                dumpedProperty += property(name).toBool() ? "true" : "false";
+                dumpedProperties << v.arg(name, property(name).toBool() ? "true" : "false");
                 break;
             case QVariant::Int:
-                dumpedProperty += QString::number(property(name).toInt());
+                dumpedProperties << v.arg(name).arg(property(name).toInt());
                 break;
             case QVariant::Double:
-                dumpedProperty += QString::number(property(name).toDouble());
+                dumpedProperties << v.arg(name).arg(property(name).toDouble());
                 break;
             case QVariant::String:
-                dumpedProperty += Util::jsString(property(name).toString());
+                if (!property(name).toString().isEmpty()) {
+                    dumpedProperties << v.arg(name, Util::jsString(property(name).toString()));
+                }
                 break;
             case QVariant::StringList:
                 stringList.clear();
                 foreach (QString string, property(name).toStringList()) {
                     stringList << Util::jsString(string);
                 }
-                dumpedProperty += "[ " + stringList.join(", ") + " ]";
+                if (!stringList.isEmpty()) {
+                    dumpedProperties << l.arg(name, stringList.join(", "));
+                }
                 break;
             case QVariant::UserType:
                 if (metaProperty.userType() == QMetaType::type("GameObjectPtr")) {
-                    dumpedProperty += Util::jsString(property(name).value<GameObjectPtr>().toString());
+                    dumpedProperties << v.arg(name, Util::jsString(property(name).value<GameObjectPtr>().toString()));
                     break;
                 } else if (metaProperty.userType() == QMetaType::type("GameObjectPtrList")) {
                     stringList.clear();
                     foreach (GameObjectPtr pointer, property(name).value<GameObjectPtrList>()) {
                         stringList << Util::jsString(pointer.toString());
                     }
-                    dumpedProperty += "[ " + stringList.join(", ") + " ]";
+                    if (!stringList.isEmpty()) {
+                        dumpedProperties << l.arg(name, stringList.join(", "));
+                    }
                     break;
                 }
                 // fall-through
             default:
                 qDebug() << "Unknown type: " << metaProperty.type();
-                continue;
         }
-
-        dumpedProperties << dumpedProperty;
     }
 
     QFile file(Realm::saveObjectPath(m_objectType, m_id));
@@ -223,6 +229,8 @@ GameObject *GameObject::createByObjectType(const QString &objectType, uint id, O
         return new Character(id, options);
     } else if (objectType == "exit") {
         return new Exit(id, options);
+    } else if (objectType == "item") {
+        return new Item(id, options);
     } else {
         throw BadGameObjectException(BadGameObjectException::UnknownGameObjectType);
     }

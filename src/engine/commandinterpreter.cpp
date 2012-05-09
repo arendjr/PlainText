@@ -9,13 +9,18 @@
 #include "gameobjectptr.h"
 #include "realm.h"
 #include "util.h"
+#include "commands/dropcommand.h"
+#include "commands/getcommand.h"
+#include "commands/givecommand.h"
 #include "commands/gocommand.h"
 #include "commands/quitcommand.h"
 #include "commands/saycommand.h"
 #include "commands/slashmecommand.h"
 #include "commands/admin/addexitcommand.h"
+#include "commands/admin/additemcommand.h"
 #include "commands/admin/getpropcommand.h"
 #include "commands/admin/removeexitcommand.h"
+#include "commands/admin/removeitemcommand.h"
 #include "commands/admin/setpropcommand.h"
 #include "commands/admin/stopservercommand.h"
 
@@ -24,20 +29,30 @@ CommandInterpreter::CommandInterpreter(Character *character, QObject *parent) :
     QObject(parent),
     m_character(character) {
 
+    Command *drop = new DropCommand(character, this);
+    Command *get = new GetCommand(character, this);
+    Command *give = new GiveCommand(character, this);
     Command *go = new GoCommand(character, this);
     Command *quit = new QuitCommand(character, this);
     Command *say = new SayCommand(character, this);
     Command *slashMe = new SlashMeCommand(character, this);
 
+    m_commands.insert("drop", drop);
+    m_commands.insert("give", give);
+    m_commands.insert("get", get);
     m_commands.insert("go", go);
     m_commands.insert("goodbye", quit);
     m_commands.insert("quit", quit);
     m_commands.insert("say", say);
+    m_commands.insert("take", get);
     m_commands.insert("/me", slashMe);
 
     if (m_character->isAdmin()) {
         m_commands.insert("get-prop", new GetPropCommand(character, this));
         m_commands.insert("set-prop", new SetPropCommand(character, this));
+
+        m_commands.insert("add-item", new AddItemCommand(character, this));
+        m_commands.insert("remove-item", new RemoveItemCommand(character, this));
 
         m_commands.insert("add-exit", new AddExitCommand(character, this));
         m_commands.insert("remove-exit", new RemoveExitCommand(character, this));
@@ -54,24 +69,34 @@ CommandInterpreter::~CommandInterpreter() {
 void CommandInterpreter::execute(const QString &command) {
 
     QStringList words = command.trimmed().split(QRegExp("\\s+"));
-    words[0] = words[0].toLower();
+    QString commandName = words[0].toLower();
 
-    if (Util::isDirectionAbbreviation(words[0])) {
-        words[0] = Util::direction(words[0]);
+    if (Util::isDirectionAbbreviation(commandName)) {
+        commandName = Util::direction(commandName);
     }
-    if (Util::isDirection(words[0])) {
+    if (Util::isDirection(commandName)) {
         words.prepend("go");
-
-        if (m_commands.contains(words[0])) {
-            m_commands[words[0]]->execute(words.join(" "));
-            return;
-        }
-    }
-
-    if (m_commands.contains(words[0])) {
-        m_commands[words[0]]->execute(command);
+        m_commands["go"]->execute(words.join(" "));
         return;
     }
 
-    m_character->send(QString("The command \"%1\" does not exist.").arg(words[0]));
+    if (m_commands.contains(commandName)) {
+        m_commands[commandName]->execute(command);
+        return;
+    }
+
+    QList<Command *> commands;
+    foreach (const QString &key, m_commands.keys()) {
+        if (key.startsWith(commandName)) {
+            commands << m_commands[key];
+        }
+    }
+
+    if (commands.length() == 1) {
+        commands[0]->execute(command);
+    } else if (commands.length() > 1) {
+        m_character->send("Command is not unique.");
+    } else {
+        m_character->send(QString("Command \"%1\" does not exist.").arg(words[0]));
+    }
 }

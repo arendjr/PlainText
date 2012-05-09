@@ -1,5 +1,8 @@
 #include "setpropcommand.h"
 
+#include "engine/item.h"
+#include "engine/util.h"
+
 
 SetPropCommand::SetPropCommand(Character *character, QObject *parent) :
     AdminCommand(character, parent) {
@@ -19,10 +22,10 @@ void SetPropCommand::execute(const QString &command) {
         return;
     }
 
-    QString propertyName = takeWord();
+    QString propertyName = Util::toCamelCase(takeWord());
     QString value = takeRest();
 
-    QVariant variant;
+    QVariant variant = objects[0]->property(propertyName.toAscii().constData());
     switch (variant.type()) {
         case QVariant::Bool:
             variant = (value == "true");
@@ -51,11 +54,20 @@ void SetPropCommand::execute(const QString &command) {
             }
         default:
             character()->send(QString("Setting property %1 is not supported.").arg(propertyName));
+            return;
     }
 
     if (variant.isValid()) {
         objects[0]->setProperty(propertyName.toAscii().constData(), variant);
 
         character()->send(QString("Property %1 modified.").arg(propertyName));
+
+        Item *item = objects[0].cast<Item *>();
+        if (item && (propertyName == "name" || propertyName == "plural" || propertyName == "indefiniteArticle")) {
+            character()->send(QString("New forms: one %1, two %2, %3 %4.").arg(item->name(),
+                                                                               item->plural(),
+                                                                               item->indefiniteArticle(),
+                                                                               item->name()));
+        }
     }
 }

@@ -27,8 +27,9 @@ class GameObjectPtr {
         bool operator==(const GameObject *other) const;
         bool operator!=(const GameObjectPtr &other) const;
         bool operator!=(const GameObject *other) const;
-        GameObject &operator*() const;
-        GameObject *operator->() const;
+
+        GameObject &operator*() const { Q_ASSERT(m_gameObject); return *m_gameObject; }
+        GameObject *operator->() const { Q_ASSERT(m_gameObject); return m_gameObject; }
 
         template <class T> T cast() const { Q_ASSERT(m_gameObject); return qobject_cast<T>(m_gameObject); }
 

@@ -1,5 +1,7 @@
 #include "getpropcommand.h"
 
+#include "engine/util.h"
+
 
 GetPropCommand::GetPropCommand(Character *character, QObject *parent) :
     AdminCommand(character, parent) {
@@ -19,7 +21,7 @@ void GetPropCommand::execute(const QString &command) {
         return;
     }
 
-    QString propertyName = takeWord();
+    QString propertyName = Util::toCamelCase(takeWord());
 
     if (propertyName == "id") {
         character()->send(QString::number(objects[0]->id()));

@@ -22,14 +22,19 @@ SOURCES += \
     engine/realm.cpp \
     engine/util.cpp \
     engine/commands/command.cpp \
+    engine/commands/dropcommand.cpp \
+    engine/commands/getcommand.cpp \
+    engine/commands/givecommand.cpp \
     engine/commands/gocommand.cpp \
     engine/commands/quitcommand.cpp \
     engine/commands/saycommand.cpp \
     engine/commands/slashmecommand.cpp \
     engine/commands/admin/addexitcommand.cpp \
+    engine/commands/admin/additemcommand.cpp \
     engine/commands/admin/admincommand.cpp \
     engine/commands/admin/getpropcommand.cpp \
     engine/commands/admin/removeexitcommand.cpp \
+    engine/commands/admin/removeitemcommand.cpp \
     engine/commands/admin/setpropcommand.cpp \
     engine/commands/admin/stopservercommand.cpp \
     interface/httpserver.cpp \
@@ -53,14 +58,19 @@ HEADERS += \
     engine/realm.h \
     engine/util.h \
     engine/commands/command.h \
+    engine/commands/dropcommand.h \
+    engine/commands/getcommand.h \
+    engine/commands/givecommand.h \
     engine/commands/gocommand.h \
     engine/commands/quitcommand.h \
     engine/commands/saycommand.h \
     engine/commands/slashmecommand.h \
     engine/commands/admin/addexitcommand.h \
+    engine/commands/admin/additemcommand.h \
     engine/commands/admin/admincommand.h \
     engine/commands/admin/getpropcommand.h \
     engine/commands/admin/removeexitcommand.h \
+    engine/commands/admin/removeitemcommand.h \
     engine/commands/admin/setpropcommand.h \
     engine/commands/admin/stopservercommand.h \
     interface/httpserver.h \

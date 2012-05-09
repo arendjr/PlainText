@@ -42,6 +42,9 @@ class Character : public GameObject {
 
         void send(QString data);
 
+        void enter(const GameObjectPtr &area);
+        void leave(const GameObjectPtr &area, const QString &exitName = QString::null);
+
     signals:
         void write(const QString &data);
 

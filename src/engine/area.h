@@ -5,8 +5,6 @@
 #include "gameobjectptr.h"
 
 
-class Character;
-
 class Area : public GameObject {
 
     Q_OBJECT
@@ -32,9 +30,6 @@ class Area : public GameObject {
         virtual void removeItem(const GameObjectPtr &item);
         virtual void setItems(const GameObjectPtrList &items);
         Q_PROPERTY(GameObjectPtrList items READ items WRITE setItems);
-
-        void enter(Character *character);
-        void leave(Character *character, const QString &exitName = QString::null);
 
     private:
         GameObjectPtrList m_exits;

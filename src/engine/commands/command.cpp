@@ -96,11 +96,26 @@ GameObjectPtrList Command::objectsByDescription(const QPair<QString, uint> &desc
         }
     }
     if (description.second > 0) {
-        GameObjectPtr selected = objects[description.second - 1];
-        objects.clear();
-        objects << selected;
+        if (description.second <= objects.length()) {
+            GameObjectPtr selected = objects[description.second - 1];
+            objects.clear();
+            objects << selected;
+        } else {
+            objects.clear();
+        }
     }
     return objects;
+}
+
+bool Command::requireSome(const GameObjectPtrList &objects,
+                          const QString &tooFewText) {
+
+    if (objects.length() == 0) {
+        m_character->send(tooFewText);
+        return false;
+    } else {
+        return true;
+    }
 }
 
 bool Command::requireUnique(const GameObjectPtrList &objects,

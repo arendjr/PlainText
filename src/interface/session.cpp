@@ -27,7 +27,7 @@ Session::~Session() {
 
     if (m_character) {
         if (m_interpreter) {
-            m_character->currentArea().cast<Area *>()->leave(m_character);
+            m_character->leave(m_character->currentArea());
         }
         m_character->setSession(0);
     }
@@ -147,7 +147,7 @@ void Session::processSignIn(const QString &data) {
 
             m_interpreter = new CommandInterpreter(m_character, this);
             connect(m_interpreter, SIGNAL(quit()), this, SIGNAL(terminate()));
-            m_character->currentArea().cast<Area *>()->enter(m_character);
+            m_character->enter(m_character->currentArea());
             break;
 
         case SignInAborted:

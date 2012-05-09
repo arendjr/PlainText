@@ -43,6 +43,8 @@ class Command : public QObject {
         virtual GameObjectPtrList objectsByDescription(const QPair<QString, uint> &description,
                                                        const GameObjectPtrList &pool);
 
+        bool requireSome(const GameObjectPtrList &objects,
+                         const QString &tooFewText);
         bool requireUnique(const GameObjectPtrList &objects,
                            const QString &tooFewText,
                            const QString &tooManyText);

@@ -3,6 +3,8 @@
 
 #include <QStringList>
 
+#include "gameobjectptr.h"
+
 
 enum Color {
     White = 0,
@@ -23,12 +25,21 @@ enum Color {
     Purple
 };
 
+enum Articles {
+    IndefiniteArticle,
+    DefiniteArticle
+};
+
 class Util {
 
     public:
         static QString joinFancy(const QStringList &list,
                                  const QString &separator = ", ",
                                  const QString &last = " and ");
+
+        static QString joinItems(const GameObjectPtrList &items, Articles article = IndefiniteArticle);
+
+        static QString writtenNumber(int number);
 
         static QString jsString(QString string);
 
@@ -41,6 +52,12 @@ class Util {
         static bool isDirectionAbbreviation(const QString &string);
 
         static QString direction(const QString &abbreviation);
+
+        static QString toCamelCase(QString string);
+
+        static void sendOthers(GameObjectPtrList characters, const QString &string,
+                               const GameObjectPtr &exclude1 = GameObjectPtr::null,
+                               const GameObjectPtr &exclude2 = GameObjectPtr::null);
 
     private:
         Util();

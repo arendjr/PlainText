@@ -1,7 +1,4 @@
 #include "area.h"
-#include "character.h"
-
-#include "engine/util.h"
 
 
 Area::Area(uint id, Options options) :
@@ -79,56 +76,3 @@ void Area::setItems(const GameObjectPtrList &items) {
         setModified();
     }
 }
-
-void Area::enter(Character *character) {
-
-    character->setCurrentArea(this);
-
-    addCharacter(character);
-
-    if (!name().isEmpty()) {
-        character->send(Util::colorize("\n" + name() + "\n\n", Teal));
-    }
-
-    character->send(description());
-
-    if (exits().length() > 0) {
-        QStringList exitNames;
-        foreach (const GameObjectPtr &exit, exits()) {
-            exitNames << exit->name();
-        }
-        character->send(Util::colorize("Obvious exits: " + exitNames.join(", ") + ".", Green));
-    }
-
-    GameObjectPtrList others = characters();
-    others.removeOne(character);
-    if (others.length() > 0) {
-        QStringList characterNames;
-        foreach (const GameObjectPtr &otherPtr, others) {
-            Character *other = otherPtr.cast<Character *>();
-            Q_ASSERT(other);
-
-            characterNames << other->name();
-
-            other->send(QString("%1 arrived.").arg(character->name()));
-        }
-        character->send("You see " + Util::joinFancy(characterNames) + ".");
-    }
-}
-
-void Area::leave(Character *character, const QString &exitName) {
-
-    removeCharacter(character);
-
-    foreach (const GameObjectPtr &otherPtr, characters()) {
-        Character *other = otherPtr.cast<Character *>();
-        Q_ASSERT(other);
-
-        if (exitName.isEmpty()) {
-            other->send(QString("%1 left.").arg(character->name()));
-        } else {
-            other->send(QString("%1 left to the %2.").arg(character->name(), exitName));
-        }
-    }
-}
-

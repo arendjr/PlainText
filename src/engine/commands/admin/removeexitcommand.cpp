@@ -13,6 +13,9 @@ void RemoveExitCommand::execute(const QString &command) {
     setCommand(command);
 
     /*QString alias = */takeWord();
+    if (!assertWordsLeft("Usage: remove-exit <exit-name>")) {
+        return;
+    }
 
     GameObjectPtrList exits = takeObjects(currentArea()->exits());
     if (!requireUnique(exits, "There's no such exit.", "Exit is not unique.")) {

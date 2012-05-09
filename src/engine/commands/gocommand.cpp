@@ -24,6 +24,6 @@ void GoCommand::execute(const QString &command) {
         return;
     }
 
-    currentArea()->leave(character(), exits[0]->name());
-    exits[0].cast<Exit *>()->destinationArea().cast<Area *>()->enter(character());
+    character()->leave(currentArea(), exits[0]->name());
+    character()->enter(exits[0].cast<Exit *>()->destinationArea());
 }

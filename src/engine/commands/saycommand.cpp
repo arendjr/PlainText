@@ -1,5 +1,7 @@
 #include "saycommand.h"
 
+#include "engine/util.h"
+
 
 SayCommand::SayCommand(Character *character, QObject *parent) :
     Command(character, parent) {
@@ -19,7 +21,6 @@ void SayCommand::execute(const QString &command) {
 
     QString message = takeRest();
 
-    foreach (const GameObjectPtr &other, currentArea()->characters()) {
-        other.cast<Character *>()->send(QString("%1 says, \"%2\".").arg(character()->name(), message));
-    }
+    Util::sendOthers(currentArea()->characters(),
+                     QString("%1 says, \"%2\".").arg(character()->name(), message));
 }

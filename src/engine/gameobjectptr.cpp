@@ -77,18 +77,6 @@ bool GameObjectPtr::operator!=(const GameObject *other) const {
     return m_gameObject != other;
 }
 
-GameObject &GameObjectPtr::operator*() const {
-
-    Q_ASSERT(m_gameObject);
-    return *m_gameObject;
-}
-
-GameObject *GameObjectPtr::operator->() const {
-
-    Q_ASSERT(m_gameObject);
-    return m_gameObject;
-}
-
 void GameObjectPtr::resolve() throw (BadGameObjectException) {
 
     if (m_id == 0) {

@@ -21,7 +21,6 @@ void SlashMeCommand::execute(const QString &command) {
 
     QString action = takeRest();
 
-    foreach (const GameObjectPtr &other, currentArea()->characters()) {
-        other.cast<Character *>()->send(Util::colorize("%1 %2", Purple).arg(character()->name(), action));
-    }
+    Util::sendOthers(currentArea()->characters(),
+                     Util::colorize("%1 %2", Purple).arg(character()->name(), action));
 }

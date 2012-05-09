@@ -17,6 +17,9 @@ void AddExitCommand::execute(const QString &command) {
     setCommand(command);
 
     /*QString alias = */takeWord();
+    if (!assertWordsLeft("Usage: add-exit <exit-name> <destination-area-id>")) {
+        return;
+    }
 
     QString exitName = takeWord();
     QString destinationAreaId = takeWord();
@@ -35,12 +38,12 @@ void AddExitCommand::execute(const QString &command) {
     Exit *exit = qobject_cast<Exit *>(GameObject::createByObjectType("exit"));
     exit->setName(exitName);
     exit->setDestinationArea(destinationArea);
-    character()->currentArea().cast<Area *>()->addExit(exit);
+    currentArea()->addExit(exit);
 
     if (Util::isDirection(exitName)) {
         exit = qobject_cast<Exit *>(GameObject::createByObjectType("exit"));
         exit->setName(Util::opposingDirection(exitName));
-        exit->setDestinationArea(character()->currentArea());
+        exit->setDestinationArea(currentArea());
         destinationArea->addExit(exit);
 
         character()->send(QString("Bi-directional exit %1-%2 added.").arg(exitName, exit->name()));
