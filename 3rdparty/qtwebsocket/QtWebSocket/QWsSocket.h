@@ -32,7 +32,7 @@ public:
 
 public:
 	// ctor
-	QWsSocket(QTcpSocket * socket = 0, QObject * parent = 0);
+	QWsSocket(QTcpSocket * socket = 0, int version = 6, QObject * parent = 0);
 	// dtor
 	virtual ~QWsSocket();
 
@@ -66,14 +66,14 @@ private:
 	QTcpSocket * tcpSocket;
 	QByteArray currentFrame;
 	QTime pingTimer;
+	int version;
 
 public:
 	// Static functions
 	static QByteArray generateMaskingKey();
 	static QByteArray mask( QByteArray data, QByteArray maskingKey );
-	static QList<QByteArray> composeFrames( QByteArray byteArray, bool asBinary = false, int maxFrameBytes = 0 );
+	static QList<QByteArray> composeFrames( QByteArray byteArray, bool asBinary = false, int maxFrameBytes = 0, int version = 6 );
 	static QByteArray composeHeader( bool fin, EOpcode opcode, quint64 payloadLength, QByteArray maskingKey = QByteArray() );
-	static QString composeOpeningHandShake( QString ressourceName, QString host, QString origin, QString extensions, QString key );
 
 	// static vars
 	static int maxBytesPerFrame;

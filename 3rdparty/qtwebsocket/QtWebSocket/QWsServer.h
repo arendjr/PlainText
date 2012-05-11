@@ -5,6 +5,7 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QString>
+#include <QRegExp>
 #include <QQueue>
 #include <QNetworkProxy>
 
@@ -61,18 +62,6 @@ public:
 	static QString computeAcceptV2( QString key );
 	static QString computeAcceptV1( QString key1, QString key2, QString thirdPart );
 	static QString serializeInt( quint32 number, quint8 nbBytes = 4 );
-	// public static vars
-	static const QString regExpResourceNameStr;
-	static const QString regExpHostStr;
-	static const QString regExpKeyStr;
-	static const QString regExpKey1Str;
-	static const QString regExpKey2Str;
-	static const QString regExpKey3Str;
-	static const QString regExpVersionStr;
-	static const QString regExpOriginStr;
-	static const QString regExpOriginV6Str;
-	static const QString regExpProtocolStr;
-	static const QString regExpExtensionsStr;
 };
 
 #endif // QWSSERVER_H

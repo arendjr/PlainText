@@ -42,7 +42,9 @@ SOURCES += \
     interface/websocketserver.cpp \
     ../3rdparty/qjson/json_driver.cc \
     ../3rdparty/qjson/json_parser.cc \
-    ../3rdparty/qjson/json_scanner.cpp
+    ../3rdparty/qjson/json_scanner.cpp \
+    ../3rdparty/qtwebsocket/QtWebSocket/QWsServer.cpp \
+    ../3rdparty/qtwebsocket/QtWebSocket/QWsSocket.cpp
 
 HEADERS += \
     engine/area.h \
@@ -78,23 +80,15 @@ HEADERS += \
     interface/websocketserver.h \
     ../3rdparty/qjson/json_parser.hh \
     ../3rdparty/qjson/json_driver.hh \
-    ../3rdparty/qjson/json_scanner.h
+    ../3rdparty/qjson/json_scanner.h \
+    ../3rdparty/qtwebsocket/QtWebSocket/QWsServer.h \
+    ../3rdparty/qtwebsocket/QtWebSocket/QWsSocket.h
 
 OTHER_FILES += \
     ../web/index.html \
     ../web/main.css \
     ../web/main.js
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../3rdparty/qtwebsocket/QtWebSocket/release/ -lQtWebSocket
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../3rdparty/qtwebsocket/QtWebSocket/debug/ -lQtWebSocket
-else:unix:!symbian: LIBS += -L$$OUT_PWD/../3rdparty/qtwebsocket/QtWebSocket/ -lQtWebSocket
-
 INCLUDEPATH += \
     $$PWD/../3rdparty \
     $$PWD/../3rdparty/qtwebsocket/QtWebSocket
-DEPENDPATH += \
-    $$PWD/../3rdparty/qtwebsocket/QtWebSocket
-
-win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../3rdparty/qtwebsocket/QtWebSocket/release/QtWebSocket.lib
-else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../3rdparty/qtwebsocket/QtWebSocket/debug/QtWebSocket.lib
-else:unix:!symbian: PRE_TARGETDEPS += $$OUT_PWD/../3rdparty/qtwebsocket/QtWebSocket/libQtWebSocket.a
