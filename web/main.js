@@ -34,6 +34,12 @@ function Controller() {
     this.screen = document.getElementsByClassName("screen")[0];
     this.writeToScreen("Connecting...");
 
+    this.character = {};
+    this.statusHeader = {
+        "name": document.querySelector(".status-header .name"),
+        "hp": document.querySelector(".status-header .hp"),
+    };
+
     this.history = [];
     this.historyIndex = 0;
     this.currentCommand = '';
@@ -46,13 +52,15 @@ function Controller() {
             self.socket.send(command);
             self.commandInput.value = "";
 
-            if (self.history[self.history.length - 1] !== command) {
-                self.history.push(command);
+            if (self.character.name) {
+                if (self.history[self.history.length - 1] !== command) {
+                    self.history.push(command);
+                }
+                self.historyIndex = 0;
             }
-            self.historyIndex = 0;
         }
     }
-    this.commandInput.onkeyup = function(event) {
+    this.commandInput.onkeydown = function(event) {
         if (event.keyCode === keys.KEY_UP) {
             if (self.historyIndex === 0) {
                 self.currentCommand = self.commandInput.value;
@@ -77,12 +85,26 @@ function Controller() {
         }
     }
 
-    this.socket = new WebSocket("ws://" + document.location.hostname + ":4801");
+    this.socket = new WebSocket("ws://" + document.location.hostname + ":4802");
     this.socket.onopen = function(message) {
         self.writeToScreen("Connected.");
     };
     this.socket.onmessage = function(message) {
-        self.writeToScreen(message.data);
+        if (message.data.substr(0, 1) === "{" && message.data.substr(-1) === "}") {
+            var data = JSON.parse(message.data);
+            if (data.character) {
+                self.character = data.character;
+
+                if (self.character.isAdmin) {
+                    self.commandInput.removeAttribute("maxlength");
+                }
+
+                self.statusHeader.name.innerText = self.character.name;
+                self.statusHeader.hp.innerText = self.character.hp + "HP";
+            }
+        } else {
+            self.writeToScreen(message.data);
+        }
     };
     this.socket.onclose = function(message) {
         self.writeToScreen("Connection closed.");
@@ -96,19 +118,30 @@ function Controller() {
 
 Controller.prototype.writeToScreen = function(message) {
 
-    var element = document.createElement("div");
-    if (message.substr(0, 5) === "\\x1B[" && message.substr(-7) === "\\x1B[0m") {
-        var mIndex = message.indexOf("m");
-        var color = message.substring(5, mIndex);
-        if (color) {
-            element.style.color = colorMap[color];
-            message = message.substring(mIndex + 1, message.length - 7);
+    var div = document.createElement("div");
+
+    var index;
+    while ((index = message.indexOf("\x1B[", index)) > -1) {
+        var mIndex = message.indexOf("m", index);
+        var endIndex = message.indexOf("\x1B[0m", mIndex);
+
+        if (index > 0) {
+            div.appendChild(document.createTextNode(message.substr(0, index)));
         }
+
+        var color = message.substring(index + 2, mIndex);
+        var span = document.createElement("span");
+        span.appendChild(document.createTextNode(message.substring(mIndex + 1, endIndex)));
+        span.style.color = colorMap[color];
+        div.appendChild(span);
+
+        message = message.substr(endIndex + 4);
+    }
+    if (message.length > 0) {
+        div.appendChild(document.createTextNode(message));
     }
 
-    var text = document.createTextNode(message);
-    element.appendChild(text);
-    this.screen.appendChild(element);
+    this.screen.appendChild(div);
 
     this.screen.scrollTop = this.screen.scrollHeight;
 }

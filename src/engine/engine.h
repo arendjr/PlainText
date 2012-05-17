@@ -5,6 +5,7 @@
 
 
 class HttpServer;
+class TelnetServer;
 class WebSocketServer;
 
 class Engine : public QObject {
@@ -19,6 +20,7 @@ class Engine : public QObject {
 
     private:
         HttpServer *m_httpServer;
+        TelnetServer *m_telnetServer;
         WebSocketServer *m_webSocketServer;
 };
 

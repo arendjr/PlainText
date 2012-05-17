@@ -33,6 +33,10 @@ class Character : public GameObject {
         virtual void setInventory(const GameObjectPtrList &inventory);
         Q_PROPERTY(GameObjectPtrList inventory READ inventory WRITE setInventory)
 
+        int hp() const { return m_hp; }
+        virtual void setHp(int hp);
+        Q_PROPERTY(int hp READ hp WRITE setHp)
+
         bool isAdmin() const { return m_admin; }
         virtual void setAdmin(bool admin);
         Q_PROPERTY(bool admin READ isAdmin WRITE setAdmin)
@@ -55,6 +59,8 @@ class Character : public GameObject {
         GameObjectPtr m_currentArea;
 
         GameObjectPtrList m_inventory;
+
+        int m_hp;
 
         bool m_admin;
 

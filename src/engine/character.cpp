@@ -7,6 +7,7 @@
 
 Character::Character(uint id, Options options) :
     GameObject("character", id, options),
+    m_hp(1),
     m_admin(false),
     m_session(0) {
 }
@@ -72,6 +73,15 @@ void Character::setInventory(const GameObjectPtrList &inventory) {
     }
 }
 
+void Character::setHp(int hp) {
+
+    if (m_hp != hp) {
+        m_hp = hp;
+
+        setModified();
+    }
+}
+
 void Character::setAdmin(bool admin) {
 
     if (m_admin != admin) {
@@ -88,6 +98,9 @@ void Character::setSession(Session *session) {
 
 void Character::send(QString data) {
 
+    if (!data.endsWith("\n")) {
+        data += "\n";
+    }
     write(data);
 }
 
@@ -106,39 +119,37 @@ void Character::enter(const GameObjectPtr &areaPtr) {
 void Character::look() {
 
     Area *area = currentArea().cast<Area *>();
+    QString text;
 
     if (!area->name().isEmpty()) {
-        send(Util::colorize("\n" + area->name() + "\n\n", Teal));
+        text += "\n" + Util::colorize(area->name(), Teal) + "\n\n";
     }
 
-    send(area->description());
+    text += area->description() + "\n";
 
     if (area->exits().length() > 0) {
         QStringList exitNames;
         foreach (const GameObjectPtr &exit, area->exits()) {
             exitNames << exit->name();
         }
-        send(Util::colorize("Obvious exits: " + exitNames.join(", ") + ".", Green));
+        text += Util::colorize("Obvious exits: " + exitNames.join(", ") + ".", Green) + "\n";
     }
 
     GameObjectPtrList others = area->characters();
     others.removeOne(this);
     if (others.length() > 0) {
         QStringList characterNames;
-        foreach (const GameObjectPtr &otherPtr, others) {
-            Character *other = otherPtr.cast<Character *>();
-            Q_ASSERT(other);
-
+        foreach (const GameObjectPtr &other, others) {
             characterNames << other->name();
-
-            other->send(QString("%1 arrived.").arg(name()));
         }
-        send("You see " + Util::joinFancy(characterNames) + ".");
+        text += "You see " + Util::joinFancy(characterNames) + ".\n";
     }
 
     if (area->items().length() > 0) {
-        send("You see " + Util::joinItems(area->items()) + ".");
+        text += "You see " + Util::joinItems(area->items()) + ".\n";
     }
+
+    send(text);
 }
 
 void Character::leave(const GameObjectPtr &areaPtr, const QString &exitName) {

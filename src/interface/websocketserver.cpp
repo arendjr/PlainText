@@ -7,9 +7,8 @@
 #include <QWsSocket.h>
 
 #include "session.h"
-#include "engine/area.h"
 #include "engine/character.h"
-#include "engine/realm.h"
+#include "engine/util.h"
 
 
 WebSocketServer::WebSocketServer(quint16 port, QObject *parent) :
@@ -69,4 +68,14 @@ void WebSocketServer::onSessionOutput(const QString &data) {
     }
 
     socket->write(data);
+
+    if (session->authenticated()) {
+        Character *character = session->character();
+        Q_ASSERT(character);
+
+        socket->write(QString("{ \"character\": { \"name\": %1, \"isAdmin\": %2, \"hp\": %3 } }")
+                      .arg(Util::jsString(character->name()),
+                           character->isAdmin() ? "true" : "false",
+                           QString::number(character->hp())));
+    }
 }

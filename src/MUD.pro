@@ -44,6 +44,7 @@ SOURCES += \
     engine/commands/admin/stopservercommand.cpp \
     interface/httpserver.cpp \
     interface/session.cpp \
+    interface/telnetserver.cpp \
     interface/websocketserver.cpp \
     ../3rdparty/qjson/json_driver.cc \
     ../3rdparty/qjson/json_parser.cc \
@@ -87,6 +88,7 @@ HEADERS += \
     engine/commands/admin/stopservercommand.h \
     interface/httpserver.h \
     interface/session.h \
+    interface/telnetserver.h \
     interface/websocketserver.h \
     ../3rdparty/qjson/json_parser.hh \
     ../3rdparty/qjson/json_driver.hh \

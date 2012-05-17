@@ -1,5 +1,7 @@
 #include "area.h"
 
+#include "character.h"
+
 
 Area::Area(uint id, Options options) :
     GameObject("area", id, options) {
@@ -38,6 +40,13 @@ void Area::setExits(const GameObjectPtrList &exits) {
 void Area::addCharacter(const GameObjectPtr &character) {
 
     if (!m_characters.contains(character)) {
+        foreach (const GameObjectPtr &otherPtr, m_characters) {
+            Character *other = otherPtr.cast<Character *>();
+            Q_ASSERT(other);
+
+            other->send(QString("%1 arrived.").arg(character->name()));
+        }
+
         m_characters << character;
     }
 }

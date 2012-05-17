@@ -76,6 +76,9 @@ void CommandInterpreter::execute(const QString &command) {
 
     QStringList words = command.trimmed().split(QRegExp("\\s+"));
     QString commandName = words[0].toLower();
+    if (commandName.isEmpty()) {
+        return;
+    }
 
     if (Util::isDirectionAbbreviation(commandName)) {
         commandName = Util::direction(commandName);
@@ -101,8 +104,8 @@ void CommandInterpreter::execute(const QString &command) {
     if (commands.length() == 1) {
         commands[0]->execute(command);
     } else if (commands.length() > 1) {
-        m_character->send("Command is not unique.");
+        m_character->send("Command is not unique.\n");
     } else {
-        m_character->send(QString("Command \"%1\" does not exist.").arg(words[0]));
+        m_character->send(QString("Command \"%1\" does not exist.\n").arg(words[0]));
     }
 }

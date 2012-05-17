@@ -112,7 +112,7 @@ static const char *colorMap[] = {
 
 QString Util::colorize(const QString &string, Color color) {
 
-    return "\\x1B[" + QString(colorMap[color]) + "m" + string + "\\x1B[0m";
+    return "\x1B[" + QString(colorMap[color]) + "m" + string + "\x1B[0m";
 
 }
 

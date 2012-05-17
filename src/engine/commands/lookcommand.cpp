@@ -26,5 +26,11 @@ void LookCommand::execute(const QString &command) {
         return;
     }
 
-    character()->send(objects[0]->description());
+    QString description = objects[0]->description();
+    if (description.isEmpty()) {
+        QString name = objects[0]->name();
+        character()->send(QString("There's nothing special about the %1.").arg(name));
+    } else {
+        character()->send(description);
+    }
 }

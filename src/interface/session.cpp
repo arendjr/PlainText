@@ -88,10 +88,10 @@ void Session::processSignIn(const QString &data) {
         case AskingPassword:
             passwordHash = QCryptographicHash::hash(input.toUtf8(), QCryptographicHash::Sha1).toBase64();
             if (m_character->passwordHash() == passwordHash) {
-                write(QString("Welcome back, %1").arg(m_character->name()));
+                write(QString("Welcome back, %1\n").arg(m_character->name()));
                 m_signInStage = SignedIn;
             }  else {
-                write("Password incorrect.");
+                write("Password incorrect.\n");
             }
             break;
 
@@ -114,7 +114,7 @@ void Session::processSignIn(const QString &data) {
                 m_signUpData = 0;
                 m_signInStage = SignedIn;
             } else {
-                write("Passwords don't match.");
+                write("Passwords don't match.\n");
                 m_signInStage = AskingSignupPassword;
             }
             break;

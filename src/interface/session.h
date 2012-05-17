@@ -1,6 +1,7 @@
 #ifndef SESSION_H
 #define SESSION_H
 
+#include <QMetaType>
 #include <QObject>
 
 
@@ -16,6 +17,10 @@ class Session : public QObject {
         virtual ~Session();
 
         void open();
+
+        bool authenticated() const { return m_signInStage == SignedIn; }
+
+        Character *character() const { return m_character; }
 
     public slots:
         void onUserInput(QString data);
@@ -46,5 +51,7 @@ class Session : public QObject {
 
         void processSignIn(const QString &data);
 };
+
+Q_DECLARE_METATYPE(Session *)
 
 #endif // SESSION_H

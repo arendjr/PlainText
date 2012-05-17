@@ -3,23 +3,39 @@ body {
     padding: 0;
 }
 
+body,input {
+    font-size: 10pt;
+}
+
+.status-header,.screen,.command-input {
+    padding: 0.5em;
+    width: 640px;
+}
+
+.status-header {
+    font-weight: bold;
+
+    margin: 2em 2em 0;
+    border: 2px solid #000;
+}
+    .stats {
+        float: right;
+    }
+
 .screen,.command-input {
     display: block;
 
     font-family: "Courier", monospace;
-    font-size: 10pt;
     color: #c0c0c0;
     white-space: pre-wrap;
 
     outline: 0;
     border: 2px inset #777;
-    padding: 0.5em;
-    width: 640px;
     background: #000;
 }
 
 .screen {
-    margin: 2em 2em 0;
+    margin: 0 2em;
     height: 480px;
     overflow: auto;
 }
@@ -29,11 +45,22 @@ body {
 }
 
 @media screen and (max-width: 660px) {
-    .screen,.command-input {
+    body,input {
         font-size: 8pt;
-        border: 0;
+    }
+
+    .status-header,.screen,.command-input {
         padding: 0.1em;
         width: 100%;
+    }
+
+    .status-header {
+        margin: 0;
+        border: 0;
+    }
+
+    .screen,.command-input {
+        border: 0;
     }
 
     .screen {
