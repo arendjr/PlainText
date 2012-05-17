@@ -4,6 +4,8 @@
 #include <QList>
 #include <QMetaType>
 #include <QObject>
+#include <QScriptEngine>
+#include <QScriptValue>
 #include <QString>
 
 #include "badgameobjectexception.h"
@@ -14,8 +16,6 @@ class GameObject;
 class GameObjectPtr {
 
     public:
-        static GameObjectPtr null;
-
         GameObjectPtr();
         GameObjectPtr(GameObject *gameObject);
         GameObjectPtr(const char *objectType, uint id);
@@ -41,6 +41,9 @@ class GameObjectPtr {
 
         friend void swap(GameObjectPtr &first, GameObjectPtr &second);
 
+        static QScriptValue toScriptValue(QScriptEngine *engine, const GameObjectPtr &pointer);
+        static void fromScriptValue(const QScriptValue &object, GameObjectPtr &pointer);
+
     private:
         GameObject *m_gameObject;
 
@@ -50,7 +53,7 @@ class GameObjectPtr {
 
 typedef QList<GameObjectPtr> GameObjectPtrList;
 
-Q_DECLARE_METATYPE(GameObjectPtr);
-Q_DECLARE_METATYPE(GameObjectPtrList);
+Q_DECLARE_METATYPE(GameObjectPtr)
+Q_DECLARE_METATYPE(GameObjectPtrList)
 
 #endif // GAMEOBJECTPTR_H

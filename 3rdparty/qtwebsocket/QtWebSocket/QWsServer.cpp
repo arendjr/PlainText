@@ -136,7 +136,7 @@ void QWsServer::dataReceived()
 			|| resourceName.isEmpty()
 			|| ( version >= 6 && key.length() != 24 )
 			|| ( version < 6 && ( key1.isEmpty() || key2.isEmpty() || key3.length() != 8 ) )
-		   )
+           )
 			break;
 
 		////////////////////////////////////////////////////////////////////
@@ -155,8 +155,8 @@ void QWsServer::dataReceived()
 			answer.append("Sec-WebSocket-Accept: " + accept + "\r\n" + "\r\n");
 		}
 		else
-		{
-			accept = computeAcceptV1( key1, key2, key3 );
+        {
+            accept = computeAcceptV1( key1, key2, key3 );
 			answer.append("HTTP/1.1 101 WebSocket Protocol Handshake\r\n");
 			answer.append("Upgrade: WebSocket\r\n");
 			answer.append("Connection: Upgrade\r\n");

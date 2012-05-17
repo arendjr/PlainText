@@ -7,6 +7,7 @@ const char *BadGameObjectException::s_messages[] = {
     "Corrupt game object file",
     "Invalid game object file name",
     "Invalid game object pointer",
+    "Invalid function code",
     "Invalid exit format"
 };
 

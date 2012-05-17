@@ -3,14 +3,13 @@
 #include <algorithm>
 #include <cstring>
 
+#include <QMetaProperty>
 #include <QStringList>
 
 #include "badgameobjectexception.h"
 #include "gameobject.h"
 #include "realm.h"
 
-
-GameObjectPtr GameObjectPtr::null = GameObjectPtr();
 
 GameObjectPtr::GameObjectPtr() :
     m_gameObject(0),
@@ -117,4 +116,16 @@ void swap(GameObjectPtr &first, GameObjectPtr &second) {
     std::swap(first.m_gameObject, second.m_gameObject);
     std::swap(first.m_objectType, second.m_objectType);
     std::swap(first.m_id, second.m_id);
+}
+
+QScriptValue GameObjectPtr::toScriptValue(QScriptEngine *engine, const GameObjectPtr &pointer) {
+
+    Q_ASSERT(pointer.m_gameObject);
+    return engine->newQObject(pointer.m_gameObject);
+}
+
+void GameObjectPtr::fromScriptValue(const QScriptValue &object, GameObjectPtr &pointer) {
+
+    pointer = GameObjectPtr(object.property("objectType").toString().toAscii().constData(),
+                            object.property("id").toUInt32());
 }

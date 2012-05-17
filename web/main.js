@@ -9,6 +9,24 @@ var colorMap = {
     "35;1": "#ff00ff", "35": "#800080"
 };
 
+var keys = {
+    KEY_BACKSPACE: 8,
+    KEY_TAB:       9,
+    KEY_RETURN:   13,
+    KEY_ESC:      27,
+    KEY_SPACE:    32,
+    KEY_LEFT:     37,
+    KEY_UP:       38,
+    KEY_RIGHT:    39,
+    KEY_DOWN:     40,
+    KEY_DELETE:   46,
+    KEY_HOME:     36,
+    KEY_END:      35,
+    KEY_PAGEUP:   33,
+    KEY_PAGEDOWN: 34,
+    KEY_INSERT:   45
+}
+
 var controller;
 
 function Controller() {
@@ -16,12 +34,46 @@ function Controller() {
     this.screen = document.getElementsByClassName("screen")[0];
     this.writeToScreen("Connecting...");
 
+    this.history = [];
+    this.historyIndex = 0;
+    this.currentCommand = '';
+
     var self = this;
     this.commandInput = document.getElementsByClassName("command-input")[0];
     this.commandInput.onkeypress = function(event) {
-        if (event.keyCode === 13) {
-            self.socket.send(self.commandInput.value);
+        if (event.keyCode === keys.KEY_RETURN) {
+            var command = self.commandInput.value;
+            self.socket.send(command);
             self.commandInput.value = "";
+
+            if (self.history[self.history.length - 1] !== command) {
+                self.history.push(command);
+            }
+            self.historyIndex = 0;
+        }
+    }
+    this.commandInput.onkeyup = function(event) {
+        if (event.keyCode === keys.KEY_UP) {
+            if (self.historyIndex === 0) {
+                self.currentCommand = self.commandInput.value;
+            }
+            self.historyIndex++;
+            if (self.historyIndex > self.history.length) {
+                self.historyIndex = self.history.length;
+            } else {
+                self.commandInput.value = self.history[self.history.length - self.historyIndex];
+            }
+        } else if (event.keyCode === keys.KEY_DOWN) {
+            self.historyIndex--;
+            if (self.historyIndex < 0) {
+                self.historyIndex = 0;
+            } else {
+                if (self.historyIndex === 0) {
+                    self.commandInput.value = self.currentCommand;
+                } else {
+                    self.commandInput.value = self.history[self.history.length - self.historyIndex];
+                }
+            }
         }
     }
 

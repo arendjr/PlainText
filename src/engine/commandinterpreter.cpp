@@ -13,11 +13,13 @@
 #include "commands/getcommand.h"
 #include "commands/givecommand.h"
 #include "commands/gocommand.h"
+#include "commands/lookcommand.h"
 #include "commands/quitcommand.h"
 #include "commands/saycommand.h"
 #include "commands/slashmecommand.h"
 #include "commands/admin/addexitcommand.h"
 #include "commands/admin/additemcommand.h"
+#include "commands/admin/execscriptcommand.h"
 #include "commands/admin/getpropcommand.h"
 #include "commands/admin/removeexitcommand.h"
 #include "commands/admin/removeitemcommand.h"
@@ -33,11 +35,13 @@ CommandInterpreter::CommandInterpreter(Character *character, QObject *parent) :
     Command *get = new GetCommand(character, this);
     Command *give = new GiveCommand(character, this);
     Command *go = new GoCommand(character, this);
+    Command *look = new LookCommand(character, this);
     Command *quit = new QuitCommand(character, this);
     Command *say = new SayCommand(character, this);
     Command *slashMe = new SlashMeCommand(character, this);
 
     m_commands.insert("drop", drop);
+    m_commands.insert("look", look);
     m_commands.insert("give", give);
     m_commands.insert("get", get);
     m_commands.insert("go", go);
@@ -56,6 +60,8 @@ CommandInterpreter::CommandInterpreter(Character *character, QObject *parent) :
 
         m_commands.insert("add-exit", new AddExitCommand(character, this));
         m_commands.insert("remove-exit", new RemoveExitCommand(character, this));
+
+        m_commands.insert("exec-script", new ExecScriptCommand(character, this));
 
         m_commands.insert("stop-server", new StopServerCommand(character, this));
     }

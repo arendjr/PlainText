@@ -47,6 +47,10 @@ void Session::onUserInput(QString data) {
         return;
     }
 
+    if (!m_character || !m_character->isAdmin()) {
+        data = data.left(160);
+    }
+
     if (m_signInStage != SignedIn) {
         processSignIn(data);
         return;

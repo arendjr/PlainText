@@ -14,7 +14,7 @@ class Realm : public GameObject {
     Q_OBJECT
 
     public:
-        static Realm *instance() { Q_ASSERT(s_instance); return s_instance; };
+        static Realm *instance() { Q_ASSERT(s_instance); return s_instance; }
 
         static void instantiate();
         static void destroy();
@@ -24,6 +24,7 @@ class Realm : public GameObject {
         void registerObject(GameObject *gameObject);
         void unregisterObject(GameObject *gameObject);
         GameObject *getObject(const char *objectType, uint id) const;
+        Q_INVOKABLE GameObject *getObject(const QString &objectType, uint id) const;
 
         void registerCharacter(Character *character);
         void unregisterCharacter(Character *character);

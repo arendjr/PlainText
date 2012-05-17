@@ -17,23 +17,23 @@ class Exit : public GameObject {
 
         const GameObjectPtr &destinationArea() const { return m_destinationArea; }
         virtual void setDestinationArea(const GameObjectPtr &destinationArea);
-        Q_PROPERTY(GameObjectPtr destinationArea READ destinationArea WRITE setDestinationArea);
+        Q_PROPERTY(GameObjectPtr destinationArea READ destinationArea WRITE setDestinationArea)
 
         double size() const { return m_size; }
         virtual void setSize(double size);
-        Q_PROPERTY(double size READ size WRITE setSize);
+        Q_PROPERTY(double size READ size WRITE setSize)
 
         bool isDoor() const { return m_door; }
         virtual void setDoor(bool door);
-        Q_PROPERTY(bool door READ isDoor WRITE setDoor);
+        Q_PROPERTY(bool door READ isDoor WRITE setDoor)
 
         bool isOpen() const { return m_open; }
         virtual void setOpen(bool open);
-        Q_PROPERTY(bool open READ isOpen WRITE setOpen STORED false);
+        Q_PROPERTY(bool open READ isOpen WRITE setOpen STORED false)
 
         bool isHidden() const { return m_hidden; }
         virtual void setHidden(bool hidden);
-        Q_PROPERTY(bool hidden READ isHidden WRITE setHidden);
+        Q_PROPERTY(bool hidden READ isHidden WRITE setHidden)
 
     protected:
         virtual void timerEvent(QTimerEvent *event);

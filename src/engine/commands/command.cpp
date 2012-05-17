@@ -36,7 +36,7 @@ QString Command::takeWord() {
         return m_words.takeFirst();
     }
 
-    return QString::null;
+    return QString();
 }
 
 QString Command::takeWord(const QRegExp &pattern) {
@@ -47,7 +47,7 @@ QString Command::takeWord(const QRegExp &pattern) {
         }
     }
 
-    return QString::null;
+    return QString();
 }
 
 GameObjectPtrList Command::takeObjects(const GameObjectPtrList &pool) {
@@ -96,7 +96,7 @@ GameObjectPtrList Command::objectsByDescription(const QPair<QString, uint> &desc
         }
     }
     if (description.second > 0) {
-        if (description.second <= objects.length()) {
+        if (description.second <= (uint) objects.length()) {
             GameObjectPtr selected = objects[description.second - 1];
             objects.clear();
             objects << selected;

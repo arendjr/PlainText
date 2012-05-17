@@ -28,17 +28,13 @@ void QWsSocket::dataReceived()
 		QByteArray BA; // ReadBuffer
 
 		// FIN, RSV1-3, Opcode
-		BA = tcpSocket->read(1);
+        BA = tcpSocket->read(2);
 		byte = BA[0];
 		quint8 FIN = (byte >> 7);
-		quint8 RSV1 = ((byte & 0x7F) >> 6);
-		quint8 RSV2 = ((byte & 0x3F) >> 5);
-		quint8 RSV3 = ((byte & 0x1F) >> 4);
 		EOpcode Opcode = (EOpcode)(byte & 0x0F);
 
 		// Mask, PayloadLength
-		BA = tcpSocket->read(1);
-		byte = BA[0];
+        byte = BA[1];
 		quint8 Mask = (byte >> 7);
 		quint64 PayloadLength = (byte & 0x7F);
 		// Extended PayloadLength
@@ -85,11 +81,7 @@ void QWsSocket::dataReceived()
 			}
 			else if ( Opcode == OpText )
 			{
-				QString byteString;
-				byteString.reserve(currentFrame.size());
-				for (int i=0 ; i<currentFrame.size() ; i++)
-					byteString[i] = currentFrame[i];
-				emit frameReceived( byteString );
+                emit frameReceived( QString(currentFrame) );
 			}
 			else if ( Opcode == OpPing )
 			{
@@ -188,13 +180,12 @@ qint64 QWsSocket::writeFrames ( QList<QByteArray> framesList )
 
 void QWsSocket::close( QString reason )
 {
+	Q_UNUSED(reason)
+
 	if ( version >= 6 )
 	{
 		// Compose and send close frame
-		quint64 messageSize = reason.size();
-		QByteArray maskingKey = generateMaskingKey();
 		QByteArray BA;
-		quint8 byte;
 
 		QByteArray header = QWsSocket::composeHeader( true, OpClose, 0 );
 		BA.append( header );
@@ -253,7 +244,7 @@ QList<QByteArray> QWsSocket::composeFrames( QByteArray byteArray, bool asBinary,
 
 	if (version >= 6)
 	{
-		QByteArray maskingKey = generateMaskingKey();
+        QByteArray maskingKey;// = generateMaskingKey(); /// DISABLED FOR NOW
 
 		for ( int i=0 ; i<nbFrames ; i++ )
 		{
@@ -292,7 +283,7 @@ QList<QByteArray> QWsSocket::composeFrames( QByteArray byteArray, bool asBinary,
 	}
 	else
 	{
-		if ( asBinary )
+        if ( asBinary )
 		{
 			// NOT SUPPORTED
 		}

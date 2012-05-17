@@ -56,8 +56,8 @@ class Util {
         static QString toCamelCase(QString string);
 
         static void sendOthers(GameObjectPtrList characters, const QString &string,
-                               const GameObjectPtr &exclude1 = GameObjectPtr::null,
-                               const GameObjectPtr &exclude2 = GameObjectPtr::null);
+                               const GameObjectPtr &exclude1 = GameObjectPtr(),
+                               const GameObjectPtr &exclude2 = GameObjectPtr());
 
     private:
         Util();

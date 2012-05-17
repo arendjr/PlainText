@@ -4,6 +4,10 @@
 #include <QList>
 #include <QMetaProperty>
 #include <QObject>
+#include <QScriptEngine>
+#include <QScriptValue>
+
+#include "scriptfunctionmap.h"
 
 
 class GameObject : public QObject {
@@ -20,15 +24,22 @@ class GameObject : public QObject {
         virtual ~GameObject();
 
         const char *objectType() const { return m_objectType; }
+        Q_PROPERTY(const char *objectType READ objectType STORED false)
+
         const uint id() const { return m_id; }
+        Q_PROPERTY(uint id READ id STORED false)
 
         const QString &name() const { return m_name; }
         virtual void setName(const QString &name);
-        Q_PROPERTY(QString name READ name WRITE setName);
+        Q_PROPERTY(QString name READ name WRITE setName)
 
         const QString &description() const { return m_description; }
         virtual void setDescription(const QString &description);
-        Q_PROPERTY(QString description READ description WRITE setDescription);
+        Q_PROPERTY(QString description READ description WRITE setDescription)
+
+        const ScriptFunctionMap &triggers() const { return m_triggers; }
+        virtual void setTriggers(const ScriptFunctionMap &triggers);
+        Q_PROPERTY(ScriptFunctionMap triggers READ triggers WRITE setTriggers)
 
         bool save();
         bool load(const QString &path);
@@ -44,6 +55,9 @@ class GameObject : public QObject {
 
         static GameObject *createFromFile(const QString &path);
 
+        static QScriptValue toScriptValue(QScriptEngine *engine, GameObject *const &gameObject);
+        static void fromScriptValue(const QScriptValue &object, GameObject *&gameObject);
+
     protected:
         void setModified();
 
@@ -56,10 +70,13 @@ class GameObject : public QObject {
 
         QString m_name;
         QString m_description;
+        ScriptFunctionMap m_triggers;
 
         bool m_deleted;
 
         QList<QMetaProperty> storedMetaProperties() const;
 };
+
+Q_DECLARE_METATYPE(GameObject *)
 
 #endif // GAMEOBJECT_H

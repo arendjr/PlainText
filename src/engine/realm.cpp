@@ -56,6 +56,11 @@ GameObject *Realm::getObject(const char *objectType, uint id) const {
     return 0;
 }
 
+GameObject *Realm::getObject(const QString &objectType, uint id) const {
+
+    return getObject(objectType.toAscii().constData(), id);
+}
+
 void Realm::registerCharacter(Character *character) {
 
     Q_ASSERT(character);

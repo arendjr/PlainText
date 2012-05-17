@@ -1,4 +1,4 @@
-QT += core network
+QT += core network script
 QT -= gui
 
 TARGET = MUD
@@ -20,18 +20,23 @@ SOURCES += \
     engine/gameobjectsyncthread.cpp \
     engine/item.cpp \
     engine/realm.cpp \
+    engine/scriptengine.cpp \
+    engine/scriptfunction.cpp \
+    engine/scriptfunctionmap.cpp \
     engine/util.cpp \
     engine/commands/command.cpp \
     engine/commands/dropcommand.cpp \
     engine/commands/getcommand.cpp \
     engine/commands/givecommand.cpp \
     engine/commands/gocommand.cpp \
+    engine/commands/lookcommand.cpp \
     engine/commands/quitcommand.cpp \
     engine/commands/saycommand.cpp \
     engine/commands/slashmecommand.cpp \
     engine/commands/admin/addexitcommand.cpp \
     engine/commands/admin/additemcommand.cpp \
     engine/commands/admin/admincommand.cpp \
+    engine/commands/admin/execscriptcommand.cpp \
     engine/commands/admin/getpropcommand.cpp \
     engine/commands/admin/removeexitcommand.cpp \
     engine/commands/admin/removeitemcommand.cpp \
@@ -58,18 +63,23 @@ HEADERS += \
     engine/gameobjectsyncthread.h \
     engine/item.h \
     engine/realm.h \
+    engine/scriptengine.h \
+    engine/scriptfunction.h \
+    engine/scriptfunctionmap.h \
     engine/util.h \
     engine/commands/command.h \
     engine/commands/dropcommand.h \
     engine/commands/getcommand.h \
     engine/commands/givecommand.h \
     engine/commands/gocommand.h \
+    engine/commands/lookcommand.h \
     engine/commands/quitcommand.h \
     engine/commands/saycommand.h \
     engine/commands/slashmecommand.h \
     engine/commands/admin/addexitcommand.h \
     engine/commands/admin/additemcommand.h \
     engine/commands/admin/admincommand.h \
+    engine/commands/admin/execscriptcommand.h \
     engine/commands/admin/getpropcommand.h \
     engine/commands/admin/removeexitcommand.h \
     engine/commands/admin/removeitemcommand.h \

@@ -50,7 +50,7 @@ class Command : public QObject {
                            const QString &tooManyText);
 
         void enterArea(const GameObjectPtr &area);
-        void leaveArea(const GameObjectPtr &area, const QString &exitName = QString::null);
+        void leaveArea(const GameObjectPtr &area, const QString &exitName = QString());
 
     private:
         Character *m_character;

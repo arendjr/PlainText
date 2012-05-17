@@ -13,6 +13,7 @@ class BadGameObjectException : public std::exception {
             CorruptGameObjectFile,
             InvalidGameObjectFileName,
             InvalidGameObjectPointer,
+            InvalidFunctionCode,
             InvalidExitFormat
         };
 

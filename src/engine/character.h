@@ -21,21 +21,21 @@ class Character : public GameObject {
 
         const QString &passwordHash() const { return m_passwordHash; }
         virtual void setPasswordHash(const QString &passwordHash);
-        Q_PROPERTY(QString passwordHash READ passwordHash WRITE setPasswordHash);
+        Q_PROPERTY(QString passwordHash READ passwordHash WRITE setPasswordHash)
 
         const GameObjectPtr &currentArea() const { return m_currentArea; }
         virtual void setCurrentArea(const GameObjectPtr &currentArea);
-        Q_PROPERTY(GameObjectPtr currentArea READ currentArea WRITE setCurrentArea);
+        Q_PROPERTY(GameObjectPtr currentArea READ currentArea WRITE setCurrentArea)
 
         const GameObjectPtrList &inventory() const { return m_inventory; }
         virtual void addInventoryItem(const GameObjectPtr &item);
         virtual void removeInventoryItem(const GameObjectPtr &item);
         virtual void setInventory(const GameObjectPtrList &inventory);
-        Q_PROPERTY(GameObjectPtrList inventory READ inventory WRITE setInventory);
+        Q_PROPERTY(GameObjectPtrList inventory READ inventory WRITE setInventory)
 
         bool isAdmin() const { return m_admin; }
         virtual void setAdmin(bool admin);
-        Q_PROPERTY(bool admin READ isAdmin WRITE setAdmin);
+        Q_PROPERTY(bool admin READ isAdmin WRITE setAdmin)
 
         Session *session() const { return m_session; }
         void setSession(Session *session);
@@ -43,7 +43,8 @@ class Character : public GameObject {
         void send(QString data);
 
         void enter(const GameObjectPtr &area);
-        void leave(const GameObjectPtr &area, const QString &exitName = QString::null);
+        void look();
+        void leave(const GameObjectPtr &area, const QString &exitName = QString());
 
     signals:
         void write(const QString &data);

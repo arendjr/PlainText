@@ -5,10 +5,12 @@
 #include <QScriptEngine>
 #include <QScriptValue>
 
+#include "gameobjectptr.h"
+#include "scriptfunction.h"
+
 
 class Area;
 class Character;
-class GameObject;
 
 class ScriptEngine : public QObject {
 
@@ -23,10 +25,12 @@ class ScriptEngine : public QObject {
         bool isInitialized() const { return m_initialized; }
 
         QScriptValue evaluate(const QString &program, const QString &fileName = QString(), int lineNumber = 1);
+        ScriptFunction defineFunction(const QString &program, const QString &fileName = QString(), int lineNumber = 1);
+
         bool hasUncaughtException() const;
 
-        bool executeTrigger(QScriptValue &trigger, GameObject *object, Area *area, Character *character);
-
+        bool executeFunction(ScriptFunction &function, const GameObjectPtr &thisObject,
+                             const GameObjectPtrList &objects);
     private:
         static ScriptEngine *s_instance;
 

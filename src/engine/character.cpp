@@ -100,6 +100,13 @@ void Character::enter(const GameObjectPtr &areaPtr) {
 
     area->addCharacter(this);
 
+    look();
+}
+
+void Character::look() {
+
+    Area *area = currentArea().cast<Area *>();
+
     if (!area->name().isEmpty()) {
         send(Util::colorize("\n" + area->name() + "\n\n", Teal));
     }
