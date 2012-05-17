@@ -15,7 +15,11 @@ class ScriptFunction {
         QScriptValue value;
         QString source;
 
-        bool operator==(const ScriptFunction &other) const { return source == other.source; }
+        ScriptFunction();
+        ScriptFunction(const ScriptFunction &other);
+
+        ScriptFunction &operator=(const ScriptFunction &other);
+        bool operator==(const ScriptFunction &other) const;
 
         QString toString() const;
 

@@ -13,11 +13,11 @@
 #include "qjson/json_driver.hh"
 
 #include "area.h"
-#include "badgameobjectexception.h"
 #include "character.h"
 #include "exit.h"
 #include "gameobjectptr.h"
 #include "item.h"
+#include "npc.h"
 #include "realm.h"
 #include "scriptfunctionmap.h"
 #include "util.h"
@@ -80,6 +80,7 @@ bool GameObject::save() {
     const QString v("  \"%1\": %2");
     const QString o("  \"%1\": { %2 }");
     const QString l("  \"%1\": [ %2 ]");
+    const QString k("%1: %2");
 
     QStringList dumpedProperties;
     foreach (const QMetaProperty &metaProperty, storedMetaProperties()) {
@@ -102,7 +103,7 @@ bool GameObject::save() {
                 break;
             case QVariant::StringList: {
                 QStringList stringList;
-                foreach (QString string, property(name).toStringList()) {
+                foreach (const QString &string, property(name).toStringList()) {
                     stringList << Util::jsString(string);
                 }
                 if (!stringList.isEmpty()) {
@@ -116,7 +117,7 @@ bool GameObject::save() {
                     break;
                 } else if (metaProperty.userType() == QMetaType::type("GameObjectPtrList")) {
                     QStringList stringList;
-                    foreach (GameObjectPtr pointer, property(name).value<GameObjectPtrList>()) {
+                    foreach (const GameObjectPtr &pointer, property(name).value<GameObjectPtrList>()) {
                         stringList << Util::jsString(pointer.toString());
                     }
                     if (!stringList.isEmpty()) {
@@ -126,8 +127,8 @@ bool GameObject::save() {
                 } else if (metaProperty.userType() == QMetaType::type("ScriptFunctionMap")) {
                     QStringList stringList;
                     ScriptFunctionMap functionMap = property(name).value<ScriptFunctionMap>();
-                    foreach (QString key, functionMap.keys()) {
-                        stringList << v.arg(key, Util::jsString(functionMap[key].toString()));
+                    foreach (const QString &key, functionMap.keys()) {
+                        stringList << k.arg(Util::jsString(key), Util::jsString(functionMap[key].toString()));
                     }
                     if (!stringList.isEmpty()) {
                         dumpedProperties << o.arg(name, stringList.join(", "));
@@ -150,7 +151,7 @@ bool GameObject::save() {
     return true;
 }
 
-bool GameObject::load(const QString &path) {
+bool GameObject::load(const QString &path) throw (BadGameObjectException) {
 
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly)) {
@@ -179,7 +180,7 @@ bool GameObject::load(const QString &path) {
                 break;
             case QVariant::StringList: {
                 QStringList stringList;
-                foreach (QVariant variant, map[name].toList()) {
+                foreach (const QVariant &variant, map[name].toList()) {
                     stringList << variant.toString();
                 }
                 setProperty(name, stringList);
@@ -191,7 +192,7 @@ bool GameObject::load(const QString &path) {
                     break;
                 } else if (metaProperty.userType() == QMetaType::type("GameObjectPtrList")) {
                     GameObjectPtrList pointerList;
-                    foreach (QVariant variant, map[name].toList()) {
+                    foreach (const QVariant &variant, map[name].toList()) {
                         pointerList << GameObjectPtr::fromString(variant.toString());
                     }
                     setProperty(name, QVariant::fromValue(pointerList));
@@ -199,7 +200,7 @@ bool GameObject::load(const QString &path) {
                 } else if (metaProperty.userType() == QMetaType::type("ScriptFunctionMap")) {
                     ScriptFunctionMap functionMap;
                     QVariantMap variantMap = map[name].toMap();
-                    foreach (QString key, variantMap.keys()) {
+                    foreach (const QString &key, variantMap.keys()) {
                         functionMap[key] = ScriptFunction::fromString(variantMap[key].toString());
                     }
                     setProperty(name, QVariant::fromValue(functionMap));
@@ -245,7 +246,7 @@ void GameObject::setDeleted() {
     }
 }
 
-GameObject *GameObject::createByObjectType(const QString &objectType, uint id, Options options) {
+GameObject *GameObject::createByObjectType(const QString &objectType, uint id, Options options) throw (BadGameObjectException) {
 
     if (id == 0) {
         id = Realm::instance()->uniqueObjectId();
@@ -259,6 +260,8 @@ GameObject *GameObject::createByObjectType(const QString &objectType, uint id, O
         return new Exit(id, options);
     } else if (objectType == "item") {
         return new Item(id, options);
+    } else if (objectType == "npc") {
+        return new NPC(id, options);
     } else {
         throw BadGameObjectException(BadGameObjectException::UnknownGameObjectType);
     }
@@ -278,7 +281,7 @@ GameObject *GameObject::createCopy(const GameObject *other) {
     return copy;
 }
 
-GameObject *GameObject::createFromFile(const QString &path) {
+GameObject *GameObject::createFromFile(const QString &path) throw (BadGameObjectException) {
 
     QFileInfo fileInfo(path);
     QString fileName = fileInfo.fileName();

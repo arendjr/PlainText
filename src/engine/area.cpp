@@ -40,13 +40,6 @@ void Area::setExits(const GameObjectPtrList &exits) {
 void Area::addCharacter(const GameObjectPtr &character) {
 
     if (!m_characters.contains(character)) {
-        foreach (const GameObjectPtr &otherPtr, m_characters) {
-            Character *other = otherPtr.cast<Character *>();
-            Q_ASSERT(other);
-
-            other->send(QString("%1 arrived.").arg(character->name()));
-        }
-
         m_characters << character;
     }
 }
@@ -59,6 +52,31 @@ void Area::removeCharacter(const GameObjectPtr &character) {
 void Area::setCharacters(const GameObjectPtrList &characters) {
 
     m_characters = characters;
+}
+
+void Area::addNPC(const GameObjectPtr &npc) {
+
+    if (!m_npcs.contains(npc)) {
+        m_npcs << npc;
+
+        setModified();
+    }
+}
+
+void Area::removeNPC(const GameObjectPtr &npc) {
+
+    if (m_npcs.removeAll(npc) > 0) {
+        setModified();
+    }
+}
+
+void Area::setNPCs(const GameObjectPtrList &npcs) {
+
+    if (m_npcs != npcs) {
+        m_npcs = npcs;
+
+        setModified();
+    }
 }
 
 void Area::addItem(const GameObjectPtr &item) {

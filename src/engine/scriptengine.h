@@ -31,6 +31,9 @@ class ScriptEngine : public QObject {
 
         bool executeFunction(ScriptFunction &function, const GameObjectPtr &thisObject,
                              const GameObjectPtrList &objects);
+
+        void setGlobalObject(const char *name, QObject *object);
+
     private:
         static ScriptEngine *s_instance;
 

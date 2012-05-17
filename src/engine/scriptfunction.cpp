@@ -3,6 +3,26 @@
 #include "scriptengine.h"
 
 
+ScriptFunction::ScriptFunction() {
+}
+
+ScriptFunction::ScriptFunction(const ScriptFunction &other) :
+    value(other.value),
+    source(other.source) {
+}
+
+ScriptFunction &ScriptFunction::operator=(const ScriptFunction &other) {
+
+    value = other.value;
+    source = other.source;
+    return *this;
+}
+
+bool ScriptFunction::operator==(const ScriptFunction &other) const {
+
+    return source == other.source;
+}
+
 QString ScriptFunction::toString() const {
 
     return source;

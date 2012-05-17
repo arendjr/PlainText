@@ -111,6 +111,13 @@ void Character::enter(const GameObjectPtr &areaPtr) {
 
     setCurrentArea(area);
 
+    foreach (const GameObjectPtr &otherPtr, area->characters()) {
+        Character *other = otherPtr.cast<Character *>();
+        Q_ASSERT(other);
+
+        other->send(QString("%1 arrived.").arg(name()));
+    }
+
     area->addCharacter(this);
 
     look();
@@ -143,6 +150,10 @@ void Character::look() {
             characterNames << other->name();
         }
         text += "You see " + Util::joinFancy(characterNames) + ".\n";
+    }
+
+    if (area->npcs().length() > 0) {
+        text += "You see " + Util::joinItems(area->npcs()) + ".\n";
     }
 
     if (area->items().length() > 0) {

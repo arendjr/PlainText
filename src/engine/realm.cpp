@@ -2,10 +2,13 @@
 
 #include <cstring>
 
+#include <QDebug>
 #include <QDir>
 
+#include "badgameobjectexception.h"
 #include "character.h"
 #include "gameobjectsyncthread.h"
+#include "scriptengine.h"
 
 
 Realm *Realm::s_instance = 0;
@@ -121,7 +124,11 @@ Realm::Realm() :
         if (fileName.startsWith("realm.")) {
             continue;
         }
-        GameObject::createFromFile(dir.path() + "/" + fileName);
+        try {
+            GameObject::createFromFile(dir.path() + "/" + fileName);
+        } catch (const BadGameObjectException &exception) {
+            qWarning() << "Error loading game object from" << fileName << ":" << exception.what();
+        }
     }
 
     foreach (GameObject *gameObject, m_objectMap) {
@@ -131,6 +138,8 @@ Realm::Realm() :
 
     m_syncThread = new GameObjectSyncThread(this);
     m_syncThread->start(QThread::LowestPriority);
+
+    ScriptEngine::instance()->setGlobalObject("Realm", this);
 
     m_initialized = true;
 }

@@ -92,6 +92,11 @@ QString Util::writtenNumber(int number) {
     }
 }
 
+QString Util::capitalize(const QString &string) {
+
+    return string.left(1).toUpper() + string.mid(1);
+}
+
 QString Util::jsString(QString string) {
 
     return "\"" + string.replace('\\', "\\\\")

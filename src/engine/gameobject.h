@@ -7,6 +7,7 @@
 #include <QScriptEngine>
 #include <QScriptValue>
 
+#include "badgameobjectexception.h"
 #include "scriptfunctionmap.h"
 
 
@@ -42,18 +43,18 @@ class GameObject : public QObject {
         Q_PROPERTY(ScriptFunctionMap triggers READ triggers WRITE setTriggers)
 
         bool save();
-        bool load(const QString &path);
+        bool load(const QString &path) throw (BadGameObjectException);
 
         void resolvePointers();
 
         void setDeleted();
 
         static GameObject *createByObjectType(const QString &objectType, uint id = 0,
-                                              Options options = NoOptions);
+                                              Options options = NoOptions) throw (BadGameObjectException);
 
         static GameObject *createCopy(const GameObject *other);
 
-        static GameObject *createFromFile(const QString &path);
+        static GameObject *createFromFile(const QString &path) throw (BadGameObjectException);
 
         static QScriptValue toScriptValue(QScriptEngine *engine, GameObject *const &gameObject);
         static void fromScriptValue(const QScriptValue &object, GameObject *&gameObject);

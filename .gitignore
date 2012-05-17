@@ -1,5 +1,6 @@
 # Qt Creator build
 MUD-build-desktop
+MUD.pro.user
 
 # Compiled Object files
 *.slo

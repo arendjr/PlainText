@@ -41,6 +41,8 @@ class Util {
 
         static QString writtenNumber(int number);
 
+        static QString capitalize(const QString &string);
+
         static QString jsString(QString string);
 
         static QString colorize(const QString &string, Color color);

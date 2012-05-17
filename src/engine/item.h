@@ -26,6 +26,9 @@ class Item : public GameObject {
         virtual void setPortable(bool portable);
         Q_PROPERTY(bool portable READ isPortable WRITE setPortable)
 
+    protected:
+        explicit Item(const char *objectType, uint id, Options options = NoOptions);
+
     private:
         QString m_plural;
         QString m_indefiniteArticle;

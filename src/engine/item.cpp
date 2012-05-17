@@ -63,3 +63,8 @@ void Item::setPortable(bool portable) {
         setModified();
     }
 }
+
+Item::Item(const char *objectType, uint id, Options options) :
+    GameObject(objectType, id, options),
+    m_portable(false) {
+}

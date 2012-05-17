@@ -19,6 +19,7 @@ SOURCES += \
     engine/gameobjectptr.cpp \
     engine/gameobjectsyncthread.cpp \
     engine/item.cpp \
+    engine/npc.cpp \
     engine/realm.cpp \
     engine/scriptengine.cpp \
     engine/scriptfunction.cpp \
@@ -63,6 +64,7 @@ HEADERS += \
     engine/gameobjectptr.h \
     engine/gameobjectsyncthread.h \
     engine/item.h \
+    engine/npc.h \
     engine/realm.h \
     engine/scriptengine.h \
     engine/scriptfunction.h \

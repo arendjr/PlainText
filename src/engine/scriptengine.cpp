@@ -1,6 +1,6 @@
 #include "scriptengine.h"
 
-#include "realm.h"
+#include "gameobject.h"
 #include "scriptfunctionmap.h"
 
 
@@ -47,6 +47,11 @@ bool ScriptEngine::executeFunction(ScriptFunction &function, const GameObjectPtr
     return function.value.call(m_jsEngine.toScriptValue(thisObject), arguments).toBool();
 }
 
+void ScriptEngine::setGlobalObject(const char *name, QObject *object) {
+
+    m_jsEngine.globalObject().setProperty(name, m_jsEngine.newQObject(object));
+}
+
 ScriptEngine::ScriptEngine() :
     QObject(),
     m_initialized(false) {
@@ -58,8 +63,6 @@ ScriptEngine::ScriptEngine() :
     qScriptRegisterMetaType(&m_jsEngine, ScriptFunction::toScriptValue, ScriptFunction::fromScriptValue);
     qScriptRegisterMetaType(&m_jsEngine, ScriptFunctionMap::toScriptValue, ScriptFunctionMap::fromScriptValue);
     qScriptRegisterSequenceMetaType<GameObjectPtrList>(&m_jsEngine);
-
-    m_jsEngine.globalObject().setProperty("Realm", m_jsEngine.newQObject(Realm::instance()));
 
     m_initialized = true;
 }

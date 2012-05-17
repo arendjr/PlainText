@@ -18,9 +18,9 @@ Engine::Engine(QObject *parent) :
     qRegisterMetaType<GameObjectPtr>();
     qRegisterMetaType<GameObjectPtrList>();
 
-    Realm::instantiate();
-
     ScriptEngine::instantiate();
+
+    Realm::instantiate();
 }
 
 void Engine::start() {
@@ -36,7 +36,7 @@ Engine::~Engine() {
     delete m_webSocketServer;
     delete m_telnetServer;
 
-    ScriptEngine::destroy();
-
     Realm::destroy();
+
+    ScriptEngine::destroy();
 }
