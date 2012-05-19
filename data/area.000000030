@@ -1,0 +1,5 @@
+{
+  "name": "Hidden Path",
+  "description": "The path extends further to the south. As you keep moving, the sound of the sea seems to be getting closer and closer.",
+  "exits": [ "exit:32", "exit:34" ]
+}

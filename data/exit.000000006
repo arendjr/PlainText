@@ -1,0 +1,8 @@
+{
+  "name": "north",
+  "description": "",
+  "destinationArea": "area:5",
+  "size": 1.5,
+  "door": false,
+  "hidden": false
+}

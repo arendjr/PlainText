@@ -1,0 +1,8 @@
+{
+  "name": "Earl",
+  "triggers": { "onenter": "(function(character) { var hasLight = false; for (var i = 0; i < character.inventory.length; i++) { if (character.inventory[i].name == 'mechanical light') { hasLight = true; break; } }; if (hasLight) { this.say(\"Hey, please put back my lighting device.\"); } else { this.say(\"Hey there, can I help you?\"); } })", "onexit": "(function(character, exitName) { if (exitName != 'out') { return false; } var hasLight = false; for (var i = 0; i < character.inventory.length; i++) { if (character.inventory[i].name == 'mechanical light') { hasLight = true; break; } }; if (hasLight) { this.say(\"Hey, you're not leaving with my lighting device!\"); return true; } })", "ontalk": "(function(character, message) { if (message == 'tower' || message == 'light tower') { this.say(\"Nobody knows who built that tower, as far as we can tell it's been there forever. It's a real aid for the ships though, they can find our bay and navigate to the haven without trouble.\") } else if (message == '') { this.say(\"I'm Earl, keeper of the light tower.\"); } else { this.say(\"Say what?\") } })" },
+  "plural": "Earls",
+  "portable": false,
+  "currentArea": "area:36",
+  "hp": 1
+}

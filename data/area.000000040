@@ -1,0 +1,6 @@
+{
+  "name": "Light Tower Keeper's House",
+  "description": "The room looks like it is mainly used for storing various stuff. Of all the things you have seen, the light tower keeper certainly has some interesting stuff laying around.",
+  "exits": [ "exit:42" ],
+  "items": [ "item:44" ]
+}

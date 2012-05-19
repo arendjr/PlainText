@@ -1,0 +1,8 @@
+{
+  "name": "door",
+  "description": "A heavy wooden door. It makes you curious as to what's behind it.",
+  "destinationArea": "area:40",
+  "size": 1.5,
+  "door": true,
+  "hidden": false
+}

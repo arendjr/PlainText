@@ -1,0 +1,7 @@
+{
+  "name": "sign",
+  "description": "The sign looks a bit worn out through time. It reads in capital letters:\n\n LIGHT TOWER AHEAD",
+  "plural": "signs",
+  "indefiniteArticle": "a",
+  "portable": true
+}

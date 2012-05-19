@@ -1,0 +1,7 @@
+{
+  "name": "path",
+  "destinationArea": "area:30",
+  "size": 1.5,
+  "door": false,
+  "hidden": false
+}

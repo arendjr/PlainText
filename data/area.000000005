@@ -1,0 +1,6 @@
+{
+  "name": "Light Tower Road",
+  "description": "This is the road that leads to the light tower.",
+  "exits": [ "exit:7", "exit:12" ],
+  "items": [ "item:8" ]
+}

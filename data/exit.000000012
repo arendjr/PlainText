@@ -1,0 +1,7 @@
+{
+  "name": "north",
+  "destinationArea": "area:11",
+  "size": 1.5,
+  "door": false,
+  "hidden": false
+}

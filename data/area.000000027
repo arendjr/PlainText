@@ -1,0 +1,5 @@
+{
+  "name": "Hidden Path",
+  "description": "You're on a tight path that seems to move south from the light tower. The path itself is barely visible because of thick vegetation all over.",
+  "exits": [ "exit:29", "exit:31" ]
+}
