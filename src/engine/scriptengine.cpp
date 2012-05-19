@@ -1,5 +1,8 @@
 #include "scriptengine.h"
 
+#include <QDebug>
+#include <QMetaType>
+
 #include "gameobject.h"
 #include "scriptfunctionmap.h"
 
@@ -38,11 +41,27 @@ bool ScriptEngine::hasUncaughtException() const {
 }
 
 bool ScriptEngine::executeFunction(ScriptFunction &function, const GameObjectPtr &thisObject,
-                                   const GameObjectPtrList &objects) {
+                                   const QVariantList &variantList) {
 
     QScriptValueList arguments;
-    foreach (const GameObjectPtr &object, objects) {
-        arguments << m_jsEngine.toScriptValue(object);
+    foreach (const QVariant &variant, variantList) {
+        switch (variant.type()) {
+            case QVariant::Int:
+                arguments << m_jsEngine.toScriptValue(variant.toInt());
+                break;
+            case QVariant::String:
+                arguments << m_jsEngine.toScriptValue(variant.toString());
+                break;
+            case QVariant::UserType:
+                if (variant.userType() == QMetaType::type("GameObjectPtr")) {
+                    arguments << m_jsEngine.toScriptValue(variant.value<GameObjectPtr>());
+                } else if (variant.userType() == QMetaType::type("GameObjectPtrList")) {
+                    arguments << m_jsEngine.toScriptValue(variant.value<GameObjectPtrList>());
+                }
+                break;
+            default:
+                qDebug() << "ScriptEngine::executeFunction(): Unknown argument type:" << variant.type();
+        }
     }
     return function.value.call(m_jsEngine.toScriptValue(thisObject), arguments).toBool();
 }

@@ -1,7 +1,7 @@
 #include "lookcommand.h"
 
 
-LookCommand::LookCommand(Character *character, QObject *parent) :
+LookCommand::LookCommand(Player *character, QObject *parent) :
     Command(character, parent) {
 }
 
@@ -14,11 +14,11 @@ void LookCommand::execute(const QString &command) {
 
     /*QString alias = */takeWord();
     if (numWordsLeft() == 0) {
-        character()->look();
+        player()->look();
         return;
     }
 
-    GameObjectPtrList objects = takeObjects(character()->inventory() +
+    GameObjectPtrList objects = takeObjects(player()->inventory() +
                                             currentArea()->exits() +
                                             currentArea()->characters() +
                                             currentArea()->items());
@@ -29,8 +29,8 @@ void LookCommand::execute(const QString &command) {
     QString description = objects[0]->description();
     if (description.isEmpty()) {
         QString name = objects[0]->name();
-        character()->send(QString("There's nothing special about the %1.").arg(name));
+        player()->send(QString("There's nothing special about the %1.").arg(name));
     } else {
-        character()->send(description);
+        player()->send(description);
     }
 }

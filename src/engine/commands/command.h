@@ -6,8 +6,8 @@
 #include <QStringList>
 
 #include "engine/area.h"
-#include "engine/character.h"
 #include "engine/gameobjectptr.h"
+#include "engine/player.h"
 
 
 class QRegExp;
@@ -17,7 +17,7 @@ class Command : public QObject {
     Q_OBJECT
 
     public:
-        explicit Command(Character *character, QObject *parent = 0);
+        explicit Command(Player *player, QObject *parent = 0);
         virtual ~Command();
 
         virtual void execute(const QString &command) = 0;
@@ -26,8 +26,8 @@ class Command : public QObject {
         void quit();
 
     protected:
-        Character *character() { return m_character; }
-        Area *currentArea() { return m_character->currentArea().cast<Area *>(); }
+        Player *player() { return m_player; }
+        Area *currentArea() { return m_player->currentArea().cast<Area *>(); }
 
         void setCommand(const QString &command);
 
@@ -49,11 +49,8 @@ class Command : public QObject {
                            const QString &tooFewText,
                            const QString &tooManyText);
 
-        void enterArea(const GameObjectPtr &area);
-        void leaveArea(const GameObjectPtr &area, const QString &exitName = QString());
-
     private:
-        Character *m_character;
+        Player *m_player;
 
         QStringList m_words;
 };

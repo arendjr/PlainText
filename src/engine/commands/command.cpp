@@ -5,11 +5,11 @@
 #include "engine/util.h"
 
 
-Command::Command(Character *character, QObject *parent) :
+Command::Command(Player *player, QObject *parent) :
     QObject(parent),
-    m_character(character) {
+    m_player(player) {
 
-    Q_ASSERT(m_character);
+    Q_ASSERT(m_player);
 }
 
 Command::~Command() {
@@ -18,12 +18,27 @@ Command::~Command() {
 void Command::setCommand(const QString &command) {
 
     m_words = command.trimmed().split(QRegExp("\\s+"));
+
+    for (int i = 0; i < m_words.length(); i++) {
+        QString word = m_words[i];
+        if (word.startsWith("\"")) {
+            while (i < m_words.length() - 1 && !word.endsWith("\"")) {
+                word += " " + m_words[i + 1];
+                m_words.removeAt(i);
+            }
+            if (word.endsWith("\"")) {
+                m_words[i] = word.mid(1, word.length() - 2);
+            } else {
+                m_words[i] = word.mid(1);
+            }
+        }
+    }
 }
 
 bool Command::assertWordsLeft(const QString &noneLeftText) {
 
     if (numWordsLeft() == 0) {
-        m_character->send(noneLeftText);
+        m_player->send(noneLeftText);
         return false;
     } else {
         return true;
@@ -111,7 +126,7 @@ bool Command::requireSome(const GameObjectPtrList &objects,
                           const QString &tooFewText) {
 
     if (objects.length() == 0) {
-        m_character->send(tooFewText);
+        m_player->send(tooFewText);
         return false;
     } else {
         return true;
@@ -123,10 +138,10 @@ bool Command::requireUnique(const GameObjectPtrList &objects,
                             const QString &tooManyText) {
 
     if (objects.length() == 0) {
-        m_character->send(tooFewText);
+        m_player->send(tooFewText);
         return false;
     } else if (objects.length() > 1) {
-        m_character->send(tooManyText);
+        m_player->send(tooManyText);
         return false;
     } else {
         return true;

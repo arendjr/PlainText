@@ -6,8 +6,8 @@
 #include <QDir>
 
 #include "badgameobjectexception.h"
-#include "character.h"
 #include "gameobjectsyncthread.h"
+#include "player.h"
 #include "scriptengine.h"
 
 
@@ -64,22 +64,22 @@ GameObject *Realm::getObject(const QString &objectType, uint id) const {
     return getObject(objectType.toAscii().constData(), id);
 }
 
-void Realm::registerCharacter(Character *character) {
+void Realm::registerPlayer(Player *player) {
 
-    Q_ASSERT(character);
-    m_characterMap.insert(character->name(), character);
+    Q_ASSERT(player);
+    m_playerMap.insert(player->name(), player);
 }
 
-void Realm::unregisterCharacter(Character *character) {
+void Realm::unregisterPlayer(Player *player) {
 
-    Q_ASSERT(character);
-    m_characterMap.remove(character->name());
+    Q_ASSERT(player);
+    m_playerMap.remove(player->name());
 }
 
-Character *Realm::getCharacter(const QString &name) const {
+Player *Realm::getPlayer(const QString &name) const {
 
-    if (m_characterMap.contains(name)) {
-        return m_characterMap[name];
+    if (m_playerMap.contains(name)) {
+        return m_playerMap[name];
     }
 
     return 0;

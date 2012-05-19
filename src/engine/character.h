@@ -1,15 +1,13 @@
 #ifndef CHARACTER_H
 #define CHARACTER_H
 
-#include "gameobject.h"
+#include "item.h"
 #include "gameobjectptr.h"
 
 #include <QString>
 
 
-class Session;
-
-class Character : public GameObject {
+class Character : public Item {
 
     Q_OBJECT
 
@@ -17,11 +15,7 @@ class Character : public GameObject {
         explicit Character(uint id, Options options = NoOptions);
         virtual ~Character();
 
-        virtual void setName(const QString &name);
-
-        const QString &passwordHash() const { return m_passwordHash; }
-        virtual void setPasswordHash(const QString &passwordHash);
-        Q_PROPERTY(QString passwordHash READ passwordHash WRITE setPasswordHash)
+        virtual void setName(const QString &newName);
 
         const GameObjectPtr &currentArea() const { return m_currentArea; }
         virtual void setCurrentArea(const GameObjectPtr &currentArea);
@@ -37,34 +31,26 @@ class Character : public GameObject {
         virtual void setHp(int hp);
         Q_PROPERTY(int hp READ hp WRITE setHp)
 
-        bool isAdmin() const { return m_admin; }
-        virtual void setAdmin(bool admin);
-        Q_PROPERTY(bool admin READ isAdmin WRITE setAdmin)
+        Q_INVOKABLE virtual void open(const GameObjectPtr &exit);
+        Q_INVOKABLE virtual void close(const GameObjectPtr &exit);
+        Q_INVOKABLE virtual void go(const GameObjectPtr &exit);
 
-        Session *session() const { return m_session; }
-        void setSession(Session *session);
+        virtual void enter(const GameObjectPtr &area);
+        virtual void leave(const GameObjectPtr &area, const QString &exitName = QString());
 
-        void send(QString data);
+        Q_INVOKABLE virtual void say(const QString &message);
+        Q_INVOKABLE virtual void shout(const QString &message);
+        Q_INVOKABLE virtual void talk(const GameObjectPtr &character, const QString &message);
 
-        void enter(const GameObjectPtr &area);
-        void look();
-        void leave(const GameObjectPtr &area, const QString &exitName = QString());
-
-    signals:
-        void write(const QString &data);
+    protected:
+        explicit Character(const char *objectType, uint id, Options options = NoOptions);
 
     private:
-        QString m_passwordHash;
-
         GameObjectPtr m_currentArea;
 
         GameObjectPtrList m_inventory;
 
         int m_hp;
-
-        bool m_admin;
-
-        Session *m_session;
 };
 
 #endif // CHARACTER_H

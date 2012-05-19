@@ -34,7 +34,7 @@ function Controller() {
     this.screen = document.getElementsByClassName("screen")[0];
     this.writeToScreen("Connecting...");
 
-    this.character = {};
+    this.player = {};
     this.statusHeader = {
         "name": document.querySelector(".status-header .name"),
         "hp": document.querySelector(".status-header .hp"),
@@ -52,7 +52,7 @@ function Controller() {
             self.socket.send(command);
             self.commandInput.value = "";
 
-            if (self.character.name) {
+            if (self.player.name) {
                 if (self.history[self.history.length - 1] !== command) {
                     self.history.push(command);
                 }
@@ -92,15 +92,15 @@ function Controller() {
     this.socket.onmessage = function(message) {
         if (message.data.substr(0, 1) === "{" && message.data.substr(-1) === "}") {
             var data = JSON.parse(message.data);
-            if (data.character) {
-                self.character = data.character;
+            if (data.player) {
+                self.player = data.player;
 
-                if (self.character.isAdmin) {
+                if (self.player.isAdmin) {
                     self.commandInput.removeAttribute("maxlength");
                 }
 
-                self.statusHeader.name.innerText = self.character.name;
-                self.statusHeader.hp.innerText = self.character.hp + "HP";
+                self.statusHeader.name.innerText = self.player.name;
+                self.statusHeader.hp.innerText = self.player.hp + "HP";
             }
         } else {
             self.writeToScreen(message.data);

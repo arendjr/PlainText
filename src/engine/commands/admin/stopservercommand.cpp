@@ -3,7 +3,7 @@
 #include <QCoreApplication>
 
 
-StopServerCommand::StopServerCommand(Character *character, QObject *parent) :
+StopServerCommand::StopServerCommand(Player *character, QObject *parent) :
     AdminCommand(character, parent) {
 }
 

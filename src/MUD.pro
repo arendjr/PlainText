@@ -19,30 +19,38 @@ SOURCES += \
     engine/gameobjectptr.cpp \
     engine/gameobjectsyncthread.cpp \
     engine/item.cpp \
-    engine/npc.cpp \
+    engine/player.cpp \
     engine/realm.cpp \
     engine/scriptengine.cpp \
     engine/scriptfunction.cpp \
     engine/scriptfunctionmap.cpp \
     engine/util.cpp \
+    engine/commands/closecommand.cpp \
     engine/commands/command.cpp \
     engine/commands/dropcommand.cpp \
     engine/commands/getcommand.cpp \
     engine/commands/givecommand.cpp \
     engine/commands/gocommand.cpp \
     engine/commands/lookcommand.cpp \
+    engine/commands/opencommand.cpp \
     engine/commands/quitcommand.cpp \
     engine/commands/saycommand.cpp \
+    engine/commands/shoutcommand.cpp \
     engine/commands/slashmecommand.cpp \
+    engine/commands/talkcommand.cpp \
+    engine/commands/admin/addcharactercommand.cpp \
     engine/commands/admin/addexitcommand.cpp \
     engine/commands/admin/additemcommand.cpp \
     engine/commands/admin/admincommand.cpp \
     engine/commands/admin/execscriptcommand.cpp \
     engine/commands/admin/getpropcommand.cpp \
+    engine/commands/admin/gettriggercommand.cpp \
     engine/commands/admin/removeexitcommand.cpp \
     engine/commands/admin/removeitemcommand.cpp \
     engine/commands/admin/setpropcommand.cpp \
+    engine/commands/admin/settriggercommand.cpp \
     engine/commands/admin/stopservercommand.cpp \
+    engine/commands/admin/unsettriggercommand.cpp \
     interface/httpserver.cpp \
     interface/session.cpp \
     interface/telnetserver.cpp \
@@ -64,30 +72,38 @@ HEADERS += \
     engine/gameobjectptr.h \
     engine/gameobjectsyncthread.h \
     engine/item.h \
-    engine/npc.h \
+    engine/player.h \
     engine/realm.h \
     engine/scriptengine.h \
     engine/scriptfunction.h \
     engine/scriptfunctionmap.h \
     engine/util.h \
+    engine/commands/closecommand.h \
     engine/commands/command.h \
     engine/commands/dropcommand.h \
     engine/commands/getcommand.h \
     engine/commands/givecommand.h \
     engine/commands/gocommand.h \
     engine/commands/lookcommand.h \
+    engine/commands/opencommand.h \
     engine/commands/quitcommand.h \
     engine/commands/saycommand.h \
+    engine/commands/shoutcommand.h \
     engine/commands/slashmecommand.h \
+    engine/commands/talkcommand.h \
+    engine/commands/admin/addcharactercommand.h \
     engine/commands/admin/addexitcommand.h \
     engine/commands/admin/additemcommand.h \
     engine/commands/admin/admincommand.h \
     engine/commands/admin/execscriptcommand.h \
     engine/commands/admin/getpropcommand.h \
+    engine/commands/admin/gettriggercommand.h \
     engine/commands/admin/removeexitcommand.h \
     engine/commands/admin/removeitemcommand.h \
     engine/commands/admin/setpropcommand.h \
+    engine/commands/admin/settriggercommand.h \
     engine/commands/admin/stopservercommand.h \
+    engine/commands/admin/unsettriggercommand.h \
     interface/httpserver.h \
     interface/session.h \
     interface/telnetserver.h \

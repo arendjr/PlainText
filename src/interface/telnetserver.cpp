@@ -6,7 +6,7 @@
 #include <QTcpSocket>
 
 #include "session.h"
-#include "engine/character.h"
+#include "engine/player.h"
 
 
 TelnetServer::TelnetServer(quint16 port, QObject *parent) :
@@ -92,9 +92,9 @@ void TelnetServer::onSessionOutput(QString data) {
     socket->write(data.replace("\n", "\r\n").toUtf8());
 
     if (session->authenticated()) {
-        Character *character = session->character();
-        Q_ASSERT(character);
+        Player *player = session->player();
+        Q_ASSERT(player);
 
-        socket->write(QString("(%1H) ").arg(character->hp()).toUtf8());
+        socket->write(QString("(%1H) ").arg(player->hp()).toUtf8());
     }
 }

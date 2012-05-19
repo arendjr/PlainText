@@ -5,7 +5,7 @@
 #include <QObject>
 
 
-class Character;
+class Player;
 class Command;
 
 class CommandInterpreter : public QObject {
@@ -13,7 +13,7 @@ class CommandInterpreter : public QObject {
     Q_OBJECT
 
     public:
-        explicit CommandInterpreter(Character *character, QObject *parent = 0);
+        explicit CommandInterpreter(Player *player, QObject *parent = 0);
         virtual ~CommandInterpreter();
 
         void execute(const QString &command);
@@ -22,7 +22,7 @@ class CommandInterpreter : public QObject {
         void quit();
 
     private:
-        Character *m_character;
+        Player *m_player;
 
         QMap<QString, Command *> m_commands;
 };

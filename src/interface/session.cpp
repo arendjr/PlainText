@@ -4,8 +4,8 @@
 #include <QDebug>
 
 #include "engine/area.h"
-#include "engine/character.h"
 #include "engine/commandinterpreter.h"
+#include "engine/player.h"
 #include "engine/realm.h"
 
 
@@ -20,16 +20,16 @@ Session::Session(QObject *parent) :
     QObject(parent),
     m_signInStage(SessionClosed),
     m_signUpData(0),
-    m_character(0) {
+    m_player(0) {
 }
 
 Session::~Session() {
 
-    if (m_character) {
+    if (m_player) {
         if (m_interpreter) {
-            m_character->leave(m_character->currentArea());
+            m_player->leave(m_player->currentArea());
         }
-        m_character->setSession(0);
+        m_player->setSession(0);
     }
     delete m_signUpData;
 }
@@ -47,7 +47,7 @@ void Session::onUserInput(QString data) {
         return;
     }
 
-    if (!m_character || !m_character->isAdmin()) {
+    if (!m_player || !m_player->isAdmin()) {
         data = data.left(160);
     }
 
@@ -67,8 +67,8 @@ void Session::processSignIn(const QString &data) {
     QString passwordHash;
     switch (m_signInStage) {
         case AskingUserName:
-            m_character = Realm::instance()->getCharacter(input);
-            if (m_character) {
+            m_player = Realm::instance()->getPlayer(input);
+            if (m_player) {
                 m_signInStage = AskingPassword;
             } else {
                 m_signUpData = new SignUpData();
@@ -87,8 +87,8 @@ void Session::processSignIn(const QString &data) {
 
         case AskingPassword:
             passwordHash = QCryptographicHash::hash(input.toUtf8(), QCryptographicHash::Sha1).toBase64();
-            if (m_character->passwordHash() == passwordHash) {
-                write(QString("Welcome back, %1\n").arg(m_character->name()));
+            if (m_player->passwordHash() == passwordHash) {
+                write(QString("Welcome back, %1\n").arg(m_player->name()));
                 m_signInStage = SignedIn;
             }  else {
                 write("Password incorrect.\n");
@@ -103,12 +103,12 @@ void Session::processSignIn(const QString &data) {
         case AskingSignupPasswordConfirmation:
             if (m_signUpData->password == input) {
                 passwordHash = QCryptographicHash::hash(input.toUtf8(), QCryptographicHash::Sha1).toBase64();
-                m_character = qobject_cast<Character *>(GameObject::createByObjectType("character"));
-                Q_ASSERT(m_character);
+                m_player = qobject_cast<Player *>(GameObject::createByObjectType("player"));
+                Q_ASSERT(m_player);
 
-                m_character->setName(m_signUpData->userName);
-                m_character->setPasswordHash(passwordHash);
-                m_character->setCurrentArea(Realm::instance()->getObject("area", 1));
+                m_player->setName(m_signUpData->userName);
+                m_player->setPasswordHash(passwordHash);
+                m_player->setCurrentArea(Realm::instance()->getObject("area", 1));
 
                 delete m_signUpData;
                 m_signUpData = 0;
@@ -141,17 +141,17 @@ void Session::processSignIn(const QString &data) {
             break;
 
         case SignedIn:
-            if (m_character->session() != 0) {
+            if (m_player->session() != 0) {
                 write("Cannot sign you in because you're already signed in from another location.");
                 terminate();
                 break;
             }
-            m_character->setSession(this);
-            connect(m_character, SIGNAL(write(QString)), this, SIGNAL(write(QString)));
+            m_player->setSession(this);
+            connect(m_player, SIGNAL(write(QString)), this, SIGNAL(write(QString)));
 
-            m_interpreter = new CommandInterpreter(m_character, this);
+            m_interpreter = new CommandInterpreter(m_player, this);
             connect(m_interpreter, SIGNAL(quit()), this, SIGNAL(terminate()));
-            m_character->enter(m_character->currentArea());
+            m_player->enter(m_player->currentArea());
             break;
 
         case SignInAborted:

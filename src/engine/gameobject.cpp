@@ -8,6 +8,7 @@
 #include <QMetaProperty>
 #include <QMetaType>
 #include <QStringList>
+#include <QVariantList>
 #include <QVariantMap>
 
 #include "qjson/json_driver.hh"
@@ -17,8 +18,9 @@
 #include "exit.h"
 #include "gameobjectptr.h"
 #include "item.h"
-#include "npc.h"
+#include "player.h"
 #include "realm.h"
+#include "scriptengine.h"
 #include "scriptfunctionmap.h"
 #include "util.h"
 
@@ -62,6 +64,22 @@ void GameObject::setDescription(const QString &description) {
     }
 }
 
+void GameObject::setTrigger(const QString &name, const ScriptFunction &function) {
+
+    if (!m_triggers.contains(name) || m_triggers[name] != function) {
+        m_triggers.insert(name, function);
+
+        setModified();
+    }
+}
+
+void GameObject::unsetTrigger(const QString &name) {
+
+    if (m_triggers.remove(name) > 0) {
+        setModified();
+    }
+}
+
 void GameObject::setTriggers(const ScriptFunctionMap &triggers) {
 
     if (m_triggers != triggers) {
@@ -69,6 +87,40 @@ void GameObject::setTriggers(const ScriptFunctionMap &triggers) {
 
         setModified();
     }
+}
+
+bool GameObject::invokeTrigger(const QString &name,
+                               const QVariant &arg1, const QVariant &arg2,
+                               const QVariant &arg3, const QVariant &arg4) {
+
+    if (!m_triggers.contains(name)) {
+        return false;
+    }
+
+    QVariantList arguments;
+    if (arg1.isValid()) {
+        arguments << arg1;
+
+        if (arg2.isValid()) {
+            arguments << arg2;
+
+            if (arg3.isValid()) {
+                arguments << arg3;
+
+                if (arg4.isValid()) {
+                    arguments << arg4;
+                }
+            }
+        }
+    }
+
+    return ScriptEngine::instance()->executeFunction(m_triggers[name], this, arguments);
+}
+
+void GameObject::send(QString message) {
+
+    Q_UNUSED(message)
+    qDebug() << "Sent message to headless game object.";
 }
 
 bool GameObject::save() {
@@ -260,8 +312,8 @@ GameObject *GameObject::createByObjectType(const QString &objectType, uint id, O
         return new Exit(id, options);
     } else if (objectType == "item") {
         return new Item(id, options);
-    } else if (objectType == "npc") {
-        return new NPC(id, options);
+    } else if (objectType == "player") {
+        return new Player(id, options);
     } else {
         throw BadGameObjectException(BadGameObjectException::UnknownGameObjectType);
     }

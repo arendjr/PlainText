@@ -23,6 +23,11 @@ bool ScriptFunction::operator==(const ScriptFunction &other) const {
     return source == other.source;
 }
 
+bool ScriptFunction::operator!=(const ScriptFunction &other) const {
+
+    return source != other.source;
+}
+
 QString ScriptFunction::toString() const {
 
     return source;

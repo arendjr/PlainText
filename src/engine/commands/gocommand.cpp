@@ -1,10 +1,8 @@
 #include "gocommand.h"
 
-#include "engine/exit.h"
 
-
-GoCommand::GoCommand(Character *character, QObject *parent) :
-    Command(character, parent) {
+GoCommand::GoCommand(Player *player, QObject *parent) :
+    Command(player, parent) {
 }
 
 GoCommand::~GoCommand() {
@@ -24,6 +22,5 @@ void GoCommand::execute(const QString &command) {
         return;
     }
 
-    character()->leave(currentArea(), exits[0]->name());
-    character()->enter(exits[0].cast<Exit *>()->destinationArea());
+    player()->go(exits[0]);
 }

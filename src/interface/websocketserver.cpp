@@ -7,7 +7,7 @@
 #include <QWsSocket.h>
 
 #include "session.h"
-#include "engine/character.h"
+#include "engine/player.h"
 #include "engine/util.h"
 
 
@@ -70,12 +70,12 @@ void WebSocketServer::onSessionOutput(const QString &data) {
     socket->write(data);
 
     if (session->authenticated()) {
-        Character *character = session->character();
-        Q_ASSERT(character);
+        Player *player = session->player();
+        Q_ASSERT(player);
 
-        socket->write(QString("{ \"character\": { \"name\": %1, \"isAdmin\": %2, \"hp\": %3 } }")
-                      .arg(Util::jsString(character->name()),
-                           character->isAdmin() ? "true" : "false",
-                           QString::number(character->hp())));
+        socket->write(QString("{ \"player\": { \"name\": %1, \"isAdmin\": %2, \"hp\": %3 } }")
+                      .arg(Util::jsString(player->name()),
+                           player->isAdmin() ? "true" : "false",
+                           QString::number(player->hp())));
     }
 }

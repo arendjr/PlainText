@@ -9,7 +9,7 @@ class AddItemCommand : public AdminCommand {
     Q_OBJECT
 
     public:
-        explicit AddItemCommand(Character *character, QObject *parent = 0);
+        explicit AddItemCommand(Player *player, QObject *parent = 0);
         virtual ~AddItemCommand();
 
         virtual void execute(const QString &command);

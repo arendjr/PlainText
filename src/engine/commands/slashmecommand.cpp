@@ -3,7 +3,7 @@
 #include "engine/util.h"
 
 
-SlashMeCommand::SlashMeCommand(Character *character, QObject *parent) :
+SlashMeCommand::SlashMeCommand(Player *character, QObject *parent) :
     Command(character, parent) {
 }
 
@@ -22,5 +22,5 @@ void SlashMeCommand::execute(const QString &command) {
     QString action = takeRest();
 
     Util::sendOthers(currentArea()->characters(),
-                     Util::colorize("%1 %2", Purple).arg(character()->name(), action));
+                     Util::colorize("%1 %2", Purple).arg(player()->name(), action));
 }

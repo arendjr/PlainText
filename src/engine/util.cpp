@@ -1,6 +1,6 @@
-#include "character.h"
 #include "gameobjectptr.h"
 #include "item.h"
+#include "player.h"
 #include "util.h"
 
 #include <QMap>
@@ -49,10 +49,14 @@ QString Util::joinItems(const GameObjectPtrList &list, Articles article) {
         if (itemCounts[i] > 1) {
             strings << writtenNumber(itemCounts[i]) + " " + item->plural();
         } else {
-            if (article == DefiniteArticle) {
-                strings << "the " + item->name();
+            if (item->indefiniteArticle().isEmpty()) {
+                strings << item->name();
             } else {
-                strings << item->indefiniteArticle() + " " + item->name();
+                if (article == DefiniteArticle) {
+                    strings << "the " + item->name();
+                } else {
+                    strings << item->indefiniteArticle() + " " + item->name();
+                }
             }
         }
     }
@@ -194,18 +198,13 @@ QString Util::toCamelCase(QString string) {
     return string;
 }
 
-void Util::sendOthers(GameObjectPtrList characters, const QString &string,
+void Util::sendOthers(GameObjectPtrList players, const QString &message,
                       const GameObjectPtr &exclude1, const GameObjectPtr &exclude2) {
 
-    characters.removeOne(exclude1);
-    characters.removeOne(exclude2);
-    if (characters.length() > 0) {
-        foreach (const GameObjectPtr &characterPtr, characters) {
-            Character *character = characterPtr.cast<Character *>();
-            Q_ASSERT(character);
-
-            character->send(string);
-        }
+    players.removeOne(exclude1);
+    players.removeOne(exclude2);
+    foreach (const GameObjectPtr &player, players) {
+        player->send(message);
     }
 }
 

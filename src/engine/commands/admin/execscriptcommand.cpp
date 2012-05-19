@@ -5,7 +5,7 @@
 #include "engine/scriptengine.h"
 
 
-ExecScriptCommand::ExecScriptCommand(Character *character, QObject *parent) :
+ExecScriptCommand::ExecScriptCommand(Player *character, QObject *parent) :
     AdminCommand(character, parent) {
 }
 
@@ -24,9 +24,9 @@ void ExecScriptCommand::execute(const QString &command) {
     ScriptEngine *scriptEngine = ScriptEngine::instance();
     QScriptValue value = scriptEngine->evaluate(takeRest());
     if (scriptEngine->hasUncaughtException()) {
-        character()->send("Exception: " + value.toString());
+        player()->send("Exception: " + value.toString());
         return;
     }
 
-    character()->send("Result: " + value.toString());
+    player()->send("Result: " + value.toString());
 }

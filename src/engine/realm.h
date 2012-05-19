@@ -6,7 +6,7 @@
 #include "gameobject.h"
 
 
-class Character;
+class Player;
 class GameObjectSyncThread;
 
 class Realm : public GameObject {
@@ -26,9 +26,9 @@ class Realm : public GameObject {
         GameObject *getObject(const char *objectType, uint id) const;
         Q_INVOKABLE GameObject *getObject(const QString &objectType, uint id) const;
 
-        void registerCharacter(Character *character);
-        void unregisterCharacter(Character *character);
-        Character *getCharacter(const QString &name) const;
+        void registerPlayer(Player *player);
+        void unregisterPlayer(Player *player);
+        Player *getPlayer(const QString &name) const;
 
         uint uniqueObjectId();
 
@@ -44,7 +44,7 @@ class Realm : public GameObject {
 
         uint m_nextId;
         QHash<uint, GameObject *> m_objectMap;
-        QHash<QString, Character *> m_characterMap;
+        QHash<QString, Player *> m_playerMap;
 
         GameObjectSyncThread *m_syncThread;
 

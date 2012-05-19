@@ -9,7 +9,7 @@ class SetPropCommand : public AdminCommand {
     Q_OBJECT
 
     public:
-        explicit SetPropCommand(Character *character, QObject *parent = 0);
+        explicit SetPropCommand(Player *player, QObject *parent = 0);
         virtual ~SetPropCommand();
 
         virtual void execute(const QString &command);

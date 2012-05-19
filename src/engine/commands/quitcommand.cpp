@@ -1,7 +1,7 @@
 #include "quitcommand.h"
 
 
-QuitCommand::QuitCommand(Character *character, QObject *parent) :
+QuitCommand::QuitCommand(Player *character, QObject *parent) :
     Command(character, parent) {
 }
 

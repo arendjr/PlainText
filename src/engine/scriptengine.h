@@ -4,13 +4,14 @@
 #include <QObject>
 #include <QScriptEngine>
 #include <QScriptValue>
+#include <QVariantList>
 
 #include "gameobjectptr.h"
 #include "scriptfunction.h"
 
 
 class Area;
-class Character;
+class Player;
 
 class ScriptEngine : public QObject {
 
@@ -30,7 +31,7 @@ class ScriptEngine : public QObject {
         bool hasUncaughtException() const;
 
         bool executeFunction(ScriptFunction &function, const GameObjectPtr &thisObject,
-                             const GameObjectPtrList &objects);
+                             const QVariantList &arguments);
 
         void setGlobalObject(const char *name, QObject *object);
 

@@ -9,7 +9,7 @@ class GoCommand : public Command {
     Q_OBJECT
 
     public:
-        explicit GoCommand(Character *character, QObject *parent = 0);
+        explicit GoCommand(Player *player, QObject *parent = 0);
         virtual ~GoCommand();
 
         virtual void execute(const QString &command);

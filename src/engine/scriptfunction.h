@@ -20,6 +20,7 @@ class ScriptFunction {
 
         ScriptFunction &operator=(const ScriptFunction &other);
         bool operator==(const ScriptFunction &other) const;
+        bool operator!=(const ScriptFunction &other) const;
 
         QString toString() const;
 

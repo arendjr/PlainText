@@ -9,7 +9,7 @@ class AddExitCommand : public AdminCommand {
     Q_OBJECT
 
     public:
-        explicit AddExitCommand(Character *character, QObject *parent = 0);
+        explicit AddExitCommand(Player *player, QObject *parent = 0);
         virtual ~AddExitCommand();
 
         virtual void execute(const QString &command);

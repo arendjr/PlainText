@@ -6,6 +6,11 @@ Item::Item(uint id, Options options) :
     m_portable(false) {
 }
 
+Item::Item(const char *objectType, uint id, Options options) :
+    GameObject(objectType, id, options),
+    m_portable(false) {
+}
+
 Item::~Item() {
 }
 
@@ -62,9 +67,4 @@ void Item::setPortable(bool portable) {
 
         setModified();
     }
-}
-
-Item::Item(const char *objectType, uint id, Options options) :
-    GameObject(objectType, id, options),
-    m_portable(false) {
 }

@@ -37,21 +37,21 @@ void Area::setExits(const GameObjectPtrList &exits) {
     }
 }
 
-void Area::addCharacter(const GameObjectPtr &character) {
+void Area::addPlayer(const GameObjectPtr &player) {
 
-    if (!m_characters.contains(character)) {
-        m_characters << character;
+    if (!m_players.contains(player)) {
+        m_players << player;
     }
 }
 
-void Area::removeCharacter(const GameObjectPtr &character) {
+void Area::removePlayer(const GameObjectPtr &player) {
 
-    m_characters.removeAll(character);
+    m_players.removeAll(player);
 }
 
-void Area::setCharacters(const GameObjectPtrList &characters) {
+void Area::setPlayers(const GameObjectPtrList &players) {
 
-    m_characters = characters;
+    m_players = players;
 }
 
 void Area::addNPC(const GameObjectPtr &npc) {

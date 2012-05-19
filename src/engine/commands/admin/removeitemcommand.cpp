@@ -1,7 +1,7 @@
 #include "removeitemcommand.h"
 
 
-RemoveItemCommand::RemoveItemCommand(Character *character, QObject *parent) :
+RemoveItemCommand::RemoveItemCommand(Player *character, QObject *parent) :
     AdminCommand(character, parent) {
 }
 
@@ -17,7 +17,7 @@ void RemoveItemCommand::execute(const QString &command) {
         return;
     }
 
-    GameObjectPtrList items = takeObjects(currentArea()->items());
+    GameObjectPtrList items = takeObjects(currentArea()->objects());
     if (!requireSome(items, "That's not here.")) {
         return;
     }
@@ -25,7 +25,7 @@ void RemoveItemCommand::execute(const QString &command) {
     foreach (const GameObjectPtr &item, items) {
         currentArea()->removeItem(item);
 
-        character()->send(QString("Item %1 removed.").arg(item->name()));
+        player()->send(QString("Item %1 removed.").arg(item->name()));
 
         item->deleteLater();
     }

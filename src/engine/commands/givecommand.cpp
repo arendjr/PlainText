@@ -7,7 +7,7 @@
 #include "engine/util.h"
 
 
-GiveCommand::GiveCommand(Character *character, QObject *parent) :
+GiveCommand::GiveCommand(Player *character, QObject *parent) :
     Command(character, parent) {
 }
 
@@ -23,7 +23,7 @@ void GiveCommand::execute(const QString &command) {
         return;
     }
 
-    GameObjectPtrList items = takeObjects(character()->inventory());
+    GameObjectPtrList items = takeObjects(player()->inventory());
     if (!requireSome(items, "You don't have that.")) {
         return;
     }
@@ -38,14 +38,14 @@ void GiveCommand::execute(const QString &command) {
     Character *recipient = recipients[0].cast<Character *>();
     foreach (const GameObjectPtr &item, items) {
         recipient->addInventoryItem(item);
-        character()->removeInventoryItem(item);
+        player()->removeInventoryItem(item);
     }
 
     QString itemsDescription = Util::joinItems(items);
-    character()->send(QString("You give %1 %2.").arg(recipient->name(), itemsDescription));
-    recipient->send(QString("%1 gives you %2.").arg(character()->name(), itemsDescription));
+    player()->send(QString("You give %1 %2.").arg(recipient->name(), itemsDescription));
+    recipient->send(QString("%1 gives you %2.").arg(player()->name(), itemsDescription));
 
-    Util::sendOthers(currentArea()->characters(),
-                     QString("%1 gives %2 %3.").arg(character()->name(), recipient->name(), itemsDescription),
-                     character(), recipient);
+    Util::sendOthers(currentArea()->players(),
+                     QString("%1 gives %2 %3.").arg(player()->name(), recipient->name(), itemsDescription),
+                     player(), recipient);
 }

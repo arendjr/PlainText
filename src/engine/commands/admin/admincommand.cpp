@@ -1,7 +1,7 @@
 #include "admincommand.h"
 
 
-AdminCommand::AdminCommand(Character *character, QObject *parent) :
+AdminCommand::AdminCommand(Player *character, QObject *parent) :
     Command(character, parent) {
 }
 

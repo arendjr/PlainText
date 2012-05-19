@@ -4,7 +4,7 @@
 #include "engine/util.h"
 
 
-AddItemCommand::AddItemCommand(Character *character, QObject *parent) :
+AddItemCommand::AddItemCommand(Player *character, QObject *parent) :
     AdminCommand(character, parent) {
 }
 
@@ -26,5 +26,5 @@ void AddItemCommand::execute(const QString &command) {
     item->setName(itemName);
     currentArea()->addItem(item);
 
-    character()->send(QString("Item %1 added.").arg(itemName));
+    player()->send(QString("Item %1 added.").arg(itemName));
 }

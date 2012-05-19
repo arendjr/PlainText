@@ -1,7 +1,7 @@
 #include "removeexitcommand.h"
 
 
-RemoveExitCommand::RemoveExitCommand(Character *character, QObject *parent) :
+RemoveExitCommand::RemoveExitCommand(Player *character, QObject *parent) :
     AdminCommand(character, parent) {
 }
 
@@ -24,5 +24,5 @@ void RemoveExitCommand::execute(const QString &command) {
 
     currentArea()->removeExit(exits[0]);
 
-    character()->send(QString("Exit %1 removed.").arg(exits[0]->name()));
+    player()->send(QString("Exit %1 removed.").arg(exits[0]->name()));
 }

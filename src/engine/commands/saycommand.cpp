@@ -1,10 +1,8 @@
 #include "saycommand.h"
 
-#include "engine/util.h"
 
-
-SayCommand::SayCommand(Character *character, QObject *parent) :
-    Command(character, parent) {
+SayCommand::SayCommand(Player *player, QObject *parent) :
+    Command(player, parent) {
 }
 
 SayCommand::~SayCommand() {
@@ -21,6 +19,5 @@ void SayCommand::execute(const QString &command) {
 
     QString message = takeRest();
 
-    Util::sendOthers(currentArea()->characters(),
-                     QString("%1 says, \"%2\".").arg(character()->name(), message));
+    player()->say(message);
 }

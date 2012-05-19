@@ -5,7 +5,7 @@ Exit::Exit(uint id, Options options) :
     GameObject("exit", id, options),
     m_size(1.5),
     m_door(false),
-    m_open(true),
+    m_open(false),
     m_hidden(false) {
 }
 
@@ -43,8 +43,6 @@ void Exit::setOpen(bool open) {
 
     if (m_open != open) {
         m_open = open;
-
-        setModified();
 
         if (open && isDoor()) {
             m_doorTimer.start(30 * 1000, this);

@@ -39,8 +39,17 @@ class GameObject : public QObject {
         Q_PROPERTY(QString description READ description WRITE setDescription)
 
         const ScriptFunctionMap &triggers() const { return m_triggers; }
+        ScriptFunction trigger(const QString &name) const { return m_triggers[name]; }
+        virtual void setTrigger(const QString &name, const ScriptFunction &function);
+        virtual void unsetTrigger(const QString &name);
         virtual void setTriggers(const ScriptFunctionMap &triggers);
         Q_PROPERTY(ScriptFunctionMap triggers READ triggers WRITE setTriggers)
+
+        bool invokeTrigger(const QString &triggerName,
+                           const QVariant &arg1 = QVariant(), const QVariant &arg2 = QVariant(),
+                           const QVariant &arg3 = QVariant(), const QVariant &arg4 = QVariant());
+
+        virtual void send(QString message);
 
         bool save();
         bool load(const QString &path) throw (BadGameObjectException);

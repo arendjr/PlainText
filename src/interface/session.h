@@ -5,7 +5,7 @@
 #include <QObject>
 
 
-class Character;
+class Player;
 class CommandInterpreter;
 
 class Session : public QObject {
@@ -20,7 +20,7 @@ class Session : public QObject {
 
         bool authenticated() const { return m_signInStage == SignedIn; }
 
-        Character *character() const { return m_character; }
+        Player *player() const { return m_player; }
 
     public slots:
         void onUserInput(QString data);
@@ -45,7 +45,7 @@ class Session : public QObject {
         class SignUpData;
         SignUpData *m_signUpData;
 
-        Character *m_character;
+        Player *m_player;
 
         CommandInterpreter *m_interpreter;
 

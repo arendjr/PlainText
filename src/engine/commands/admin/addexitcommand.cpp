@@ -5,7 +5,7 @@
 #include "engine/util.h"
 
 
-AddExitCommand::AddExitCommand(Character *character, QObject *parent) :
+AddExitCommand::AddExitCommand(Player *character, QObject *parent) :
     AdminCommand(character, parent) {
 }
 
@@ -30,7 +30,7 @@ void AddExitCommand::execute(const QString &command) {
     } else {
         destinationArea = qobject_cast<Area *>(Realm::instance()->getObject("area", destinationAreaId.toInt()));
         if (!destinationArea) {
-            character()->send(QString("No area with ID %1.").arg(destinationAreaId));
+            player()->send(QString("No area with ID %1.").arg(destinationAreaId));
             return;
         }
     }
@@ -46,8 +46,8 @@ void AddExitCommand::execute(const QString &command) {
         exit->setDestinationArea(currentArea());
         destinationArea->addExit(exit);
 
-        character()->send(QString("Bi-directional exit %1-%2 added.").arg(exitName, exit->name()));
+        player()->send(QString("Bi-directional exit %1-%2 added.").arg(exitName, exit->name()));
     } else {
-        character()->send(QString("Exit %1 added.").arg(exitName));
+        player()->send(QString("Exit %1 added.").arg(exitName));
     }
 }

@@ -5,7 +5,7 @@
 #include "engine/util.h"
 
 
-DropCommand::DropCommand(Character *character, QObject *parent) :
+DropCommand::DropCommand(Player *character, QObject *parent) :
     Command(character, parent) {
 }
 
@@ -21,20 +21,20 @@ void DropCommand::execute(const QString &command) {
         return;
     }
 
-    GameObjectPtrList items = takeObjects(character()->inventory());
+    GameObjectPtrList items = takeObjects(player()->inventory());
     if (!requireSome(items, "You don't have that.")) {
         return;
     }
 
     foreach (const GameObjectPtr &item, items) {
         currentArea()->addItem(item);
-        character()->removeInventoryItem(item);
+        player()->removeInventoryItem(item);
     }
 
     QString itemsDescription = Util::joinItems(items, DefiniteArticle);
-    character()->send(QString("You drop %2.").arg(itemsDescription));
+    player()->send(QString("You drop %2.").arg(itemsDescription));
 
     Util::sendOthers(currentArea()->characters(),
-                     QString("%1 drops %2.").arg(character()->name(), itemsDescription),
-                     character());
+                     QString("%1 drops %2.").arg(player()->name(), itemsDescription),
+                     player());
 }
