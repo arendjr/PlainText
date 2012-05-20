@@ -29,6 +29,19 @@ var keys = {
 
 var controller;
 
+if (window.webkitNotifications) {
+    window.notifications = window.webkitNotifications;
+    window.notifications.permissionRequested = false;
+}
+
+window.onfocus = function() {
+    window.isActive = true;
+};
+window.onblur = function() {
+    window.isActive = false;
+};
+window.onfocus();
+
 function Controller() {
 
     this.screen = document.getElementsByClassName("screen")[0];
@@ -57,6 +70,13 @@ function Controller() {
                     self.history.push(command);
                 }
                 self.historyIndex = 0;
+            }
+
+            if (window.notifications &&
+                notifications.requestPermission &&
+                !notifications.permissionRequested) {
+                notifications.requestPermission(function() {});
+                notifications.permissionRequested = true;
             }
         }
     }
@@ -117,6 +137,18 @@ function Controller() {
 }
 
 Controller.prototype.writeToScreen = function(message) {
+
+    if (!window.isActive && window.notifications &&
+        notifications.checkPermission &&
+        notifications.checkPermission() === 0 &&
+        /^\w+ (says|tells|shouts)/.test(message)) {
+        var notification = notifications.createNotification(null, "MUD", message);
+        notification.show()
+
+        setTimeout(function(){
+            notification.cancel();
+        }, 10000);
+    }
 
     var div = document.createElement("div");
 
