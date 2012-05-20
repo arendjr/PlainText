@@ -15,6 +15,11 @@ Command::Command(Player *player, QObject *parent) :
 Command::~Command() {
 }
 
+void Command::setDescription(const QString &description) {
+
+    m_description = description;
+}
+
 void Command::setCommand(const QString &command) {
 
     m_words = command.trimmed().split(QRegExp("\\s+"));
@@ -52,6 +57,11 @@ QString Command::takeWord() {
     }
 
     return QString();
+}
+
+QString Command::takeWord(const char *pattern) {
+
+    return takeWord(QRegExp(QString(pattern)));
 }
 
 QString Command::takeWord(const QRegExp &pattern) {

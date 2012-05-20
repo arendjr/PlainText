@@ -5,6 +5,10 @@
 
 GetPropCommand::GetPropCommand(Player *character, QObject *parent) :
     AdminCommand(character, parent) {
+
+    setDescription("Show the value of some object's property.\n"
+                   "\n"
+                   "Usage: get-prop <object-name> [#] <property-name>");
 }
 
 GetPropCommand::~GetPropCommand() {

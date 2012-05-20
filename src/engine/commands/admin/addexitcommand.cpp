@@ -7,6 +7,11 @@
 
 AddExitCommand::AddExitCommand(Player *character, QObject *parent) :
     AdminCommand(character, parent) {
+
+    setDescription("Add an exit to the current area. Use \"new\" instead of an "
+                   "destination area ID to create a new destination area.\n"
+                   "\n"
+                   "Usage: add-exit <exit-name> <destination-area-id>");
 }
 
 AddExitCommand::~AddExitCommand() {

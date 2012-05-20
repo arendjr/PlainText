@@ -25,6 +25,9 @@ class CommandInterpreter : public QObject {
         Player *m_player;
 
         QMap<QString, Command *> m_commands;
+
+        void showHelp();
+        void showAdminHelp();
 };
 
 #endif // COMMANDINTERPRETER_H

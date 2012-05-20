@@ -44,28 +44,6 @@ body,input {
     margin: 0 2em 2em;
 }
 
-.help {
-    position: absolute;
-    left: -webkit-calc(644px + 3em);
-    left: -moz-calc(644px + 3em);
-    left: calc(644px + 3em);
-    top: 0;
-    margin: 2em;
-    border: 1px solid black;
-}
-    .help .header {
-        font-weight: bold;
-
-        border-bottom: 1px solid black;
-    }
-    .help .header,ul {
-        padding: 0.5em;
-    }
-    .help ul {
-        list-style-type: none;
-        margin: 0;
-    }
-
 @media screen and (max-width: 660px) {
     body,input {
         font-size: 8pt;
@@ -94,11 +72,5 @@ body,input {
     .command-input {
         margin: 0;
         border-top: 1px solid #777;
-    }
-}
-
-@media screen and (max-width: 900px) {
-    .help {
-        display: none;
     }
 }

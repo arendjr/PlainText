@@ -27,7 +27,7 @@ class GameObject : public QObject {
         const char *objectType() const { return m_objectType; }
         Q_PROPERTY(const char *objectType READ objectType STORED false)
 
-        const uint id() const { return m_id; }
+        uint id() const { return m_id; }
         Q_PROPERTY(uint id READ id STORED false)
 
         const QString &name() const { return m_name; }

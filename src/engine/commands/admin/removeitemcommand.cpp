@@ -3,6 +3,10 @@
 
 RemoveItemCommand::RemoveItemCommand(Player *character, QObject *parent) :
     AdminCommand(character, parent) {
+
+    setDescription("Remove an item from the current area.\n"
+                   "\n"
+                   "Usage: remove-item <item-name> [#]");
 }
 
 RemoveItemCommand::~RemoveItemCommand() {

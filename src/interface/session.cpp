@@ -7,6 +7,7 @@
 #include "engine/commandinterpreter.h"
 #include "engine/player.h"
 #include "engine/realm.h"
+#include "engine/util.h"
 
 
 class Session::SignUpData {
@@ -66,17 +67,18 @@ void Session::processSignIn(const QString &data) {
 
     QString passwordHash;
     switch (m_signInStage) {
-        case AskingUserName:
-            m_player = Realm::instance()->getPlayer(input);
+        case AskingUserName: {
+            QString userName = Util::capitalize(input);
+            m_player = Realm::instance()->getPlayer(userName);
             if (m_player) {
                 m_signInStage = AskingPassword;
             } else {
                 m_signUpData = new SignUpData();
-                m_signUpData->userName = input;
+                m_signUpData->userName = userName;
                 m_signInStage = AskingUserNameConfirmation;
             }
             break;
-
+        }
         case AskingUserNameConfirmation:
             if (input.toLower() == "yes" || input.toLower() == "correct") {
                 m_signInStage = AskingSignupPassword;
@@ -88,7 +90,7 @@ void Session::processSignIn(const QString &data) {
         case AskingPassword:
             passwordHash = QCryptographicHash::hash(input.toUtf8(), QCryptographicHash::Sha1).toBase64();
             if (m_player->passwordHash() == passwordHash) {
-                write(QString("Welcome back, %1\n").arg(m_player->name()));
+                write(QString("Welcome back, %1. Type \"help\" if you're feeling lost.\n").arg(m_player->name()));
                 m_signInStage = SignedIn;
             }  else {
                 write("Password incorrect.\n");

@@ -6,6 +6,10 @@
 
 SetPropCommand::SetPropCommand(Player *character, QObject *parent) :
     AdminCommand(character, parent) {
+
+    setDescription("Set the value of some object's property.\n"
+                   "\n"
+                   "Usage: set-prop <object-name> [#] <property-name> <value>");
 }
 
 SetPropCommand::~SetPropCommand() {

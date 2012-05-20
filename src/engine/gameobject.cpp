@@ -120,7 +120,6 @@ bool GameObject::invokeTrigger(const QString &name,
 void GameObject::send(QString message) {
 
     Q_UNUSED(message)
-    qDebug() << "Sent message to headless game object.";
 }
 
 bool GameObject::save() {

@@ -3,6 +3,10 @@
 
 RemoveExitCommand::RemoveExitCommand(Player *character, QObject *parent) :
     AdminCommand(character, parent) {
+
+    setDescription("Remove an exit from the current area.\n"
+                   "\n"
+                   "Usage: remove-exit <exit-name> [#]");
 }
 
 RemoveExitCommand::~RemoveExitCommand() {
@@ -13,7 +17,7 @@ void RemoveExitCommand::execute(const QString &command) {
     setCommand(command);
 
     /*QString alias = */takeWord();
-    if (!assertWordsLeft("Usage: remove-exit <exit-name>")) {
+    if (!assertWordsLeft("Usage: remove-exit <exit-name> [#]")) {
         return;
     }
 

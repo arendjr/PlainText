@@ -64,6 +64,26 @@ GameObject *Realm::getObject(const QString &objectType, uint id) const {
     return getObject(objectType.toAscii().constData(), id);
 }
 
+GameObjectPtrList Realm::players() const {
+
+    GameObjectPtrList players;
+    foreach (Player *player, m_playerMap) {
+        players << player;
+    }
+    return players;
+}
+
+GameObjectPtrList Realm::onlinePlayers() const {
+
+    GameObjectPtrList players;
+    foreach (Player *player, m_playerMap) {
+        if (player->session()) {
+            players << player;
+        }
+    }
+    return players;
+}
+
 void Realm::registerPlayer(Player *player) {
 
     Q_ASSERT(player);

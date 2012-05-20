@@ -3,6 +3,10 @@
 
 GetTriggerCommand::GetTriggerCommand(Player *character, QObject *parent) :
     AdminCommand(character, parent) {
+
+    setDescription("Show the script for some object's trigger.\n"
+                   "\n"
+                   "Usage: get-trigger <object-name> [#] <trigger-name>");
 }
 
 GetTriggerCommand::~GetTriggerCommand() {

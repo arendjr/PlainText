@@ -28,6 +28,10 @@ QString Util::joinItems(const GameObjectPtrList &list, Articles article) {
     QStringList itemNames;
     QList<int> itemCounts;
 
+    if (list.isEmpty()) {
+        return "nothing";
+    }
+
     foreach (const GameObjectPtr &itemPtr, list) {
         Item *item = itemPtr.cast<Item *>();
         Q_ASSERT(item);
@@ -99,6 +103,52 @@ QString Util::writtenNumber(int number) {
 QString Util::capitalize(const QString &string) {
 
     return string.left(1).toUpper() + string.mid(1);
+}
+
+QStringList Util::splitLines(const QString &string, int maxLineLength) {
+
+    QStringList words = string.split(' ');
+    QStringList lines;
+    QString currentLine;
+
+    foreach (QString word, words) {
+        int index;
+        while ((index = word.indexOf('\n')) != -1) {
+            QString left = word.left(index);
+            if (!left.isEmpty()) {
+                if (currentLine.length() + left.length() + 1 > maxLineLength) {
+                    lines << currentLine;
+                    currentLine = left;
+                } else {
+                    if (!currentLine.isEmpty()) {
+                        currentLine += " ";
+                    }
+                    currentLine += left;
+                }
+            }
+            lines << currentLine;
+            currentLine = "";
+            word = word.mid(index + 1);
+        }
+        if (word.isEmpty()) {
+            continue;
+        }
+
+        if (currentLine.length() + word.length() + 1 > maxLineLength) {
+            lines << currentLine;
+            currentLine = word;
+        } else {
+            if (!currentLine.isEmpty()) {
+                currentLine += " ";
+            }
+            currentLine += word;
+        }
+    }
+    if (!currentLine.isEmpty()) {
+        lines << currentLine;
+    }
+
+    return lines;
 }
 
 QString Util::jsString(QString string) {

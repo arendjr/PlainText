@@ -7,6 +7,10 @@
 
 ExecScriptCommand::ExecScriptCommand(Player *character, QObject *parent) :
     AdminCommand(character, parent) {
+
+    setDescription("Executes a script.\n"
+                   "\n"
+                   "Usage: exec-script <script>");
 }
 
 ExecScriptCommand::~ExecScriptCommand() {

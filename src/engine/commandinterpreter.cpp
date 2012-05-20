@@ -14,6 +14,7 @@
 #include "commands/getcommand.h"
 #include "commands/givecommand.h"
 #include "commands/gocommand.h"
+#include "commands/inventorycommand.h"
 #include "commands/lookcommand.h"
 #include "commands/opencommand.h"
 #include "commands/quitcommand.h"
@@ -21,6 +22,8 @@
 #include "commands/shoutcommand.h"
 #include "commands/slashmecommand.h"
 #include "commands/talkcommand.h"
+#include "commands/tellcommand.h"
+#include "commands/whocommand.h"
 #include "commands/admin/addcharactercommand.h"
 #include "commands/admin/addexitcommand.h"
 #include "commands/admin/additemcommand.h"
@@ -44,6 +47,7 @@ CommandInterpreter::CommandInterpreter(Player *player, QObject *parent) :
     Command *get = new GetCommand(player, this);
     Command *give = new GiveCommand(player, this);
     Command *go = new GoCommand(player, this);
+    Command *inventory = new InventoryCommand(player, this);
     Command *look = new LookCommand(player, this);
     Command *open = new OpenCommand(player, this);
     Command *quit = new QuitCommand(player, this);
@@ -51,13 +55,17 @@ CommandInterpreter::CommandInterpreter(Player *player, QObject *parent) :
     Command *shout = new ShoutCommand(player, this);
     Command *slashMe = new SlashMeCommand(player, this);
     Command *talk = new TalkCommand(player, this);
+    Command *tell = new TellCommand(player, this);
+    Command *who = new WhoCommand(player, this);
 
     m_commands.insert("close", close);
     m_commands.insert("drop", drop);
+    m_commands.insert("enter", go);
     m_commands.insert("give", give);
     m_commands.insert("get", get);
     m_commands.insert("go", go);
     m_commands.insert("goodbye", quit);
+    m_commands.insert("inventory", inventory);
     m_commands.insert("look", look);
     m_commands.insert("open", open);
     m_commands.insert("quit", quit);
@@ -65,6 +73,8 @@ CommandInterpreter::CommandInterpreter(Player *player, QObject *parent) :
     m_commands.insert("shout", shout);
     m_commands.insert("take", get);
     m_commands.insert("talk", talk);
+    m_commands.insert("tell", tell);
+    m_commands.insert("who", who);
     m_commands.insert("/me", slashMe);
 
     if (m_player->isAdmin()) {
@@ -102,6 +112,14 @@ void CommandInterpreter::execute(const QString &command) {
         return;
     }
 
+    if (commandName == "help") {
+        showHelp();
+        return;
+    } else if (commandName == "admin-help" && m_player->isAdmin()) {
+        showAdminHelp();
+        return;
+    }
+
     if (Util::isDirectionAbbreviation(commandName)) {
         commandName = Util::direction(commandName);
     }
@@ -129,5 +147,38 @@ void CommandInterpreter::execute(const QString &command) {
         m_player->send("Command is not unique.");
     } else {
         m_player->send(QString("Command \"%1\" does not exist.").arg(words[0]));
+    }
+}
+
+void CommandInterpreter::showHelp() {
+
+    m_player->send("Here is a list of all the commands you can use:\n\n");
+
+    foreach (const QString &key, m_commands.keys()) {
+        if (key.contains("-") || key.startsWith("/")) {
+            continue;
+        }
+
+        m_player->send(Util::colorize(key, White) + "\n"
+                       "  " + Util::splitLines(m_commands[key]->description(), 78).join("\n  ") + "\n\n");
+    }
+
+    if (m_player->isAdmin()) {
+        m_player->send("To see all the admin commands you can use, type " + Util::colorize("admin-help", White) + ".");
+    }
+}
+
+void CommandInterpreter::showAdminHelp() {
+
+    m_player->send("Here is a list of all the commands you can use as an admin:\n\n" +
+                   Util::colorize("Remember: With great power comes great responsibility!", White) + "\n\n");
+
+    foreach (const QString &key, m_commands.keys()) {
+        if (!key.contains("-") || key.startsWith("/")) {
+            continue;
+        }
+
+        m_player->send(Util::colorize(key, White) + "\n"
+                       "  " + Util::splitLines(m_commands[key]->description(), 78).join("\n  ") + "\n\n");
     }
 }

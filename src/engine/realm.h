@@ -4,6 +4,7 @@
 #include <QHash>
 
 #include "gameobject.h"
+#include "gameobjectptr.h"
 
 
 class Player;
@@ -26,6 +27,8 @@ class Realm : public GameObject {
         GameObject *getObject(const char *objectType, uint id) const;
         Q_INVOKABLE GameObject *getObject(const QString &objectType, uint id) const;
 
+        GameObjectPtrList players() const;
+        GameObjectPtrList onlinePlayers() const;
         void registerPlayer(Player *player);
         void unregisterPlayer(Player *player);
         Player *getPlayer(const QString &name) const;

@@ -43,6 +43,8 @@ class Util {
 
         static QString capitalize(const QString &string);
 
+        static QStringList splitLines(const QString &string, int maxLineLength = 80);
+
         static QString jsString(QString string);
 
         static QString colorize(const QString &string, Color color);

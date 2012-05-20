@@ -2,13 +2,16 @@
 
 #include <QRegExp>
 
-#include "engine/character.h"
-#include "engine/item.h"
 #include "engine/util.h"
 
 
-GiveCommand::GiveCommand(Player *character, QObject *parent) :
-    Command(character, parent) {
+GiveCommand::GiveCommand(Player *player, QObject *parent) :
+    Command(player, parent) {
+
+    setDescription("Give an item or gold from your inventory to another "
+                   "character.\n"
+                   "\n"
+                   "Example: give stick earl");
 }
 
 GiveCommand::~GiveCommand() {
@@ -22,6 +25,8 @@ void GiveCommand::execute(const QString &command) {
     if (!assertWordsLeft("Give what?")) {
         return;
     }
+
+    takeWord(QRegExp("the"));
 
     GameObjectPtrList items = takeObjects(player()->inventory());
     if (!requireSome(items, "You don't have that.")) {

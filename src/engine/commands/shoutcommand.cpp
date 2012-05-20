@@ -3,6 +3,11 @@
 
 ShoutCommand::ShoutCommand(Player *character, QObject *parent) :
     Command(character, parent) {
+
+    setDescription("Shout a message. Everyone in the same area and every "
+                   "adjacent area can hear it.\n"
+                   "\n"
+                   "Example: shout Anyone there?");
 }
 
 ShoutCommand::~ShoutCommand() {

@@ -22,14 +22,20 @@ class Character : public Item {
         Q_PROPERTY(GameObjectPtr currentArea READ currentArea WRITE setCurrentArea)
 
         const GameObjectPtrList &inventory() const { return m_inventory; }
-        virtual void addInventoryItem(const GameObjectPtr &item);
-        virtual void removeInventoryItem(const GameObjectPtr &item);
+        Q_INVOKABLE virtual void addInventoryItem(const GameObjectPtr &item);
+        Q_INVOKABLE virtual void removeInventoryItem(const GameObjectPtr &item);
         virtual void setInventory(const GameObjectPtrList &inventory);
         Q_PROPERTY(GameObjectPtrList inventory READ inventory WRITE setInventory)
 
         int hp() const { return m_hp; }
+        virtual void adjustHp(int delta);
         virtual void setHp(int hp);
         Q_PROPERTY(int hp READ hp WRITE setHp)
+
+        int gold() const { return m_gold; }
+        virtual void adjustGold(int delta);
+        virtual void setGold(int gold);
+        Q_PROPERTY(int gold READ gold WRITE setGold)
 
         Q_INVOKABLE virtual void open(const GameObjectPtr &exit);
         Q_INVOKABLE virtual void close(const GameObjectPtr &exit);
@@ -41,6 +47,7 @@ class Character : public Item {
         Q_INVOKABLE virtual void say(const QString &message);
         Q_INVOKABLE virtual void shout(const QString &message);
         Q_INVOKABLE virtual void talk(const GameObjectPtr &character, const QString &message);
+        Q_INVOKABLE virtual void tell(const GameObjectPtr &player, const QString &message);
 
     protected:
         explicit Character(const char *objectType, uint id, Options options = NoOptions);
@@ -51,6 +58,7 @@ class Character : public Item {
         GameObjectPtrList m_inventory;
 
         int m_hp;
+        int m_gold;
 };
 
 #endif // CHARACTER_H

@@ -2,6 +2,9 @@
 MUD-build-desktop
 MUD.pro.user
 
+# Don't save user data
+player.*
+
 # Compiled Object files
 *.slo
 *.lo

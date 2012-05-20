@@ -10,12 +10,14 @@
 
 Character::Character(uint id, Options options) :
     Item("character", id, options),
-    m_hp(1) {
+    m_hp(1),
+    m_gold(0) {
 }
 
 Character::Character(const char *objectType, uint id, Options options) :
     Item(objectType, id, options),
-    m_hp(1) {
+    m_hp(1),
+    m_gold(0) {
 }
 
 Character::~Character() {
@@ -64,10 +66,35 @@ void Character::setInventory(const GameObjectPtrList &inventory) {
     }
 }
 
+void Character::adjustHp(int delta) {
+
+    setHp(m_hp + delta);
+}
+
 void Character::setHp(int hp) {
 
     if (m_hp != hp) {
         m_hp = hp;
+        if (m_hp < 0) {
+            m_hp = 0;
+        }
+
+        setModified();
+    }
+}
+
+void Character::adjustGold(int delta) {
+
+    setGold(m_gold + delta);
+}
+
+void Character::setGold(int gold) {
+
+    if (m_gold != gold) {
+        m_gold = gold;
+        if (m_gold < 0) {
+            m_gold = 0;
+        }
 
         setModified();
     }
@@ -249,8 +276,25 @@ void Character::talk(const GameObjectPtr &characterPtr, const QString &message) 
 
     Player *player = qobject_cast<Player *>(character);
     if (player) {
-        player->send(QString("%1 tells you, \"%2\".").arg(name(), message));
+        tell(player, message);
     } else {
         character->invokeTrigger("ontalk", QVariant::fromValue(GameObjectPtr(this)), message);
     }
+}
+
+void Character::tell(const GameObjectPtr &playerPtr, const QString &message) {
+
+    Player *player = playerPtr.cast<Player *>();
+    if (!player) {
+        qWarning() << "Character::tell(): Invalid player.";
+        return;
+    }
+
+    if (message.isEmpty()) {
+        send(QString("Tell %1 what?").arg(player->name()));
+        return;
+    }
+
+    player->send(QString("%1 tells you, \"%2\".").arg(name(), message));
+    send(QString("You tell %1, \"%2\".").arg(player->name(), message));
 }

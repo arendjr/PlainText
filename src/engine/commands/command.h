@@ -20,6 +20,9 @@ class Command : public QObject {
         explicit Command(Player *player, QObject *parent = 0);
         virtual ~Command();
 
+        const QString &description() const { return m_description; }
+        void setDescription(const QString &description);
+
         virtual void execute(const QString &command) = 0;
 
     signals:
@@ -35,6 +38,7 @@ class Command : public QObject {
         bool assertWordsLeft(const QString &noneLeftText);
 
         QString takeWord();
+        QString takeWord(const char *pattern);
         QString takeWord(const QRegExp &pattern);
         GameObjectPtrList takeObjects(const GameObjectPtrList &pool);
         QPair<QString, uint> takeObjectsDescription();
@@ -51,6 +55,8 @@ class Command : public QObject {
 
     private:
         Player *m_player;
+
+        QString m_description;
 
         QStringList m_words;
 };

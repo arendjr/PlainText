@@ -3,6 +3,10 @@
 
 UnsetTriggerCommand::UnsetTriggerCommand(Player *character, QObject *parent) :
     AdminCommand(character, parent) {
+
+    setDescription("Removes the script for some object's trigger.\n"
+                   "\n"
+                   "Usage: unset-trigger <object-name> [#] <trigger-name>");
 }
 
 UnsetTriggerCommand::~UnsetTriggerCommand() {

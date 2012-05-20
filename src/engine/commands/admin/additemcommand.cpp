@@ -6,6 +6,10 @@
 
 AddItemCommand::AddItemCommand(Player *character, QObject *parent) :
     AdminCommand(character, parent) {
+
+    setDescription("Add an item to the current area.\n"
+                   "\n"
+                   "Usage: add-item <item-name>");
 }
 
 AddItemCommand::~AddItemCommand() {

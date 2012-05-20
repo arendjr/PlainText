@@ -31,6 +31,7 @@ SOURCES += \
     engine/commands/getcommand.cpp \
     engine/commands/givecommand.cpp \
     engine/commands/gocommand.cpp \
+    engine/commands/inventorycommand.cpp \
     engine/commands/lookcommand.cpp \
     engine/commands/opencommand.cpp \
     engine/commands/quitcommand.cpp \
@@ -38,6 +39,8 @@ SOURCES += \
     engine/commands/shoutcommand.cpp \
     engine/commands/slashmecommand.cpp \
     engine/commands/talkcommand.cpp \
+    engine/commands/tellcommand.cpp \
+    engine/commands/whocommand.cpp \
     engine/commands/admin/addcharactercommand.cpp \
     engine/commands/admin/addexitcommand.cpp \
     engine/commands/admin/additemcommand.cpp \
@@ -84,6 +87,7 @@ HEADERS += \
     engine/commands/getcommand.h \
     engine/commands/givecommand.h \
     engine/commands/gocommand.h \
+    engine/commands/inventorycommand.h \
     engine/commands/lookcommand.h \
     engine/commands/opencommand.h \
     engine/commands/quitcommand.h \
@@ -91,6 +95,8 @@ HEADERS += \
     engine/commands/shoutcommand.h \
     engine/commands/slashmecommand.h \
     engine/commands/talkcommand.h \
+    engine/commands/tellcommand.h \
+    engine/commands/whocommand.h \
     engine/commands/admin/addcharactercommand.h \
     engine/commands/admin/addexitcommand.h \
     engine/commands/admin/additemcommand.h \

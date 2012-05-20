@@ -5,6 +5,10 @@
 
 StopServerCommand::StopServerCommand(Player *character, QObject *parent) :
     AdminCommand(character, parent) {
+
+    setDescription("Terminate the game server.\n"
+                   "\n"
+                   "Usage: stop-server");
 }
 
 StopServerCommand::~StopServerCommand() {

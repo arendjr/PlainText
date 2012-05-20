@@ -3,6 +3,10 @@
 
 SetTriggerCommand::SetTriggerCommand(Player *character, QObject *parent) :
     AdminCommand(character, parent) {
+
+    setDescription("Set the script for some object's trigger.\n"
+                   "\n"
+                   "Usage: set-trigger <object-name> [#] <trigger-name> <script>");
 }
 
 SetTriggerCommand::~SetTriggerCommand() {

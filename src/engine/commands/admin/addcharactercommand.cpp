@@ -7,6 +7,10 @@
 
 AddCharacterCommand::AddCharacterCommand(Player *character, QObject *parent) :
     AdminCommand(character, parent) {
+
+    setDescription("Add a character to the current area.\n"
+                   "\n"
+                   "Usage: add-character <character-name>");
 }
 
 AddCharacterCommand::~AddCharacterCommand() {

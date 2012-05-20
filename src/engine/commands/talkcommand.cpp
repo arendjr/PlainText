@@ -1,12 +1,15 @@
 #include "talkcommand.h"
 
-#include "engine/character.h"
-#include "engine/item.h"
 #include "engine/util.h"
 
 
-TalkCommand::TalkCommand(Player *character, QObject *parent) :
-    Command(character, parent) {
+TalkCommand::TalkCommand(Player *player, QObject *parent) :
+    Command(player, parent) {
+
+    setDescription("Talk to a specific character who's in the same area. Only "
+                   "this character will hear you.\n"
+                   "\n"
+                   "Example: talk earl Hey Earl, how are you?");
 }
 
 TalkCommand::~TalkCommand() {
@@ -20,6 +23,8 @@ void TalkCommand::execute(const QString &command) {
     if (!assertWordsLeft("Talk to who?")) {
         return;
     }
+
+    takeWord("to");
 
     QPair <QString, uint> description = takeObjectsDescription();
     GameObjectPtrList characters = objectsByDescription(description,
