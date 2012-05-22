@@ -17,6 +17,8 @@ class ScriptWindow : public QObject {
 
         QScriptValue toScriptValue();
 
+        Q_INVOKABLE int randomInt(int min = 0, int max = INT32_MAX) const;
+
         Q_INVOKABLE int setInterval(const QScriptValue &function, int delay);
         Q_INVOKABLE void clearInterval(int timerId);
 

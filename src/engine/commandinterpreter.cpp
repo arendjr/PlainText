@@ -113,10 +113,11 @@ void CommandInterpreter::execute(const QString &command) {
     }
 
     if (commandName == "help") {
-        showHelp();
-        return;
-    } else if (commandName == "admin-help" && m_player->isAdmin()) {
-        showAdminHelp();
+        if (words.length() > 1) {
+            showHelp(words[1].toLower());
+        } else {
+            showHelp();
+        }
         return;
     }
 
@@ -150,35 +151,55 @@ void CommandInterpreter::execute(const QString &command) {
     }
 }
 
-void CommandInterpreter::showHelp() {
+void CommandInterpreter::showHelp(const QString &command) {
 
-    m_player->send("Here is a list of all the commands you can use:\n\n");
+    if (command.isEmpty()) {
+        m_player->send(QString("Type %1 to see a list of all commands.\n"
+                               "Type %2 to see help about a particular command.")
+                       .arg(Util::colorize("help commands", White),
+                            Util::colorize("help <command>", White)));
+    } else if (command == "commands") {
+        m_player->send("Here is a list of all the commands you can use:\n\n");
 
-    foreach (const QString &key, m_commands.keys()) {
-        if (key.contains("-") || key.startsWith("/")) {
-            continue;
+        QStringList commandNames = m_commands.keys();
+        showColumns(commandNames.filter(QRegExp("^\\w+$")));
+
+        if (m_player->isAdmin()) {
+            m_player->send(QString("\nTo see all the admin commands you can use, type %1.")
+                           .arg(Util::colorize("help admin-commands", White)));
         }
+    } else if (command == "admin-commands") {
+        if (m_player->isAdmin()) {
+            m_player->send("Here is a list of all the commands you can use as an admin:\n\n" +
+                           Util::colorize("Remember: With great power comes great responsibility!", White) + "\n\n");
 
-        m_player->send(Util::colorize(key, White) + "\n"
-                       "  " + Util::splitLines(m_commands[key]->description(), 78).join("\n  ") + "\n\n");
-    }
-
-    if (m_player->isAdmin()) {
-        m_player->send("To see all the admin commands you can use, type " + Util::colorize("admin-help", White) + ".");
+            QStringList commandNames = m_commands.keys();
+            showColumns(commandNames.filter("-"));
+        } else {
+            m_player->send("Sorry, but you don't look much like an admin to me.");
+        }
+    } else {
+        if (m_commands.contains(command)) {
+            m_player->send("\n" + Util::colorize(command, White) + "\n"
+                           "  " + Util::splitLines(m_commands[command]->description(), 78).join("\n  ") + "\n\n");
+        } else {
+            m_player->send(QString("The command %1 is not recognized.\n"
+                                   "Type %2 to see a list of all commands.")
+                           .arg(Util::colorize(command, White),
+                                Util::colorize("help commands", White)));
+        }
     }
 }
 
-void CommandInterpreter::showAdminHelp() {
+void CommandInterpreter::showColumns(const QStringList &commandNames) {
 
-    m_player->send("Here is a list of all the commands you can use as an admin:\n\n" +
-                   Util::colorize("Remember: With great power comes great responsibility!", White) + "\n\n");
+    int length = commandNames.length();
+    int halfLength = length / 2 + length % 2;
+    for (int i = 0; i < halfLength; i++) {
+        QString first = commandNames[i];
+        QString second = i + halfLength < length ? commandNames[i + halfLength] : "";
 
-    foreach (const QString &key, m_commands.keys()) {
-        if (!key.contains("-") || key.startsWith("/")) {
-            continue;
-        }
-
-        m_player->send(Util::colorize(key, White) + "\n"
-                       "  " + Util::splitLines(m_commands[key]->description(), 78).join("\n  ") + "\n\n");
+        m_player->send("  " + Util::colorize(first.leftJustified(30), White) +
+                       "  " + Util::colorize(second, White));
     }
 }

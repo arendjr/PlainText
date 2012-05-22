@@ -1,5 +1,6 @@
 #include "engine.h"
 
+#include <QDateTime>
 #include <QMetaType>
 
 #include "gameobject.h"
@@ -13,6 +14,8 @@
 
 Engine::Engine(QObject *parent) :
     QObject(parent) {
+
+    qsrand(QDateTime::currentMSecsSinceEpoch());
 
     qRegisterMetaType<GameObject *>();
     qRegisterMetaType<GameObjectPtr>();

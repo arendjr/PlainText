@@ -23,7 +23,7 @@ void LookCommand::execute(const QString &command) {
         return;
     }
 
-    takeWord("at");
+    takeWord("at", IfNotLast);
     takeWord("the");
 
     if (!assertWordsLeft("Look at what?")) {

@@ -24,6 +24,11 @@ QScriptValue ScriptWindow::toScriptValue() {
     return value;
 }
 
+int ScriptWindow::randomInt(int min, int max) const {
+
+    return min + qrand() % (max - min);
+}
+
 int ScriptWindow::setInterval(const QScriptValue &function, int delay) {
 
     if (function.isString() || function.isFunction()) {
