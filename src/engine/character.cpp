@@ -119,6 +119,10 @@ void Character::open(const GameObjectPtr &exitPtr) {
         Area *area = currentArea().cast<Area *>();
         Q_ASSERT(area);
 
+        if (!exit->invokeTrigger("onopen", this)) {
+            return;
+        }
+
         exit->setOpen(true);
         send(QString("You open the %1.").arg(exit->name()));
 
@@ -143,6 +147,10 @@ void Character::close(const GameObjectPtr &exitPtr) {
     if (exit->isOpen()) {
         Area *area = currentArea().cast<Area *>();
         Q_ASSERT(area);
+
+        if (!exit->invokeTrigger("onclose", this)) {
+            return;
+        }
 
         exit->setOpen(false);
         send(QString("You close the %1.").arg(exit->name()));
@@ -170,7 +178,7 @@ void Character::go(const GameObjectPtr &exitPtr) {
     Area *area = currentArea().cast<Area *>();
     Q_ASSERT(area);
     foreach (const GameObjectPtr &character, area->npcs()) {
-        if (character->invokeTrigger("onexit", QVariant::fromValue(GameObjectPtr(this)), exit->name())) {
+        if (!character->invokeTrigger("onexit", this, exit->name())) {
             return;
         }
     }
@@ -181,7 +189,7 @@ void Character::go(const GameObjectPtr &exitPtr) {
     area = currentArea().cast<Area *>();
     Q_ASSERT(area);
     foreach (const GameObjectPtr &character, area->npcs()) {
-        character->invokeTrigger("onenter", QVariant::fromValue(GameObjectPtr(this)));
+        character->invokeTrigger("onenter", this);
     }
 }
 
@@ -278,7 +286,7 @@ void Character::talk(const GameObjectPtr &characterPtr, const QString &message) 
     if (player) {
         tell(player, message);
     } else {
-        character->invokeTrigger("ontalk", QVariant::fromValue(GameObjectPtr(this)), message);
+        character->invokeTrigger("ontalk", this, message);
     }
 }
 

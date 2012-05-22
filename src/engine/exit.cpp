@@ -43,10 +43,6 @@ void Exit::setOpen(bool open) {
 
     if (m_open != open) {
         m_open = open;
-
-        if (open && isDoor()) {
-            m_doorTimer.start(30 * 1000, this);
-        }
     }
 }
 
@@ -57,12 +53,4 @@ void Exit::setHidden(bool hidden) {
 
         setModified();
     }
-}
-
-void Exit::timerEvent(QTimerEvent *event) {
-
-    Q_UNUSED(event);
-
-    m_open = false;
-    m_doorTimer.stop();
 }

@@ -30,8 +30,8 @@ class ScriptEngine : public QObject {
 
         bool hasUncaughtException() const;
 
-        bool executeFunction(ScriptFunction &function, const GameObjectPtr &thisObject,
-                             const QVariantList &arguments);
+        QScriptValue executeFunction(ScriptFunction &function, const GameObjectPtr &thisObject,
+                                     const QVariantList &arguments);
 
         void setGlobalObject(const char *name, QObject *object);
 

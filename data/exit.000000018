@@ -1,6 +1,7 @@
 {
   "name": "door",
   "description": "The heavy steel door seems to be in a pristine condition, though the building appears to be much older.",
+  "triggers": { "onopen": "(function() { var self = this; setTimeout(function() { self.open = false; }, 30000); })" },
   "destinationArea": "area:17",
   "size": 1.5,
   "door": true,

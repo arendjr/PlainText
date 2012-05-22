@@ -24,6 +24,7 @@ SOURCES += \
     engine/scriptengine.cpp \
     engine/scriptfunction.cpp \
     engine/scriptfunctionmap.cpp \
+    engine/scriptwindow.cpp \
     engine/util.cpp \
     engine/commands/closecommand.cpp \
     engine/commands/command.cpp \
@@ -80,6 +81,7 @@ HEADERS += \
     engine/scriptengine.h \
     engine/scriptfunction.h \
     engine/scriptfunctionmap.h \
+    engine/scriptwindow.h \
     engine/util.h \
     engine/commands/closecommand.h \
     engine/commands/command.h \

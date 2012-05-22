@@ -30,5 +30,10 @@ void GetTriggerCommand::execute(const QString &command) {
         return;
     }
 
-    player()->send(objects[0]->trigger(triggerName).source);
+    ScriptFunction trigger = objects[0]->trigger(triggerName);
+    if (trigger.source.isEmpty()) {
+        player()->send(QString("No trigger set for %1.").arg(triggerName));
+    } else {
+        player()->send(trigger.source);
+    }
 }

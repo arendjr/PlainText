@@ -50,23 +50,29 @@ bool Command::assertWordsLeft(const QString &noneLeftText) {
     }
 }
 
-QString Command::takeWord() {
+QString Command::takeWord(Options options) {
 
     if (m_words.length() > 0) {
+        if (options & IfNotLast && m_words.length() == 1) {
+            return QString();
+        }
         return m_words.takeFirst();
     }
 
     return QString();
 }
 
-QString Command::takeWord(const char *pattern) {
+QString Command::takeWord(const char *pattern, Options options) {
 
-    return takeWord(QRegExp(QString(pattern)));
+    return takeWord(QRegExp(QString(pattern)), options);
 }
 
-QString Command::takeWord(const QRegExp &pattern) {
+QString Command::takeWord(const QRegExp &pattern, Options options) {
 
     if (m_words.length() > 0) {
+        if (options & IfNotLast && m_words.length() == 1) {
+            return QString();
+        }
         if (pattern.exactMatch(m_words[0])) {
             return m_words.takeFirst();
         }

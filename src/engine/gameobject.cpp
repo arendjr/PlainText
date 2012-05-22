@@ -94,7 +94,7 @@ bool GameObject::invokeTrigger(const QString &name,
                                const QVariant &arg3, const QVariant &arg4) {
 
     if (!m_triggers.contains(name)) {
-        return false;
+        return true;
     }
 
     QVariantList arguments;
@@ -114,7 +114,20 @@ bool GameObject::invokeTrigger(const QString &name,
         }
     }
 
-    return ScriptEngine::instance()->executeFunction(m_triggers[name], this, arguments);
+    QScriptValue returnValue = ScriptEngine::instance()->executeFunction(m_triggers[name], this, arguments);
+    if (returnValue.isBool()) {
+        return returnValue.toBool();
+    } else {
+        return true;
+    }
+}
+
+bool GameObject::invokeTrigger(const QString &triggerName,
+                               GameObject *arg1, const QVariant &arg2,
+                               const QVariant &arg3, const QVariant &arg4) {
+
+    return invokeTrigger(triggerName, QVariant::fromValue(GameObjectPtr(arg1)),
+                         arg2, arg3, arg4);
 }
 
 void GameObject::send(QString message) {
@@ -348,7 +361,8 @@ GameObject *GameObject::createFromFile(const QString &path) throw (BadGameObject
 
 QScriptValue GameObject::toScriptValue(QScriptEngine *engine, GameObject *const &gameObject) {
 
-    return engine->newQObject(gameObject);
+    return engine->newQObject(gameObject, QScriptEngine::QtOwnership,
+                              QScriptEngine::ExcludeDeleteLater | QScriptEngine::PreferExistingWrapperObject);
 }
 
 void GameObject::fromScriptValue(const QScriptValue &object, GameObject *&gameObject) {

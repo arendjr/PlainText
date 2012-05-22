@@ -121,7 +121,8 @@ void swap(GameObjectPtr &first, GameObjectPtr &second) {
 QScriptValue GameObjectPtr::toScriptValue(QScriptEngine *engine, const GameObjectPtr &pointer) {
 
     Q_ASSERT(pointer.m_gameObject);
-    return engine->newQObject(pointer.m_gameObject);
+    return engine->newQObject(pointer.m_gameObject, QScriptEngine::QtOwnership,
+                              QScriptEngine::ExcludeDeleteLater | QScriptEngine::PreferExistingWrapperObject);
 }
 
 void GameObjectPtr::fromScriptValue(const QScriptValue &object, GameObjectPtr &pointer) {

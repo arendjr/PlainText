@@ -1,7 +1,5 @@
 #include "givecommand.h"
 
-#include <QRegExp>
-
 #include "engine/util.h"
 
 
@@ -26,14 +24,14 @@ void GiveCommand::execute(const QString &command) {
         return;
     }
 
-    takeWord(QRegExp("the"));
+    takeWord("the");
 
     GameObjectPtrList items = takeObjects(player()->inventory());
     if (!requireSome(items, "You don't have that.")) {
         return;
     }
 
-    takeWord(QRegExp("to"));
+    takeWord("to", IfNotLast);
 
     GameObjectPtrList recipients = takeObjects(currentArea()->characters());
     if (!requireUnique(recipients, "Recipient is not here.", "Recipient is not unique.")) {

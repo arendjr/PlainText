@@ -21,5 +21,5 @@ void InventoryCommand::execute(const QString &command) {
     player()->send(QString("You carry %1.\n"
                            "You've got $%2 worth of gold.")
                    .arg(Util::joinItems(player()->inventory()),
-                        player()->gold()));
+                        QString::number(player()->gold())));
 }

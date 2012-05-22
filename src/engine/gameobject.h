@@ -48,6 +48,9 @@ class GameObject : public QObject {
         bool invokeTrigger(const QString &triggerName,
                            const QVariant &arg1 = QVariant(), const QVariant &arg2 = QVariant(),
                            const QVariant &arg3 = QVariant(), const QVariant &arg4 = QVariant());
+        bool invokeTrigger(const QString &triggerName,
+                           GameObject *arg1, const QVariant &arg2 = QVariant(),
+                           const QVariant &arg3 = QVariant(), const QVariant &arg4 = QVariant());
 
         virtual void send(QString message);
 

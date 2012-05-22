@@ -5,6 +5,7 @@
 
 #include "gameobject.h"
 #include "scriptfunctionmap.h"
+#include "scriptwindow.h"
 
 
 ScriptEngine *ScriptEngine::s_instance = 0;
@@ -40,8 +41,8 @@ bool ScriptEngine::hasUncaughtException() const {
     return m_jsEngine.hasUncaughtException();
 }
 
-bool ScriptEngine::executeFunction(ScriptFunction &function, const GameObjectPtr &thisObject,
-                                   const QVariantList &variantList) {
+QScriptValue ScriptEngine::executeFunction(ScriptFunction &function, const GameObjectPtr &thisObject,
+                                           const QVariantList &variantList) {
 
     QScriptValueList arguments;
     foreach (const QVariant &variant, variantList) {
@@ -63,7 +64,7 @@ bool ScriptEngine::executeFunction(ScriptFunction &function, const GameObjectPtr
                 qDebug() << "ScriptEngine::executeFunction(): Unknown argument type:" << variant.type();
         }
     }
-    return function.value.call(m_jsEngine.toScriptValue(thisObject), arguments).toBool();
+    return function.value.call(m_jsEngine.toScriptValue(thisObject), arguments);
 }
 
 void ScriptEngine::setGlobalObject(const char *name, QObject *object) {
@@ -82,6 +83,9 @@ ScriptEngine::ScriptEngine() :
     qScriptRegisterMetaType(&m_jsEngine, ScriptFunction::toScriptValue, ScriptFunction::fromScriptValue);
     qScriptRegisterMetaType(&m_jsEngine, ScriptFunctionMap::toScriptValue, ScriptFunctionMap::fromScriptValue);
     qScriptRegisterSequenceMetaType<GameObjectPtrList>(&m_jsEngine);
+
+    ScriptWindow *window = new ScriptWindow(m_jsEngine.globalObject(), this);
+    m_jsEngine.setGlobalObject(window->toScriptValue());
 
     m_initialized = true;
 }

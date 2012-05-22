@@ -1,8 +1,6 @@
 #ifndef EXIT_H
 #define EXIT_H
 
-#include <QBasicTimer>
-
 #include "gameobject.h"
 #include "gameobjectptr.h"
 
@@ -35,17 +33,12 @@ class Exit : public GameObject {
         virtual void setHidden(bool hidden);
         Q_PROPERTY(bool hidden READ isHidden WRITE setHidden)
 
-    protected:
-        virtual void timerEvent(QTimerEvent *event);
-
     private:
         GameObjectPtr m_destinationArea;
         double m_size;
         bool m_door;
         bool m_open;
         bool m_hidden;
-
-        QBasicTimer m_doorTimer;
 };
 
 #endif // EXIT_H

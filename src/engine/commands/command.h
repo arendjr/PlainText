@@ -17,6 +17,11 @@ class Command : public QObject {
     Q_OBJECT
 
     public:
+        enum Options {
+            None = 0x00,
+            IfNotLast = 0x01
+        };
+
         explicit Command(Player *player, QObject *parent = 0);
         virtual ~Command();
 
@@ -37,9 +42,9 @@ class Command : public QObject {
         int numWordsLeft() const { return m_words.length(); }
         bool assertWordsLeft(const QString &noneLeftText);
 
-        QString takeWord();
-        QString takeWord(const char *pattern);
-        QString takeWord(const QRegExp &pattern);
+        QString takeWord(Options options = None);
+        QString takeWord(const char *pattern, Options options = None);
+        QString takeWord(const QRegExp &pattern, Options options = None);
         GameObjectPtrList takeObjects(const GameObjectPtrList &pool);
         QPair<QString, uint> takeObjectsDescription();
         QString takeRest();

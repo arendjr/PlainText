@@ -18,7 +18,7 @@ void GoCommand::execute(const QString &command) {
 
     QString alias = takeWord();
     if (alias == "go") {
-        takeWord("to");
+        takeWord("to", IfNotLast);
     }
     takeWord("the");
 
