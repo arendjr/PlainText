@@ -86,6 +86,10 @@ void GameObjectPtr::resolve() throw (BadGameObjectException) {
     if (m_gameObject == 0) {
         throw BadGameObjectException(BadGameObjectException::InvalidGameObjectPointer);
     }
+    if (strcmp(m_objectType, "any") == 0) {
+        delete[] m_objectType;
+        m_objectType = strdup(m_gameObject->objectType());
+    }
 }
 
 QString GameObjectPtr::toString() const {
@@ -127,6 +131,5 @@ QScriptValue GameObjectPtr::toScriptValue(QScriptEngine *engine, const GameObjec
 
 void GameObjectPtr::fromScriptValue(const QScriptValue &object, GameObjectPtr &pointer) {
 
-    pointer = GameObjectPtr(object.property("objectType").toString().toAscii().constData(),
-                            object.property("id").toUInt32());
+    pointer = GameObjectPtr("any", object.property("id").toUInt32());
 }

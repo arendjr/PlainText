@@ -51,7 +51,8 @@ GameObject *Realm::getObject(const char *objectType, uint id) const {
     if (m_objectMap.contains(id)) {
         GameObject *object = m_objectMap[id];
         Q_ASSERT(object);
-        if (strcmp(object->objectType(), objectType) == 0) {
+        if (strcmp(object->objectType(), objectType) == 0 ||
+            strcmp(objectType, "any") == 0) {
             return object;
         }
     }
