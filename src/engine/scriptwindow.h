@@ -1,6 +1,8 @@
 #ifndef SCRIPTWINDOW_H
 #define SCRIPTWINDOW_H
 
+#include <stdint.h>
+
 #include <QHash>
 #include <QObject>
 #include <QScriptValue>
