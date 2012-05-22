@@ -1,6 +1,7 @@
 # Qt Creator build
 MUD-build-desktop
 MUD.pro.user
+moc_*.cpp
 
 # Don't save user data
 player.*
