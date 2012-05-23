@@ -21,7 +21,7 @@ void RemoveItemCommand::execute(const QString &command) {
         return;
     }
 
-    GameObjectPtrList items = takeObjects(currentArea()->objects());
+    GameObjectPtrList items = takeObjects(currentArea()->items());
     if (!requireSome(items, "That's not here.")) {
         return;
     }
@@ -31,6 +31,6 @@ void RemoveItemCommand::execute(const QString &command) {
 
         player()->send(QString("Item %1 removed.").arg(item->name()));
 
-        item->deleteLater();
+        item->setDeleted();
     }
 }
