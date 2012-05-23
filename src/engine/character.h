@@ -32,6 +32,16 @@ class Character : public Item {
         virtual void setHp(int hp);
         Q_PROPERTY(int hp READ hp WRITE setHp)
 
+        int mp() const { return m_mp; }
+        virtual void adjustMp(int delta);
+        virtual void setMp(int mp);
+        Q_PROPERTY(int mp READ mp WRITE setMp)
+
+        int sp() const { return m_sp; }
+        virtual void adjustSp(int delta);
+        virtual void setSp(int sp);
+        Q_PROPERTY(int sp READ sp WRITE setSp)
+
         int gold() const { return m_gold; }
         virtual void adjustGold(int delta);
         virtual void setGold(int gold);
@@ -58,6 +68,8 @@ class Character : public Item {
         GameObjectPtrList m_inventory;
 
         int m_hp;
+        int m_mp;
+        int m_sp;
         int m_gold;
 };
 

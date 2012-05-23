@@ -1,10 +1,26 @@
 #include "gameobjectptr.h"
 #include "item.h"
 #include "player.h"
+#include "scriptengine.h"
 #include "util.h"
 
 #include <QMap>
 
+
+Util *Util::s_instance = 0;
+
+
+void Util::instantiate() {
+
+    Q_ASSERT(s_instance == 0);
+    new Util();
+}
+
+void Util::destroy() {
+
+    delete s_instance;
+    s_instance = 0;
+}
 
 QString Util::joinFancy(const QStringList &list,
                         const QString &separator, const QString &last) {
@@ -172,7 +188,11 @@ static const char *colorMap[] = {
 QString Util::colorize(const QString &string, Color color) {
 
     return "\x1B[" + QString(colorMap[color]) + "m" + string + "\x1B[0m";
+}
 
+QString Util::highlight(const QString &string) {
+
+    return colorize(string, White);
 }
 
 static QMap<QString, QString> opposingDirectionsMap;
@@ -248,9 +268,10 @@ QString Util::toCamelCase(QString string) {
     return string;
 }
 
-void Util::sendOthers(GameObjectPtrList players, const QString &message,
+void Util::sendOthers(const GameObjectPtrList &_players, const QString &message,
                       const GameObjectPtr &exclude1, const GameObjectPtr &exclude2) {
 
+    GameObjectPtrList players(_players);
     players.removeOne(exclude1);
     players.removeOne(exclude2);
     foreach (const GameObjectPtr &player, players) {
@@ -258,5 +279,15 @@ void Util::sendOthers(GameObjectPtrList players, const QString &message,
     }
 }
 
-Util::Util() {
+Util::Util() :
+    QObject() {
+
+    s_instance = this;
+
+    ScriptEngine::instance()->setGlobalObject("Util", this);
+}
+
+Util::~Util() {
+
+    ScriptEngine::instance()->unsetGlobalObject("Util");
 }

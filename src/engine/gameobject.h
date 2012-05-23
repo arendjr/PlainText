@@ -1,13 +1,14 @@
 #ifndef GAMEOBJECT_H
 #define GAMEOBJECT_H
 
+#include <QHash>
 #include <QList>
 #include <QMetaProperty>
 #include <QObject>
 #include <QScriptEngine>
 #include <QScriptValue>
 
-#include "badgameobjectexception.h"
+#include "gameexception.h"
 #include "scriptfunctionmap.h"
 
 
@@ -52,26 +53,34 @@ class GameObject : public QObject {
                            GameObject *arg1, const QVariant &arg2 = QVariant(),
                            const QVariant &arg3 = QVariant(), const QVariant &arg4 = QVariant());
 
-        virtual void send(QString message);
+        Q_INVOKABLE virtual void send(const QString &message);
+
+        Q_INVOKABLE int setInterval(const QScriptValue &function, int delay);
+        Q_INVOKABLE void clearInterval(int timerId);
+
+        Q_INVOKABLE int setTimeout(const QScriptValue &function, int delay);
+        Q_INVOKABLE void clearTimeout(int timerId);
 
         bool save();
-        bool load(const QString &path) throw (BadGameObjectException);
+        bool load(const QString &path) throw (GameException);
 
         void resolvePointers();
 
         void setDeleted();
 
         static GameObject *createByObjectType(const QString &objectType, uint id = 0,
-                                              Options options = NoOptions) throw (BadGameObjectException);
+                                              Options options = NoOptions) throw (GameException);
 
         static GameObject *createCopy(const GameObject *other);
 
-        static GameObject *createFromFile(const QString &path) throw (BadGameObjectException);
+        static GameObject *createFromFile(const QString &path) throw (GameException);
 
         static QScriptValue toScriptValue(QScriptEngine *engine, GameObject *const &gameObject);
         static void fromScriptValue(const QScriptValue &object, GameObject *&gameObject);
 
     protected:
+        virtual void timerEvent(QTimerEvent *event);
+
         void setModified();
 
         Options options() const { return m_options; }
@@ -86,6 +95,9 @@ class GameObject : public QObject {
         ScriptFunctionMap m_triggers;
 
         bool m_deleted;
+
+        QHash<int, QScriptValue> *m_intervalHash;
+        QHash<int, QScriptValue> *m_timeoutHash;
 
         QList<QMetaProperty> storedMetaProperties() const;
 };

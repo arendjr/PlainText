@@ -91,7 +91,7 @@ void Session::processSignIn(const QString &data) {
             passwordHash = QCryptographicHash::hash(input.toUtf8(), QCryptographicHash::Sha1).toBase64();
             if (m_player->passwordHash() == passwordHash) {
                 write(QString("Welcome back, %1. Type %2 if you're feeling lost.\n")
-                      .arg(m_player->name(), Util::colorize("help", White)));
+                      .arg(m_player->name(), Util::highlight("help")));
                 m_signInStage = SignedIn;
             }  else {
                 write("Password incorrect.\n");

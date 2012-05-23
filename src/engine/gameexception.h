@@ -1,10 +1,12 @@
-#ifndef BADGAMEOBJECTEXCEPTION_H
-#define BADGAMEOBJECTEXCEPTION_H
+#ifndef GAMEEXCEPTION_H
+#define GAMEEXCEPTION_H
 
 #include <exception>
 
+#include <Qt>
 
-class BadGameObjectException : public std::exception {
+
+class GameException : public std::exception {
 
     public:
         enum Cause {
@@ -17,15 +19,17 @@ class BadGameObjectException : public std::exception {
             InvalidExitFormat
         };
 
-        BadGameObjectException(Cause cause);
-        virtual ~BadGameObjectException() throw ();
+        GameException(Cause cause);
+        GameException(Cause cause, const char *objectType, uint id);
+        virtual ~GameException() throw ();
 
         virtual const char *what() const throw ();
 
     private:
         static const char *s_messages[];
 
-        Cause m_cause;
+        bool m_customMessage;
+        char *m_message;
 };
 
-#endif // BADGAMEOBJECTEXCEPTION_H
+#endif // GAMEEXCEPTION_H

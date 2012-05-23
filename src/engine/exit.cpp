@@ -21,6 +21,15 @@ void Exit::setDestinationArea(const GameObjectPtr &destinationArea) {
     }
 }
 
+void Exit::setOppositeExit(const GameObjectPtr &oppositeExit) {
+
+    if (m_oppositeExit != oppositeExit) {
+        m_oppositeExit = oppositeExit;
+
+        setModified();
+    }
+}
+
 void Exit::setSize(double size) {
 
     if (m_size != size) {

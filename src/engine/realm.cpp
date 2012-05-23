@@ -5,7 +5,7 @@
 #include <QDebug>
 #include <QDir>
 
-#include "badgameobjectexception.h"
+#include "gameexception.h"
 #include "gameobjectsyncthread.h"
 #include "player.h"
 #include "scriptengine.h"
@@ -46,13 +46,10 @@ void Realm::unregisterObject(GameObject *gameObject) {
 
 GameObject *Realm::getObject(const char *objectType, uint id) const {
 
-    Q_ASSERT(objectType);
-
     if (m_objectMap.contains(id)) {
         GameObject *object = m_objectMap[id];
         Q_ASSERT(object);
-        if (strcmp(object->objectType(), objectType) == 0 ||
-            strcmp(objectType, "any") == 0) {
+        if (!objectType || strcmp(object->objectType(), objectType) == 0) {
             return object;
         }
     }
@@ -147,7 +144,7 @@ Realm::Realm() :
         }
         try {
             GameObject::createFromFile(dir.path() + "/" + fileName);
-        } catch (const BadGameObjectException &exception) {
+        } catch (const GameException &exception) {
             qWarning() << "Error loading game object from" << fileName << ":" << exception.what();
         }
     }
@@ -166,6 +163,8 @@ Realm::Realm() :
 }
 
 Realm::~Realm() {
+
+    ScriptEngine::instance()->unsetGlobalObject("Realm");
 
     m_syncThread->quit();
 

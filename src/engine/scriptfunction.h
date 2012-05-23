@@ -4,7 +4,7 @@
 #include <QMetaType>
 #include <QScriptValue>
 
-#include "badgameobjectexception.h"
+#include "gameexception.h"
 
 
 class QScriptEngine;
@@ -24,7 +24,7 @@ class ScriptFunction {
 
         QString toString() const;
 
-        static ScriptFunction fromString(const QString &string) throw (BadGameObjectException);
+        static ScriptFunction fromString(const QString &string) throw (GameException);
 
         static QScriptValue toScriptValue(QScriptEngine *engine, const ScriptFunction &function);
         static void fromScriptValue(const QScriptValue &value, ScriptFunction &function);

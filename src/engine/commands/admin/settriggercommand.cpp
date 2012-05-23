@@ -44,7 +44,7 @@ void SetTriggerCommand::execute(const QString &command) {
         ScriptFunction trigger = ScriptFunction::fromString(source);
         objects[0]->setTrigger(triggerName, trigger);
         player()->send(QString("Trigger %1 set.").arg(triggerName));
-    } catch (const BadGameObjectException &exception) {
+    } catch (const GameException &exception) {
         player()->send("Could not parse trigger.");
     }
 }

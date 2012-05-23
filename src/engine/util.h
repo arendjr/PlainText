@@ -1,6 +1,7 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+#include <QObject>
 #include <QStringList>
 
 #include "gameobjectptr.h"
@@ -30,24 +31,31 @@ enum Articles {
     DefiniteArticle
 };
 
-class Util {
+class Util : public QObject {
+
+    Q_OBJECT
 
     public:
-        static QString joinFancy(const QStringList &list,
-                                 const QString &separator = ", ",
-                                 const QString &last = " and ");
+        static void instantiate();
+        static void destroy();
+
+        Q_INVOKABLE static QString joinFancy(const QStringList &list,
+                                             const QString &separator = ", ",
+                                             const QString &last = " and ");
 
         static QString joinItems(const GameObjectPtrList &items, Articles article = IndefiniteArticle);
 
-        static QString writtenNumber(int number);
+        Q_INVOKABLE static QString writtenNumber(int number);
 
-        static QString capitalize(const QString &string);
+        Q_INVOKABLE static QString capitalize(const QString &string);
 
         static QStringList splitLines(const QString &string, int maxLineLength = 80);
 
         static QString jsString(QString string);
 
         static QString colorize(const QString &string, Color color);
+
+        Q_INVOKABLE static QString highlight(const QString &string);
 
         static bool isDirection(const QString &string);
 
@@ -59,12 +67,15 @@ class Util {
 
         static QString toCamelCase(QString string);
 
-        static void sendOthers(GameObjectPtrList players, const QString &message,
-                               const GameObjectPtr &exclude1 = GameObjectPtr(),
-                               const GameObjectPtr &exclude2 = GameObjectPtr());
+        Q_INVOKABLE static void sendOthers(const GameObjectPtrList &players, const QString &message,
+                                           const GameObjectPtr &exclude1 = GameObjectPtr(),
+                                           const GameObjectPtr &exclude2 = GameObjectPtr());
 
     private:
-        Util();
+        static Util *s_instance;
+
+        explicit Util();
+        virtual ~Util();
 };
 
 #endif // UTIL_H

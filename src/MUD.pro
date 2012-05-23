@@ -10,11 +10,11 @@ TEMPLATE = app
 SOURCES += \
     main.cpp \
     engine/area.cpp \
-    engine/badgameobjectexception.cpp \
     engine/character.cpp \
     engine/commandinterpreter.cpp \
     engine/engine.cpp \
     engine/exit.cpp \
+    engine/gameexception.cpp \
     engine/gameobject.cpp \
     engine/gameobjectptr.cpp \
     engine/gameobjectsyncthread.cpp \
@@ -67,11 +67,11 @@ SOURCES += \
 
 HEADERS += \
     engine/area.h \
-    engine/badgameobjectexception.h \
     engine/character.h \
     engine/commandinterpreter.h \
     engine/engine.h \
     engine/exit.h \
+    engine/gameexception.h \
     engine/gameobject.h \
     engine/gameobjectptr.h \
     engine/gameobjectsyncthread.h \

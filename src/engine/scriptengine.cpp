@@ -41,6 +41,11 @@ bool ScriptEngine::hasUncaughtException() const {
     return m_jsEngine.hasUncaughtException();
 }
 
+QScriptValue ScriptEngine::uncaughtException() const {
+
+    return m_jsEngine.uncaughtException();
+}
+
 QScriptValue ScriptEngine::executeFunction(ScriptFunction &function, const GameObjectPtr &thisObject,
                                            const QVariantList &variantList) {
 
@@ -69,7 +74,15 @@ QScriptValue ScriptEngine::executeFunction(ScriptFunction &function, const GameO
 
 void ScriptEngine::setGlobalObject(const char *name, QObject *object) {
 
-    m_jsEngine.globalObject().setProperty(name, m_jsEngine.newQObject(object));
+    m_jsEngine.globalObject().setProperty(name, m_jsEngine.newQObject(object,
+                                                                      QScriptEngine::QtOwnership,
+                                                                      QScriptEngine::ExcludeSuperClassContents |
+                                                                      QScriptEngine::ExcludeDeleteLater));
+}
+
+void ScriptEngine::unsetGlobalObject(const char *name) {
+
+    m_jsEngine.globalObject().setProperty(name, QScriptValue());
 }
 
 ScriptEngine::ScriptEngine() :

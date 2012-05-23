@@ -156,22 +156,25 @@ void CommandInterpreter::showHelp(const QString &command) {
     if (command.isEmpty()) {
         m_player->send(QString("Type %1 to see a list of all commands.\n"
                                "Type %2 to see help about a particular command.")
-                       .arg(Util::colorize("help commands", White),
-                            Util::colorize("help <command>", White)));
+                       .arg(Util::highlight("help commands"),
+                            Util::highlight("help <command>")));
     } else if (command == "commands") {
         m_player->send("Here is a list of all the commands you can use:\n\n");
 
         QStringList commandNames = m_commands.keys();
         showColumns(commandNames.filter(QRegExp("^\\w+$")));
 
+        m_player->send(QString("\nType %1 to see help about a particular command.")
+                       .arg(Util::highlight("help <command>")));
+
         if (m_player->isAdmin()) {
             m_player->send(QString("\nTo see all the admin commands you can use, type %1.")
-                           .arg(Util::colorize("help admin-commands", White)));
+                           .arg(Util::highlight("help admin-commands")));
         }
     } else if (command == "admin-commands") {
         if (m_player->isAdmin()) {
             m_player->send("Here is a list of all the commands you can use as an admin:\n\n" +
-                           Util::colorize("Remember: With great power comes great responsibility!", White) + "\n\n");
+                           Util::highlight("Remember: With great power comes great responsibility!") + "\n\n");
 
             QStringList commandNames = m_commands.keys();
             showColumns(commandNames.filter("-"));
@@ -180,13 +183,13 @@ void CommandInterpreter::showHelp(const QString &command) {
         }
     } else {
         if (m_commands.contains(command)) {
-            m_player->send("\n" + Util::colorize(command, White) + "\n"
+            m_player->send("\n" + Util::highlight(command) + "\n"
                            "  " + Util::splitLines(m_commands[command]->description(), 78).join("\n  ") + "\n\n");
         } else {
             m_player->send(QString("The command %1 is not recognized.\n"
                                    "Type %2 to see a list of all commands.")
-                           .arg(Util::colorize(command, White),
-                                Util::colorize("help commands", White)));
+                           .arg(Util::highlight(command),
+                                Util::highlight("help commands")));
         }
     }
 }
@@ -199,7 +202,7 @@ void CommandInterpreter::showColumns(const QStringList &commandNames) {
         QString first = commandNames[i];
         QString second = i + halfLength < length ? commandNames[i + halfLength] : "";
 
-        m_player->send("  " + Util::colorize(first.leftJustified(30), White) +
-                       "  " + Util::colorize(second, White));
+        m_player->send("  " + Util::highlight(first.leftJustified(30)) +
+                       "  " + Util::highlight(second));
     }
 }

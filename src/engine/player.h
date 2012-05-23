@@ -30,7 +30,7 @@ class Player : public Character {
         Session *session() const { return m_session; }
         void setSession(Session *session);
 
-        virtual void send(QString message);
+        virtual void send(const QString &message);
 
         virtual void enter(const GameObjectPtr &area);
         virtual void leave(const GameObjectPtr &area, const QString &exitName = QString());

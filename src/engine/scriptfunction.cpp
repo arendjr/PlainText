@@ -33,12 +33,12 @@ QString ScriptFunction::toString() const {
     return source;
 }
 
-ScriptFunction ScriptFunction::fromString(const QString &string) throw (BadGameObjectException) {
+ScriptFunction ScriptFunction::fromString(const QString &string) throw (GameException) {
 
     ScriptEngine *scriptEngine = ScriptEngine::instance();
     ScriptFunction function = scriptEngine->defineFunction(string);
     if (scriptEngine->hasUncaughtException()) {
-        throw BadGameObjectException(BadGameObjectException::InvalidFunctionCode);
+        throw GameException(GameException::InvalidFunctionCode);
     }
     return function;
 }

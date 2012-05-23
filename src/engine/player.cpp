@@ -56,12 +56,13 @@ void Player::setSession(Session *session) {
     m_session = session;
 }
 
-void Player::send(QString message) {
+void Player::send(const QString &message) {
 
-    if (!message.endsWith("\n")) {
-        message += "\n";
+    if (message.endsWith("\n")) {
+        write(message);
+    } else {
+        write(message + "\n");
     }
-    write(message);
 }
 
 void Player::enter(const GameObjectPtr &areaPtr) {

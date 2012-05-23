@@ -1,9 +1,11 @@
 {
   "name": "Joe",
-  "triggers": { "ontalk": "(function(character, message) { var self = this; setInterval(function() { var exits = self.currentArea.exits; var tries = 0; do { var exit = exits[randomInt(0, exits.length)]; if (!exit.hidden && (!exit.door || exit.open)) { self.go(exit); return; } tries++; } while (tries < 3); }, 5000); })" },
+  "triggers": { "ontalk": "(function(character, message) { if (this.intervalId) { return; } var self = this; this.intervalId = this.setInterval(function() { var exits = self.currentArea.exits; var tries = 0; do { var exit = exits[randomInt(0, exits.length)]; if (!exit.hidden && (!exit.door || exit.open)) { self.go(exit); return; } tries++; } while (tries < 3); }, 5000); })" },
   "plural": "Joes",
   "portable": false,
   "currentArea": "area:1",
   "hp": 1,
+  "mp": 0,
+  "sp": 0,
   "gold": 0
 }

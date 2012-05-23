@@ -11,12 +11,16 @@
 Character::Character(uint id, Options options) :
     Item("character", id, options),
     m_hp(1),
+    m_mp(0),
+    m_sp(0),
     m_gold(0) {
 }
 
 Character::Character(const char *objectType, uint id, Options options) :
     Item(objectType, id, options),
     m_hp(1),
+    m_mp(0),
+    m_sp(0),
     m_gold(0) {
 }
 
@@ -74,10 +78,35 @@ void Character::adjustHp(int delta) {
 void Character::setHp(int hp) {
 
     if (m_hp != hp) {
-        m_hp = hp;
-        if (m_hp < 0) {
-            m_hp = 0;
-        }
+        m_hp = hp > 0 ? hp : 0;
+
+        setModified();
+    }
+}
+
+void Character::adjustMp(int delta) {
+
+    setMp(m_mp + delta);
+}
+
+void Character::setMp(int mp) {
+
+    if (m_mp != mp) {
+        m_mp = mp > 0 ? mp : 0;
+
+        setModified();
+    }
+}
+
+void Character::adjustSp(int delta) {
+
+    setSp(m_sp + delta);
+}
+
+void Character::setSp(int sp) {
+
+    if (m_sp != sp) {
+        m_sp = sp > 0 ? sp : 0;
 
         setModified();
     }
@@ -91,10 +120,7 @@ void Character::adjustGold(int delta) {
 void Character::setGold(int gold) {
 
     if (m_gold != gold) {
-        m_gold = gold;
-        if (m_gold < 0) {
-            m_gold = 0;
-        }
+        m_gold = gold > 0 ? gold : 0;
 
         setModified();
     }

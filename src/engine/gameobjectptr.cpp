@@ -6,7 +6,6 @@
 #include <QMetaProperty>
 #include <QStringList>
 
-#include "badgameobjectexception.h"
 #include "gameobject.h"
 #include "realm.h"
 
@@ -25,9 +24,12 @@ GameObjectPtr::GameObjectPtr(GameObject *gameObject) :
 
 GameObjectPtr::GameObjectPtr(const char *objectType, uint id) :
     m_gameObject(0),
-    m_objectType(strdup(objectType)),
+    m_objectType(0),
     m_id(id) {
 
+    if (objectType) {
+        m_objectType = strdup(objectType);
+    }
     if (Realm::instance()->isInitialized()) {
         resolve();
     }
@@ -76,18 +78,17 @@ bool GameObjectPtr::operator!=(const GameObject *other) const {
     return m_gameObject != other;
 }
 
-void GameObjectPtr::resolve() throw (BadGameObjectException) {
+void GameObjectPtr::resolve() throw (GameException) {
 
     if (m_id == 0) {
-        throw BadGameObjectException(BadGameObjectException::InvalidGameObjectPointer);
+        return;
     }
 
     m_gameObject = Realm::instance()->getObject(m_objectType, m_id);
     if (m_gameObject == 0) {
-        throw BadGameObjectException(BadGameObjectException::InvalidGameObjectPointer);
+        throw GameException(GameException::InvalidGameObjectPointer, m_objectType, m_id);
     }
-    if (strcmp(m_objectType, "any") == 0) {
-        delete[] m_objectType;
+    if (!m_objectType) {
         m_objectType = strdup(m_gameObject->objectType());
     }
 }
@@ -101,7 +102,7 @@ QString GameObjectPtr::toString() const {
     return QString(m_objectType) + ":" + QString::number(m_id);
 }
 
-GameObjectPtr GameObjectPtr::fromString(const QString &string) throw (BadGameObjectException) {
+GameObjectPtr GameObjectPtr::fromString(const QString &string) throw (GameException) {
 
     if (string == "0") {
         return GameObjectPtr();
@@ -109,7 +110,7 @@ GameObjectPtr GameObjectPtr::fromString(const QString &string) throw (BadGameObj
 
     QStringList components = string.split(':');
     if (components.length() != 2) {
-        throw BadGameObjectException(BadGameObjectException::InvalidGameObjectPointer);
+        throw GameException(GameException::InvalidGameObjectPointer);
     }
 
     return GameObjectPtr(components[0].toAscii().constData(), components[1].toInt());
@@ -124,12 +125,19 @@ void swap(GameObjectPtr &first, GameObjectPtr &second) {
 
 QScriptValue GameObjectPtr::toScriptValue(QScriptEngine *engine, const GameObjectPtr &pointer) {
 
-    Q_ASSERT(pointer.m_gameObject);
-    return engine->newQObject(pointer.m_gameObject, QScriptEngine::QtOwnership,
-                              QScriptEngine::ExcludeDeleteLater | QScriptEngine::PreferExistingWrapperObject);
+    if (pointer.m_gameObject) {
+        return engine->newQObject(pointer.m_gameObject, QScriptEngine::QtOwnership,
+                                  QScriptEngine::ExcludeDeleteLater | QScriptEngine::PreferExistingWrapperObject);
+    } else {
+        return engine->nullValue();
+    }
 }
 
 void GameObjectPtr::fromScriptValue(const QScriptValue &object, GameObjectPtr &pointer) {
 
-    pointer = GameObjectPtr("any", object.property("id").toUInt32());
+    if (object.isQObject()) {
+        pointer = GameObjectPtr(0, object.property("id").toUInt32());
+    } else {
+        pointer = GameObjectPtr();
+    }
 }

@@ -8,7 +8,7 @@
 #include <QScriptValue>
 #include <QString>
 
-#include "badgameobjectexception.h"
+#include "gameexception.h"
 
 
 class GameObject;
@@ -33,11 +33,11 @@ class GameObjectPtr {
 
         template <class T> T cast() const { Q_ASSERT(m_gameObject); return qobject_cast<T>(m_gameObject); }
 
-        void resolve() throw (BadGameObjectException);
+        void resolve() throw (GameException);
 
         QString toString() const;
 
-        static GameObjectPtr fromString(const QString &string) throw (BadGameObjectException);
+        static GameObjectPtr fromString(const QString &string) throw (GameException);
 
         friend void swap(GameObjectPtr &first, GameObjectPtr &second);
 

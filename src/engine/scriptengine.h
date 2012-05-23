@@ -29,11 +29,13 @@ class ScriptEngine : public QObject {
         ScriptFunction defineFunction(const QString &program, const QString &fileName = QString(), int lineNumber = 1);
 
         bool hasUncaughtException() const;
+        QScriptValue uncaughtException() const;
 
         QScriptValue executeFunction(ScriptFunction &function, const GameObjectPtr &thisObject,
                                      const QVariantList &arguments);
 
         void setGlobalObject(const char *name, QObject *object);
+        void unsetGlobalObject(const char *name);
 
     private:
         static ScriptEngine *s_instance;

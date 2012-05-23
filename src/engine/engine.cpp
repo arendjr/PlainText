@@ -7,6 +7,7 @@
 #include "gameobjectptr.h"
 #include "realm.h"
 #include "scriptengine.h"
+#include "util.h"
 #include "interface/httpserver.h"
 #include "interface/telnetserver.h"
 #include "interface/websocketserver.h"
@@ -24,6 +25,8 @@ Engine::Engine(QObject *parent) :
     ScriptEngine::instantiate();
 
     Realm::instantiate();
+
+    Util::instantiate();
 }
 
 void Engine::start() {
@@ -38,6 +41,8 @@ Engine::~Engine() {
     delete m_httpServer;
     delete m_webSocketServer;
     delete m_telnetServer;
+
+    Util::destroy();
 
     Realm::destroy();
 

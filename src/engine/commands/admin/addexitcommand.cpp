@@ -46,12 +46,14 @@ void AddExitCommand::execute(const QString &command) {
     currentArea()->addExit(exit);
 
     if (Util::isDirection(exitName)) {
-        exit = qobject_cast<Exit *>(GameObject::createByObjectType("exit"));
-        exit->setName(Util::opposingDirection(exitName));
-        exit->setDestinationArea(currentArea());
-        destinationArea->addExit(exit);
+        Exit *oppositeExit = qobject_cast<Exit *>(GameObject::createByObjectType("exit"));
+        oppositeExit->setName(Util::opposingDirection(exitName));
+        oppositeExit->setDestinationArea(currentArea());
+        oppositeExit->setOppositeExit(exit);
+        destinationArea->addExit(oppositeExit);
+        exit->setOppositeExit(oppositeExit);
 
-        player()->send(QString("Bi-directional exit %1-%2 added.").arg(exitName, exit->name()));
+        player()->send(QString("Bi-directional exit %1-%2 added.").arg(exitName, oppositeExit->name()));
     } else {
         player()->send(QString("Exit %1 added.").arg(exitName));
     }

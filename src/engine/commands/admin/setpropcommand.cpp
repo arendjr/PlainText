@@ -52,7 +52,7 @@ void SetPropCommand::execute(const QString &command) {
                             pointerList << GameObjectPtr::fromString(string);
                         }
                         variant = QVariant::fromValue(pointerList);
-                    } catch (BadGameObjectException exception) {
+                    } catch (GameException exception) {
                         player()->send(exception.what());
                     }
                     break;
@@ -75,7 +75,7 @@ void SetPropCommand::execute(const QString &command) {
                                                                                    item->name()));
             }
         }
-    } catch (const BadGameObjectException &exception) {
+    } catch (const GameException &exception) {
         player()->send(QString("An exception occurred while setting the property: %1").arg(exception.what()));
     }
 }
