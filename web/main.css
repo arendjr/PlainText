@@ -44,6 +44,33 @@ body,input {
     margin: 0 2em 2em;
 }
 
+.edit-screen {
+    display: none;
+
+    position: absolute;
+    top: 150px;
+    left: 150px;
+    right: 150px;
+
+    border: 1px solid #000;
+    background-color: white;
+}
+    .edit-screen textarea {
+        margin: 20px 20px 10px;
+        border: 1px solid #000;
+        padding: 2px;
+
+        width: -webkit-calc(100% - 46px);
+        width: -moz-calc(100% - 46px);
+        width: calc(100% - 46px);
+        height: 300px;
+    }
+    .edit-screen .button-list {
+        padding: 0 20px 10px;
+
+        text-align: right;
+    }
+
 @media screen and (max-width: 660px) {
     body,input {
         font-size: 8pt;
