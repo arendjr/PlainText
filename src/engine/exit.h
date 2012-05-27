@@ -21,10 +21,6 @@ class Exit : public GameObject {
         virtual void setOppositeExit(const GameObjectPtr &oppositeExit);
         Q_PROPERTY(GameObjectPtr oppositeExit READ oppositeExit WRITE setOppositeExit)
 
-        double size() const { return m_size; }
-        virtual void setSize(double size);
-        Q_PROPERTY(double size READ size WRITE setSize)
-
         bool isDoor() const { return m_door; }
         virtual void setDoor(bool door);
         Q_PROPERTY(bool door READ isDoor WRITE setDoor)

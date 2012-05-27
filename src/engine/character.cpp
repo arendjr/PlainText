@@ -10,18 +10,24 @@
 
 Character::Character(uint id, Options options) :
     Item("character", id, options),
+    m_gender("male"),
     m_hp(1),
     m_mp(0),
     m_sp(0),
     m_gold(0) {
+
+    setAutoDelete(false);
 }
 
 Character::Character(const char *objectType, uint id, Options options) :
     Item(objectType, id, options),
+    m_gender("male"),
     m_hp(1),
     m_mp(0),
     m_sp(0),
     m_gold(0) {
+
+    setAutoDelete(false);
 }
 
 Character::~Character() {
@@ -70,6 +76,42 @@ void Character::setInventory(const GameObjectPtrList &inventory) {
     }
 }
 
+void Character::setRace(const GameObjectPtr &race) {
+
+    if (m_race != race) {
+        m_race = race;
+
+        setModified();
+    }
+}
+
+void Character::setClass(const GameObjectPtr &characterClass) {
+
+    if (m_class != characterClass) {
+        m_class = characterClass;
+
+        setModified();
+    }
+}
+
+void Character::setGender(const QString &gender) {
+
+    if (m_gender != gender) {
+        m_gender = gender;
+
+        setModified();
+    }
+}
+
+void Character::setStats(const CharacterStats &stats) {
+
+    if (m_stats != stats) {
+        m_stats = stats;
+
+        setModified();
+    }
+}
+
 void Character::adjustHp(int delta) {
 
     setHp(m_hp + delta);
@@ -79,6 +121,15 @@ void Character::setHp(int hp) {
 
     if (m_hp != hp) {
         m_hp = hp > 0 ? hp : 0;
+
+        setModified();
+    }
+}
+
+void Character::setMaxHp(int maxHp) {
+
+    if (m_maxHp != maxHp) {
+        m_maxHp = maxHp > 0 ? maxHp : 0;
 
         setModified();
     }
@@ -98,6 +149,15 @@ void Character::setMp(int mp) {
     }
 }
 
+void Character::setMaxMp(int maxMp) {
+
+    if (m_maxMp != maxMp) {
+        m_maxMp = maxMp > 0 ? maxMp : 0;
+
+        setModified();
+    }
+}
+
 void Character::adjustSp(int delta) {
 
     setSp(m_sp + delta);
@@ -107,6 +167,15 @@ void Character::setSp(int sp) {
 
     if (m_sp != sp) {
         m_sp = sp > 0 ? sp : 0;
+
+        setModified();
+    }
+}
+
+void Character::setMaxSp(int maxSp) {
+
+    if (m_maxSp != maxSp) {
+        m_maxSp = maxSp > 0 ? maxSp : 0;
 
         setModified();
     }
@@ -142,9 +211,6 @@ void Character::open(const GameObjectPtr &exitPtr) {
     if (exit->isOpen()) {
         send(QString("The %1 is already open.").arg(exit->name()));
     } else {
-        Area *area = currentArea().cast<Area *>();
-        Q_ASSERT(area);
-
         if (!exit->invokeTrigger("onopen", this)) {
             return;
         }
@@ -153,7 +219,7 @@ void Character::open(const GameObjectPtr &exitPtr) {
         send(QString("You open the %1.").arg(exit->name()));
 
         QString text = QString("%1 opens the %2.").arg(name(), exit->name());
-        Util::sendOthers(area->players(), text, this);
+        Util::sendOthers(currentArea().cast<Area *>()->players(), text, this);
     }
 }
 
@@ -171,9 +237,6 @@ void Character::close(const GameObjectPtr &exitPtr) {
     }
 
     if (exit->isOpen()) {
-        Area *area = currentArea().cast<Area *>();
-        Q_ASSERT(area);
-
         if (!exit->invokeTrigger("onclose", this)) {
             return;
         }
@@ -182,7 +245,7 @@ void Character::close(const GameObjectPtr &exitPtr) {
         send(QString("You close the %1.").arg(exit->name()));
 
         QString text = QString("%1 closes the %2.").arg(name(), exit->name());
-        Util::sendOthers(area->players(), text, this);
+        Util::sendOthers(currentArea().cast<Area *>()->players(), text, this);
     } else {
         send(QString("The %1 is already closed.").arg(exit->name()));
     }
@@ -191,10 +254,6 @@ void Character::close(const GameObjectPtr &exitPtr) {
 void Character::go(const GameObjectPtr &exitPtr) {
 
     Exit *exit = exitPtr.cast<Exit *>();
-    if (!exit) {
-        qWarning() << "Character::go(): Invalid exit.";
-        return;
-    }
 
     if (exit->isDoor() && !exit->isOpen()) {
         send(QString("The %1 is closed.").arg(exit->name()));
@@ -202,18 +261,20 @@ void Character::go(const GameObjectPtr &exitPtr) {
     }
 
     Area *area = currentArea().cast<Area *>();
-    Q_ASSERT(area);
     foreach (const GameObjectPtr &character, area->npcs()) {
         if (!character->invokeTrigger("onexit", this, exit->name())) {
             return;
         }
     }
 
+    if (!exit->invokeTrigger("onenter", this)) {
+        return;
+    }
+
     leave(currentArea(), exit->name());
     enter(exit->destinationArea());
 
     area = currentArea().cast<Area *>();
-    Q_ASSERT(area);
     foreach (const GameObjectPtr &character, area->npcs()) {
         character->invokeTrigger("onenter", this);
     }
@@ -222,7 +283,6 @@ void Character::go(const GameObjectPtr &exitPtr) {
 void Character::enter(const GameObjectPtr &areaPtr) {
 
     Area *area = areaPtr.cast<Area *>();
-    Q_ASSERT(area);
 
     setCurrentArea(area);
 
@@ -238,7 +298,6 @@ void Character::enter(const GameObjectPtr &areaPtr) {
 void Character::leave(const GameObjectPtr &areaPtr, const QString &exitName) {
 
     Area *area = areaPtr.cast<Area *>();
-    Q_ASSERT(area);
 
     area->removeNPC(this);
 
@@ -273,17 +332,13 @@ void Character::leave(const GameObjectPtr &areaPtr, const QString &exitName) {
 
 void Character::say(const QString &message) {
 
-    Area *area = currentArea().cast<Area *>();
-    Q_ASSERT(area);
-
     QString text = QString("%1 says, \"%2\".").arg(name(), message);
-    Util::sendOthers(area->players(), text);
+    Util::sendOthers(currentArea().cast<Area *>()->players(), text);
 }
 
 void Character::shout(const QString &message) {
 
     Area *area = currentArea().cast<Area *>();
-    Q_ASSERT(area);
 
     GameObjectPtrList players = area->players();
     foreach (const GameObjectPtr &exitPtr, area->exits()) {
@@ -303,11 +358,6 @@ void Character::shout(const QString &message) {
 void Character::talk(const GameObjectPtr &characterPtr, const QString &message) {
 
     Character *character = characterPtr.cast<Character *>();
-    if (!character) {
-        qWarning() << "Character::talk(): Invalid character.";
-        return;
-    }
-
     Player *player = qobject_cast<Player *>(character);
     if (player) {
         tell(player, message);
@@ -319,10 +369,6 @@ void Character::talk(const GameObjectPtr &characterPtr, const QString &message) 
 void Character::tell(const GameObjectPtr &playerPtr, const QString &message) {
 
     Player *player = playerPtr.cast<Player *>();
-    if (!player) {
-        qWarning() << "Character::tell(): Invalid player.";
-        return;
-    }
 
     if (message.isEmpty()) {
         send(QString("Tell %1 what?").arg(player->name()));

@@ -5,6 +5,7 @@
 
 #include "area.h"
 #include "exit.h"
+#include "gameexception.h"
 #include "gameobjectptr.h"
 #include "player.h"
 #include "realm.h"
@@ -21,6 +22,7 @@
 #include "commands/saycommand.h"
 #include "commands/shoutcommand.h"
 #include "commands/slashmecommand.h"
+#include "commands/statscommand.h"
 #include "commands/talkcommand.h"
 #include "commands/tellcommand.h"
 #include "commands/whocommand.h"
@@ -54,6 +56,7 @@ CommandInterpreter::CommandInterpreter(Player *player, QObject *parent) :
     Command *say = new SayCommand(player, this);
     Command *shout = new ShoutCommand(player, this);
     Command *slashMe = new SlashMeCommand(player, this);
+    Command *stats = new StatsCommand(player, this);
     Command *talk = new TalkCommand(player, this);
     Command *tell = new TellCommand(player, this);
     Command *who = new WhoCommand(player, this);
@@ -71,6 +74,7 @@ CommandInterpreter::CommandInterpreter(Player *player, QObject *parent) :
     m_commands.insert("quit", quit);
     m_commands.insert("say", say);
     m_commands.insert("shout", shout);
+    m_commands.insert("stats", stats);
     m_commands.insert("take", get);
     m_commands.insert("talk", talk);
     m_commands.insert("tell", tell);
@@ -143,7 +147,14 @@ void CommandInterpreter::execute(const QString &command) {
     }
 
     if (commands.length() == 1) {
-        commands[0]->execute(command);
+        try {
+            commands[0]->execute(command);
+        } catch (const GameException &exception) {
+            m_player->send(QString("Executing the command gave an exception: %1").arg(exception.what()));
+            if (m_player->isAdmin()) {
+                m_player->send("This is not good. You may want to contact a game admin about this.");
+            }
+        }
     } else if (commands.length() > 1) {
         m_player->send("Command is not unique.");
     } else {

@@ -20,6 +20,8 @@ GameObjectPtr::GameObjectPtr(GameObject *gameObject) :
     m_gameObject(gameObject),
     m_objectType(strdup(gameObject->objectType())),
     m_id(gameObject->id()) {
+
+    m_gameObject->registerPointer(this);
 }
 
 GameObjectPtr::GameObjectPtr(const char *objectType, uint id) :
@@ -30,6 +32,7 @@ GameObjectPtr::GameObjectPtr(const char *objectType, uint id) :
     if (objectType) {
         m_objectType = strdup(objectType);
     }
+
     if (Realm::instance()->isInitialized()) {
         resolve();
     }
@@ -43,16 +46,50 @@ GameObjectPtr::GameObjectPtr(const GameObjectPtr &other) :
     if (m_objectType) {
         m_objectType = strdup(m_objectType);
     }
+
+    if (m_gameObject) {
+        m_gameObject->registerPointer(this);
+    }
 }
 
 GameObjectPtr::~GameObjectPtr() {
 
+    if (m_gameObject) {
+        m_gameObject->unregisterPointer(this);
+    }
+
     delete[] m_objectType;
 }
 
-GameObjectPtr &GameObjectPtr::operator=(GameObjectPtr other) {
+bool GameObjectPtr::isNull() const {
 
-    swap(*this, other);
+    return m_id == 0;
+}
+
+GameObjectPtr &GameObjectPtr::operator=(const GameObjectPtr &other) {
+
+    if (&other == this) {
+        return *this;
+    }
+
+    if (m_gameObject) {
+        m_gameObject->unregisterPointer(this);
+    }
+
+    delete[] m_objectType;
+
+    m_gameObject = other.m_gameObject;
+    m_objectType = other.m_objectType;
+    m_id = other.m_id;
+
+    if (m_objectType) {
+        m_objectType = strdup(m_objectType);
+    }
+
+    if (m_gameObject) {
+        m_gameObject->registerPointer(this);
+    }
+
     return *this;
 }
 
@@ -91,6 +128,8 @@ void GameObjectPtr::resolve() throw (GameException) {
     if (!m_objectType) {
         m_objectType = strdup(m_gameObject->objectType());
     }
+
+    m_gameObject->registerPointer(this);
 }
 
 QString GameObjectPtr::toString() const {
@@ -118,9 +157,23 @@ GameObjectPtr GameObjectPtr::fromString(const QString &string) throw (GameExcept
 
 void swap(GameObjectPtr &first, GameObjectPtr &second) {
 
+    if (first.m_gameObject) {
+        first.m_gameObject->unregisterPointer(&first);
+    }
+    if (second.m_gameObject) {
+        second.m_gameObject->unregisterPointer(&second);
+    }
+
     std::swap(first.m_gameObject, second.m_gameObject);
     std::swap(first.m_objectType, second.m_objectType);
     std::swap(first.m_id, second.m_id);
+
+    if (first.m_gameObject) {
+        first.m_gameObject->registerPointer(&first);
+    }
+    if (second.m_gameObject) {
+        second.m_gameObject->registerPointer(&second);
+    }
 }
 
 QScriptValue GameObjectPtr::toScriptValue(QScriptEngine *engine, const GameObjectPtr &pointer) {

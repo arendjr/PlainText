@@ -22,21 +22,42 @@ class GameObjectPtr {
         GameObjectPtr(const GameObjectPtr &other);
         ~GameObjectPtr();
 
-        GameObjectPtr &operator=(GameObjectPtr other);
+        bool isNull() const;
+
+        GameObjectPtr &operator=(const GameObjectPtr &other);
         bool operator==(const GameObjectPtr &other) const;
         bool operator==(const GameObject *other) const;
         bool operator!=(const GameObjectPtr &other) const;
         bool operator!=(const GameObject *other) const;
 
-        GameObject &operator*() const { Q_ASSERT(m_gameObject); return *m_gameObject; }
-        GameObject *operator->() const { Q_ASSERT(m_gameObject); return m_gameObject; }
+        inline GameObject &operator*() const throw (GameException) {
+            if (!m_gameObject) {
+                throw GameException(GameException::NullPointerReference);
+            }
+            return *m_gameObject;
+        }
 
-        template <class T> T cast() const { Q_ASSERT(m_gameObject); return qobject_cast<T>(m_gameObject); }
+        inline GameObject *operator->() const throw (GameException) {
+            if (!m_gameObject) {
+                throw GameException(GameException::NullPointerReference);
+            }
+            return m_gameObject;
+        }
+
+        template <class T> inline T cast() const throw (GameException) {
+            if (!m_gameObject) {
+                throw GameException(GameException::NullPointerReference);
+            }
+            T pointer = qobject_cast<T>(m_gameObject);
+            if (!pointer) {
+                throw GameException(GameException::InvalidGameObjectCast, m_objectType, m_id);
+            }
+            return pointer;
+        }
 
         void resolve() throw (GameException);
 
         QString toString() const;
-
         static GameObjectPtr fromString(const QString &string) throw (GameException);
 
         friend void swap(GameObjectPtr &first, GameObjectPtr &second);

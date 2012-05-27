@@ -30,15 +30,6 @@ void Exit::setOppositeExit(const GameObjectPtr &oppositeExit) {
     }
 }
 
-void Exit::setSize(double size) {
-
-    if (m_size != size) {
-        m_size = size;
-
-        setModified();
-    }
-}
-
 void Exit::setDoor(bool door) {
 
     if (m_door != door) {

@@ -3,9 +3,16 @@
   "triggers": { "ontalk": "(function(character, message) { if (this.intervalId) { return; } var self = this; this.intervalId = this.setInterval(function() { var exits = self.currentArea.exits; var tries = 0; do { var exit = exits[randomInt(0, exits.length)]; if (!exit.hidden && (!exit.door || exit.open)) { self.go(exit); return; } tries++; } while (tries < 3); }, 5000); })" },
   "plural": "Joes",
   "portable": false,
-  "currentArea": "area:1",
+  "currentArea": "area:14",
+  "race": "0",
+  "characterClass": "0",
+  "gender": "male",
+  "stats": [0, 0, 0, 0, 0, 0, 0, 0],
   "hp": 1,
+  "maxHp": 1,
   "mp": 0,
+  "maxMp": 1,
   "sp": 0,
+  "maxSp": 1,
   "gold": 0
 }

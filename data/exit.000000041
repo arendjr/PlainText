@@ -1,9 +1,9 @@
 {
   "name": "door",
   "description": "A heavy wooden door. It makes you curious as to what's behind it.",
-  "triggers": { "onopen": "(function() { var self = this; setTimeout(function() { self.open = false; }, 30000); })" },
+  "triggers": { "onopen": "(function() { var self = this; this.setTimeout(function() { self.open = false; }, 30000); })" },
   "destinationArea": "area:40",
-  "size": 1.5,
+  "oppositeExit": "0",
   "door": true,
   "hidden": false
 }

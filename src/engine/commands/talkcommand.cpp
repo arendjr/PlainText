@@ -28,8 +28,7 @@ void TalkCommand::execute(const QString &command) {
 
     QPair <QString, uint> description = takeObjectsDescription();
     GameObjectPtrList characters = objectsByDescription(description,
-                                                        currentArea()->players() +
-                                                        currentArea()->npcs());
+                                                        currentArea()->characters());
     if (!requireUnique(characters,
                        QString("%1 is not here.").arg(description.first),
                        QString("%1 is not unique.").arg(description.first))) {

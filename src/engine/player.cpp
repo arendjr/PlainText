@@ -68,7 +68,6 @@ void Player::send(const QString &message) {
 void Player::enter(const GameObjectPtr &areaPtr) {
 
     Area *area = areaPtr.cast<Area *>();
-    Q_ASSERT(area);
 
     setCurrentArea(area);
 
@@ -82,7 +81,6 @@ void Player::enter(const GameObjectPtr &areaPtr) {
 void Player::leave(const GameObjectPtr &areaPtr, const QString &exitName) {
 
     Area *area = areaPtr.cast<Area *>();
-    Q_ASSERT(area);
 
     area->removePlayer(this);
 
@@ -107,7 +105,6 @@ void Player::look() {
         QStringList exitNames;
         foreach (const GameObjectPtr &exitPtr, area->exits()) {
             Exit *exit = exitPtr.cast<Exit *>();
-            Q_ASSERT(exit);
 
             if (exit->isHidden()) {
                 continue;

@@ -1,0 +1,5 @@
+{
+  "name": "Knight",
+  "description": "Knights are highly trained and well-equiped combatants. They have excellent fighting skills and some magic skills. Their have to pay for their heavy equipment with reduced dexterity however.",
+  "stats": [8, 2, 7, 6, 4, 3, 0, 10]
+}

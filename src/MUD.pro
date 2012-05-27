@@ -11,6 +11,7 @@ SOURCES += \
     main.cpp \
     engine/area.cpp \
     engine/character.cpp \
+    engine/class.cpp \
     engine/commandinterpreter.cpp \
     engine/engine.cpp \
     engine/exit.cpp \
@@ -20,6 +21,7 @@ SOURCES += \
     engine/gameobjectsyncthread.cpp \
     engine/item.cpp \
     engine/player.cpp \
+    engine/race.cpp \
     engine/realm.cpp \
     engine/scriptengine.cpp \
     engine/scriptfunction.cpp \
@@ -39,6 +41,7 @@ SOURCES += \
     engine/commands/saycommand.cpp \
     engine/commands/shoutcommand.cpp \
     engine/commands/slashmecommand.cpp \
+    engine/commands/statscommand.cpp \
     engine/commands/talkcommand.cpp \
     engine/commands/tellcommand.cpp \
     engine/commands/whocommand.cpp \
@@ -63,11 +66,13 @@ SOURCES += \
     ../3rdparty/qjson/json_parser.cc \
     ../3rdparty/qjson/json_scanner.cpp \
     ../3rdparty/qtwebsocket/QtWebSocket/QWsServer.cpp \
-    ../3rdparty/qtwebsocket/QtWebSocket/QWsSocket.cpp
+    ../3rdparty/qtwebsocket/QtWebSocket/QWsSocket.cpp \
+    engine/characterstats.cpp
 
 HEADERS += \
     engine/area.h \
     engine/character.h \
+    engine/class.h \
     engine/commandinterpreter.h \
     engine/engine.h \
     engine/exit.h \
@@ -77,6 +82,7 @@ HEADERS += \
     engine/gameobjectsyncthread.h \
     engine/item.h \
     engine/player.h \
+    engine/race.h \
     engine/realm.h \
     engine/scriptengine.h \
     engine/scriptfunction.h \
@@ -96,6 +102,7 @@ HEADERS += \
     engine/commands/saycommand.h \
     engine/commands/shoutcommand.h \
     engine/commands/slashmecommand.h \
+    engine/commands/statscommand.h \
     engine/commands/talkcommand.h \
     engine/commands/tellcommand.h \
     engine/commands/whocommand.h \
@@ -120,7 +127,9 @@ HEADERS += \
     ../3rdparty/qjson/json_driver.hh \
     ../3rdparty/qjson/json_scanner.h \
     ../3rdparty/qtwebsocket/QtWebSocket/QWsServer.h \
-    ../3rdparty/qtwebsocket/QtWebSocket/QWsSocket.h
+    ../3rdparty/qtwebsocket/QtWebSocket/QWsSocket.h \
+    engine/characterstats.h \
+    engine/constants.h
 
 OTHER_FILES += \
     ../web/index.html \

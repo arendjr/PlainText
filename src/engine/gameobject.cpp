@@ -1,7 +1,5 @@
 #include "gameobject.h"
 
-#include <exception>
-
 #include <QDebug>
 #include <QFile>
 #include <QFileInfo>
@@ -16,10 +14,14 @@
 
 #include "area.h"
 #include "character.h"
+#include "characterstats.h"
+#include "class.h"
 #include "exit.h"
+#include "gameexception.h"
 #include "gameobjectptr.h"
 #include "item.h"
 #include "player.h"
+#include "race.h"
 #include "realm.h"
 #include "scriptengine.h"
 #include "scriptfunctionmap.h"
@@ -28,6 +30,7 @@
 
 GameObject::GameObject(const char *objectType, uint id, Options options) :
     QObject(),
+    m_autoDelete(true),
     m_objectType(objectType),
     m_id(id),
     m_options(options),
@@ -46,6 +49,10 @@ GameObject::~GameObject() {
 
     if (m_id && ~m_options & Copy) {
         Realm::instance()->unregisterObject(this);
+    }
+
+    foreach (GameObjectPtr *pointer, m_pointers) {
+        *pointer = GameObjectPtr();
     }
 
     delete m_intervalHash;
@@ -232,6 +239,9 @@ bool GameObject::save() {
                 } else if (metaProperty.userType() == QMetaType::type("GameObjectPtrList")) {
                     QStringList stringList;
                     foreach (const GameObjectPtr &pointer, property(name).value<GameObjectPtrList>()) {
+                        if (pointer.isNull()) {
+                            continue;
+                        }
                         stringList << Util::jsString(pointer.toString());
                     }
                     if (!stringList.isEmpty()) {
@@ -247,6 +257,9 @@ bool GameObject::save() {
                     if (!stringList.isEmpty()) {
                         dumpedProperties << o.arg(name, stringList.join(", "));
                     }
+                    break;
+                } else if (metaProperty.userType() == QMetaType::type("CharacterStats")) {
+                    dumpedProperties << v.arg(name, property(name).value<CharacterStats>().toString());
                     break;
                 }
                 // fall-through
@@ -319,6 +332,9 @@ bool GameObject::load(const QString &path) throw (GameException) {
                     }
                     setProperty(name, QVariant::fromValue(functionMap));
                     break;
+                } else if (metaProperty.userType() == QMetaType::type("CharacterStats")) {
+                    setProperty(name, QVariant::fromValue(CharacterStats::fromVariantList(map[name].toList())));
+                    break;
                 }
                 // fall-through
             default:
@@ -370,12 +386,16 @@ GameObject *GameObject::createByObjectType(const QString &objectType, uint id, O
         return new Area(id, options);
     } else if (objectType == "character") {
         return new Character(id, options);
+    } else if (objectType == "class") {
+        return new Class(id, options);
     } else if (objectType == "exit") {
         return new Exit(id, options);
     } else if (objectType == "item") {
         return new Item(id, options);
     } else if (objectType == "player") {
         return new Player(id, options);
+    } else if (objectType == "race") {
+        return new Race(id, options);
     } else {
         throw GameException(GameException::UnknownGameObjectType);
     }
@@ -435,16 +455,20 @@ void GameObject::timerEvent(QTimerEvent *event) {
         }
     }
 
-    ScriptEngine *engine = ScriptEngine::instance();
-    if (function.isString()) {
-        engine->evaluate(function.toString());
-    } else if (function.isFunction()) {
-        function.call();
-    }
+    try {
+        ScriptEngine *engine = ScriptEngine::instance();
+        if (function.isString()) {
+            engine->evaluate(function.toString());
+        } else if (function.isFunction()) {
+            function.call();
+        }
 
-    if (engine->hasUncaughtException()) {
-        QScriptValue exception = engine->uncaughtException();
-        qWarning() << "Exception: " + exception.toString();
+        if (engine->hasUncaughtException()) {
+            QScriptValue exception = engine->uncaughtException();
+            qWarning() << "Script Exception: " + exception.toString();
+        }
+    } catch (const GameException &exception) {
+        qWarning() << "Game Exception: " + QString(exception.what());
     }
 }
 
@@ -452,6 +476,27 @@ void GameObject::setModified() {
 
     if (~m_options & Copy) {
         Realm::instance()->syncObject(this);
+    }
+}
+
+void GameObject::setAutoDelete(bool autoDelete) {
+
+    m_autoDelete = autoDelete;
+}
+
+void GameObject::registerPointer(GameObjectPtr *pointer) {
+
+    Q_ASSERT(!m_pointers.contains(pointer));
+    m_pointers.append(pointer);
+}
+
+void GameObject::unregisterPointer(GameObjectPtr *pointer) {
+
+    Q_ASSERT(m_pointers.contains(pointer));
+    m_pointers.removeOne(pointer);
+
+    if (m_autoDelete && m_pointers.length() == 0) {
+        setDeleted();
     }
 }
 

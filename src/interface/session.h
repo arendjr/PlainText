@@ -31,13 +31,18 @@ class Session : public QObject {
         void terminate();
 
     private:
-        enum {
+        enum SignInStage {
             SessionClosed = 0,
             AskingUserName,
             AskingUserNameConfirmation,
             AskingPassword,
             AskingSignupPassword,
             AskingSignupPasswordConfirmation,
+            AskingRace,
+            AskingClass,
+            AskingGender,
+            AskingExtraStats,
+            AskingSignupConfirmation,
             SignedIn,
             SignInAborted
         } m_signInStage;
@@ -50,6 +55,8 @@ class Session : public QObject {
         CommandInterpreter *m_interpreter;
 
         void processSignIn(const QString &data);
+
+        void showColumns(const QStringList &items);
 };
 
 Q_DECLARE_METATYPE(Session *)

@@ -3,6 +3,7 @@
 #include <QDateTime>
 #include <QMetaType>
 
+#include "characterstats.h"
 #include "gameobject.h"
 #include "gameobjectptr.h"
 #include "realm.h"
@@ -18,6 +19,7 @@ Engine::Engine(QObject *parent) :
 
     qsrand(QDateTime::currentMSecsSinceEpoch());
 
+    qRegisterMetaType<CharacterStats>();
     qRegisterMetaType<GameObject *>();
     qRegisterMetaType<GameObjectPtr>();
     qRegisterMetaType<GameObjectPtrList>();

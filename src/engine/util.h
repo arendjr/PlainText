@@ -49,6 +49,8 @@ class Util : public QObject {
 
         Q_INVOKABLE static QString capitalize(const QString &string);
 
+        Q_INVOKABLE static QString center(const QString &string, int width);
+
         static QStringList splitLines(const QString &string, int maxLineLength = 80);
 
         static QString jsString(QString string);

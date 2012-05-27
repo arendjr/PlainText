@@ -33,6 +33,8 @@ class Realm : public GameObject {
         void unregisterPlayer(Player *player);
         Player *getPlayer(const QString &name) const;
 
+        const GameObjectPtrList &races() const { return m_races; }
+
         uint uniqueObjectId();
 
         void syncObject(GameObject *gameObject);
@@ -48,6 +50,8 @@ class Realm : public GameObject {
         uint m_nextId;
         QHash<uint, GameObject *> m_objectMap;
         QHash<QString, Player *> m_playerMap;
+
+        GameObjectPtrList m_races;
 
         GameObjectSyncThread *m_syncThread;
 

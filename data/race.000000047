@@ -1,0 +1,7 @@
+{
+  "name": "Gnome",
+  "description": "Gnomes are very friedly people, and they get along well with humans, elves and especially dwarves. Gnomes are very small, typically little more than a meter tall, and are not very strong as such. What they lack in strength however, they make up for in magical abilities. In addition, gnomes have the ability to see in the dark, which is a very useful adjustment to their underground life.",
+  "stats": [3, 6, 4, 3, 8, 6, 120, 55],
+  "classes": [ "class:50", "class:51", "class:54", "class:55", "class:56" ],
+  "startingArea": "area:1"
+}

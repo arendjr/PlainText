@@ -49,8 +49,11 @@ QString Util::joinItems(const GameObjectPtrList &list, Articles article) {
     }
 
     foreach (const GameObjectPtr &itemPtr, list) {
+        if (itemPtr.isNull()) {
+            continue;
+        }
+
         Item *item = itemPtr.cast<Item *>();
-        Q_ASSERT(item);
 
         int index = itemNames.indexOf(item->name());
         if (index > -1) {
@@ -119,6 +122,15 @@ QString Util::writtenNumber(int number) {
 QString Util::capitalize(const QString &string) {
 
     return string.left(1).toUpper() + string.mid(1);
+}
+
+QString Util::center(const QString &string, int width) {
+
+    int padding = qMax(width - string.length(), 0);
+    int rightPad = padding / 2;
+    int leftPad = padding - rightPad;
+
+    return QString(leftPad, ' ') + string + QString(rightPad, ' ');
 }
 
 QStringList Util::splitLines(const QString &string, int maxLineLength) {
@@ -275,6 +287,9 @@ void Util::sendOthers(const GameObjectPtrList &_players, const QString &message,
     players.removeOne(exclude1);
     players.removeOne(exclude2);
     foreach (const GameObjectPtr &player, players) {
+        if (player.isNull()) {
+            continue;
+        }
         player->send(message);
     }
 }

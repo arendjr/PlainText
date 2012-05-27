@@ -15,8 +15,10 @@ class GameException : public std::exception {
             CorruptGameObjectFile,
             InvalidGameObjectFileName,
             InvalidGameObjectPointer,
+            NullPointerReference,
+            InvalidGameObjectCast,
             InvalidFunctionCode,
-            InvalidExitFormat
+            InvalidCharacterStats
         };
 
         GameException(Cause cause);

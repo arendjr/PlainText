@@ -12,9 +12,14 @@
 #include "scriptfunctionmap.h"
 
 
+class GameObjectPtr;
+
 class GameObject : public QObject {
 
     Q_OBJECT
+
+    friend class GameObjectPtr;
+    friend void swap(GameObjectPtr &first, GameObjectPtr &second);
 
     public:
         enum Options {
@@ -82,10 +87,17 @@ class GameObject : public QObject {
         virtual void timerEvent(QTimerEvent *event);
 
         void setModified();
+        void setAutoDelete(bool autoDelete);
 
         Options options() const { return m_options; }
 
+        void registerPointer(GameObjectPtr *pointer);
+        void unregisterPointer(GameObjectPtr *pointer);
+
     private:
+        QList<GameObjectPtr *> m_pointers;
+        bool m_autoDelete;
+
         const char *m_objectType;
         uint m_id;
         Options m_options;

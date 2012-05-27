@@ -33,6 +33,10 @@ void Realm::registerObject(GameObject *gameObject) {
     uint id = gameObject->id();
     m_objectMap.insert(id, gameObject);
 
+    if (strcmp(gameObject->objectType(), "race") == 0) {
+        m_races.append(gameObject);
+    }
+
     if (id >= m_nextId) {
         m_nextId = id + 1;
     }
@@ -142,10 +146,11 @@ Realm::Realm() :
         if (fileName.startsWith("realm.")) {
             continue;
         }
+
         try {
             GameObject::createFromFile(dir.path() + "/" + fileName);
         } catch (const GameException &exception) {
-            qWarning() << "Error loading game object from" << fileName << ":" << exception.what();
+            qWarning() << "Error loading game object from " << fileName << ":" << exception.what();
         }
     }
 

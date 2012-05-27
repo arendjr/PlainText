@@ -36,15 +36,11 @@ void SetTriggerCommand::execute(const QString &command) {
         return;
     }
 
-    try {
-        if (source.startsWith("function")) {
-            source = "(" + source + ")";
-        }
-
-        ScriptFunction trigger = ScriptFunction::fromString(source);
-        objects[0]->setTrigger(triggerName, trigger);
-        player()->send(QString("Trigger %1 set.").arg(triggerName));
-    } catch (const GameException &exception) {
-        player()->send("Could not parse trigger.");
+    if (source.startsWith("function")) {
+        source = "(" + source + ")";
     }
+
+    ScriptFunction trigger = ScriptFunction::fromString(source);
+    objects[0]->setTrigger(triggerName, trigger);
+    player()->send(QString("Trigger %1 set.").arg(triggerName));
 }

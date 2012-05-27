@@ -228,7 +228,13 @@ function Controller() {
                 }
 
                 self.statusHeader.name.innerText = self.player.name;
+
                 self.statusHeader.hp.innerText = self.player.hp + "HP";
+                if (self.player.hp < self.player.maxHp / 4) {
+                    self.statusHeader.hp.style.color = "#f00";
+                } else {
+                    self.statusHeader.hp.style.color = "";
+                }
             }
         } else if (self.onMessageHook) {
             self.onMessageHook(message.data);
@@ -264,7 +270,7 @@ Controller.prototype.writeToScreen = function(message) {
     var div = document.createElement("div");
 
     var index;
-    while ((index = message.indexOf("\x1B[", index)) > -1) {
+    while ((index = message.indexOf("\x1B[")) > -1) {
         var mIndex = message.indexOf("m", index);
         var endIndex = message.indexOf("\x1B[0m", mIndex);
 

@@ -73,9 +73,15 @@ void WebSocketServer::onSessionOutput(const QString &data) {
         Player *player = session->player();
         Q_ASSERT(player);
 
-        socket->write(QString("{ \"player\": { \"name\": %1, \"isAdmin\": %2, \"hp\": %3 } }")
+        socket->write(QString("{ \"player\": { "
+                                  "\"name\": %1, "
+                                  "\"isAdmin\": %2, "
+                                  "\"hp\": %3, "
+                                  "\"maxHp\": %4 } "
+                              "}")
                       .arg(Util::jsString(player->name()),
                            player->isAdmin() ? "true" : "false",
-                           QString::number(player->hp())));
+                           QString::number(player->hp()),
+                           QString::number(player->maxHp())));
     }
 }

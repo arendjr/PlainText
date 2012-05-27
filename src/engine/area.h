@@ -38,7 +38,10 @@ class Area : public GameObject {
         Q_PROPERTY(GameObjectPtrList items READ items WRITE setItems)
 
         GameObjectPtrList characters() const { return m_players + m_npcs; }
+        Q_PROPERTY(GameObjectPtrList characters READ characters STORED false)
+
         GameObjectPtrList objects() const { return m_exits + characters() + m_items; }
+        Q_PROPERTY(GameObjectPtrList objects READ objects STORED false)
 
     private:
         GameObjectPtrList m_exits;

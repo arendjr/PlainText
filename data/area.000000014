@@ -1,5 +1,6 @@
 {
   "name": "Light Tower",
   "description": "You are now at the foot of the light tower. The door of the tower is heavy, and made of steel. The entire building looks odd and out of place in this environment. You cannot imagine who built it, or when, yet the steel on the tower looks unaffected by the ages.\n\nWhen you're quiet you can hear the slow moving of the sea in the distance.",
-  "exits": [ "exit:16", "exit:18", "exit:28" ]
+  "exits": [ "exit:16", "exit:18", "exit:28" ],
+  "npcs": [ "character:45" ]
 }

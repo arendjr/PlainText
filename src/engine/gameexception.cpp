@@ -9,8 +9,10 @@ const char *GameException::s_messages[] = {
     "Corrupt game object file",
     "Invalid game object file name",
     "Invalid game object pointer",
-    "Invalid function code",
-    "Invalid exit format"
+    "Null pointer referenced",
+    "Game object pointer casted to invalid type",
+    "Invalid function code (Parse Error)",
+    "Invalid character stats"
 };
 
 GameException::GameException(Cause cause) :
