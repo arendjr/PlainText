@@ -88,7 +88,13 @@ class Character : public Item {
         Q_INVOKABLE virtual void kill(const GameObjectPtr &character);
         Q_INVOKABLE virtual void die();
 
+        int secondsStunned() const { return m_secondsStunned; }
+        Q_INVOKABLE virtual void stun(int timeout);
+        void setLeaveOnActive(bool leaveOnActive);
+
     protected:
+        virtual void timerEvent(QTimerEvent *event);
+
         explicit Character(const char *objectType, uint id, Options options = NoOptions);
 
     private:
@@ -114,6 +120,11 @@ class Character : public Item {
         int m_maxSp;
 
         int m_gold;
+
+        int m_secondsStunned;
+        int m_stunTimeout;
+        bool m_oddStunTimer;
+        bool m_leaveOnActive;
 };
 
 #endif // CHARACTER_H

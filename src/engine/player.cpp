@@ -63,6 +63,12 @@ void Player::setSession(Session *session) {
     } else {
         killTimer(m_regenerationInterval);
         m_regenerationInterval = 0;
+
+        if (secondsStunned() > 0) {
+            setLeaveOnActive(true);
+        } else {
+            leave(currentArea());
+        }
     }
 }
 

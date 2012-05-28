@@ -43,9 +43,6 @@ Session::Session(QObject *parent) :
 Session::~Session() {
 
     if (m_player) {
-        if (m_interpreter) {
-            m_player->leave(m_player->currentArea());
-        }
         m_player->setSession(0);
     }
     delete m_signUpData;

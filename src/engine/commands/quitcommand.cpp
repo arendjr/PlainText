@@ -1,5 +1,7 @@
 #include "quitcommand.h"
 
+#include "engine/util.h"
+
 
 QuitCommand::QuitCommand(Player *character, QObject *parent) :
     Command(character, parent) {
@@ -17,5 +19,9 @@ void QuitCommand::execute(const QString &command) {
 
     Q_UNUSED(command);
 
-    emit quit();
+    if (player()->secondsStunned() > 0) {
+        player()->send(Util::colorize(QString("Please wait %1 seconds.").arg(player()->secondsStunned()), Olive));
+    } else {
+        emit quit();
+    }
 }

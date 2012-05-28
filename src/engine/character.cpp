@@ -3,11 +3,19 @@
 #include <cstdlib>
 
 #include <QDebug>
+#include <QTimerEvent>
 
 #include "area.h"
 #include "exit.h"
 #include "player.h"
 #include "util.h"
+
+
+#define NO_STUN \
+    if (m_secondsStunned > 0) { \
+        send(Util::colorize(QString("Please wait %1 seconds.").arg(m_secondsStunned), Olive)); \
+        return; \
+    }
 
 
 Character::Character(uint id, Options options) :
@@ -19,7 +27,11 @@ Character::Character(uint id, Options options) :
     m_maxHp(1),
     m_mp(0),
     m_maxMp(0),
-    m_gold(0) {
+    m_gold(0),
+    m_secondsStunned(0),
+    m_stunTimeout(0),
+    m_oddStunTimer(false),
+    m_leaveOnActive(false) {
 
     setAutoDelete(false);
 }
@@ -33,7 +45,11 @@ Character::Character(const char *objectType, uint id, Options options) :
     m_maxHp(1),
     m_mp(0),
     m_maxMp(0),
-    m_gold(0) {
+    m_gold(0),
+    m_secondsStunned(0),
+    m_stunTimeout(0),
+    m_oddStunTimer(false),
+    m_leaveOnActive(false) {
 
     setAutoDelete(false);
 }
@@ -189,6 +205,8 @@ void Character::setGold(int gold) {
 
 void Character::open(const GameObjectPtr &exitPtr) {
 
+    NO_STUN
+
     Exit *exit = exitPtr.cast<Exit *>();
     if (!exit) {
         qWarning() << "Character::open(): Invalid exit.";
@@ -217,6 +235,8 @@ void Character::open(const GameObjectPtr &exitPtr) {
 
 void Character::close(const GameObjectPtr &exitPtr) {
 
+    NO_STUN
+
     Exit *exit = exitPtr.cast<Exit *>();
     if (!exit) {
         qWarning() << "Character::close(): Invalid exit.";
@@ -244,6 +264,8 @@ void Character::close(const GameObjectPtr &exitPtr) {
 }
 
 void Character::go(const GameObjectPtr &exitPtr) {
+
+    NO_STUN
 
     Exit *exit = exitPtr.cast<Exit *>();
 
@@ -373,8 +395,14 @@ void Character::tell(const GameObjectPtr &playerPtr, const QString &message) {
 
 void Character::kill(const GameObjectPtr &characterPtr) {
 
+    NO_STUN
+
     Character *character = characterPtr.cast<Character *>();
     GameObjectPtrList others = currentArea().cast<Area *>()->players();
+
+    QString myName = indefiniteArticle().isEmpty() ? name() : "The " + name();
+    QString enemyName = (character->indefiniteArticle().isEmpty() ? "" : "the ") +
+                        character->name();
 
     qreal hitChance = 100 * ((80 + stats().dexterity) / 160.0) *
                             ((100 - character->stats().dexterity) / 100.0);
@@ -386,19 +414,19 @@ void Character::kill(const GameObjectPtr &characterPtr) {
 
         switch (qrand() % 3) {
             case 0:
-                character->send(Util::colorize(QString("%1 deals you a sweeping punch, causing %2 damage.").arg(name()).arg(damage), Maroon));
-                send(Util::colorize(QString("You deal a sweeping punch to %1, causing %2 damage.").arg(character->name()).arg(damage), Teal));
-                Util::sendOthers(others, Util::colorize(QString("%1 deals a sweeping punch to %2.").arg(name(), character->name()), Teal), this, character);
+                character->send(Util::colorize(QString("%1 deals you a sweeping punch, causing %2 damage.").arg(myName).arg(damage), Maroon));
+                send(Util::colorize(QString("You deal a sweeping punch to %1, causing %2 damage.").arg(enemyName).arg(damage), Teal));
+                Util::sendOthers(others, Util::colorize(QString("%1 deals a sweeping punch to %2.").arg(myName, enemyName), Teal), this, character);
                 break;
             case 1:
-                character->send(Util::colorize(QString("%1 hits you on the jaw for %2 damage.").arg(name()).arg(damage), Maroon));
-                send(Util::colorize(QString("You hit %1 on the jaw for %2 damage.").arg(character->name()).arg(damage), Teal));
-                Util::sendOthers(others, Util::colorize(QString("%1 hits %2 on the jaw.").arg(name(), character->name()), Teal), this, character);
+                character->send(Util::colorize(QString("%1 hits you on the jaw for %2 damage.").arg(myName).arg(damage), Maroon));
+                send(Util::colorize(QString("You hit %1 on the jaw for %2 damage.").arg(enemyName).arg(damage), Teal));
+                Util::sendOthers(others, Util::colorize(QString("%1 hits %2 on the jaw.").arg(myName, enemyName), Teal), this, character);
                 break;
             case 2:
-                character->send(Util::colorize(QString("%1 kicks you for %2 damage.").arg(name()).arg(damage), Maroon));
-                send(Util::colorize(QString("You kick %1 for %2 damage.").arg(character->name()).arg(damage), Teal));
-                Util::sendOthers(others, Util::colorize(QString("%1 kicks %2.").arg(name(), character->name()), Teal), this, character);
+                character->send(Util::colorize(QString("%1 kicks you for %2 damage.").arg(myName).arg(damage), Maroon));
+                send(Util::colorize(QString("You kick %1 for %2 damage.").arg(enemyName).arg(damage), Teal));
+                Util::sendOthers(others, Util::colorize(QString("%1 kicks %2.").arg(myName, enemyName), Teal), this, character);
                 break;
         }
 
@@ -408,22 +436,24 @@ void Character::kill(const GameObjectPtr &characterPtr) {
     } else {
         switch (qrand() % 3) {
             case 0:
-                character->send(Util::colorize(QString("%1 tries to punch you, but misses.").arg(name()), Green));
-                send(Util::colorize(QString("You try to punch %1, but miss.").arg(character->name()), Teal));
-                Util::sendOthers(others, Util::colorize(QString("%1 tries to punch %2, but misses.").arg(name(), character->name()), Teal), this, character);
+                character->send(Util::colorize(QString("%1 tries to punch you, but misses.").arg(myName), Green));
+                send(Util::colorize(QString("You try to punch %1, but miss.").arg(enemyName), Teal));
+                Util::sendOthers(others, Util::colorize(QString("%1 tries to punch %2, but misses.").arg(myName, enemyName), Teal), this, character);
                 break;
             case 1:
-                character->send(Util::colorize(QString("%1 tries to grab you, but you shake %2 off.").arg(name(), objectPronoun()), Green));
-                send(Util::colorize(QString("You try to grab %1, but %2 shakes you off.").arg(character->name(), character->subjectPronoun()), Teal));
-                Util::sendOthers(others, Util::colorize(QString("%1 tries to grab %2, but gets shaken off.").arg(name(), character->name()), Teal), this, character);
+                character->send(Util::colorize(QString("%1 tries to grab you, but you shake %2 off.").arg(myName, objectPronoun()), Green));
+                send(Util::colorize(QString("You try to grab %1, but %2 shakes you off.").arg(enemyName, character->subjectPronoun()), Teal));
+                Util::sendOthers(others, Util::colorize(QString("%1 tries to grab %2, but gets shaken off.").arg(myName, enemyName), Teal), this, character);
                 break;
             case 2:
-                character->send(Util::colorize(QString("%1 kicks at you, but fails to hurt you.").arg(name()), Green));
-                send(Util::colorize(QString("You kick at %1, but fail to hurt %2.").arg(character->name(), character->objectPronoun()), Teal));
-                Util::sendOthers(others, Util::colorize(QString("%1 kicks at %2, but fails to hurt %3.").arg(name(), character->name(), character->objectPronoun()), Teal), this, character);
+                character->send(Util::colorize(QString("%1 kicks at you, but fails to hurt you.").arg(myName), Green));
+                send(Util::colorize(QString("You kick at %1, but fail to hurt %2.").arg(enemyName, character->objectPronoun()), Teal));
+                Util::sendOthers(others, Util::colorize(QString("%1 kicks at %2, but fails to hurt %3.").arg(myName, enemyName, character->objectPronoun()), Teal), this, character);
                 break;
         }
     }
+
+    stun(4000 - (25 * stats().dexterity));
 }
 
 void Character::die() {
@@ -440,4 +470,55 @@ void Character::die() {
 
     area->removeNPC(this);
     setDeleted();
+}
+
+void Character::stun(int timeout) {
+
+    if (m_stunTimeout) {
+        killTimer(m_stunTimeout);
+    }
+
+    int seconds = timeout / 1000;
+    int firstTimeout = timeout % 1000;
+    if (firstTimeout == 0) {
+        firstTimeout = 1000;
+    } else {
+        seconds++;
+    }
+
+    m_secondsStunned = seconds;
+    m_stunTimeout = startTimer(firstTimeout);
+    m_oddStunTimer = (firstTimeout < 1000);
+}
+
+void Character::setLeaveOnActive(bool leaveOnActive) {
+
+    m_leaveOnActive = leaveOnActive;
+}
+
+void Character::timerEvent(QTimerEvent *event) {
+
+    if (event->timerId() == m_stunTimeout) {
+        m_secondsStunned--;
+
+        if (m_secondsStunned > 0) {
+            if (m_oddStunTimer) {
+                killTimer(m_stunTimeout);
+                m_stunTimeout = startTimer(1000);
+                m_oddStunTimer = false;
+            }
+        } else {
+            killTimer(m_stunTimeout);
+            m_stunTimeout = 0;
+
+            if (m_leaveOnActive) {
+                leave(currentArea());
+                m_leaveOnActive = false;
+            } else {
+                invokeTrigger("onactive");
+            }
+        }
+    } else {
+        Item::timerEvent(event);
+    }
 }
