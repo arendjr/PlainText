@@ -16,7 +16,6 @@ SOURCES += \
     engine/commandinterpreter.cpp \
     engine/engine.cpp \
     engine/exit.cpp \
-    engine/gameapplication.cpp \
     engine/gameexception.cpp \
     engine/gameobject.cpp \
     engine/gameobjectptr.cpp \
@@ -80,7 +79,6 @@ HEADERS += \
     engine/constants.h \
     engine/engine.h \
     engine/exit.h \
-    engine/gameapplication.h \
     engine/gameexception.h \
     engine/gameobject.h \
     engine/gameobjectptr.h \

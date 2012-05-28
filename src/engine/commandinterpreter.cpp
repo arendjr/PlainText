@@ -114,55 +114,55 @@ CommandInterpreter::~CommandInterpreter() {
 
 void CommandInterpreter::execute(const QString &command) {
 
-    QStringList words = command.trimmed().split(QRegExp("\\s+"));
-    QString commandName = words[0].toLower();
-    if (commandName.isEmpty()) {
-        return;
-    }
-
-    if (commandName == "help") {
-        if (words.length() > 1) {
-            showHelp(words[1].toLower());
-        } else {
-            showHelp();
+    try {
+        QStringList words = command.trimmed().split(QRegExp("\\s+"));
+        QString commandName = words[0].toLower();
+        if (commandName.isEmpty()) {
+            return;
         }
-        return;
-    }
 
-    if (Util::isDirectionAbbreviation(commandName)) {
-        commandName = Util::direction(commandName);
-    }
-    if (Util::isDirection(commandName)) {
-        words.prepend("go");
-        m_commands["go"]->execute(words.join(" "));
-        return;
-    }
-
-    if (m_commands.contains(commandName)) {
-        m_commands[commandName]->execute(command);
-        return;
-    }
-
-    QList<Command *> commands;
-    foreach (const QString &key, m_commands.keys()) {
-        if (key.startsWith(commandName)) {
-            commands << m_commands[key];
+        if (commandName == "help") {
+            if (words.length() > 1) {
+                showHelp(words[1].toLower());
+            } else {
+                showHelp();
+            }
+            return;
         }
-    }
 
-    if (commands.length() == 1) {
-        try {
-            commands[0]->execute(command);
-        } catch (const GameException &exception) {
-            m_player->send(QString("Executing the command gave an exception: %1").arg(exception.what()));
-            if (m_player->isAdmin()) {
-                m_player->send("This is not good. You may want to contact a game admin about this.");
+        if (Util::isDirectionAbbreviation(commandName)) {
+            commandName = Util::direction(commandName);
+        }
+        if (Util::isDirection(commandName)) {
+            words.prepend("go");
+            m_commands["go"]->execute(words.join(" "));
+            return;
+        }
+
+        if (m_commands.contains(commandName)) {
+            m_commands[commandName]->execute(command);
+            return;
+        }
+
+        QList<Command *> commands;
+        foreach (const QString &key, m_commands.keys()) {
+            if (key.startsWith(commandName)) {
+                commands << m_commands[key];
             }
         }
-    } else if (commands.length() > 1) {
-        m_player->send("Command is not unique.");
-    } else {
-        m_player->send(QString("Command \"%1\" does not exist.").arg(words[0]));
+
+        if (commands.length() == 1) {
+            commands[0]->execute(command);
+        } else if (commands.length() > 1) {
+            m_player->send("Command is not unique.");
+        } else {
+            m_player->send(QString("Command \"%1\" does not exist.").arg(words[0]));
+        }
+    } catch (const GameException &exception) {
+        m_player->send(QString("Executing the command gave an exception: %1").arg(exception.what()));
+        if (m_player->isAdmin()) {
+            m_player->send("This is not good. You may want to contact a game admin about this.");
+        }
     }
 }
 

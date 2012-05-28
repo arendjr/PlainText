@@ -17,6 +17,8 @@ bool GameApplication::notify(QObject *receiver, QEvent *event) {
     try {
         return receiver->event(event);
     } catch (const GameException &exception) {
-        qWarning() << "Game Exception in event handler: " << exception.what();
+        qWarning() << "Game Exception in event (" << event->type() << ") handler: "
+                   << exception.what();
+        return false;
     }
 }

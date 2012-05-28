@@ -137,11 +137,7 @@ void Character::setHp(int hp) {
     if (m_hp != hp) {
         m_hp = qBound(0, hp, maxHp());
 
-        if (m_hp == 0) {
-            die();
-        } else {
-            setModified();
-        }
+        setModified();
     }
 }
 
@@ -380,7 +376,7 @@ void Character::kill(const GameObjectPtr &characterPtr) {
     Character *character = characterPtr.cast<Character *>();
     GameObjectPtrList others = currentArea().cast<Area *>()->players();
 
-    qreal hitChance = 100 * ((20 + stats().dexterity) / 100.0) *
+    qreal hitChance = 100 * ((80 + stats().dexterity) / 160.0) *
                             ((100 - character->stats().dexterity) / 100.0);
     if (qrand() % 100 < hitChance) {
         int damage = qrand() % (int) (20.0 * (stats().strength / 40.0) *
