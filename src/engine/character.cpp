@@ -1,5 +1,7 @@
 #include "character.h"
 
+#include <cstdlib>
+
 #include <QDebug>
 
 #include "area.h"
@@ -11,9 +13,12 @@
 Character::Character(uint id, Options options) :
     Item("character", id, options),
     m_gender("male"),
+    m_subjectPronoun("he"),
+    m_objectPronoun("him"),
     m_hp(1),
+    m_maxHp(1),
     m_mp(0),
-    m_sp(0),
+    m_maxMp(0),
     m_gold(0) {
 
     setAutoDelete(false);
@@ -22,9 +27,12 @@ Character::Character(uint id, Options options) :
 Character::Character(const char *objectType, uint id, Options options) :
     Item(objectType, id, options),
     m_gender("male"),
+    m_subjectPronoun("he"),
+    m_objectPronoun("him"),
     m_hp(1),
+    m_maxHp(1),
     m_mp(0),
-    m_sp(0),
+    m_maxMp(0),
     m_gold(0) {
 
     setAutoDelete(false);
@@ -98,6 +106,8 @@ void Character::setGender(const QString &gender) {
 
     if (m_gender != gender) {
         m_gender = gender;
+        m_subjectPronoun = (m_gender == "male" ? "he" : "she");
+        m_objectPronoun = (m_gender == "male" ? "him" : "her");
 
         setModified();
     }
@@ -108,7 +118,12 @@ void Character::setStats(const CharacterStats &stats) {
     if (m_stats != stats) {
         m_stats = stats;
 
-        setModified();
+        startBulkModification();
+
+        setMaxHp(2 * m_stats.vitality);
+        setMaxMp(m_stats.intelligence);
+
+        commitBulkModification();
     }
 }
 
@@ -120,16 +135,20 @@ void Character::adjustHp(int delta) {
 void Character::setHp(int hp) {
 
     if (m_hp != hp) {
-        m_hp = hp > 0 ? hp : 0;
+        m_hp = qBound(0, hp, maxHp());
 
-        setModified();
+        if (m_hp == 0) {
+            die();
+        } else {
+            setModified();
+        }
     }
 }
 
 void Character::setMaxHp(int maxHp) {
 
     if (m_maxHp != maxHp) {
-        m_maxHp = maxHp > 0 ? maxHp : 0;
+        m_maxHp = qMax(maxHp, 0);
 
         setModified();
     }
@@ -143,7 +162,7 @@ void Character::adjustMp(int delta) {
 void Character::setMp(int mp) {
 
     if (m_mp != mp) {
-        m_mp = mp > 0 ? mp : 0;
+        m_mp = qBound(0, mp, maxMp());
 
         setModified();
     }
@@ -152,30 +171,7 @@ void Character::setMp(int mp) {
 void Character::setMaxMp(int maxMp) {
 
     if (m_maxMp != maxMp) {
-        m_maxMp = maxMp > 0 ? maxMp : 0;
-
-        setModified();
-    }
-}
-
-void Character::adjustSp(int delta) {
-
-    setSp(m_sp + delta);
-}
-
-void Character::setSp(int sp) {
-
-    if (m_sp != sp) {
-        m_sp = sp > 0 ? sp : 0;
-
-        setModified();
-    }
-}
-
-void Character::setMaxSp(int maxSp) {
-
-    if (m_maxSp != maxSp) {
-        m_maxSp = maxSp > 0 ? maxSp : 0;
+        m_maxMp = qMax(maxMp, 0);
 
         setModified();
     }
@@ -189,7 +185,7 @@ void Character::adjustGold(int delta) {
 void Character::setGold(int gold) {
 
     if (m_gold != gold) {
-        m_gold = gold > 0 ? gold : 0;
+        m_gold = qMax(gold, 0);
 
         setModified();
     }
@@ -377,4 +373,75 @@ void Character::tell(const GameObjectPtr &playerPtr, const QString &message) {
 
     player->send(QString("%1 tells you, \"%2\".").arg(name(), message));
     send(QString("You tell %1, \"%2\".").arg(player->name(), message));
+}
+
+void Character::kill(const GameObjectPtr &characterPtr) {
+
+    Character *character = characterPtr.cast<Character *>();
+    GameObjectPtrList others = currentArea().cast<Area *>()->players();
+
+    qreal hitChance = 100 * ((20 + stats().dexterity) / 100.0) *
+                            ((100 - character->stats().dexterity) / 100.0);
+    if (qrand() % 100 < hitChance) {
+        int damage = qrand() % (int) (20.0 * (stats().strength / 40.0) *
+                                             ((80 - character->stats().endurance) / 80.0)) + 1;
+
+        character->adjustHp(-damage);
+
+        switch (qrand() % 3) {
+            case 0:
+                character->send(Util::colorize(QString("%1 deals you a sweeping punch, causing %2 damage.").arg(name()).arg(damage), Maroon));
+                send(Util::colorize(QString("You deal a sweeping punch to %1, causing %2 damage.").arg(character->name()).arg(damage), Teal));
+                Util::sendOthers(others, Util::colorize(QString("%1 deals a sweeping punch to %2.").arg(name(), character->name()), Teal), this, character);
+                break;
+            case 1:
+                character->send(Util::colorize(QString("%1 hits you on the jaw for %2 damage.").arg(name()).arg(damage), Maroon));
+                send(Util::colorize(QString("You hit %1 on the jaw for %2 damage.").arg(character->name()).arg(damage), Teal));
+                Util::sendOthers(others, Util::colorize(QString("%1 hits %2 on the jaw.").arg(name(), character->name()), Teal), this, character);
+                break;
+            case 2:
+                character->send(Util::colorize(QString("%1 kicks you for %2 damage.").arg(name()).arg(damage), Maroon));
+                send(Util::colorize(QString("You kick %1 for %2 damage.").arg(character->name()).arg(damage), Teal));
+                Util::sendOthers(others, Util::colorize(QString("%1 kicks %2.").arg(name(), character->name()), Teal), this, character);
+                break;
+        }
+
+        if (character->hp() == 0) {
+            character->die();
+        }
+    } else {
+        switch (qrand() % 3) {
+            case 0:
+                character->send(Util::colorize(QString("%1 tries to punch you, but misses.").arg(name()), Green));
+                send(Util::colorize(QString("You try to punch %1, but miss.").arg(character->name()), Teal));
+                Util::sendOthers(others, Util::colorize(QString("%1 tries to punch %2, but misses.").arg(name(), character->name()), Teal), this, character);
+                break;
+            case 1:
+                character->send(Util::colorize(QString("%1 tries to grab you, but you shake %2 off.").arg(name(), objectPronoun()), Green));
+                send(Util::colorize(QString("You try to grab %1, but %2 shakes you off.").arg(character->name(), character->subjectPronoun()), Teal));
+                Util::sendOthers(others, Util::colorize(QString("%1 tries to grab %2, but gets shaken off.").arg(name(), character->name()), Teal), this, character);
+                break;
+            case 2:
+                character->send(Util::colorize(QString("%1 kicks at you, but fails to hurt you.").arg(name()), Green));
+                send(Util::colorize(QString("You kick at %1, but fail to hurt %2.").arg(character->name(), character->objectPronoun()), Teal));
+                Util::sendOthers(others, Util::colorize(QString("%1 kicks at %2, but fails to hurt %3.").arg(name(), character->name(), character->objectPronoun()), Teal), this, character);
+                break;
+        }
+    }
+}
+
+void Character::die() {
+
+    Area *area = currentArea().cast<Area *>();
+    GameObjectPtrList others = area->players();
+    Util::sendOthers(others, Util::colorize(QString("%1 died.").arg(name()), Teal));
+    if (inventory().length() > 0) {
+        Util::sendOthers(others, Util::colorize(QString("%1 was carrying %2.").arg(name(), Util::joinItems(inventory())), Teal));
+        foreach (const GameObjectPtr &item, inventory()) {
+            area->addItem(item);
+        }
+    }
+
+    area->removeNPC(this);
+    setDeleted();
 }

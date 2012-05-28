@@ -4,15 +4,13 @@
   "plural": "Joes",
   "portable": false,
   "currentArea": "area:14",
-  "race": "0",
+  "race": "race:2",
   "characterClass": "0",
   "gender": "male",
   "stats": [0, 0, 0, 0, 0, 0, 0, 0],
-  "hp": 1,
+  "hp": 5,
   "maxHp": 1,
   "mp": 0,
   "maxMp": 1,
-  "sp": 0,
-  "maxSp": 1,
   "gold": 0
 }

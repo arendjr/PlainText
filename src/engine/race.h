@@ -14,6 +14,10 @@ class Race : public GameObject {
         explicit Race(uint id, Options options = NoOptions);
         virtual ~Race();
 
+        const QString &adjective() const { return m_adjective; }
+        virtual void setAdjective(const QString &adjective);
+        Q_PROPERTY(QString adjective READ adjective WRITE setAdjective)
+
         const CharacterStats &stats() const { return m_stats; }
         virtual void setStats(const CharacterStats &stats);
         Q_PROPERTY(CharacterStats stats READ stats WRITE setStats)
@@ -27,6 +31,8 @@ class Race : public GameObject {
         Q_PROPERTY(GameObjectPtr startingArea READ startingArea WRITE setStartingArea)
 
     private:
+        QString m_adjective;
+
         CharacterStats m_stats;
 
         GameObjectPtrList m_classes;

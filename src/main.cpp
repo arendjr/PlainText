@@ -1,12 +1,10 @@
-#include <QCoreApplication>
-#include <QDir>
-
 #include "engine/engine.h"
+#include "engine/gameapplication.h"
 
 
 int main(int argc, char *argv[]) {
 
-    QCoreApplication application(argc, argv);
+    GameApplication application(argc, argv);
 
     Engine engine;
     engine.start();

@@ -1,30 +1,29 @@
-#include "talkcommand.h"
+#include "killcommand.h"
 
 #include "engine/util.h"
 
 
-TalkCommand::TalkCommand(Player *player, QObject *parent) :
+KillCommand::KillCommand(Player *player, QObject *parent) :
     Command(player, parent) {
 
-    setDescription("Talk to a specific character who's in the same area. Only "
-                   "this character will hear you.\n"
+    setDescription("Attacks another character."
                    "\n"
-                   "Example: talk earl Hey Earl, how are you?");
+                   "Examples: kill joe, attack earl");
 }
 
-TalkCommand::~TalkCommand() {
+KillCommand::~KillCommand() {
 }
 
-void TalkCommand::execute(const QString &command) {
+void KillCommand::execute(const QString &command) {
 
     setCommand(command);
 
     /*QString alias = */takeWord();
-    if (!assertWordsLeft("Talk to who?")) {
+    if (!assertWordsLeft("Kill who?")) {
         return;
     }
 
-    takeWord("to");
+    takeWord("the");
 
     QPair <QString, uint> description = takeObjectsDescription();
     GameObjectPtrList characters = objectsByDescription(description,
@@ -35,7 +34,5 @@ void TalkCommand::execute(const QString &command) {
         return;
     }
 
-    QString message = takeRest();
-
-    player()->talk(characters[0], message);
+    player()->kill(characters[0]);
 }

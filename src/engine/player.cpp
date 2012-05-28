@@ -1,14 +1,17 @@
 #include "player.h"
 
+#include <QTimerEvent>
+
 #include "area.h"
 #include "exit.h"
+#include "race.h"
 #include "realm.h"
 #include "util.h"
 
 
 Player::Player(uint id, Options options) :
     Character("player", id, options),
-    m_hp(1),
+    m_regenerationInterval(0),
     m_admin(false),
     m_session(0) {
 
@@ -54,6 +57,13 @@ void Player::setAdmin(bool admin) {
 void Player::setSession(Session *session) {
 
     m_session = session;
+
+    if (m_session) {
+        m_regenerationInterval = startTimer(30000);
+    } else {
+        killTimer(m_regenerationInterval);
+        m_regenerationInterval = 0;
+    }
 }
 
 void Player::send(const QString &message) {
@@ -134,4 +144,26 @@ void Player::look() {
     }
 
     send(text);
+}
+
+void Player::die() {
+
+    Area *area = currentArea().cast<Area *>();
+    GameObjectPtrList others = area->players();
+
+    send(Util::colorize("You died.", Maroon));
+    Util::sendOthers(others, Util::colorize(QString("%1 died.").arg(name()), Teal), this);
+
+    area->removePlayer(this);
+    enter(race().cast<Race *>()->startingArea());
+}
+
+void Player::timerEvent(QTimerEvent *event) {
+
+    if (event->timerId() == m_regenerationInterval) {
+        adjustHp(qMax((int) ((1.5 * stats().vitality) / 10), 1));
+        send("");
+    } else {
+        Character::timerEvent(event);
+    }
 }

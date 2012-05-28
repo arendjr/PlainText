@@ -79,6 +79,10 @@ void TelnetServer::onClientDisconnected() {
 
 void TelnetServer::onSessionOutput(QString data) {
 
+    if (data.trimmed().isEmpty()) {
+        return;
+    }
+
     Session *session = qobject_cast<Session *>(sender());
     if (session == 0) {
         return;

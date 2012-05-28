@@ -34,6 +34,7 @@ GameObject::GameObject(const char *objectType, uint id, Options options) :
     m_objectType(objectType),
     m_id(id),
     m_options(options),
+    m_numBulkModifications(0),
     m_deleted(false),
     m_intervalHash(0),
     m_timeoutHash(0) {
@@ -441,6 +442,17 @@ void GameObject::fromScriptValue(const QScriptValue &object, GameObject *&gameOb
     Q_ASSERT(gameObject);
 }
 
+void GameObject::startBulkModification() {
+
+    m_numBulkModifications++;
+}
+
+void GameObject::commitBulkModification() {
+
+    m_numBulkModifications--;
+    setModified();
+}
+
 void GameObject::timerEvent(QTimerEvent *event) {
 
     int id = event->timerId();
@@ -474,7 +486,7 @@ void GameObject::timerEvent(QTimerEvent *event) {
 
 void GameObject::setModified() {
 
-    if (~m_options & Copy) {
+    if (m_numBulkModifications == 0 && ~m_options & Copy) {
         Realm::instance()->syncObject(this);
     }
 }

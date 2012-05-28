@@ -20,7 +20,7 @@ void GetPropCommand::execute(const QString &command) {
 
     /*QString alias = */takeWord();
 
-    GameObjectPtrList objects = takeObjects(currentArea()->items() + currentArea()->exits());
+    GameObjectPtrList objects = takeObjects(currentArea()->objects());
     if (!requireUnique(objects, "Object not found.", "Object is not unique.")) {
         return;
     }

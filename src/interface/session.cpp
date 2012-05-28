@@ -86,11 +86,11 @@ void Session::processSignIn(const QString &data) {
     QMap<QString, GameObjectPtr> classes;
     if (m_signInStage == AskingRace) {
         foreach (const GameObjectPtr &racePtr, Realm::instance()->races()) {
-            races[racePtr->name().toLower()] = racePtr;
+            races[racePtr->name()] = racePtr;
         }
     } else if (m_signInStage == AskingClass) {
         foreach (const GameObjectPtr &classPtr, m_signUpData->race->classes()) {
-            classes[classPtr->name().toLower()] = classPtr;
+            classes[classPtr->name()] = classPtr;
         }
     }
 
@@ -136,16 +136,28 @@ void Session::processSignIn(const QString &data) {
             break;
 
         case AskingSignupPassword:
+            if (input.length() < 6) {
+                write(Util::colorize("Please choose a password of at least 6 characters.\n", Maroon));
+                break;
+            }
+            if (input.toLower() == m_signUpData->userName.toLower()) {
+                write(Util::colorize("Your password and your username may not be the same.\n", Maroon));
+                break;
+            }
+            if (input == "123456" || input == "654321") {
+                write(Util::colorize("Sorry, that password is too simple.\n", Maroon));
+                break;
+            }
             m_signUpData->password = input;
             m_signInStage = AskingSignupPasswordConfirmation;
             break;
 
         case AskingSignupPasswordConfirmation:
             if (m_signUpData->password == input) {
-                write("Okay, your password is confirmed. Let's create your character...\n");
+                write(Util::colorize("Password confirmed.\n", Green));
                 m_signInStage = AskingRace;
             } else {
-                write("Passwords don't match.\n");
+                write(Util::colorize("Passwords don't match.\n", Maroon));
                 m_signInStage = AskingSignupPassword;
             }
             break;
@@ -248,7 +260,7 @@ void Session::processSignIn(const QString &data) {
                 uint total = strength + dexterity + vitality +
                             endurance + intelligence + faith;
                 if (total != 9) {
-                    write(Util::colorize("\nThe total of attributes should be 9.\n", Red));
+                    write(Util::colorize("\nThe total of attributes should be 9.\n", Maroon));
                     break;
                 }
 
@@ -273,6 +285,8 @@ void Session::processSignIn(const QString &data) {
                 m_player = qobject_cast<Player *>(GameObject::createByObjectType("player"));
                 Q_ASSERT(m_player);
 
+                m_player->startBulkModification();
+
                 m_player->setName(m_signUpData->userName);
                 m_player->setPasswordHash(passwordHash);
                 m_player->setRace(m_signUpData->race);
@@ -280,6 +294,12 @@ void Session::processSignIn(const QString &data) {
                 m_player->setGender(m_signUpData->gender);
                 m_player->setStats(m_signUpData->stats);
                 m_player->setCurrentArea(m_signUpData->race->startingArea());
+
+                m_player->setHp(m_player->maxHp());
+                m_player->setMp(m_player->maxMp());
+                m_player->setGold(100);
+
+                m_player->commitBulkModification();
 
                 delete m_signUpData;
                 m_signUpData = 0;
@@ -300,11 +320,11 @@ void Session::processSignIn(const QString &data) {
 
     if (m_signInStage == AskingRace && races.isEmpty()) {
         foreach (const GameObjectPtr &racePtr, Realm::instance()->races()) {
-            races[racePtr->name().toLower()] = racePtr;
+            races[racePtr->name()] = racePtr;
         }
     } else if (m_signInStage == AskingClass && classes.isEmpty()) {
         foreach (const GameObjectPtr &classPtr, m_signUpData->race->classes()) {
-            classes[classPtr->name().toLower()] = classPtr;
+            classes[classPtr->name()] = classPtr;
         }
     } else if (m_signInStage == AskingExtraStats) {
         CharacterStats raceStats = m_signUpData->race->stats();
@@ -325,12 +345,11 @@ void Session::processSignIn(const QString &data) {
         }
         if (m_signUpData->gender == "male") {
             m_signUpData->stats.strength++;
-            m_signUpData->stats.height += 5;
-            m_signUpData->stats.weight += 5;
+            m_signUpData->stats.height += 10;
+            m_signUpData->stats.weight += 10;
         } else {
             m_signUpData->stats.dexterity++;
-            m_signUpData->stats.height -= 5;
-            m_signUpData->stats.weight -= 5;
+            m_signUpData->stats.weight -= 10;
         }
     }
 
@@ -410,8 +429,8 @@ void Session::processSignIn(const QString &data) {
                               "Your base character stats are: \n"
                               "\n")
                       .arg(m_signUpData->gender,
-                           m_signUpData->race->name().toLower(),
-                           m_signUpData->characterClass->name().toLower()) +
+                           m_signUpData->race->adjective(),
+                           m_signUpData->characterClass->name()) +
                       QString("  %1, %2, %3, %4, %5, %6.\n")
                       .arg(Util::highlight(QString("STR: %1").arg(m_signUpData->stats.strength)),
                            Util::highlight(QString("DEX: %1").arg(m_signUpData->stats.dexterity)),
@@ -426,13 +445,13 @@ void Session::processSignIn(const QString &data) {
                           "Please enter the distribution you would like to use in the following form:\n"
                           "\n"
                           "  %1\n"
-                          "  (replace every part with a number, for a total of 9. Example: %2)\n"
+                          "  (Replace every part with a number, for a total of 9. Example: %2)\n"
                           "\n"
                           "To revisit your choice of gender, type %3. If you want more information about "
                           "character stats, type %4.\n")
-                  .arg(Util::highlight(barbarian ? "2 2 2 2 1" : "2 2 2 1 1 1"),
-                       Util::highlight(barbarian ? "<str> <dex> <vit> <end> <fai>" :
+                  .arg(Util::highlight(barbarian ? "<str> <dex> <vit> <end> <fai>" :
                                                    "<str> <dex> <vit> <end> <int> <fai>"),
+                       Util::highlight(barbarian ? "2 2 2 2 1" : "2 2 2 1 1 1"),
                        Util::highlight("back"),
                        Util::highlight("info stats")));
             break;
@@ -444,8 +463,8 @@ void Session::processSignIn(const QString &data) {
                               "Your final character stats are: \n"
                               "\n")
                       .arg(m_signUpData->gender,
-                           m_signUpData->race->name().toLower(),
-                           m_signUpData->characterClass->name().toLower()) +
+                           m_signUpData->race->adjective(),
+                           m_signUpData->characterClass->name()) +
                       QString("  %1, %2, %3, %4, %5, %6.\n")
                       .arg(Util::highlight(QString("STR: %1").arg(m_signUpData->stats.strength)),
                            Util::highlight(QString("DEX: %1").arg(m_signUpData->stats.dexterity)),

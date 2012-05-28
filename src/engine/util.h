@@ -51,6 +51,10 @@ class Util : public QObject {
 
         Q_INVOKABLE static QString center(const QString &string, int width);
 
+        Q_INVOKABLE static QString formatHeight(int height);
+
+        Q_INVOKABLE static QString formatWeight(int weight);
+
         static QStringList splitLines(const QString &string, int maxLineLength = 80);
 
         static QString jsString(QString string);

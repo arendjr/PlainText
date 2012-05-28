@@ -1,6 +1,7 @@
 {
-  "name": "Elf",
+  "name": "elf",
   "description": "Elves are a friendly race. They get along very well with other races, except for the dwarves. And the goblins, obviously. Physically, elves are very similar to humans, only slightly taller and slimmer. Elves draw their strength more from magic than from physical strength.",
+  "adjective": "elfish",
   "stats": [3, 6, 4, 3, 6, 8, 180, 70],
   "classes": [ "class:49", "class:51", "class:53", "class:54", "class:55", "class:56" ],
   "startingArea": "area:1"

@@ -11,10 +11,12 @@ SOURCES += \
     main.cpp \
     engine/area.cpp \
     engine/character.cpp \
+    engine/characterstats.cpp \
     engine/class.cpp \
     engine/commandinterpreter.cpp \
     engine/engine.cpp \
     engine/exit.cpp \
+    engine/gameapplication.cpp \
     engine/gameexception.cpp \
     engine/gameobject.cpp \
     engine/gameobjectptr.cpp \
@@ -35,6 +37,7 @@ SOURCES += \
     engine/commands/givecommand.cpp \
     engine/commands/gocommand.cpp \
     engine/commands/inventorycommand.cpp \
+    engine/commands/killcommand.cpp \
     engine/commands/lookcommand.cpp \
     engine/commands/opencommand.cpp \
     engine/commands/quitcommand.cpp \
@@ -66,16 +69,18 @@ SOURCES += \
     ../3rdparty/qjson/json_parser.cc \
     ../3rdparty/qjson/json_scanner.cpp \
     ../3rdparty/qtwebsocket/QtWebSocket/QWsServer.cpp \
-    ../3rdparty/qtwebsocket/QtWebSocket/QWsSocket.cpp \
-    engine/characterstats.cpp
+    ../3rdparty/qtwebsocket/QtWebSocket/QWsSocket.cpp
 
 HEADERS += \
     engine/area.h \
     engine/character.h \
+    engine/characterstats.h \
     engine/class.h \
     engine/commandinterpreter.h \
+    engine/constants.h \
     engine/engine.h \
     engine/exit.h \
+    engine/gameapplication.h \
     engine/gameexception.h \
     engine/gameobject.h \
     engine/gameobjectptr.h \
@@ -96,6 +101,7 @@ HEADERS += \
     engine/commands/givecommand.h \
     engine/commands/gocommand.h \
     engine/commands/inventorycommand.h \
+    engine/commands/killcommand.h \
     engine/commands/lookcommand.h \
     engine/commands/opencommand.h \
     engine/commands/quitcommand.h \
@@ -127,11 +133,10 @@ HEADERS += \
     ../3rdparty/qjson/json_driver.hh \
     ../3rdparty/qjson/json_scanner.h \
     ../3rdparty/qtwebsocket/QtWebSocket/QWsServer.h \
-    ../3rdparty/qtwebsocket/QtWebSocket/QWsSocket.h \
-    engine/characterstats.h \
-    engine/constants.h
+    ../3rdparty/qtwebsocket/QtWebSocket/QWsSocket.h
 
 OTHER_FILES += \
+    ../web/admin.js \
     ../web/index.html \
     ../web/main.css \
     ../web/main.js

@@ -5,6 +5,7 @@
 #include "util.h"
 
 #include <QMap>
+#include <QTextStream>
 
 
 Util *Util::s_instance = 0;
@@ -131,6 +132,20 @@ QString Util::center(const QString &string, int width) {
     int leftPad = padding - rightPad;
 
     return QString(leftPad, ' ') + string + QString(rightPad, ' ');
+}
+
+QString Util::formatHeight(int height) {
+
+    QString result;
+    QTextStream stream(&result);
+    stream.setRealNumberPrecision(2);
+    stream << ((qreal) height) / 100 << "m";
+    return result;
+}
+
+QString Util::formatWeight(int weight) {
+
+    return QString::number(weight) + "kg";
 }
 
 QStringList Util::splitLines(const QString &string, int maxLineLength) {

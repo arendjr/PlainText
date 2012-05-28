@@ -37,8 +37,13 @@ class Player : public Character {
 
         virtual void look();
 
+        virtual void die();
+
     signals:
         void write(const QString &data);
+
+    protected:
+        virtual void timerEvent(QTimerEvent *event);
 
     private:
         QString m_passwordHash;
@@ -47,7 +52,7 @@ class Player : public Character {
 
         GameObjectPtrList m_inventory;
 
-        int m_hp;
+        int m_regenerationInterval;
 
         bool m_admin;
 

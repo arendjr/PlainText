@@ -10,6 +10,15 @@ Race::Race(uint id, Options options) :
 Race::~Race() {
 }
 
+void Race::setAdjective(const QString &adjective) {
+
+    if (m_adjective != adjective) {
+        m_adjective = adjective;
+
+        setModified();
+    }
+}
+
 void Race::setStats(const CharacterStats &stats) {
 
     if (m_stats != stats) {

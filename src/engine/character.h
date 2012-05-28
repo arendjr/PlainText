@@ -40,6 +40,12 @@ class Character : public Item {
         virtual void setGender(const QString &gender);
         Q_PROPERTY(QString gender READ gender WRITE setGender)
 
+        const QString &subjectPronoun() const { return m_subjectPronoun; }
+        Q_PROPERTY(QString subjectPronoun READ subjectPronoun STORED false)
+
+        const QString &objectPronoun() const { return m_objectPronoun; }
+        Q_PROPERTY(QString objectPronoun READ objectPronoun STORED false)
+
         const CharacterStats &stats() const { return m_stats; }
         virtual void setStats(const CharacterStats &stats);
         Q_PROPERTY(CharacterStats stats READ stats WRITE setStats)
@@ -62,15 +68,6 @@ class Character : public Item {
         virtual void setMaxMp(int maxMp);
         Q_PROPERTY(int maxMp READ maxMp WRITE setMaxMp)
 
-        int sp() const { return m_sp; }
-        virtual void adjustSp(int delta);
-        virtual void setSp(int sp);
-        Q_PROPERTY(int sp READ sp WRITE setSp)
-
-        int maxSp() const { return m_maxSp; }
-        virtual void setMaxSp(int maxSp);
-        Q_PROPERTY(int maxSp READ maxSp WRITE setMaxSp)
-
         int gold() const { return m_gold; }
         virtual void adjustGold(int delta);
         virtual void setGold(int gold);
@@ -88,6 +85,9 @@ class Character : public Item {
         Q_INVOKABLE virtual void talk(const GameObjectPtr &character, const QString &message);
         Q_INVOKABLE virtual void tell(const GameObjectPtr &player, const QString &message);
 
+        Q_INVOKABLE virtual void kill(const GameObjectPtr &character);
+        Q_INVOKABLE virtual void die();
+
     protected:
         explicit Character(const char *objectType, uint id, Options options = NoOptions);
 
@@ -99,6 +99,8 @@ class Character : public Item {
         GameObjectPtr m_race;
         GameObjectPtr m_class;
         QString m_gender;
+        QString m_subjectPronoun;
+        QString m_objectPronoun;
 
         CharacterStats m_stats;
 

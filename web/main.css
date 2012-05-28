@@ -21,6 +21,9 @@ body,input {
     .stats {
         float: right;
     }
+        .mp {
+            margin-left: 20px;
+        }
 
 .screen,.command-input {
     display: block;

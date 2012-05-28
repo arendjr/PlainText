@@ -16,6 +16,7 @@
 #include "commands/givecommand.h"
 #include "commands/gocommand.h"
 #include "commands/inventorycommand.h"
+#include "commands/killcommand.h"
 #include "commands/lookcommand.h"
 #include "commands/opencommand.h"
 #include "commands/quitcommand.h"
@@ -50,6 +51,7 @@ CommandInterpreter::CommandInterpreter(Player *player, QObject *parent) :
     Command *give = new GiveCommand(player, this);
     Command *go = new GoCommand(player, this);
     Command *inventory = new InventoryCommand(player, this);
+    Command *kill = new KillCommand(player, this);
     Command *look = new LookCommand(player, this);
     Command *open = new OpenCommand(player, this);
     Command *quit = new QuitCommand(player, this);
@@ -61,6 +63,7 @@ CommandInterpreter::CommandInterpreter(Player *player, QObject *parent) :
     Command *tell = new TellCommand(player, this);
     Command *who = new WhoCommand(player, this);
 
+    m_commands.insert("attack", kill);
     m_commands.insert("close", close);
     m_commands.insert("drop", drop);
     m_commands.insert("enter", go);
@@ -69,6 +72,7 @@ CommandInterpreter::CommandInterpreter(Player *player, QObject *parent) :
     m_commands.insert("go", go);
     m_commands.insert("goodbye", quit);
     m_commands.insert("inventory", inventory);
+    m_commands.insert("kill", kill);
     m_commands.insert("look", look);
     m_commands.insert("open", open);
     m_commands.insert("quit", quit);

@@ -83,10 +83,15 @@ class GameObject : public QObject {
         static QScriptValue toScriptValue(QScriptEngine *engine, GameObject *const &gameObject);
         static void fromScriptValue(const QScriptValue &object, GameObject *&gameObject);
 
+        // use with care!!
+        void startBulkModification();
+        void commitBulkModification();
+
     protected:
         virtual void timerEvent(QTimerEvent *event);
 
         void setModified();
+
         void setAutoDelete(bool autoDelete);
 
         Options options() const { return m_options; }
@@ -106,6 +111,7 @@ class GameObject : public QObject {
         QString m_description;
         ScriptFunctionMap m_triggers;
 
+        int m_numBulkModifications;
         bool m_deleted;
 
         QHash<int, QScriptValue> *m_intervalHash;

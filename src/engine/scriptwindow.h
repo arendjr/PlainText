@@ -1,6 +1,8 @@
 #ifndef SCRIPTWINDOW_H
 #define SCRIPTWINDOW_H
 
+#include <cstdlib>
+
 #include <QObject>
 #include <QScriptValue>
 
@@ -17,7 +19,7 @@ class ScriptWindow : public QObject {
 
         QScriptValue toScriptValue();
 
-        Q_INVOKABLE int randomInt(int min = 0, int max = 2147483647) const;
+        Q_INVOKABLE int randomInt(int min = 0, int max = RAND_MAX) const;
 
     private:
         QScriptEngine *m_engine;
