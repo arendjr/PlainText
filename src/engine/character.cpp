@@ -460,9 +460,10 @@ void Character::die() {
 
     Area *area = currentArea().cast<Area *>();
     GameObjectPtrList others = area->players();
-    Util::sendOthers(others, Util::colorize(QString("%1 died.").arg(name()), Teal));
+    QString myName = indefiniteArticle().isEmpty() ? name() : "The " + name();
+    Util::sendOthers(others, Util::colorize(QString("%1 died.").arg(myName), Teal));
     if (inventory().length() > 0) {
-        Util::sendOthers(others, Util::colorize(QString("%1 was carrying %2.").arg(name(), Util::joinItems(inventory())), Teal));
+        Util::sendOthers(others, Util::colorize(QString("%1 was carrying %2.").arg(myName, Util::joinItems(inventory())), Teal));
         foreach (const GameObjectPtr &item, inventory()) {
             area->addItem(item);
         }

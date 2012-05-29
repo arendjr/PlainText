@@ -77,6 +77,8 @@ function prettyPrint(code) {
                     self.editField.value = message;
                     self.editField.focus();
                 }
+            } else if (command.substr(0, 1) === "@") {
+                self.commandInput.value = "set-prop area " + command.substr(1);
             }
         }
 
@@ -90,7 +92,7 @@ function prettyPrint(code) {
         self.commandInput.focus();
     }
     document.getElementById("edit-submit-button").onclick = function() {
-        self.socket.send(self.setCommand + " " + self.editField.value);
+        self.socket.send(self.setCommand + " " + self.editField.value.replace(/\n/g, "\\n"));
 
         self.editScreen.style.display = "none";
         self.commandInput.focus();

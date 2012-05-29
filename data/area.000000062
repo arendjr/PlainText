@@ -1,0 +1,4 @@
+{
+  "name": "Middle Port City Wall",
+  "exits": [ "exit:64", "exit:69" ]
+}

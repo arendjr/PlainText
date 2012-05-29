@@ -58,6 +58,8 @@ class Command : public QObject {
                            const QString &tooFewText,
                            const QString &tooManyText);
 
+        inline void send(const QString &message) { m_player->send(message); }
+
     private:
         Player *m_player;
 

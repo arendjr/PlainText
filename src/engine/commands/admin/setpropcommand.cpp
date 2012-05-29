@@ -52,26 +52,28 @@ void SetPropCommand::execute(const QString &command) {
                     }
                     variant = QVariant::fromValue(pointerList);
                 } catch (const GameException &exception) {
-                    player()->send(exception.what());
+                    send(exception.what());
                 }
                 break;
             }
         default:
-            player()->send(QString("Setting property %1 is not supported.").arg(propertyName));
+            send(QString("Setting property %1 is not supported.").arg(propertyName));
             return;
     }
 
     if (variant.isValid()) {
         objects[0]->setProperty(propertyName.toAscii().constData(), variant);
 
-        player()->send(QString("Property %1 modified.").arg(propertyName));
+        send(QString("Property %1 modified.").arg(propertyName));
 
-        Item *item = objects[0].cast<Item *>();
-        if (item && (propertyName == "name" || propertyName == "plural" || propertyName == "indefiniteArticle")) {
-            player()->send(QString("New forms: one %1, two %2, %3 %4.").arg(item->name(),
-                                                                               item->plural(),
-                                                                               item->indefiniteArticle(),
-                                                                               item->name()));
+        try {
+            Item *item = objects[0].cast<Item *>();
+            if (propertyName == "name" || propertyName == "plural" || propertyName == "indefiniteArticle") {
+                send(QString("New forms: one %1, two %2, %3 %4.").arg(item->name(), item->plural(),
+                                                                      item->indefiniteArticle(), item->name()));
+            }
+        } catch (const GameException &exception) {
+            Q_UNUSED(exception);
         }
     }
 }

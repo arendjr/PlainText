@@ -162,6 +162,8 @@ void Player::die() {
 
     area->removePlayer(this);
     enter(race().cast<Race *>()->startingArea());
+
+    setHp(1);
 }
 
 void Player::timerEvent(QTimerEvent *event) {
