@@ -170,6 +170,8 @@ void Session::processSignIn(const QString &data) {
                     write("\n" +
                           Util::highlight(Util::capitalize(raceName)) + "\n"
                           "  " + Util::splitLines(races[raceName].cast<Race *>()->description(), 78).join("\n  ") + "\n");
+                } else if (raceName == "<race>") {
+                    write(QString("Sorry, you are supposed to replace <race> with the name of an actual race. For example: %1.\n").arg(Util::highlight("info human")));
                 } else {
                     write(QString("I don't know anything about the \"%1\" race.\n").arg(raceName));
                 }
@@ -187,6 +189,8 @@ void Session::processSignIn(const QString &data) {
                     write("\n" +
                           Util::highlight(Util::capitalize(className)) + "\n"
                           "  " + Util::splitLines(classes[className].cast<Class *>()->description(), 78).join("\n  ") + "\n");
+                } else if (className == "<class>") {
+                    write(QString("Sorry, you are supposed to replace <class> with the name of an actual race. For example: %1.\n").arg(Util::highlight("info knight")));
                 } else {
                     write(QString("I don't know anything about the \"%1\" class.\n").arg(className));
                 }
