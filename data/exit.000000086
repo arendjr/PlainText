@@ -1,0 +1,7 @@
+{
+  "name": "bread stall",
+  "destinationArea": "area:85",
+  "oppositeExit": "0",
+  "door": false,
+  "hidden": false
+}

@@ -22,11 +22,11 @@ void AddExitCommand::execute(const QString &command) {
     setCommand(command);
 
     /*QString alias = */takeWord();
+    QString exitName = takeWord();
     if (!assertWordsLeft("Usage: add-exit <exit-name> <destination-area-id>")) {
         return;
     }
 
-    QString exitName = takeWord();
     QString destinationAreaId = takeWord();
 
     Area *destinationArea;

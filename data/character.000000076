@@ -1,0 +1,16 @@
+{
+  "name": "shopper",
+  "plural": "shoppers",
+  "indefiniteArticle": "a",
+  "portable": false,
+  "currentArea": "area:65",
+  "race": "0",
+  "characterClass": "0",
+  "gender": "male",
+  "stats": [0, 0, 0, 0, 0, 0, 0, 0],
+  "hp": 1,
+  "maxHp": 1,
+  "mp": 0,
+  "maxMp": 0,
+  "gold": 0
+}

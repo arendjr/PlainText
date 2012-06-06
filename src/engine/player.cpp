@@ -128,6 +128,7 @@ void Player::look() {
 
             exitNames << exit->name();
         }
+        exitNames = Util::sortExitNames(exitNames);
         text += Util::colorize("Obvious exits: " + exitNames.join(", ") + ".", Green) + "\n";
     }
 

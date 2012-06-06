@@ -1,0 +1,4 @@
+{
+  "name": "Middle Port Plaza",
+  "exits": [ "exit:112", "exit:114" ]
+}

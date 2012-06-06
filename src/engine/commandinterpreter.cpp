@@ -131,9 +131,10 @@ void CommandInterpreter::execute(const QString &command) {
         }
 
         if (Util::isDirectionAbbreviation(commandName)) {
-            commandName = Util::direction(commandName);
+            words[0] = Util::direction(commandName);
+            commandName = words[0];
         }
-        if (Util::isDirection(commandName)) {
+        if (Util::isDirection(commandName) || commandName == "out") {
             words.prepend("go");
             m_commands["go"]->execute(words.join(" "));
             return;

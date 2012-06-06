@@ -4,6 +4,7 @@
 
 #include <QDebug>
 #include <QDir>
+#include <QTimerEvent>
 
 #include "gameexception.h"
 #include "gameobjectsyncthread.h"
@@ -24,6 +25,62 @@ void Realm::destroy() {
 
     delete s_instance;
     s_instance = 0;
+}
+
+Realm::Realm(Options options) :
+    GameObject("realm", 0, options),
+    m_initialized(false),
+    m_nextId(1),
+    m_syncThread(0) {
+
+    if (options & Copy) {
+        return;
+    }
+
+    s_instance = this;
+
+    load(saveObjectPath(objectType(), id()));
+
+    QDir dir(saveDirPath());
+    foreach (QString fileName, dir.entryList(QDir::Files)) {
+        if (fileName.startsWith("realm.")) {
+            continue;
+        }
+
+        try {
+            GameObject::createFromFile(dir.path() + "/" + fileName);
+        } catch (const GameException &exception) {
+            qWarning() << "Error loading game object from " << fileName << ":" << exception.what();
+        }
+    }
+
+    foreach (GameObject *gameObject, m_objectMap) {
+        Q_ASSERT(gameObject);
+        gameObject->resolvePointers();
+    }
+
+    m_syncThread = new GameObjectSyncThread(this);
+    m_syncThread->start(QThread::LowestPriority);
+
+    ScriptEngine::instance()->setGlobalObject("Realm", this);
+
+    m_timeTimer = startTimer(150000);
+
+    m_initialized = true;
+}
+
+Realm::~Realm() {
+
+    ScriptEngine::instance()->unsetGlobalObject("Realm");
+
+    m_syncThread->quit();
+
+    foreach (GameObject *gameObject, m_objectMap) {
+        Q_ASSERT(gameObject);
+        delete gameObject;
+    }
+
+    m_syncThread->wait();
 }
 
 void Realm::registerObject(GameObject *gameObject) {
@@ -107,6 +164,15 @@ Player *Realm::getPlayer(const QString &name) const {
     return 0;
 }
 
+void Realm::setDateTime(const QDateTime &dateTime) {
+
+    if (m_dateTime != dateTime) {
+        m_dateTime = dateTime;
+
+        setModified();
+    }
+}
+
 uint Realm::uniqueObjectId() {
 
     return m_nextId++;
@@ -131,52 +197,17 @@ QString Realm::saveObjectPath(const char *objectType, uint id) {
     return (saveDirPath() + "/%1.%2").arg(objectType).arg(id, 9, 10, QChar('0'));
 }
 
-Realm::Realm() :
-    GameObject("realm", 0),
-    m_initialized(false),
-    m_nextId(1),
-    m_syncThread(0) {
+void Realm::timerEvent(QTimerEvent *event) {
 
-    s_instance = this;
+    int id = event->timerId();
+    if (id == m_timeTimer) {
+        m_dateTime = m_dateTime.addSecs(3600);
 
-    load(saveObjectPath(objectType(), id()));
-
-    QDir dir(saveDirPath());
-    foreach (QString fileName, dir.entryList(QDir::Files)) {
-        if (fileName.startsWith("realm.")) {
-            continue;
+        emit hourPassed(m_dateTime);
+        if (m_dateTime.time().hour() == 0) {
+            emit dayPassed(m_dateTime);
         }
-
-        try {
-            GameObject::createFromFile(dir.path() + "/" + fileName);
-        } catch (const GameException &exception) {
-            qWarning() << "Error loading game object from " << fileName << ":" << exception.what();
-        }
+    } else {
+        GameObject::timerEvent(event);
     }
-
-    foreach (GameObject *gameObject, m_objectMap) {
-        Q_ASSERT(gameObject);
-        gameObject->resolvePointers();
-    }
-
-    m_syncThread = new GameObjectSyncThread(this);
-    m_syncThread->start(QThread::LowestPriority);
-
-    ScriptEngine::instance()->setGlobalObject("Realm", this);
-
-    m_initialized = true;
-}
-
-Realm::~Realm() {
-
-    ScriptEngine::instance()->unsetGlobalObject("Realm");
-
-    m_syncThread->quit();
-
-    foreach (GameObject *gameObject, m_objectMap) {
-        Q_ASSERT(gameObject);
-        delete gameObject;
-    }
-
-    m_syncThread->wait();
 }

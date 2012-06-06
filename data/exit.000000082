@@ -1,0 +1,7 @@
+{
+  "name": "weapons stall",
+  "destinationArea": "area:81",
+  "oppositeExit": "0",
+  "door": false,
+  "hidden": false
+}

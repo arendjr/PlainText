@@ -1,0 +1,7 @@
+{
+  "name": "east",
+  "destinationArea": "area:127",
+  "oppositeExit": "exit:129",
+  "door": false,
+  "hidden": false
+}

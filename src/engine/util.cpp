@@ -4,8 +4,8 @@
 #include "scriptengine.h"
 #include "util.h"
 
-#include <QMap>
 #include <QTextStream>
+#include <QtAlgorithms>
 
 
 Util *Util::s_instance = 0;
@@ -86,6 +86,74 @@ QString Util::joinItems(const GameObjectPtrList &list, Articles article) {
     }
 
     return joinFancy(strings);
+}
+
+struct Direction {
+    QString name;
+    QString opposite;
+    QString abbreviation;
+};
+
+static Direction directions[10] = {
+    { QString("north"), QString("south"), QString("n") },
+    { QString("northeast"), QString("southwest"), QString("ne") },
+    { QString("east"), QString("west"), QString("e") },
+    { QString("southeast"), QString("northwest"), QString("se") },
+    { QString("south"), QString("north"), QString("s") },
+    { QString("southwest"), QString("northeast"), QString("sw") },
+    { QString("west"), QString("east"), QString("w") },
+    { QString("northwest"), QString("southeast"), QString("nw") },
+    { QString("up"), QString("down"), QString("u") },
+    { QString("down"), QString("up"), QString("d") }
+};
+
+static int indexOfDirection(const QString &direction) {
+
+    for (int i = 0; i < 10; i++) {
+        if (directions[i].name == direction) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+static int indexOfDirectionAbbreviation(const QString &abbreviation) {
+
+    for (int i = 0; i < 10; i++) {
+        if (directions[i].abbreviation == abbreviation) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+static bool exitNameLessThan(const QString &s1, const QString &s2) {
+
+    int index1 = indexOfDirection(s1);
+    int index2 = indexOfDirection(s2);
+
+    if (index1 > -1) {
+        if (index2 > -1) {
+            return index1 < index2;
+        } else {
+            return true;
+        }
+    } else {
+        if (index2 > -1) {
+            return false;
+        } else {
+            return s1.toLower() < s2.toLower();
+        }
+    }
+}
+
+QStringList Util::sortExitNames(const QStringList &_exitNames) {
+
+    QStringList exitNames = _exitNames;
+    qStableSort(exitNames.begin(), exitNames.end(), exitNameLessThan);
+    return exitNames;
 }
 
 static const char *writtenNumbers[] = {
@@ -222,68 +290,26 @@ QString Util::highlight(const QString &string) {
     return colorize(string, White);
 }
 
-static QMap<QString, QString> opposingDirectionsMap;
-
-static void initOpposingDirectionsMap() {
-
-    if (!opposingDirectionsMap.isEmpty()) {
-        return;
-    }
-
-    opposingDirectionsMap.insert("north", "south");
-    opposingDirectionsMap.insert("northeast", "southwest");
-    opposingDirectionsMap.insert("east", "west");
-    opposingDirectionsMap.insert("southeast", "northwest");
-    opposingDirectionsMap.insert("south", "north");
-    opposingDirectionsMap.insert("southwest", "northeast");
-    opposingDirectionsMap.insert("west", "east");
-    opposingDirectionsMap.insert("northwest", "southeast");
-    opposingDirectionsMap.insert("up", "down");
-    opposingDirectionsMap.insert("down", "up");
-}
-
 bool Util::isDirection(const QString &string) {
 
-    initOpposingDirectionsMap();
-    return opposingDirectionsMap.contains(string);
+    return indexOfDirection(string) > -1;
 }
 
 QString Util::opposingDirection(const QString &direction) {
 
-    initOpposingDirectionsMap();
-    return opposingDirectionsMap[direction];
-}
-
-static QMap<QString, QString> directionAbbreviationsMap;
-
-static void initDirectionAbbreviationsMap() {
-
-    if (!directionAbbreviationsMap.isEmpty()) {
-        return;
-    }
-
-    directionAbbreviationsMap.insert("n", "north");
-    directionAbbreviationsMap.insert("ne", "northeast");
-    directionAbbreviationsMap.insert("e", "east");
-    directionAbbreviationsMap.insert("se", "southeast");
-    directionAbbreviationsMap.insert("s", "south");
-    directionAbbreviationsMap.insert("sw", "southwest");
-    directionAbbreviationsMap.insert("w", "west");
-    directionAbbreviationsMap.insert("nw", "northwest");
-    directionAbbreviationsMap.insert("u", "up");
-    directionAbbreviationsMap.insert("d", "down");
+    Q_ASSERT(isDirection(direction));
+    return directions[indexOfDirection(direction)].opposite;
 }
 
 bool Util::isDirectionAbbreviation(const QString &string) {
 
-    initDirectionAbbreviationsMap();
-    return directionAbbreviationsMap.contains(string);
+    return indexOfDirectionAbbreviation(string) > -1;
 }
 
 QString Util::direction(const QString &abbreviation) {
 
-    initDirectionAbbreviationsMap();
-    return directionAbbreviationsMap[abbreviation];
+    Q_ASSERT(isDirectionAbbreviation(abbreviation));
+    return directions[indexOfDirectionAbbreviation(abbreviation)].name;
 }
 
 QString Util::toCamelCase(QString string) {

@@ -1,4 +1,5 @@
 {
   "name": "Middle Port City Wall",
+  "description": "This path, providing a shortcut to the east side of the city, seems like it is not supposed to be used by men or women from any self-respecting class. The high walls on your north look fearsome and intimidating, while the thick vegetation of the forest on the other side would make a perfect hiding spot for some wild animal that is ready to attack you.",
   "exits": [ "exit:64", "exit:69" ]
 }

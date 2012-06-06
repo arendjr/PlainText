@@ -1,5 +1,6 @@
 #include "gameobject.h"
 
+#include <QDateTime>
 #include <QDebug>
 #include <QFile>
 #include <QFileInfo>
@@ -233,6 +234,9 @@ bool GameObject::save() {
                 }
                 break;
             }
+            case QVariant::DateTime: {
+                dumpedProperties << v.arg(name).arg(property(name).toDateTime().toMSecsSinceEpoch());
+            }
             case QVariant::UserType:
                 if (metaProperty.userType() == QMetaType::type("GameObjectPtr")) {
                     dumpedProperties << v.arg(name, Util::jsString(property(name).value<GameObjectPtr>().toString()));
@@ -314,6 +318,9 @@ bool GameObject::load(const QString &path) throw (GameException) {
                 setProperty(name, stringList);
                 break;
             }
+            case QVariant::DateTime:
+                setProperty(name, QDateTime::fromMSecsSinceEpoch(map[name].toLongLong()));
+                break;
             case QVariant::UserType:
                 if (metaProperty.userType() == QMetaType::type("GameObjectPtr")) {
                     setProperty(name, QVariant::fromValue(GameObjectPtr::fromString(map[name].toString())));
@@ -397,6 +404,8 @@ GameObject *GameObject::createByObjectType(const QString &objectType, uint id, O
         return new Player(id, options);
     } else if (objectType == "race") {
         return new Race(id, options);
+    } else if (objectType == "realm") {
+        return new Realm(options);
     } else {
         throw GameException(GameException::UnknownGameObjectType);
     }

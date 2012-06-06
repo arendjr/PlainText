@@ -1,0 +1,7 @@
+{
+  "name": "square",
+  "destinationArea": "area:65",
+  "oppositeExit": "0",
+  "door": false,
+  "hidden": false
+}

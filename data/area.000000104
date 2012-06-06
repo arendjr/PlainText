@@ -1,0 +1,4 @@
+{
+  "name": "Boatman's Street",
+  "exits": [ "exit:106", "exit:108" ]
+}

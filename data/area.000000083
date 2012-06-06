@@ -1,0 +1,4 @@
+{
+  "name": "Butcher's Stall",
+  "exits": [ "exit:90" ]
+}

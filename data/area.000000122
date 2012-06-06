@@ -1,0 +1,4 @@
+{
+  "name": "Middle Port's East Gate",
+  "exits": [ "exit:124", "exit:126", "exit:128" ]
+}

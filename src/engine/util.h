@@ -45,6 +45,8 @@ class Util : public QObject {
 
         static QString joinItems(const GameObjectPtrList &items, Articles article = IndefiniteArticle);
 
+        Q_INVOKABLE static QStringList sortExitNames(const QStringList &exitNames);
+
         Q_INVOKABLE static QString writtenNumber(int number);
 
         Q_INVOKABLE static QString capitalize(const QString &string);

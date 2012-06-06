@@ -1,6 +1,7 @@
 #ifndef REALM_H
 #define REALM_H
 
+#include <QDateTime>
 #include <QHash>
 
 #include "gameobject.h"
@@ -20,6 +21,9 @@ class Realm : public GameObject {
         static void instantiate();
         static void destroy();
 
+        explicit Realm(Options options = NoOptions);
+        virtual ~Realm();
+
         bool isInitialized() const { return m_initialized; }
 
         void registerObject(GameObject *gameObject);
@@ -35,12 +39,23 @@ class Realm : public GameObject {
 
         const GameObjectPtrList &races() const { return m_races; }
 
+        const QDateTime &dateTime() const { return m_dateTime; }
+        virtual void setDateTime(const QDateTime &dateTime);
+        Q_PROPERTY(QDateTime dateTime READ dateTime WRITE setDateTime)
+
         uint uniqueObjectId();
 
         void syncObject(GameObject *gameObject);
 
         static QString saveDirPath();
         static QString saveObjectPath(const char *objectType, uint id);
+
+    signals:
+        void hourPassed(const QDateTime &dateTime);
+        void dayPassed(const QDateTime &dateTime);
+
+    protected:
+        virtual void timerEvent(QTimerEvent *event);
 
     private:
         static Realm *s_instance;
@@ -53,10 +68,10 @@ class Realm : public GameObject {
 
         GameObjectPtrList m_races;
 
-        GameObjectSyncThread *m_syncThread;
+        QDateTime m_dateTime;
+        int m_timeTimer;
 
-        explicit Realm();
-        virtual ~Realm();
+        GameObjectSyncThread *m_syncThread;
 };
 
 #endif // REALM_H
