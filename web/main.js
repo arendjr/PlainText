@@ -149,7 +149,20 @@ function Controller() {
         self.writeToScreen("Connection error.");
     };
 
-    this.commandInput.focus();
+    window.onorientationchange = function() {
+        self.updateLayout();
+    };
+    this.commandInput.onfocus = function() {
+        self.updateLayout();
+    }
+    this.commandInput.onblur = function() {
+        self.updateLayout();
+    }
+
+    var width = body.clientWidth;
+    if (width > 660) {
+        this.commandInput.focus();
+    }
 }
 
 Controller.prototype.writeToScreen = function(message) {
@@ -184,6 +197,32 @@ Controller.prototype.writeToScreen = function(message) {
     this.screen.appendChild(div);
 
     this.screen.scrollTop = this.screen.scrollHeight;
+}
+
+Controller.prototype.updateLayout = function() {
+
+    var body = document.body;
+
+    var width = body.clientWidth;
+    var height = body.clientHeight;
+
+    if (width > 660) {
+        body.scrollTop = 0;
+        return;
+    }
+
+    var defaultScreenHeight = 320;
+
+    body.scrollTop = 2000;
+    var actualScrollTop = body.scrollTop;
+
+    var keyboardShown = (actualScrollTop > 0);
+    if (keyboardShown) {
+        this.screen.style.height = (defaultScreenHeight - actualScrollTop) + "px";
+        body.scrollTop = 0;
+    } else {
+        this.screen.style.height = defaultScreenHeight + "px";
+    }
 }
 
 function main() {

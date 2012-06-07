@@ -1,6 +1,10 @@
 body {
     margin: 0;
     padding: 0;
+
+    height: -webkit-calc(492px + 7em);
+    height: -moz-calc(492px + 7em);
+    height: calc(492px + 7em);
 }
 
 body,input {
@@ -45,6 +49,7 @@ body,input {
 
 .command-input {
     margin: 0 2em 2em;
+    border-radius: 0;
 }
 
 .edit-screen {
@@ -82,6 +87,9 @@ body,input {
     .status-header,.screen,.command-input {
         padding: 0.1em;
         width: 100%;
+        width: -webkit-calc(100% - 0.2em);
+        width: -moz-calc(100% - 0.2em);
+        width: calc(100% - 0.2em);
     }
 
     .status-header {
@@ -95,7 +103,7 @@ body,input {
 
     .screen {
         margin: 0;
-        height: 400px;
+        height: 320px;
         border-bottom: 1px solid #777;
     }
 
