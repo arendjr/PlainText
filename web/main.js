@@ -40,6 +40,23 @@ function loadScript(fileName) {
     document.head.appendChild(script);
 }
 
+function getQueryParam(name, defaultValue) {
+
+    var params = window.location.search.substr(1).split("&");
+    for (var i = 0; i < params.length; i++) {
+        var parts = params[i].split("=");
+        if (parts.length !== 2) {
+            continue;
+        }
+        if (parts[0] === name) {
+            return decodeURIComponent(parts[1]);
+        }
+    }
+    return defaultValue;
+}
+
+var isPhoneGap = (getQueryParam("phonegap") === "true");
+
 var controller;
 
 function Controller() {
@@ -159,9 +176,14 @@ function Controller() {
         self.updateLayout();
     }
 
-    var width = body.clientWidth;
-    if (width > 660) {
+    var width = document.body.clientWidth;
+    if (width > 660 && navigator.userAgent.toLowerCase().indexOf("ipad") === -1) {
         this.commandInput.focus();
+    }
+
+    if (isPhoneGap) {
+        document.querySelector(".status-header").style.backgroundColor = "#c0c0c0";
+        this.updateLayout();
     }
 }
 
@@ -211,13 +233,17 @@ Controller.prototype.updateLayout = function() {
         return;
     }
 
-    var defaultScreenHeight = 320;
+    var defaultScreenHeight = (isPhoneGap ? 424 : 320);
 
     body.scrollTop = 2000;
     var actualScrollTop = body.scrollTop;
 
     var keyboardShown = (actualScrollTop > 0);
     if (keyboardShown) {
+        if (isPhoneGap) {
+            actualScrollTop -= 44;
+        }
+
         this.screen.style.height = (defaultScreenHeight - actualScrollTop) + "px";
         body.scrollTop = 0;
     } else {

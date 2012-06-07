@@ -3,6 +3,9 @@ MUD-build-desktop
 MUD.pro.user
 moc_*.cpp
 
+# XCode project
+*.xcodeproj
+
 # Don't save user data
 player.*
 

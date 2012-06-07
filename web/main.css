@@ -80,6 +80,12 @@ body,input {
     }
 
 @media screen and (max-width: 660px) {
+    body {
+        height: -webkit-calc(322px + 3.2em);
+        height: -moz-calc(322px + 3.2em);
+        height: calc(322px + 3.2em);
+    }
+
     body,input {
         font-size: 8pt;
     }

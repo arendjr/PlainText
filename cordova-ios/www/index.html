@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MUD</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no;" />
+	<meta charset="utf-8">
+</head>
+<body onload="redirect()">
+    <h1>Loading...</h1>
+	<script type="text/javascript">
+        function redirect() {
+            var targetUrl = "http://192.168.107.87:8080/?phonegap=true";
+
+            window.location = targetUrl;
+
+            setInterval(function() {
+                window.location = targetUrl;
+            }, 15000);
+        }
+    </script>
+</body>
+</html>

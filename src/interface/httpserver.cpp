@@ -55,11 +55,15 @@ void HttpServer::onReadyRead() {
                 return;
             }
 
-            if (tokens[1] == "/") {
-                tokens[1] = "/index.html";
+            QString path = tokens[1];
+            if (path.contains('?')) {
+                path = path.section('?', 0, 0);
             }
+            if (path == "/") {
+                path = "/index.html";
+            }
+            path = "../web" + path;
 
-            QString path = "../web" + tokens[1];
             QFile file(path);
             if (!file.open(QIODevice::ReadOnly)) {
                 os << "HTTP/1.0 404 Not Found"
