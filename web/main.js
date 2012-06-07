@@ -27,25 +27,20 @@ var keys = {
     KEY_INSERT:   45
 }
 
-var controller;
-
-if (window.webkitNotifications) {
-    window.notifications = window.webkitNotifications;
-    window.notifications.permissionRequested = false;
-}
-
-window.onfocus = function() {
-    window.isActive = true;
-};
-window.onblur = function() {
-    window.isActive = false;
-};
-window.onfocus();
-
 String.prototype.trimmed = function() {
 
     return this.replace(/^\s+|\s+$/g, "");
 };
+
+function loadScript(fileName) {
+
+    var script = document.createElement("script");
+    script.setAttribute("type", "text/javascript");
+    script.setAttribute("src", fileName);
+    document.head.appendChild(script);
+}
+
+var controller;
 
 function Controller() {
 
@@ -83,13 +78,6 @@ function Controller() {
                 }
                 self.historyIndex = 0;
             }
-
-            if (window.notifications &&
-                notifications.requestPermission &&
-                !notifications.permissionRequested) {
-                notifications.requestPermission(function() {});
-                notifications.permissionRequested = true;
-            }
         }
     }
     this.commandInput.onkeydown = function(event) {
@@ -126,24 +114,21 @@ function Controller() {
             var data = JSON.parse(message.data);
             if (data && data.player) {
                 if (!self.player.isAdmin && data.player.isAdmin) {
-                    var script = document.createElement("script");
-                    script.setAttribute("type", "text/javascript");
-                    script.setAttribute("src", "admin.js");
-                    document.head.appendChild(script);
+                    loadScript("admin.js");
                 }
 
                 self.player = data.player;
 
-                self.statusHeader.name.innerText = self.player.name;
+                self.statusHeader.name.textContent = self.player.name;
 
-                self.statusHeader.hp.innerText = self.player.hp + "HP";
+                self.statusHeader.hp.textContent = self.player.hp + "HP";
                 if (self.player.hp < self.player.maxHp / 4) {
                     self.statusHeader.hp.style.color = "#f00";
                 } else {
                     self.statusHeader.hp.style.color = "";
                 }
 
-                self.statusHeader.mp.innerText = self.player.mp + "MP";
+                self.statusHeader.mp.textContent = self.player.mp + "MP";
                 if (self.player.mp < self.player.maxMp / 4) {
                     self.statusHeader.mp.style.color = "#f00";
                 } else {
@@ -171,18 +156,6 @@ Controller.prototype.writeToScreen = function(message) {
 
     if (message.trimmed().length === 0) {
         return;
-    }
-
-    if (!window.isActive && window.notifications &&
-        notifications.checkPermission &&
-        notifications.checkPermission() === 0 &&
-        /^\w+ (says|tells|shouts)/.test(message)) {
-        var notification = notifications.createNotification(null, "MUD", message);
-        notification.show()
-
-        setTimeout(function(){
-            notification.cancel();
-        }, 10000);
     }
 
     var div = document.createElement("div");
@@ -216,4 +189,9 @@ Controller.prototype.writeToScreen = function(message) {
 function main() {
 
     controller = new Controller();
+
+    if ((window.notifications && notifications.requestPermission) ||
+        (window.webkitNotifications && webkitNotifications.requestPermission)) {
+        loadScript("notifications.js");
+    }
 }

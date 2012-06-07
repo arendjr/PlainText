@@ -137,7 +137,8 @@ OTHER_FILES += \
     ../web/admin.js \
     ../web/index.html \
     ../web/main.css \
-    ../web/main.js
+    ../web/main.js \
+    ../web/notifications.js
 
 INCLUDEPATH += \
     $$PWD/../3rdparty \
