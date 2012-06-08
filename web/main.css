@@ -46,6 +46,10 @@ body,input {
     height: 480px;
     overflow: auto;
 }
+    .screen a {
+        color: inherit;
+        text-decoration: none;
+    }
 
 .command-input {
     margin: 0 2em 2em;
@@ -87,7 +91,7 @@ body,input {
     }
 
     body,input {
-        font-size: 8pt;
+        font-size: 9pt;
     }
 
     .status-header,.screen,.command-input {
@@ -112,6 +116,9 @@ body,input {
         height: 320px;
         border-bottom: 1px solid #777;
     }
+        .screen a {
+            text-decoration: underline;
+        }
 
     .command-input {
         margin: 0;

@@ -55,33 +55,47 @@ function getQueryParam(name, defaultValue) {
     return defaultValue;
 }
 
+function element(selector) {
+
+    return document.querySelector(selector);
+}
+
+function elements(selector) {
+
+    return document.querySelectorAll(selector);
+}
+
 var isPhoneGap = (getQueryParam("phonegap") === "true");
+var isIPad = (navigator.userAgent.toLowerCase().indexOf("ipad") > -1);
+var isIPhone = (navigator.userAgent.toLowerCase().indexOf("iphone") > -1);
 
 var controller;
 
 function Controller() {
 
-    this.screen = document.getElementsByClassName("screen")[0];
+    this.screen = element(".screen");
     this.writeToScreen("Connecting...");
 
     this.player = {};
     this.statusHeader = {
-        "name": document.querySelector(".status-header .name"),
-        "hp": document.querySelector(".status-header .hp"),
-        "mp": document.querySelector(".status-header .mp"),
+        "name": element(".status-header .name"),
+        "hp": element(".status-header .hp"),
+        "mp": element(".status-header .mp"),
     };
 
     this.history = [];
     this.historyIndex = 0;
     this.currentCommand = "";
 
-    this.editScreen = document.querySelector(".edit-screen");
-    this.editField = document.getElementById("edit-field");
+    this.editScreen = element(".edit-screen");
+    this.editField = element("#edit-field");
     this.setCommand = "";
     this.onMessageHook = null;
 
+    this.screen.addEventListener("click")
+
     var self = this;
-    this.commandInput = document.getElementsByClassName("command-input")[0];
+    this.commandInput = element(".command-input");
     this.commandInput.onkeypress = function(event) {
         if (event.keyCode === keys.KEY_RETURN) {
             var command = self.commandInput.value;
@@ -171,19 +185,17 @@ function Controller() {
     };
     this.commandInput.onfocus = function() {
         self.updateLayout();
+        self.screen.scrollTop = self.screen.scrollHeight;
     }
     this.commandInput.onblur = function() {
         self.updateLayout();
     }
 
-    var width = document.body.clientWidth;
-    if (width > 660 && navigator.userAgent.toLowerCase().indexOf("ipad") === -1) {
-        this.commandInput.focus();
-    }
-
     if (isPhoneGap) {
-        document.querySelector(".status-header").style.backgroundColor = "#c0c0c0";
+        element(".status-header").style.backgroundColor = "#c0c0c0";
         this.updateLayout();
+    } else if (document.body.clientWidth > 660 && !isIPad) {
+        this.setFocus();
     }
 }
 
@@ -192,6 +204,8 @@ Controller.prototype.writeToScreen = function(message) {
     if (message.trimmed().length === 0) {
         return;
     }
+
+    var containsExits = (message.indexOf("Obvious exits:") > -1);
 
     var div = document.createElement("div");
 
@@ -206,7 +220,36 @@ Controller.prototype.writeToScreen = function(message) {
 
         var color = message.substring(index + 2, mIndex);
         var span = document.createElement("span");
-        span.appendChild(document.createTextNode(message.substring(mIndex + 1, endIndex)));
+
+        if (containsExits) {
+            var regExp = /[:,] ([\w '-]+)/g;
+            var startIndex = mIndex + 1;
+            var array;
+
+            regExp.lastIndex = startIndex;
+            while ((array = regExp.exec(message)) !== null) {
+                if (array.index >= endIndex) {
+                    break;
+                }
+
+                span.appendChild(document.createTextNode(message.substring(startIndex, array.index + 2)));
+
+                var anchor = document.createElement("a");
+                anchor.className = "go";
+                anchor.setAttribute("href", "javascript:void(0)");
+                anchor.textContent = array[1];
+                span.appendChild(anchor);
+
+                startIndex = regExp.lastIndex;
+            }
+
+            if (startIndex < endIndex) {
+                span.appendChild(document.createTextNode(message.substring(startIndex, endIndex)));
+            }
+        } else {
+            span.appendChild(document.createTextNode(message.substring(mIndex + 1, endIndex)));
+        }
+
         span.style.color = colorMap[color];
         div.appendChild(span);
 
@@ -251,6 +294,11 @@ Controller.prototype.updateLayout = function() {
     }
 }
 
+Controller.prototype.setFocus = function() {
+
+    this.commandInput.focus();
+}
+
 function main() {
 
     controller = new Controller();
@@ -258,5 +306,32 @@ function main() {
     if ((window.notifications && notifications.requestPermission) ||
         (window.webkitNotifications && webkitNotifications.requestPermission)) {
         loadScript("notifications.js");
+    }
+
+    if (isIPad || isIPhone) {
+        loadScript("tappable.js");
+
+        function initTappable() {
+
+            if (!window.tappable) {
+                setTimeout(initTappable, 50);
+                return;
+            }
+
+            tappable(".go", function(event) {
+                var exitName = event.target.textContent;
+                controller.socket.send("go \"" + exitName + "\"");
+            });
+        }
+
+        setTimeout(initTappable, 50);
+    } else {
+        controller.screen.addEventListener("click", function(event) {
+            var target = event.target;
+            if (target.className === "go") {
+                var exitName = target.textContent;
+                controller.socket.send("go \"" + exitName + "\"");
+            }
+        }, false);
     }
 }

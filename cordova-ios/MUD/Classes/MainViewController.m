@@ -10,11 +10,14 @@
 
 @implementation MainViewController
 
-- (id)initWithNibName:(NSString *) nibNameOrNil bundle:(NSBundle *) nibBundleOrNil
+- (id) initWithNibName:(NSString *) nibNameOrNil bundle:(NSBundle *) nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:)
+                                              name:UIKeyboardWillShowNotification object:nil];
+
+        self.webView.scrollView.scrollEnabled = NO;
     }
     return self;
 }
@@ -51,13 +54,13 @@
 {    
     // Locate non-UIWindow.
     UIWindow *keyboardWindow = nil;
-    for (UIWindow *testWindow in [[UIApplication sharedApplication] windows]) {
-        if (![[testWindow class] isEqual:[UIWindow class]]) {
-            keyboardWindow = testWindow;
+    for (UIWindow *window in [[UIApplication sharedApplication] windows]) {
+        if (![[window class] isEqual:[UIWindow class]]) {
+            keyboardWindow = window;
             break;
         }
     }
-    
+
     // Locate UIWebFormView.
     for (UIView *possibleFormView in [keyboardWindow subviews]) {       
         // iOS 5 sticks the UIWebFormView inside a UIPeripheralHostView.
@@ -69,6 +72,11 @@
             }
         }
     }
+
+    // Resize web view to avoid annoying scrolling behavior on input
+    //CGRect webViewFrame = self.webView.frame;
+    //webViewFrame.size.height -= 216; // subtract height of keyboard
+    //self.webView.frame = webViewFrame;
 }
 
 - (void) keyboardWillShow:(NSNotification *) notification

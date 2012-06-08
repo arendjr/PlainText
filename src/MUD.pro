@@ -138,7 +138,8 @@ OTHER_FILES += \
     ../web/index.html \
     ../web/main.css \
     ../web/main.js \
-    ../web/notifications.js
+    ../web/notifications.js \
+    ../web/tappable.js
 
 INCLUDEPATH += \
     $$PWD/../3rdparty \

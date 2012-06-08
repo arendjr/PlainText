@@ -12,6 +12,7 @@
     #import "CDVViewController.h"
 #endif
 
+
 @interface MainViewController : CDVViewController
 
 - (void) removeBar;
