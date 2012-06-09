@@ -145,6 +145,14 @@ bool GameObject::invokeTrigger(const QString &triggerName,
                          arg2, arg3, arg4);
 }
 
+bool GameObject::invokeTrigger(const QString &triggerName,
+                               const GameObjectPtr &arg1, const QVariant &arg2,
+                               const QVariant &arg3, const QVariant &arg4) {
+
+    return invokeTrigger(triggerName, QVariant::fromValue(arg1),
+                         arg2, arg3, arg4);
+}
+
 void GameObject::send(const QString &message) {
 
     Q_UNUSED(message)
@@ -192,6 +200,11 @@ void GameObject::clearTimeout(int timerId) {
         killTimer(timerId);
         m_timeoutHash->remove(timerId);
     }
+}
+
+void GameObject::init() {
+
+    invokeTrigger("oninit");
 }
 
 bool GameObject::save() {
@@ -490,6 +503,24 @@ void GameObject::timerEvent(QTimerEvent *event) {
         }
     } catch (const GameException &exception) {
         qWarning() << "Game Exception: " + QString(exception.what());
+    }
+}
+
+void GameObject::killAllTimers() {
+
+    if (m_intervalHash) {
+        foreach (int id, m_intervalHash->keys()) {
+            killTimer(id);
+        }
+        delete m_intervalHash;
+        m_intervalHash = 0;
+    }
+    if (m_timeoutHash) {
+        foreach (int id, m_timeoutHash->keys()) {
+            killTimer(id);
+        }
+        delete m_timeoutHash;
+        m_timeoutHash = 0;
     }
 }
 

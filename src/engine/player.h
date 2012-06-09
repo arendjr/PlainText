@@ -37,7 +37,7 @@ class Player : public Character {
 
         virtual void look();
 
-        virtual void die();
+        virtual void die(const GameObjectPtr &attacker);
 
     signals:
         void write(const QString &data);

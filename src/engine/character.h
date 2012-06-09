@@ -50,6 +50,14 @@ class Character : public Item {
         virtual void setStats(const CharacterStats &stats);
         Q_PROPERTY(CharacterStats stats READ stats WRITE setStats)
 
+        int respawnTime() const { return m_respawnTime; }
+        virtual void setRespawnTime(int respawnTime);
+        Q_PROPERTY(int respawnTime READ respawnTime WRITE setRespawnTime)
+
+        int respawnTimeVariation() const { return m_respawnTimeVariation; }
+        virtual void setRespawnTimeVariation(int respawnTimeVariation);
+        Q_PROPERTY(int respawnTimeVariation READ respawnTimeVariation WRITE setRespawnTimeVariation)
+
         int hp() const { return m_hp; }
         virtual void adjustHp(int delta);
         virtual void setHp(int hp);
@@ -86,11 +94,13 @@ class Character : public Item {
         Q_INVOKABLE virtual void tell(const GameObjectPtr &player, const QString &message);
 
         Q_INVOKABLE virtual void kill(const GameObjectPtr &character);
-        Q_INVOKABLE virtual void die();
+        Q_INVOKABLE virtual void die(const GameObjectPtr &attacker = GameObjectPtr());
 
         int secondsStunned() const { return m_secondsStunned; }
         Q_INVOKABLE virtual void stun(int timeout);
         void setLeaveOnActive(bool leaveOnActive);
+
+        virtual void init();
 
     protected:
         virtual void timerEvent(QTimerEvent *event);
@@ -110,14 +120,15 @@ class Character : public Item {
 
         CharacterStats m_stats;
 
+        int m_respawnTime;
+        int m_respawnTimeVariation;
+        int m_respawnTimeout;
+
         int m_hp;
         int m_maxHp;
 
         int m_mp;
         int m_maxMp;
-
-        int m_sp;
-        int m_maxSp;
 
         int m_gold;
 

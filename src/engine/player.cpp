@@ -153,7 +153,9 @@ void Player::look() {
     send(text);
 }
 
-void Player::die() {
+void Player::die(const GameObjectPtr &attacker) {
+
+    Q_UNUSED(attacker)
 
     Area *area = currentArea().cast<Area *>();
     GameObjectPtrList others = area->players();

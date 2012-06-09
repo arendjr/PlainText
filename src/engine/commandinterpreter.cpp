@@ -104,6 +104,32 @@ CommandInterpreter::CommandInterpreter(Player *player, QObject *parent) :
         m_commands.insert("exec-script", new ExecScriptCommand(player, this));
 
         m_commands.insert("stop-server", new StopServerCommand(player, this));
+
+
+        m_triggers.insert("onactive : void",
+                          "The onactive trigger is invoked on any character when it's no longer "
+                          "stunned, ie. when it can perform a new action again.");
+        m_triggers.insert("onclose(activator : character) : bool",
+                          "The onclose trigger is invoked on any item or exit when it's closed.");
+        m_triggers.insert("ondie(attacker : optional character) : bool",
+                          "The ondie trigger is invoked on any character when it dies.");
+        m_triggers.insert("onenter(activator : character) : bool",
+                          "The onenter trigger is invoked on any exit when it's entered.");
+        m_triggers.insert("onenter(activator : character) : void",
+                          "The onenter trigger is invoked on any character in an area when another "
+                          "character enters that area.");
+        m_triggers.insert("onexit(activator : character, exitName : string) : bool",
+                          "The onexit trigger is invoked on any character in an area when another "
+                          "character leaves that area.");
+        m_triggers.insert("oninit : void",
+                          "The oninit trigger is invoked once on every object when the game server "
+                          "is started.");
+        m_triggers.insert("onopen(activator : character) : bool",
+                          "The onopen trigger is invoked on any item or exit when it's opened.");
+        m_triggers.insert("onspawn : void",
+                          "The onspawn trigger is invoked on any character when it respawns.");
+        m_triggers.insert("ontalk(speaker : character, message : string) : void",
+                          "The ontalk trigger is invoked on any character when talked to.");
     }
 
     connect(quit, SIGNAL(quit()), this, SIGNAL(quit()));
@@ -194,6 +220,24 @@ void CommandInterpreter::showHelp(const QString &command) {
 
             QStringList commandNames = m_commands.keys();
             showColumns(commandNames.filter("-"));
+
+            m_player->send(QString("\nType %1 to see help about a particular command.")
+                           .arg(Util::highlight("help <command>")));
+        } else {
+            m_player->send("Sorry, but you don't look much like an admin to me.");
+        }
+    } else if (command == "triggers") {
+        if (m_player->isAdmin()) {
+            m_player->send("Here is a list of all the triggers which are available:\n\n");
+
+            foreach (const QString &triggerName, m_triggers.keys()) {
+                m_player->send("  " + Util::highlight(triggerName));
+            }
+
+            m_player->send(QString("\nType %1 to see help about a particular trigger.\n"
+                                   "Note: For any trigger with a boolean return type, returning "
+                                   "false will have the effect of canceling the original action.")
+                           .arg(Util::highlight("help <trigger>")));
         } else {
             m_player->send("Sorry, but you don't look much like an admin to me.");
         }
@@ -201,12 +245,23 @@ void CommandInterpreter::showHelp(const QString &command) {
         if (m_commands.contains(command)) {
             m_player->send("\n" + Util::highlight(command) + "\n"
                            "  " + Util::splitLines(m_commands[command]->description(), 78).join("\n  ") + "\n\n");
-        } else {
-            m_player->send(QString("The command %1 is not recognized.\n"
-                                   "Type %2 to see a list of all commands.")
-                           .arg(Util::highlight(command),
-                                Util::highlight("help commands")));
+            return;
         }
+
+        if (m_player->isAdmin()) {
+            foreach (const QString &triggerName, m_triggers.keys()) {
+                if (triggerName.startsWith(command)) {
+                    m_player->send("\n" + Util::highlight(triggerName) + "\n"
+                                   "  " + Util::splitLines(m_triggers[triggerName], 78).join("\n  ") + "\n\n");
+                    return;
+                }
+            }
+        }
+
+        m_player->send(QString("The command %1 is not recognized.\n"
+                               "Type %2 to see a list of all commands.")
+                       .arg(Util::highlight(command),
+                            Util::highlight("help commands")));
     }
 }
 

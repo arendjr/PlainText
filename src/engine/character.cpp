@@ -2,7 +2,6 @@
 
 #include <cstdlib>
 
-#include <QDebug>
 #include <QTimerEvent>
 
 #include "area.h"
@@ -23,6 +22,9 @@ Character::Character(uint id, Options options) :
     m_gender("male"),
     m_subjectPronoun("he"),
     m_objectPronoun("him"),
+    m_respawnTime(0),
+    m_respawnTimeVariation(0),
+    m_respawnTimeout(0),
     m_hp(1),
     m_maxHp(1),
     m_mp(0),
@@ -41,6 +43,9 @@ Character::Character(const char *objectType, uint id, Options options) :
     m_gender("male"),
     m_subjectPronoun("he"),
     m_objectPronoun("him"),
+    m_respawnTime(0),
+    m_respawnTimeVariation(0),
+    m_respawnTimeout(0),
     m_hp(1),
     m_maxHp(1),
     m_mp(0),
@@ -143,6 +148,24 @@ void Character::setStats(const CharacterStats &stats) {
     }
 }
 
+void Character::setRespawnTime(int respawnTime) {
+
+    if (m_respawnTime != respawnTime) {
+        m_respawnTime = qMax(respawnTime, 0);
+
+        setModified();
+    }
+}
+
+void Character::setRespawnTimeVariation(int respawnTimeVariation) {
+
+    if (m_respawnTimeVariation != respawnTimeVariation) {
+        m_respawnTimeVariation = qMax(respawnTimeVariation, 0);
+
+        setModified();
+    }
+}
+
 void Character::adjustHp(int delta) {
 
     setHp(m_hp + delta);
@@ -208,10 +231,6 @@ void Character::open(const GameObjectPtr &exitPtr) {
     NO_STUN
 
     Exit *exit = exitPtr.cast<Exit *>();
-    if (!exit) {
-        qWarning() << "Character::open(): Invalid exit.";
-        return;
-    }
 
     if (!exit->isDoor()) {
         send("Exit cannot be opened.");
@@ -238,10 +257,6 @@ void Character::close(const GameObjectPtr &exitPtr) {
     NO_STUN
 
     Exit *exit = exitPtr.cast<Exit *>();
-    if (!exit) {
-        qWarning() << "Character::close(): Invalid exit.";
-        return;
-    }
 
     if (!exit->isDoor()) {
         send("Exit cannot be closed.");
@@ -431,7 +446,7 @@ void Character::kill(const GameObjectPtr &characterPtr) {
         }
 
         if (character->hp() == 0) {
-            character->die();
+            character->die(this);
         }
     } else {
         switch (qrand() % 3) {
@@ -456,7 +471,11 @@ void Character::kill(const GameObjectPtr &characterPtr) {
     stun(4000 - (25 * stats().dexterity));
 }
 
-void Character::die() {
+void Character::die(const GameObjectPtr &attacker) {
+
+    if (!invokeTrigger("ondie", attacker)) {
+        return;
+    }
 
     Area *area = currentArea().cast<Area *>();
     GameObjectPtrList others = area->players();
@@ -470,7 +489,20 @@ void Character::die() {
     }
 
     area->removeNPC(this);
-    setDeleted();
+
+    if (m_respawnTime) {
+        setInventory(GameObjectPtrList());
+
+        killAllTimers();
+
+        int respawnTime = m_respawnTime;
+        if (m_respawnTimeVariation) {
+            respawnTime += qrand() % m_respawnTimeVariation;
+        }
+        m_respawnTimeout = startTimer(respawnTime);
+    } else {
+        setDeleted();
+    }
 }
 
 void Character::stun(int timeout) {
@@ -497,6 +529,18 @@ void Character::setLeaveOnActive(bool leaveOnActive) {
     m_leaveOnActive = leaveOnActive;
 }
 
+void Character::init() {
+
+    // guarantee our current area lists us, otherwise we may end up in a real
+    // limbo if we died and a server termination killed the respawn timers
+    if (strcmp(objectType(), "character") == 0) {
+        Area *area = currentArea().cast<Area *>();
+        area->addNPC(this);
+    }
+
+    GameObject::init();
+}
+
 void Character::timerEvent(QTimerEvent *event) {
 
     if (event->timerId() == m_stunTimeout) {
@@ -519,6 +563,18 @@ void Character::timerEvent(QTimerEvent *event) {
                 invokeTrigger("onactive");
             }
         }
+    } else if (event->timerId() == m_respawnTimeout) {
+        killTimer(m_respawnTimeout);
+        m_respawnTimeout = 0;
+
+        m_hp = m_maxHp;
+        m_mp = m_maxMp;
+
+        setModified();
+
+        enter(currentArea());
+
+        invokeTrigger("onspawn");
     } else {
         Item::timerEvent(event);
     }

@@ -57,6 +57,9 @@ class GameObject : public QObject {
         bool invokeTrigger(const QString &triggerName,
                            GameObject *arg1, const QVariant &arg2 = QVariant(),
                            const QVariant &arg3 = QVariant(), const QVariant &arg4 = QVariant());
+        bool invokeTrigger(const QString &triggerName,
+                           const GameObjectPtr &arg1, const QVariant &arg2 = QVariant(),
+                           const QVariant &arg3 = QVariant(), const QVariant &arg4 = QVariant());
 
         Q_INVOKABLE virtual void send(const QString &message);
 
@@ -65,6 +68,8 @@ class GameObject : public QObject {
 
         Q_INVOKABLE int setTimeout(const QScriptValue &function, int delay);
         Q_INVOKABLE void clearTimeout(int timerId);
+
+        Q_INVOKABLE virtual void init();
 
         bool save();
         bool load(const QString &path) throw (GameException);
@@ -89,6 +94,8 @@ class GameObject : public QObject {
 
     protected:
         virtual void timerEvent(QTimerEvent *event);
+
+        void killAllTimers();
 
         void setModified();
 

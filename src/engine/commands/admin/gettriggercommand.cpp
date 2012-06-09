@@ -1,12 +1,17 @@
 #include "gettriggercommand.h"
 
+#include "engine/util.h"
+
 
 GetTriggerCommand::GetTriggerCommand(Player *character, QObject *parent) :
     AdminCommand(character, parent) {
 
-    setDescription("Show the script for some object's trigger.\n"
-                   "\n"
-                   "Usage: get-trigger <object-name> [#] <trigger-name>");
+    setDescription(QString("Show the script for some object's trigger.\n"
+                           "\n"
+                           "Usage: get-trigger <object-name> [#] <trigger-name>\n"
+                           "\n"
+                           "Type %1 to see a list of all available triggers.")
+                   .arg(Util::highlight("help triggers")));
 }
 
 GetTriggerCommand::~GetTriggerCommand() {

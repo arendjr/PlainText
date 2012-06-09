@@ -64,9 +64,13 @@ Realm::Realm(Options options) :
 
     ScriptEngine::instance()->setGlobalObject("Realm", this);
 
-    m_timeTimer = startTimer(150000);
-
     m_initialized = true;
+
+    foreach (GameObject *gameObject, m_objectMap) {
+        gameObject->init();
+    }
+
+    m_timeTimer = startTimer(150000);
 }
 
 Realm::~Realm() {

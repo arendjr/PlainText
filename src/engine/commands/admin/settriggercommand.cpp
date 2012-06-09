@@ -1,12 +1,17 @@
 #include "settriggercommand.h"
 
+#include "engine/util.h"
+
 
 SetTriggerCommand::SetTriggerCommand(Player *character, QObject *parent) :
     AdminCommand(character, parent) {
 
-    setDescription("Set the script for some object's trigger.\n"
-                   "\n"
-                   "Usage: set-trigger <object-name> [#] <trigger-name> <script>");
+    setDescription(QString("Set the script for some object's trigger.\n"
+                           "\n"
+                           "Usage: set-trigger <object-name> [#] <trigger-name> <script>\n"
+                           "\n"
+                           "Type %1 to see a list of all available triggers.")
+                   .arg(Util::highlight("help triggers")));
 }
 
 SetTriggerCommand::~SetTriggerCommand() {
