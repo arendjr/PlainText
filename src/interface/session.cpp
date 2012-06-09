@@ -221,7 +221,7 @@ void Session::processSignIn(const QString &data) {
                               "\n"
                               "%1 (STR)\n"
                               "  Strength primarily determines the power of your physical attacks. When\n"
-                              "  wielding a shield, it also gives a small defence power up.\n"
+                              "  wielding a shield, it also gives a small defense power up.\n"
                               "\n"
                               "%2 (DEX)\n"
                               "  Dexterity determines the speed with which attacks can be dealt. It also \n"
@@ -232,13 +232,13 @@ void Session::processSignIn(const QString &data) {
                               "  Vitality primarily determines your max. health points (HP).\n"
                               "\n"
                               "%4 (END)\n"
-                              "  Endurance primarily determines your physical defence power.\n"
+                              "  Endurance primarily determines your physical defense power.\n"
                               "\n"
                               "%5 (INT)\n"
                               "  Intelligence determines your max. magic points (MP).\n"
                               "\n"
                               "%6 (FAI)\n"
-                              "  Faith determines the magical defence power. It also decreases the chance that\n"
+                              "  Faith determines the magical defense power. It also decreases the chance that\n"
                               "  a spell will fail when cast.\n")
                       .arg(Util::highlight("Strength"), Util::highlight("Dexterity"),
                            Util::highlight("Vitality"), Util::highlight("Endurance"),
