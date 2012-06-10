@@ -1,6 +1,7 @@
 #include "gameexception.h"
 
 #include <cstdio>
+#include <cstring>
 
 
 const char *GameException::s_messages[] = {
