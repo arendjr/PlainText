@@ -109,15 +109,25 @@ CommandInterpreter::CommandInterpreter(Player *player, QObject *parent) :
         m_triggers.insert("onactive : void",
                           "The onactive trigger is invoked on any character when it's no longer "
                           "stunned, ie. when it can perform a new action again.");
+        m_triggers.insert("onattack(attacker : character) : bool",
+                          "The onattack trigger is invoked on any character when it's being "
+                          "attacked.");
+        m_triggers.insert("oncharacterattacked(attacker : character, defendant : character) : void",
+                          "The oncharacterattacked trigger is invoked on any character in an area, "
+                          "except for the attacker and defendant themselves, when another character "
+                          "in that area emerges into combat.");
+        m_triggers.insert("oncharacterdied(defendant : character, attacker : optional character) : bool",
+                          "The oncharacterdied trigger is invoked on any character in an area, when "
+                          "another character in that area dies.");
+        m_triggers.insert("oncharacterentered(activator : character) : void",
+                          "The oncharacterentered trigger is invoked on any character in an area "
+                          "when another character enters that area.");
         m_triggers.insert("onclose(activator : character) : bool",
                           "The onclose trigger is invoked on any item or exit when it's closed.");
         m_triggers.insert("ondie(attacker : optional character) : bool",
                           "The ondie trigger is invoked on any character when it dies.");
         m_triggers.insert("onenter(activator : character) : bool",
                           "The onenter trigger is invoked on any exit when it's entered.");
-        m_triggers.insert("onenter(activator : character) : void",
-                          "The onenter trigger is invoked on any character in an area when another "
-                          "character enters that area.");
         m_triggers.insert("onexit(activator : character, exitName : string) : bool",
                           "The onexit trigger is invoked on any character in an area when another "
                           "character leaves that area.");

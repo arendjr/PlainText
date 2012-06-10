@@ -3,12 +3,14 @@
 
 Item::Item(uint id, Options options) :
     GameObject("item", id, options),
-    m_portable(false) {
+    m_portable(false),
+    m_weight(0) {
 }
 
 Item::Item(const char *objectType, uint id, Options options) :
     GameObject(objectType, id, options),
-    m_portable(false) {
+    m_portable(false),
+    m_weight(0) {
 }
 
 Item::~Item() {
@@ -64,6 +66,20 @@ void Item::setPortable(bool portable) {
 
     if (m_portable != portable) {
         m_portable = portable;
+
+        setModified();
+    }
+}
+
+void Item::adjustWeight(int delta) {
+
+    setWeight(m_weight + delta);
+}
+
+void Item::setWeight(int weight) {
+
+    if (m_weight != weight) {
+        m_weight = weight;
 
         setModified();
     }

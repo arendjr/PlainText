@@ -1,9 +1,19 @@
 {
   "name": "Earl",
-  "triggers": { "onenter": "(function(character) { var hasLight = false; for (var i = 0; i < character.inventory.length; i++) { if (character.inventory[i].name == 'mechanical light') { hasLight = true; break; } }; if (hasLight) { this.say(\"Hey, please put back my lighting device.\"); } else { this.say(\"Hey there, can I help you?\"); } })", "onexit": "(function(character, exitName) { if (exitName != 'out') { return; } var hasLight = false; for (var i = 0; i < character.inventory.length; i++) { if (character.inventory[i].name == 'mechanical light') { hasLight = true; break; } }; if (hasLight) { this.say(\"Hey, you're not leaving with my lighting device!\"); return false; } })", "ontalk": "(function(character, message) { if (message == 'tower' || message == 'light tower') { this.say(\"Nobody knows who built that tower, as far as we can tell it's been there forever. It's a real aid for the ships though, they can find our bay and navigate to the haven without trouble.\") } else if (message == '') { this.say(\"I'm Earl, keeper of the light tower.\"); } else { this.say(\"Say what?\") } })" },
+  "triggers": { "onactive": "(function() { for (var i = 0; i < this.enemies.length; i++) { var enemy = this.enemies[i]; if (enemy.currentArea === this.currentArea) { this.kill(enemy); return; } } })", "onattack": "(function(attacker) { if (this.enemies.indexOf(attacker) === -1) { this.enemies.push(attacker); } var self = this; this.setTimeout(function() { self.invokeTrigger('onactive'); }, 200); })", "oncharacterdied": "(function(defendant, attacker) { var index = this.enemies.indexOf(defendant); if (index > -1) { this.enemies.splice(index, 1); } })", "oncharacterentered": "(function(character) { var self = this; this.setTimeout(function() { for (var i = 0; i < self.enemies.length; i++) { var enemy = self.enemies[i]; if (enemy.currentArea === self.currentArea) { self.kill(enemy); return; } } var hasLight = false; for (i = 0; i < character.inventory.length; i++) { if (character.inventory[i].name == 'mechanical light') { hasLight = true; break; } } if (hasLight) { self.say('Hey, please put back my lighting device.'); } else { self.say('Hey there, can I help you?'); } }, 500); })", "onexit": "(function(character, exitName) { if (exitName != 'out') { return; } var hasLight = false; for (var i = 0; i < character.inventory.length; i++) { if (character.inventory[i].name == 'mechanical light') { hasLight = true; break; } }; if (hasLight) { this.say(\"Hey, you're not leaving with my lighting device!\"); return false; } })", "oninit": "(function() { this.invokeTrigger('onspawn'); })", "onspawn": "(function() { this.enemies = []; })", "ontalk": "(function(character, message) { if (message == 'tower' || message == 'light tower') { this.say(\"Nobody knows who built that tower, as far as we can tell it's been there forever. It's a real aid for the ships though, they can find our bay and navigate to the haven without trouble.\") } else if (message == '') { this.say(\"I'm Earl, keeper of the light tower.\"); } else { this.say(\"Say what?\") } })" },
   "plural": "Earls",
   "portable": false,
+  "weight": 90,
   "currentArea": "area:36",
-  "hp": 1,
+  "race": "0",
+  "characterClass": "0",
+  "gender": "male",
+  "stats": [40, 40, 40, 40, 20, 20, 185, 90],
+  "respawnTime": 12000,
+  "respawnTimeVariation": 8000,
+  "hp": 80,
+  "maxHp": 80,
+  "mp": 20,
+  "maxMp": 20,
   "gold": 0
 }

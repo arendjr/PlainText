@@ -141,16 +141,27 @@ bool GameObject::invokeTrigger(const QString &triggerName,
                                GameObject *arg1, const QVariant &arg2,
                                const QVariant &arg3, const QVariant &arg4) {
 
-    return invokeTrigger(triggerName, QVariant::fromValue(GameObjectPtr(arg1)),
-                         arg2, arg3, arg4);
+    return invokeTrigger(triggerName,
+                         QVariant::fromValue(GameObjectPtr(arg1)), arg2,
+                         arg3, arg4);
 }
 
 bool GameObject::invokeTrigger(const QString &triggerName,
                                const GameObjectPtr &arg1, const QVariant &arg2,
                                const QVariant &arg3, const QVariant &arg4) {
 
-    return invokeTrigger(triggerName, QVariant::fromValue(arg1),
-                         arg2, arg3, arg4);
+    return invokeTrigger(triggerName,
+                         QVariant::fromValue(arg1), arg2,
+                         arg3, arg4);
+}
+
+bool GameObject::invokeTrigger(const QString &triggerName,
+                               const GameObjectPtr &arg1, const GameObjectPtr &arg2,
+                               const QVariant &arg3, const QVariant &arg4) {
+
+    return invokeTrigger(triggerName,
+                         QVariant::fromValue(arg1), QVariant::fromValue(arg2),
+                         arg3, arg4);
 }
 
 void GameObject::send(const QString &message) {

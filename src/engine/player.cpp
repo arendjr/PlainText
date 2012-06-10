@@ -158,15 +158,21 @@ void Player::die(const GameObjectPtr &attacker) {
     Q_UNUSED(attacker)
 
     Area *area = currentArea().cast<Area *>();
-    GameObjectPtrList others = area->players();
+    GameObjectPtrList players = area->players();
 
     send(Util::colorize("You died.", Maroon));
-    Util::sendOthers(others, Util::colorize(QString("%1 died.").arg(name()), Teal), this);
+    Util::sendOthers(players, Util::colorize(QString("%1 died.").arg(name()), Teal), this);
+
+    GameObjectPtrList others = area->characters();
+    others.removeOne(this);
+    foreach (const GameObjectPtr &other, others) {
+        other->invokeTrigger("oncharacterdied", this, attacker);
+    }
+
+    setHp(1);
 
     area->removePlayer(this);
     enter(race().cast<Race *>()->startingArea());
-
-    setHp(1);
 }
 
 void Player::timerEvent(QTimerEvent *event) {

@@ -51,14 +51,17 @@ class GameObject : public QObject {
         virtual void setTriggers(const ScriptFunctionMap &triggers);
         Q_PROPERTY(ScriptFunctionMap triggers READ triggers WRITE setTriggers)
 
-        bool invokeTrigger(const QString &triggerName,
-                           const QVariant &arg1 = QVariant(), const QVariant &arg2 = QVariant(),
-                           const QVariant &arg3 = QVariant(), const QVariant &arg4 = QVariant());
+        Q_INVOKABLE bool invokeTrigger(const QString &triggerName,
+                                       const QVariant &arg1 = QVariant(), const QVariant &arg2 = QVariant(),
+                                       const QVariant &arg3 = QVariant(), const QVariant &arg4 = QVariant());
         bool invokeTrigger(const QString &triggerName,
                            GameObject *arg1, const QVariant &arg2 = QVariant(),
                            const QVariant &arg3 = QVariant(), const QVariant &arg4 = QVariant());
         bool invokeTrigger(const QString &triggerName,
                            const GameObjectPtr &arg1, const QVariant &arg2 = QVariant(),
+                           const QVariant &arg3 = QVariant(), const QVariant &arg4 = QVariant());
+        bool invokeTrigger(const QString &triggerName,
+                           const GameObjectPtr &arg1, const GameObjectPtr &arg2,
                            const QVariant &arg3 = QVariant(), const QVariant &arg4 = QVariant());
 
         Q_INVOKABLE virtual void send(const QString &message);

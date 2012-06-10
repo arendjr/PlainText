@@ -325,8 +325,12 @@ void Util::sendOthers(const GameObjectPtrList &_players, const QString &message,
                       const GameObjectPtr &exclude1, const GameObjectPtr &exclude2) {
 
     GameObjectPtrList players(_players);
-    players.removeOne(exclude1);
-    players.removeOne(exclude2);
+    if (!exclude1.isNull()) {
+        players.removeOne(exclude1);
+    }
+    if (!exclude2.isNull()) {
+        players.removeOne(exclude2);
+    }
     foreach (const GameObjectPtr &player, players) {
         if (player.isNull()) {
             continue;

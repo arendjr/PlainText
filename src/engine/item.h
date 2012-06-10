@@ -26,6 +26,11 @@ class Item : public GameObject {
         virtual void setPortable(bool portable);
         Q_PROPERTY(bool portable READ isPortable WRITE setPortable)
 
+        int weight() const { return m_weight; }
+        virtual void adjustWeight(int delta);
+        virtual void setWeight(int weight);
+        Q_PROPERTY(int weight READ weight WRITE setWeight)
+
     protected:
         explicit Item(const char *objectType, uint id, Options options = NoOptions);
 
@@ -34,6 +39,8 @@ class Item : public GameObject {
         QString m_indefiniteArticle;
 
         bool m_portable;
+
+        int m_weight;
 };
 
 #endif // ITEM_H

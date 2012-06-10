@@ -33,6 +33,14 @@ GameException::GameException(Cause cause, const char *objectType, uint id) :
     }
 }
 
+GameException::GameException(GameException::Cause cause, const char *message) :
+    std::exception(),
+    m_customMessage(true) {
+
+    m_message = new char[100 + strlen(message)];
+    sprintf(m_message, "%s: %s", s_messages[cause], message);
+}
+
 GameException::~GameException() throw () {
 
     if (m_customMessage) {

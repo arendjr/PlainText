@@ -136,6 +136,8 @@ class Character : public Item {
         int m_stunTimeout;
         bool m_oddStunTimer;
         bool m_leaveOnActive;
+
+        int m_regenerationInterval;
 };
 
 #endif // CHARACTER_H

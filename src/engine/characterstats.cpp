@@ -2,6 +2,7 @@
 
 #include <cstring>
 
+#include <QScriptEngine>
 #include <QStringList>
 
 
@@ -85,4 +86,30 @@ CharacterStats CharacterStats::fromVariantList(const QVariantList &variantList) 
     stats.height = variantList[6].toInt();
     stats.weight = variantList[7].toInt();
     return stats;
+}
+
+QScriptValue CharacterStats::toScriptValue(QScriptEngine *engine, const CharacterStats &stats) {
+
+    QScriptValue object = engine->newObject();
+    object.setProperty("strength", stats.strength);
+    object.setProperty("dexterity", stats.dexterity);
+    object.setProperty("vitality", stats.vitality);
+    object.setProperty("endurance", stats.endurance);
+    object.setProperty("intelligence", stats.intelligence);
+    object.setProperty("faith", stats.faith);
+    object.setProperty("height", stats.height);
+    object.setProperty("weight", stats.weight);
+    return object;
+}
+
+void CharacterStats::fromScriptValue(const QScriptValue &object, CharacterStats &stats) {
+
+    stats.strength = object.property("strength").toInt32();
+    stats.dexterity = object.property("dexterity").toInt32();
+    stats.vitality = object.property("vitality").toInt32();
+    stats.endurance = object.property("endurance").toInt32();
+    stats.intelligence = object.property("intelligence").toInt32();
+    stats.faith = object.property("faith").toInt32();
+    stats.height = object.property("height").toInt32();
+    stats.weight = object.property("weight").toInt32();
 }

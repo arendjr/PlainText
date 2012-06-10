@@ -2,6 +2,7 @@
 #define CHARACTERSTATS_H
 
 #include <QMetaType>
+#include <QScriptValue>
 #include <QString>
 #include <QVariantList>
 
@@ -31,6 +32,9 @@ class CharacterStats {
         static CharacterStats fromString(const QString &string) throw (GameException);
 
         static CharacterStats fromVariantList(const QVariantList &variantList) throw (GameException);
+
+        static QScriptValue toScriptValue(QScriptEngine *engine, const CharacterStats &stats);
+        static void fromScriptValue(const QScriptValue &object, CharacterStats &stats);
 };
 
 Q_DECLARE_METATYPE(CharacterStats)

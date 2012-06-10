@@ -7,6 +7,12 @@ function prettyPrint(code) {
         var firstOpeningBrace = code.indexOf("{", fromIndex);
         var firstIndentedClosingBrace = code.indexOf("    }", fromIndex);
         var firstClosingBrace = code.indexOf("}", fromIndex);
+        var firstOpeningBracket = code.indexOf("(", fromIndex);
+        var firstClosingBracket = code.indexOf(")", fromIndex);
+
+        if (firstOpeningBrace < firstSemicolon && firstSemicolon < firstClosingBracket) {
+            firstSemicolon = -1;
+        }
 
         if (firstSemicolon === -1) {
             firstSemicolon = 99999;
@@ -58,6 +64,8 @@ function prettyPrint(code) {
     var self = controller;
     controller.commandInput.onkeypress = function(event) {
         if (event.keyCode === keys.KEY_RETURN) {
+            var overwriteHistory = false;
+
             var command = self.commandInput.value;
             if (command.substr(0, 10) === "edit-prop " ||
                 command.substr(0, 13) === "edit-trigger ") {
@@ -77,12 +85,22 @@ function prettyPrint(code) {
                     self.editField.value = message;
                     self.editField.focus();
                 }
+
+                overwriteHistory = true;
             } else if (command.substr(0, 1) === "@") {
                 self.commandInput.value = "set-prop area " + command.substr(1);
-            }
-        }
 
-        onkeypress(event);
+                overwriteHistory = true;
+            }
+
+            onkeypress(event);
+
+            if (overwriteHistory) {
+                self.history[self.history.length - 1] = command;
+            }
+        } else {
+            onkeypress(event);
+        }
     }
 
     controller.commandInput.removeAttribute("maxlength");
@@ -92,7 +110,11 @@ function prettyPrint(code) {
         self.commandInput.focus();
     }
     document.getElementById("edit-submit-button").onclick = function() {
-        self.socket.send(self.setCommand + " " + self.editField.value.replace(/\n/g, "\\n"));
+        if (self.setCommand.substr(0, 8) === "set-prop") {
+            self.socket.send(self.setCommand + " " + self.editField.value.replace(/\n/g, "\\n"));
+        } else {
+            self.socket.send(self.setCommand + " " + self.editField.value);
+        }
 
         self.editScreen.style.display = "none";
         self.commandInput.focus();
@@ -102,9 +124,38 @@ function prettyPrint(code) {
             var value = self.editField.value;
             var start = self.editField.selectionStart;
             var end = self.editField.selectionEnd;
-            self.editField.value = value.substr(0, start) + "    " + value.substr(end);
-            self.editField.selectionStart = start + 4;
-            self.editField.selectionEnd = start + 4;
+
+            var content;
+            var sizeDiff;
+            if (start === end) {
+                content = "    ";
+            } else {
+                content = value.substring(start, end);
+                sizeDiff = -content.length;
+                if (event.shiftKey) {
+                    content = content.replace(/\n    /g, "\n");
+                    if (content.substr(0, 4) === "    ") {
+                        content = content.substr(4);
+                    }
+                } else {
+                    content = "    " + content.replace(/\n/g, "\n    ");
+                    if (content.substr(-5) === "\n    ") {
+                        content = content.substr(0, content.length - 4);
+                    }
+                }
+                sizeDiff += content.length;
+            }
+
+            self.editField.value = value.substr(0, start) + content + value.substr(end);
+
+            if (start === end) {
+                self.editField.selectionStart = start + 4;
+                self.editField.selectionEnd = start + 4;
+            } else {
+                self.editField.selectionStart = start;
+                self.editField.selectionEnd = end + sizeDiff;
+            }
+
             return false;
         }
     }

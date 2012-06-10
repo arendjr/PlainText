@@ -1,5 +1,6 @@
 #include "setpropcommand.h"
 
+#include "engine/characterstats.h"
 #include "engine/item.h"
 #include "engine/util.h"
 
@@ -47,12 +48,30 @@ void SetPropCommand::execute(const QString &command) {
             } else if (variant.userType() == QMetaType::type("GameObjectPtrList")) {
                 try {
                     GameObjectPtrList pointerList;
-                    foreach (QString string, value.split(' ')) {
+                    foreach (const QString &string, value.split(' ')) {
                         pointerList << GameObjectPtr::fromString(string);
                     }
                     variant = QVariant::fromValue(pointerList);
                 } catch (const GameException &exception) {
                     send(exception.what());
+                }
+                break;
+            } else if (variant.userType() == QMetaType::type("CharacterStats")) {
+                QStringList stringList = value.mid(1, value.length() - 2).split(',');
+                if (stringList.length() == 8) {
+                    CharacterStats stats;
+                    stats.strength = stringList[0].toInt();
+                    stats.dexterity = stringList[1].toInt();
+                    stats.vitality = stringList[2].toInt();
+                    stats.endurance = stringList[3].toInt();
+                    stats.intelligence = stringList[4].toInt();
+                    stats.faith = stringList[5].toInt();
+                    stats.height = stringList[6].toInt();
+                    stats.weight = stringList[7].toInt();
+                    variant = QVariant::fromValue(stats);
+                } else {
+                    send("Property of type CharacterStats takes the form [ <str>, <dex>, <vit>, <end>, <int>, <fai>, <hei>, <wei> ].");
+                    return;
                 }
                 break;
             }

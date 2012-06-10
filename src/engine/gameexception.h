@@ -23,6 +23,7 @@ class GameException : public std::exception {
 
         GameException(Cause cause);
         GameException(Cause cause, const char *objectType, uint id);
+        GameException(Cause cause, const char *message);
         virtual ~GameException() throw ();
 
         virtual const char *what() const throw ();

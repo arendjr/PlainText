@@ -33,9 +33,12 @@ Character::Character(uint id, Options options) :
     m_secondsStunned(0),
     m_stunTimeout(0),
     m_oddStunTimer(false),
-    m_leaveOnActive(false) {
+    m_leaveOnActive(false),
+    m_regenerationInterval(0) {
 
     setAutoDelete(false);
+
+    m_regenerationInterval = startTimer(45000);
 }
 
 Character::Character(const char *objectType, uint id, Options options) :
@@ -54,7 +57,8 @@ Character::Character(const char *objectType, uint id, Options options) :
     m_secondsStunned(0),
     m_stunTimeout(0),
     m_oddStunTimer(false),
-    m_leaveOnActive(false) {
+    m_leaveOnActive(false),
+    m_regenerationInterval(0) {
 
     setAutoDelete(false);
 }
@@ -85,6 +89,8 @@ void Character::addInventoryItem(const GameObjectPtr &item) {
     if (!m_inventory.contains(item)) {
         m_inventory << item;
 
+        adjustWeight(item.cast<Item *>()->weight());
+
         setModified();
     }
 }
@@ -92,6 +98,8 @@ void Character::addInventoryItem(const GameObjectPtr &item) {
 void Character::removeInventoryItem(const GameObjectPtr &item) {
 
     if (m_inventory.removeAll(item) > 0) {
+        adjustWeight(-item.cast<Item *>()->weight());
+
         setModified();
     }
 }
@@ -100,6 +108,12 @@ void Character::setInventory(const GameObjectPtrList &inventory) {
 
     if (m_inventory != inventory) {
         m_inventory = inventory;
+
+        int weight = m_stats.weight;
+        foreach (const GameObjectPtr &item, m_inventory) {
+            weight += item.cast<Item *>()->weight();
+        }
+        setWeight(weight);
 
         setModified();
     }
@@ -143,6 +157,12 @@ void Character::setStats(const CharacterStats &stats) {
 
         setMaxHp(2 * m_stats.vitality);
         setMaxMp(m_stats.intelligence);
+
+        int weight = m_stats.weight;
+        foreach (const GameObjectPtr &item, m_inventory) {
+            weight += item.cast<Item *>()->weight();
+        }
+        setWeight(weight);
 
         commitBulkModification();
     }
@@ -305,7 +325,7 @@ void Character::go(const GameObjectPtr &exitPtr) {
 
     area = currentArea().cast<Area *>();
     foreach (const GameObjectPtr &character, area->npcs()) {
-        character->invokeTrigger("onenter", this);
+        character->invokeTrigger("oncharacterentered", this);
     }
 }
 
@@ -413,7 +433,14 @@ void Character::kill(const GameObjectPtr &characterPtr) {
     NO_STUN
 
     Character *character = characterPtr.cast<Character *>();
+
+    if (!character->invokeTrigger("onattack", this)) {
+        return;
+    }
+
     GameObjectPtrList others = currentArea().cast<Area *>()->players();
+    others.removeOne(this);
+    others.removeOne(character);
 
     QString myName = indefiniteArticle().isEmpty() ? name() : "The " + name();
     QString enemyName = (character->indefiniteArticle().isEmpty() ? "" : "the ") +
@@ -431,17 +458,17 @@ void Character::kill(const GameObjectPtr &characterPtr) {
             case 0:
                 character->send(Util::colorize(QString("%1 deals you a sweeping punch, causing %2 damage.").arg(myName).arg(damage), Maroon));
                 send(Util::colorize(QString("You deal a sweeping punch to %1, causing %2 damage.").arg(enemyName).arg(damage), Teal));
-                Util::sendOthers(others, Util::colorize(QString("%1 deals a sweeping punch to %2.").arg(myName, enemyName), Teal), this, character);
+                Util::sendOthers(others, Util::colorize(QString("%1 deals a sweeping punch to %2.").arg(myName, enemyName), Teal));
                 break;
             case 1:
                 character->send(Util::colorize(QString("%1 hits you on the jaw for %2 damage.").arg(myName).arg(damage), Maroon));
                 send(Util::colorize(QString("You hit %1 on the jaw for %2 damage.").arg(enemyName).arg(damage), Teal));
-                Util::sendOthers(others, Util::colorize(QString("%1 hits %2 on the jaw.").arg(myName, enemyName), Teal), this, character);
+                Util::sendOthers(others, Util::colorize(QString("%1 hits %2 on the jaw.").arg(myName, enemyName), Teal));
                 break;
             case 2:
                 character->send(Util::colorize(QString("%1 kicks you for %2 damage.").arg(myName).arg(damage), Maroon));
                 send(Util::colorize(QString("You kick %1 for %2 damage.").arg(enemyName).arg(damage), Teal));
-                Util::sendOthers(others, Util::colorize(QString("%1 kicks %2.").arg(myName, enemyName), Teal), this, character);
+                Util::sendOthers(others, Util::colorize(QString("%1 kicks %2.").arg(myName, enemyName), Teal));
                 break;
         }
 
@@ -453,22 +480,26 @@ void Character::kill(const GameObjectPtr &characterPtr) {
             case 0:
                 character->send(Util::colorize(QString("%1 tries to punch you, but misses.").arg(myName), Green));
                 send(Util::colorize(QString("You try to punch %1, but miss.").arg(enemyName), Teal));
-                Util::sendOthers(others, Util::colorize(QString("%1 tries to punch %2, but misses.").arg(myName, enemyName), Teal), this, character);
+                Util::sendOthers(others, Util::colorize(QString("%1 tries to punch %2, but misses.").arg(myName, enemyName), Teal));
                 break;
             case 1:
                 character->send(Util::colorize(QString("%1 tries to grab you, but you shake %2 off.").arg(myName, objectPronoun()), Green));
                 send(Util::colorize(QString("You try to grab %1, but %2 shakes you off.").arg(enemyName, character->subjectPronoun()), Teal));
-                Util::sendOthers(others, Util::colorize(QString("%1 tries to grab %2, but gets shaken off.").arg(myName, enemyName), Teal), this, character);
+                Util::sendOthers(others, Util::colorize(QString("%1 tries to grab %2, but gets shaken off.").arg(myName, enemyName), Teal));
                 break;
             case 2:
                 character->send(Util::colorize(QString("%1 kicks at you, but fails to hurt you.").arg(myName), Green));
                 send(Util::colorize(QString("You kick at %1, but fail to hurt %2.").arg(enemyName, character->objectPronoun()), Teal));
-                Util::sendOthers(others, Util::colorize(QString("%1 kicks at %2, but fails to hurt %3.").arg(myName, enemyName, character->objectPronoun()), Teal), this, character);
+                Util::sendOthers(others, Util::colorize(QString("%1 kicks at %2, but fails to hurt %3.").arg(myName, enemyName, character->objectPronoun()), Teal));
                 break;
         }
     }
 
     stun(4000 - (25 * stats().dexterity));
+
+    foreach (const GameObjectPtr &other, others) {
+        other->invokeTrigger("oncharacterattacked", this, characterPtr);
+    }
 }
 
 void Character::die(const GameObjectPtr &attacker) {
@@ -478,14 +509,22 @@ void Character::die(const GameObjectPtr &attacker) {
     }
 
     Area *area = currentArea().cast<Area *>();
-    GameObjectPtrList others = area->players();
+
+    GameObjectPtrList players = area->players();
+
     QString myName = indefiniteArticle().isEmpty() ? name() : "The " + name();
-    Util::sendOthers(others, Util::colorize(QString("%1 died.").arg(myName), Teal));
+    Util::sendOthers(players, Util::colorize(QString("%1 died.").arg(myName), Teal));
     if (inventory().length() > 0) {
-        Util::sendOthers(others, Util::colorize(QString("%1 was carrying %2.").arg(myName, Util::joinItems(inventory())), Teal));
+        Util::sendOthers(players, Util::colorize(QString("%1 was carrying %2.").arg(myName, Util::joinItems(inventory())), Teal));
         foreach (const GameObjectPtr &item, inventory()) {
             area->addItem(item);
         }
+    }
+
+    GameObjectPtrList others = area->characters();
+    others.removeOne(this);
+    foreach (const GameObjectPtr &other, others) {
+        other->invokeTrigger("oncharacterdied", this, attacker);
     }
 
     area->removeNPC(this);
@@ -575,6 +614,8 @@ void Character::timerEvent(QTimerEvent *event) {
         enter(currentArea());
 
         invokeTrigger("onspawn");
+    } else if (event->timerId() == m_regenerationInterval) {
+        adjustHp(qMax((int) ((1.5 * stats().vitality) / 10), 1));
     } else {
         Item::timerEvent(event);
     }

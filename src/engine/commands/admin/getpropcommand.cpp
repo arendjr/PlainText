@@ -31,6 +31,11 @@ void GetPropCommand::execute(const QString &command) {
         player()->send(QString::number(objects[0]->id()));
     } else {
         QVariant value = objects[0]->property(propertyName.toAscii().constData());
+        if (!value.isValid()) {
+            player()->send("Property is not set on object.");
+            return;
+        }
+
         switch (value.type()) {
             case QVariant::Bool:
                 player()->send(value.toBool() ? "true" : "false");
@@ -51,6 +56,14 @@ void GetPropCommand::execute(const QString &command) {
                         strings << pointer.toString();
                     }
                     player()->send("[ " + strings.join(", ") + " ]");
+                    break;
+                } else if (value.userType() == QMetaType::type("CharacterStats")) {
+                    CharacterStats stats = value.value<CharacterStats>();
+                    player()->send(QString("[ %1, %2, %3, %4, %5, %6, %7, %8 ]")
+                                   .arg(stats.strength).arg(stats.dexterity)
+                                   .arg(stats.vitality).arg(stats.endurance)
+                                   .arg(stats.intelligence).arg(stats.faith)
+                                   .arg(stats.height).arg(stats.weight));
                     break;
                 }
             default:
