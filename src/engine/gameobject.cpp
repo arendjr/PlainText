@@ -486,6 +486,20 @@ void GameObject::commitBulkModification() {
     setModified();
 }
 
+QList<QMetaProperty> GameObject::storedMetaProperties() const {
+
+    QList<QMetaProperty> properties;
+    int count = metaObject()->propertyCount(),
+        offset = GameObject::staticMetaObject.propertyOffset();
+    for (int i = offset; i < count; i++) {
+        QMetaProperty metaProperty = metaObject()->property(i);
+        if (metaProperty.isStored()) {
+            properties << metaProperty;
+        }
+    }
+    return properties;
+}
+
 void GameObject::timerEvent(QTimerEvent *event) {
 
     int id = event->timerId();
@@ -561,18 +575,4 @@ void GameObject::unregisterPointer(GameObjectPtr *pointer) {
     if (m_autoDelete && m_pointers.length() == 0) {
         setDeleted();
     }
-}
-
-QList<QMetaProperty> GameObject::storedMetaProperties() const {
-
-    QList<QMetaProperty> properties;
-    int count = metaObject()->propertyCount(),
-        offset = GameObject::staticMetaObject.propertyOffset();
-    for (int i = offset; i < count; i++) {
-        QMetaProperty metaProperty = metaObject()->property(i);
-        if (metaProperty.isStored()) {
-            properties << metaProperty;
-        }
-    }
-    return properties;
 }

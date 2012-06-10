@@ -615,7 +615,7 @@ void Character::timerEvent(QTimerEvent *event) {
 
         invokeTrigger("onspawn");
     } else if (event->timerId() == m_regenerationInterval) {
-        adjustHp(qMax((int) ((1.5 * stats().vitality) / 10), 1));
+        adjustHp(qMax(stats().vitality / 15, 1));
     } else {
         Item::timerEvent(event);
     }

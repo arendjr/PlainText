@@ -51,12 +51,15 @@ SOURCES += \
     engine/commands/admin/addexitcommand.cpp \
     engine/commands/admin/additemcommand.cpp \
     engine/commands/admin/admincommand.cpp \
+    engine/commands/admin/copyitemcommand.cpp \
     engine/commands/admin/execscriptcommand.cpp \
     engine/commands/admin/getpropcommand.cpp \
     engine/commands/admin/gettriggercommand.cpp \
     engine/commands/admin/removeexitcommand.cpp \
     engine/commands/admin/removeitemcommand.cpp \
+    engine/commands/admin/setclasscommand.cpp \
     engine/commands/admin/setpropcommand.cpp \
+    engine/commands/admin/setracecommand.cpp \
     engine/commands/admin/settriggercommand.cpp \
     engine/commands/admin/stopservercommand.cpp \
     engine/commands/admin/unsettriggercommand.cpp \
@@ -114,12 +117,15 @@ HEADERS += \
     engine/commands/admin/addexitcommand.h \
     engine/commands/admin/additemcommand.h \
     engine/commands/admin/admincommand.h \
+    engine/commands/admin/copyitemcommand.h \
     engine/commands/admin/execscriptcommand.h \
     engine/commands/admin/getpropcommand.h \
     engine/commands/admin/gettriggercommand.h \
     engine/commands/admin/removeexitcommand.h \
     engine/commands/admin/removeitemcommand.h \
+    engine/commands/admin/setclasscommand.h \
     engine/commands/admin/setpropcommand.h \
+    engine/commands/admin/setracecommand.h \
     engine/commands/admin/settriggercommand.h \
     engine/commands/admin/stopservercommand.h \
     engine/commands/admin/unsettriggercommand.h \

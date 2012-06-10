@@ -30,12 +30,15 @@
 #include "commands/admin/addcharactercommand.h"
 #include "commands/admin/addexitcommand.h"
 #include "commands/admin/additemcommand.h"
+#include "commands/admin/copyitemcommand.h"
 #include "commands/admin/execscriptcommand.h"
 #include "commands/admin/getpropcommand.h"
 #include "commands/admin/gettriggercommand.h"
 #include "commands/admin/removeexitcommand.h"
 #include "commands/admin/removeitemcommand.h"
+#include "commands/admin/setclasscommand.h"
 #include "commands/admin/setpropcommand.h"
+#include "commands/admin/setracecommand.h"
 #include "commands/admin/settriggercommand.h"
 #include "commands/admin/stopservercommand.h"
 #include "commands/admin/unsettriggercommand.h"
@@ -86,25 +89,21 @@ CommandInterpreter::CommandInterpreter(Player *player, QObject *parent) :
     m_commands.insert("/me", slashMe);
 
     if (m_player->isAdmin()) {
-        m_commands.insert("get-prop", new GetPropCommand(player, this));
-        m_commands.insert("set-prop", new SetPropCommand(player, this));
-
-        m_commands.insert("get-trigger", new GetTriggerCommand(player, this));
-        m_commands.insert("set-trigger", new SetTriggerCommand(player, this));
-        m_commands.insert("unset-trigger", new UnsetTriggerCommand(player, this));
-
-        m_commands.insert("add-item", new AddItemCommand(player, this));
-        m_commands.insert("remove-item", new RemoveItemCommand(player, this));
-
-        m_commands.insert("add-exit", new AddExitCommand(player, this));
-        m_commands.insert("remove-exit", new RemoveExitCommand(player, this));
-
         m_commands.insert("add-character", new AddCharacterCommand(player, this));
-
+        m_commands.insert("add-item", new AddItemCommand(player, this));
+        m_commands.insert("add-exit", new AddExitCommand(player, this));
+        m_commands.insert("copy-item", new CopyItemCommand(player, this));
         m_commands.insert("exec-script", new ExecScriptCommand(player, this));
-
+        m_commands.insert("get-prop", new GetPropCommand(player, this));
+        m_commands.insert("get-trigger", new GetTriggerCommand(player, this));
+        m_commands.insert("remove-exit", new RemoveExitCommand(player, this));
+        m_commands.insert("remove-item", new RemoveItemCommand(player, this));
+        m_commands.insert("set-class", new SetClassCommand(player, this));
+        m_commands.insert("set-prop", new SetPropCommand(player, this));
+        m_commands.insert("set-race", new SetRaceCommand(player, this));
+        m_commands.insert("set-trigger", new SetTriggerCommand(player, this));
         m_commands.insert("stop-server", new StopServerCommand(player, this));
-
+        m_commands.insert("unset-trigger", new UnsetTriggerCommand(player, this));
 
         m_triggers.insert("onactive : void",
                           "The onactive trigger is invoked on any character when it's no longer "

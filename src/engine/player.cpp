@@ -178,7 +178,7 @@ void Player::die(const GameObjectPtr &attacker) {
 void Player::timerEvent(QTimerEvent *event) {
 
     if (event->timerId() == m_regenerationInterval) {
-        adjustHp(qMax((int) ((1.5 * stats().vitality) / 10), 1));
+        adjustHp(qMax(stats().vitality / 15, 1));
         send("");
     } else {
         Character::timerEvent(event);

@@ -95,6 +95,8 @@ class GameObject : public QObject {
         void startBulkModification();
         void commitBulkModification();
 
+        QList<QMetaProperty> storedMetaProperties() const;
+
     protected:
         virtual void timerEvent(QTimerEvent *event);
 
@@ -126,8 +128,6 @@ class GameObject : public QObject {
 
         QHash<int, QScriptValue> *m_intervalHash;
         QHash<int, QScriptValue> *m_timeoutHash;
-
-        QList<QMetaProperty> storedMetaProperties() const;
 };
 
 Q_DECLARE_METATYPE(GameObject *)

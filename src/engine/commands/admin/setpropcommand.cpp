@@ -28,6 +28,11 @@ void SetPropCommand::execute(const QString &command) {
     }
 
     QString propertyName = Util::toCamelCase(takeWord());
+
+    if (!assertWordsLeft("Usage: set-prop <object-name> [#] <property-name> <value>")) {
+        return;
+    }
+
     QString value = takeRest();
 
     QVariant variant = objects[0]->property(propertyName.toAscii().constData());

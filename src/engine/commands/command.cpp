@@ -127,8 +127,11 @@ GameObjectPtrList Command::objectsByDescription(const QPair<QString, uint> &desc
                 objects << object;
                 break;
             }
-            if (loweredName.startsWith(description.first)) {
-                objects << object;
+            foreach (const QString &word, loweredName.split(' ')) {
+                if (word.startsWith(description.first)) {
+                    objects << object;
+                    break;
+                }
             }
         }
     }
