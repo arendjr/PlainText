@@ -31,8 +31,8 @@ class Realm : public GameObject {
         GameObject *getObject(const char *objectType, uint id) const;
         Q_INVOKABLE GameObject *getObject(const QString &objectType, uint id) const;
 
-        GameObjectPtrList players() const;
-        GameObjectPtrList onlinePlayers() const;
+        Q_INVOKABLE GameObjectPtrList players() const;
+        Q_INVOKABLE GameObjectPtrList onlinePlayers() const;
         void registerPlayer(Player *player);
         void unregisterPlayer(Player *player);
         Player *getPlayer(const QString &name) const;

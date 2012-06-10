@@ -2,5 +2,5 @@
   "name": "Light Tower Keeper's House",
   "description": "The house looks pretty well-kept on the inside. You're currently standing in a big room, with a big fireplace at the left wall. In the right corner stands a one-person bed, suggesting that the keeper is living here by himself.",
   "exits": [ "exit:38", "exit:41" ],
-  "npcs": [ "character:39", "character:45" ]
+  "npcs": [ "character:39" ]
 }

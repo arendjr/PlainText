@@ -438,9 +438,7 @@ void Character::kill(const GameObjectPtr &characterPtr) {
         return;
     }
 
-    GameObjectPtrList others = currentArea().cast<Area *>()->players();
-    others.removeOne(this);
-    others.removeOne(character);
+    GameObjectPtrList players = currentArea().cast<Area *>()->players();
 
     QString myName = indefiniteArticle().isEmpty() ? name() : "The " + name();
     QString enemyName = (character->indefiniteArticle().isEmpty() ? "" : "the ") +
@@ -458,17 +456,17 @@ void Character::kill(const GameObjectPtr &characterPtr) {
             case 0:
                 character->send(Util::colorize(QString("%1 deals you a sweeping punch, causing %2 damage.").arg(myName).arg(damage), Maroon));
                 send(Util::colorize(QString("You deal a sweeping punch to %1, causing %2 damage.").arg(enemyName).arg(damage), Teal));
-                Util::sendOthers(others, Util::colorize(QString("%1 deals a sweeping punch to %2.").arg(myName, enemyName), Teal));
+                Util::sendOthers(players, Util::colorize(QString("%1 deals a sweeping punch to %2.").arg(myName, enemyName), Teal), this, characterPtr);
                 break;
             case 1:
                 character->send(Util::colorize(QString("%1 hits you on the jaw for %2 damage.").arg(myName).arg(damage), Maroon));
                 send(Util::colorize(QString("You hit %1 on the jaw for %2 damage.").arg(enemyName).arg(damage), Teal));
-                Util::sendOthers(others, Util::colorize(QString("%1 hits %2 on the jaw.").arg(myName, enemyName), Teal));
+                Util::sendOthers(players, Util::colorize(QString("%1 hits %2 on the jaw.").arg(myName, enemyName), Teal), this, characterPtr);
                 break;
             case 2:
                 character->send(Util::colorize(QString("%1 kicks you for %2 damage.").arg(myName).arg(damage), Maroon));
                 send(Util::colorize(QString("You kick %1 for %2 damage.").arg(enemyName).arg(damage), Teal));
-                Util::sendOthers(others, Util::colorize(QString("%1 kicks %2.").arg(myName, enemyName), Teal));
+                Util::sendOthers(players, Util::colorize(QString("%1 kicks %2.").arg(myName, enemyName), Teal), this, characterPtr);
                 break;
         }
 
@@ -480,23 +478,26 @@ void Character::kill(const GameObjectPtr &characterPtr) {
             case 0:
                 character->send(Util::colorize(QString("%1 tries to punch you, but misses.").arg(myName), Green));
                 send(Util::colorize(QString("You try to punch %1, but miss.").arg(enemyName), Teal));
-                Util::sendOthers(others, Util::colorize(QString("%1 tries to punch %2, but misses.").arg(myName, enemyName), Teal));
+                Util::sendOthers(players, Util::colorize(QString("%1 tries to punch %2, but misses.").arg(myName, enemyName), Teal), this, characterPtr);
                 break;
             case 1:
                 character->send(Util::colorize(QString("%1 tries to grab you, but you shake %2 off.").arg(myName, objectPronoun()), Green));
                 send(Util::colorize(QString("You try to grab %1, but %2 shakes you off.").arg(enemyName, character->subjectPronoun()), Teal));
-                Util::sendOthers(others, Util::colorize(QString("%1 tries to grab %2, but gets shaken off.").arg(myName, enemyName), Teal));
+                Util::sendOthers(players, Util::colorize(QString("%1 tries to grab %2, but gets shaken off.").arg(myName, enemyName), Teal), this, characterPtr);
                 break;
             case 2:
                 character->send(Util::colorize(QString("%1 kicks at you, but fails to hurt you.").arg(myName), Green));
                 send(Util::colorize(QString("You kick at %1, but fail to hurt %2.").arg(enemyName, character->objectPronoun()), Teal));
-                Util::sendOthers(others, Util::colorize(QString("%1 kicks at %2, but fails to hurt %3.").arg(myName, enemyName, character->objectPronoun()), Teal));
+                Util::sendOthers(players, Util::colorize(QString("%1 kicks at %2, but fails to hurt %3.").arg(myName, enemyName, character->objectPronoun()), Teal), this, characterPtr);
                 break;
         }
     }
 
     stun(4000 - (25 * stats().dexterity));
 
+    GameObjectPtrList others = currentArea().cast<Area *>()->characters();
+    others.removeOne(this);
+    others.removeOne(character);
     foreach (const GameObjectPtr &other, others) {
         other->invokeTrigger("oncharacterattacked", this, characterPtr);
     }
