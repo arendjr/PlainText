@@ -92,8 +92,6 @@ function Controller() {
     this.setCommand = "";
     this.onMessageHook = null;
 
-    this.screen.addEventListener("click")
-
     var self = this;
     this.commandInput = element(".command-input");
     this.commandInput.onkeypress = function(event) {
