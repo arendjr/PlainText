@@ -34,7 +34,7 @@ void GiveCommand::execute(const QString &command) {
     takeWord("to", IfNotLast);
 
     GameObjectPtrList recipients = takeObjects(currentArea()->characters());
-    if (!requireUnique(recipients, "Recipient is not here.", "Recipient is not unique.")) {
+    if (!requireSome(recipients, "That recipient is not here.")) {
         return;
     }
 
@@ -44,11 +44,12 @@ void GiveCommand::execute(const QString &command) {
         player()->removeInventoryItem(item);
     }
 
+    QString recipientName = Util::definiteName(recipients[0], recipients);
     QString itemsDescription = Util::joinItems(items);
-    player()->send(QString("You give %1 %2.").arg(recipient->name(), itemsDescription));
+    player()->send(QString("You give %1 %2.").arg(recipientName, itemsDescription));
     recipient->send(QString("%1 gives you %2.").arg(player()->name(), itemsDescription));
 
     Util::sendOthers(currentArea()->players(),
-                     QString("%1 gives %2 %3.").arg(player()->name(), recipient->name(), itemsDescription),
+                     QString("%1 gives %2 %3.").arg(player()->name(), recipientName, itemsDescription),
                      player(), recipient);
 }

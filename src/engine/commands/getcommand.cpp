@@ -43,7 +43,7 @@ void GetCommand::execute(const QString &command) {
     }
 
     if (takenItems.length() > 0) {
-        QString itemsDescription = Util::joinItems(takenItems, DefiniteArticle);
+        QString itemsDescription = Util::joinItems(takenItems, DefiniteArticles);
         player()->send(QString("You %1 %2.").arg(alias, itemsDescription));
 
         Util::sendOthers(currentArea()->characters(),

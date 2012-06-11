@@ -23,6 +23,6 @@ void WhoCommand::execute(const QString &command) {
     if (players.length() == 1) {
         player()->send("Only you are online.");
     } else {
-        player()->send(QString("%1 are online.").arg(Util::joinItems(players)));
+        player()->send(QString("%1 are online.").arg(Util::joinItems(players, Capitalized)));
     }
 }

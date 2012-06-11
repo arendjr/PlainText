@@ -28,9 +28,7 @@ void KillCommand::execute(const QString &command) {
     QPair <QString, uint> description = takeObjectsDescription();
     GameObjectPtrList characters = objectsByDescription(description,
                                                         currentArea()->characters());
-    if (!requireUnique(characters,
-                       QString("%1 is not here.").arg(Util::capitalize(description.first)),
-                       QString("%1 is not unique.").arg(Util::capitalize(description.first)))) {
+    if (!requireSome(characters, "That character is not here.")) {
         return;
     }
 

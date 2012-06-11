@@ -96,6 +96,8 @@ void Realm::registerObject(GameObject *gameObject) {
 
     if (strcmp(gameObject->objectType(), "race") == 0) {
         m_races.append(gameObject);
+    } else if (strcmp(gameObject->objectType(), "class") == 0) {
+        m_classes.append(gameObject);
     }
 
     if (id >= m_nextId) {

@@ -1,5 +1,9 @@
 #include "lookcommand.h"
 
+#include <cstring>
+
+#include "engine/util.h"
+
 
 LookCommand::LookCommand(Player *character, QObject *parent) :
     Command(character, parent) {
@@ -30,22 +34,22 @@ void LookCommand::execute(const QString &command) {
         return;
     }
 
-    GameObjectPtrList objects = takeObjects(player()->inventory() +
-                                            currentArea()->exits() +
-                                            currentArea()->characters() +
-                                            currentArea()->items());
-    if (!requireUnique(objects, "That's not here.", "Not unique.")) {
+    GameObjectPtrList pool = player()->inventory() + currentArea()->exits() +
+                             currentArea()->characters() + currentArea()->items();
+    GameObjectPtrList objects = takeObjects(pool);
+    if (!requireSome(objects, "That's not here.")) {
         return;
     }
 
     QString description = objects[0]->description();
     if (description.isEmpty()) {
-        QString name = objects[0]->name();
-        if (name[0].toLower() != name[0]) {
-            player()->send(QString("There's nothing special about %1.").arg(name));
+        QString name;
+        if (strcmp(objects[0]->objectType(), "exit") == 0) {
+            name = "the " + objects[0]->name();
         } else {
-            player()->send(QString("There's nothing special about the %1.").arg(name));
+            name = Util::definiteName(objects[0], pool);
         }
+        player()->send(QString("There's nothing special about %1.").arg(name));
     } else {
         player()->send(description);
     }

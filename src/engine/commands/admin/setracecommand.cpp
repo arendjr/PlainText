@@ -26,14 +26,13 @@ void SetRaceCommand::execute(const QString &command) {
         return;
     }
 
-    Character *character = characters[0].cast<Character *>();
-
     QString raceName = takeWord();
     if (raceName.isEmpty()) {
         send("Usage: set-race <character-name> [#] <race-name>");
         return;
     }
 
+    Character *character = characters[0].cast<Character *>();
     foreach (const GameObjectPtr &racePtr, Realm::instance()->races()) {
         if (racePtr->name() == raceName) {
             character->setRace(racePtr);
@@ -42,4 +41,6 @@ void SetRaceCommand::execute(const QString &command) {
             return;
         }
     }
+
+    send("Unknown race given.");
 }

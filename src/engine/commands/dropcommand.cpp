@@ -35,7 +35,7 @@ void DropCommand::execute(const QString &command) {
         player()->removeInventoryItem(item);
     }
 
-    QString itemsDescription = Util::joinItems(items, DefiniteArticle);
+    QString itemsDescription = Util::joinItems(items, DefiniteArticles);
     player()->send(QString("You drop %2.").arg(itemsDescription));
 
     Util::sendOthers(currentArea()->characters(),

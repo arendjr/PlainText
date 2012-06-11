@@ -139,15 +139,15 @@ void Player::look() {
         foreach (const GameObjectPtr &other, others) {
             playerNames << other->name();
         }
-        text += "You see " + Util::joinFancy(playerNames) + ".\n";
+        text += QString("You see %1.\n").arg(Util::joinFancy(playerNames));
     }
 
     if (area->npcs().length() > 0) {
-        text += "You see " + Util::joinItems(area->npcs()) + ".\n";
+        text += QString("You see %1.\n").arg(Util::joinItems(area->npcs()));
     }
 
     if (area->items().length() > 0) {
-        text += "You see " + Util::joinItems(area->items()) + ".\n";
+        text += QString("You see %1.\n").arg(Util::joinItems(area->items()));
     }
 
     send(text);

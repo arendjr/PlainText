@@ -39,14 +39,14 @@ QString Util::joinFancy(const QStringList &list,
     return string;
 }
 
-QString Util::joinItems(const GameObjectPtrList &list, Articles article) {
+QString Util::joinItems(const GameObjectPtrList &list, Options options) {
 
     QList<Item *> items;
     QStringList itemNames;
     QList<int> itemCounts;
 
     if (list.isEmpty()) {
-        return "nothing";
+        return (options & Capitalized ? "Nothing" : "nothing");
     }
 
     foreach (const GameObjectPtr &itemPtr, list) {
@@ -76,10 +76,13 @@ QString Util::joinItems(const GameObjectPtrList &list, Articles article) {
             if (item->indefiniteArticle().isEmpty()) {
                 strings << item->name();
             } else {
-                if (article == DefiniteArticle) {
-                    strings << "the " + item->name();
+                if (options & DefiniteArticles) {
+                    strings << (i == 0 && options & Capitalized ? "The " : "the ") +
+                               item->name();
                 } else {
-                    strings << item->indefiniteArticle() + " " + item->name();
+                    strings << (i == 0 && options & Capitalized ? capitalize(item->indefiniteArticle()) :
+                                                                  item->indefiniteArticle()) +
+                               " " + item->name();
                 }
             }
         }
@@ -185,6 +188,77 @@ QString Util::writtenNumber(int number) {
         return ::writtenNumbers[number];
     } else {
         return QString::number(number);
+    }
+}
+
+static const char *writtenPositions[] = {
+    "zeroth",
+    "first",
+    "second",
+    "third",
+    "fourth",
+    "fifth",
+    "sixth",
+    "seventh",
+    "eightth",
+    "ninth",
+    "tenth",
+    "eleventh",
+    "twelfth",
+    "thirteenth",
+    "fourteenth",
+    "fifteenth",
+    "sixteenth",
+    "seventeenth",
+    "eighteenth",
+    "nineteenth"
+};
+
+QString Util::writtenPosition(int position) {
+
+    if (position >= 1 && position <= 19) {
+        return ::writtenPositions[position];
+    } else {
+        int rest = position % 10;
+        return QString::number(position) +
+               (rest == 1 ? "st" : rest == 2 ? "nd" : rest == 3 ? "rd" : "th");
+    }
+}
+
+QString Util::definiteName(const GameObjectPtr &itemPtr, const GameObjectPtrList &pool,
+                           Options options) {
+
+    Item *item = itemPtr.cast<Item *>();
+    if (item->indefiniteArticle().isEmpty()) {
+        return item->name();
+    } else {
+        int position = 0;
+        int total = 0;
+        foreach (const GameObjectPtr &otherPtr, pool) {
+            if (otherPtr->name() == itemPtr->name()) {
+                total++;
+
+                if (otherPtr == itemPtr) {
+                    position = total;
+                }
+            }
+        }
+
+        return QString(options & Capitalized ? "The " : "the ") +
+               QString(total > 1 ? writtenPosition(position) + " ": "") +
+               item->name();
+    }
+}
+
+QString Util::indefiniteName(const GameObjectPtr &itemPtr, Options options) {
+
+    Item *item = itemPtr.cast<Item *>();
+    if (item->indefiniteArticle().isEmpty()) {
+        return item->name();
+    } else {
+        return (options & Capitalized ? capitalize(item->indefiniteArticle()) :
+                                        item->indefiniteArticle()) +
+               " " + item->name();
     }
 }
 

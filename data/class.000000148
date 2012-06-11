@@ -1,0 +1,5 @@
+{
+  "name": "soldier",
+  "description": "Soldiers form the majority of any armed forces.",
+  "stats": [6, 3, 3, 3, 0, 3, 0, 5]
+}

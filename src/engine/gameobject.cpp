@@ -526,8 +526,10 @@ void GameObject::timerEvent(QTimerEvent *event) {
             QScriptValue exception = engine->uncaughtException();
             qWarning() << "Script Exception: " + exception.toString();
         }
-    } catch (const GameException &exception) {
+    } catch (GameException &exception) {
         qWarning() << "Game Exception: " + QString(exception.what());
+    } catch (...) {
+        qWarning() << "Unknown exception.";
     }
 }
 

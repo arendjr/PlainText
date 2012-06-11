@@ -1,7 +1,7 @@
 #include "setclasscommand.h"
 
 #include "engine/character.h"
-#include "engine/race.h"
+#include "engine/realm.h"
 
 
 SetClassCommand::SetClassCommand(Player *character, QObject *parent) :
@@ -26,20 +26,14 @@ void SetClassCommand::execute(const QString &command) {
         return;
     }
 
-    Character *character = characters[0].cast<Character *>();
-    if (character->race().isNull()) {
-        send("Need to set the race first.");
-        return;
-    }
-
     QString className = takeWord();
     if (className.isEmpty()) {
         send("Usage: set-class <character-name> [#] <class-name>");
         return;
     }
 
-    Race *race = character->race().cast<Race *>();
-    foreach (const GameObjectPtr &classPtr, race->classes()) {
+    Character *character = characters[0].cast<Character *>();
+    foreach (const GameObjectPtr &classPtr, Realm::instance()->classes()) {
         if (classPtr->name() == className) {
             character->setClass(classPtr);
 
@@ -47,4 +41,6 @@ void SetClassCommand::execute(const QString &command) {
             return;
         }
     }
+
+    send("Unknown class given.");
 }

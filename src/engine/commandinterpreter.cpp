@@ -194,9 +194,14 @@ void CommandInterpreter::execute(const QString &command) {
         } else {
             m_player->send(QString("Command \"%1\" does not exist.").arg(words[0]));
         }
-    } catch (const GameException &exception) {
+    } catch (GameException &exception) {
         m_player->send(QString("Executing the command gave an exception: %1").arg(exception.what()));
-        if (m_player->isAdmin()) {
+        if (!m_player->isAdmin()) {
+            m_player->send("This is not good. You may want to contact a game admin about this.");
+        }
+    } catch (...) {
+        m_player->send("Executing the command gave an unknown exception.");
+        if (!m_player->isAdmin()) {
             m_player->send("This is not good. You may want to contact a game admin about this.");
         }
     }

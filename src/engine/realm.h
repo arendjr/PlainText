@@ -37,7 +37,8 @@ class Realm : public GameObject {
         void unregisterPlayer(Player *player);
         Player *getPlayer(const QString &name) const;
 
-        const GameObjectPtrList &races() const { return m_races; }
+        Q_INVOKABLE const GameObjectPtrList &races() const { return m_races; }
+        Q_INVOKABLE const GameObjectPtrList &classes() const { return m_classes; }
 
         const QDateTime &dateTime() const { return m_dateTime; }
         virtual void setDateTime(const QDateTime &dateTime);
@@ -67,6 +68,7 @@ class Realm : public GameObject {
         QHash<QString, Player *> m_playerMap;
 
         GameObjectPtrList m_races;
+        GameObjectPtrList m_classes;
 
         QDateTime m_dateTime;
         int m_timeTimer;

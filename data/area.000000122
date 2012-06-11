@@ -1,4 +1,5 @@
 {
   "name": "Middle Port's East Gate",
-  "exits": [ "exit:124", "exit:126", "exit:128" ]
+  "exits": [ "exit:124", "exit:126", "exit:128" ],
+  "npcs": [ "character:149", "character:150" ]
 }

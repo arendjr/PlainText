@@ -27,7 +27,7 @@ void GoCommand::execute(const QString &command) {
     }
 
     GameObjectPtrList exits = takeObjects(currentArea()->exits());
-    if (!requireUnique(exits, "You can't go that way.", "Exit is not unique.")) {
+    if (!requireSome(exits, "You can't go that way.")) {
         return;
     }
 

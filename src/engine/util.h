@@ -26,9 +26,10 @@ enum Color {
     Purple
 };
 
-enum Articles {
-    IndefiniteArticle,
-    DefiniteArticle
+enum Options {
+    NoOptions = 0x00,
+    Capitalized = 0x01,
+    DefiniteArticles = 0x02
 };
 
 class Util : public QObject {
@@ -43,11 +44,20 @@ class Util : public QObject {
                                              const QString &separator = ", ",
                                              const QString &last = " and ");
 
-        static QString joinItems(const GameObjectPtrList &items, Articles article = IndefiniteArticle);
+        static QString joinItems(const GameObjectPtrList &items, Options options = NoOptions);
 
         Q_INVOKABLE static QStringList sortExitNames(const QStringList &exitNames);
 
         Q_INVOKABLE static QString writtenNumber(int number);
+
+        Q_INVOKABLE static QString writtenPosition(int position);
+
+        Q_INVOKABLE static QString definiteName(const GameObjectPtr &item,
+                                                const GameObjectPtrList &pool,
+                                                Options options = NoOptions);
+
+        Q_INVOKABLE static QString indefiniteName(const GameObjectPtr &item,
+                                                  Options options = NoOptions);
 
         Q_INVOKABLE static QString capitalize(const QString &string);
 

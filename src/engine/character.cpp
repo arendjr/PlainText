@@ -438,11 +438,11 @@ void Character::kill(const GameObjectPtr &characterPtr) {
         return;
     }
 
-    GameObjectPtrList players = currentArea().cast<Area *>()->players();
+    Area *area = currentArea().cast<Area *>();
+    GameObjectPtrList players = area->players();
 
-    QString myName = indefiniteArticle().isEmpty() ? name() : "The " + name();
-    QString enemyName = (character->indefiniteArticle().isEmpty() ? "" : "the ") +
-                        character->name();
+    QString myName = Util::definiteName(this, area->characters(), Capitalized);
+    QString enemyName = Util::definiteName(characterPtr, area->characters());
 
     qreal hitChance = 100 * ((80 + stats().dexterity) / 160.0) *
                             ((100 - character->stats().dexterity) / 100.0);
@@ -513,7 +513,7 @@ void Character::die(const GameObjectPtr &attacker) {
 
     GameObjectPtrList players = area->players();
 
-    QString myName = indefiniteArticle().isEmpty() ? name() : "The " + name();
+    QString myName = Util::definiteName(this, area->characters(), Capitalized);
     Util::sendOthers(players, Util::colorize(QString("%1 died.").arg(myName), Teal));
     if (inventory().length() > 0) {
         Util::sendOthers(players, Util::colorize(QString("%1 was carrying %2.").arg(myName, Util::joinItems(inventory())), Teal));
