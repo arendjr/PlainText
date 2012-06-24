@@ -11,7 +11,9 @@
 #include "realm.h"
 #include "util.h"
 #include "commands/closecommand.h"
+#include "commands/drinkcommand.h"
 #include "commands/dropcommand.h"
+#include "commands/eatcommand.h"
 #include "commands/getcommand.h"
 #include "commands/givecommand.h"
 #include "commands/gocommand.h"
@@ -26,6 +28,7 @@
 #include "commands/statscommand.h"
 #include "commands/talkcommand.h"
 #include "commands/tellcommand.h"
+#include "commands/usecommand.h"
 #include "commands/whocommand.h"
 #include "commands/admin/addcharactercommand.h"
 #include "commands/admin/addexitcommand.h"
@@ -34,6 +37,7 @@
 #include "commands/admin/execscriptcommand.h"
 #include "commands/admin/getpropcommand.h"
 #include "commands/admin/gettriggercommand.h"
+#include "commands/admin/listpropscommand.h"
 #include "commands/admin/removeexitcommand.h"
 #include "commands/admin/removeitemcommand.h"
 #include "commands/admin/setclasscommand.h"
@@ -48,45 +52,37 @@ CommandInterpreter::CommandInterpreter(Player *player, QObject *parent) :
     QObject(parent),
     m_player(player) {
 
-    Command *close = new CloseCommand(player, this);
-    Command *drop = new DropCommand(player, this);
     Command *get = new GetCommand(player, this);
-    Command *give = new GiveCommand(player, this);
     Command *go = new GoCommand(player, this);
-    Command *inventory = new InventoryCommand(player, this);
     Command *kill = new KillCommand(player, this);
     Command *look = new LookCommand(player, this);
-    Command *open = new OpenCommand(player, this);
     Command *quit = new QuitCommand(player, this);
-    Command *say = new SayCommand(player, this);
-    Command *shout = new ShoutCommand(player, this);
-    Command *slashMe = new SlashMeCommand(player, this);
-    Command *stats = new StatsCommand(player, this);
-    Command *talk = new TalkCommand(player, this);
-    Command *tell = new TellCommand(player, this);
-    Command *who = new WhoCommand(player, this);
 
     m_commands.insert("attack", kill);
-    m_commands.insert("close", close);
-    m_commands.insert("drop", drop);
+    m_commands.insert("close", new CloseCommand(player, this));
+    m_commands.insert("drink", new DrinkCommand(player, this));
+    m_commands.insert("drop", new DropCommand(player, this));
+    m_commands.insert("eat", new EatCommand(player, this));
     m_commands.insert("enter", go);
-    m_commands.insert("give", give);
     m_commands.insert("get", get);
+    m_commands.insert("give", new GiveCommand(player, this));
     m_commands.insert("go", go);
     m_commands.insert("goodbye", quit);
-    m_commands.insert("inventory", inventory);
+    m_commands.insert("inventory", new InventoryCommand(player, this));
     m_commands.insert("kill", kill);
+    m_commands.insert("l", look);
     m_commands.insert("look", look);
-    m_commands.insert("open", open);
+    m_commands.insert("open", new OpenCommand(player, this));
     m_commands.insert("quit", quit);
-    m_commands.insert("say", say);
-    m_commands.insert("shout", shout);
-    m_commands.insert("stats", stats);
+    m_commands.insert("say", new SayCommand(player, this));
+    m_commands.insert("shout", new ShoutCommand(player, this));
+    m_commands.insert("stats", new StatsCommand(player, this));
     m_commands.insert("take", get);
-    m_commands.insert("talk", talk);
-    m_commands.insert("tell", tell);
-    m_commands.insert("who", who);
-    m_commands.insert("/me", slashMe);
+    m_commands.insert("talk", new TalkCommand(player, this));
+    m_commands.insert("tell", new TellCommand(player, this));
+    m_commands.insert("use", new UseCommand(player, this));
+    m_commands.insert("who", new WhoCommand(player, this));
+    m_commands.insert("/me", new SlashMeCommand(player, this));
 
     if (m_player->isAdmin()) {
         m_commands.insert("add-character", new AddCharacterCommand(player, this));
@@ -96,6 +92,7 @@ CommandInterpreter::CommandInterpreter(Player *player, QObject *parent) :
         m_commands.insert("exec-script", new ExecScriptCommand(player, this));
         m_commands.insert("get-prop", new GetPropCommand(player, this));
         m_commands.insert("get-trigger", new GetTriggerCommand(player, this));
+        m_commands.insert("list-props", new ListPropsCommand(player, this));
         m_commands.insert("remove-exit", new RemoveExitCommand(player, this));
         m_commands.insert("remove-item", new RemoveItemCommand(player, this));
         m_commands.insert("set-class", new SetClassCommand(player, this));
@@ -125,6 +122,10 @@ CommandInterpreter::CommandInterpreter(Player *player, QObject *parent) :
                           "The onclose trigger is invoked on any item or exit when it's closed.");
         m_triggers.insert("ondie(attacker : optional character) : bool",
                           "The ondie trigger is invoked on any character when it dies.");
+        m_triggers.insert("ondrink(activator : character) : bool",
+                          "The ondrink trigger is invoked on any item when it's drunk.");
+        m_triggers.insert("oneat(activator : character) : bool",
+                          "The ondrink trigger is invoked on any item when it's eaten.");
         m_triggers.insert("onenter(activator : character) : bool",
                           "The onenter trigger is invoked on any exit when it's entered.");
         m_triggers.insert("onexit(activator : character, exitName : string) : bool",
@@ -139,6 +140,8 @@ CommandInterpreter::CommandInterpreter(Player *player, QObject *parent) :
                           "The onspawn trigger is invoked on any character when it respawns.");
         m_triggers.insert("ontalk(speaker : character, message : string) : void",
                           "The ontalk trigger is invoked on any character when talked to.");
+        m_triggers.insert("onuse(activator : character) : bool",
+                          "The onuse trigger is invoked on any item when it's used.");
     }
 
     connect(quit, SIGNAL(quit()), this, SIGNAL(quit()));

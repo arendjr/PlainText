@@ -2,6 +2,7 @@
 
 #include <cstdlib>
 
+#include <QDateTime>
 #include <QTimerEvent>
 
 #include "area.h"
@@ -24,21 +25,25 @@ Character::Character(uint id, Options options) :
     m_objectPronoun("him"),
     m_respawnTime(0),
     m_respawnTimeVariation(0),
-    m_respawnTimeout(0),
+    m_respawnTimerId(0),
     m_hp(1),
     m_maxHp(1),
     m_mp(0),
     m_maxMp(0),
-    m_gold(0),
+    m_gold(0.0),
+    m_effectsTimerId(0),
+    m_effectsTimerStarted(0),
+    m_modifiersTimerId(0),
+    m_modifiersTimerStarted(0),
     m_secondsStunned(0),
-    m_stunTimeout(0),
+    m_stunTimerId(0),
     m_oddStunTimer(false),
     m_leaveOnActive(false),
-    m_regenerationInterval(0) {
+    m_regenerationTimerId(0) {
 
     setAutoDelete(false);
 
-    m_regenerationInterval = startTimer(45000);
+    m_regenerationTimerId = startTimer(45000);
 }
 
 Character::Character(const char *objectType, uint id, Options options) :
@@ -48,17 +53,21 @@ Character::Character(const char *objectType, uint id, Options options) :
     m_objectPronoun("him"),
     m_respawnTime(0),
     m_respawnTimeVariation(0),
-    m_respawnTimeout(0),
+    m_respawnTimerId(0),
     m_hp(1),
     m_maxHp(1),
     m_mp(0),
     m_maxMp(0),
-    m_gold(0),
+    m_gold(0.0),
+    m_effectsTimerId(0),
+    m_effectsTimerStarted(0),
+    m_modifiersTimerId(0),
+    m_modifiersTimerStarted(0),
     m_secondsStunned(0),
-    m_stunTimeout(0),
+    m_stunTimerId(0),
     m_oddStunTimer(false),
     m_leaveOnActive(false),
-    m_regenerationInterval(0) {
+    m_regenerationTimerId(0) {
 
     setAutoDelete(false);
 }
@@ -110,7 +119,7 @@ void Character::setInventory(const GameObjectPtrList &inventory) {
         m_inventory = inventory;
 
         int weight = m_stats.weight;
-        foreach (const GameObjectPtr &item, m_inventory) {
+        gopl_foreach (item, m_inventory) {
             weight += item.cast<Item *>()->weight();
         }
         setWeight(weight);
@@ -159,7 +168,7 @@ void Character::setStats(const CharacterStats &stats) {
         setMaxMp(m_stats.intelligence);
 
         int weight = m_stats.weight;
-        foreach (const GameObjectPtr &item, m_inventory) {
+        gopl_foreach (item, m_inventory) {
             weight += item.cast<Item *>()->weight();
         }
         setWeight(weight);
@@ -232,17 +241,105 @@ void Character::setMaxMp(int maxMp) {
     }
 }
 
-void Character::adjustGold(int delta) {
+void Character::adjustGold(double delta) {
 
     setGold(m_gold + delta);
 }
 
-void Character::setGold(int gold) {
+void Character::setGold(double gold) {
 
     if (m_gold != gold) {
-        m_gold = qMax(gold, 0);
+        m_gold = qMax(gold, 0.0);
 
         setModified();
+    }
+}
+
+void Character::addEffect(const Effect &effect) {
+
+    qint64 now = QDateTime::currentMSecsSinceEpoch();
+    int nextTimeout = updateEffects(now);
+
+    if (nextTimeout == -1 || effect.delay < nextTimeout) {
+        if (m_effectsTimerId) {
+            killTimer(m_effectsTimerId);
+        }
+        m_effectsTimerId = startTimer(effect.delay);
+        m_effectsTimerStarted = now;
+    }
+
+    m_effects.append(effect);
+}
+
+void Character::clearEffects() {
+
+    m_effects.clear();
+    if (m_effectsTimerId) {
+        killTimer(m_effectsTimerId);
+        m_effectsTimerId = 0;
+    }
+    m_effectsTimerStarted = 0;
+}
+
+void Character::clearNegativeEffects() {
+
+    for (int i = 0; i < m_effects.length(); i++) {
+        Effect &effect = m_effects[i];
+
+        if (effect.hpDelta < 0 || effect.mpDelta < 0) {
+            m_effects.removeAt(i);
+            i--;
+            continue;
+        }
+    }
+
+    if (m_effects.length() == 0) {
+        clearEffects();
+    }
+}
+
+void Character::addModifier(const Modifier &modifier) {
+
+    qint64 now = QDateTime::currentMSecsSinceEpoch();
+    int nextTimeout = updateModifiers(now);
+
+    if (nextTimeout == -1 || modifier.duration < nextTimeout) {
+        if (m_modifiersTimerId) {
+            killTimer(m_modifiersTimerId);
+        }
+        m_modifiersTimerId = startTimer(modifier.duration);
+        m_modifiersTimerStarted = now;
+    }
+
+    m_modifiers.append(modifier);
+}
+
+void Character::clearModifiers() {
+
+    m_modifiers.clear();
+    if (m_modifiersTimerId) {
+        killTimer(m_modifiersTimerId);
+        m_modifiersTimerId = 0;
+    }
+    m_modifiersTimerStarted = 0;
+}
+
+void Character::clearNegativeModifiers() {
+
+    for (int i = 0; i < m_modifiers.length(); i++) {
+        Modifier &modifier = m_modifiers[i];
+        CharacterStats &stats = modifier.stats;
+
+        if ((stats.strength + stats.dexterity + stats.vitality +
+             stats.endurance + stats.intelligence + stats.faith) < 0)  {
+            m_modifiers.removeAt(i);
+            i--;
+            continue;
+        }
+    }
+
+    if (m_modifiers.length() == 0) {
+        clearModifiers();
     }
 }
 
@@ -310,7 +407,7 @@ void Character::go(const GameObjectPtr &exitPtr) {
     }
 
     Area *area = currentArea().cast<Area *>();
-    foreach (const GameObjectPtr &character, area->npcs()) {
+    gopl_foreach (character, area->npcs()) {
         if (!character->invokeTrigger("onexit", this, exit->name())) {
             return;
         }
@@ -324,7 +421,7 @@ void Character::go(const GameObjectPtr &exitPtr) {
     enter(exit->destinationArea());
 
     area = currentArea().cast<Area *>();
-    foreach (const GameObjectPtr &character, area->npcs()) {
+    gopl_foreach (character, area->npcs()) {
         character->invokeTrigger("oncharacterentered", this);
     }
 }
@@ -359,7 +456,7 @@ void Character::leave(const GameObjectPtr &areaPtr, const QString &exitName) {
                     QString("%1 left to the %2.").arg(name(), exitName));
         } else {
             bool unique = true;
-            foreach (const GameObjectPtr &other, area->npcs()) {
+            gopl_foreach (other, area->npcs()) {
                 if (other->name() == name()) {
                     unique = false;
                     break;
@@ -372,7 +469,8 @@ void Character::leave(const GameObjectPtr &areaPtr, const QString &exitName) {
             } else {
                 text = (exitName.isEmpty() ?
                         QString("%1 %2 left.").arg(Util::capitalize(article), name()) :
-                        QString("%1 %2 left to the %3.").arg(Util::capitalize(article), name(), exitName));
+                        QString("%1 %2 left to the %3.").arg(Util::capitalize(article), name(),
+                                                             exitName));
             }
         }
         Util::sendOthers(area->players(), text);
@@ -390,14 +488,14 @@ void Character::shout(const QString &message) {
     Area *area = currentArea().cast<Area *>();
 
     GameObjectPtrList players = area->players();
-    foreach (const GameObjectPtr &exitPtr, area->exits()) {
+    gopl_foreach (exitPtr, area->exits()) {
         Exit *exit = exitPtr.cast<Exit *>();
         Q_ASSERT(exit);
 
         Area *adjacentArea = exit->destinationArea().cast<Area *>();
         Q_ASSERT(adjacentArea);
 
-        players += adjacentArea->players();
+        players << adjacentArea->players();
     }
 
     QString text = QString("%1 shouts, \"%2\".").arg(name(), message);
@@ -439,10 +537,12 @@ void Character::kill(const GameObjectPtr &characterPtr) {
     }
 
     Area *area = currentArea().cast<Area *>();
-    GameObjectPtrList players = area->players();
+    GameObjectPtrList others = area->players();
+    others.removeOne(this);
+    others.removeOne(characterPtr);
 
-    QString myName = Util::definiteName(this, area->characters(), Capitalized);
-    QString enemyName = Util::definiteName(characterPtr, area->characters());
+    QString myName = definiteName(area->characters(), Capitalized);
+    QString enemyName = character->definiteName(area->characters());
 
     qreal hitChance = 100 * ((80 + stats().dexterity) / 160.0) *
                             ((100 - character->stats().dexterity) / 100.0);
@@ -454,19 +554,25 @@ void Character::kill(const GameObjectPtr &characterPtr) {
 
         switch (qrand() % 3) {
             case 0:
-                character->send(Util::colorize(QString("%1 deals you a sweeping punch, causing %2 damage.").arg(myName).arg(damage), Maroon));
-                send(Util::colorize(QString("You deal a sweeping punch to %1, causing %2 damage.").arg(enemyName).arg(damage), Teal));
-                Util::sendOthers(players, Util::colorize(QString("%1 deals a sweeping punch to %2.").arg(myName, enemyName), Teal), this, characterPtr);
+                character->send(QString("%1 deals you a sweeping punch, causing %2 damage.")
+                                .arg(myName).arg(damage), Maroon);
+                send(QString("You deal a sweeping punch to %1, causing %2 damage.")
+                     .arg(enemyName).arg(damage), Teal);
+                others.send(QString("%1 deals a sweeping punch to %2.").arg(myName, enemyName),
+                            Teal);
                 break;
             case 1:
-                character->send(Util::colorize(QString("%1 hits you on the jaw for %2 damage.").arg(myName).arg(damage), Maroon));
-                send(Util::colorize(QString("You hit %1 on the jaw for %2 damage.").arg(enemyName).arg(damage), Teal));
-                Util::sendOthers(players, Util::colorize(QString("%1 hits %2 on the jaw.").arg(myName, enemyName), Teal), this, characterPtr);
+                character->send(QString("%1 hits you on the jaw for %2 damage.")
+                                .arg(myName).arg(damage), Maroon);
+                send(QString("You hit %1 on the jaw for %2 damage.").arg(enemyName).arg(damage),
+                     Teal);
+                others.send(QString("%1 hits %2 on the jaw.").arg(myName, enemyName), Teal);
                 break;
             case 2:
-                character->send(Util::colorize(QString("%1 kicks you for %2 damage.").arg(myName).arg(damage), Maroon));
-                send(Util::colorize(QString("You kick %1 for %2 damage.").arg(enemyName).arg(damage), Teal));
-                Util::sendOthers(players, Util::colorize(QString("%1 kicks %2.").arg(myName, enemyName), Teal), this, characterPtr);
+                character->send(QString("%1 kicks you for %2 damage.").arg(myName).arg(damage),
+                                Maroon);
+                send(QString("You kick %1 for %2 damage.").arg(enemyName).arg(damage), Teal);
+                others.send(QString("%1 kicks %2.").arg(myName, enemyName), Teal);
                 break;
         }
 
@@ -476,29 +582,36 @@ void Character::kill(const GameObjectPtr &characterPtr) {
     } else {
         switch (qrand() % 3) {
             case 0:
-                character->send(Util::colorize(QString("%1 tries to punch you, but misses.").arg(myName), Green));
-                send(Util::colorize(QString("You try to punch %1, but miss.").arg(enemyName), Teal));
-                Util::sendOthers(players, Util::colorize(QString("%1 tries to punch %2, but misses.").arg(myName, enemyName), Teal), this, characterPtr);
+                character->send(QString("%1 tries to punch you, but misses.").arg(myName), Green);
+                send(QString("You try to punch %1, but miss.").arg(enemyName), Teal);
+                others.send(QString("%1 tries to punch %2, but misses.")
+                                 .arg(myName, enemyName), Teal);
                 break;
             case 1:
-                character->send(Util::colorize(QString("%1 tries to grab you, but you shake %2 off.").arg(myName, objectPronoun()), Green));
-                send(Util::colorize(QString("You try to grab %1, but %2 shakes you off.").arg(enemyName, character->subjectPronoun()), Teal));
-                Util::sendOthers(players, Util::colorize(QString("%1 tries to grab %2, but gets shaken off.").arg(myName, enemyName), Teal), this, characterPtr);
+                character->send(QString("%1 tries to grab you, but you shake %2 off.")
+                                .arg(myName, objectPronoun()), Green);
+                send(QString("You try to grab %1, but %2 shakes you off.")
+                     .arg(enemyName, character->subjectPronoun()), Teal);
+                others.send(QString("%1 tries to grab %2, but gets shaken off.")
+                            .arg(myName, enemyName), Teal);
                 break;
             case 2:
-                character->send(Util::colorize(QString("%1 kicks at you, but fails to hurt you.").arg(myName), Green));
-                send(Util::colorize(QString("You kick at %1, but fail to hurt %2.").arg(enemyName, character->objectPronoun()), Teal));
-                Util::sendOthers(players, Util::colorize(QString("%1 kicks at %2, but fails to hurt %3.").arg(myName, enemyName, character->objectPronoun()), Teal), this, characterPtr);
+                character->send(QString("%1 kicks at you, but fails to hurt you.")
+                                .arg(myName), Green);
+                send(QString("You kick at %1, but fail to hurt %2.")
+                     .arg(enemyName, character->objectPronoun()), Teal);
+                others.send(QString("%1 kicks at %2, but fails to hurt %3.")
+                            .arg(myName, enemyName, character->objectPronoun()), Teal);
                 break;
         }
     }
 
     stun(4000 - (25 * stats().dexterity));
 
-    GameObjectPtrList others = currentArea().cast<Area *>()->characters();
+    others = currentArea().cast<Area *>()->characters();
     others.removeOne(this);
-    others.removeOne(character);
-    foreach (const GameObjectPtr &other, others) {
+    others.removeOne(characterPtr);
+    gopl_foreach (other, others) {
         other->invokeTrigger("oncharacterattacked", this, characterPtr);
     }
 }
@@ -513,18 +626,31 @@ void Character::die(const GameObjectPtr &attacker) {
 
     GameObjectPtrList players = area->players();
 
-    QString myName = Util::definiteName(this, area->characters(), Capitalized);
-    Util::sendOthers(players, Util::colorize(QString("%1 died.").arg(myName), Teal));
-    if (inventory().length() > 0) {
-        Util::sendOthers(players, Util::colorize(QString("%1 was carrying %2.").arg(myName, Util::joinItems(inventory())), Teal));
-        foreach (const GameObjectPtr &item, inventory()) {
+    QString myName = definiteName(area->characters(), Capitalized);
+    players.send(QString("%1 died.").arg(myName), Teal);
+
+    if (inventory().length() > 0 || m_gold > 0.0) {
+        QString inventoryStr;
+        if (inventory().length() > 0) {
+            inventoryStr = Util::joinItems(inventory());
+        }
+        if (m_gold > 0.0) {
+            if (!inventoryStr.isEmpty()) {
+                inventoryStr += " and ";
+            }
+            inventoryStr += QString("$%1 worth of gold").arg(m_gold);
+        }
+
+        players.send(QString("%1 was carrying %2.").arg(myName, inventoryStr), Teal);
+
+        gopl_foreach (item, inventory()) {
             area->addItem(item);
         }
     }
 
     GameObjectPtrList others = area->characters();
     others.removeOne(this);
-    foreach (const GameObjectPtr &other, others) {
+    gopl_foreach (other, others) {
         other->invokeTrigger("oncharacterdied", this, attacker);
     }
 
@@ -534,12 +660,14 @@ void Character::die(const GameObjectPtr &attacker) {
         setInventory(GameObjectPtrList());
 
         killAllTimers();
+        clearEffects();
+        clearModifiers();
 
         int respawnTime = m_respawnTime;
         if (m_respawnTimeVariation) {
             respawnTime += qrand() % m_respawnTimeVariation;
         }
-        m_respawnTimeout = startTimer(respawnTime);
+        m_respawnTimerId = startTimer(respawnTime);
     } else {
         setDeleted();
     }
@@ -547,8 +675,8 @@ void Character::die(const GameObjectPtr &attacker) {
 
 void Character::stun(int timeout) {
 
-    if (m_stunTimeout) {
-        killTimer(m_stunTimeout);
+    if (m_stunTimerId) {
+        killTimer(m_stunTimerId);
     }
 
     int seconds = timeout / 1000;
@@ -560,7 +688,7 @@ void Character::stun(int timeout) {
     }
 
     m_secondsStunned = seconds;
-    m_stunTimeout = startTimer(firstTimeout);
+    m_stunTimerId = startTimer(firstTimeout);
     m_oddStunTimer = (firstTimeout < 1000);
 }
 
@@ -583,29 +711,9 @@ void Character::init() {
 
 void Character::timerEvent(QTimerEvent *event) {
 
-    if (event->timerId() == m_stunTimeout) {
-        m_secondsStunned--;
-
-        if (m_secondsStunned > 0) {
-            if (m_oddStunTimer) {
-                killTimer(m_stunTimeout);
-                m_stunTimeout = startTimer(1000);
-                m_oddStunTimer = false;
-            }
-        } else {
-            killTimer(m_stunTimeout);
-            m_stunTimeout = 0;
-
-            if (m_leaveOnActive) {
-                leave(currentArea());
-                m_leaveOnActive = false;
-            } else {
-                invokeTrigger("onactive");
-            }
-        }
-    } else if (event->timerId() == m_respawnTimeout) {
-        killTimer(m_respawnTimeout);
-        m_respawnTimeout = 0;
+    if (event->timerId() == m_respawnTimerId) {
+        killTimer(m_respawnTimerId);
+        m_respawnTimerId = 0;
 
         m_hp = m_maxHp;
         m_mp = m_maxMp;
@@ -615,9 +723,104 @@ void Character::timerEvent(QTimerEvent *event) {
         enter(currentArea());
 
         invokeTrigger("onspawn");
-    } else if (event->timerId() == m_regenerationInterval) {
+    } else if (event->timerId() == m_effectsTimerId) {
+        killTimer(m_effectsTimerId);
+        qint64 now = QDateTime::currentMSecsSinceEpoch();
+        int nextTimeout = updateEffects(now);
+        if (nextTimeout > -1) {
+            m_effectsTimerId = startTimer(nextTimeout);
+            m_effectsTimerStarted = now;
+        } else {
+            m_effectsTimerId = 0;
+        }
+    } else if (event->timerId() == m_modifiersTimerId) {
+        killTimer(m_modifiersTimerId);
+        qint64 now = QDateTime::currentMSecsSinceEpoch();
+        int nextTimeout = updateModifiers(now);
+        if (nextTimeout > -1) {
+            m_modifiersTimerId = startTimer(nextTimeout);
+            m_modifiersTimerStarted = now;
+        } else {
+            m_modifiersTimerId = 0;
+        }
+    } else if (event->timerId() == m_stunTimerId) {
+        m_secondsStunned--;
+
+        if (m_secondsStunned > 0) {
+            if (m_oddStunTimer) {
+                killTimer(m_stunTimerId);
+                m_stunTimerId = startTimer(1000);
+                m_oddStunTimer = false;
+            }
+        } else {
+            killTimer(m_stunTimerId);
+            m_stunTimerId = 0;
+
+            if (m_leaveOnActive) {
+                leave(currentArea());
+                m_leaveOnActive = false;
+            } else {
+                invokeTrigger("onactive");
+            }
+        }
+    } else if (event->timerId() == m_regenerationTimerId) {
         adjustHp(qMax(stats().vitality / 15, 1));
     } else {
         Item::timerEvent(event);
     }
+}
+
+int Character::updateEffects(qint64 now) {
+
+    Q_ASSERT(m_effects.length() ? (bool) m_effectsTimerStarted : true);
+
+    int nextTimeout = -1;
+    qint64 msecsPassed = now - m_effectsTimerStarted;
+    for (int i = 0; i < m_effects.length(); i++) {
+        Effect &effect = m_effects[i];
+
+        effect.delay -= msecsPassed;
+        if (effect.delay <= 0) {
+            adjustHp(effect.hpDelta);
+            adjustMp(effect.mpDelta);
+            send(effect.message);
+
+            effect.numOccurrences--;
+            if (effect.numOccurrences <= 0) {
+                m_effects.removeAt(i);
+                i--;
+                continue;
+            }
+        }
+
+        if (nextTimeout == -1 || effect.delay < nextTimeout) {
+            nextTimeout = effect.delay;
+        }
+    }
+
+    return nextTimeout;
+}
+
+int Character::updateModifiers(qint64 now) {
+
+    Q_ASSERT(m_modifiers.length() ? (bool) m_modifiersTimerStarted : true);
+
+    int nextTimeout = -1;
+    qint64 msecsPassed = now - m_modifiersTimerStarted;
+    for (int i = 0; i < m_modifiers.length(); i++) {
+        Modifier &modifier = m_modifiers[i];
+
+        modifier.duration -= msecsPassed;
+        if (modifier.duration <= 0) {
+            m_modifiers.removeAt(i);
+            i--;
+            continue;
+        }
+
+        if (nextTimeout == -1 || modifier.duration < nextTimeout) {
+            nextTimeout = modifier.duration;
+        }
+    }
+
+    return nextTimeout;
 }

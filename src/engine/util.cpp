@@ -49,7 +49,7 @@ QString Util::joinItems(const GameObjectPtrList &list, Options options) {
         return (options & Capitalized ? "Nothing" : "nothing");
     }
 
-    foreach (const GameObjectPtr &itemPtr, list) {
+    gopl_foreach (itemPtr, list) {
         if (itemPtr.isNull()) {
             continue;
         }
@@ -80,9 +80,9 @@ QString Util::joinItems(const GameObjectPtrList &list, Options options) {
                     strings << (i == 0 && options & Capitalized ? "The " : "the ") +
                                item->name();
                 } else {
-                    strings << (i == 0 && options & Capitalized ? capitalize(item->indefiniteArticle()) :
-                                                                  item->indefiniteArticle()) +
-                               " " + item->name();
+                    strings << item->indefiniteName(i == 0 && options & Capitalized ?
+                                                    GameObject::Capitalized :
+                                                    GameObject::NoOptions);
                 }
             }
         }
@@ -222,43 +222,6 @@ QString Util::writtenPosition(int position) {
         int rest = position % 10;
         return QString::number(position) +
                (rest == 1 ? "st" : rest == 2 ? "nd" : rest == 3 ? "rd" : "th");
-    }
-}
-
-QString Util::definiteName(const GameObjectPtr &itemPtr, const GameObjectPtrList &pool,
-                           Options options) {
-
-    Item *item = itemPtr.cast<Item *>();
-    if (item->indefiniteArticle().isEmpty()) {
-        return item->name();
-    } else {
-        int position = 0;
-        int total = 0;
-        foreach (const GameObjectPtr &otherPtr, pool) {
-            if (otherPtr->name() == itemPtr->name()) {
-                total++;
-
-                if (otherPtr == itemPtr) {
-                    position = total;
-                }
-            }
-        }
-
-        return QString(options & Capitalized ? "The " : "the ") +
-               QString(total > 1 ? writtenPosition(position) + " ": "") +
-               item->name();
-    }
-}
-
-QString Util::indefiniteName(const GameObjectPtr &itemPtr, Options options) {
-
-    Item *item = itemPtr.cast<Item *>();
-    if (item->indefiniteArticle().isEmpty()) {
-        return item->name();
-    } else {
-        return (options & Capitalized ? capitalize(item->indefiniteArticle()) :
-                                        item->indefiniteArticle()) +
-               " " + item->name();
     }
 }
 
@@ -405,10 +368,7 @@ void Util::sendOthers(const GameObjectPtrList &_players, const QString &message,
     if (!exclude2.isNull()) {
         players.removeOne(exclude2);
     }
-    foreach (const GameObjectPtr &player, players) {
-        if (player.isNull()) {
-            continue;
-        }
+    gopl_foreach (player, players) {
         player->send(message);
     }
 }

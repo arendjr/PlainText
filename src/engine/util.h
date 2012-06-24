@@ -4,27 +4,9 @@
 #include <QObject>
 #include <QStringList>
 
+#include "constants.h"
 #include "gameobjectptr.h"
 
-
-enum Color {
-    White = 0,
-    Silver,
-    Gray,
-    Black,
-    Red,
-    Maroon,
-    Yellow,
-    Olive,
-    Lime,
-    Green,
-    Aqua,
-    Teal,
-    Blue,
-    Navy,
-    Fuchsia,
-    Purple
-};
 
 enum Options {
     NoOptions = 0x00,
@@ -51,13 +33,6 @@ class Util : public QObject {
         Q_INVOKABLE static QString writtenNumber(int number);
 
         Q_INVOKABLE static QString writtenPosition(int position);
-
-        Q_INVOKABLE static QString definiteName(const GameObjectPtr &item,
-                                                const GameObjectPtrList &pool,
-                                                Options options = NoOptions);
-
-        Q_INVOKABLE static QString indefiniteName(const GameObjectPtr &item,
-                                                  Options options = NoOptions);
 
         Q_INVOKABLE static QString capitalize(const QString &string);
 

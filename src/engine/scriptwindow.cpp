@@ -1,5 +1,6 @@
 #include "scriptwindow.h"
 
+#include <QDebug>
 #include <QScriptEngine>
 #include <QScriptValueIterator>
 
@@ -27,5 +28,9 @@ QScriptValue ScriptWindow::toScriptValue() {
 
 int ScriptWindow::randomInt(int min, int max) const {
 
+    if (max == min) {
+        qWarning() << "Division by zero in ScriptWindow::randomInt()";
+        return min;
+    }
     return min + qrand() % (max - min);
 }

@@ -39,12 +39,12 @@ void GiveCommand::execute(const QString &command) {
     }
 
     Character *recipient = recipients[0].cast<Character *>();
-    foreach (const GameObjectPtr &item, items) {
+    gopl_foreach (item, items) {
         recipient->addInventoryItem(item);
         player()->removeInventoryItem(item);
     }
 
-    QString recipientName = Util::definiteName(recipients[0], recipients);
+    QString recipientName = recipient->definiteName(recipients);
     QString itemsDescription = Util::joinItems(items);
     player()->send(QString("You give %1 %2.").arg(recipientName, itemsDescription));
     recipient->send(QString("%1 gives you %2.").arg(player()->name(), itemsDescription));

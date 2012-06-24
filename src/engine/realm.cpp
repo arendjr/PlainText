@@ -42,7 +42,7 @@ Realm::Realm(Options options) :
     load(saveObjectPath(objectType(), id()));
 
     QDir dir(saveDirPath());
-    foreach (QString fileName, dir.entryList(QDir::Files)) {
+    foreach (const QString &fileName, dir.entryList(QDir::Files)) {
         if (fileName.startsWith("realm.")) {
             continue;
         }

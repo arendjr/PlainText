@@ -41,7 +41,7 @@ public:
 	qint64 write ( const QByteArray & byteArray, int maxFrameBytes = 0 ); // write data as binary
 
 public slots:
-	virtual void close( QString reason = QString() );
+    virtual void close();
 	void ping();
 
 signals:

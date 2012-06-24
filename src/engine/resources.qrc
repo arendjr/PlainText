@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/script">
+        <file>util.js</file>
+    </qresource>
+</RCC>

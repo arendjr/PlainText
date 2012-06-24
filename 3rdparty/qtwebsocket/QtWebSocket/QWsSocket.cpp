@@ -178,10 +178,8 @@ qint64 QWsSocket::writeFrames ( QList<QByteArray> framesList )
 	return nbBytesWritten;
 }
 
-void QWsSocket::close( QString reason )
+void QWsSocket::close()
 {
-	Q_UNUSED(reason)
-
 	if ( version >= 6 )
 	{
 		// Compose and send close frame

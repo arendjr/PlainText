@@ -54,6 +54,7 @@ GameObject::~GameObject() {
     }
 
     foreach (GameObjectPtr *pointer, m_pointers) {
+        pointer->unresolve(false);
         *pointer = GameObjectPtr();
     }
 
@@ -164,9 +165,10 @@ bool GameObject::invokeTrigger(const QString &triggerName,
                          arg3, arg4);
 }
 
-void GameObject::send(const QString &message) {
+void GameObject::send(const QString &message, Color color) {
 
     Q_UNUSED(message)
+    Q_UNUSED(color)
 }
 
 int GameObject::setInterval(const QScriptValue &function, int delay) {
@@ -267,7 +269,7 @@ bool GameObject::save() {
                     break;
                 } else if (metaProperty.userType() == QMetaType::type("GameObjectPtrList")) {
                     QStringList stringList;
-                    foreach (const GameObjectPtr &pointer, property(name).value<GameObjectPtrList>()) {
+                    gopl_foreach (pointer, property(name).value<GameObjectPtrList>()) {
                         if (pointer.isNull()) {
                             continue;
                         }
@@ -388,9 +390,7 @@ void GameObject::resolvePointers() {
                 setProperty(name, QVariant::fromValue(pointer));
             } else if (metaProperty.userType() == QMetaType::type("GameObjectPtrList")) {
                 GameObjectPtrList pointerList = property(name).value<GameObjectPtrList>();
-                for (int i = 0; i < pointerList.length(); i++) {
-                    pointerList[i].resolve();
-                }
+                pointerList.resolvePointers();
                 setProperty(name, QVariant::fromValue(pointerList));
             }
         }
@@ -443,7 +443,23 @@ GameObject *GameObject::createCopy(const GameObject *other) {
 
     foreach (const QMetaProperty &metaProperty, other->storedMetaProperties()) {
         const char *name = metaProperty.name();
-        copy->setProperty(name, other->property(name));
+        QVariant value = other->property(name);
+
+        // game object pointers need to be unresolved to avoid them being
+        // registrated in the other thread
+        if (metaProperty.type() == QVariant::UserType) {
+            if (metaProperty.userType() == QMetaType::type("GameObjectPtr")) {
+                GameObjectPtr pointer = value.value<GameObjectPtr>();
+                pointer.unresolve();
+                value = QVariant::fromValue(pointer);
+            } else if (metaProperty.userType() == QMetaType::type("GameObjectPtrList")) {
+                GameObjectPtrList pointerList = value.value<GameObjectPtrList>();
+                pointerList.unresolvePointers();
+                value = QVariant::fromValue(pointerList);
+            }
+        }
+
+        copy->setProperty(name, value);
     }
 
     return copy;

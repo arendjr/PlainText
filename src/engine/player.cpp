@@ -72,13 +72,20 @@ void Player::setSession(Session *session) {
     }
 }
 
-void Player::send(const QString &message) {
+void Player::send(const QString &_message, Color color) {
 
-    if (message.endsWith("\n")) {
-        write(message);
+    QString message;
+    if (_message.endsWith("\n")) {
+        message = _message;
     } else {
-        write(message + "\n");
+        message = _message + "\n";
     }
+
+    if (color != Silver) {
+        message = Util::colorize(message, color);
+    }
+
+    write(message);
 }
 
 void Player::enter(const GameObjectPtr &areaPtr) {
@@ -119,7 +126,7 @@ void Player::look() {
 
     if (area->exits().length() > 0) {
         QStringList exitNames;
-        foreach (const GameObjectPtr &exitPtr, area->exits()) {
+        gopl_foreach (exitPtr, area->exits()) {
             Exit *exit = exitPtr.cast<Exit *>();
 
             if (exit->isHidden()) {
@@ -136,7 +143,7 @@ void Player::look() {
     others.removeOne(this);
     if (others.length() > 0) {
         QStringList playerNames;
-        foreach (const GameObjectPtr &other, others) {
+        gopl_foreach (other, others) {
             playerNames << other->name();
         }
         text += QString("You see %1.\n").arg(Util::joinFancy(playerNames));
@@ -165,9 +172,13 @@ void Player::die(const GameObjectPtr &attacker) {
 
     GameObjectPtrList others = area->characters();
     others.removeOne(this);
-    foreach (const GameObjectPtr &other, others) {
+    gopl_foreach (other, others) {
         other->invokeTrigger("oncharacterdied", this, attacker);
     }
+
+    killAllTimers();
+    clearEffects();
+    clearModifiers();
 
     setHp(1);
 

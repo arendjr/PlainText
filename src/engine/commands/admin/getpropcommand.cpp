@@ -48,7 +48,12 @@ void GetPropCommand::execute(const QString &command) {
                 break;
             case QVariant::UserType:
                 if (value.userType() == QMetaType::type("GameObjectPtr")) {
-                    player()->send(value.value<GameObjectPtr>().toString());
+                    GameObjectPtr pointer = value.value<GameObjectPtr>();
+                    if (pointer.isNull()) {
+                        player()->send(pointer.toString());
+                    } else {
+                        player()->send(pointer.toString() + QString(" (%1)").arg(pointer->name()));
+                    }
                     break;
                 } else if (value.userType() == QMetaType::type("GameObjectPtrList")) {
                     QStringList strings;

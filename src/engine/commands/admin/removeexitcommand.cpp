@@ -26,7 +26,7 @@ void RemoveExitCommand::execute(const QString &command) {
         return;
     }
 
-    currentArea()->removeExit(exits[0]);
+    exits[0]->setDeleted();
 
     player()->send(QString("Exit %1 removed.").arg(exits[0]->name()));
 }

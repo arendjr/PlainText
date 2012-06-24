@@ -2,7 +2,9 @@
 
 #include <algorithm>
 #include <cstring>
+#include <utility>
 
+#include <QDebug>
 #include <QMetaProperty>
 #include <QStringList>
 
@@ -13,13 +15,15 @@
 GameObjectPtr::GameObjectPtr() :
     m_gameObject(0),
     m_objectType(0),
-    m_id(0) {
+    m_id(0),
+    m_list(0) {
 }
 
 GameObjectPtr::GameObjectPtr(GameObject *gameObject) :
     m_gameObject(gameObject),
     m_objectType(strdup(gameObject->objectType())),
-    m_id(gameObject->id()) {
+    m_id(gameObject->id()),
+    m_list(0) {
 
     m_gameObject->registerPointer(this);
 }
@@ -27,7 +31,8 @@ GameObjectPtr::GameObjectPtr(GameObject *gameObject) :
 GameObjectPtr::GameObjectPtr(const char *objectType, uint id) :
     m_gameObject(0),
     m_objectType(0),
-    m_id(id) {
+    m_id(id),
+    m_list(0) {
 
     if (objectType) {
         m_objectType = strdup(objectType);
@@ -41,15 +46,29 @@ GameObjectPtr::GameObjectPtr(const char *objectType, uint id) :
 GameObjectPtr::GameObjectPtr(const GameObjectPtr &other) :
     m_gameObject(other.m_gameObject),
     m_objectType(other.m_objectType),
-    m_id(other.m_id) {
+    m_id(other.m_id),
+    m_list(0) {
 
+    qDebug() << "Before copy: " << m_objectType << "," << other.m_objectType;
     if (m_objectType) {
         m_objectType = strdup(m_objectType);
     }
+    qDebug() << "After copy: " << m_objectType << "," << other.m_objectType;
 
     if (m_gameObject) {
         m_gameObject->registerPointer(this);
     }
+}
+
+GameObjectPtr::GameObjectPtr(GameObjectPtr &&other) :
+    m_gameObject(0),
+    m_objectType(0),
+    m_id(0),
+    m_list(0) {
+
+    qDebug() << "Before move: " << m_objectType << "," << other.m_objectType;
+    *this = std::move(other);
+    qDebug() << "After move: " << m_objectType << "," << other.m_objectType;
 }
 
 GameObjectPtr::~GameObjectPtr() {
@@ -59,6 +78,10 @@ GameObjectPtr::~GameObjectPtr() {
     }
 
     delete[] m_objectType;
+
+    if (m_list) {
+        m_list->removeOne(*this);
+    }
 }
 
 bool GameObjectPtr::isNull() const {
@@ -68,27 +91,36 @@ bool GameObjectPtr::isNull() const {
 
 GameObjectPtr &GameObjectPtr::operator=(const GameObjectPtr &other) {
 
-    if (&other == this) {
-        return *this;
+    if (&other != this) {
+        if (m_gameObject) {
+            m_gameObject->unregisterPointer(this);
+        }
+
+        delete[] m_objectType;
+
+        m_gameObject = other.m_gameObject;
+        m_objectType = other.m_objectType;
+        m_id = other.m_id;
+
+        if (m_objectType) {
+            m_objectType = strdup(m_objectType);
+        }
+
+        if (m_gameObject) {
+            m_gameObject->registerPointer(this);
+        }
     }
 
-    if (m_gameObject) {
-        m_gameObject->unregisterPointer(this);
+    return *this;
+}
+
+GameObjectPtr &GameObjectPtr::operator=(GameObjectPtr &&other) {
+
+    qDebug() << "Before swap: " << m_objectType << "," << other.m_objectType;
+    if (&other != this) {
+        swap(*this, other);
     }
-
-    delete[] m_objectType;
-
-    m_gameObject = other.m_gameObject;
-    m_objectType = other.m_objectType;
-    m_id = other.m_id;
-
-    if (m_objectType) {
-        m_objectType = strdup(m_objectType);
-    }
-
-    if (m_gameObject) {
-        m_gameObject->registerPointer(this);
-    }
+    qDebug() << "After swap: " << m_objectType << "," << other.m_objectType;
 
     return *this;
 }
@@ -130,6 +162,16 @@ void GameObjectPtr::resolve() throw (GameException) {
     }
 
     m_gameObject->registerPointer(this);
+}
+
+void GameObjectPtr::unresolve(bool unregister) {
+
+    if (m_gameObject) {
+        if (unregister) {
+            m_gameObject->unregisterPointer(this);
+        }
+        m_gameObject = 0;
+    }
 }
 
 QString GameObjectPtr::toString() const {
@@ -180,7 +222,8 @@ QScriptValue GameObjectPtr::toScriptValue(QScriptEngine *engine, const GameObjec
 
     if (pointer.m_gameObject) {
         return engine->newQObject(pointer.m_gameObject, QScriptEngine::QtOwnership,
-                                  QScriptEngine::ExcludeDeleteLater | QScriptEngine::PreferExistingWrapperObject);
+                                  QScriptEngine::ExcludeDeleteLater |
+                                  QScriptEngine::PreferExistingWrapperObject);
     } else {
         return engine->nullValue();
     }
@@ -192,5 +235,495 @@ void GameObjectPtr::fromScriptValue(const QScriptValue &object, GameObjectPtr &p
         pointer = GameObjectPtr(0, object.property("id").toUInt32());
     } else {
         pointer = GameObjectPtr();
+    }
+}
+
+
+GameObjectPtrList::iterator::iterator() :
+    m_list(0),
+    m_index(0) {
+}
+
+GameObjectPtrList::iterator::iterator(const GameObjectPtrList::iterator &other) :
+    m_list(other.m_list),
+    m_index(other.m_index) {
+}
+
+bool GameObjectPtrList::iterator::operator!=(const GameObjectPtrList::iterator &other) const {
+
+    return m_list != other.m_list || m_index != other.m_index;
+}
+
+bool GameObjectPtrList::iterator::operator!=(const GameObjectPtrList::const_iterator &other) const {
+
+    return m_list != other.m_list || m_index != other.m_index;
+}
+
+GameObjectPtr &GameObjectPtrList::iterator::operator*() const {
+
+    Q_ASSERT(m_list);
+    return m_list->m_items[m_index];
+}
+
+GameObjectPtrList::iterator &GameObjectPtrList::iterator::operator++() {
+
+    if (m_index < m_list->m_size - 1 || !m_list->m_nextList) {
+        m_index++;
+    } else {
+        m_list = m_list->m_nextList;
+        m_index = 0;
+    }
+    return *this;
+}
+
+GameObjectPtrList::iterator GameObjectPtrList::iterator::operator++(int) {
+
+    GameObjectPtrList::iterator it(*this);
+    if (m_index < m_list->m_size - 1 || !m_list->m_nextList) {
+        m_index++;
+    } else {
+        m_list = m_list->m_nextList;
+        m_index = 0;
+    }
+    return it;
+}
+
+bool GameObjectPtrList::iterator::operator==(const GameObjectPtrList::iterator &other) const {
+
+    return m_list == other.m_list && m_index == other.m_index;
+}
+
+bool GameObjectPtrList::iterator::operator==(const GameObjectPtrList::const_iterator &other) const {
+
+    return m_list == other.m_list && m_index == other.m_index;
+}
+
+
+GameObjectPtrList::const_iterator::const_iterator() :
+    m_list(0),
+    m_index(0) {
+}
+
+GameObjectPtrList::const_iterator::const_iterator(const GameObjectPtrList::const_iterator &other) :
+    m_list(other.m_list),
+    m_index(other.m_index) {
+}
+
+GameObjectPtrList::const_iterator::const_iterator(const GameObjectPtrList::iterator &other) :
+    m_list(other.m_list),
+    m_index(other.m_index) {
+}
+
+bool GameObjectPtrList::const_iterator::operator!=(const GameObjectPtrList::const_iterator &other)
+    const {
+
+    return m_list != other.m_list || m_index != other.m_index;
+}
+
+const GameObjectPtr &GameObjectPtrList::const_iterator::operator*() const {
+
+    Q_ASSERT(m_list);
+    return m_list->m_items[m_index];
+}
+
+GameObjectPtrList::const_iterator &GameObjectPtrList::const_iterator::operator++() {
+
+    if (m_index < m_list->m_size - 1 || !m_list->m_nextList) {
+        m_index++;
+    } else {
+        m_list = m_list->m_nextList;
+        m_index = 0;
+    }
+    return *this;
+}
+
+GameObjectPtrList::const_iterator GameObjectPtrList::const_iterator::operator++(int) {
+
+    GameObjectPtrList::const_iterator it(*this);
+    if (m_index < m_list->m_size - 1 || !m_list->m_nextList) {
+        m_index++;
+    } else {
+        m_list = m_list->m_nextList;
+        m_index = 0;
+    }
+    return it;
+}
+
+bool GameObjectPtrList::const_iterator::operator==(const GameObjectPtrList::const_iterator &other)
+    const {
+
+    return m_list == other.m_list && m_index == other.m_index;
+}
+
+
+GameObjectPtrList::GameObjectPtrList() :
+    m_size(0),
+    m_nextList(0) {
+}
+
+GameObjectPtrList::GameObjectPtrList(const GameObjectPtrList &other) :
+    m_size(other.m_size),
+    m_nextList(0) {
+
+    for (int i = 0; i < m_size; i++) {
+        m_items[i] = other.m_items[i];
+        m_items[i].m_list = this;
+    }
+
+    if (other.m_nextList) {
+        m_nextList = new GameObjectPtrList(*other.m_nextList);
+    }
+}
+
+GameObjectPtrList::GameObjectPtrList(GameObjectPtrList &&other) :
+    m_size(0),
+    m_nextList(0) {
+
+    *this = std::move(other);
+}
+
+GameObjectPtrList::~GameObjectPtrList() {
+
+    for (int i = 0; i < m_size; i++) {
+        m_items[i].m_list = 0;
+    }
+
+    delete m_nextList;
+}
+
+void GameObjectPtrList::append(const GameObjectPtr &value) {
+
+    if (value.isNull()) {
+        qDebug() << "Adding null value to GameObjectPtrList.";
+        return;
+    }
+
+    if (m_size < NUM_ITEMS) {
+        m_items[m_size] = value;
+        m_items[m_size].m_list = this;
+        m_size++;
+    } else {
+        if (!m_nextList) {
+            qDebug() << "Expanding GameObjectPtrList.";
+            m_nextList = new GameObjectPtrList();
+        }
+
+        m_nextList->append(value);
+    }
+}
+
+void GameObjectPtrList::append(const GameObjectPtrList &value) {
+
+    gopl_foreach (item, value) {
+        append(item);
+    }
+}
+
+GameObjectPtrList::iterator GameObjectPtrList::begin() {
+
+    GameObjectPtrList::iterator it;
+    it.m_list = this;
+    return it;
+}
+
+GameObjectPtrList::const_iterator GameObjectPtrList::begin() const {
+
+    GameObjectPtrList::const_iterator it;
+    it.m_list = const_cast<GameObjectPtrList *>(this);
+    return it;
+}
+
+void GameObjectPtrList::clear() {
+
+    delete m_nextList;
+
+    m_size = 0;
+    m_nextList = 0;
+}
+
+GameObjectPtrList::const_iterator GameObjectPtrList::constBegin() const {
+
+    GameObjectPtrList::const_iterator it;
+    it.m_list = const_cast<GameObjectPtrList *>(this);
+    return it;
+}
+
+GameObjectPtrList::const_iterator GameObjectPtrList::constEnd() const {
+
+    if (m_nextList) {
+        return m_nextList->constEnd();
+    } else {
+        GameObjectPtrList::const_iterator it;
+        it.m_list = const_cast<GameObjectPtrList *>(this);
+        it.m_index = m_size;
+        return it;
+    }
+}
+
+bool GameObjectPtrList::contains(const GameObjectPtr &value) const {
+
+    for (int i = 0; i < m_size; i++) {
+        if (m_items[i] == value) {
+            return true;
+        }
+    }
+
+    if (m_nextList) {
+        return m_nextList->contains(value);
+    } else {
+        return false;
+    }
+}
+
+GameObjectPtrList::iterator GameObjectPtrList::end() {
+
+    if (m_nextList) {
+        return m_nextList->end();
+    } else {
+        GameObjectPtrList::iterator it;
+        it.m_list = this;
+        it.m_index = m_size;
+        return it;
+    }
+}
+
+GameObjectPtrList::const_iterator GameObjectPtrList::end() const {
+
+    if (m_nextList) {
+        return m_nextList->end();
+    } else {
+        GameObjectPtrList::const_iterator it;
+        it.m_list = const_cast<GameObjectPtrList *>(this);
+        it.m_index = m_size;
+        return it;
+    }
+}
+
+int GameObjectPtrList::indexOf(const GameObjectPtr &value, int from) const {
+
+    for (int i = from; i < m_size; i++) {
+        if (m_items[i] == value) {
+            return i;
+        }
+    }
+
+    if (m_nextList) {
+        return m_nextList->indexOf(value, from - NUM_ITEMS) + NUM_ITEMS;
+    } else {
+        return -1;
+    }
+}
+
+bool GameObjectPtrList::isEmpty() const {
+
+    return m_size == 0;
+}
+
+int GameObjectPtrList::length() const {
+
+    if (m_nextList) {
+        return m_size + m_nextList->length();
+    } else {
+        return m_size;
+    }
+}
+
+void GameObjectPtrList::push_back(const GameObjectPtr &value) {
+
+    append(value);
+}
+
+int GameObjectPtrList::removeAll(const GameObjectPtr &value) {
+
+    int numRemovals = 0;
+    for (int i = 0; i < m_size; i++) {
+        if (m_items[i] == value) {
+            removeAt(i);
+            numRemovals++;
+            i--;
+        }
+    }
+
+    if (m_nextList) {
+        numRemovals += m_nextList->removeAll(value);
+    }
+
+    return numRemovals;
+}
+
+void GameObjectPtrList::removeAt(int i) {
+
+    if (i < m_size) {
+        m_items[i] = GameObjectPtr();
+        for (int j = i; j < m_size - 1; j++) {
+            swap(m_items[j], m_items[j + 1]);
+        }
+        if (m_nextList) {
+            m_items[m_size - 1] = m_nextList->m_items[0];
+            m_items[m_size - 1].m_list = this;
+            m_nextList->removeAt(0);
+        } else {
+            m_size--;
+        }
+    } else {
+        Q_ASSERT(m_nextList);
+        m_nextList->removeAt(i - NUM_ITEMS);
+    }
+}
+
+bool GameObjectPtrList::removeOne(const GameObjectPtr &value) {
+
+    for (int i = 0; i < m_size; i++) {
+        if (m_items[i] == value) {
+            removeAt(i);
+            return true;
+        }
+    }
+
+    if (m_nextList) {
+        return m_nextList->removeOne(value);
+    } else {
+        return false;
+    }
+}
+
+int GameObjectPtrList::size() const {
+
+    if (m_nextList) {
+        return m_size + m_nextList->size();
+    } else {
+        return m_size;
+    }
+}
+
+void swap(GameObjectPtrList &first, GameObjectPtrList &second) {
+
+    std::swap(first.m_size, second.m_size);
+
+    for (int i = 0, max = qMax(first.m_size, second.m_size); i < max; i++) {
+        swap(first.m_items[i], second.m_items[i]);
+    }
+    for (int i = 0; i < first.m_size; i++) {
+        first.m_items[i].m_list = &first;
+    }
+    for (int i = 0; i < second.m_size; i++) {
+        second.m_items[i].m_list = &second;
+    }
+
+    std::swap(first.m_nextList, second.m_nextList);
+}
+
+bool GameObjectPtrList::operator!=(const GameObjectPtrList &other) const {
+
+    if (size() != other.size()) {
+        return true;
+    }
+
+    for (int i = 0; i < m_size; i++) {
+        if (m_items[i] != other.m_items[i]) {
+            return true;
+        }
+    }
+
+    if (m_nextList) {
+        return *m_nextList != *other.m_nextList;
+    } else {
+        return false;
+    }
+}
+
+GameObjectPtrList GameObjectPtrList::operator+(const GameObjectPtrList &other) const {
+
+    GameObjectPtrList list(*this);
+    list.append(other);
+    return list;
+}
+
+GameObjectPtrList &GameObjectPtrList::operator=(const GameObjectPtrList &other) {
+
+    m_size = other.m_size;
+
+    for (int i = 0; i < m_size; i++) {
+        m_items[i] = other.m_items[i];
+        m_items[i].m_list = this;
+    }
+
+    if (m_nextList) {
+        delete m_nextList;
+    }
+    if (other.m_nextList) {
+        m_nextList = new GameObjectPtrList(*other.m_nextList);
+    } else {
+        m_nextList = 0;
+    }
+
+    return *this;
+}
+
+GameObjectPtrList &GameObjectPtrList::operator=(GameObjectPtrList &&other) {
+
+    if (&other != this) {
+        swap(*this, other);
+    }
+
+    return *this;
+}
+
+bool GameObjectPtrList::operator==(const GameObjectPtrList &other) const {
+
+    if (size() != other.size()) {
+        return false;
+    }
+
+    for (int i = 0; i < m_size; i++) {
+        if (m_items[i] != other.m_items[i]) {
+            return false;
+        }
+    }
+
+    if (m_nextList) {
+        return *m_nextList == *other.m_nextList;
+    } else {
+        return true;
+    }
+}
+
+const GameObjectPtr &GameObjectPtrList::operator[](int i) const {
+
+    if (i < m_size) {
+        return m_items[i];
+    } else {
+        Q_ASSERT(m_nextList);
+        return (*m_nextList)[i - NUM_ITEMS];
+    }
+}
+
+void GameObjectPtrList::resolvePointers() throw (GameException) {
+
+    for (int i = 0; i < m_size; i++) {
+        m_items[i].resolve();
+    }
+    if (m_nextList) {
+        m_nextList->resolvePointers();
+    }
+}
+
+void GameObjectPtrList::unresolvePointers() {
+
+    for (int i = 0; i < m_size; i++) {
+        m_items[i].unresolve();
+    }
+    if (m_nextList) {
+        m_nextList->unresolvePointers();
+    }
+}
+
+void GameObjectPtrList::send(const QString &message, Color color) {
+
+    for (int i = 0; i < m_size; i++) {
+        m_items[i]->send(message, color);
+    }
+    if (m_nextList) {
+        m_nextList->send(message, color);
     }
 }

@@ -1,6 +1,8 @@
 QT += core network script
 QT -= gui
 
+QMAKE_CXXFLAGS = -std=c++11 -stdlib=libc++
+
 TARGET = MUD
 CONFIG += console
 CONFIG -= app_bundle
@@ -14,6 +16,7 @@ SOURCES += \
     engine/characterstats.cpp \
     engine/class.cpp \
     engine/commandinterpreter.cpp \
+    engine/effect.cpp \
     engine/engine.cpp \
     engine/exit.cpp \
     engine/gameexception.cpp \
@@ -21,6 +24,7 @@ SOURCES += \
     engine/gameobjectptr.cpp \
     engine/gameobjectsyncthread.cpp \
     engine/item.cpp \
+    engine/modifier.cpp \
     engine/player.cpp \
     engine/race.cpp \
     engine/realm.cpp \
@@ -31,7 +35,9 @@ SOURCES += \
     engine/util.cpp \
     engine/commands/closecommand.cpp \
     engine/commands/command.cpp \
+    engine/commands/drinkcommand.cpp \
     engine/commands/dropcommand.cpp \
+    engine/commands/eatcommand.cpp \
     engine/commands/getcommand.cpp \
     engine/commands/givecommand.cpp \
     engine/commands/gocommand.cpp \
@@ -46,6 +52,7 @@ SOURCES += \
     engine/commands/statscommand.cpp \
     engine/commands/talkcommand.cpp \
     engine/commands/tellcommand.cpp \
+    engine/commands/usecommand.cpp \
     engine/commands/whocommand.cpp \
     engine/commands/admin/addcharactercommand.cpp \
     engine/commands/admin/addexitcommand.cpp \
@@ -55,6 +62,7 @@ SOURCES += \
     engine/commands/admin/execscriptcommand.cpp \
     engine/commands/admin/getpropcommand.cpp \
     engine/commands/admin/gettriggercommand.cpp \
+    engine/commands/admin/listpropscommand.cpp \
     engine/commands/admin/removeexitcommand.cpp \
     engine/commands/admin/removeitemcommand.cpp \
     engine/commands/admin/setclasscommand.cpp \
@@ -80,6 +88,7 @@ HEADERS += \
     engine/class.h \
     engine/commandinterpreter.h \
     engine/constants.h \
+    engine/effect.h \
     engine/engine.h \
     engine/exit.h \
     engine/gameexception.h \
@@ -87,6 +96,7 @@ HEADERS += \
     engine/gameobjectptr.h \
     engine/gameobjectsyncthread.h \
     engine/item.h \
+    engine/modifier.h \
     engine/player.h \
     engine/race.h \
     engine/realm.h \
@@ -97,7 +107,9 @@ HEADERS += \
     engine/util.h \
     engine/commands/closecommand.h \
     engine/commands/command.h \
+    engine/commands/drinkcommand.h \
     engine/commands/dropcommand.h \
+    engine/commands/eatcommand.h \
     engine/commands/getcommand.h \
     engine/commands/givecommand.h \
     engine/commands/gocommand.h \
@@ -112,6 +124,7 @@ HEADERS += \
     engine/commands/statscommand.h \
     engine/commands/talkcommand.h \
     engine/commands/tellcommand.h \
+    engine/commands/usecommand.h \
     engine/commands/whocommand.h \
     engine/commands/admin/addcharactercommand.h \
     engine/commands/admin/addexitcommand.h \
@@ -121,6 +134,7 @@ HEADERS += \
     engine/commands/admin/execscriptcommand.h \
     engine/commands/admin/getpropcommand.h \
     engine/commands/admin/gettriggercommand.h \
+    engine/commands/admin/listpropscommand.h \
     engine/commands/admin/removeexitcommand.h \
     engine/commands/admin/removeitemcommand.h \
     engine/commands/admin/setclasscommand.h \
@@ -145,8 +159,12 @@ OTHER_FILES += \
     ../web/main.css \
     ../web/main.js \
     ../web/notifications.js \
-    ../web/tappable.js
+    ../web/tappable.js \
+    engine/util.js
 
 INCLUDEPATH += \
     $$PWD/../3rdparty \
     $$PWD/../3rdparty/qtwebsocket/QtWebSocket
+
+RESOURCES += \
+    engine/resources.qrc

@@ -1,5 +1,8 @@
 #include "item.h"
 
+#include "gameobjectptr.h"
+#include "util.h"
+
 
 Item::Item(uint id, Options options) :
     GameObject("item", id, options),
@@ -41,6 +44,40 @@ void Item::setName(const QString &newName) {
         }
 
         GameObject::setName(newName);
+    }
+}
+
+QString Item::definiteName(const GameObjectPtrList &pool, Options options) {
+
+    if (m_indefiniteArticle.isEmpty()) {
+        return name();
+    } else {
+        int position = 0;
+        int total = 0;
+        gopl_foreach (other, pool) {
+            if (other->name() == name()) {
+                total++;
+
+                if (other->id() == id()) {
+                    position = total;
+                }
+            }
+        }
+
+        return QString(options & Capitalized ? "The " : "the ") +
+               QString(total > 1 ? Util::writtenPosition(position) + " ": "") +
+               name();
+    }
+}
+
+QString Item::indefiniteName(Options options) {
+
+    if (m_indefiniteArticle.isEmpty()) {
+        return name();
+    } else {
+        return (options & Capitalized ? Util::capitalize(m_indefiniteArticle) :
+                                        m_indefiniteArticle) + " " +
+               name();
     }
 }
 

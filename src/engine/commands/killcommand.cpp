@@ -6,7 +6,7 @@
 KillCommand::KillCommand(Player *player, QObject *parent) :
     Command(player, parent) {
 
-    setDescription("Attacks another character."
+    setDescription("Attacks another character.\n"
                    "\n"
                    "Examples: kill joe, attack earl");
 }

@@ -8,6 +8,7 @@
 #include <QScriptEngine>
 #include <QScriptValue>
 
+#include "constants.h"
 #include "gameexception.h"
 #include "scriptfunctionmap.h"
 
@@ -24,7 +25,8 @@ class GameObject : public QObject {
     public:
         enum Options {
             NoOptions = 0x00,
-            Copy = 0x01
+            Copy = 0x01,
+            Capitalized = 0x02
         };
 
         explicit GameObject(const char *objectType, uint id, Options options = NoOptions);
@@ -46,14 +48,17 @@ class GameObject : public QObject {
 
         const ScriptFunctionMap &triggers() const { return m_triggers; }
         ScriptFunction trigger(const QString &name) const { return m_triggers[name]; }
+        bool hasTrigger(const QString &name) const { return m_triggers.contains(name); }
         virtual void setTrigger(const QString &name, const ScriptFunction &function);
         virtual void unsetTrigger(const QString &name);
         virtual void setTriggers(const ScriptFunctionMap &triggers);
         Q_PROPERTY(ScriptFunctionMap triggers READ triggers WRITE setTriggers)
 
         Q_INVOKABLE bool invokeTrigger(const QString &triggerName,
-                                       const QVariant &arg1 = QVariant(), const QVariant &arg2 = QVariant(),
-                                       const QVariant &arg3 = QVariant(), const QVariant &arg4 = QVariant());
+                                       const QVariant &arg1 = QVariant(),
+                                       const QVariant &arg2 = QVariant(),
+                                       const QVariant &arg3 = QVariant(),
+                                       const QVariant &arg4 = QVariant());
         bool invokeTrigger(const QString &triggerName,
                            GameObject *arg1, const QVariant &arg2 = QVariant(),
                            const QVariant &arg3 = QVariant(), const QVariant &arg4 = QVariant());
@@ -64,7 +69,7 @@ class GameObject : public QObject {
                            const GameObjectPtr &arg1, const GameObjectPtr &arg2,
                            const QVariant &arg3 = QVariant(), const QVariant &arg4 = QVariant());
 
-        Q_INVOKABLE virtual void send(const QString &message);
+        Q_INVOKABLE virtual void send(const QString &message, Color color = Silver);
 
         Q_INVOKABLE int setInterval(const QScriptValue &function, int delay);
         Q_INVOKABLE void clearInterval(int timerId);

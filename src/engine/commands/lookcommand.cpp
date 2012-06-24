@@ -2,6 +2,7 @@
 
 #include <cstring>
 
+#include "engine/item.h"
 #include "engine/util.h"
 
 
@@ -47,7 +48,7 @@ void LookCommand::execute(const QString &command) {
         if (strcmp(objects[0]->objectType(), "exit") == 0) {
             name = "the " + objects[0]->name();
         } else {
-            name = Util::definiteName(objects[0], pool);
+            name = objects[0].cast<Item *>()->definiteName(pool);
         }
         player()->send(QString("There's nothing special about %1.").arg(name));
     } else {

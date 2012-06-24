@@ -1,11 +1,13 @@
 #ifndef CHARACTER_H
 #define CHARACTER_H
 
-#include "characterstats.h"
-#include "item.h"
-#include "gameobjectptr.h"
-
 #include <QString>
+
+#include "characterstats.h"
+#include "effect.h"
+#include "gameobjectptr.h"
+#include "item.h"
+#include "modifier.h"
 
 
 class Character : public Item {
@@ -76,10 +78,22 @@ class Character : public Item {
         virtual void setMaxMp(int maxMp);
         Q_PROPERTY(int maxMp READ maxMp WRITE setMaxMp)
 
-        int gold() const { return m_gold; }
-        virtual void adjustGold(int delta);
-        virtual void setGold(int gold);
-        Q_PROPERTY(int gold READ gold WRITE setGold)
+        double gold() const { return m_gold; }
+        virtual void adjustGold(double delta);
+        virtual void setGold(double gold);
+        Q_PROPERTY(double gold READ gold WRITE setGold)
+
+        EffectList effects() const { return m_effects; }
+        Q_INVOKABLE void addEffect(const Effect &effect);
+        Q_INVOKABLE void clearEffects();
+        Q_INVOKABLE void clearNegativeEffects();
+        Q_PROPERTY(EffectList effects READ effects STORED false)
+
+        ModifierList modifiers() const { return m_modifiers; }
+        Q_INVOKABLE void addModifier(const Modifier &modifier);
+        Q_INVOKABLE void clearModifiers();
+        Q_INVOKABLE void clearNegativeModifiers();
+        Q_PROPERTY(ModifierList modifiers READ modifiers STORED false)
 
         Q_INVOKABLE virtual void open(const GameObjectPtr &exit);
         Q_INVOKABLE virtual void close(const GameObjectPtr &exit);
@@ -122,7 +136,7 @@ class Character : public Item {
 
         int m_respawnTime;
         int m_respawnTimeVariation;
-        int m_respawnTimeout;
+        int m_respawnTimerId;
 
         int m_hp;
         int m_maxHp;
@@ -130,14 +144,25 @@ class Character : public Item {
         int m_mp;
         int m_maxMp;
 
-        int m_gold;
+        double m_gold;
+
+        EffectList m_effects;
+        int m_effectsTimerId;
+        qint64 m_effectsTimerStarted;
+
+        ModifierList m_modifiers;
+        int m_modifiersTimerId;
+        qint64 m_modifiersTimerStarted;
 
         int m_secondsStunned;
-        int m_stunTimeout;
+        int m_stunTimerId;
         bool m_oddStunTimer;
         bool m_leaveOnActive;
 
-        int m_regenerationInterval;
+        int m_regenerationTimerId;
+
+        int updateEffects(qint64 now);
+        int updateModifiers(qint64 now);
 };
 
 #endif // CHARACTER_H

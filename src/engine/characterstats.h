@@ -37,6 +37,9 @@ class CharacterStats {
         static void fromScriptValue(const QScriptValue &object, CharacterStats &stats);
 };
 
+typedef QList<CharacterStats> CharacterStatsList;
+
 Q_DECLARE_METATYPE(CharacterStats)
+Q_DECLARE_METATYPE(CharacterStatsList)
 
 #endif // CHARACTERSTATS_H

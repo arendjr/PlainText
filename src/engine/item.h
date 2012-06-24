@@ -2,6 +2,7 @@
 #define ITEM_H
 
 #include "gameobject.h"
+#include "gameobjectptr.h"
 
 
 class Item : public GameObject {
@@ -13,6 +14,10 @@ class Item : public GameObject {
         virtual ~Item();
 
         virtual void setName(const QString &newName);
+
+        Q_INVOKABLE QString definiteName(const GameObjectPtrList &pool,
+                                         Options options = NoOptions);
+        Q_INVOKABLE QString indefiniteName(Options options = NoOptions);
 
         const QString &plural() const { return m_plural; }
         virtual void setPlural(const QString &plural);
