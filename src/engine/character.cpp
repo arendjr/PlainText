@@ -119,7 +119,7 @@ void Character::setInventory(const GameObjectPtrList &inventory) {
         m_inventory = inventory;
 
         int weight = m_stats.weight;
-        gopl_foreach (item, m_inventory) {
+        foreach (const GameObjectPtr &item, m_inventory) {
             weight += item.cast<Item *>()->weight();
         }
         setWeight(weight);
@@ -168,7 +168,7 @@ void Character::setStats(const CharacterStats &stats) {
         setMaxMp(m_stats.intelligence);
 
         int weight = m_stats.weight;
-        gopl_foreach (item, m_inventory) {
+        foreach (const GameObjectPtr &item, m_inventory) {
             weight += item.cast<Item *>()->weight();
         }
         setWeight(weight);
@@ -407,7 +407,7 @@ void Character::go(const GameObjectPtr &exitPtr) {
     }
 
     Area *area = currentArea().cast<Area *>();
-    gopl_foreach (character, area->npcs()) {
+    foreach (const GameObjectPtr &character, area->npcs()) {
         if (!character->invokeTrigger("onexit", this, exit->name())) {
             return;
         }
@@ -421,7 +421,7 @@ void Character::go(const GameObjectPtr &exitPtr) {
     enter(exit->destinationArea());
 
     area = currentArea().cast<Area *>();
-    gopl_foreach (character, area->npcs()) {
+    foreach (const GameObjectPtr &character, area->npcs()) {
         character->invokeTrigger("oncharacterentered", this);
     }
 }
@@ -456,7 +456,7 @@ void Character::leave(const GameObjectPtr &areaPtr, const QString &exitName) {
                     QString("%1 left to the %2.").arg(name(), exitName));
         } else {
             bool unique = true;
-            gopl_foreach (other, area->npcs()) {
+            foreach (const GameObjectPtr &other, area->npcs()) {
                 if (other->name() == name()) {
                     unique = false;
                     break;
@@ -488,7 +488,7 @@ void Character::shout(const QString &message) {
     Area *area = currentArea().cast<Area *>();
 
     GameObjectPtrList players = area->players();
-    gopl_foreach (exitPtr, area->exits()) {
+    foreach (const GameObjectPtr &exitPtr, area->exits()) {
         Exit *exit = exitPtr.cast<Exit *>();
         Q_ASSERT(exit);
 
@@ -611,7 +611,7 @@ void Character::kill(const GameObjectPtr &characterPtr) {
     others = currentArea().cast<Area *>()->characters();
     others.removeOne(this);
     others.removeOne(characterPtr);
-    gopl_foreach (other, others) {
+    foreach (const GameObjectPtr &other, others) {
         other->invokeTrigger("oncharacterattacked", this, characterPtr);
     }
 }
@@ -643,14 +643,14 @@ void Character::die(const GameObjectPtr &attacker) {
 
         players.send(QString("%1 was carrying %2.").arg(myName, inventoryStr), Teal);
 
-        gopl_foreach (item, inventory()) {
+        foreach (const GameObjectPtr &item, inventory()) {
             area->addItem(item);
         }
     }
 
     GameObjectPtrList others = area->characters();
     others.removeOne(this);
-    gopl_foreach (other, others) {
+    foreach (const GameObjectPtr &other, others) {
         other->invokeTrigger("oncharacterdied", this, attacker);
     }
 

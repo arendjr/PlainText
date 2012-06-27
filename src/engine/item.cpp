@@ -54,7 +54,7 @@ QString Item::definiteName(const GameObjectPtrList &pool, Options options) {
     } else {
         int position = 0;
         int total = 0;
-        gopl_foreach (other, pool) {
+        foreach (const GameObjectPtr &other, pool) {
             if (other->name() == name()) {
                 total++;
 

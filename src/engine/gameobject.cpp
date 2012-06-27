@@ -269,7 +269,7 @@ bool GameObject::save() {
                     break;
                 } else if (metaProperty.userType() == QMetaType::type("GameObjectPtrList")) {
                     QStringList stringList;
-                    gopl_foreach (pointer, property(name).value<GameObjectPtrList>()) {
+                    foreach (const GameObjectPtr &pointer, property(name).value<GameObjectPtrList>()) {
                         if (pointer.isNull()) {
                             continue;
                         }

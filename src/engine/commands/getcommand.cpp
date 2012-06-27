@@ -33,7 +33,7 @@ void GetCommand::execute(const QString &command) {
     }
 
     GameObjectPtrList takenItems;
-    gopl_foreach (itemPtr, items) {
+    foreach (const GameObjectPtr &itemPtr, items) {
         Item *item = itemPtr.cast<Item *>();
         if (item->isPortable()) {
             player()->addInventoryItem(itemPtr);

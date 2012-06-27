@@ -120,7 +120,7 @@ GameObjectPtrList Command::objectsByDescription(const QPair<QString, uint> &desc
     if (description.first == "all") {
         objects = pool;
     } else {
-        gopl_foreach (object, pool) {
+        foreach (const GameObjectPtr &object, pool) {
             QString loweredName = object->name().toLower();
             if (loweredName == description.first) {
                 objects.clear();

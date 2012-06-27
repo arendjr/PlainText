@@ -18,8 +18,6 @@ class GameObjectPtrList;
 class GameObjectPtr {
 
     public:
-        friend class GameObjectPtrList;
-
         GameObjectPtr();
         GameObjectPtr(GameObject *gameObject);
         GameObjectPtr(const char *objectType, uint id);
@@ -64,6 +62,8 @@ class GameObjectPtr {
 
         void resolve() throw (GameException);
         void unresolve(bool unregister = true);
+
+        void setOwnerList(GameObjectPtrList *list);
 
         QString toString() const;
         static GameObjectPtr fromString(const QString &string) throw (GameException);
@@ -177,7 +177,9 @@ class GameObjectPtrList {
 
         int length() const;
 
-        void push_back(const GameObjectPtr &value);
+        inline void push_back(const GameObjectPtr &value) {
+            append(value);
+        }
 
         int removeAll(const GameObjectPtr &value);
         void removeAt(int i);
@@ -221,36 +223,5 @@ class GameObjectPtrList {
 };
 
 Q_DECLARE_METATYPE(GameObjectPtrList)
-
-
-//
-// works just like Qt's foreach keyword ...
-//
-// ... except:
-// - the container is not copied (this is faster, but modifying the list is
-//   unsupported)
-// - the variable type is always const GameObjectPtr &
-//
-class GOPLForeachContainer {
-
-    public:
-        inline GOPLForeachContainer(const GameObjectPtrList &t) :
-            c(t),
-            brk(0),
-            i(c.begin()),
-            e(c.end()) {
-        }
-
-        const GameObjectPtrList &c;
-        int brk;
-        typename GameObjectPtrList::const_iterator i, e;
-};
-
-#define gopl_foreach(variable, container) \
-for (GOPLForeachContainer _container_(container); \
-     !_container_.brk && _container_.i != _container_.e; \
-     __extension__  ({ ++_container_.brk; ++_container_.i; })) \
-    for (const GameObjectPtr &variable = *_container_.i;; \
-         __extension__ ({ --_container_.brk; break; }))
 
 #endif // GAMEOBJECTPTR_H

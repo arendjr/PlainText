@@ -82,11 +82,11 @@ void Session::processSignIn(const QString &data) {
     QMap<QString, GameObjectPtr> races;
     QMap<QString, GameObjectPtr> classes;
     if (m_signInStage == AskingRace) {
-        gopl_foreach (racePtr, Realm::instance()->races()) {
+        foreach (const GameObjectPtr &racePtr, Realm::instance()->races()) {
             races[racePtr->name()] = racePtr;
         }
     } else if (m_signInStage == AskingClass) {
-        gopl_foreach (classPtr, m_signUpData->race->classes()) {
+        foreach (const GameObjectPtr &classPtr, m_signUpData->race->classes()) {
             classes[classPtr->name()] = classPtr;
         }
     }
@@ -320,11 +320,11 @@ void Session::processSignIn(const QString &data) {
     }
 
     if (m_signInStage == AskingRace && races.isEmpty()) {
-        gopl_foreach (racePtr, Realm::instance()->races()) {
+        foreach (const GameObjectPtr &racePtr, Realm::instance()->races()) {
             races[racePtr->name()] = racePtr;
         }
     } else if (m_signInStage == AskingClass && classes.isEmpty()) {
-        gopl_foreach (classPtr, m_signUpData->race->classes()) {
+        foreach (const GameObjectPtr &classPtr, m_signUpData->race->classes()) {
             classes[classPtr->name()] = classPtr;
         }
     } else if (m_signInStage == AskingExtraStats) {

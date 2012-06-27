@@ -29,7 +29,7 @@ class GameObject : public QObject {
             Capitalized = 0x02
         };
 
-        explicit GameObject(const char *objectType, uint id, Options options = NoOptions);
+        GameObject(const char *objectType, uint id, Options options = NoOptions);
         virtual ~GameObject();
 
         const char *objectType() const { return m_objectType; }

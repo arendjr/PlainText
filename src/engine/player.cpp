@@ -126,7 +126,7 @@ void Player::look() {
 
     if (area->exits().length() > 0) {
         QStringList exitNames;
-        gopl_foreach (exitPtr, area->exits()) {
+        foreach (const GameObjectPtr &exitPtr, area->exits()) {
             Exit *exit = exitPtr.cast<Exit *>();
 
             if (exit->isHidden()) {
@@ -143,7 +143,7 @@ void Player::look() {
     others.removeOne(this);
     if (others.length() > 0) {
         QStringList playerNames;
-        gopl_foreach (other, others) {
+        foreach (const GameObjectPtr &other, others) {
             playerNames << other->name();
         }
         text += QString("You see %1.\n").arg(Util::joinFancy(playerNames));
@@ -172,7 +172,7 @@ void Player::die(const GameObjectPtr &attacker) {
 
     GameObjectPtrList others = area->characters();
     others.removeOne(this);
-    gopl_foreach (other, others) {
+    foreach (const GameObjectPtr &other, others) {
         other->invokeTrigger("oncharacterdied", this, attacker);
     }
 

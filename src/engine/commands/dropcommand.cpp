@@ -30,7 +30,7 @@ void DropCommand::execute(const QString &command) {
         return;
     }
 
-    gopl_foreach (item, items) {
+    foreach (const GameObjectPtr &item, items) {
         currentArea()->addItem(item);
         player()->removeInventoryItem(item);
     }

@@ -33,7 +33,7 @@ void SetClassCommand::execute(const QString &command) {
     }
 
     Character *character = characters[0].cast<Character *>();
-    gopl_foreach (classPtr, Realm::instance()->classes()) {
+    foreach (const GameObjectPtr &classPtr, Realm::instance()->classes()) {
         if (classPtr->name() == className) {
             character->setClass(classPtr);
 

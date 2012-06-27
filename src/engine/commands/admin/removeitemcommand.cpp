@@ -26,7 +26,7 @@ void RemoveItemCommand::execute(const QString &command) {
         return;
     }
 
-    gopl_foreach (item, items) {
+    foreach (const GameObjectPtr &item, items) {
         item->setDeleted();
 
         player()->send(QString("Item %1 removed.").arg(item->name()));

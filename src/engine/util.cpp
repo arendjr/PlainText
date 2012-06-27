@@ -49,7 +49,7 @@ QString Util::joinItems(const GameObjectPtrList &list, Options options) {
         return (options & Capitalized ? "Nothing" : "nothing");
     }
 
-    gopl_foreach (itemPtr, list) {
+    foreach (const GameObjectPtr &itemPtr, list) {
         if (itemPtr.isNull()) {
             continue;
         }
@@ -368,7 +368,7 @@ void Util::sendOthers(const GameObjectPtrList &_players, const QString &message,
     if (!exclude2.isNull()) {
         players.removeOne(exclude2);
     }
-    gopl_foreach (player, players) {
+    foreach (const GameObjectPtr &player, players) {
         player->send(message);
     }
 }

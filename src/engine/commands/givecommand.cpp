@@ -39,7 +39,7 @@ void GiveCommand::execute(const QString &command) {
     }
 
     Character *recipient = recipients[0].cast<Character *>();
-    gopl_foreach (item, items) {
+    foreach (const GameObjectPtr &item, items) {
         recipient->addInventoryItem(item);
         player()->removeInventoryItem(item);
     }
