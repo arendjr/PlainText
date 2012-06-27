@@ -34,11 +34,8 @@ void UseCommand::execute(const QString &command) {
     Item *item = items[0].cast<Item *>();
     if (!item->hasTrigger("onuse")) {
         send("You cannot use that.");
-    }
-
-    if (!item->invokeTrigger("onuse", player())) {
         return;
     }
 
-    item->setDeleted();
+    item->invokeTrigger("onuse", player());
 }

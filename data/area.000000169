@@ -1,4 +1,5 @@
 {
+  "name": "Tea House",
   "exits": [ "exit:172" ],
   "items": [ "item:173" ]
 }

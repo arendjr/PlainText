@@ -34,6 +34,7 @@ void DrinkCommand::execute(const QString &command) {
     Item *item = items[0].cast<Item *>();
     if (!item->hasTrigger("ondrink")) {
         send("You cannot drink that.");
+        return;
     }
 
     if (!item->invokeTrigger("ondrink", player())) {

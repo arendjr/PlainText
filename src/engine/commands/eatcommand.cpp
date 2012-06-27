@@ -34,6 +34,7 @@ void EatCommand::execute(const QString &command) {
     Item *item = items[0].cast<Item *>();
     if (!item->hasTrigger("oneat")) {
         send("You cannot eat that.");
+        return;
     }
 
     if (!item->invokeTrigger("oneat", player())) {
