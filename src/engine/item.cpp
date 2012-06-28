@@ -5,15 +5,14 @@
 
 
 Item::Item(uint id, Options options) :
-    GameObject("item", id, options),
-    m_portable(false),
-    m_weight(0) {
+    Item("item", id, options) {
 }
 
 Item::Item(const char *objectType, uint id, Options options) :
     GameObject(objectType, id, options),
     m_portable(false),
-    m_weight(0) {
+    m_weight(0),
+    m_cost(0.0) {
 }
 
 Item::~Item() {
@@ -117,6 +116,15 @@ void Item::setWeight(int weight) {
 
     if (m_weight != weight) {
         m_weight = weight;
+
+        setModified();
+    }
+}
+
+void Item::setCost(double cost) {
+
+    if (m_cost != cost) {
+        m_cost = cost;
 
         setModified();
     }

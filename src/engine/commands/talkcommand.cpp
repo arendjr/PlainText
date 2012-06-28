@@ -26,12 +26,18 @@ void TalkCommand::execute(const QString &command) {
 
     takeWord("to");
 
+    QString name = takeWord("the");
+
     QPair <QString, uint> description = takeObjectsDescription();
-    GameObjectPtrList characters = objectsByDescription(description,
-                                                        currentArea()->characters());
-    if (!requireUnique(characters,
-                       QString("%1 is not here.").arg(Util::capitalize(description.first)),
-                       QString("%1 is not unique.").arg(Util::capitalize(description.first)))) {
+    GameObjectPtrList characters = objectsByDescription(description, currentArea()->characters());
+
+    if (characters.isEmpty()) {
+        if (name.isEmpty()) {
+            name = Util::capitalize(description.first);
+        } else {
+            name = "The " + description.first;
+        }
+        player()->send(QString("%1 is not here.").arg(name));
         return;
     }
 

@@ -40,9 +40,14 @@ void Command::setCommand(const QString &command) {
     }
 }
 
+void Command::appendWord(const QString &word) {
+
+    m_words.append(word);
+}
+
 bool Command::assertWordsLeft(const QString &noneLeftText) {
 
-    if (numWordsLeft() == 0) {
+    if (!hasWordsLeft()) {
         m_player->send(noneLeftText);
         return false;
     } else {
@@ -79,6 +84,19 @@ QString Command::takeWord(const QRegExp &pattern, Options options) {
     }
 
     return QString();
+}
+
+GameObjectPtr Command::takeObject(const GameObjectPtrList &pool) {
+
+    QPair<QString, uint> description = takeObjectsDescription();
+    if (!description.first.isEmpty()) {
+        GameObjectPtrList objects = objectsByDescription(description, pool);
+        if (objects.length() > 0) {
+            return objects[0];
+        }
+    }
+
+    return GameObjectPtr();
 }
 
 GameObjectPtrList Command::takeObjects(const GameObjectPtrList &pool) {
@@ -145,6 +163,16 @@ GameObjectPtrList Command::objectsByDescription(const QPair<QString, uint> &desc
         }
     }
     return objects;
+}
+
+bool Command::requireSome(const GameObjectPtr &object, const QString &tooFewText) {
+
+    if (object.isNull()) {
+        m_player->send(tooFewText);
+        return false;
+    } else {
+        return true;
+    }
 }
 
 bool Command::requireSome(const GameObjectPtrList &objects,

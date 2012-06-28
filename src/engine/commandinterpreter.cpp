@@ -10,6 +10,7 @@
 #include "player.h"
 #include "realm.h"
 #include "util.h"
+#include "commands/buycommand.h"
 #include "commands/closecommand.h"
 #include "commands/drinkcommand.h"
 #include "commands/dropcommand.h"
@@ -59,6 +60,7 @@ CommandInterpreter::CommandInterpreter(Player *player, QObject *parent) :
     Command *quit = new QuitCommand(player, this);
 
     m_commands.insert("attack", kill);
+    m_commands.insert("buy", new BuyCommand(player, this));
     m_commands.insert("close", new CloseCommand(player, this));
     m_commands.insert("drink", new DrinkCommand(player, this));
     m_commands.insert("drop", new DropCommand(player, this));
@@ -108,20 +110,28 @@ CommandInterpreter::CommandInterpreter(Player *player, QObject *parent) :
         m_triggers.insert("onattack(attacker : character) : bool",
                           "The onattack trigger is invoked on any character when it's being "
                           "attacked.");
+        m_triggers.insert("onbuy(buyer : character, boughtItem : optional item) : bool",
+                          "The onbuy trigger is invoked on any character when something is being "
+                          "bought from it. When boughtItem is omitted, the buyer is requesting an "
+                          "overview of the things for sale.");
         m_triggers.insert("oncharacterattacked(attacker : character, defendant : character) : void",
                           "The oncharacterattacked trigger is invoked on any character in an area, "
-                          "except for the attacker and defendant themselves, when another character "
-                          "in that area emerges into combat.");
-        m_triggers.insert("oncharacterdied(defendant : character, attacker : optional character) : bool",
-                          "The oncharacterdied trigger is invoked on any character in an area, when "
-                          "another character in that area dies.");
+                          "except for the attacker and defendant themselves, when another "
+                          "character in that area emerges into combat.");
+        m_triggers.insert("oncharacterdied(defendant : character, attacker : optional character) : "
+                          "bool",
+                          "The oncharacterdied trigger is invoked on any character in an area, "
+                          "when another character in that area dies. When attacker is omitted, the "
+                          "defendant died because of a non-combat cause (for example, poison).");
         m_triggers.insert("oncharacterentered(activator : character) : void",
                           "The oncharacterentered trigger is invoked on any character in an area "
                           "when another character enters that area.");
         m_triggers.insert("onclose(activator : character) : bool",
                           "The onclose trigger is invoked on any item or exit when it's closed.");
         m_triggers.insert("ondie(attacker : optional character) : bool",
-                          "The ondie trigger is invoked on any character when it dies.");
+                          "The ondie trigger is invoked on any character when it dies. When "
+                          "attacker is omitted, the character died because of a non-combat cause "
+                          "(for example, poison).");
         m_triggers.insert("ondrink(activator : character) : bool",
                           "The ondrink trigger is invoked on any item when it's drunk.");
         m_triggers.insert("oneat(activator : character) : bool",
@@ -140,7 +150,7 @@ CommandInterpreter::CommandInterpreter(Player *player, QObject *parent) :
                           "The onspawn trigger is invoked on any character when it respawns.");
         m_triggers.insert("ontalk(speaker : character, message : string) : void",
                           "The ontalk trigger is invoked on any character when talked to.");
-        m_triggers.insert("onuse(activator : character) : bool",
+        m_triggers.insert("onuse(activator : character) : void",
                           "The onuse trigger is invoked on any item when it's used.");
     }
 
@@ -198,7 +208,8 @@ void CommandInterpreter::execute(const QString &command) {
             m_player->send(QString("Command \"%1\" does not exist.").arg(words[0]));
         }
     } catch (GameException &exception) {
-        m_player->send(QString("Executing the command gave an exception: %1").arg(exception.what()));
+        m_player->send(QString("Executing the command gave an exception: "
+                               "%1").arg(exception.what()));
         if (!m_player->isAdmin()) {
             m_player->send("This is not good. You may want to contact a game admin about this.");
         }
@@ -233,7 +244,8 @@ void CommandInterpreter::showHelp(const QString &command) {
     } else if (command == "admin-commands") {
         if (m_player->isAdmin()) {
             m_player->send("Here is a list of all the commands you can use as an admin:\n\n" +
-                           Util::highlight("Remember: With great power comes great responsibility!") + "\n\n");
+                           Util::highlight("Remember: With great power comes great "
+                                           "responsibility!") + "\n\n");
 
             QStringList commandNames = m_commands.keys();
             showColumns(commandNames.filter("-"));
@@ -261,7 +273,8 @@ void CommandInterpreter::showHelp(const QString &command) {
     } else {
         if (m_commands.contains(command)) {
             m_player->send("\n" + Util::highlight(command) + "\n"
-                           "  " + Util::splitLines(m_commands[command]->description(), 78).join("\n  ") + "\n\n");
+                           "  " + Util::splitLines(m_commands[command]->description(),
+                                                   78).join("\n  ") + "\n\n");
             return;
         }
 
@@ -269,7 +282,8 @@ void CommandInterpreter::showHelp(const QString &command) {
             foreach (const QString &triggerName, m_triggers.keys()) {
                 if (triggerName.startsWith(command)) {
                     m_player->send("\n" + Util::highlight(triggerName) + "\n"
-                                   "  " + Util::splitLines(m_triggers[triggerName], 78).join("\n  ") + "\n\n");
+                                   "  " + Util::splitLines(m_triggers[triggerName],
+                                                           78).join("\n  ") + "\n\n");
                     return;
                 }
             }

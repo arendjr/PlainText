@@ -23,7 +23,7 @@ void LookCommand::execute(const QString &command) {
     setCommand(command);
 
     /*QString alias = */takeWord();
-    if (numWordsLeft() == 0) {
+    if (!hasWordsLeft()) {
         player()->look();
         return;
     }

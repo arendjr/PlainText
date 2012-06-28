@@ -34,17 +34,20 @@ class Command : public QObject {
         void quit();
 
     protected:
-        Player *player() { return m_player; }
-        Area *currentArea() { return m_player->currentArea().cast<Area *>(); }
+        inline Player *player() { return m_player; }
+        inline Area *currentArea() { return m_player->currentArea().cast<Area *>(); }
 
         void setCommand(const QString &command);
+        void appendWord(const QString &word);
 
-        int numWordsLeft() const { return m_words.length(); }
+        inline int numWordsLeft() const { return m_words.length(); }
+        inline bool hasWordsLeft() const { return m_words.length() > 0; }
         bool assertWordsLeft(const QString &noneLeftText);
 
         QString takeWord(Options options = None);
         QString takeWord(const char *pattern, Options options = None);
         QString takeWord(const QRegExp &pattern, Options options = None);
+        GameObjectPtr takeObject(const GameObjectPtrList &pool);
         GameObjectPtrList takeObjects(const GameObjectPtrList &pool);
         QPair<QString, uint> takeObjectsDescription();
         QString takeRest();
@@ -52,6 +55,8 @@ class Command : public QObject {
         virtual GameObjectPtrList objectsByDescription(const QPair<QString, uint> &description,
                                                        const GameObjectPtrList &pool);
 
+        bool requireSome(const GameObjectPtr &object,
+                         const QString &tooFewText);
         bool requireSome(const GameObjectPtrList &objects,
                          const QString &tooFewText);
         bool requireUnique(const GameObjectPtrList &objects,

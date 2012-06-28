@@ -53,7 +53,7 @@ void SetPropCommand::execute(const QString &command) {
             } else if (variant.userType() == QMetaType::type("GameObjectPtrList")) {
                 try {
                     GameObjectPtrList pointerList;
-                    foreach (QString string, value.mid(1, value.length() - 2).split(',')) {
+                    for (QString string : value.mid(1, value.length() - 2).split(',')) {
                         string = string.trimmed();
                         if (!string.isEmpty()) {
                             pointerList << GameObjectPtr::fromString(string);

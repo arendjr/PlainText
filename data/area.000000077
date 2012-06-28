@@ -1,5 +1,4 @@
 {
   "name": "Fruit Stall",
-  "exits": [ "exit:87" ],
-  "npcs": [ "character:167" ]
+  "exits": [ "exit:87" ]
 }

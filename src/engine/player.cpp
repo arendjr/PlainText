@@ -88,6 +88,17 @@ void Player::send(const QString &_message, Color color) {
     write(message);
 }
 
+void Player::sendSellableItemsList(const GameObjectPtrList &items) {
+
+    QString message;
+    for (const GameObjectPtr &item : items) {
+        message += QString("  %1$%3\n")
+                   .arg(item->name().leftJustified(30))
+                   .arg(item.cast<Item *>()->cost());
+    }
+    write(message);
+}
+
 void Player::enter(const GameObjectPtr &areaPtr) {
 
     Area *area = areaPtr.cast<Area *>();
@@ -126,7 +137,7 @@ void Player::look() {
 
     if (area->exits().length() > 0) {
         QStringList exitNames;
-        foreach (const GameObjectPtr &exitPtr, area->exits()) {
+        for (const GameObjectPtr &exitPtr : area->exits()) {
             Exit *exit = exitPtr.cast<Exit *>();
 
             if (exit->isHidden()) {
@@ -143,7 +154,7 @@ void Player::look() {
     others.removeOne(this);
     if (others.length() > 0) {
         QStringList playerNames;
-        foreach (const GameObjectPtr &other, others) {
+        for (const GameObjectPtr &other : others) {
             playerNames << other->name();
         }
         text += QString("You see %1.\n").arg(Util::joinFancy(playerNames));
@@ -172,7 +183,7 @@ void Player::die(const GameObjectPtr &attacker) {
 
     GameObjectPtrList others = area->characters();
     others.removeOne(this);
-    foreach (const GameObjectPtr &other, others) {
+    for (const GameObjectPtr &other : others) {
         other->invokeTrigger("oncharacterdied", this, attacker);
     }
 

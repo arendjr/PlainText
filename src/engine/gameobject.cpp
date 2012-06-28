@@ -139,6 +139,15 @@ bool GameObject::invokeTrigger(const QString &name,
 }
 
 bool GameObject::invokeTrigger(const QString &triggerName,
+                               GameObject *arg1, const GameObjectPtr &arg2,
+                               const QVariant &arg3, const QVariant &arg4) {
+
+    return invokeTrigger(triggerName,
+                         QVariant::fromValue(GameObjectPtr(arg1)), QVariant::fromValue(arg2),
+                         arg3, arg4);
+}
+
+bool GameObject::invokeTrigger(const QString &triggerName,
                                GameObject *arg1, const QVariant &arg2,
                                const QVariant &arg3, const QVariant &arg4) {
 
@@ -218,6 +227,17 @@ void GameObject::clearTimeout(int timerId) {
 void GameObject::init() {
 
     invokeTrigger("oninit");
+}
+
+GameObject *GameObject::copy() {
+
+    GameObject *object = GameObject::createByObjectType(objectType());
+    for (const QMetaProperty &metaProperty : storedMetaProperties()) {
+        const char *name = metaProperty.name();
+        object->setProperty(name, property(name));
+    }
+    object->init();
+    return object;
 }
 
 bool GameObject::save() {

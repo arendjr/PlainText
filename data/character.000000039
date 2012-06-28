@@ -4,6 +4,7 @@
   "plural": "Earls",
   "portable": false,
   "weight": 90,
+  "cost": 0,
   "currentArea": "area:36",
   "race": "0",
   "characterClass": "0",

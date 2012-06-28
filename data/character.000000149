@@ -5,6 +5,7 @@
   "indefiniteArticle": "a",
   "portable": false,
   "weight": 90,
+  "cost": 0,
   "currentArea": "area:122",
   "race": "race:2",
   "characterClass": "class:148",

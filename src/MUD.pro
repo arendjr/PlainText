@@ -33,6 +33,7 @@ SOURCES += \
     engine/scriptfunctionmap.cpp \
     engine/scriptwindow.cpp \
     engine/util.cpp \
+    engine/commands/buycommand.cpp \
     engine/commands/closecommand.cpp \
     engine/commands/command.cpp \
     engine/commands/drinkcommand.cpp \
@@ -105,6 +106,7 @@ HEADERS += \
     engine/scriptfunctionmap.h \
     engine/scriptwindow.h \
     engine/util.h \
+    engine/commands/buycommand.h \
     engine/commands/closecommand.h \
     engine/commands/command.h \
     engine/commands/drinkcommand.h \

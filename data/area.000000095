@@ -1,4 +1,5 @@
 {
   "name": "Boatman's Street",
-  "exits": [ "exit:97", "exit:105" ]
+  "exits": [ "exit:97", "exit:105" ],
+  "npcs": [ "character:167" ]
 }

@@ -36,6 +36,10 @@ class Item : public GameObject {
         virtual void setWeight(int weight);
         Q_PROPERTY(int weight READ weight WRITE setWeight)
 
+        double cost() const { return m_cost; }
+        virtual void setCost(double cost);
+        Q_PROPERTY(double cost READ cost WRITE setCost)
+
     protected:
         explicit Item(const char *objectType, uint id, Options options = NoOptions);
 
@@ -46,6 +50,8 @@ class Item : public GameObject {
         bool m_portable;
 
         int m_weight;
+
+        double m_cost;
 };
 
 #endif // ITEM_H

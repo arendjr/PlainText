@@ -23,10 +23,10 @@ void CloseCommand::execute(const QString &command) {
 
     takeWord("the");
 
-    GameObjectPtrList exits = takeObjects(currentArea()->exits());
-    if (!requireUnique(exits, "That's not here.", "Exit is not unique.")) {
+    GameObjectPtr exit = takeObject(currentArea()->exits());
+    if (!requireSome(exit, "That's not here.")) {
         return;
     }
 
-    player()->close(exits[0]);
+    player()->close(exit);
 }

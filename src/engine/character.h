@@ -30,6 +30,12 @@ class Character : public Item {
         virtual void setInventory(const GameObjectPtrList &inventory);
         Q_PROPERTY(GameObjectPtrList inventory READ inventory WRITE setInventory)
 
+        const GameObjectPtrList &sellableItems() const { return m_sellableItems; }
+        Q_INVOKABLE virtual void addSellableItem(const GameObjectPtr &item);
+        Q_INVOKABLE virtual void removeSellableItem(const GameObjectPtr &item);
+        virtual void setSellableItems(const GameObjectPtrList &items);
+        Q_PROPERTY(GameObjectPtrList sellableItems READ sellableItems WRITE setSellableItems)
+
         const GameObjectPtr &race() const { return m_race; }
         virtual void setRace(const GameObjectPtr &race);
         Q_PROPERTY(GameObjectPtr race READ race WRITE setRace)
@@ -125,6 +131,7 @@ class Character : public Item {
         GameObjectPtr m_currentArea;
 
         GameObjectPtrList m_inventory;
+        GameObjectPtrList m_sellableItems;
 
         GameObjectPtr m_race;
         GameObjectPtr m_class;

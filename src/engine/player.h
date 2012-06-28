@@ -31,6 +31,7 @@ class Player : public Character {
         void setSession(Session *session);
 
         virtual void send(const QString &message, Color color = Silver);
+        Q_INVOKABLE void sendSellableItemsList(const GameObjectPtrList &items);
 
         virtual void enter(const GameObjectPtr &area);
         virtual void leave(const GameObjectPtr &area, const QString &exitName = QString());
