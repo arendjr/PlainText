@@ -1,6 +1,5 @@
 {
   "name": "Tea House",
   "description": "The tea house is a serene old place, where people gather for comfort and relaxation. A subtle chatter and occassional laughter help to provide a warm atmosphere that's enjoyed by many people from around town.",
-  "exits": [ "exit:172" ],
-  "npcs": [ "character:174" ]
+  "exits": [ "exit:172" ]
 }

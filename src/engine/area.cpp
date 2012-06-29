@@ -58,24 +58,18 @@ void Area::addNPC(const GameObjectPtr &npc) {
 
     if (!m_npcs.contains(npc)) {
         m_npcs << npc;
-
-        setModified();
     }
 }
 
 void Area::removeNPC(const GameObjectPtr &npc) {
 
-    if (m_npcs.removeAll(npc) > 0) {
-        setModified();
-    }
+    m_npcs.removeAll(npc);
 }
 
 void Area::setNPCs(const GameObjectPtrList &npcs) {
 
     if (m_npcs != npcs) {
         m_npcs = npcs;
-
-        setModified();
     }
 }
 

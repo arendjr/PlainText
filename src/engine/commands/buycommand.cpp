@@ -59,7 +59,7 @@ void BuyCommand::execute(const QString &command) {
 
         character = takeObject(currentArea()->npcs());
     } else {
-        appendWord(word);
+        prependWord(word);
 
         itemDescription = takeObjectsDescription();
     }
@@ -87,7 +87,7 @@ void BuyCommand::execute(const QString &command) {
             if (sellers.length() == 1) {
                 character = sellers[0];
             } else {
-                player()->send("Buy from who?");
+                send("Buy from who?");
                 return;
             }
         }
@@ -101,7 +101,7 @@ void BuyCommand::execute(const QString &command) {
     QString sellerName = seller->definiteName(currentArea()->npcs(), GameObject::Capitalized);
 
     if (seller->sellableItems().length() == 0) {
-        player()->send(QString("%1 has nothing for sale.").arg(sellerName));
+        send(QString("%1 has nothing for sale.").arg(sellerName));
         return;
     }
 
@@ -117,7 +117,7 @@ void BuyCommand::execute(const QString &command) {
 
     Item *item = items[0].cast<Item *>();
     if (item->cost() > player()->gold()) {
-        player()->send("You don't have enough gold to buy that.");
+        send("You don't have enough gold to buy that.");
         return;
     }
 
@@ -128,5 +128,5 @@ void BuyCommand::execute(const QString &command) {
     player()->adjustGold(-item->cost());
     player()->addInventoryItem(item->copy());
 
-    player()->send(QString("You bought %1.").arg(item->indefiniteName()));
+    send(QString("You bought %1.").arg(item->indefiniteName()));
 }

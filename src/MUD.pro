@@ -11,6 +11,7 @@ TEMPLATE = app
 
 SOURCES += \
     main.cpp \
+    engine/application.cpp \
     engine/area.cpp \
     engine/character.cpp \
     engine/characterstats.cpp \
@@ -23,6 +24,7 @@ SOURCES += \
     engine/gameobject.cpp \
     engine/gameobjectptr.cpp \
     engine/gameobjectsyncthread.cpp \
+    engine/gameobjectsyncworker.cpp \
     engine/item.cpp \
     engine/modifier.cpp \
     engine/player.cpp \
@@ -83,6 +85,7 @@ SOURCES += \
     ../3rdparty/qtwebsocket/QtWebSocket/QWsSocket.cpp
 
 HEADERS += \
+    engine/application.h \
     engine/area.h \
     engine/character.h \
     engine/characterstats.h \
@@ -96,6 +99,7 @@ HEADERS += \
     engine/gameobject.h \
     engine/gameobjectptr.h \
     engine/gameobjectsyncthread.h \
+    engine/gameobjectsyncworker.h \
     engine/item.h \
     engine/modifier.h \
     engine/player.h \

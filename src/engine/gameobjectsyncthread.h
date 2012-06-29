@@ -1,12 +1,11 @@
 #ifndef GAMEOBJECTSYNCTHREAD_H
 #define GAMEOBJECTSYNCTHREAD_H
 
-#include <QMutex>
-#include <QQueue>
 #include <QThread>
 
 
 class GameObject;
+class GameObjectSyncWorker;
 
 class GameObjectSyncThread : public QThread {
 
@@ -14,23 +13,15 @@ class GameObjectSyncThread : public QThread {
 
     public:
         explicit GameObjectSyncThread(QObject *parent = 0);
+        virtual ~GameObjectSyncThread();
 
         void queueObject(const GameObject *object);
-
-    signals:
-        void objectEnqueued();
 
     protected:
         virtual void run();
 
-        void syncObject(GameObject *object);
-
-    protected slots:
-        void onObjectEnqueued();
-
     private:
-        QQueue<GameObject *> m_objectQueue;
-        QMutex m_queueMutex;
+        GameObjectSyncWorker *m_worker;
 };
 
 #endif // GAMEOBJECTSYNCTHREAD_H

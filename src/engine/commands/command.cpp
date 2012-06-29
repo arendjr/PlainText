@@ -40,6 +40,11 @@ void Command::setCommand(const QString &command) {
     }
 }
 
+void Command::prependWord(const QString &word) {
+
+    m_words.prepend(word);
+}
+
 void Command::appendWord(const QString &word) {
 
     m_words.append(word);

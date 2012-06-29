@@ -1,47 +1,29 @@
 #include "gameobjectsyncthread.h"
 
-#include "gameobject.h"
+#include "gameobjectsyncworker.h"
 
 
 GameObjectSyncThread::GameObjectSyncThread(QObject *parent) :
-    QThread(parent) {
+    QThread(parent),
+    m_worker(0) {
+}
 
-    connect(this, SIGNAL(objectEnqueued()), SLOT(onObjectEnqueued()), Qt::QueuedConnection);
+GameObjectSyncThread::~GameObjectSyncThread() {
+
+    delete m_worker;
 }
 
 void GameObjectSyncThread::queueObject(const GameObject *object) {
 
-    GameObject *copy = GameObject::createCopy(object);
-
-    m_queueMutex.lock();
-    m_objectQueue.enqueue(copy);
-    m_queueMutex.unlock();
-
-    emit objectEnqueued();
+    Q_ASSERT(m_worker);
+    m_worker->queueObject(object);
 }
 
 void GameObjectSyncThread::run() {
 
+    m_worker = new GameObjectSyncWorker();
+
     exec();
 
-    while (!m_objectQueue.isEmpty()) {
-        GameObject *object = m_objectQueue.dequeue();
-        syncObject(object);
-    }
-}
-
-void GameObjectSyncThread::syncObject(GameObject *object) {
-
-    object->save();
-
-    delete object;
-}
-
-void GameObjectSyncThread::onObjectEnqueued() {
-
-    m_queueMutex.lock();
-    GameObject *object = m_objectQueue.dequeue();
-    m_queueMutex.unlock();
-
-    syncObject(object);
+    m_worker->syncAll();
 }

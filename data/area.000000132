@@ -1,5 +1,4 @@
 {
   "name": "Main Street",
-  "exits": [ "exit:134", "exit:135" ],
-  "npcs": [ "character:45" ]
+  "exits": [ "exit:134", "exit:135" ]
 }

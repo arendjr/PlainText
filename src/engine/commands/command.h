@@ -38,6 +38,7 @@ class Command : public QObject {
         inline Area *currentArea() { return m_player->currentArea().cast<Area *>(); }
 
         void setCommand(const QString &command);
+        void prependWord(const QString &word);
         void appendWord(const QString &word);
 
         inline int numWordsLeft() const { return m_words.length(); }

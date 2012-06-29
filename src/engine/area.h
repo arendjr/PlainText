@@ -29,7 +29,7 @@ class Area : public GameObject {
         virtual void addNPC(const GameObjectPtr &npc);
         virtual void removeNPC(const GameObjectPtr &npc);
         virtual void setNPCs(const GameObjectPtrList &npcs);
-        Q_PROPERTY(GameObjectPtrList npcs READ npcs WRITE setNPCs)
+        Q_PROPERTY(GameObjectPtrList npcs READ npcs WRITE setNPCs STORED false)
 
         const GameObjectPtrList &items() const { return m_items; }
         virtual void addItem(const GameObjectPtr &item);

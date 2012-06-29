@@ -96,11 +96,13 @@ void Character::setInventory(const GameObjectPtrList &inventory) {
     if (m_inventory != inventory) {
         m_inventory = inventory;
 
-        int weight = m_stats.weight;
-        foreach (const GameObjectPtr &item, m_inventory) {
-            weight += item.cast<Item *>()->weight();
+        if (~options() & Copy) {
+            int weight = m_stats.weight;
+            foreach (const GameObjectPtr &item, m_inventory) {
+                weight += item.cast<Item *>()->weight();
+            }
+            setWeight(weight);
         }
-        setWeight(weight);
 
         setModified();
     }
@@ -165,18 +167,20 @@ void Character::setStats(const CharacterStats &stats) {
     if (m_stats != stats) {
         m_stats = stats;
 
-        startBulkModification();
+        if (~options() & Copy) {
+            startBulkModification();
 
-        setMaxHp(2 * m_stats.vitality);
-        setMaxMp(m_stats.intelligence);
+            setMaxHp(2 * m_stats.vitality);
+            setMaxMp(m_stats.intelligence);
 
-        int weight = m_stats.weight;
-        foreach (const GameObjectPtr &item, m_inventory) {
-            weight += item.cast<Item *>()->weight();
+            int weight = m_stats.weight;
+            foreach (const GameObjectPtr &item, m_inventory) {
+                weight += item.cast<Item *>()->weight();
+            }
+            setWeight(weight);
+
+            commitBulkModification();
         }
-        setWeight(weight);
-
-        commitBulkModification();
     }
 }
 
@@ -703,7 +707,9 @@ void Character::setLeaveOnActive(bool leaveOnActive) {
 void Character::init() {
 
     // guarantee our current area lists us, otherwise we may end up in a real
-    // limbo if we died and a server termination killed the respawn timers
+    // limbo if we died and a server termination killed the respawn timers.
+    // in addition, this allows Area::npcs to become a non-stored property,
+    // saving many disk writes when NPCs walk around
     if (strcmp(objectType(), "character") == 0) {
         Area *area = currentArea().cast<Area *>();
         area->addNPC(this);
