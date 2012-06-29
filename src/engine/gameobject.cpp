@@ -1,5 +1,7 @@
 #include "gameobject.h"
 
+#include <unistd.h>
+
 #include <QDateTime>
 #include <QDebug>
 #include <QFile>
@@ -326,6 +328,12 @@ bool GameObject::save() {
     }
 
     file.write("{\n" + dumpedProperties.join(",\n").toUtf8() + "\n}\n");
+    file.flush();
+#ifdef Q_OS_LINUX
+    fdatasync(file.handle());
+#else
+    fsync(file.handle());
+#endif
     return true;
 }
 
