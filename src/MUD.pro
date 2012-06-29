@@ -1,7 +1,12 @@
 QT += core network script
 QT -= gui
 
-QMAKE_CXXFLAGS = -std=c++11 -stdlib=libc++
+macx {
+    QMAKE_CXXFLAGS = -std=c++11 -stdlib=libc++
+}
+!macx {
+    QMAKE_CXXFLAGS = -std=c++0x
+}
 
 TARGET = MUD
 CONFIG += console

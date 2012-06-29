@@ -19,7 +19,29 @@
 
 
 Character::Character(uint id, Options options) :
-    Character("character", id, options) {
+    Item("character", id, options),
+    m_gender("male"),
+    m_subjectPronoun("he"),
+    m_objectPronoun("him"),
+    m_respawnTime(0),
+    m_respawnTimeVariation(0),
+    m_respawnTimerId(0),
+    m_hp(1),
+    m_maxHp(1),
+    m_mp(0),
+    m_maxMp(0),
+    m_gold(0.0),
+    m_effectsTimerId(0),
+    m_effectsTimerStarted(0),
+    m_modifiersTimerId(0),
+    m_modifiersTimerStarted(0),
+    m_secondsStunned(0),
+    m_stunTimerId(0),
+    m_oddStunTimer(false),
+    m_leaveOnActive(false),
+    m_regenerationTimerId(0) {
+
+    setAutoDelete(false);
 
     m_regenerationTimerId = startTimer(45000);
 }

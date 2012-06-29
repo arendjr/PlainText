@@ -59,7 +59,10 @@ GameObjectPtr::GameObjectPtr(const GameObjectPtr &other) :
 }
 
 GameObjectPtr::GameObjectPtr(GameObjectPtr &&other) :
-    GameObjectPtr() {
+    m_gameObject(0),
+    m_objectType(0),
+    m_id(0),
+    m_list(0) {
 
     *this = std::move(other);
 }
