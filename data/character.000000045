@@ -1,11 +1,11 @@
 {
   "name": "Joe",
-  "triggers": { "oninit": "(function() { var self = this; this.setInterval(function() { var exits = self.currentArea.exits; var tries = 0; do { var exit = exits[randomInt(0, exits.length)]; if (!exit.hidden && (!exit.door || exit.open)) { self.go(exit); return; } tries++; } while (tries < 3); }, 5000); })", "onspawn": "(function() { var self = this; this.setInterval(function() { var exits = self.currentArea.exits; var tries = 0; do { var exit = exits[randomInt(0, exits.length)]; if (!exit.hidden && (!exit.door || exit.open)) { self.go(exit); return; } tries++; } while (tries < 3); }, 5000); })" },
+  "triggers": { "oninit": "(function() {\n    this.invokeTrigger('onspawn');\n})", "onspawn": "(function() {\n    var previousAreaId = 0;\n    this.setInterval(function() {\n        var exits = this.currentArea.exits.filter(function(exit) {\n            return !exit.hidden && (!exit.door || exit.open);\n        });\n        if (exits.length > 1) {\n            exits = exits.filter(function(exit) { return exit.destinationArea.id !== previousAreaId; });\n        }\n        previousAreaId = this.currentArea.id;\n        this.go(exits.randomElement());\n    }, 5000);\n})" },
   "plural": "Joes",
   "portable": false,
   "weight": 0,
   "cost": 0,
-  "currentArea": "area:11",
+  "currentArea": "area:156",
   "race": "race:2",
   "characterClass": "0",
   "gender": "male",
@@ -14,7 +14,7 @@
   "respawnTimeVariation": 8000,
   "hp": 1,
   "maxHp": 1,
-  "mp": 0,
+  "mp": 1,
   "maxMp": 1,
   "gold": 0
 }

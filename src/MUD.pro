@@ -8,6 +8,8 @@ macx {
     QMAKE_CXXFLAGS = -std=c++0x
 }
 
+DEFINES *= QT_USE_QSTRINGBUILDER
+
 TARGET = MUD
 CONFIG += console
 CONFIG -= app_bundle

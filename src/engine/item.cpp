@@ -53,7 +53,7 @@ QString Item::definiteName(const GameObjectPtrList &pool, Options options) {
     } else {
         int position = 0;
         int total = 0;
-        foreach (const GameObjectPtr &other, pool) {
+        for (const GameObjectPtr &other : pool) {
             if (other->name() == name()) {
                 total++;
 
@@ -64,7 +64,7 @@ QString Item::definiteName(const GameObjectPtrList &pool, Options options) {
         }
 
         return QString(options & Capitalized ? "The " : "the ") +
-               QString(total > 1 ? Util::writtenPosition(position) + " ": "") +
+               (total > 1 ? QString(Util::writtenPosition(position) + " ") : QLatin1String("")) +
                name();
     }
 }

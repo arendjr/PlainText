@@ -23,12 +23,6 @@ class GameObject : public QObject {
     friend void swap(GameObjectPtr &first, GameObjectPtr &second);
 
     public:
-        enum Options {
-            NoOptions = 0x00,
-            Copy = 0x01,
-            Capitalized = 0x02
-        };
-
         GameObject(const char *objectType, uint id, Options options = NoOptions);
         virtual ~GameObject();
 
@@ -72,7 +66,7 @@ class GameObject : public QObject {
                            const GameObjectPtr &arg1, const GameObjectPtr &arg2,
                            const QVariant &arg3 = QVariant(), const QVariant &arg4 = QVariant());
 
-        Q_INVOKABLE virtual void send(const QString &message, Color color = Silver);
+        Q_INVOKABLE virtual void send(const QString &message, Color color = Silver) const;
 
         Q_INVOKABLE int setInterval(const QScriptValue &function, int delay);
         Q_INVOKABLE void clearInterval(int timerId);
@@ -112,6 +106,7 @@ class GameObject : public QObject {
 
         void killAllTimers();
 
+        bool mayReferenceOtherProperties() const;
         void setModified();
 
         void setAutoDelete(bool autoDelete);

@@ -200,7 +200,7 @@ QString Realm::saveDirPath() {
 
 QString Realm::saveObjectPath(const char *objectType, uint id) {
 
-    return (saveDirPath() + "/%1.%2").arg(objectType).arg(id, 9, 10, QChar('0'));
+    return QString(saveDirPath() + "/%1.%2").arg(objectType).arg(id, 9, 10, QChar('0'));
 }
 
 void Realm::timerEvent(QTimerEvent *event) {

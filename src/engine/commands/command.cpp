@@ -20,9 +20,30 @@ void Command::setDescription(const QString &description) {
     m_description = description;
 }
 
-void Command::setCommand(const QString &command) {
+void Command::setCommand(const QString &_command) {
 
-    m_words = command.trimmed().split(QRegExp("\\s+"));
+    QRegExp whitespace("\\s+");
+    QString command = _command.trimmed();
+
+    m_words = command.split(whitespace);
+    if (m_player->isAdmin()) {
+        if (m_words[0] == "exec-script") {
+            m_words.clear();
+            m_words << command.section(whitespace, 0, 0);
+            m_words << command.section(whitespace, 1);
+            return;
+        }
+        if (m_words[0].endsWith("-trigger")) {
+            m_words.clear();
+            m_words << command.section(whitespace, 0, 0);
+            m_words << command.section(whitespace, 1, 1);
+            m_words << command.section(whitespace, 2, 2);
+            if (m_words[0] == "set-trigger") {
+                m_words << command.section(whitespace, 3);
+            }
+            return;
+        }
+    }
 
     for (int i = 0; i < m_words.length(); i++) {
         QString word = m_words[i];
@@ -143,14 +164,14 @@ GameObjectPtrList Command::objectsByDescription(const QPair<QString, uint> &desc
     if (description.first == "all") {
         objects = pool;
     } else {
-        foreach (const GameObjectPtr &object, pool) {
+        for (const GameObjectPtr &object : pool) {
             QString loweredName = object->name().toLower();
             if (loweredName == description.first) {
                 objects.clear();
                 objects << object;
                 break;
             }
-            foreach (const QString &word, loweredName.split(' ')) {
+            for (const QString &word : loweredName.split(' ')) {
                 if (word.startsWith(description.first)) {
                     objects << object;
                     break;

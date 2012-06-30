@@ -30,7 +30,7 @@ class Player : public Character {
         Session *session() const { return m_session; }
         void setSession(Session *session);
 
-        virtual void send(const QString &message, Color color = Silver);
+        virtual void send(const QString &message, Color color = Silver) const;
         Q_INVOKABLE void sendSellableItemsList(const GameObjectPtrList &items);
 
         virtual void enter(const GameObjectPtr &area);
@@ -41,7 +41,7 @@ class Player : public Character {
         virtual void die(const GameObjectPtr &attacker);
 
     signals:
-        void write(const QString &data);
+        void write(const QString &data) const;
 
     protected:
         virtual void timerEvent(QTimerEvent *event);

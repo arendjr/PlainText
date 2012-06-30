@@ -12,9 +12,9 @@
   "stats": [40, 40, 40, 40, 20, 20, 185, 90],
   "respawnTime": 12000,
   "respawnTimeVariation": 8000,
-  "hp": 1,
+  "hp": 80,
   "maxHp": 80,
   "mp": 0,
   "maxMp": 20,
-  "gold": 0
+  "gold": 5
 }

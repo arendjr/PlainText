@@ -76,6 +76,16 @@ QScriptValue ScriptEngine::executeFunction(ScriptFunction &function, const GameO
     return function.value.call(m_jsEngine.toScriptValue(thisObject), arguments);
 }
 
+QScriptValue ScriptEngine::toScriptValue(GameObject *object) {
+
+    return m_jsEngine.toScriptValue(object);
+}
+
+QScriptValue ScriptEngine::toScriptValue(const GameObjectPtr &object) {
+
+    return m_jsEngine.toScriptValue(object);
+}
+
 void ScriptEngine::setGlobalObject(const char *name, QObject *object) {
 
     m_jsEngine.globalObject().setProperty(name, m_jsEngine.newQObject(object,

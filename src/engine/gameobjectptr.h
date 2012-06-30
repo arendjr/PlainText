@@ -212,7 +212,9 @@ class GameObjectPtrList {
         void resolvePointers() throw (GameException);
         void unresolvePointers();
 
-        void send(const QString &message, Color color = Silver);
+        void send(const QString &message, Color color = Silver) const;
+
+        QString joinFancy(Options options = NoOptions) const;
 
     private:
         static const int NUM_ITEMS = 16;

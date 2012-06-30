@@ -1,8 +1,8 @@
+#include "util.h"
+
 #include "gameobjectptr.h"
-#include "item.h"
 #include "player.h"
 #include "scriptengine.h"
-#include "util.h"
 
 #include <QTextStream>
 #include <QtAlgorithms>
@@ -37,58 +37,6 @@ QString Util::joinFancy(const QStringList &list,
         }
     }
     return string;
-}
-
-QString Util::joinItems(const GameObjectPtrList &list, Options options) {
-
-    QList<Item *> items;
-    QStringList itemNames;
-    QList<int> itemCounts;
-
-    if (list.isEmpty()) {
-        return (options & Capitalized ? "Nothing" : "nothing");
-    }
-
-    foreach (const GameObjectPtr &itemPtr, list) {
-        if (itemPtr.isNull()) {
-            continue;
-        }
-
-        Item *item = itemPtr.cast<Item *>();
-
-        int index = itemNames.indexOf(item->name());
-        if (index > -1) {
-            itemCounts[index]++;
-        } else {
-            items << item;
-            itemNames << item->name();
-            itemCounts << 1;
-        }
-    }
-
-    QStringList strings;
-    for (int i = 0; i < items.length(); i++) {
-        Item *item = items[i];
-
-        if (itemCounts[i] > 1) {
-            strings << writtenNumber(itemCounts[i]) + " " + item->plural();
-        } else {
-            if (item->indefiniteArticle().isEmpty()) {
-                strings << item->name();
-            } else {
-                if (options & DefiniteArticles) {
-                    strings << (i == 0 && options & Capitalized ? "The " : "the ") +
-                               item->name();
-                } else {
-                    strings << item->indefiniteName(i == 0 && options & Capitalized ?
-                                                    GameObject::Capitalized :
-                                                    GameObject::NoOptions);
-                }
-            }
-        }
-    }
-
-    return joinFancy(strings);
 }
 
 struct Direction {
@@ -356,21 +304,6 @@ QString Util::toCamelCase(QString string) {
         string = string.left(index) + string[index + 1].toUpper() + string.mid(index + 2);
     }
     return string;
-}
-
-void Util::sendOthers(const GameObjectPtrList &_players, const QString &message,
-                      const GameObjectPtr &exclude1, const GameObjectPtr &exclude2) {
-
-    GameObjectPtrList players(_players);
-    if (!exclude1.isNull()) {
-        players.removeOne(exclude1);
-    }
-    if (!exclude2.isNull()) {
-        players.removeOne(exclude2);
-    }
-    foreach (const GameObjectPtr &player, players) {
-        player->send(message);
-    }
 }
 
 Util::Util() :

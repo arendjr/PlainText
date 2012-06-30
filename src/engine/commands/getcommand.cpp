@@ -33,23 +33,23 @@ void GetCommand::execute(const QString &command) {
     }
 
     GameObjectPtrList takenItems;
-    foreach (const GameObjectPtr &itemPtr, items) {
+    for (const GameObjectPtr &itemPtr : items) {
         Item *item = itemPtr.cast<Item *>();
         if (item->isPortable()) {
             player()->addInventoryItem(itemPtr);
             currentArea()->removeItem(itemPtr);
             takenItems << itemPtr;
         } else {
-            player()->send(QString("You can't take %2.").arg(item->definiteName(allItems)));
+            send(QString("You can't take %2.").arg(item->definiteName(allItems)));
         }
     }
 
     if (takenItems.length() > 0) {
-        QString itemsDescription = Util::joinItems(takenItems, DefiniteArticles);
-        player()->send(QString("You %1 %2.").arg(alias, itemsDescription));
+        QString description = takenItems.joinFancy(DefiniteArticles);
+        send(QString("You %1 %2.").arg(alias, description));
 
-        Util::sendOthers(currentArea()->characters(),
-                         QString("%1 %2s %3.").arg(player()->name(), alias, itemsDescription),
-                         player());
+        GameObjectPtrList others = currentArea()->players();
+        others.removeOne(player());
+        others.send(QString("%1 %2s %3.").arg(player()->name(), alias, description));
     }
 }

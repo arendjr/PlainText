@@ -1,10 +1,32 @@
 
 Array.prototype.named = function(name) {
 
-    var result = [];
     for (var i = 0; i < this.length; i++) {
         var element = this[i];
         if (element && typeof element === "object" && element.name === name) {
+            return element;
+        }
+    }
+    return undefined;
+}
+
+Array.prototype.withId = function(id) {
+
+    for (var i = 0; i < this.length; i++) {
+        var element = this[i];
+        if (element && typeof element === "object" && element.id === id) {
+            return element;
+        }
+    }
+    return undefined;
+}
+
+Array.prototype.withoutId = function(id) {
+
+    var result = [];
+    for (var i = 0; i < this.length; i++) {
+        var element = this[i];
+        if (element && typeof element === "object" && element.id !== id) {
             result.push(element);
         }
     }

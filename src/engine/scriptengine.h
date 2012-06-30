@@ -34,6 +34,9 @@ class ScriptEngine : public QObject {
         QScriptValue executeFunction(ScriptFunction &function, const GameObjectPtr &thisObject,
                                      const QVariantList &arguments);
 
+        QScriptValue toScriptValue(GameObject *object);
+        QScriptValue toScriptValue(const GameObjectPtr &object);
+
         void setGlobalObject(const char *name, QObject *object);
         void unsetGlobalObject(const char *name);
 

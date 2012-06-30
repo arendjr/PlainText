@@ -72,7 +72,7 @@ void Player::setSession(Session *session) {
     }
 }
 
-void Player::send(const QString &_message, Color color) {
+void Player::send(const QString &_message, Color color) const {
 
     QString message;
     if (_message.endsWith("\n")) {
@@ -105,7 +105,7 @@ void Player::enter(const GameObjectPtr &areaPtr) {
 
     setCurrentArea(area);
 
-    Util::sendOthers(area->players(), QString("%1 arrived.").arg(name()));
+    area->players().send(QString("%1 arrived.").arg(name()));
 
     area->addPlayer(this);
 
@@ -118,10 +118,9 @@ void Player::leave(const GameObjectPtr &areaPtr, const QString &exitName) {
 
     area->removePlayer(this);
 
-    QString text = (exitName.isEmpty() ?
-                    QString("%1 left.").arg(name()) :
-                    QString("%1 left to the %2.").arg(name(), exitName));
-    Util::sendOthers(area->players(), text);
+    area->players().send(exitName.isEmpty() ?
+                         QString("%1 left.").arg(name()) :
+                         QString("%1 left to the %2.").arg(name(), exitName));
 }
 
 void Player::look() {
@@ -161,11 +160,11 @@ void Player::look() {
     }
 
     if (area->npcs().length() > 0) {
-        text += QString("You see %1.\n").arg(Util::joinItems(area->npcs()));
+        text += QString("You see %1.\n").arg(area->npcs().joinFancy());
     }
 
     if (area->items().length() > 0) {
-        text += QString("You see %1.\n").arg(Util::joinItems(area->items()));
+        text += QString("You see %1.\n").arg(area->items().joinFancy());
     }
 
     send(text);
@@ -175,14 +174,14 @@ void Player::die(const GameObjectPtr &attacker) {
 
     Q_UNUSED(attacker)
 
+    send("You died.", Maroon);
+
     Area *area = currentArea().cast<Area *>();
-    GameObjectPtrList players = area->players();
-
-    send(Util::colorize("You died.", Maroon));
-    Util::sendOthers(players, Util::colorize(QString("%1 died.").arg(name()), Teal), this);
-
     GameObjectPtrList others = area->characters();
     others.removeOne(this);
+
+    others.send(QString("%1 died.").arg(name()), Teal);
+
     for (const GameObjectPtr &other : others) {
         other->invokeTrigger("oncharacterdied", this, attacker);
     }

@@ -8,12 +8,6 @@
 #include "gameobjectptr.h"
 
 
-enum Options {
-    NoOptions = 0x00,
-    Capitalized = 0x01,
-    DefiniteArticles = 0x02
-};
-
 class Util : public QObject {
 
     Q_OBJECT
@@ -25,8 +19,6 @@ class Util : public QObject {
         Q_INVOKABLE static QString joinFancy(const QStringList &list,
                                              const QString &separator = ", ",
                                              const QString &last = " and ");
-
-        static QString joinItems(const GameObjectPtrList &items, Options options = NoOptions);
 
         Q_INVOKABLE static QStringList sortExitNames(const QStringList &exitNames);
 
@@ -59,10 +51,6 @@ class Util : public QObject {
         static QString direction(const QString &abbreviation);
 
         static QString toCamelCase(QString string);
-
-        Q_INVOKABLE static void sendOthers(const GameObjectPtrList &players, const QString &message,
-                                           const GameObjectPtr &exclude1 = GameObjectPtr(),
-                                           const GameObjectPtr &exclude2 = GameObjectPtr());
 
     private:
         static Util *s_instance;

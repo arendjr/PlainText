@@ -176,7 +176,7 @@ bool GameObject::invokeTrigger(const QString &triggerName,
                          arg3, arg4);
 }
 
-void GameObject::send(const QString &message, Color color) {
+void GameObject::send(const QString &message, Color color) const {
 
     Q_UNUSED(message)
     Q_UNUSED(color)
@@ -563,12 +563,13 @@ void GameObject::timerEvent(QTimerEvent *event) {
         if (function.isString()) {
             engine->evaluate(function.toString());
         } else if (function.isFunction()) {
-            function.call();
+            function.call(engine->toScriptValue(this));
         }
 
         if (engine->hasUncaughtException()) {
             QScriptValue exception = engine->uncaughtException();
-            qWarning() << "Script Exception: " + exception.toString();
+            qWarning() << QString("Script Exception: " + exception.toString() +
+                                  " In script:\n" + function.toString()).toUtf8().data();
         }
     } catch (GameException &exception) {
         qWarning() << "Game Exception: " + QString(exception.what());
@@ -593,6 +594,11 @@ void GameObject::killAllTimers() {
         delete m_timeoutHash;
         m_timeoutHash = 0;
     }
+}
+
+bool GameObject::mayReferenceOtherProperties() const {
+
+    return ~m_options & Copy && Realm::instance()->isInitialized();
 }
 
 void GameObject::setModified() {

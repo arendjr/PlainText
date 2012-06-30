@@ -1,7 +1,5 @@
 #include "inventorycommand.h"
 
-#include "engine/util.h"
-
 
 InventoryCommand::InventoryCommand(Player *player, QObject *parent) :
     Command(player, parent) {
@@ -18,8 +16,7 @@ void InventoryCommand::execute(const QString &command) {
 
     setCommand(command);
 
-    player()->send(QString("You carry %1.\n"
-                           "You've got $%2 worth of gold.")
-                   .arg(Util::joinItems(player()->inventory()),
-                        QString::number(player()->gold())));
+    send(QString("You carry %1.\n"
+                 "You've got $%2 worth of gold.")
+         .arg(player()->inventory().joinFancy(), QString::number(player()->gold())));
 }

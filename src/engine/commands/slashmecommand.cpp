@@ -21,6 +21,5 @@ void SlashMeCommand::execute(const QString &command) {
 
     QString action = takeRest();
 
-    Util::sendOthers(currentArea()->characters(),
-                     Util::colorize("%1 %2", Purple).arg(player()->name(), action));
+    currentArea()->characters().send(QString("%1 %2").arg(player()->name(), action), Purple);
 }

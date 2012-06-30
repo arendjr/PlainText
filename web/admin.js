@@ -1,62 +1,3 @@
-function prettyPrint(code) {
-
-    var indent = "";
-    var fromIndex = 0;
-    do {
-        var firstSemicolon = code.indexOf(";", fromIndex);
-        var firstOpeningBrace = code.indexOf("{", fromIndex);
-        var firstIndentedClosingBrace = code.indexOf("    }", fromIndex);
-        var firstClosingBrace = code.indexOf("}", fromIndex);
-        var firstOpeningBracket = code.indexOf("(", fromIndex);
-        var firstClosingBracket = code.indexOf(")", fromIndex);
-
-        if (firstOpeningBrace < firstSemicolon && firstSemicolon < firstClosingBracket) {
-            firstSemicolon = -1;
-        }
-
-        if (firstSemicolon === -1) {
-            firstSemicolon = 99999;
-        }
-        if (firstOpeningBrace === -1) {
-            firstOpeningBrace = 99999;
-        }
-        if (firstIndentedClosingBrace === -1) {
-            firstIndentedClosingBrace = 99999;
-        }
-        if (firstClosingBrace === -1) {
-            firstClosingBrace = 99999;
-        }
-
-        if (firstSemicolon < firstOpeningBrace && firstSemicolon < firstClosingBrace) {
-            code = code.substr(0, firstSemicolon + 1) + "\n" +
-                   indent + code.substr(firstSemicolon + 1).trimmed();
-            fromIndex = firstSemicolon + 1;
-        } else if (firstOpeningBrace < firstClosingBrace) {
-            indent += "    ";
-            code = code.substr(0, firstOpeningBrace + 1) + "\n" +
-                   indent + code.substr(firstOpeningBrace + 1).trimmed();
-            fromIndex = firstOpeningBrace + 1;
-        } else if (firstIndentedClosingBrace < firstClosingBrace) {
-            indent = indent.substr(0, indent.length - 4);
-            code = code.substr(0, firstIndentedClosingBrace) + "}\n" +
-                   indent + code.substr(firstIndentedClosingBrace + 5).trimmed();
-            fromIndex = firstIndentedClosingBrace + 2;
-        } else {
-            indent = indent.substr(0, indent.length - 4);
-            code = code.substr(0, firstClosingBrace + 1) + "\n" +
-                   indent + code.substr(firstClosingBrace + 1).trimmed();
-            fromIndex = firstClosingBrace + 1;
-        }
-    } while (firstSemicolon < 99999 ||
-             firstOpeningBrace < 99999 ||
-             firstClosingBrace < 99999);
-
-    code = code.replace(/}\s+(else|while)/g, "} $1");
-    code = code.replace(/}\s+(\)|,)/g, "}$1");
-
-    return code;
-}
-
 (function() {
     
     var onkeypress = controller.commandInput.onkeypress;
@@ -77,10 +18,6 @@ function prettyPrint(code) {
 
                 self.onMessageHook = function(message) {
                     message = message.trimmed();
-                    if (message.substr(0, 9) === "(function" &&
-                        message.substr(-2) === "})") {
-                        message = prettyPrint(message);
-                    }
 
                     self.editField.value = message;
                     self.editField.focus();

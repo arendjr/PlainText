@@ -21,7 +21,7 @@ void Area::addExit(const GameObjectPtr &exit) {
 
 void Area::removeExit(const GameObjectPtr &exit) {
 
-    if (m_exits.removeAll(exit) > 0) {
+    if (m_exits.removeOne(exit)) {
         exit->setDeleted();
 
         setModified();
@@ -46,7 +46,7 @@ void Area::addPlayer(const GameObjectPtr &player) {
 
 void Area::removePlayer(const GameObjectPtr &player) {
 
-    m_players.removeAll(player);
+    m_players.removeOne(player);
 }
 
 void Area::setPlayers(const GameObjectPtrList &players) {
@@ -63,7 +63,7 @@ void Area::addNPC(const GameObjectPtr &npc) {
 
 void Area::removeNPC(const GameObjectPtr &npc) {
 
-    m_npcs.removeAll(npc);
+    m_npcs.removeOne(npc);
 }
 
 void Area::setNPCs(const GameObjectPtrList &npcs) {
@@ -84,7 +84,7 @@ void Area::addItem(const GameObjectPtr &item) {
 
 void Area::removeItem(const GameObjectPtr &item) {
 
-    if (m_items.removeAll(item) > 0) {
+    if (m_items.removeOne(item)) {
         setModified();
     }
 }

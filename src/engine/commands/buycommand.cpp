@@ -98,7 +98,7 @@ void BuyCommand::execute(const QString &command) {
     }
 
     Character *seller = character.cast<Character *>();
-    QString sellerName = seller->definiteName(currentArea()->npcs(), GameObject::Capitalized);
+    QString sellerName = seller->definiteName(currentArea()->npcs(), Capitalized);
 
     if (seller->sellableItems().length() == 0) {
         send(QString("%1 has nothing for sale.").arg(sellerName));

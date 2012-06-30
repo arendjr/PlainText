@@ -8,8 +8,14 @@
 #include "area.h"
 #include "exit.h"
 #include "player.h"
+#include "realm.h"
 #include "util.h"
 
+
+#define NOT_NULL(pointer) \
+    if (pointer.isNull()) { \
+        return; \
+    }
 
 #define NO_STUN \
     if (m_secondsStunned > 0) { \
@@ -106,7 +112,7 @@ void Character::addInventoryItem(const GameObjectPtr &item) {
 
 void Character::removeInventoryItem(const GameObjectPtr &item) {
 
-    if (m_inventory.removeAll(item) > 0) {
+    if (m_inventory.removeOne(item)) {
         adjustWeight(-item.cast<Item *>()->weight());
 
         setModified();
@@ -118,9 +124,9 @@ void Character::setInventory(const GameObjectPtrList &inventory) {
     if (m_inventory != inventory) {
         m_inventory = inventory;
 
-        if (~options() & Copy) {
+        if (mayReferenceOtherProperties()) {
             int weight = m_stats.weight;
-            foreach (const GameObjectPtr &item, m_inventory) {
+            for (const GameObjectPtr &item : m_inventory) {
                 weight += item.cast<Item *>()->weight();
             }
             setWeight(weight);
@@ -141,7 +147,7 @@ void Character::addSellableItem(const GameObjectPtr &item) {
 
 void Character::removeSellableItem(const GameObjectPtr &item) {
 
-    if (m_sellableItems.removeAll(item) > 0) {
+    if (m_sellableItems.removeOne(item)) {
         setModified();
     }
 }
@@ -189,14 +195,14 @@ void Character::setStats(const CharacterStats &stats) {
     if (m_stats != stats) {
         m_stats = stats;
 
-        if (~options() & Copy) {
+        if (mayReferenceOtherProperties()) {
             startBulkModification();
 
             setMaxHp(2 * m_stats.vitality);
             setMaxMp(m_stats.intelligence);
 
             int weight = m_stats.weight;
-            foreach (const GameObjectPtr &item, m_inventory) {
+            for (const GameObjectPtr &item : m_inventory) {
                 weight += item.cast<Item *>()->weight();
             }
             setWeight(weight);
@@ -232,7 +238,11 @@ void Character::adjustHp(int delta) {
 void Character::setHp(int hp) {
 
     if (m_hp != hp) {
-        m_hp = qBound(0, hp, maxHp());
+        if (mayReferenceOtherProperties()) {
+            m_hp = qBound(0, hp, maxHp());
+        } else {
+            m_hp = hp;
+        }
 
         setModified();
     }
@@ -255,7 +265,11 @@ void Character::adjustMp(int delta) {
 void Character::setMp(int mp) {
 
     if (m_mp != mp) {
-        m_mp = qBound(0, mp, maxMp());
+        if (mayReferenceOtherProperties()) {
+            m_mp = qBound(0, mp, maxMp());
+        } else {
+            m_mp = mp;
+        }
 
         setModified();
     }
@@ -374,6 +388,7 @@ void Character::clearNegativeModifiers() {
 
 void Character::open(const GameObjectPtr &exitPtr) {
 
+    NOT_NULL(exitPtr)
     NO_STUN
 
     Exit *exit = exitPtr.cast<Exit *>();
@@ -391,15 +406,18 @@ void Character::open(const GameObjectPtr &exitPtr) {
         }
 
         exit->setOpen(true);
+
         send(QString("You open the %1.").arg(exit->name()));
 
-        QString text = QString("%1 opens the %2.").arg(name(), exit->name());
-        Util::sendOthers(currentArea().cast<Area *>()->players(), text, this);
+        GameObjectPtrList others = currentArea().cast<Area *>()->players();
+        others.removeOne(this);
+        others.send(QString("%1 opens the %2.").arg(name(), exit->name()));
     }
 }
 
 void Character::close(const GameObjectPtr &exitPtr) {
 
+    NOT_NULL(exitPtr)
     NO_STUN
 
     Exit *exit = exitPtr.cast<Exit *>();
@@ -417,8 +435,9 @@ void Character::close(const GameObjectPtr &exitPtr) {
         exit->setOpen(false);
         send(QString("You close the %1.").arg(exit->name()));
 
-        QString text = QString("%1 closes the %2.").arg(name(), exit->name());
-        Util::sendOthers(currentArea().cast<Area *>()->players(), text, this);
+        GameObjectPtrList others = currentArea().cast<Area *>()->players();
+        others.removeOne(this);
+        others.send(QString("%1 closes the %2.").arg(name(), exit->name()));
     } else {
         send(QString("The %1 is already closed.").arg(exit->name()));
     }
@@ -426,6 +445,7 @@ void Character::close(const GameObjectPtr &exitPtr) {
 
 void Character::go(const GameObjectPtr &exitPtr) {
 
+    NOT_NULL(exitPtr)
     NO_STUN
 
     Exit *exit = exitPtr.cast<Exit *>();
@@ -436,7 +456,7 @@ void Character::go(const GameObjectPtr &exitPtr) {
     }
 
     Area *area = currentArea().cast<Area *>();
-    foreach (const GameObjectPtr &character, area->npcs()) {
+    for (const GameObjectPtr &character : area->npcs()) {
         if (!character->invokeTrigger("onexit", this, exit->name())) {
             return;
         }
@@ -449,8 +469,7 @@ void Character::go(const GameObjectPtr &exitPtr) {
     leave(currentArea(), exit->name());
     enter(exit->destinationArea());
 
-    area = currentArea().cast<Area *>();
-    foreach (const GameObjectPtr &character, area->npcs()) {
+    for (const GameObjectPtr &character : currentArea().cast<Area *>()->npcs()) {
         character->invokeTrigger("oncharacterentered", this);
     }
 }
@@ -463,11 +482,7 @@ void Character::enter(const GameObjectPtr &areaPtr) {
 
     area->addNPC(this);
 
-    QString article = indefiniteArticle();
-    QString text = (article.isEmpty() ?
-                    QString("%1 arrived.").arg(name()) :
-                    QString("%1 %2 arrived.").arg(Util::capitalize(article), name()));
-    Util::sendOthers(area->players(), text);
+    area->players().send(QString("%1 arrived.").arg(indefiniteName(Capitalized)));
 }
 
 void Character::leave(const GameObjectPtr &areaPtr, const QString &exitName) {
@@ -485,7 +500,7 @@ void Character::leave(const GameObjectPtr &areaPtr, const QString &exitName) {
                     QString("%1 left to the %2.").arg(name(), exitName));
         } else {
             bool unique = true;
-            foreach (const GameObjectPtr &other, area->npcs()) {
+            for (const GameObjectPtr &other : area->npcs()) {
                 if (other->name() == name()) {
                     unique = false;
                     break;
@@ -502,14 +517,14 @@ void Character::leave(const GameObjectPtr &areaPtr, const QString &exitName) {
                                                              exitName));
             }
         }
-        Util::sendOthers(area->players(), text);
+        area->players().send(text);
     }
 }
 
 void Character::say(const QString &message) {
 
     QString text = QString("%1 says, \"%2\".").arg(name(), message);
-    Util::sendOthers(currentArea().cast<Area *>()->players(), text);
+    currentArea().cast<Area *>()->players().send(text);
 }
 
 void Character::shout(const QString &message) {
@@ -517,21 +532,25 @@ void Character::shout(const QString &message) {
     Area *area = currentArea().cast<Area *>();
 
     GameObjectPtrList players = area->players();
-    foreach (const GameObjectPtr &exitPtr, area->exits()) {
+    players.send(QString("%1 shouts, \"%2\".").arg(definiteName(area->characters(),
+                                                                Capitalized), message));
+
+    GameObjectPtrList adjacentPlayers;
+    for (const GameObjectPtr &exitPtr : area->exits()) {
         Exit *exit = exitPtr.cast<Exit *>();
         Q_ASSERT(exit);
 
         Area *adjacentArea = exit->destinationArea().cast<Area *>();
         Q_ASSERT(adjacentArea);
 
-        players << adjacentArea->players();
+        adjacentPlayers << adjacentArea->players();
     }
-
-    QString text = QString("%1 shouts, \"%2\".").arg(name(), message);
-    Util::sendOthers(players, text);
+    adjacentPlayers.send(QString("You hear %1 shouting, \"%2\".").arg(indefiniteName(), message));
 }
 
 void Character::talk(const GameObjectPtr &characterPtr, const QString &message) {
+
+    NOT_NULL(characterPtr)
 
     Character *character = characterPtr.cast<Character *>();
     Player *player = qobject_cast<Player *>(character);
@@ -543,6 +562,8 @@ void Character::talk(const GameObjectPtr &characterPtr, const QString &message) 
 }
 
 void Character::tell(const GameObjectPtr &playerPtr, const QString &message) {
+
+    NOT_NULL(playerPtr)
 
     Player *player = playerPtr.cast<Player *>();
 
@@ -557,6 +578,7 @@ void Character::tell(const GameObjectPtr &playerPtr, const QString &message) {
 
 void Character::kill(const GameObjectPtr &characterPtr) {
 
+    NOT_NULL(characterPtr)
     NO_STUN
 
     Character *character = characterPtr.cast<Character *>();
@@ -661,7 +683,7 @@ void Character::die(const GameObjectPtr &attacker) {
     if (inventory().length() > 0 || m_gold > 0.0) {
         QString inventoryStr;
         if (inventory().length() > 0) {
-            inventoryStr = Util::joinItems(inventory());
+            inventoryStr = inventory().joinFancy();
         }
         if (m_gold > 0.0) {
             if (!inventoryStr.isEmpty()) {

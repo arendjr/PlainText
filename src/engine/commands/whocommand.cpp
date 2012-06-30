@@ -1,7 +1,6 @@
 #include "whocommand.h"
 
 #include "engine/realm.h"
-#include "engine/util.h"
 
 
 WhoCommand::WhoCommand(Player *character, QObject *parent) :
@@ -21,8 +20,8 @@ void WhoCommand::execute(const QString &command) {
 
     GameObjectPtrList players = Realm::instance()->onlinePlayers();
     if (players.length() == 1) {
-        player()->send("Only you are online.");
+        send("Only you are online.");
     } else {
-        player()->send(QString("%1 are online.").arg(Util::joinItems(players, Capitalized)));
+        send(QString("%1 are online.").arg(players.joinFancy(Capitalized)));
     }
 }

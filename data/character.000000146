@@ -13,7 +13,7 @@
   "stats": [30, 30, 30, 30, 20, 20, 180, 90],
   "respawnTime": 1800000,
   "respawnTimeVariation": 1800000,
-  "hp": 1,
+  "hp": 60,
   "maxHp": 60,
   "mp": 0,
   "maxMp": 20,

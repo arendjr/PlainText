@@ -9,7 +9,9 @@
 #include <QStringList>
 
 #include "gameobject.h"
+#include "item.h"
 #include "realm.h"
+#include "util.h"
 
 
 GameObjectPtr::GameObjectPtr() :
@@ -732,7 +734,7 @@ void GameObjectPtrList::unresolvePointers() {
     }
 }
 
-void GameObjectPtrList::send(const QString &message, Color color) {
+void GameObjectPtrList::send(const QString &message, Color color) const {
 
     for (int i = 0; i < m_size; i++) {
         m_items[i]->send(message, color);
@@ -740,4 +742,61 @@ void GameObjectPtrList::send(const QString &message, Color color) {
     if (m_nextList) {
         m_nextList->send(message, color);
     }
+}
+
+QString GameObjectPtrList::joinFancy(Options options) const {
+
+    QList<GameObject *> objects;
+    QStringList objectNames;
+    QList<int> objectCounts;
+
+    if (isEmpty()) {
+        return (options & Capitalized ? "Nothing" : "nothing");
+    }
+
+    for (const GameObjectPtr &pointer : *this) {
+        GameObject *object = pointer.cast<GameObject *>();
+
+        int index = objectNames.indexOf(object->name());
+        if (index > -1) {
+            objectCounts[index]++;
+        } else {
+            objects << object;
+            objectNames << object->name();
+            objectCounts << 1;
+        }
+    }
+
+    QStringList strings;
+    for (int i = 0; i < objects.length(); i++) {
+        GameObject *object = objects[i];
+
+        Item *item = qobject_cast<Item *>(object);
+        if (item) {
+            if (objectCounts[i] > 1) {
+                if (i == 0 && options & Capitalized) {
+                    strings << Util::capitalize(Util::writtenNumber(objectCounts[i])) + " " +
+                               item->plural();
+                } else {
+                    strings << Util::writtenNumber(objectCounts[i]) + " " + item->plural();
+                }
+            } else {
+                if (item->indefiniteArticle().isEmpty()) {
+                    strings << item->name();
+                } else {
+                    if (options & DefiniteArticles) {
+                        strings << (i == 0 && options & Capitalized ? "The " : "the ") +
+                                   item->name();
+                    } else {
+                        strings << item->indefiniteName(i == 0 && options & Capitalized ?
+                                                        Capitalized : NoOptions);
+                    }
+                }
+            }
+        } else {
+            strings << object->name();
+        }
+    }
+
+    return Util::joinFancy(strings);
 }
