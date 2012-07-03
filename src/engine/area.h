@@ -10,7 +10,7 @@ class Area : public GameObject {
     Q_OBJECT
 
     public:
-        explicit Area(uint id, Options options = NoOptions);
+        Area(Realm *realm, uint id, Options options = NoOptions);
         virtual ~Area();
 
         const GameObjectPtrList &exits() const { return m_exits; }

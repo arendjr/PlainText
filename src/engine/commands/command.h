@@ -12,6 +12,8 @@
 
 class QRegExp;
 
+class Realm;
+
 class Command : public QObject {
 
     Q_OBJECT
@@ -36,6 +38,7 @@ class Command : public QObject {
     protected:
         inline Player *player() { return m_player; }
         inline Area *currentArea() { return m_player->currentArea().cast<Area *>(); }
+        inline Realm *realm() { return m_player->realm(); }
 
         void setCommand(const QString &command);
         void prependWord(const QString &word);

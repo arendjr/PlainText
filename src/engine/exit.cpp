@@ -1,9 +1,8 @@
 #include "exit.h"
 
 
-Exit::Exit(uint id, Options options) :
-    GameObject("exit", id, options),
-    m_size(1.5),
+Exit::Exit(Realm *realm, uint id, Options options) :
+    GameObject(realm, "exit", id, options),
     m_door(false),
     m_open(false),
     m_hidden(false) {

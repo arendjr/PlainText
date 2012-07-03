@@ -6,13 +6,14 @@
 #include <QWsServer.h>
 #include <QWsSocket.h>
 
-#include "session.h"
 #include "engine/player.h"
+#include "engine/session.h"
 #include "engine/util.h"
 
 
-WebSocketServer::WebSocketServer(quint16 port, QObject *parent) :
-    QObject(parent) {
+WebSocketServer::WebSocketServer(Realm *realm, quint16 port, QObject *parent) :
+    QObject(parent),
+    m_realm(realm) {
 
     m_server = new QWsServer(this);
     if (!m_server->listen(QHostAddress::Any, port)) {
@@ -32,7 +33,7 @@ void WebSocketServer::onClientConnected() {
     QWsSocket *socket = m_server->nextPendingConnection();
     connect(socket, SIGNAL(disconnected()), SLOT(onClientDisconnected()));
 
-    Session *session = new Session(socket);
+    Session *session = new Session(m_realm, socket);
     connect(session, SIGNAL(write(QString)), SLOT(onSessionOutput(QString)));
 
     connect(socket, SIGNAL(frameReceived(QString)), session, SLOT(onUserInput(QString)));
@@ -46,7 +47,7 @@ void WebSocketServer::onClientConnected() {
 void WebSocketServer::onClientDisconnected() {
 
     QWsSocket *socket = qobject_cast<QWsSocket *>(sender());
-    if (socket == 0) {
+    if (!socket) {
         return;
     }
 
@@ -58,12 +59,12 @@ void WebSocketServer::onClientDisconnected() {
 void WebSocketServer::onSessionOutput(const QString &data) {
 
     Session *session = qobject_cast<Session *>(sender());
-    if (session == 0) {
+    if (!session) {
         return;
     }
 
     QWsSocket *socket = qobject_cast<QWsSocket *>(session->parent());
-    if (socket == 0) {
+    if (!socket) {
         return;
     }
 

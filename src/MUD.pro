@@ -23,15 +23,17 @@ SOURCES += \
     engine/character.cpp \
     engine/characterstats.cpp \
     engine/class.cpp \
+    engine/commandevent.cpp \
     engine/commandinterpreter.cpp \
     engine/effect.cpp \
     engine/engine.cpp \
+    engine/event.cpp \
     engine/exit.cpp \
     engine/gameexception.cpp \
     engine/gameobject.cpp \
     engine/gameobjectptr.cpp \
     engine/gameobjectsyncthread.cpp \
-    engine/gameobjectsyncworker.cpp \
+    engine/gamethread.cpp \
     engine/item.cpp \
     engine/modifier.cpp \
     engine/player.cpp \
@@ -41,6 +43,8 @@ SOURCES += \
     engine/scriptfunction.cpp \
     engine/scriptfunctionmap.cpp \
     engine/scriptwindow.cpp \
+    engine/session.cpp \
+    engine/timerevent.cpp \
     engine/util.cpp \
     engine/commands/buycommand.cpp \
     engine/commands/closecommand.cpp \
@@ -82,7 +86,6 @@ SOURCES += \
     engine/commands/admin/stopservercommand.cpp \
     engine/commands/admin/unsettriggercommand.cpp \
     interface/httpserver.cpp \
-    interface/session.cpp \
     interface/telnetserver.cpp \
     interface/websocketserver.cpp \
     ../3rdparty/qjson/json_driver.cc \
@@ -97,16 +100,18 @@ HEADERS += \
     engine/character.h \
     engine/characterstats.h \
     engine/class.h \
+    engine/commandevent.h \
     engine/commandinterpreter.h \
     engine/constants.h \
     engine/effect.h \
     engine/engine.h \
+    engine/event.h \
     engine/exit.h \
     engine/gameexception.h \
     engine/gameobject.h \
     engine/gameobjectptr.h \
     engine/gameobjectsyncthread.h \
-    engine/gameobjectsyncworker.h \
+    engine/gamethread.h \
     engine/item.h \
     engine/modifier.h \
     engine/player.h \
@@ -116,6 +121,8 @@ HEADERS += \
     engine/scriptfunction.h \
     engine/scriptfunctionmap.h \
     engine/scriptwindow.h \
+    engine/session.h \
+    engine/timerevent.h \
     engine/util.h \
     engine/commands/buycommand.h \
     engine/commands/closecommand.h \
@@ -157,7 +164,6 @@ HEADERS += \
     engine/commands/admin/stopservercommand.h \
     engine/commands/admin/unsettriggercommand.h \
     interface/httpserver.h \
-    interface/session.h \
     interface/telnetserver.h \
     interface/websocketserver.h \
     ../3rdparty/qjson/json_parser.hh \
@@ -173,7 +179,8 @@ OTHER_FILES += \
     ../web/main.js \
     ../web/notifications.js \
     ../web/tappable.js \
-    engine/util.js
+    engine/util.js \
+    ../DESIGN.txt
 
 INCLUDEPATH += \
     $$PWD/../3rdparty \

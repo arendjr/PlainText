@@ -6,8 +6,6 @@
 #include <QString>
 #include <QVariantList>
 
-#include "gameexception.h"
-
 
 class CharacterStats {
 
@@ -24,14 +22,21 @@ class CharacterStats {
         int height;
         int weight;
 
+        inline int total() const {
+            return strength + dexterity + vitality + endurance + intelligence + faith;
+        }
+
         CharacterStats &operator=(const CharacterStats &other);
         bool operator==(const CharacterStats &other) const;
         bool operator!=(const CharacterStats &other) const;
 
-        QString toString() const;
-        static CharacterStats fromString(const QString &string) throw (GameException);
+        CharacterStats operator+(const CharacterStats &other) const;
+        CharacterStats &operator+=(const CharacterStats &other);
 
-        static CharacterStats fromVariantList(const QVariantList &variantList) throw (GameException);
+        QString toString() const;
+        static CharacterStats fromString(const QString &string);
+
+        static CharacterStats fromVariantList(const QVariantList &variantList);
 
         static QScriptValue toScriptValue(QScriptEngine *engine, const CharacterStats &stats);
         static void fromScriptValue(const QScriptValue &object, CharacterStats &stats);

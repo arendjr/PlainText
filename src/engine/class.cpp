@@ -1,8 +1,8 @@
 #include "class.h"
 
 
-Class::Class(uint id, Options options) :
-    GameObject("class", id, options) {
+Class::Class(Realm *realm, int id, Options options) :
+    GameObject(realm, "class", id, options) {
 
     setAutoDelete(false);
 }

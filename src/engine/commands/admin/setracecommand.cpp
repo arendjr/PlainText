@@ -33,7 +33,7 @@ void SetRaceCommand::execute(const QString &command) {
     }
 
     Character *character = characters[0].cast<Character *>();
-    foreach (const GameObjectPtr &racePtr, Realm::instance()->races()) {
+    for (const GameObjectPtr &racePtr : Realm::instance()->races()) {
         if (racePtr->name() == raceName) {
             character->setRace(racePtr);
 

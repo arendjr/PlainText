@@ -7,12 +7,14 @@
 class QTcpServer;
 class QTcpSocket;
 
+class Realm;
+
 class TelnetServer : public QObject {
 
     Q_OBJECT
 
     public:
-        explicit TelnetServer(quint16 port, QObject *parent = 0);
+        TelnetServer(Realm *realm, quint16 port, QObject *parent = nullptr);
         virtual ~TelnetServer();
 
     public slots:
@@ -23,6 +25,8 @@ class TelnetServer : public QObject {
         void onSessionOutput(QString data);
 
     private:
+        Realm *m_realm;
+
         QTcpServer *m_server;
         QList<QTcpSocket *> m_clients;
 };

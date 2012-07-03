@@ -57,7 +57,7 @@ void GetPropCommand::execute(const QString &command) {
                     break;
                 } else if (value.userType() == QMetaType::type("GameObjectPtrList")) {
                     QStringList strings;
-                    foreach (GameObjectPtr pointer, value.value<GameObjectPtrList>()) {
+                    for (const GameObjectPtr &pointer : value.value<GameObjectPtrList>()) {
                         strings << pointer.toString();
                     }
                     player()->send("[ " + strings.join(", ") + " ]");

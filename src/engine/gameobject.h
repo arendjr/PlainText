@@ -9,11 +9,12 @@
 #include <QScriptValue>
 
 #include "constants.h"
-#include "gameexception.h"
 #include "scriptfunctionmap.h"
 
 
 class GameObjectPtr;
+class GameObjectPtrList;
+class Realm;
 
 class GameObject : public QObject {
 
@@ -23,10 +24,19 @@ class GameObject : public QObject {
     friend void swap(GameObjectPtr &first, GameObjectPtr &second);
 
     public:
-        GameObject(const char *objectType, uint id, Options options = NoOptions);
+        GameObject(Realm *realm, const char *objectType, uint id, Options options = NoOptions);
         virtual ~GameObject();
 
+        Realm *realm() const { return m_realm; }
+
         const char *objectType() const { return m_objectType; }
+        Q_INVOKABLE bool isArea() const;
+        Q_INVOKABLE bool isClass() const;
+        Q_INVOKABLE bool isExit() const;
+        Q_INVOKABLE bool isItem() const;
+        Q_INVOKABLE bool isCharacter() const;
+        Q_INVOKABLE bool isPlayer() const;
+        Q_INVOKABLE bool isRace() const;
         Q_PROPERTY(const char *objectType READ objectType STORED false)
 
         uint id() const { return m_id; }
@@ -49,22 +59,35 @@ class GameObject : public QObject {
         Q_PROPERTY(ScriptFunctionMap triggers READ triggers WRITE setTriggers)
 
         Q_INVOKABLE bool invokeTrigger(const QString &triggerName,
-                                       const QVariant &arg1 = QVariant(),
-                                       const QVariant &arg2 = QVariant(),
-                                       const QVariant &arg3 = QVariant(),
-                                       const QVariant &arg4 = QVariant());
+                                       const QScriptValue &arg1 = QScriptValue(),
+                                       const QScriptValue &arg2 = QScriptValue(),
+                                       const QScriptValue &arg3 = QScriptValue(),
+                                       const QScriptValue &arg4 = QScriptValue());
         bool invokeTrigger(const QString &triggerName,
-                           GameObject *arg1, const GameObjectPtr &arg2,
-                           const QVariant &arg3 = QVariant(), const QVariant &arg4 = QVariant());
+                           GameObject *arg1,
+                           const GameObjectPtr &arg2,
+                           const QScriptValue &arg3 = QScriptValue(),
+                           const QScriptValue &arg4 = QScriptValue());
         bool invokeTrigger(const QString &triggerName,
-                           GameObject *arg1, const QVariant &arg2 = QVariant(),
-                           const QVariant &arg3 = QVariant(), const QVariant &arg4 = QVariant());
+                           GameObject *arg1,
+                           const GameObjectPtrList &arg2,
+                           const QScriptValue &arg3 = QScriptValue(),
+                           const QScriptValue &arg4 = QScriptValue());
         bool invokeTrigger(const QString &triggerName,
-                           const GameObjectPtr &arg1, const QVariant &arg2 = QVariant(),
-                           const QVariant &arg3 = QVariant(), const QVariant &arg4 = QVariant());
+                           GameObject *arg1,
+                           const QScriptValue &arg2 = QScriptValue(),
+                           const QScriptValue &arg3 = QScriptValue(),
+                           const QScriptValue &arg4 = QScriptValue());
         bool invokeTrigger(const QString &triggerName,
-                           const GameObjectPtr &arg1, const GameObjectPtr &arg2,
-                           const QVariant &arg3 = QVariant(), const QVariant &arg4 = QVariant());
+                           const GameObjectPtr &arg1,
+                           const GameObjectPtr &arg2,
+                           const QScriptValue &arg3 = QScriptValue(),
+                           const QScriptValue &arg4 = QScriptValue());
+        bool invokeTrigger(const QString &triggerName,
+                           const GameObjectPtr &arg1,
+                           const QScriptValue &arg2 = QScriptValue(),
+                           const QScriptValue &arg3 = QScriptValue(),
+                           const QScriptValue &arg4 = QScriptValue());
 
         Q_INVOKABLE virtual void send(const QString &message, Color color = Silver) const;
 
@@ -79,27 +102,35 @@ class GameObject : public QObject {
         Q_INVOKABLE virtual GameObject *copy();
 
         bool save();
-        bool load(const QString &path) throw (GameException);
+        bool load(const QString &path);
 
         void resolvePointers();
 
         void setDeleted();
 
-        static GameObject *createByObjectType(const QString &objectType, uint id = 0,
-                                              Options options = NoOptions) throw (GameException);
+        static GameObject *createByObjectType(Realm *realm, const QString &objectType, uint id = 0,
+                                              Options options = NoOptions);
+
+        template <class T>
+        inline static T createByObjectType(Realm *realm, const char *objectType, uint id = 0,
+                                           Options options = NoOptions) {
+            T pointer = qobject_cast<T>(createByObjectType(realm, objectType, id, options));
+            if (!pointer) {
+                throw GameException(GameException::InvalidGameObjectCast, objectType, id);
+            }
+            return pointer;
+        }
+
+        static GameObject *createFromFile(Realm *realm, const QString &path);
 
         static GameObject *createCopy(const GameObject *other);
-
-        static GameObject *createFromFile(const QString &path) throw (GameException);
 
         static QScriptValue toScriptValue(QScriptEngine *engine, GameObject *const &gameObject);
         static void fromScriptValue(const QScriptValue &object, GameObject *&gameObject);
 
-        // use with care!!
-        void startBulkModification();
-        void commitBulkModification();
-
         QList<QMetaProperty> storedMetaProperties() const;
+
+        virtual void timerEvent(int timerId);
 
     protected:
         virtual void timerEvent(QTimerEvent *event);
@@ -116,19 +147,23 @@ class GameObject : public QObject {
         void registerPointer(GameObjectPtr *pointer);
         void unregisterPointer(GameObjectPtr *pointer);
 
+        static QString saveDirPath();
+        static QString saveObjectPath(const char *objectType, uint id);
+
     private:
-        QList<GameObjectPtr *> m_pointers;
-        bool m_autoDelete;
+        Realm *m_realm;
 
         const char *m_objectType;
         uint m_id;
         Options m_options;
 
+        QList<GameObjectPtr *> m_pointers;
+        bool m_autoDelete;
+
         QString m_name;
         QString m_description;
         ScriptFunctionMap m_triggers;
 
-        int m_numBulkModifications;
         bool m_deleted;
 
         QHash<int, QScriptValue> *m_intervalHash;

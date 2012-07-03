@@ -3,8 +3,8 @@
 #include "character.h"
 
 
-Area::Area(uint id, Options options) :
-    GameObject("area", id, options) {
+Area::Area(Realm *realm, uint id, Options options) :
+    GameObject(realm, "area", id, options) {
 }
 
 Area::~Area() {
@@ -22,8 +22,6 @@ void Area::addExit(const GameObjectPtr &exit) {
 void Area::removeExit(const GameObjectPtr &exit) {
 
     if (m_exits.removeOne(exit)) {
-        exit->setDeleted();
-
         setModified();
     }
 }

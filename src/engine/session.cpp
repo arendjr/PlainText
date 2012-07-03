@@ -4,16 +4,17 @@
 #include <QDebug>
 #include <QMap>
 
-#include "engine/area.h"
-#include "engine/characterstats.h"
-#include "engine/class.h"
-#include "engine/commandinterpreter.h"
-#include "engine/constants.h"
-#include "engine/gameobjectptr.h"
-#include "engine/player.h"
-#include "engine/race.h"
-#include "engine/realm.h"
-#include "engine/util.h"
+#include "area.h"
+#include "characterstats.h"
+#include "class.h"
+#include "commandevent.h"
+#include "commandinterpreter.h"
+#include "constants.h"
+#include "gameobjectptr.h"
+#include "player.h"
+#include "race.h"
+#include "realm.h"
+#include "util.h"
 
 
 class Session::SignUpData {
@@ -28,22 +29,23 @@ class Session::SignUpData {
         CharacterStats stats;
 
         SignUpData() :
-            race(0),
-            characterClass(0) {
+            race(nullptr),
+            characterClass(nullptr) {
         }
 };
 
-Session::Session(QObject *parent) :
+Session::Session(Realm *realm, QObject *parent) :
     QObject(parent),
     m_signInStage(SessionClosed),
-    m_signUpData(0),
-    m_player(0) {
+    m_signUpData(nullptr),
+    m_realm(realm),
+    m_player(nullptr) {
 }
 
 Session::~Session() {
 
-    if (m_player) {
-        m_player->setSession(0);
+    if (m_player && m_player->session() == this) {
+        m_player->setSession(nullptr);
     }
     delete m_signUpData;
 }
@@ -61,20 +63,25 @@ void Session::onUserInput(QString data) {
         return;
     }
 
+    if (data.isEmpty()) {
+        return;
+    }
+
     if (!m_player || !m_player->isAdmin()) {
         data = data.left(160);
     }
 
     if (m_signInStage != SignedIn) {
         processSignIn(data);
-        return;
+    } else {
+        Q_ASSERT(m_interpreter);
+        m_realm->enqueueEvent(new CommandEvent(m_interpreter, data));
     }
-
-    Q_ASSERT(m_interpreter);
-    m_interpreter->execute(data);
 }
 
 void Session::processSignIn(const QString &data) {
+
+    m_realm->lock();
 
     QString input = data.trimmed();
     QString answer = input.toLower();
@@ -82,11 +89,11 @@ void Session::processSignIn(const QString &data) {
     QMap<QString, GameObjectPtr> races;
     QMap<QString, GameObjectPtr> classes;
     if (m_signInStage == AskingRace) {
-        foreach (const GameObjectPtr &racePtr, Realm::instance()->races()) {
+        for (const GameObjectPtr &racePtr : m_realm->races()) {
             races[racePtr->name()] = racePtr;
         }
     } else if (m_signInStage == AskingClass) {
-        foreach (const GameObjectPtr &classPtr, m_signUpData->race->classes()) {
+        for (const GameObjectPtr &classPtr : m_signUpData->race->classes()) {
             classes[classPtr->name()] = classPtr;
         }
     }
@@ -97,11 +104,10 @@ void Session::processSignIn(const QString &data) {
 
     SignInStage previousSignInStage = m_signInStage;
 
-    QString passwordHash;
     switch (m_signInStage) {
         case AskingUserName: {
             QString userName = Util::capitalize(answer.left(12));
-            m_player = Realm::instance()->getPlayer(userName);
+            m_player = m_realm->getPlayer(userName);
             if (m_player) {
                 m_signInStage = AskingPassword;
             } else {
@@ -121,8 +127,10 @@ void Session::processSignIn(const QString &data) {
             }
             break;
         }
-        case AskingPassword:
-            passwordHash = QCryptographicHash::hash(input.toUtf8(), QCryptographicHash::Sha1).toBase64();
+        case AskingPassword: {
+            QByteArray data = QString(m_player->passwordSalt() + input).toUtf8();
+            QString passwordHash = QCryptographicHash::hash(data, QCryptographicHash::Sha1)
+                                   .toBase64();
             if (m_player->passwordHash() == passwordHash) {
                 write(QString("Welcome back, %1. Type %2 if you're feeling lost.\n")
                       .arg(m_player->name(), Util::highlight("help")));
@@ -131,7 +139,7 @@ void Session::processSignIn(const QString &data) {
                 write("Password incorrect.\n");
             }
             break;
-
+        }
         case AskingSignupPassword:
             if (input.length() < 6) {
                 write(Util::colorize("Please choose a password of at least 6 characters.\n", Maroon));
@@ -170,7 +178,7 @@ void Session::processSignIn(const QString &data) {
                     write("\n" +
                           Util::highlight(Util::capitalize(raceName)) + "\n"
                           "  " + Util::splitLines(races[raceName].cast<Race *>()->description(), 78).join("\n  ") + "\n");
-                } else if (raceName == "<race>") {
+                } else if (raceName.startsWith("<") && raceName.endsWith(">")) {
                     write(QString("Sorry, you are supposed to replace <race> with the name of an actual race. For example: %1.\n").arg(Util::highlight("info human")));
                 } else {
                     write(QString("I don't know anything about the \"%1\" race.\n").arg(raceName));
@@ -189,7 +197,7 @@ void Session::processSignIn(const QString &data) {
                     write("\n" +
                           Util::highlight(Util::capitalize(className)) + "\n"
                           "  " + Util::splitLines(classes[className].cast<Class *>()->description(), 78).join("\n  ") + "\n");
-                } else if (className == "<class>") {
+                } else if (className.startsWith("<") && className.endsWith(">")) {
                     write(QString("Sorry, you are supposed to replace <class> with the name of an actual race. For example: %1.\n").arg(Util::highlight("info knight")));
                 } else {
                     write(QString("I don't know anything about the \"%1\" class.\n").arg(className));
@@ -251,29 +259,23 @@ void Session::processSignIn(const QString &data) {
                     break;
                 }
 
-                uint strength = attributes[0].toUInt();
-                uint dexterity = attributes[1].toUInt();
-                uint vitality = attributes[2].toUInt();
-                uint endurance = attributes[3].toUInt();
-                uint intelligence = barbarian ? 0 : attributes[4].toUInt();
-                uint faith = attributes[barbarian ? 4 : 5].toUInt();
+                CharacterStats stats;
+                stats.strength = qMax(attributes[0].toInt(), 0);
+                stats.dexterity = qMax(attributes[1].toInt(), 0);
+                stats.vitality = qMax(attributes[2].toInt(), 0);
+                stats.endurance = qMax(attributes[3].toInt(), 0);
+                stats.intelligence = barbarian ? 0 : qMax(attributes[4].toInt(), 0);
+                stats.faith = qMax(attributes[barbarian ? 4 : 5].toInt(), 0);
 
-                uint total = strength + dexterity + vitality +
-                            endurance + intelligence + faith;
-                if (total != 9) {
+                if (stats.total() != 9) {
                     write(Util::colorize("\nThe total of attributes should be 9.\n", Maroon));
                     break;
                 }
 
-                m_signUpData->stats.strength += strength;
-                m_signUpData->stats.dexterity += dexterity;
-                m_signUpData->stats.vitality += vitality;
-                m_signUpData->stats.endurance += endurance;
-                m_signUpData->stats.intelligence += intelligence;
-                m_signUpData->stats.faith += faith;
+                m_signUpData->stats += stats;
 
-                m_signUpData->stats.height += intelligence - (dexterity / 2);
-                m_signUpData->stats.weight += strength;
+                m_signUpData->stats.height += stats.intelligence - (stats.dexterity / 2);
+                m_signUpData->stats.weight += stats.strength;
 
                 write(Util::colorize("\nYour character stats have been recorded.\n", Green));
                 m_signInStage = AskingSignupConfirmation;
@@ -282,14 +284,15 @@ void Session::processSignIn(const QString &data) {
 
         case AskingSignupConfirmation:
             if (answer == "yes" || answer == "y") {
-                passwordHash = QCryptographicHash::hash(m_signUpData->password.toUtf8(), QCryptographicHash::Sha1).toBase64();
-                m_player = qobject_cast<Player *>(GameObject::createByObjectType("player"));
-                Q_ASSERT(m_player);
+                QString salt = Util::randomString(8);
+                QByteArray data = QString(salt + m_signUpData->password).toUtf8();
+                QString hash = QCryptographicHash::hash(data, QCryptographicHash::Sha1).toBase64();
 
-                m_player->startBulkModification();
+                m_player = GameObject::createByObjectType<Player *>(m_realm, "player");
 
                 m_player->setName(m_signUpData->userName);
-                m_player->setPasswordHash(passwordHash);
+                m_player->setPasswordSalt(salt);
+                m_player->setPasswordHash(hash);
                 m_player->setRace(m_signUpData->race);
                 m_player->setClass(m_signUpData->characterClass);
                 m_player->setGender(m_signUpData->gender);
@@ -299,8 +302,6 @@ void Session::processSignIn(const QString &data) {
                 m_player->setHp(m_player->maxHp());
                 m_player->setMp(m_player->maxMp());
                 m_player->setGold(100);
-
-                m_player->commitBulkModification();
 
                 delete m_signUpData;
                 m_signUpData = 0;
@@ -320,26 +321,18 @@ void Session::processSignIn(const QString &data) {
     }
 
     if (m_signInStage == AskingRace && races.isEmpty()) {
-        foreach (const GameObjectPtr &racePtr, Realm::instance()->races()) {
+        for (const GameObjectPtr &racePtr : m_realm->races()) {
             races[racePtr->name()] = racePtr;
         }
     } else if (m_signInStage == AskingClass && classes.isEmpty()) {
-        foreach (const GameObjectPtr &classPtr, m_signUpData->race->classes()) {
+        for (const GameObjectPtr &classPtr : m_signUpData->race->classes()) {
             classes[classPtr->name()] = classPtr;
         }
     } else if (m_signInStage == AskingExtraStats) {
         CharacterStats raceStats = m_signUpData->race->stats();
         CharacterStats classStats = m_signUpData->characterClass->stats();
 
-        m_signUpData->stats.strength = raceStats.strength + classStats.strength;
-        m_signUpData->stats.dexterity = raceStats.dexterity + classStats.dexterity;
-        m_signUpData->stats.vitality = raceStats.vitality + classStats.vitality;
-        m_signUpData->stats.endurance = raceStats.endurance + classStats.endurance;
-        m_signUpData->stats.intelligence = raceStats.intelligence + classStats.intelligence;
-        m_signUpData->stats.faith = raceStats.faith + classStats.faith;
-
-        m_signUpData->stats.height = raceStats.height + classStats.height;
-        m_signUpData->stats.weight = raceStats.weight + classStats.weight;
+        m_signUpData->stats = raceStats + classStats;
 
         if (barbarian) {
             m_signUpData->stats.intelligence = 0;
@@ -479,7 +472,7 @@ void Session::processSignIn(const QString &data) {
             break;
 
         case SignedIn:
-            if (m_player->session() != 0) {
+            if (m_player->session()) {
                 write("Cannot sign you in because you're already signed in from another location.");
                 terminate();
                 break;
@@ -500,6 +493,8 @@ void Session::processSignIn(const QString &data) {
         default:
             break;
     }
+
+    m_realm->unlock();
 }
 
 void Session::showColumns(const QStringList &items) {

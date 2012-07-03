@@ -48,7 +48,7 @@ void SetPropCommand::execute(const QString &command) {
             break;
         case QVariant::UserType:
             if (variant.userType() == QMetaType::type("GameObjectPtr")) {
-                variant = QVariant::fromValue(GameObjectPtr::fromString(value));
+                variant = QVariant::fromValue(GameObjectPtr::fromString(realm(), value));
                 break;
             } else if (variant.userType() == QMetaType::type("GameObjectPtrList")) {
                 try {
@@ -56,7 +56,7 @@ void SetPropCommand::execute(const QString &command) {
                     for (QString string : value.mid(1, value.length() - 2).split(',')) {
                         string = string.trimmed();
                         if (!string.isEmpty()) {
-                            pointerList << GameObjectPtr::fromString(string);
+                            pointerList << GameObjectPtr::fromString(realm(), string);
                         }
                     }
                     variant = QVariant::fromValue(pointerList);

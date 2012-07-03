@@ -1,29 +1,71 @@
 #include "gameobjectsyncthread.h"
 
-#include "gameobjectsyncworker.h"
+#include <QDebug>
+
+#include "gameexception.h"
+#include "gameobject.h"
 
 
-GameObjectSyncThread::GameObjectSyncThread(QObject *parent) :
-    QThread(parent),
-    m_worker(0) {
+GameObjectSyncThread::GameObjectSyncThread() :
+    QThread(),
+    m_quit(false) {
 }
 
 GameObjectSyncThread::~GameObjectSyncThread() {
-
-    delete m_worker;
 }
 
-void GameObjectSyncThread::queueObject(const GameObject *object) {
+void GameObjectSyncThread::enqueueObject(const GameObject *object) {
 
-    Q_ASSERT(m_worker);
-    m_worker->queueObject(object);
+    GameObject *copy = GameObject::createCopy(object);
+
+    m_mutex.lock();
+    m_objectQueue.enqueue(copy);
+    m_mutex.unlock();
+
+    m_waitCondition.wakeAll();
+}
+
+void GameObjectSyncThread::terminate() {
+
+    m_quit = true;
+    m_waitCondition.wakeAll();
 }
 
 void GameObjectSyncThread::run() {
 
-    m_worker = new GameObjectSyncWorker();
+    while (!m_quit) {
+        m_mutex.lock();
+        m_waitCondition.wait(&m_mutex);
 
-    exec();
+        while (!m_quit && !m_objectQueue.isEmpty()) {
+            GameObject *object = m_objectQueue.dequeue();
+            m_mutex.unlock();
 
-    m_worker->syncAll();
+            syncObject(object);
+
+            m_mutex.lock();
+        }
+
+        m_mutex.unlock();
+    }
+
+    while (!m_objectQueue.isEmpty()) {
+        GameObject *object = m_objectQueue.dequeue();
+        syncObject(object);
+    }
+}
+
+void GameObjectSyncThread::syncObject(GameObject *object) {
+
+    try {
+        object->save();
+    } catch (const GameException &exception) {
+        qWarning() << "Game Exception: " << exception.what() << endl
+                   << "While synching object: " << object->objectType() << ":" << object->id();
+    } catch (...) {
+        qWarning() << "Unknown exception." << endl
+                   << "While synching object: " << object->objectType() << ":" << object->id();
+    }
+
+    delete object;
 }

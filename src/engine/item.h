@@ -10,7 +10,8 @@ class Item : public GameObject {
     Q_OBJECT
 
     public:
-        explicit Item(uint id, Options options = NoOptions);
+        Item(Realm *realm, uint id, Options options = NoOptions);
+        Item(Realm *realm, const char *objectType, uint id, Options options = NoOptions);
         virtual ~Item();
 
         virtual void setName(const QString &newName);
@@ -39,9 +40,6 @@ class Item : public GameObject {
         double cost() const { return m_cost; }
         virtual void setCost(double cost);
         Q_PROPERTY(double cost READ cost WRITE setCost)
-
-    protected:
-        explicit Item(const char *objectType, uint id, Options options = NoOptions);
 
     private:
         QString m_plural;

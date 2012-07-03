@@ -9,8 +9,8 @@
 #include "util.h"
 
 
-Player::Player(uint id, Options options) :
-    Character("player", id, options),
+Player::Player(Realm *realm, uint id, Options options) :
+    Character(realm, "player", id, options),
     m_regenerationInterval(0),
     m_admin(false),
     m_session(0) {
@@ -21,7 +21,7 @@ Player::Player(uint id, Options options) :
 Player::~Player() {
 
     if (~options() & Copy) {
-        Realm::instance()->unregisterPlayer(this);
+        realm()->unregisterPlayer(this);
     }
 }
 
@@ -32,7 +32,16 @@ void Player::setName(const QString &newName) {
     GameObject::setName(newName);
 
     if (~options() & Copy) {
-        Realm::instance()->registerPlayer(this);
+        realm()->registerPlayer(this);
+    }
+}
+
+void Player::setPasswordSalt(const QString &passwordSalt) {
+
+    if (m_passwordSalt != passwordSalt) {
+        m_passwordSalt = passwordSalt;
+
+        setModified();
     }
 }
 
@@ -110,6 +119,10 @@ void Player::enter(const GameObjectPtr &areaPtr) {
     area->addPlayer(this);
 
     look();
+
+    for (const GameObjectPtr &character : area->npcs()) {
+        character->invokeTrigger("oncharacterentered", this);
+    }
 }
 
 void Player::leave(const GameObjectPtr &areaPtr, const QString &exitName) {
@@ -196,12 +209,12 @@ void Player::die(const GameObjectPtr &attacker) {
     enter(race().cast<Race *>()->startingArea());
 }
 
-void Player::timerEvent(QTimerEvent *event) {
+void Player::timerEvent(int timerId) {
 
-    if (event->timerId() == m_regenerationInterval) {
+    if (timerId == m_regenerationInterval) {
         adjustHp(qMax(stats().vitality / 15, 1));
         send("");
     } else {
-        Character::timerEvent(event);
+        Character::timerEvent(timerId);
     }
 }

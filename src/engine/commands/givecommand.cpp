@@ -7,7 +7,7 @@ GiveCommand::GiveCommand(Player *player, QObject *parent) :
     setDescription("Give an item or gold from your inventory to another "
                    "character.\n"
                    "\n"
-                   "Example: give stick earl");
+                   "Examples: give stick earl, give $5 to beggar");
 }
 
 GiveCommand::~GiveCommand() {
@@ -67,11 +67,25 @@ void GiveCommand::execute(const QString &command) {
     QString description;
 
     if (gold > 0.0) {
+        if (!recipient->invokeTrigger("onreceive", player(), gold)) {
+            return;
+        }
+
         recipient->adjustGold(gold);
         player()->adjustGold(-gold);
 
         description = word;
     } else {
+        if (items.length() == 1) {
+            if (!recipient->invokeTrigger("onreceive", player(), items[0])) {
+                return;
+            }
+        } else {
+            if (!recipient->invokeTrigger("onreceive", player(), items)) {
+                return;
+            }
+        }
+
         for (const GameObjectPtr &item : items) {
             recipient->addInventoryItem(item);
             player()->removeInventoryItem(item);

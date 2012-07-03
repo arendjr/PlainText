@@ -1,15 +1,38 @@
 (function() {
-    
-    var onkeypress = controller.commandInput.onkeypress;
 
     var self = controller;
+
+    var triggers = {};
+    self.onMessageHook = function(message) {
+        message = message.trimmed();
+
+        var lines = message.split("\n");
+        lines.forEach(function(line) {
+            if (line.startsWith("  \x1B[37;1m")) {
+                var trigger = line.substring(9, line.indexOf("\x1B[0m"));
+                var triggerName;
+                if (trigger.indexOf("(") === -1) {
+                    triggerName = trigger.substr(0, trigger.indexOf(" : "));
+                } else {
+                    triggerName = trigger.substr(0, trigger.indexOf("("));
+                }
+
+                triggers[triggerName] = trigger;
+            }
+        });
+    }
+    self.socket.send("help triggers");
+
+    var onkeypress = controller.commandInput.onkeypress;
+
     controller.commandInput.onkeypress = function(event) {
         if (event.keyCode === keys.KEY_RETURN) {
             var overwriteHistory = false;
 
             var command = self.commandInput.value;
-            if (command.substr(0, 10) === "edit-prop " ||
-                command.substr(0, 13) === "edit-trigger ") {
+            var commandName = command.split(" ")[0];
+            if (commandName === "edit-prop") {
+                overwriteHistory = true;
 
                 self.setCommand = "set" + command.substr(4);
                 self.commandInput.value = "get" + command.substr(4);
@@ -22,12 +45,53 @@
                     self.editField.value = message;
                     self.editField.focus();
                 }
-
+            } else if (commandName === "edit-trigger") {
                 overwriteHistory = true;
-            } else if (command.substr(0, 1) === "@") {
+
+                var triggerName = command.split(/\s+/)[2];
+                if (triggers.hasOwnProperty(triggerName)) {
+                    self.setCommand = "set" + command.substr(4);
+                    self.commandInput.value = "get" + command.substr(4);
+
+                    self.onMessageHook = function(message) {
+                        message = message.trimmed();
+
+                        if (message.startsWith("No trigger set for")) {
+                            var trigger = triggers[triggerName];
+                            if (trigger.indexOf("(") === -1) {
+                                message = "(function() {\n    \n})";
+                            } else {
+                                var arguments = trigger.substring(trigger.indexOf("(") + 1,
+                                                                  trigger.indexOf(")"));
+                                var args = [];
+                                arguments.split(", ").forEach(function(arg) {
+                                    args.push(arg.substr(0, arg.indexOf(" : ")));
+                                });
+                                message = "(function(" + args.join(", ") + ") {\n    \n})";
+                            }
+                        }
+
+                        if (message === "Object not found.") {
+                            self.writeToScreen(message);
+                        } else {
+                            self.editScreen.style.display = "block";
+
+                            self.editField.value = message;
+
+                            self.editField.selectionStart = message.length - 3;
+                            self.editField.selectionEnd = self.editField.selectionStart;
+
+                            self.editField.focus();
+                        }
+                    }
+                } else {
+                    self.writeToScreen("There is no trigger named " + triggerName + ".");
+                    self.commandInput.value = "";
+                }
+            } else if (command.startsWith("@")) {
+                overwriteHistory = true;
+
                 self.commandInput.value = "set-prop area " + command.substr(1);
-
-                overwriteHistory = true;
             }
 
             onkeypress(event);
@@ -47,7 +111,7 @@
         self.commandInput.focus();
     }
     document.getElementById("edit-submit-button").onclick = function() {
-        if (self.setCommand.substr(0, 8) === "set-prop") {
+        if (self.setCommand.startsWith("set-prop")) {
             self.socket.send(self.setCommand + " " + self.editField.value.replace(/\n/g, "\\n"));
         } else {
             self.socket.send(self.setCommand + " " + self.editField.value);
@@ -96,4 +160,5 @@
             return false;
         }
     }
+
 })();

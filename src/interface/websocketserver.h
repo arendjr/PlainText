@@ -7,12 +7,14 @@
 class QWsServer;
 class QWsSocket;
 
+class Realm;
+
 class WebSocketServer : public QObject {
 
     Q_OBJECT
 
     public:
-        explicit WebSocketServer(quint16 port, QObject *parent = 0);
+        WebSocketServer(Realm *realm, quint16 port, QObject *parent = nullptr);
         virtual ~WebSocketServer();
 
     public slots:
@@ -22,6 +24,8 @@ class WebSocketServer : public QObject {
         void onSessionOutput(const QString &data);
 
     private:
+        Realm *m_realm;
+
         QWsServer *m_server;
         QList<QWsSocket *> m_clients;
 };

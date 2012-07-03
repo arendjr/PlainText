@@ -1,7 +1,5 @@
 #include "lookcommand.h"
 
-#include <cstring>
-
 #include "engine/item.h"
 #include "engine/util.h"
 
@@ -35,8 +33,7 @@ void LookCommand::execute(const QString &command) {
         return;
     }
 
-    GameObjectPtrList pool = player()->inventory() + currentArea()->exits() +
-                             currentArea()->characters() + currentArea()->items();
+    GameObjectPtrList pool = player()->inventory() + currentArea()->objects();
     GameObjectPtrList objects = takeObjects(pool);
     if (!requireSome(objects, "That's not here.")) {
         return;
@@ -45,13 +42,13 @@ void LookCommand::execute(const QString &command) {
     QString description = objects[0]->description();
     if (description.isEmpty()) {
         QString name;
-        if (strcmp(objects[0]->objectType(), "exit") == 0) {
+        if (objects[0]->isExit()) {
             name = "the " + objects[0]->name();
         } else {
             name = objects[0].cast<Item *>()->definiteName(pool);
         }
-        player()->send(QString("There's nothing special about %1.").arg(name));
+        send(QString("There's nothing special about %1.").arg(name));
     } else {
-        player()->send(description);
+        send(description);
     }
 }

@@ -20,7 +20,7 @@ ScriptFunctionMap::ScriptFunctionMap(const QMap<QString, ScriptFunction> &other)
 QScriptValue ScriptFunctionMap::toScriptValue(QScriptEngine *engine, const ScriptFunctionMap &map) {
 
     QScriptValue value = engine->newObject();
-    foreach (const QString &key, map.keys()) {
+    for (const QString &key : map.keys()) {
         value.setProperty(key, ScriptFunction::toScriptValue(engine, map[key]));
     }
     return value;

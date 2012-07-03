@@ -5,15 +5,16 @@
 #include <QObject>
 
 
-class Player;
 class CommandInterpreter;
+class Player;
+class Realm;
 
 class Session : public QObject {
 
     Q_OBJECT
 
     public:
-        explicit Session(QObject *object);
+        Session(Realm *realm, QObject *object);
         virtual ~Session();
 
         void open();
@@ -50,6 +51,7 @@ class Session : public QObject {
         class SignUpData;
         SignUpData *m_signUpData;
 
+        Realm *m_realm;
         Player *m_player;
 
         CommandInterpreter *m_interpreter;

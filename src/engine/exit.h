@@ -10,7 +10,7 @@ class Exit : public GameObject {
     Q_OBJECT
 
     public:
-        explicit Exit(uint id, Options options = NoOptions);
+        Exit(Realm *realm, uint id, Options options = NoOptions);
         virtual ~Exit();
 
         const GameObjectPtr &destinationArea() const { return m_destinationArea; }
@@ -36,7 +36,6 @@ class Exit : public GameObject {
     private:
         GameObjectPtr m_destinationArea;
         GameObjectPtr m_oppositeExit;
-        double m_size;
         bool m_door;
         bool m_open;
         bool m_hidden;

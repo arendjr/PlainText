@@ -18,37 +18,31 @@ class ScriptEngine : public QObject {
     Q_OBJECT
 
     public:
-        static ScriptEngine *instance() { Q_ASSERT(s_instance); return s_instance; }
+        ScriptEngine();
+        virtual ~ScriptEngine();
 
-        static void instantiate();
-        static void destroy();
+        static ScriptEngine *instance();
 
-        bool isInitialized() const { return m_initialized; }
-
-        QScriptValue evaluate(const QString &program, const QString &fileName = QString(), int lineNumber = 1);
-        ScriptFunction defineFunction(const QString &program, const QString &fileName = QString(), int lineNumber = 1);
+        QScriptValue evaluate(const QString &program,
+                              const QString &fileName = QString(), int lineNumber = 1);
+        ScriptFunction defineFunction(const QString &program,
+                                      const QString &fileName = QString(), int lineNumber = 1);
 
         bool hasUncaughtException() const;
         QScriptValue uncaughtException() const;
 
         QScriptValue executeFunction(ScriptFunction &function, const GameObjectPtr &thisObject,
-                                     const QVariantList &arguments);
+                                     const QScriptValueList &arguments);
 
         QScriptValue toScriptValue(GameObject *object);
         QScriptValue toScriptValue(const GameObjectPtr &object);
+        QScriptValue toScriptValue(const GameObjectPtrList &list);
 
         void setGlobalObject(const char *name, QObject *object);
         void unsetGlobalObject(const char *name);
 
     private:
-        static ScriptEngine *s_instance;
-
-        bool m_initialized;
-
         QScriptEngine m_jsEngine;
-
-        explicit ScriptEngine();
-        virtual ~ScriptEngine();
 };
 
 #endif // SCRIPTENGINE_H

@@ -1,0 +1,20 @@
+{
+  "name": "O'Malley",
+  "description": "O'Malley is busy pouring out drinks.",
+  "plural": "O'Malleies",
+  "portable": false,
+  "weight": 0,
+  "cost": 0,
+  "currentArea": "area:176",
+  "race": "0",
+  "characterClass": "0",
+  "gender": "male",
+  "stats": [0, 0, 0, 0, 0, 0, 0, 0],
+  "respawnTime": 0,
+  "respawnTimeVariation": 0,
+  "hp": 1,
+  "maxHp": 1,
+  "mp": 0,
+  "maxMp": 0,
+  "gold": 0
+}

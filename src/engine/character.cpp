@@ -1,7 +1,5 @@
 #include "character.h"
 
-#include <cstdlib>
-
 #include <QDateTime>
 #include <QTimerEvent>
 
@@ -24,36 +22,14 @@
     }
 
 
-Character::Character(uint id, Options options) :
-    Item("character", id, options),
-    m_gender("male"),
-    m_subjectPronoun("he"),
-    m_objectPronoun("him"),
-    m_respawnTime(0),
-    m_respawnTimeVariation(0),
-    m_respawnTimerId(0),
-    m_hp(1),
-    m_maxHp(1),
-    m_mp(0),
-    m_maxMp(0),
-    m_gold(0.0),
-    m_effectsTimerId(0),
-    m_effectsTimerStarted(0),
-    m_modifiersTimerId(0),
-    m_modifiersTimerStarted(0),
-    m_secondsStunned(0),
-    m_stunTimerId(0),
-    m_oddStunTimer(false),
-    m_leaveOnActive(false),
-    m_regenerationTimerId(0) {
-
-    setAutoDelete(false);
+Character::Character(Realm *realm, uint id, Options options) :
+    Character(realm, "character", id, options) {
 
     m_regenerationTimerId = startTimer(45000);
 }
 
-Character::Character(const char *objectType, uint id, Options options) :
-    Item(objectType, id, options),
+Character::Character(Realm *realm, const char *objectType, uint id, Options options) :
+    Item(realm, objectType, id, options),
     m_gender("male"),
     m_subjectPronoun("he"),
     m_objectPronoun("him"),
@@ -196,8 +172,6 @@ void Character::setStats(const CharacterStats &stats) {
         m_stats = stats;
 
         if (mayReferenceOtherProperties()) {
-            startBulkModification();
-
             setMaxHp(2 * m_stats.vitality);
             setMaxMp(m_stats.intelligence);
 
@@ -206,8 +180,6 @@ void Character::setStats(const CharacterStats &stats) {
                 weight += item.cast<Item *>()->weight();
             }
             setWeight(weight);
-
-            commitBulkModification();
         }
     }
 }
@@ -373,8 +345,7 @@ void Character::clearNegativeModifiers() {
         Modifier &modifier = m_modifiers[i];
         CharacterStats &stats = modifier.stats;
 
-        if ((stats.strength + stats.dexterity + stats.vitality +
-             stats.endurance + stats.intelligence + stats.faith) < 0)  {
+        if (stats.total() < 0)  {
             m_modifiers.removeAt(i);
             i--;
             continue;
@@ -468,10 +439,6 @@ void Character::go(const GameObjectPtr &exitPtr) {
 
     leave(currentArea(), exit->name());
     enter(exit->destinationArea());
-
-    for (const GameObjectPtr &character : currentArea().cast<Area *>()->npcs()) {
-        character->invokeTrigger("oncharacterentered", this);
-    }
 }
 
 void Character::enter(const GameObjectPtr &areaPtr) {
@@ -483,6 +450,10 @@ void Character::enter(const GameObjectPtr &areaPtr) {
     area->addNPC(this);
 
     area->players().send(QString("%1 arrived.").arg(indefiniteName(Capitalized)));
+
+    for (const GameObjectPtr &character : area->npcs()) {
+        character->invokeTrigger("oncharacterentered", this);
+    }
 }
 
 void Character::leave(const GameObjectPtr &areaPtr, const QString &exitName) {
@@ -523,7 +494,12 @@ void Character::leave(const GameObjectPtr &areaPtr, const QString &exitName) {
 
 void Character::say(const QString &message) {
 
-    QString text = QString("%1 says, \"%2\".").arg(name(), message);
+    QString text;
+    if (message.endsWith(".") || message.endsWith("?") || message.endsWith("!")) {
+        text = QString("%1 says, \"%2\"").arg(name(), Util::capitalize(message));
+    } else {
+        text = QString("%1 says, \"%2.\"").arg(name(), Util::capitalize(message));
+    }
     currentArea().cast<Area *>()->players().send(text);
 }
 
@@ -538,10 +514,7 @@ void Character::shout(const QString &message) {
     GameObjectPtrList adjacentPlayers;
     for (const GameObjectPtr &exitPtr : area->exits()) {
         Exit *exit = exitPtr.cast<Exit *>();
-        Q_ASSERT(exit);
-
         Area *adjacentArea = exit->destinationArea().cast<Area *>();
-        Q_ASSERT(adjacentArea);
 
         adjacentPlayers << adjacentArea->players();
     }
@@ -662,7 +635,7 @@ void Character::kill(const GameObjectPtr &characterPtr) {
     others = currentArea().cast<Area *>()->characters();
     others.removeOne(this);
     others.removeOne(characterPtr);
-    foreach (const GameObjectPtr &other, others) {
+    for (const GameObjectPtr &other : others) {
         other->invokeTrigger("oncharacterattacked", this, characterPtr);
     }
 }
@@ -694,14 +667,14 @@ void Character::die(const GameObjectPtr &attacker) {
 
         players.send(QString("%1 was carrying %2.").arg(myName, inventoryStr), Teal);
 
-        foreach (const GameObjectPtr &item, inventory()) {
+        for (const GameObjectPtr &item : inventory()) {
             area->addItem(item);
         }
     }
 
     GameObjectPtrList others = area->characters();
     others.removeOne(this);
-    foreach (const GameObjectPtr &other, others) {
+    for (const GameObjectPtr &other : others) {
         other->invokeTrigger("oncharacterdied", this, attacker);
     }
 
@@ -754,7 +727,7 @@ void Character::init() {
     // limbo if we died and a server termination killed the respawn timers.
     // in addition, this allows Area::npcs to become a non-stored property,
     // saving many disk writes when NPCs walk around
-    if (strcmp(objectType(), "character") == 0) {
+    if (!isPlayer()) {
         Area *area = currentArea().cast<Area *>();
         area->addNPC(this);
     }
@@ -762,9 +735,9 @@ void Character::init() {
     GameObject::init();
 }
 
-void Character::timerEvent(QTimerEvent *event) {
+void Character::timerEvent(int timerId) {
 
-    if (event->timerId() == m_respawnTimerId) {
+    if (timerId == m_respawnTimerId) {
         killTimer(m_respawnTimerId);
         m_respawnTimerId = 0;
 
@@ -776,7 +749,7 @@ void Character::timerEvent(QTimerEvent *event) {
         enter(currentArea());
 
         invokeTrigger("onspawn");
-    } else if (event->timerId() == m_effectsTimerId) {
+    } else if (timerId == m_effectsTimerId) {
         killTimer(m_effectsTimerId);
         qint64 now = QDateTime::currentMSecsSinceEpoch();
         int nextTimeout = updateEffects(now);
@@ -786,7 +759,7 @@ void Character::timerEvent(QTimerEvent *event) {
         } else {
             m_effectsTimerId = 0;
         }
-    } else if (event->timerId() == m_modifiersTimerId) {
+    } else if (timerId == m_modifiersTimerId) {
         killTimer(m_modifiersTimerId);
         qint64 now = QDateTime::currentMSecsSinceEpoch();
         int nextTimeout = updateModifiers(now);
@@ -796,7 +769,7 @@ void Character::timerEvent(QTimerEvent *event) {
         } else {
             m_modifiersTimerId = 0;
         }
-    } else if (event->timerId() == m_stunTimerId) {
+    } else if (timerId == m_stunTimerId) {
         m_secondsStunned--;
 
         if (m_secondsStunned > 0) {
@@ -816,10 +789,10 @@ void Character::timerEvent(QTimerEvent *event) {
                 invokeTrigger("onactive");
             }
         }
-    } else if (event->timerId() == m_regenerationTimerId) {
+    } else if (timerId == m_regenerationTimerId) {
         adjustHp(qMax(stats().vitality / 15, 1));
     } else {
-        Item::timerEvent(event);
+        Item::timerEvent(timerId);
     }
 }
 

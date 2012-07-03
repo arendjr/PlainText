@@ -26,9 +26,9 @@ void AddItemCommand::execute(const QString &command) {
 
     QString itemName = takeWord();
 
-    Item *item = qobject_cast<Item *>(GameObject::createByObjectType("item"));
+    Item *item = GameObject::createByObjectType<Item *>(realm(), "item");
     item->setName(itemName);
     currentArea()->addItem(item);
 
-    player()->send(QString("Item %1 added.").arg(itemName));
+    send(QString("Item %1 added.").arg(itemName));
 }

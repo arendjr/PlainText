@@ -27,6 +27,11 @@ var keys = {
     KEY_INSERT:   45
 }
 
+String.prototype.startsWith = function(string) {
+
+    return this.substr(0, string.length) === string;
+};
+
 String.prototype.trimmed = function() {
 
     return this.replace(/^\s+|\s+$/g, "");

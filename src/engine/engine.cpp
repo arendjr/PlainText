@@ -14,8 +14,8 @@
 #include "interface/websocketserver.h"
 
 
-Engine::Engine(QObject *parent) :
-    QObject(parent) {
+Engine::Engine() :
+    QObject() {
 
     qsrand(QDateTime::currentMSecsSinceEpoch());
 
@@ -24,17 +24,21 @@ Engine::Engine(QObject *parent) :
     qRegisterMetaType<GameObjectPtr>();
     qRegisterMetaType<GameObjectPtrList>();
 
-    ScriptEngine::instantiate();
+    m_scriptEngine = new ScriptEngine();
+    m_realm = new Realm();
+    m_util = new Util();
 
-    Realm::instantiate();
+    m_realm->setScriptEngine(m_scriptEngine);
+    m_realm->init();
 
-    Util::instantiate();
+    m_scriptEngine->setGlobalObject("Realm", m_realm);
+    m_scriptEngine->setGlobalObject("Util", m_util);
 }
 
 void Engine::start() {
 
-    m_telnetServer = new TelnetServer(4801);
-    m_webSocketServer = new WebSocketServer(4802);
+    m_telnetServer = new TelnetServer(m_realm, 4801);
+    m_webSocketServer = new WebSocketServer(m_realm, 4802);
     m_httpServer = new HttpServer(8080);
 }
 
@@ -44,9 +48,10 @@ Engine::~Engine() {
     delete m_webSocketServer;
     delete m_telnetServer;
 
-    Util::destroy();
+    m_scriptEngine->unsetGlobalObject("Realm");
+    m_scriptEngine->unsetGlobalObject("Util");
 
-    Realm::destroy();
-
-    ScriptEngine::destroy();
+    delete m_util;
+    delete m_realm;
+    delete m_scriptEngine;
 }

@@ -28,7 +28,8 @@ class CommandInterpreter : public QObject {
         QMap<QString, QString> m_triggers;
 
         void showHelp(const QString &command = QString());
-        void showColumns(const QStringList &commandNames);
+
+        static QString formatColumns(const QStringList &commandNames);
 };
 
 #endif // COMMANDINTERPRETER_H

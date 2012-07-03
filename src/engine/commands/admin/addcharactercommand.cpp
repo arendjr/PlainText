@@ -27,7 +27,7 @@ void AddCharacterCommand::execute(const QString &command) {
 
     QString characterName = takeWord();
 
-    Character *character = qobject_cast<Character *>(GameObject::createByObjectType("character"));
+    Character *character = GameObject::createByObjectType<Character *>(realm(), "character");
     character->setName(characterName);
     character->setCurrentArea(currentArea());
     currentArea()->addNPC(character);

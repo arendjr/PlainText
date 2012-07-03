@@ -2,7 +2,6 @@
 #define PLAYER_H
 
 #include "character.h"
-#include "gameobjectptr.h"
 
 #include <QString>
 
@@ -14,10 +13,14 @@ class Player : public Character {
     Q_OBJECT
 
     public:
-        explicit Player(uint id, Options options = NoOptions);
+        Player(Realm *realm, uint id, Options options = NoOptions);
         virtual ~Player();
 
         virtual void setName(const QString &name);
+
+        const QString &passwordSalt() const { return m_passwordSalt; }
+        virtual void setPasswordSalt(const QString &passwordSalt);
+        Q_PROPERTY(QString passwordSalt READ passwordSalt WRITE setPasswordSalt)
 
         const QString &passwordHash() const { return m_passwordHash; }
         virtual void setPasswordHash(const QString &passwordHash);
@@ -40,18 +43,14 @@ class Player : public Character {
 
         virtual void die(const GameObjectPtr &attacker);
 
+        virtual void timerEvent(int timerId);
+
     signals:
         void write(const QString &data) const;
 
-    protected:
-        virtual void timerEvent(QTimerEvent *event);
-
     private:
+        QString m_passwordSalt;
         QString m_passwordHash;
-
-        GameObjectPtr m_currentArea;
-
-        GameObjectPtrList m_inventory;
 
         int m_regenerationInterval;
 

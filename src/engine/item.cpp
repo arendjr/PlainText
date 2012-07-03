@@ -1,15 +1,14 @@
 #include "item.h"
 
-#include "gameobjectptr.h"
 #include "util.h"
 
 
-Item::Item(uint id, Options options) :
-    Item("item", id, options) {
+Item::Item(Realm *realm, uint id, Options options) :
+    Item(realm, "item", id, options) {
 }
 
-Item::Item(const char *objectType, uint id, Options options) :
-    GameObject(objectType, id, options),
+Item::Item(Realm *realm, const char *objectType, uint id, Options options) :
+    GameObject(realm, objectType, id, options),
     m_portable(false),
     m_weight(0),
     m_cost(0.0) {

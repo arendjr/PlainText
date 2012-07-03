@@ -1,16 +1,16 @@
 #include "telnetserver.h"
 
-#include <QCoreApplication>
 #include <QDebug>
 #include <QTcpServer>
 #include <QTcpSocket>
 
-#include "session.h"
 #include "engine/player.h"
+#include "engine/session.h"
 
 
-TelnetServer::TelnetServer(quint16 port, QObject *parent) :
-    QObject(parent) {
+TelnetServer::TelnetServer(Realm *realm, quint16 port, QObject *parent) :
+    QObject(parent),
+    m_realm(realm) {
 
     m_server = new QTcpServer(this);
     if (!m_server->listen(QHostAddress::Any, port)) {
@@ -31,7 +31,7 @@ void TelnetServer::onClientConnected() {
     connect(socket, SIGNAL(readyRead()), SLOT(onReadyRead()));
     connect(socket, SIGNAL(disconnected()), SLOT(onClientDisconnected()));
 
-    Session *session = new Session(socket);
+    Session *session = new Session(m_realm, socket);
     connect(session, SIGNAL(write(QString)), SLOT(onSessionOutput(QString)));
     connect(session, SIGNAL(terminate()), socket, SLOT(deleteLater()));
 
@@ -44,7 +44,7 @@ void TelnetServer::onClientConnected() {
 void TelnetServer::onReadyRead() {
 
     QTcpSocket *socket = qobject_cast<QTcpSocket *>(sender());
-    if (socket == 0) {
+    if (!socket) {
         return;
     }
 
@@ -55,9 +55,11 @@ void TelnetServer::onReadyRead() {
     while ((index = buffer.indexOf("\r\n")) > -1) {
         QByteArray line = buffer.left(index);
 
-        Session *session = socket->property("session").value<Session *>();
-        Q_ASSERT(session);
-        session->onUserInput(line);
+        if (!line.isEmpty()) {
+            Session *session = socket->property("session").value<Session *>();
+            Q_ASSERT(session);
+            session->onUserInput(line);
+        }
 
         buffer.remove(0, index + 2);
     }
@@ -68,7 +70,7 @@ void TelnetServer::onReadyRead() {
 void TelnetServer::onClientDisconnected() {
 
     QTcpSocket *socket = qobject_cast<QTcpSocket *>(sender());
-    if (socket == 0) {
+    if (!socket) {
         return;
     }
 
@@ -84,12 +86,12 @@ void TelnetServer::onSessionOutput(QString data) {
     }
 
     Session *session = qobject_cast<Session *>(sender());
-    if (session == 0) {
+    if (!session) {
         return;
     }
 
     QTcpSocket *socket = qobject_cast<QTcpSocket *>(session->parent());
-    if (socket == 0) {
+    if (!socket) {
         return;
     }
 

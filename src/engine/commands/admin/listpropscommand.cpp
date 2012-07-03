@@ -29,7 +29,7 @@ void ListPropsCommand::execute(const QString &command) {
     player()->send(QString("These are all known properties of %1:\n"
                            "\n").arg(Util::highlight(QString("object #%1").arg(object->id()))));
 
-    foreach (const QMetaProperty &metaProperty, object->storedMetaProperties()) {
+    for (const QMetaProperty &metaProperty : object->storedMetaProperties()) {
         const char *name = metaProperty.name();
         QStringList valueLines;
 
@@ -51,12 +51,12 @@ void ListPropsCommand::execute(const QString &command) {
                         if (pointer.isNull()) {
                             valueLines << "(not set)";
                         } else {
-                            valueLines << pointer.toString() + QString(" (%1)").arg(pointer->name());
+                            valueLines << pointer.toString() + " (" + pointer->name() + ")";
                         }
                         break;
                     } else if (value.userType() == QMetaType::type("GameObjectPtrList")) {
                         QStringList strings;
-                        foreach (GameObjectPtr pointer, value.value<GameObjectPtrList>()) {
+                        for (GameObjectPtr pointer : value.value<GameObjectPtrList>()) {
                             strings << pointer.toString();
                         }
                         valueLines = Util::splitLines("[ " + strings.join(", ") + " ]", 44);

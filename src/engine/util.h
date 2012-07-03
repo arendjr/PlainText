@@ -5,7 +5,6 @@
 #include <QStringList>
 
 #include "constants.h"
-#include "gameobjectptr.h"
 
 
 class Util : public QObject {
@@ -13,9 +12,6 @@ class Util : public QObject {
     Q_OBJECT
 
     public:
-        static void instantiate();
-        static void destroy();
-
         Q_INVOKABLE static QString joinFancy(const QStringList &list,
                                              const QString &separator = ", ",
                                              const QString &last = " and ");
@@ -42,9 +38,9 @@ class Util : public QObject {
 
         Q_INVOKABLE static QString highlight(const QString &string);
 
-        static bool isDirection(const QString &string);
+        Q_INVOKABLE static bool isDirection(const QString &string);
 
-        static QString opposingDirection(const QString &direction);
+        Q_INVOKABLE static QString opposingDirection(const QString &direction);
 
         static bool isDirectionAbbreviation(const QString &string);
 
@@ -52,11 +48,7 @@ class Util : public QObject {
 
         static QString toCamelCase(QString string);
 
-    private:
-        static Util *s_instance;
-
-        explicit Util();
-        virtual ~Util();
+        Q_INVOKABLE static QString randomString(int length);
 };
 
 #endif // UTIL_H

@@ -5,7 +5,10 @@
 
 
 class HttpServer;
+class Realm;
+class ScriptEngine;
 class TelnetServer;
+class Util;
 class WebSocketServer;
 
 class Engine : public QObject {
@@ -13,7 +16,7 @@ class Engine : public QObject {
     Q_OBJECT
 
     public:
-        explicit Engine(QObject *parent = 0);
+        Engine();
         virtual ~Engine();
 
         void start();
@@ -22,6 +25,10 @@ class Engine : public QObject {
         HttpServer *m_httpServer;
         TelnetServer *m_telnetServer;
         WebSocketServer *m_webSocketServer;
+
+        ScriptEngine *m_scriptEngine;
+        Realm *m_realm;
+        Util *m_util;
 };
 
 #endif // ENGINE_H

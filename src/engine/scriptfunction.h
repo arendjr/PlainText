@@ -24,7 +24,7 @@ class ScriptFunction {
 
         QString toString() const;
 
-        static ScriptFunction fromString(const QString &string) throw (GameException);
+        static ScriptFunction fromString(const QString &string);
 
         static QScriptValue toScriptValue(QScriptEngine *engine, const ScriptFunction &function);
         static void fromScriptValue(const QScriptValue &value, ScriptFunction &function);

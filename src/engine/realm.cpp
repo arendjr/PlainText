@@ -9,82 +9,77 @@
 #include "gameexception.h"
 #include "gameobjectsyncthread.h"
 #include "player.h"
-#include "scriptengine.h"
 
 
-Realm *Realm::s_instance = 0;
+static Realm *s_instance = nullptr;
 
-
-void Realm::instantiate() {
-
-    Q_ASSERT(s_instance == 0);
-    new Realm();
-}
-
-void Realm::destroy() {
-
-    delete s_instance;
-    s_instance = 0;
-}
 
 Realm::Realm(Options options) :
-    GameObject("realm", 0, options),
+    GameObject(this, "realm", 0, options),
     m_initialized(false),
     m_nextId(1),
-    m_syncThread(0) {
+    m_gameThread(this) {
 
-    if (options & Copy) {
-        return;
+    if (~options & Copy) {
+        s_instance = this;
     }
-
-    s_instance = this;
-
-    load(saveObjectPath(objectType(), id()));
-
-    QDir dir(saveDirPath());
-    foreach (const QString &fileName, dir.entryList(QDir::Files)) {
-        if (fileName.startsWith("realm.")) {
-            continue;
-        }
-
-        try {
-            GameObject::createFromFile(dir.path() + "/" + fileName);
-        } catch (const GameException &exception) {
-            qWarning() << "Error loading game object from " << fileName << ":" << exception.what();
-        }
-    }
-
-    foreach (GameObject *gameObject, m_objectMap) {
-        Q_ASSERT(gameObject);
-        gameObject->resolvePointers();
-    }
-
-    m_syncThread = new GameObjectSyncThread(this);
-    m_syncThread->start(QThread::LowestPriority);
-
-    ScriptEngine::instance()->setGlobalObject("Realm", this);
-
-    m_initialized = true;
-
-    foreach (GameObject *gameObject, m_objectMap) {
-        gameObject->init();
-    }
-
-    m_timeTimer = startTimer(150000);
 }
 
 Realm::~Realm() {
 
-    ScriptEngine::instance()->unsetGlobalObject("Realm");
+    m_gameThread.terminate();
+    m_gameThread.wait();
 
-    m_syncThread->quit();
+    m_syncThread.terminate();
 
-    foreach (GameObject *gameObject, m_objectMap) {
+    for (GameObject *gameObject : m_objectMap) {
         Q_ASSERT(gameObject);
         delete gameObject;
     }
 
-    m_syncThread->wait();
+    m_syncThread.wait();
+}
+
+Realm *Realm::instance() {
+
+    return s_instance;
+}
+
+void Realm::init() {
+
+    load(saveObjectPath(objectType(), id()));
+
+    QDir dir(saveDirPath());
+    for (const QString &fileName : dir.entryList(QDir::Files)) {
+        try {
+            if (!fileName.startsWith("realm.")) {
+                GameObject::createFromFile(this, dir.path() + "/" + fileName);
+            }
+        } catch (const GameException &exception) {
+            qWarning() << "Error loading game object from " << fileName.toUtf8().constData()
+                       << ": " << exception.what();
+        }
+    }
+
+    for (GameObject *object : m_objectMap) {
+        object->resolvePointers();
+    }
+
+    m_syncThread.start(QThread::LowestPriority);
+    m_gameThread.start(QThread::HighestPriority);
+
+    m_initialized = true;
+
+    for (GameObject *object : m_objectMap) {
+        try {
+            object->init();
+        } catch (const GameException &exception) {
+            qWarning() << "Error initializing game object "
+                       << object->objectType() << ":" << object->id() << ": " << exception.what();
+        }
+    }
+
+    m_timeTimer = startTimer(150000);
 }
 
 void Realm::registerObject(GameObject *gameObject) {
@@ -94,9 +89,9 @@ void Realm::registerObject(GameObject *gameObject) {
     uint id = gameObject->id();
     m_objectMap.insert(id, gameObject);
 
-    if (strcmp(gameObject->objectType(), "race") == 0) {
+    if (gameObject->isRace()) {
         m_races.append(gameObject);
-    } else if (strcmp(gameObject->objectType(), "class") == 0) {
+    } else if (gameObject->isClass()) {
         m_classes.append(gameObject);
     }
 
@@ -132,7 +127,7 @@ GameObject *Realm::getObject(const QString &objectType, uint id) const {
 GameObjectPtrList Realm::players() const {
 
     GameObjectPtrList players;
-    foreach (Player *player, m_playerMap) {
+    for (Player *player : m_playerMap) {
         players << player;
     }
     return players;
@@ -141,7 +136,7 @@ GameObjectPtrList Realm::players() const {
 GameObjectPtrList Realm::onlinePlayers() const {
 
     GameObjectPtrList players;
-    foreach (Player *player, m_playerMap) {
+    for (Player *player : m_playerMap) {
         if (player->session()) {
             players << player;
         }
@@ -184,29 +179,48 @@ uint Realm::uniqueObjectId() {
     return m_nextId++;
 }
 
-void Realm::syncObject(GameObject *gameObject) {
+void Realm::enqueueEvent(Event *event) {
+
+    m_gameThread.enqueueEvent(event);
+}
+
+void Realm::addModifiedObject(GameObject *object) {
 
     if (!m_initialized) {
         return;
     }
 
-    m_syncThread->queueObject(gameObject);
+    if (!m_modifiedObjects.contains(object)) {
+        m_modifiedObjects << object;
+    }
 }
 
-QString Realm::saveDirPath() {
+void Realm::enqueueModifiedObjects() {
 
-    return QDir::homePath() + "/.mud";
+    for (GameObject *object : m_modifiedObjects) {
+        m_syncThread.enqueueObject(object);
+    }
+    m_modifiedObjects.clear();
 }
 
-QString Realm::saveObjectPath(const char *objectType, uint id) {
+void Realm::setScriptEngine(ScriptEngine *scriptEngine) {
 
-    return QString(saveDirPath() + "/%1.%2").arg(objectType).arg(id, 9, 10, QChar('0'));
+    m_scriptEngine = scriptEngine;
 }
 
-void Realm::timerEvent(QTimerEvent *event) {
+void Realm::lock() {
 
-    int id = event->timerId();
-    if (id == m_timeTimer) {
+    m_gameThread.lock();
+}
+
+void Realm::unlock() {
+
+    m_gameThread.unlock();
+}
+
+void Realm::timerEvent(int timerId) {
+
+    if (timerId == m_timeTimer) {
         m_dateTime = m_dateTime.addSecs(3600);
 
         emit hourPassed(m_dateTime);
@@ -214,6 +228,6 @@ void Realm::timerEvent(QTimerEvent *event) {
             emit dayPassed(m_dateTime);
         }
     } else {
-        GameObject::timerEvent(event);
+        GameObject::timerEvent(timerId);
     }
 }

@@ -14,13 +14,14 @@
 
 class GameObject;
 class GameObjectPtrList;
+class Realm;
 
 class GameObjectPtr {
 
     public:
         GameObjectPtr();
         GameObjectPtr(GameObject *gameObject);
-        GameObjectPtr(const char *objectType, uint id);
+        GameObjectPtr(Realm *realm, const char *objectType, uint id);
         GameObjectPtr(const GameObjectPtr &other);
         GameObjectPtr(GameObjectPtr &&other);
         ~GameObjectPtr();
@@ -35,21 +36,21 @@ class GameObjectPtr {
         bool operator!=(const GameObjectPtr &other) const;
         bool operator!=(const GameObject *other) const;
 
-        inline GameObject &operator*() const throw (GameException) {
+        inline GameObject &operator*() const {
             if (!m_gameObject) {
                 throw GameException(GameException::NullPointerReference);
             }
             return *m_gameObject;
         }
 
-        inline GameObject *operator->() const throw (GameException) {
+        inline GameObject *operator->() const {
             if (!m_gameObject) {
                 throw GameException(GameException::NullPointerReference);
             }
             return m_gameObject;
         }
 
-        template <class T> inline T cast() const throw (GameException) {
+        template <class T> inline T cast() const {
             if (!m_gameObject) {
                 throw GameException(GameException::NullPointerReference);
             }
@@ -60,13 +61,13 @@ class GameObjectPtr {
             return pointer;
         }
 
-        void resolve() throw (GameException);
+        void resolve(Realm *realm);
         void unresolve(bool unregister = true);
 
         void setOwnerList(GameObjectPtrList *list);
 
         QString toString() const;
-        static GameObjectPtr fromString(const QString &string) throw (GameException);
+        static GameObjectPtr fromString(Realm *realm, const QString &string);
 
         friend void swap(GameObjectPtr &first, GameObjectPtr &second);
 
@@ -209,7 +210,7 @@ class GameObjectPtrList {
 
         const GameObjectPtr &operator[](int i) const;
 
-        void resolvePointers() throw (GameException);
+        void resolvePointers(Realm *realm);
         void unresolvePointers();
 
         void send(const QString &message, Color color = Silver) const;

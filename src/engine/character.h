@@ -15,7 +15,8 @@ class Character : public Item {
     Q_OBJECT
 
     public:
-        explicit Character(uint id, Options options = NoOptions);
+        Character(Realm *realm, uint id, Options options = NoOptions);
+        Character(Realm *realm, const char *objectType, uint id, Options options = NoOptions);
         virtual ~Character();
 
         virtual void setName(const QString &newName);
@@ -122,10 +123,7 @@ class Character : public Item {
 
         virtual void init();
 
-    protected:
-        virtual void timerEvent(QTimerEvent *event);
-
-        explicit Character(const char *objectType, uint id, Options options = NoOptions);
+        virtual void timerEvent(int timerId);
 
     private:
         GameObjectPtr m_currentArea;

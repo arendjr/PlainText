@@ -15,33 +15,32 @@
 
 
 GameObjectPtr::GameObjectPtr() :
-    m_gameObject(0),
-    m_objectType(0),
+    m_gameObject(nullptr),
+    m_objectType(nullptr),
     m_id(0),
-    m_list(0) {
+    m_list(nullptr) {
 }
 
 GameObjectPtr::GameObjectPtr(GameObject *gameObject) :
     m_gameObject(gameObject),
     m_objectType(strdup(gameObject->objectType())),
     m_id(gameObject->id()),
-    m_list(0) {
+    m_list(nullptr) {
 
     m_gameObject->registerPointer(this);
 }
 
-GameObjectPtr::GameObjectPtr(const char *objectType, uint id) :
-    m_gameObject(0),
-    m_objectType(0),
-    m_id(id),
-    m_list(0) {
+GameObjectPtr::GameObjectPtr(Realm *realm, const char *objectType, uint id) :
+    GameObjectPtr() {
+
+    m_id = id;
 
     if (objectType) {
         m_objectType = strdup(objectType);
     }
 
-    if (Realm::instance()->isInitialized()) {
-        resolve();
+    if (realm->isInitialized()) {
+        resolve(realm);
     }
 }
 
@@ -49,7 +48,7 @@ GameObjectPtr::GameObjectPtr(const GameObjectPtr &other) :
     m_gameObject(other.m_gameObject),
     m_objectType(other.m_objectType),
     m_id(other.m_id),
-    m_list(0) {
+    m_list(nullptr) {
 
     if (m_objectType) {
         m_objectType = strdup(m_objectType);
@@ -61,10 +60,7 @@ GameObjectPtr::GameObjectPtr(const GameObjectPtr &other) :
 }
 
 GameObjectPtr::GameObjectPtr(GameObjectPtr &&other) :
-    m_gameObject(0),
-    m_objectType(0),
-    m_id(0),
-    m_list(0) {
+    GameObjectPtr() {
 
     *this = std::move(other);
 }
@@ -93,7 +89,7 @@ GameObjectPtr &GameObjectPtr::operator=(const GameObjectPtr &other) {
         delete[] m_objectType;
 
         m_gameObject = other.m_gameObject;
-        m_objectType = other.m_objectType ? strdup(other.m_objectType) : 0;
+        m_objectType = other.m_objectType ? strdup(other.m_objectType) : nullptr;
         m_id = other.m_id;
 
         if (m_gameObject) {
@@ -143,14 +139,14 @@ bool GameObjectPtr::operator!=(const GameObject *other) const {
     return m_gameObject != other;
 }
 
-void GameObjectPtr::resolve() throw (GameException) {
+void GameObjectPtr::resolve(Realm *realm) {
 
     if (m_id == 0) {
         return;
     }
 
-    m_gameObject = Realm::instance()->getObject(m_objectType, m_id);
-    if (m_gameObject == 0) {
+    m_gameObject = realm->getObject(m_objectType, m_id);
+    if (!m_gameObject) {
         throw GameException(GameException::InvalidGameObjectPointer, m_objectType, m_id);
     }
     if (!m_objectType) {
@@ -166,7 +162,7 @@ void GameObjectPtr::unresolve(bool unregister) {
         if (unregister) {
             m_gameObject->unregisterPointer(this);
         }
-        m_gameObject = 0;
+        m_gameObject = nullptr;
     }
 }
 
@@ -184,7 +180,7 @@ QString GameObjectPtr::toString() const {
     return QString(m_objectType) + ":" + QString::number(m_id);
 }
 
-GameObjectPtr GameObjectPtr::fromString(const QString &string) throw (GameException) {
+GameObjectPtr GameObjectPtr::fromString(Realm *realm, const QString &string) {
 
     if (string == "0") {
         return GameObjectPtr();
@@ -195,7 +191,7 @@ GameObjectPtr GameObjectPtr::fromString(const QString &string) throw (GameExcept
         throw GameException(GameException::InvalidGameObjectPointer);
     }
 
-    return GameObjectPtr(components[0].toAscii().constData(), components[1].toInt());
+    return GameObjectPtr(realm, components[0].toAscii().constData(), components[1].toInt());
 }
 
 void swap(GameObjectPtr &first, GameObjectPtr &second) {
@@ -237,7 +233,7 @@ QScriptValue GameObjectPtr::toScriptValue(QScriptEngine *engine, const GameObjec
 void GameObjectPtr::fromScriptValue(const QScriptValue &object, GameObjectPtr &pointer) {
 
     if (object.isQObject()) {
-        pointer = GameObjectPtr(0, object.property("id").toUInt32());
+        pointer = GameObjectPtr(Realm::instance(), nullptr, object.property("id").toUInt32());
     } else {
         pointer = GameObjectPtr();
     }
@@ -245,7 +241,7 @@ void GameObjectPtr::fromScriptValue(const QScriptValue &object, GameObjectPtr &p
 
 
 GameObjectPtrList::iterator::iterator() :
-    m_list(0),
+    m_list(nullptr),
     m_index(0) {
 }
 
@@ -305,7 +301,7 @@ bool GameObjectPtrList::iterator::operator==(const GameObjectPtrList::const_iter
 
 
 GameObjectPtrList::const_iterator::const_iterator() :
-    m_list(0),
+    m_list(nullptr),
     m_index(0) {
 }
 
@@ -363,7 +359,7 @@ bool GameObjectPtrList::const_iterator::operator==(const GameObjectPtrList::cons
 
 GameObjectPtrList::GameObjectPtrList() :
     m_size(0),
-    m_nextList(0) {
+    m_nextList(nullptr) {
 
     for (int i = 0; i < NUM_ITEMS; i++) {
         m_items[i].setOwnerList(this);
@@ -371,12 +367,9 @@ GameObjectPtrList::GameObjectPtrList() :
 }
 
 GameObjectPtrList::GameObjectPtrList(const GameObjectPtrList &other) :
-    m_size(other.m_size),
-    m_nextList(0) {
+    GameObjectPtrList() {
 
-    for (int i = 0; i < NUM_ITEMS; i++) {
-        m_items[i].setOwnerList(this);
-    }
+    m_size = other.m_size;
 
     for (int i = 0; i < m_size; i++) {
         m_items[i] = other.m_items[i];
@@ -388,12 +381,7 @@ GameObjectPtrList::GameObjectPtrList(const GameObjectPtrList &other) :
 }
 
 GameObjectPtrList::GameObjectPtrList(GameObjectPtrList &&other) :
-    m_size(0),
-    m_nextList(0) {
-
-    for (int i = 0; i < NUM_ITEMS; i++) {
-        m_items[i].setOwnerList(this);
-    }
+    GameObjectPtrList() {
 
     *this = std::move(other);
 }
@@ -425,7 +413,7 @@ void GameObjectPtrList::append(const GameObjectPtr &value) {
 
 void GameObjectPtrList::append(const GameObjectPtrList &value) {
 
-    foreach (const GameObjectPtr &item, value) {
+    for (const GameObjectPtr &item : value) {
         append(item);
     }
 }
@@ -449,7 +437,7 @@ void GameObjectPtrList::clear() {
     delete m_nextList;
 
     m_size = 0;
-    m_nextList = 0;
+    m_nextList = nullptr;
 }
 
 GameObjectPtrList::const_iterator GameObjectPtrList::constBegin() const {
@@ -563,7 +551,7 @@ void GameObjectPtrList::removeAt(int i) {
         for (int j = i; j < m_size; j++) {
             // temporarily lift ownership, otherwise the removed item will
             // redundantly try to remove itself from the list
-            m_items[j].setOwnerList(0);
+            m_items[j].setOwnerList(nullptr);
         }
         m_items[i] = GameObjectPtr();
         for (int j = i; j < m_size - 1; j++) {
@@ -670,7 +658,7 @@ GameObjectPtrList &GameObjectPtrList::operator=(const GameObjectPtrList &other) 
     if (other.m_nextList) {
         m_nextList = new GameObjectPtrList(*other.m_nextList);
     } else {
-        m_nextList = 0;
+        m_nextList = nullptr;
     }
 
     return *this;
@@ -714,13 +702,13 @@ const GameObjectPtr &GameObjectPtrList::operator[](int i) const {
     }
 }
 
-void GameObjectPtrList::resolvePointers() throw (GameException) {
+void GameObjectPtrList::resolvePointers(Realm *realm) {
 
     for (int i = 0; i < m_size; i++) {
-        m_items[i].resolve();
+        m_items[i].resolve(realm);
     }
     if (m_nextList) {
-        m_nextList->resolvePointers();
+        m_nextList->resolvePointers(realm);
     }
 }
 

@@ -1,5 +1,7 @@
 #include "scriptfunction.h"
 
+#include <QDebug>
+
 #include "scriptengine.h"
 
 
@@ -33,11 +35,15 @@ QString ScriptFunction::toString() const {
     return source;
 }
 
-ScriptFunction ScriptFunction::fromString(const QString &string) throw (GameException) {
+ScriptFunction ScriptFunction::fromString(const QString &string) {
 
     ScriptEngine *scriptEngine = ScriptEngine::instance();
     ScriptFunction function = scriptEngine->defineFunction(string);
     if (scriptEngine->hasUncaughtException()) {
+        QScriptValue exception = scriptEngine->uncaughtException();
+        qWarning() << "Script Exception: " << exception.toString().toUtf8().constData() << endl
+                   << "While defining function: " << string.toUtf8().constData();
+        scriptEngine->evaluate("");
         throw GameException(GameException::InvalidFunctionCode);
     }
     return function;

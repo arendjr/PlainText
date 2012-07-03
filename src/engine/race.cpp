@@ -1,8 +1,8 @@
 #include "race.h"
 
 
-Race::Race(uint id, Options options) :
-    GameObject("race", id, options) {
+Race::Race(Realm *realm, uint id, Options options) :
+    GameObject(realm, "race", id, options) {
 
     setAutoDelete(false);
 }

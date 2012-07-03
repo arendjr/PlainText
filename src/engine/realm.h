@@ -6,24 +6,25 @@
 
 #include "gameobject.h"
 #include "gameobjectptr.h"
+#include "gameobjectsyncthread.h"
+#include "gamethread.h"
 
 
+class Event;
 class Player;
-class GameObjectSyncThread;
+class ScriptEngine;
 
 class Realm : public GameObject {
 
     Q_OBJECT
 
     public:
-        static Realm *instance() { Q_ASSERT(s_instance); return s_instance; }
-
-        static void instantiate();
-        static void destroy();
-
         explicit Realm(Options options = NoOptions);
         virtual ~Realm();
 
+        static Realm *instance();
+
+        virtual void init();
         bool isInitialized() const { return m_initialized; }
 
         void registerObject(GameObject *gameObject);
@@ -37,30 +38,33 @@ class Realm : public GameObject {
         void unregisterPlayer(Player *player);
         Player *getPlayer(const QString &name) const;
 
-        Q_INVOKABLE const GameObjectPtrList &races() const { return m_races; }
-        Q_INVOKABLE const GameObjectPtrList &classes() const { return m_classes; }
-
         const QDateTime &dateTime() const { return m_dateTime; }
         virtual void setDateTime(const QDateTime &dateTime);
         Q_PROPERTY(QDateTime dateTime READ dateTime WRITE setDateTime)
 
+        Q_INVOKABLE const GameObjectPtrList &races() const { return m_races; }
+        Q_INVOKABLE const GameObjectPtrList &classes() const { return m_classes; }
+
         uint uniqueObjectId();
 
-        void syncObject(GameObject *gameObject);
+        void enqueueEvent(Event *event);
 
-        static QString saveDirPath();
-        static QString saveObjectPath(const char *objectType, uint id);
+        void addModifiedObject(GameObject *object);
+        void enqueueModifiedObjects();
+
+        ScriptEngine *scriptEngine() const { return m_scriptEngine; }
+        void setScriptEngine(ScriptEngine *scriptEngine);
+
+        void lock();
+        void unlock();
+
+        virtual void timerEvent(int timerId);
 
     signals:
         void hourPassed(const QDateTime &dateTime);
         void dayPassed(const QDateTime &dateTime);
 
-    protected:
-        virtual void timerEvent(QTimerEvent *event);
-
     private:
-        static Realm *s_instance;
-
         bool m_initialized;
 
         uint m_nextId;
@@ -73,7 +77,12 @@ class Realm : public GameObject {
         QDateTime m_dateTime;
         int m_timeTimer;
 
-        GameObjectSyncThread *m_syncThread;
+        GameThread m_gameThread;
+
+        GameObjectSyncThread m_syncThread;
+        QList<GameObject *> m_modifiedObjects;
+
+        ScriptEngine *m_scriptEngine;
 };
 
 #endif // REALM_H

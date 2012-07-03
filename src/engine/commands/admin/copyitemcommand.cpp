@@ -1,7 +1,5 @@
 #include "copyitemcommand.h"
 
-#include <cstring>
-
 #include "engine/item.h"
 #include "engine/util.h"
 
@@ -32,20 +30,20 @@ void CopyItemCommand::execute(const QString &command) {
     }
 
     Item *item = items[0].cast<Item *>();
-    if (strcmp(item->objectType(), "player") == 0) {
+    if (item->isPlayer()) {
         player()->send("Players may not be copied.");
         return;
     }
 
     GameObject *copy = item->copy();
 
-    if (strcmp(item->objectType(), "item") == 0) {
-        currentArea()->addItem(copy);
-
-        player()->send(QString("Item %1 copied.").arg(item->name()));
-    } else if (strcmp(item->objectType(), "character") == 0) {
+    if (item->isCharacter()) {
         currentArea()->addNPC(copy);
 
         player()->send(QString("Character %1 copied.").arg(item->name()));
+    } else {
+        currentArea()->addItem(copy);
+
+        player()->send(QString("Item %1 copied.").arg(item->name()));
     }
 }

@@ -5,6 +5,8 @@
 #include <QScriptEngine>
 #include <QStringList>
 
+#include "gameexception.h"
+
 
 CharacterStats::CharacterStats() :
     strength(0),
@@ -33,6 +35,33 @@ bool CharacterStats::operator!=(const CharacterStats &other) const {
     return memcmp(this, &other, sizeof(CharacterStats)) != 0;
 }
 
+CharacterStats CharacterStats::operator+(const CharacterStats &other) const {
+
+    CharacterStats stats;
+    stats.strength = strength + other.strength;
+    stats.dexterity = dexterity + other.dexterity;
+    stats.vitality = vitality + other.vitality;
+    stats.endurance = endurance + other.endurance;
+    stats.intelligence = intelligence + other.intelligence;
+    stats.faith = faith + other.faith;
+    stats.height = height + other.height;
+    stats.weight = weight + other.weight;
+    return stats;
+}
+
+CharacterStats &CharacterStats::operator+=(const CharacterStats &other) {
+
+    strength += other.strength;
+    dexterity += other.dexterity;
+    vitality += other.vitality;
+    endurance += other.endurance;
+    intelligence += other.intelligence;
+    faith += other.faith;
+    height += other.height;
+    weight += other.weight;
+    return *this;
+}
+
 QString CharacterStats::toString() const {
 
     QStringList components;
@@ -47,7 +76,7 @@ QString CharacterStats::toString() const {
     return "[" + components.join(", ") + "]";
 }
 
-CharacterStats CharacterStats::fromString(const QString &string) throw (GameException) {
+CharacterStats CharacterStats::fromString(const QString &string) {
 
     if (!string.startsWith("[") || !string.endsWith("]")) {
         throw GameException(GameException::InvalidCharacterStats);
@@ -70,7 +99,7 @@ CharacterStats CharacterStats::fromString(const QString &string) throw (GameExce
     return stats;
 }
 
-CharacterStats CharacterStats::fromVariantList(const QVariantList &variantList) throw (GameException) {
+CharacterStats CharacterStats::fromVariantList(const QVariantList &variantList) {
 
     if (variantList.length() != 8) {
         throw GameException(GameException::InvalidCharacterStats);

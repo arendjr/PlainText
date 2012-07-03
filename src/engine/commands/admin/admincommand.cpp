@@ -23,7 +23,9 @@ GameObjectPtrList AdminCommand::objectsByDescription(const QPair<QString, uint> 
         uint objectId = description.first.mid(1).toInt();
         if (objectId) {
             GameObjectPtrList objects;
-            objects << Realm::instance()->getObject(0, objectId);
+            if (description.second < 2) {
+                objects << realm()->getObject(0, objectId);
+            }
             return objects;
         }
     }

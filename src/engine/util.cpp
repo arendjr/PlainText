@@ -8,23 +8,7 @@
 #include <QtAlgorithms>
 
 
-Util *Util::s_instance = 0;
-
-
-void Util::instantiate() {
-
-    Q_ASSERT(s_instance == 0);
-    new Util();
-}
-
-void Util::destroy() {
-
-    delete s_instance;
-    s_instance = 0;
-}
-
-QString Util::joinFancy(const QStringList &list,
-                        const QString &separator, const QString &last) {
+QString Util::joinFancy(const QStringList &list, const QString &separator, const QString &last) {
 
     QString string;
     int length = list.length();
@@ -207,7 +191,7 @@ QStringList Util::splitLines(const QString &string, int maxLineLength) {
     QStringList lines;
     QString currentLine;
 
-    foreach (QString word, words) {
+    for (QString word : words) {
         int index;
         while ((index = word.indexOf('\n')) != -1) {
             QString left = word.left(index);
@@ -306,15 +290,11 @@ QString Util::toCamelCase(QString string) {
     return string;
 }
 
-Util::Util() :
-    QObject() {
+QString Util::randomString(int length) {
 
-    s_instance = this;
-
-    ScriptEngine::instance()->setGlobalObject("Util", this);
-}
-
-Util::~Util() {
-
-    ScriptEngine::instance()->unsetGlobalObject("Util");
+    QString string;
+    for (int i = 0; i < length; i++) {
+        string.append(QChar::fromAscii(40 + qrand() % 87));
+    }
+    return string;
 }

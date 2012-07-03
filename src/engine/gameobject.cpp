@@ -1,9 +1,11 @@
 #include "gameobject.h"
 
+#include <cstring>
 #include <unistd.h>
 
 #include <QDateTime>
 #include <QDebug>
+#include <QDir>
 #include <QFile>
 #include <QFileInfo>
 #include <QMetaProperty>
@@ -28,31 +30,32 @@
 #include "realm.h"
 #include "scriptengine.h"
 #include "scriptfunctionmap.h"
+#include "timerevent.h"
 #include "util.h"
 
 
-GameObject::GameObject(const char *objectType, uint id, Options options) :
+GameObject::GameObject(Realm *realm, const char *objectType, uint id, Options options) :
     QObject(),
-    m_autoDelete(true),
+    m_realm(realm),
     m_objectType(objectType),
     m_id(id),
     m_options(options),
-    m_numBulkModifications(0),
+    m_autoDelete(true),
     m_deleted(false),
-    m_intervalHash(0),
-    m_timeoutHash(0) {
+    m_intervalHash(nullptr),
+    m_timeoutHash(nullptr) {
 
     Q_ASSERT(objectType);
 
     if (m_id && ~m_options & Copy) {
-        Realm::instance()->registerObject(this);
+        m_realm->registerObject(this);
     }
 }
 
 GameObject::~GameObject() {
 
     if (m_id && ~m_options & Copy) {
-        Realm::instance()->unregisterObject(this);
+        m_realm->unregisterObject(this);
     }
 
     for (GameObjectPtr *pointer : m_pointers) {
@@ -62,6 +65,41 @@ GameObject::~GameObject() {
 
     delete m_intervalHash;
     delete m_timeoutHash;
+}
+
+bool GameObject::isArea() const {
+
+    return strcmp(m_objectType, "area") == 0;
+}
+
+bool GameObject::isClass() const {
+
+    return strcmp(m_objectType, "class") == 0;
+}
+
+bool GameObject::isExit() const {
+
+    return strcmp(m_objectType, "exit") == 0;
+}
+
+bool GameObject::isItem() const {
+
+    return strcmp(m_objectType, "item") == 0 || isCharacter();
+}
+
+bool GameObject::isCharacter() const {
+
+    return strcmp(m_objectType, "character") == 0 || isPlayer();
+}
+
+bool GameObject::isPlayer() const {
+
+    return strcmp(m_objectType, "player") == 0;
+}
+
+bool GameObject::isRace() const {
+
+    return strcmp(m_objectType, "race") == 0;
 }
 
 void GameObject::setName(const QString &name) {
@@ -108,14 +146,14 @@ void GameObject::setTriggers(const ScriptFunctionMap &triggers) {
 }
 
 bool GameObject::invokeTrigger(const QString &name,
-                               const QVariant &arg1, const QVariant &arg2,
-                               const QVariant &arg3, const QVariant &arg4) {
+                               const QScriptValue &arg1, const QScriptValue &arg2,
+                               const QScriptValue &arg3, const QScriptValue &arg4) {
 
     if (!m_triggers.contains(name)) {
         return true;
     }
 
-    QVariantList arguments;
+    QScriptValueList arguments;
     if (arg1.isValid()) {
         arguments << arg1;
 
@@ -132,7 +170,8 @@ bool GameObject::invokeTrigger(const QString &name,
         }
     }
 
-    QScriptValue returnValue = ScriptEngine::instance()->executeFunction(m_triggers[name], this, arguments);
+    ScriptEngine *engine = m_realm->scriptEngine();
+    QScriptValue returnValue = engine->executeFunction(m_triggers[name], this, arguments);
     if (returnValue.isBool()) {
         return returnValue.toBool();
     } else {
@@ -142,38 +181,45 @@ bool GameObject::invokeTrigger(const QString &name,
 
 bool GameObject::invokeTrigger(const QString &triggerName,
                                GameObject *arg1, const GameObjectPtr &arg2,
-                               const QVariant &arg3, const QVariant &arg4) {
+                               const QScriptValue &arg3, const QScriptValue &arg4) {
 
+    ScriptEngine *engine = m_realm->scriptEngine();
     return invokeTrigger(triggerName,
-                         QVariant::fromValue(GameObjectPtr(arg1)), QVariant::fromValue(arg2),
-                         arg3, arg4);
+                         engine->toScriptValue(arg1), engine->toScriptValue(arg2), arg3, arg4);
 }
 
 bool GameObject::invokeTrigger(const QString &triggerName,
-                               GameObject *arg1, const QVariant &arg2,
-                               const QVariant &arg3, const QVariant &arg4) {
+                               GameObject *arg1, const GameObjectPtrList &arg2,
+                               const QScriptValue &arg3, const QScriptValue &arg4) {
 
+    ScriptEngine *engine = m_realm->scriptEngine();
     return invokeTrigger(triggerName,
-                         QVariant::fromValue(GameObjectPtr(arg1)), arg2,
-                         arg3, arg4);
+                         engine->toScriptValue(arg1), engine->toScriptValue(arg2), arg3, arg4);
 }
 
 bool GameObject::invokeTrigger(const QString &triggerName,
-                               const GameObjectPtr &arg1, const QVariant &arg2,
-                               const QVariant &arg3, const QVariant &arg4) {
+                               GameObject *arg1, const QScriptValue &arg2,
+                               const QScriptValue &arg3, const QScriptValue &arg4) {
 
-    return invokeTrigger(triggerName,
-                         QVariant::fromValue(arg1), arg2,
-                         arg3, arg4);
+    ScriptEngine *engine = m_realm->scriptEngine();
+    return invokeTrigger(triggerName, engine->toScriptValue(arg1), arg2, arg3, arg4);
 }
 
 bool GameObject::invokeTrigger(const QString &triggerName,
                                const GameObjectPtr &arg1, const GameObjectPtr &arg2,
-                               const QVariant &arg3, const QVariant &arg4) {
+                               const QScriptValue &arg3, const QScriptValue &arg4) {
 
+    ScriptEngine *engine = m_realm->scriptEngine();
     return invokeTrigger(triggerName,
-                         QVariant::fromValue(arg1), QVariant::fromValue(arg2),
-                         arg3, arg4);
+                         engine->toScriptValue(arg1), engine->toScriptValue(arg2), arg3, arg4);
+}
+
+bool GameObject::invokeTrigger(const QString &triggerName,
+                               const GameObjectPtr &arg1, const QScriptValue &arg2,
+                               const QScriptValue &arg3, const QScriptValue &arg4) {
+
+    ScriptEngine *engine = m_realm->scriptEngine();
+    return invokeTrigger(triggerName, engine->toScriptValue(arg1), arg2, arg3, arg4);
 }
 
 void GameObject::send(const QString &message, Color color) const {
@@ -192,8 +238,9 @@ int GameObject::setInterval(const QScriptValue &function, int delay) {
         int timerId = startTimer(delay);
         m_intervalHash->insert(timerId, function);
         return timerId;
+    } else {
+        return -1;
     }
-    return -1;
 }
 
 void GameObject::clearInterval(int timerId) {
@@ -214,8 +261,9 @@ int GameObject::setTimeout(const QScriptValue &function, int delay) {
         int timerId = startTimer(delay);
         m_timeoutHash->insert(timerId, function);
         return timerId;
+    } else {
+        return -1;
     }
-    return -1;
 }
 
 void GameObject::clearTimeout(int timerId) {
@@ -233,7 +281,7 @@ void GameObject::init() {
 
 GameObject *GameObject::copy() {
 
-    GameObject *object = GameObject::createByObjectType(objectType());
+    GameObject *object = GameObject::createByObjectType(realm(), objectType());
     for (const QMetaProperty &metaProperty : storedMetaProperties()) {
         const char *name = metaProperty.name();
         object->setProperty(name, property(name));
@@ -245,7 +293,7 @@ GameObject *GameObject::copy() {
 bool GameObject::save() {
 
     if (m_deleted) {
-        return QFile::remove(Realm::saveObjectPath(m_objectType, m_id));
+        return QFile::remove(saveObjectPath(m_objectType, m_id));
     }
 
     const QString v("  \"%1\": %2");
@@ -283,11 +331,14 @@ bool GameObject::save() {
                 break;
             }
             case QVariant::DateTime: {
-                dumpedProperties << v.arg(name).arg(property(name).toDateTime().toMSecsSinceEpoch());
+                dumpedProperties << v.arg(name).arg(property(name).toDateTime()
+                                                    .toMSecsSinceEpoch());
             }
             case QVariant::UserType:
                 if (metaProperty.userType() == QMetaType::type("GameObjectPtr")) {
-                    dumpedProperties << v.arg(name, Util::jsString(property(name).value<GameObjectPtr>().toString()));
+                    dumpedProperties << v.arg(name,
+                                              Util::jsString(property(name)
+                                                             .value<GameObjectPtr>().toString()));
                     break;
                 } else if (metaProperty.userType() == QMetaType::type("GameObjectPtrList")) {
                     QStringList stringList;
@@ -305,14 +356,16 @@ bool GameObject::save() {
                     QStringList stringList;
                     ScriptFunctionMap functionMap = property(name).value<ScriptFunctionMap>();
                     for (const QString &key : functionMap.keys()) {
-                        stringList << k.arg(Util::jsString(key), Util::jsString(functionMap[key].toString()));
+                        stringList << k.arg(Util::jsString(key),
+                                            Util::jsString(functionMap[key].toString()));
                     }
                     if (!stringList.isEmpty()) {
                         dumpedProperties << o.arg(name, stringList.join(", "));
                     }
                     break;
                 } else if (metaProperty.userType() == QMetaType::type("CharacterStats")) {
-                    dumpedProperties << v.arg(name, property(name).value<CharacterStats>().toString());
+                    dumpedProperties << v.arg(name,
+                                              property(name).value<CharacterStats>().toString());
                     break;
                 }
                 // fall-through
@@ -321,7 +374,7 @@ bool GameObject::save() {
         }
     }
 
-    QFile file(Realm::saveObjectPath(m_objectType, m_id));
+    QFile file(saveObjectPath(m_objectType, m_id));
     if (!file.open(QIODevice::WriteOnly)) {
         qWarning() << "Could not open file" << file.fileName() << "for writing.";
         return false;
@@ -337,18 +390,18 @@ bool GameObject::save() {
     return true;
 }
 
-bool GameObject::load(const QString &path) throw (GameException) {
+bool GameObject::load(const QString &path) {
 
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly)) {
-        throw GameException(GameException::CouldNotOpenGameObjectFile);
+       throw GameException(GameException::CouldNotOpenGameObjectFile);
     }
 
     bool error;
     JSonDriver driver;
     QVariantMap map = driver.parse(&file, &error).toMap();
     if (error) {
-        throw GameException(GameException::CorruptGameObjectFile);
+       throw GameException(GameException::CorruptGameObjectFile);
     }
 
     for (const QMetaProperty &metaProperty : storedMetaProperties()) {
@@ -377,12 +430,14 @@ bool GameObject::load(const QString &path) throw (GameException) {
                 break;
             case QVariant::UserType:
                 if (metaProperty.userType() == QMetaType::type("GameObjectPtr")) {
-                    setProperty(name, QVariant::fromValue(GameObjectPtr::fromString(map[name].toString())));
+                    setProperty(name, QVariant::fromValue(GameObjectPtr::fromString(m_realm,
+                                                                                    map[name]
+                                                                                    .toString())));
                     break;
                 } else if (metaProperty.userType() == QMetaType::type("GameObjectPtrList")) {
                     GameObjectPtrList pointerList;
                     for (const QVariant &variant : map[name].toList()) {
-                        pointerList << GameObjectPtr::fromString(variant.toString());
+                        pointerList << GameObjectPtr::fromString(m_realm, variant.toString());
                     }
                     setProperty(name, QVariant::fromValue(pointerList));
                     break;
@@ -395,7 +450,9 @@ bool GameObject::load(const QString &path) throw (GameException) {
                     setProperty(name, QVariant::fromValue(functionMap));
                     break;
                 } else if (metaProperty.userType() == QMetaType::type("CharacterStats")) {
-                    setProperty(name, QVariant::fromValue(CharacterStats::fromVariantList(map[name].toList())));
+                    setProperty(name,
+                                QVariant::fromValue(CharacterStats::fromVariantList(map[name]
+                                                                                    .toList())));
                     break;
                 }
                 // fall-through
@@ -410,15 +467,15 @@ bool GameObject::load(const QString &path) throw (GameException) {
 void GameObject::resolvePointers() {
 
     for (const QMetaProperty &metaProperty : storedMetaProperties()) {
-        const char *name = metaProperty.name();
         if (metaProperty.type() == QVariant::UserType) {
+            const char *name = metaProperty.name();
             if (metaProperty.userType() == QMetaType::type("GameObjectPtr")) {
                 GameObjectPtr pointer = property(name).value<GameObjectPtr>();
-                pointer.resolve();
+                pointer.resolve(m_realm);
                 setProperty(name, QVariant::fromValue(pointer));
             } else if (metaProperty.userType() == QMetaType::type("GameObjectPtrList")) {
                 GameObjectPtrList pointerList = property(name).value<GameObjectPtrList>();
-                pointerList.resolvePointers();
+                pointerList.resolvePointers(m_realm);
                 setProperty(name, QVariant::fromValue(pointerList));
             }
         }
@@ -430,43 +487,58 @@ void GameObject::setDeleted() {
     if (~m_options & Copy) {
         m_deleted = true;
 
-        Realm::instance()->syncObject(this);
+        m_realm->addModifiedObject(this);
 
         deleteLater();
     }
 }
 
-GameObject *GameObject::createByObjectType(const QString &objectType, uint id, Options options) throw (GameException) {
+GameObject *GameObject::createByObjectType(Realm *realm, const QString &objectType, uint id,
+                                           Options options) {
 
     if (id == 0) {
-        id = Realm::instance()->uniqueObjectId();
+        id = realm->uniqueObjectId();
     }
 
     if (objectType == "area") {
-        return new Area(id, options);
+        return new Area(realm, id, options);
     } else if (objectType == "character") {
-        return new Character(id, options);
+        return new Character(realm, id, options);
     } else if (objectType == "class") {
-        return new Class(id, options);
+        return new Class(realm, id, options);
     } else if (objectType == "exit") {
-        return new Exit(id, options);
+        return new Exit(realm, id, options);
     } else if (objectType == "item") {
-        return new Item(id, options);
+        return new Item(realm, id, options);
     } else if (objectType == "player") {
-        return new Player(id, options);
+        return new Player(realm, id, options);
     } else if (objectType == "race") {
-        return new Race(id, options);
+        return new Race(realm, id, options);
     } else if (objectType == "realm") {
         return new Realm(options);
     } else {
-        throw GameException(GameException::UnknownGameObjectType);
+       throw GameException(GameException::UnknownGameObjectType);
     }
+}
+
+GameObject *GameObject::createFromFile(Realm *realm, const QString &path) {
+
+    QFileInfo fileInfo(path);
+    QString fileName = fileInfo.fileName();
+    QStringList components = fileName.split('.');
+    if (components.length() != 2) {
+        throw GameException(GameException::InvalidGameObjectFileName);
+    }
+
+    GameObject *gameObject = createByObjectType(realm, components[0], components[1].toInt());
+    gameObject->load(path);
+    return gameObject;
 }
 
 GameObject *GameObject::createCopy(const GameObject *other) {
 
     Q_ASSERT(other);
-    GameObject *copy = createByObjectType(other->objectType(), other->id(), Copy);
+    GameObject *copy = createByObjectType(other->realm(), other->objectType(), other->id(), Copy);
     copy->m_deleted = other->m_deleted;
 
     for (const QMetaProperty &metaProperty : other->storedMetaProperties()) {
@@ -493,41 +565,17 @@ GameObject *GameObject::createCopy(const GameObject *other) {
     return copy;
 }
 
-GameObject *GameObject::createFromFile(const QString &path) throw (GameException) {
-
-    QFileInfo fileInfo(path);
-    QString fileName = fileInfo.fileName();
-    QStringList components = fileName.split('.');
-    if (components.length() != 2) {
-        throw GameException(GameException::InvalidGameObjectFileName);
-    }
-
-    GameObject *gameObject = createByObjectType(components[0], components[1].toInt());
-    gameObject->load(path);
-    return gameObject;
-}
-
 QScriptValue GameObject::toScriptValue(QScriptEngine *engine, GameObject *const &gameObject) {
 
     return engine->newQObject(gameObject, QScriptEngine::QtOwnership,
-                              QScriptEngine::ExcludeDeleteLater | QScriptEngine::PreferExistingWrapperObject);
+                              QScriptEngine::ExcludeDeleteLater |
+                              QScriptEngine::PreferExistingWrapperObject);
 }
 
 void GameObject::fromScriptValue(const QScriptValue &object, GameObject *&gameObject) {
 
     gameObject = qobject_cast<GameObject *>(object.toQObject());
     Q_ASSERT(gameObject);
-}
-
-void GameObject::startBulkModification() {
-
-    m_numBulkModifications++;
-}
-
-void GameObject::commitBulkModification() {
-
-    m_numBulkModifications--;
-    setModified();
 }
 
 QList<QMetaProperty> GameObject::storedMetaProperties() const {
@@ -544,38 +592,37 @@ QList<QMetaProperty> GameObject::storedMetaProperties() const {
     return properties;
 }
 
-void GameObject::timerEvent(QTimerEvent *event) {
+void GameObject::timerEvent(int timerId) {
 
-    int id = event->timerId();
     QScriptValue function;
     if (m_intervalHash) {
-        function = m_intervalHash->value(id);
+        function = m_intervalHash->value(timerId);
     }
     if (!function.isValid() && m_timeoutHash) {
-        function = m_timeoutHash->value(id);
+        function = m_timeoutHash->value(timerId);
         if (function.isValid()) {
-            killTimer(id);
+            killTimer(timerId);
         }
     }
 
-    try {
-        ScriptEngine *engine = ScriptEngine::instance();
-        if (function.isString()) {
-            engine->evaluate(function.toString());
-        } else if (function.isFunction()) {
-            function.call(engine->toScriptValue(this));
-        }
-
-        if (engine->hasUncaughtException()) {
-            QScriptValue exception = engine->uncaughtException();
-            qWarning() << QString("Script Exception: " + exception.toString() +
-                                  " In script:\n" + function.toString()).toUtf8().data();
-        }
-    } catch (GameException &exception) {
-        qWarning() << "Game Exception: " + QString(exception.what());
-    } catch (...) {
-        qWarning() << "Unknown exception.";
+    ScriptEngine *scriptEngine = m_realm->scriptEngine();
+    if (function.isString()) {
+        scriptEngine->evaluate(function.toString());
+    } else if (function.isFunction()) {
+        function.call(scriptEngine->toScriptValue(this));
     }
+
+    if (scriptEngine->hasUncaughtException()) {
+        QScriptValue exception = scriptEngine->uncaughtException();
+        qWarning() << "Script Exception: " << exception.toString().toUtf8().constData() << endl
+                   << "While executing function: " << function.toString().toUtf8().constData();
+        scriptEngine->evaluate("");
+    }
+}
+
+void GameObject::timerEvent(QTimerEvent *event) {
+
+    m_realm->enqueueEvent(new TimerEvent(this, event->timerId()));
 }
 
 void GameObject::killAllTimers() {
@@ -585,26 +632,26 @@ void GameObject::killAllTimers() {
             killTimer(id);
         }
         delete m_intervalHash;
-        m_intervalHash = 0;
+        m_intervalHash = nullptr;
     }
     if (m_timeoutHash) {
         for (int id : m_timeoutHash->keys()) {
             killTimer(id);
         }
         delete m_timeoutHash;
-        m_timeoutHash = 0;
+        m_timeoutHash = nullptr;
     }
 }
 
 bool GameObject::mayReferenceOtherProperties() const {
 
-    return ~m_options & Copy && Realm::instance()->isInitialized();
+    return ~m_options & Copy && m_realm->isInitialized();
 }
 
 void GameObject::setModified() {
 
-    if (m_numBulkModifications == 0 && ~m_options & Copy) {
-        Realm::instance()->syncObject(this);
+    if (~m_options & Copy) {
+        m_realm->addModifiedObject(this);
     }
 }
 
@@ -624,7 +671,17 @@ void GameObject::unregisterPointer(GameObjectPtr *pointer) {
     Q_ASSERT(m_pointers.contains(pointer));
     m_pointers.removeOne(pointer);
 
-    if (m_autoDelete && m_pointers.length() == 0) {
+    if (m_autoDelete && m_pointers.isEmpty()) {
         setDeleted();
     }
+}
+
+QString GameObject::saveDirPath() {
+
+    return QDir::homePath() + "/.mud";
+}
+
+QString GameObject::saveObjectPath(const char *objectType, uint id) {
+
+    return QString(saveDirPath() + "/%1.%2").arg(objectType).arg(id, 9, 10, QChar('0'));
 }

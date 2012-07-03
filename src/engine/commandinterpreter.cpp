@@ -146,6 +146,11 @@ CommandInterpreter::CommandInterpreter(Player *player, QObject *parent) :
                           "is started.");
         m_triggers.insert("onopen(activator : character) : bool",
                           "The onopen trigger is invoked on any item or exit when it's opened.");
+        m_triggers.insert("onreceive(giver : character, item : item or item list or amount) : bool",
+                          "The onreceive trigger is invoked on any character when something is "
+                          "being given to it. Note that item may be a number instead of an item "
+                          "object when an amount of gold is being given, or a list of items when "
+                          "multiple items are being given.");
         m_triggers.insert("onspawn : void",
                           "The onspawn trigger is invoked on any character when it respawns.");
         m_triggers.insert("ontalk(speaker : character, message : string) : void",
@@ -223,136 +228,139 @@ void CommandInterpreter::execute(const QString &command) {
 
 void CommandInterpreter::showHelp(const QString &command) {
 
+    QString message;
+
     if (command.isEmpty()) {
-        m_player->send(QString("\nType %1 to see a list of all commands.\n"
-                               "Type %2 to see help about a particular command.")
-                       .arg(Util::highlight("help commands"),
-                            Util::highlight("help <command>")));
+        message = "\n"
+                  "Type *help commands* to see a list of all commands.\n"
+                  "Type *help <command>* to see help about a particular command.";
     } else if (command == "commands") {
-        m_player->send("\nHere is a list of all the commands you can use:\n\n");
-
         QStringList commandNames = m_commands.keys();
-        showColumns(commandNames.filter(QRegExp("^\\w+$")));
 
-        m_player->send(QString("\nType %1 to see help about a particular command.")
-                       .arg(Util::highlight("help <command>")));
+        message = "\n"
+                  "Here is a list of all the commands you can use:\n"
+                  "\n" +
+                  formatColumns(commandNames.filter(QRegExp("^\\w+$"))) +
+                  "\n"
+                  "Type *help <command>* to see help about a particular command.";
 
         if (m_player->isAdmin()) {
-            m_player->send(QString("\nTo see all the admin commands you can use, type %1.")
-                           .arg(Util::highlight("help admin-commands")));
+            message += "\n"
+                       "To see all the admin commands you can use, type *help admin-commands*.";
         }
     } else if (command == "admin-commands") {
         if (m_player->isAdmin()) {
-            m_player->send("\nHere is a list of all the commands you can use as an admin:\n\n" +
-                           Util::highlight("Remember: With great power comes great "
-                                           "responsibility!") + "\n\n");
-
             QStringList commandNames = m_commands.keys();
-            showColumns(commandNames.filter("-"));
 
-            m_player->send(QString("\nType %1 to see help about a particular command.")
-                           .arg(Util::highlight("help <command>")));
+            message = "\n"
+                      "Here is a list of all the commands you can use as an admin:\n"
+                      "\n"
+                      "*Remember: With great power comes great responsibility!*\n"
+                      "\n" +
+                      formatColumns(commandNames.filter("-")) +
+                      "\n"
+                      "Type *help <command>* to see help about a particular command.";
         } else {
-            m_player->send("Sorry, but you don't look much like an admin to me.");
+            message = "Sorry, but you don't look much like an admin to me.";
         }
     } else if (command == "triggers") {
         if (m_player->isAdmin()) {
-            m_player->send("\n"
-                           "Here is a list of all the triggers which are available:\n\n");
-
-            foreach (const QString &triggerName, m_triggers.keys()) {
-                m_player->send("  " + Util::highlight(triggerName));
+            message = "\n"
+                      "Here is a list of all the triggers which are available:\n"
+                      "\n";
+            for (const QString &triggerName : m_triggers.keys()) {
+                message += "  " + Util::highlight(triggerName) + "\n";
             }
-
-            m_player->send(QString("\nType %1 to see help about a particular trigger.\n"
-                                   "Type %2 to see information about writing scripts for triggers.")
-                           .arg(Util::highlight("help <trigger>"))
-                           .arg(Util::highlight("help scripts")));
+            message += "\n"
+                       "Type *help <trigger>* to see help about a particular trigger.\n"
+                       "Type *help scripts* to see information about writing scripts for triggers.";
         } else {
-            m_player->send("Sorry, but you don't look much like an admin to me.");
+            message = "Sorry, but you don't look much like an admin to me.";
         }
     } else if (command == "scripts") {
         if (m_player->isAdmin()) {
-            m_player->send(QString("\n"
-                                   "Writing scripts is pretty straightforward, but there are a few "
-                                   "things you should know. Most importantly, any trigger is just "
-                                   "a JavaScript function. So if you know JavaScript, you will be "
-                                   "able to write triggers just fine. Still, there are some "
-                                   "differences from writing JavaScript in a webbrowser of course."
-                                   "Here's an example of a very basic trigger:\n"
-                                   "\n"
-                                   "    function() {\n"
-                                   "        this.go(this.currentArea.exits.named('north'));\n"
-                                   "    }\n"
-                                   "\n"
-                                   "The above example is a trigger that works on a character, and "
-                                   "will make him walk north, if possible.\n"
-                                   "\n"
-                                   "%1\n"
-                                   "\n"
-                                   "Ever so often, you will want to write a trigger that performs "
-                                   "some action in a delayed fashion. Possibly you will want to "
-                                   "have that action be repeated at an interval. For these "
-                                   "purposes, there are setTimeout() and setInterval() functions "
-                                   "which work just like those in your webbrowser, with one "
-                                   "difference only: The functions are attached to any game object "
-                                   "rather than to the global window object as you may be used to. "
-                                   "So, to make the character from above walk north with a delay "
-                                   "of half a second, we could write this trigger:\n"
-                                   "\n"
-                                   "    function() {\n"
-                                   "        this.setTimeout(function() {\n"
-                                   "            this.go(this.currentArea.exits.named('north'));\n"
-                                   "        }, 500);\n"
-                                   "    }\n"
-                                   "\n"
-                                   "%2\n"
-                                   "\n"
-                                   "In many cases, triggers have the ability to cancel the action "
-                                   "that triggered them. Whenever this is the case, you can have "
-                                   "your trigger return the value false, and the action will be "
-                                   "canceled. Canceling the action is supported by any trigger "
-                                   "that lists the bool return type in the overview given by %3. "
-                                   "For example, if the following function is attached to an "
-                                   "item's onopen trigger, the item cannot be opened:\n"
-                                   "\n"
-                                   "    function(activator) {\n"
-                                   "        activator.send('The lid appears to be stuck.');\n"
-                                   "        return false;\n"
-                                   "    }\n"
-                                   "\n")
-                           .arg(Util::highlight("Timers"))
-                           .arg(Util::highlight("Return values"))
-                           .arg(Util::highlight("help triggers")));
+            message = "\n"
+                      "Writing scripts is pretty straightforward, but there are a few things you "
+                      "should know. Most importantly, any trigger is just a JavaScript function. "
+                      "So if you know JavaScript, you will be able to write triggers just fine. "
+                      "Still, there are some differences from writing JavaScript in a webbrowser "
+                      "of course. Here's an example of a very basic trigger:\n"
+                      "\n"
+                      "    function() {\n"
+                      "        this.go(this.currentArea.exits.named('north'));\n"
+                      "    }\n"
+                      "\n"
+                      "The above example is a trigger that works on a character, and will will him "
+                      "walk north, if possible.\n"
+                      "\n"
+                      "*Timers*\n"
+                      "\n"
+                      "Ever so often, you will want to write a trigger that performs some action "
+                      "in a delayed fashion. Possibly you will want to have that action be "
+                      "repeated at an interval. For these purposes, there are setTimeout() and "
+                      "setInterval() functions which work just like those in your webbrowser, with "
+                      "one difference only: The functions are attached to any game object rather "
+                      "than to the global window object as you may be used to. So, to make the "
+                      "character from above walk north with a delay of half a second, we could "
+                      "write this trigger:\n"
+                      "\n"
+                      "    function() {\n"
+                      "        this.setTimeout(function() {\n"
+                      "            this.go(this.currentArea.exits.named('north'));\n"
+                      "        }, 500);\n"
+                      "    }\n"
+                      "\n"
+                      "*Return values*\n"
+                      "\n"
+                      "In many cases, triggers have the ability to cancel the action that "
+                      "triggered them. Whenever this is the case, you can have your trigger return "
+                      "the value false, and the action will be canceled. Canceling the action is "
+                      "supported by any trigger that lists the bool return type in the overview "
+                      "given by *help triggers*. For example, if the following function is "
+                      "attached to an item's onopen trigger, the item cannot be opened:\n"
+                      "\n"
+                      "    function(activator) {\n"
+                      "        activator.send('The lid appears to be stuck.');\n"
+                      "        return false;\n"
+                      "    }\n"
+                      "\n";
         } else {
-            m_player->send("Sorry, but you don't look much like an admin to me.");
+            message = "Sorry, but you don't look much like an admin to me.";
         }
     } else {
         if (m_commands.contains(command)) {
-            m_player->send("\n" + Util::highlight(command) + "\n"
-                           "  " + Util::splitLines(m_commands[command]->description(),
-                                                   78).join("\n  ") + "\n\n");
-            return;
-        }
-
-        if (m_player->isAdmin()) {
-            foreach (const QString &triggerName, m_triggers.keys()) {
-                if (triggerName.startsWith(command)) {
-                    m_player->send("\n" + Util::highlight(triggerName) + "\n"
-                                   "  " + Util::splitLines(m_triggers[triggerName],
-                                                           78).join("\n  ") + "\n\n");
-                    return;
+            message = "\n" + Util::highlight(command) + "\n"
+                      "  " + Util::splitLines(m_commands[command]->description(), 78)
+                             .join("\n  ") + "\n\n";
+        } else {
+            if (m_player->isAdmin()) {
+                for (const QString &triggerName : m_triggers.keys()) {
+                    if (triggerName.startsWith(command)) {
+                        m_player->send("\n" + Util::highlight(triggerName) + "\n"
+                                       "  " + Util::splitLines(m_triggers[triggerName],
+                                                               78).join("\n  ") + "\n\n");
+                        return;
+                    }
                 }
             }
-        }
 
-        m_player->send(QString("The command \"%1\" is not recognized.\n"
-                               "Type %2 to see a list of all commands.")
-                       .arg(command, Util::highlight("help commands")));
+            message = QString("The command \"%1\" is not recognized.\n"
+                              "Type *help commands* to see a list of all commands.").arg(command);
+        }
     }
+
+    static QRegExp bold("\\*([\\w <>:!-]+)\\*");
+    int pos = 0;
+    while ((pos = bold.indexIn(message)) != -1) {
+        message = message.replace(pos, bold.matchedLength(), Util::highlight(bold.cap(1)));
+    }
+
+    m_player->send(message);
 }
 
-void CommandInterpreter::showColumns(const QStringList &commandNames) {
+QString CommandInterpreter::formatColumns(const QStringList &commandNames) {
+
+    QString message;
 
     int length = commandNames.length();
     int halfLength = length / 2 + length % 2;
@@ -360,7 +368,9 @@ void CommandInterpreter::showColumns(const QStringList &commandNames) {
         QString first = commandNames[i];
         QString second = i + halfLength < length ? commandNames[i + halfLength] : "";
 
-        m_player->send("  " + Util::highlight(first.leftJustified(30)) +
-                       "  " + Util::highlight(second));
+        message += "  " + Util::highlight(first.leftJustified(30)) +
+                   "  " + Util::highlight(second);
     }
+
+    return message;
 }

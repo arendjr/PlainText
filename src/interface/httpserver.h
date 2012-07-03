@@ -9,7 +9,7 @@ class HttpServer : public QTcpServer {
     Q_OBJECT
 
     public:
-        explicit HttpServer(quint16 port = 80, QObject *parent = 0);
+        explicit HttpServer(quint16 port = 80, QObject *parent = nullptr);
         virtual ~HttpServer();
 
     protected:

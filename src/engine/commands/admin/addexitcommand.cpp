@@ -31,22 +31,23 @@ void AddExitCommand::execute(const QString &command) {
 
     Area *destinationArea;
     if (destinationAreaId == "new") {
-        destinationArea = qobject_cast<Area *>(GameObject::createByObjectType("area"));
+        destinationArea = GameObject::createByObjectType<Area *>(realm(), "area");
     } else {
-        destinationArea = qobject_cast<Area *>(Realm::instance()->getObject("area", destinationAreaId.toInt()));
+        destinationArea = qobject_cast<Area *>(realm()->getObject("area",
+                                                                  destinationAreaId.toInt()));
         if (!destinationArea) {
             player()->send(QString("No area with ID %1.").arg(destinationAreaId));
             return;
         }
     }
 
-    Exit *exit = qobject_cast<Exit *>(GameObject::createByObjectType("exit"));
+    Exit *exit = GameObject::createByObjectType<Exit *>(realm(), "exit");
     exit->setName(exitName);
     exit->setDestinationArea(destinationArea);
     currentArea()->addExit(exit);
 
     if (Util::isDirection(exitName)) {
-        Exit *oppositeExit = qobject_cast<Exit *>(GameObject::createByObjectType("exit"));
+        Exit *oppositeExit = GameObject::createByObjectType<Exit *>(realm(), "exit");
         oppositeExit->setName(Util::opposingDirection(exitName));
         oppositeExit->setDestinationArea(currentArea());
         oppositeExit->setOppositeExit(exit);
