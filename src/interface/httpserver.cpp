@@ -13,7 +13,7 @@ HttpServer::HttpServer(quint16 port, QObject *parent) :
     if (!listen(QHostAddress::Any, port)) {
         qDebug() << "Error: Can't launch HTTP server";
     } else {
-        qDebug() << "HTTP server is listening on port " + QString::number(port);
+        qDebug() << "HTTP server is listening on port" << port;
     }
 }
 

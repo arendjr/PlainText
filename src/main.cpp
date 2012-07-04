@@ -7,7 +7,10 @@ int main(int argc, char *argv[]) {
     Application application(argc, argv);
 
     Engine engine;
-    engine.start();
+    bool started = engine.start();
+    if (!started) {
+        return 1;
+    }
 
     return application.exec();
 }

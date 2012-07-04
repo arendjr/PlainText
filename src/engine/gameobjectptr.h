@@ -70,6 +70,7 @@ class GameObjectPtr {
         static GameObjectPtr fromString(Realm *realm, const QString &string);
 
         friend void swap(GameObjectPtr &first, GameObjectPtr &second);
+        friend void swapWithinList(GameObjectPtr &first, GameObjectPtr &second);
 
         static QScriptValue toScriptValue(QScriptEngine *engine, const GameObjectPtr &pointer);
         static void fromScriptValue(const QScriptValue &object, GameObjectPtr &pointer);

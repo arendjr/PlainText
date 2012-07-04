@@ -153,11 +153,9 @@ class Character : public Item {
 
         EffectList m_effects;
         int m_effectsTimerId;
-        qint64 m_effectsTimerStarted;
 
         ModifierList m_modifiers;
         int m_modifiersTimerId;
-        qint64 m_modifiersTimerStarted;
 
         int m_secondsStunned;
         int m_stunTimerId;

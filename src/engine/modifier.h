@@ -13,6 +13,7 @@ class Modifier {
     public:
         Modifier();
 
+        qint64 started;
         int duration;
 
         CharacterStats stats;

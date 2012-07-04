@@ -11,6 +11,7 @@ class Effect {
     public:
         Effect();
 
+        qint64 started;
         int delay;
         int numOccurrences;
 

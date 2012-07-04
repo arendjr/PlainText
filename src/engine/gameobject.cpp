@@ -21,6 +21,7 @@
 #include "character.h"
 #include "characterstats.h"
 #include "class.h"
+#include "deleteobjectevent.h"
 #include "exit.h"
 #include "gameexception.h"
 #include "gameobjectptr.h"
@@ -489,7 +490,7 @@ void GameObject::setDeleted() {
 
         m_realm->addModifiedObject(this);
 
-        deleteLater();
+        m_realm->enqueueEvent(new DeleteObjectEvent(this));
     }
 }
 

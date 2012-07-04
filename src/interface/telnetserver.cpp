@@ -16,7 +16,7 @@ TelnetServer::TelnetServer(Realm *realm, quint16 port, QObject *parent) :
     if (!m_server->listen(QHostAddress::Any, port)) {
         qDebug() << "Error: Can't launch telnet server";
     } else {
-        qDebug() << "Telnet server is listening on port " + QString::number(port);
+        qDebug() << "Telnet server is listening on port" << port;
     }
 
     connect(m_server, SIGNAL(newConnection()), this, SLOT(onClientConnected()));

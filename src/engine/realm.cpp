@@ -2,12 +2,9 @@
 
 #include <cstring>
 
-#include <QDebug>
 #include <QDir>
 #include <QTimerEvent>
 
-#include "gameexception.h"
-#include "gameobjectsyncthread.h"
 #include "player.h"
 
 
@@ -32,9 +29,10 @@ Realm::~Realm() {
 
     m_syncThread.terminate();
 
-    for (GameObject *gameObject : m_objectMap) {
-        Q_ASSERT(gameObject);
-        delete gameObject;
+    if (m_initialized) {
+        for (GameObject *object : m_objectMap) {
+            delete object;
+        }
     }
 
     m_syncThread.wait();
@@ -51,13 +49,8 @@ void Realm::init() {
 
     QDir dir(saveDirPath());
     for (const QString &fileName : dir.entryList(QDir::Files)) {
-        try {
-            if (!fileName.startsWith("realm.")) {
-                GameObject::createFromFile(this, dir.path() + "/" + fileName);
-            }
-        } catch (const GameException &exception) {
-            qWarning() << "Error loading game object from " << fileName.toUtf8().constData()
-                       << ": " << exception.what();
+        if (!fileName.startsWith("realm.")) {
+            GameObject::createFromFile(this, dir.path() + "/" + fileName);
         }
     }
 
@@ -71,12 +64,7 @@ void Realm::init() {
     m_initialized = true;
 
     for (GameObject *object : m_objectMap) {
-        try {
-            object->init();
-        } catch (const GameException &exception) {
-            qWarning() << "Error initializing game object "
-                       << object->objectType() << ":" << object->id() << ": " << exception.what();
-        }
+        object->init();
     }
 
     m_timeTimer = startTimer(150000);

@@ -1,9 +1,11 @@
 #include "engine.h"
 
 #include <QDateTime>
+#include <QDebug>
 #include <QMetaType>
 
 #include "characterstats.h"
+#include "gameexception.h"
 #include "gameobject.h"
 #include "gameobjectptr.h"
 #include "realm.h"
@@ -15,7 +17,13 @@
 
 
 Engine::Engine() :
-    QObject() {
+    QObject(),
+    m_httpServer(nullptr),
+    m_telnetServer(nullptr),
+    m_webSocketServer(nullptr),
+    m_scriptEngine(nullptr),
+    m_realm(nullptr),
+    m_util(nullptr) {
 
     qsrand(QDateTime::currentMSecsSinceEpoch());
 
@@ -23,23 +31,30 @@ Engine::Engine() :
     qRegisterMetaType<GameObject *>();
     qRegisterMetaType<GameObjectPtr>();
     qRegisterMetaType<GameObjectPtrList>();
-
-    m_scriptEngine = new ScriptEngine();
-    m_realm = new Realm();
-    m_util = new Util();
-
-    m_realm->setScriptEngine(m_scriptEngine);
-    m_realm->init();
-
-    m_scriptEngine->setGlobalObject("Realm", m_realm);
-    m_scriptEngine->setGlobalObject("Util", m_util);
 }
 
-void Engine::start() {
+bool Engine::start() {
 
-    m_telnetServer = new TelnetServer(m_realm, 4801);
-    m_webSocketServer = new WebSocketServer(m_realm, 4802);
-    m_httpServer = new HttpServer(8080);
+    try {
+        m_scriptEngine = new ScriptEngine();
+        m_realm = new Realm();
+        m_util = new Util();
+
+        m_realm->setScriptEngine(m_scriptEngine);
+        m_realm->init();
+
+        m_scriptEngine->setGlobalObject("Realm", m_realm);
+        m_scriptEngine->setGlobalObject("Util", m_util);
+
+        m_telnetServer = new TelnetServer(m_realm, 4801);
+        m_webSocketServer = new WebSocketServer(m_realm, 4802);
+        m_httpServer = new HttpServer(8080);
+
+        return true;
+    } catch (const GameException &exception) {
+        qWarning() << "Could not start engine:" << exception.what();
+        return false;
+    }
 }
 
 Engine::~Engine() {

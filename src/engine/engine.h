@@ -19,7 +19,7 @@ class Engine : public QObject {
         Engine();
         virtual ~Engine();
 
-        void start();
+        bool start();
 
     private:
         HttpServer *m_httpServer;

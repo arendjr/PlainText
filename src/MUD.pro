@@ -25,6 +25,7 @@ SOURCES += \
     engine/class.cpp \
     engine/commandevent.cpp \
     engine/commandinterpreter.cpp \
+    engine/deleteobjectevent.cpp \
     engine/effect.cpp \
     engine/engine.cpp \
     engine/event.cpp \
@@ -103,6 +104,7 @@ HEADERS += \
     engine/commandevent.h \
     engine/commandinterpreter.h \
     engine/constants.h \
+    engine/deleteobjectevent.h \
     engine/effect.h \
     engine/engine.h \
     engine/event.h \

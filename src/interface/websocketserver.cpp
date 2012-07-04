@@ -19,7 +19,7 @@ WebSocketServer::WebSocketServer(Realm *realm, quint16 port, QObject *parent) :
     if (!m_server->listen(QHostAddress::Any, port)) {
         qDebug() << "Error: Can't launch WebSocket server";
     } else {
-        qDebug() << "WebSocket server is listening on port " + QString::number(port);
+        qDebug() << "WebSocket server is listening on port" << port;
     }
 
     connect(m_server, SIGNAL(newConnection()), this, SLOT(onClientConnected()));

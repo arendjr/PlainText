@@ -110,10 +110,6 @@ GameObjectPtr &GameObjectPtr::operator=(GameObjectPtr &&other) {
         swap(*this, other);
     }
 
-    if (m_list && m_id == 0) {
-        m_list->removeOne(*this);
-    }
-
     return *this;
 }
 
@@ -177,7 +173,7 @@ QString GameObjectPtr::toString() const {
         return "0";
     }
 
-    return QString(m_objectType) + ":" + QString::number(m_id);
+    return QString("%1:%2").arg(m_objectType).arg(m_id);
 }
 
 GameObjectPtr GameObjectPtr::fromString(Realm *realm, const QString &string) {
@@ -197,9 +193,11 @@ GameObjectPtr GameObjectPtr::fromString(Realm *realm, const QString &string) {
 void swap(GameObjectPtr &first, GameObjectPtr &second) {
 
     if (first.m_gameObject) {
+        first.m_gameObject->registerPointer(&second);
         first.m_gameObject->unregisterPointer(&first);
     }
     if (second.m_gameObject) {
+        second.m_gameObject->registerPointer(&first);
         second.m_gameObject->unregisterPointer(&second);
     }
 
@@ -207,16 +205,24 @@ void swap(GameObjectPtr &first, GameObjectPtr &second) {
     std::swap(first.m_objectType, second.m_objectType);
     std::swap(first.m_id, second.m_id);
 
-    if (first.m_gameObject) {
-        first.m_gameObject->registerPointer(&first);
-    } else if (first.m_list && first.m_id == 0) {
+    if (first.m_list && first.m_id == 0) {
         first.m_list->removeOne(first);
     }
-    if (second.m_gameObject) {
-        second.m_gameObject->registerPointer(&second);
-    } else if (second.m_list && second.m_id == 0) {
+    if (second.m_list && second.m_id == 0) {
         second.m_list->removeOne(second);
     }
+}
+
+void swapWithinList(GameObjectPtr &first, GameObjectPtr &second) {
+
+    if (second.m_gameObject) {
+        second.m_gameObject->registerPointer(&first);
+        second.m_gameObject->unregisterPointer(&second);
+    }
+
+    std::swap(first.m_gameObject, second.m_gameObject);
+    std::swap(first.m_objectType, second.m_objectType);
+    std::swap(first.m_id, second.m_id);
 }
 
 QScriptValue GameObjectPtr::toScriptValue(QScriptEngine *engine, const GameObjectPtr &pointer) {
@@ -548,19 +554,12 @@ int GameObjectPtrList::removeAll(const GameObjectPtr &value) {
 void GameObjectPtrList::removeAt(int i) {
 
     if (i < m_size) {
-        for (int j = i; j < m_size; j++) {
-            // temporarily lift ownership, otherwise the removed item will
-            // redundantly try to remove itself from the list
-            m_items[j].setOwnerList(nullptr);
-        }
+        m_items[i].setOwnerList(nullptr);
         m_items[i] = GameObjectPtr();
         for (int j = i; j < m_size - 1; j++) {
-            swap(m_items[j], m_items[j + 1]);
+            swapWithinList(m_items[j], m_items[j + 1]);
         }
-        for (int j = i; j < m_size; j++) {
-            // reinstate ownership
-            m_items[j].setOwnerList(this);
-        }
+        m_items[i].setOwnerList(this);
         if (m_nextList) {
             m_items[m_size - 1] = m_nextList->m_items[0];
             m_nextList->removeAt(0);
@@ -574,7 +573,7 @@ void GameObjectPtrList::removeAt(int i) {
 
     if (m_nextList && m_nextList->m_size == 0) {
         delete m_nextList;
-        m_nextList = 0;
+        m_nextList = nullptr;
     }
 }
 

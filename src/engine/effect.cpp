@@ -4,6 +4,7 @@
 
 
 Effect::Effect() :
+    started(0),
     delay(0),
     numOccurrences(1),
     hpDelta(0),

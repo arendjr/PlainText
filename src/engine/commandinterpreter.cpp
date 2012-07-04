@@ -369,7 +369,7 @@ QString CommandInterpreter::formatColumns(const QStringList &commandNames) {
         QString second = i + halfLength < length ? commandNames[i + halfLength] : "";
 
         message += "  " + Util::highlight(first.leftJustified(30)) +
-                   "  " + Util::highlight(second);
+                   "  " + Util::highlight(second) + "\n";
     }
 
     return message;

@@ -42,9 +42,7 @@ Character::Character(Realm *realm, const char *objectType, uint id, Options opti
     m_maxMp(0),
     m_gold(0.0),
     m_effectsTimerId(0),
-    m_effectsTimerStarted(0),
     m_modifiersTimerId(0),
-    m_modifiersTimerStarted(0),
     m_secondsStunned(0),
     m_stunTimerId(0),
     m_oddStunTimer(false),
@@ -280,10 +278,10 @@ void Character::addEffect(const Effect &effect) {
             killTimer(m_effectsTimerId);
         }
         m_effectsTimerId = startTimer(effect.delay);
-        m_effectsTimerStarted = now;
     }
 
     m_effects.append(effect);
+    m_effects.last().started = now;
 }
 
 void Character::clearEffects() {
@@ -293,7 +291,6 @@ void Character::clearEffects() {
         killTimer(m_effectsTimerId);
         m_effectsTimerId = 0;
     }
-    m_effectsTimerStarted = 0;
 }
 
 void Character::clearNegativeEffects() {
@@ -323,10 +320,10 @@ void Character::addModifier(const Modifier &modifier) {
             killTimer(m_modifiersTimerId);
         }
         m_modifiersTimerId = startTimer(modifier.duration);
-        m_modifiersTimerStarted = now;
     }
 
     m_modifiers.append(modifier);
+    m_modifiers.last().started = now;
 }
 
 void Character::clearModifiers() {
@@ -336,7 +333,6 @@ void Character::clearModifiers() {
         killTimer(m_modifiersTimerId);
         m_modifiersTimerId = 0;
     }
-    m_modifiersTimerStarted = 0;
 }
 
 void Character::clearNegativeModifiers() {
@@ -751,24 +747,12 @@ void Character::timerEvent(int timerId) {
         invokeTrigger("onspawn");
     } else if (timerId == m_effectsTimerId) {
         killTimer(m_effectsTimerId);
-        qint64 now = QDateTime::currentMSecsSinceEpoch();
-        int nextTimeout = updateEffects(now);
-        if (nextTimeout > -1) {
-            m_effectsTimerId = startTimer(nextTimeout);
-            m_effectsTimerStarted = now;
-        } else {
-            m_effectsTimerId = 0;
-        }
+        int nextTimeout = updateEffects(QDateTime::currentMSecsSinceEpoch());
+        m_effectsTimerId = (nextTimeout > -1 ? startTimer(nextTimeout) : 0);
     } else if (timerId == m_modifiersTimerId) {
         killTimer(m_modifiersTimerId);
-        qint64 now = QDateTime::currentMSecsSinceEpoch();
-        int nextTimeout = updateModifiers(now);
-        if (nextTimeout > -1) {
-            m_modifiersTimerId = startTimer(nextTimeout);
-            m_modifiersTimerStarted = now;
-        } else {
-            m_modifiersTimerId = 0;
-        }
+        int nextTimeout = updateModifiers(QDateTime::currentMSecsSinceEpoch());
+        m_modifiersTimerId = (nextTimeout > -1 ? startTimer(nextTimeout) : 0);
     } else if (timerId == m_stunTimerId) {
         m_secondsStunned--;
 
@@ -798,29 +782,29 @@ void Character::timerEvent(int timerId) {
 
 int Character::updateEffects(qint64 now) {
 
-    Q_ASSERT(m_effects.length() ? (bool) m_effectsTimerStarted : true);
-
     int nextTimeout = -1;
-    qint64 msecsPassed = now - m_effectsTimerStarted;
     for (int i = 0; i < m_effects.length(); i++) {
         Effect &effect = m_effects[i];
 
-        effect.delay -= msecsPassed;
-        if (effect.delay <= 0) {
+        int msecsLeft = (effect.started + effect.delay) - now;
+        while (msecsLeft <= 0) {
             adjustHp(effect.hpDelta);
             adjustMp(effect.mpDelta);
             send(effect.message);
 
             effect.numOccurrences--;
-            if (effect.numOccurrences <= 0) {
+            if (effect.numOccurrences > 0) {
+                effect.started = now + msecsLeft;
+                msecsLeft = effect.delay + msecsLeft;
+            } else {
                 m_effects.removeAt(i);
                 i--;
-                continue;
+                break;
             }
         }
 
-        if (nextTimeout == -1 || effect.delay < nextTimeout) {
-            nextTimeout = effect.delay;
+        if (msecsLeft > 0 && (nextTimeout == -1 || msecsLeft < nextTimeout)) {
+            nextTimeout = msecsLeft;
         }
     }
 
@@ -829,22 +813,18 @@ int Character::updateEffects(qint64 now) {
 
 int Character::updateModifiers(qint64 now) {
 
-    Q_ASSERT(m_modifiers.length() ? (bool) m_modifiersTimerStarted : true);
-
     int nextTimeout = -1;
-    qint64 msecsPassed = now - m_modifiersTimerStarted;
     for (int i = 0; i < m_modifiers.length(); i++) {
         Modifier &modifier = m_modifiers[i];
 
-        modifier.duration -= msecsPassed;
-        if (modifier.duration <= 0) {
+        int msecsLeft = (modifier.started + modifier.duration) - now;
+        if (msecsLeft > 0) {
+            if (nextTimeout == -1 || msecsLeft < nextTimeout) {
+                nextTimeout = msecsLeft;
+            }
+        } else {
             m_modifiers.removeAt(i);
             i--;
-            continue;
-        }
-
-        if (nextTimeout == -1 || modifier.duration < nextTimeout) {
-            nextTimeout = modifier.duration;
         }
     }
 
