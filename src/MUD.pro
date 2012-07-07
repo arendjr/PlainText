@@ -1,13 +1,10 @@
 QT += core network script
 QT -= gui
 
-macx {
-    QMAKE_CXXFLAGS = -std=c++11 -stdlib=libc++
-}
 !macx {
-    QMAKE_CXX = clang
-    QMAKE_CXXFLAGS = -std=c++11
+    QMAKE_CXX = clang++
 }
+QMAKE_CXXFLAGS = -std=c++11 -stdlib=libc++
 
 DEFINES *= QT_USE_QSTRINGBUILDER
 
