@@ -161,7 +161,9 @@ void QWsServer::dataReceived()
 			answer.append("Upgrade: WebSocket\r\n");
 			answer.append("Connection: Upgrade\r\n");
 			answer.append("Sec-WebSocket-Origin: " + origin + "\r\n");
-			answer.append("Sec-WebSocket-Location: ws://" + hostAddress + ( hostPort ? (":"+QString::number(hostPort)) : "" ) + resourceName + "\r\n");
+            answer.append("Sec-WebSocket-Location: ws://" + hostAddress +
+                          ( hostPort ? QString(":%1").arg(hostPort) : QString() ) + resourceName +
+                          "\r\n");
 			if ( !protocol.isEmpty() )
 				answer.append("Sec-WebSocket-Protocol: " + protocol + "\r\n");
 			answer.append("\r\n");
