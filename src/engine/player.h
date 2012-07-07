@@ -43,7 +43,7 @@ class Player : public Character {
 
         virtual void die(const GameObjectPtr &attacker);
 
-        virtual void timerEvent(int timerId);
+        virtual void invokeTimer(int timerId);
 
     signals:
         void write(const QString &data) const;
@@ -52,7 +52,7 @@ class Player : public Character {
         QString m_passwordSalt;
         QString m_passwordHash;
 
-        int m_regenerationInterval;
+        int m_regenerationIntervalId;
 
         bool m_admin;
 

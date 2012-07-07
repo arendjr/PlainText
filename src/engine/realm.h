@@ -55,10 +55,23 @@ class Realm : public GameObject {
         ScriptEngine *scriptEngine() const { return m_scriptEngine; }
         void setScriptEngine(ScriptEngine *scriptEngine);
 
-        void lock();
-        void unlock();
+        inline int startTimer(GameObject *object, int timeout) {
+            return m_gameThread.startTimer(object, timeout);
+        }
 
-        virtual void timerEvent(int timerId);
+        inline int startInterval(GameObject *object, int interval) {
+            return m_gameThread.startInterval(object, interval);
+        }
+
+        inline void stopTimer(int id) {
+            m_gameThread.stopTimer(id);
+        }
+
+        inline void stopInterval(int id) {
+            m_gameThread.stopInterval(id);
+        }
+
+        virtual void invokeTimer(int timerId);
 
     signals:
         void hourPassed(const QDateTime &dateTime);
@@ -75,7 +88,7 @@ class Realm : public GameObject {
         GameObjectPtrList m_classes;
 
         QDateTime m_dateTime;
-        int m_timeTimer;
+        int m_timeIntervalId;
 
         GameThread m_gameThread;
 

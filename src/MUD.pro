@@ -5,7 +5,8 @@ macx {
     QMAKE_CXXFLAGS = -std=c++11 -stdlib=libc++
 }
 !macx {
-    QMAKE_CXXFLAGS = -std=c++0x
+    QMAKE_CXX = clang
+    QMAKE_CXXFLAGS = -std=c++11
 }
 
 DEFINES *= QT_USE_QSTRINGBUILDER

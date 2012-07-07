@@ -3,7 +3,6 @@
 #include <cstring>
 
 #include <QDir>
-#include <QTimerEvent>
 
 #include "player.h"
 
@@ -15,7 +14,9 @@ Realm::Realm(Options options) :
     GameObject(this, "realm", 0, options),
     m_initialized(false),
     m_nextId(1),
-    m_gameThread(this) {
+    m_timeIntervalId(0),
+    m_gameThread(this),
+    m_scriptEngine(nullptr) {
 
     if (~options & Copy) {
         s_instance = this;
@@ -23,6 +24,11 @@ Realm::Realm(Options options) :
 }
 
 Realm::~Realm() {
+
+    if (m_timeIntervalId) {
+        stopInterval(m_timeIntervalId);
+        m_timeIntervalId = 0;
+    }
 
     m_gameThread.terminate();
     m_gameThread.wait();
@@ -67,7 +73,7 @@ void Realm::init() {
         object->init();
     }
 
-    m_timeTimer = startTimer(150000);
+    m_timeIntervalId = startInterval(this, 150000);
 }
 
 void Realm::registerObject(GameObject *gameObject) {
@@ -196,26 +202,16 @@ void Realm::setScriptEngine(ScriptEngine *scriptEngine) {
     m_scriptEngine = scriptEngine;
 }
 
-void Realm::lock() {
+void Realm::invokeTimer(int timerId) {
 
-    m_gameThread.lock();
-}
-
-void Realm::unlock() {
-
-    m_gameThread.unlock();
-}
-
-void Realm::timerEvent(int timerId) {
-
-    if (timerId == m_timeTimer) {
-        m_dateTime = m_dateTime.addSecs(3600);
+    if (timerId == m_timeIntervalId) {
+        setDateTime(m_dateTime.addSecs(3600));
 
         emit hourPassed(m_dateTime);
         if (m_dateTime.time().hour() == 0) {
             emit dayPassed(m_dateTime);
         }
     } else {
-        GameObject::timerEvent(timerId);
+        GameObject::invokeTimer(timerId);
     }
 }

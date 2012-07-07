@@ -92,7 +92,7 @@ class GameObject : public QObject {
         Q_INVOKABLE virtual void send(const QString &message, Color color = Silver) const;
 
         Q_INVOKABLE int setInterval(const QScriptValue &function, int delay);
-        Q_INVOKABLE void clearInterval(int timerId);
+        Q_INVOKABLE void clearInterval(int intervalId);
 
         Q_INVOKABLE int setTimeout(const QScriptValue &function, int delay);
         Q_INVOKABLE void clearTimeout(int timerId);
@@ -130,12 +130,10 @@ class GameObject : public QObject {
 
         QList<QMetaProperty> storedMetaProperties() const;
 
-        virtual void timerEvent(int timerId);
+        virtual void invokeTimer(int timerId);
 
     protected:
-        virtual void timerEvent(QTimerEvent *event);
-
-        void killAllTimers();
+        virtual void killAllTimers();
 
         bool mayReferenceOtherProperties() const;
         void setModified();

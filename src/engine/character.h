@@ -123,7 +123,10 @@ class Character : public Item {
 
         virtual void init();
 
-        virtual void timerEvent(int timerId);
+        virtual void invokeTimer(int timerId);
+
+    protected:
+        virtual void killAllTimers();
 
     private:
         GameObjectPtr m_currentArea;
@@ -159,10 +162,9 @@ class Character : public Item {
 
         int m_secondsStunned;
         int m_stunTimerId;
-        bool m_oddStunTimer;
         bool m_leaveOnActive;
 
-        int m_regenerationTimerId;
+        int m_regenerationIntervalId;
 
         int updateEffects(qint64 now);
         int updateModifiers(qint64 now);

@@ -1,6 +1,6 @@
 {
   "name": "Lady Xu",
-  "triggers": { "onbuy": "(function(buyer, items) { if (!items) { buyer.send('Welcome ' + (buyer.gender == 'male' ? 'dear' : 'my lovely') + ', what can I make for you? Here\\'s my list:'); buyer.sendSellableItemsList(this.sellableItems); return; } })" },
+  "triggers": { "onbuy": "(function(buyer, items) {\n    if (!items) {\n        buyer.send('Welcome ' + (buyer.gender == 'male' ? 'dear' : 'my lovely') + ', what can I make for you? Here\\'s my list:'); \n        buyer.sendSellableItemsList(this.sellableItems);\n        return;\n    }\n})" },
   "plural": "Lady Xus",
   "portable": false,
   "weight": 0,

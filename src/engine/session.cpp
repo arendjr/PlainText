@@ -81,8 +81,6 @@ void Session::onUserInput(QString data) {
 
 void Session::processSignIn(const QString &data) {
 
-    m_realm->lock();
-
     QString input = data.trimmed();
     QString answer = input.toLower();
 
@@ -493,8 +491,6 @@ void Session::processSignIn(const QString &data) {
         default:
             break;
     }
-
-    m_realm->unlock();
 }
 
 void Session::showColumns(const QStringList &items) {

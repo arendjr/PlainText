@@ -1,7 +1,6 @@
 #include "character.h"
 
 #include <QDateTime>
-#include <QTimerEvent>
 
 #include "area.h"
 #include "exit.h"
@@ -25,7 +24,9 @@
 Character::Character(Realm *realm, uint id, Options options) :
     Character(realm, "character", id, options) {
 
-    m_regenerationTimerId = startTimer(45000);
+    if (~options & Copy) {
+        m_regenerationIntervalId = realm->startInterval(this, 45000);
+    }
 }
 
 Character::Character(Realm *realm, const char *objectType, uint id, Options options) :
@@ -45,14 +46,17 @@ Character::Character(Realm *realm, const char *objectType, uint id, Options opti
     m_modifiersTimerId(0),
     m_secondsStunned(0),
     m_stunTimerId(0),
-    m_oddStunTimer(false),
     m_leaveOnActive(false),
-    m_regenerationTimerId(0) {
+    m_regenerationIntervalId(0) {
 
     setAutoDelete(false);
 }
 
 Character::~Character() {
+
+    if (m_regenerationIntervalId) {
+        realm()->stopInterval(m_regenerationIntervalId);
+    }
 }
 
 void Character::setName(const QString &newName) {
@@ -275,9 +279,9 @@ void Character::addEffect(const Effect &effect) {
 
     if (nextTimeout == -1 || effect.delay < nextTimeout) {
         if (m_effectsTimerId) {
-            killTimer(m_effectsTimerId);
+            realm()->stopTimer(m_effectsTimerId);
         }
-        m_effectsTimerId = startTimer(effect.delay);
+        m_effectsTimerId = realm()->startTimer(this, effect.delay);
     }
 
     m_effects.append(effect);
@@ -288,7 +292,7 @@ void Character::clearEffects() {
 
     m_effects.clear();
     if (m_effectsTimerId) {
-        killTimer(m_effectsTimerId);
+        realm()->stopTimer(m_effectsTimerId);
         m_effectsTimerId = 0;
     }
 }
@@ -317,9 +321,9 @@ void Character::addModifier(const Modifier &modifier) {
 
     if (nextTimeout == -1 || modifier.duration < nextTimeout) {
         if (m_modifiersTimerId) {
-            killTimer(m_modifiersTimerId);
+            realm()->stopTimer(m_modifiersTimerId);
         }
-        m_modifiersTimerId = startTimer(modifier.duration);
+        m_modifiersTimerId = realm()->startTimer(this, modifier.duration);
     }
 
     m_modifiers.append(modifier);
@@ -330,7 +334,7 @@ void Character::clearModifiers() {
 
     m_modifiers.clear();
     if (m_modifiersTimerId) {
-        killTimer(m_modifiersTimerId);
+        realm()->stopTimer(m_modifiersTimerId);
         m_modifiersTimerId = 0;
     }
 }
@@ -680,14 +684,12 @@ void Character::die(const GameObjectPtr &attacker) {
         setInventory(GameObjectPtrList());
 
         killAllTimers();
-        clearEffects();
-        clearModifiers();
 
         int respawnTime = m_respawnTime;
         if (m_respawnTimeVariation) {
             respawnTime += qrand() % m_respawnTimeVariation;
         }
-        m_respawnTimerId = startTimer(respawnTime);
+        m_respawnTimerId = realm()->startTimer(this, respawnTime);
     } else {
         setDeleted();
     }
@@ -696,7 +698,7 @@ void Character::die(const GameObjectPtr &attacker) {
 void Character::stun(int timeout) {
 
     if (m_stunTimerId) {
-        killTimer(m_stunTimerId);
+        realm()->stopTimer(m_stunTimerId);
     }
 
     int seconds = timeout / 1000;
@@ -708,8 +710,7 @@ void Character::stun(int timeout) {
     }
 
     m_secondsStunned = seconds;
-    m_stunTimerId = startTimer(firstTimeout);
-    m_oddStunTimer = (firstTimeout < 1000);
+    m_stunTimerId = realm()->startTimer(this, firstTimeout);
 }
 
 void Character::setLeaveOnActive(bool leaveOnActive) {
@@ -731,10 +732,9 @@ void Character::init() {
     GameObject::init();
 }
 
-void Character::timerEvent(int timerId) {
+void Character::invokeTimer(int timerId) {
 
     if (timerId == m_respawnTimerId) {
-        killTimer(m_respawnTimerId);
         m_respawnTimerId = 0;
 
         m_hp = m_maxHp;
@@ -746,24 +746,17 @@ void Character::timerEvent(int timerId) {
 
         invokeTrigger("onspawn");
     } else if (timerId == m_effectsTimerId) {
-        killTimer(m_effectsTimerId);
         int nextTimeout = updateEffects(QDateTime::currentMSecsSinceEpoch());
-        m_effectsTimerId = (nextTimeout > -1 ? startTimer(nextTimeout) : 0);
+        m_effectsTimerId = (nextTimeout > -1 ? realm()->startTimer(this, nextTimeout) : 0);
     } else if (timerId == m_modifiersTimerId) {
-        killTimer(m_modifiersTimerId);
         int nextTimeout = updateModifiers(QDateTime::currentMSecsSinceEpoch());
-        m_modifiersTimerId = (nextTimeout > -1 ? startTimer(nextTimeout) : 0);
+        m_modifiersTimerId = (nextTimeout > -1 ? realm()->startTimer(this, nextTimeout) : 0);
     } else if (timerId == m_stunTimerId) {
         m_secondsStunned--;
 
         if (m_secondsStunned > 0) {
-            if (m_oddStunTimer) {
-                killTimer(m_stunTimerId);
-                m_stunTimerId = startTimer(1000);
-                m_oddStunTimer = false;
-            }
+            m_stunTimerId = realm()->startTimer(this, 1000);
         } else {
-            killTimer(m_stunTimerId);
             m_stunTimerId = 0;
 
             if (m_leaveOnActive) {
@@ -773,10 +766,28 @@ void Character::timerEvent(int timerId) {
                 invokeTrigger("onactive");
             }
         }
-    } else if (timerId == m_regenerationTimerId) {
+    } else if (timerId == m_regenerationIntervalId) {
         adjustHp(qMax(stats().vitality / 15, 1));
     } else {
-        Item::timerEvent(timerId);
+        Item::invokeTimer(timerId);
+    }
+}
+
+void Character::killAllTimers() {
+
+    Item::killAllTimers();
+
+    if (m_respawnTimerId) {
+        realm()->stopTimer(m_respawnTimerId);
+        m_respawnTimerId = 0;
+    }
+
+    clearEffects();
+    clearModifiers();
+
+    if (m_stunTimerId) {
+        realm()->stopTimer(m_stunTimerId);
+        m_stunTimerId = 0;
     }
 }
 

@@ -11,7 +11,6 @@
 #include <QMetaProperty>
 #include <QMetaType>
 #include <QStringList>
-#include <QTimerEvent>
 #include <QVariantList>
 #include <QVariantMap>
 
@@ -31,7 +30,6 @@
 #include "realm.h"
 #include "scriptengine.h"
 #include "scriptfunctionmap.h"
-#include "timerevent.h"
 #include "util.h"
 
 
@@ -64,8 +62,7 @@ GameObject::~GameObject() {
         *pointer = GameObjectPtr();
     }
 
-    delete m_intervalHash;
-    delete m_timeoutHash;
+    killAllTimers();
 }
 
 bool GameObject::isArea() const {
@@ -236,19 +233,19 @@ int GameObject::setInterval(const QScriptValue &function, int delay) {
             m_intervalHash = new QHash<int, QScriptValue>;
         }
 
-        int timerId = startTimer(delay);
-        m_intervalHash->insert(timerId, function);
-        return timerId;
+        int intervalId = m_realm->startInterval(this, delay);
+        m_intervalHash->insert(intervalId, function);
+        return intervalId;
     } else {
         return -1;
     }
 }
 
-void GameObject::clearInterval(int timerId) {
+void GameObject::clearInterval(int intervalId) {
 
     if (m_intervalHash) {
-        killTimer(timerId);
-        m_intervalHash->remove(timerId);
+        m_realm->stopInterval(intervalId);
+        m_intervalHash->remove(intervalId);
     }
 }
 
@@ -259,7 +256,7 @@ int GameObject::setTimeout(const QScriptValue &function, int delay) {
             m_timeoutHash = new QHash<int, QScriptValue>;
         }
 
-        int timerId = startTimer(delay);
+        int timerId = m_realm->startTimer(this, delay);
         m_timeoutHash->insert(timerId, function);
         return timerId;
     } else {
@@ -270,7 +267,7 @@ int GameObject::setTimeout(const QScriptValue &function, int delay) {
 void GameObject::clearTimeout(int timerId) {
 
     if (m_timeoutHash) {
-        killTimer(timerId);
+        m_realm->stopTimer(timerId);
         m_timeoutHash->remove(timerId);
     }
 }
@@ -593,7 +590,7 @@ QList<QMetaProperty> GameObject::storedMetaProperties() const {
     return properties;
 }
 
-void GameObject::timerEvent(int timerId) {
+void GameObject::invokeTimer(int timerId) {
 
     QScriptValue function;
     if (m_intervalHash) {
@@ -601,9 +598,6 @@ void GameObject::timerEvent(int timerId) {
     }
     if (!function.isValid() && m_timeoutHash) {
         function = m_timeoutHash->value(timerId);
-        if (function.isValid()) {
-            killTimer(timerId);
-        }
     }
 
     ScriptEngine *scriptEngine = m_realm->scriptEngine();
@@ -621,23 +615,18 @@ void GameObject::timerEvent(int timerId) {
     }
 }
 
-void GameObject::timerEvent(QTimerEvent *event) {
-
-    m_realm->enqueueEvent(new TimerEvent(this, event->timerId()));
-}
-
 void GameObject::killAllTimers() {
 
     if (m_intervalHash) {
         for (int id : m_intervalHash->keys()) {
-            killTimer(id);
+            m_realm->stopInterval(id);
         }
         delete m_intervalHash;
         m_intervalHash = nullptr;
     }
     if (m_timeoutHash) {
         for (int id : m_timeoutHash->keys()) {
-            killTimer(id);
+            m_realm->stopTimer(id);
         }
         delete m_timeoutHash;
         m_timeoutHash = nullptr;

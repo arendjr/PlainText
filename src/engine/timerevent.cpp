@@ -14,7 +14,7 @@ TimerEvent::~TimerEvent() {
 
 void TimerEvent::process() {
 
-    m_object->timerEvent(m_timerId);
+    m_object->invokeTimer(m_timerId);
 }
 
 QString TimerEvent::toString() const {

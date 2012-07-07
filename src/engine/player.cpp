@@ -1,7 +1,5 @@
 #include "player.h"
 
-#include <QTimerEvent>
-
 #include "area.h"
 #include "exit.h"
 #include "race.h"
@@ -11,7 +9,7 @@
 
 Player::Player(Realm *realm, uint id, Options options) :
     Character(realm, "player", id, options),
-    m_regenerationInterval(0),
+    m_regenerationIntervalId(0),
     m_admin(false),
     m_session(0) {
 
@@ -22,6 +20,10 @@ Player::~Player() {
 
     if (~options() & Copy) {
         realm()->unregisterPlayer(this);
+    }
+
+    if (m_regenerationIntervalId) {
+        realm()->stopInterval(m_regenerationIntervalId);
     }
 }
 
@@ -68,10 +70,10 @@ void Player::setSession(Session *session) {
     m_session = session;
 
     if (m_session) {
-        m_regenerationInterval = startTimer(30000);
+        m_regenerationIntervalId = realm()->startInterval(this, 30000);
     } else {
-        killTimer(m_regenerationInterval);
-        m_regenerationInterval = 0;
+        realm()->stopInterval(m_regenerationIntervalId);
+        m_regenerationIntervalId = 0;
 
         if (secondsStunned() > 0) {
             setLeaveOnActive(true);
@@ -200,8 +202,6 @@ void Player::die(const GameObjectPtr &attacker) {
     }
 
     killAllTimers();
-    clearEffects();
-    clearModifiers();
 
     setHp(1);
 
@@ -209,12 +209,12 @@ void Player::die(const GameObjectPtr &attacker) {
     enter(race().cast<Race *>()->startingArea());
 }
 
-void Player::timerEvent(int timerId) {
+void Player::invokeTimer(int timerId) {
 
-    if (timerId == m_regenerationInterval) {
+    if (timerId == m_regenerationIntervalId) {
         adjustHp(qMax(stats().vitality / 15, 1));
         send("");
     } else {
-        Character::timerEvent(timerId);
+        Character::invokeTimer(timerId);
     }
 }
