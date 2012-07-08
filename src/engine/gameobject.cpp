@@ -331,6 +331,7 @@ bool GameObject::save() {
             case QVariant::DateTime: {
                 dumpedProperties << v.arg(name).arg(property(name).toDateTime()
                                                     .toMSecsSinceEpoch());
+                break;
             }
             case QVariant::UserType:
                 if (metaProperty.userType() == QMetaType::type("GameObjectPtr")) {

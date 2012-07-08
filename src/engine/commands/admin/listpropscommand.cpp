@@ -42,6 +42,9 @@ void ListPropsCommand::execute(const QString &command) {
                 case QVariant::Int:
                     valueLines << QString::number(value.toInt());
                     break;
+                case QVariant::Double:
+                    valueLines << QString::number(value.toDouble());
+                    break;
                 case QVariant::String:
                     valueLines = Util::splitLines(value.toString(), 44);
                     break;

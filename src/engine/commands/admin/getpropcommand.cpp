@@ -43,6 +43,9 @@ void GetPropCommand::execute(const QString &command) {
             case QVariant::Int:
                 player()->send(QString::number(value.toInt()));
                 break;
+            case QVariant::Double:
+                player()->send(QString::number(value.toDouble()));
+                break;
             case QVariant::String:
                 player()->send(value.toString());
                 break;

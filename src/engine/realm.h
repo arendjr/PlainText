@@ -42,8 +42,8 @@ class Realm : public GameObject {
         virtual void setDateTime(const QDateTime &dateTime);
         Q_PROPERTY(QDateTime dateTime READ dateTime WRITE setDateTime)
 
-        Q_INVOKABLE const GameObjectPtrList &races() const { return m_races; }
-        Q_INVOKABLE const GameObjectPtrList &classes() const { return m_classes; }
+        Q_INVOKABLE GameObjectPtrList races() const { return m_races; }
+        Q_INVOKABLE GameObjectPtrList classes() const { return m_classes; }
 
         uint uniqueObjectId();
 

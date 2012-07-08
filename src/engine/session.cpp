@@ -14,6 +14,7 @@
 #include "player.h"
 #include "race.h"
 #include "realm.h"
+#include "signinevent.h"
 #include "util.h"
 
 
@@ -56,30 +57,13 @@ void Session::open() {
     m_signInStage = AskingUserName;
 }
 
-void Session::onUserInput(QString data) {
-
-    if (m_signInStage == SessionClosed) {
-        qDebug() << "User input on closed session";
-        return;
-    }
-
-    if (data.isEmpty()) {
-        return;
-    }
-
-    if (!m_player || !m_player->isAdmin()) {
-        data = data.left(160);
-    }
-
-    if (m_signInStage != SignedIn) {
-        processSignIn(data);
-    } else {
-        Q_ASSERT(m_interpreter);
-        m_realm->enqueueEvent(new CommandEvent(m_interpreter, data));
-    }
-}
-
 void Session::processSignIn(const QString &data) {
+
+    if (m_signInStage == SignedIn) {
+        CommandEvent event(m_interpreter, data);
+        event.process();
+        return;
+    }
 
     QString input = data.trimmed();
     QString answer = input.toLower();
@@ -490,6 +474,28 @@ void Session::processSignIn(const QString &data) {
 
         default:
             break;
+    }
+}
+
+void Session::onUserInput(QString data) {
+
+    if (m_signInStage == SessionClosed) {
+        qDebug() << "User input on closed session";
+        return;
+    }
+
+    if (data.isEmpty()) {
+        return;
+    }
+
+    if (!m_player || !m_player->isAdmin()) {
+        data = data.left(160);
+    }
+
+    if (m_signInStage == SignedIn && m_interpreter) {
+        m_realm->enqueueEvent(new CommandEvent(m_interpreter, data));
+    } else {
+        m_realm->enqueueEvent(new SignInEvent(this, data));
     }
 }
 

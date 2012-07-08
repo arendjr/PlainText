@@ -14,24 +14,6 @@ class Session : public QObject {
     Q_OBJECT
 
     public:
-        Session(Realm *realm, QObject *object);
-        virtual ~Session();
-
-        void open();
-
-        bool authenticated() const { return m_signInStage == SignedIn; }
-
-        Player *player() const { return m_player; }
-
-    public slots:
-        void onUserInput(QString data);
-
-    signals:
-        void write(const QString &data);
-
-        void terminate();
-
-    private:
         enum SignInStage {
             SessionClosed = 0,
             AskingUserName,
@@ -46,7 +28,30 @@ class Session : public QObject {
             AskingSignupConfirmation,
             SignedIn,
             SignInAborted
-        } m_signInStage;
+        };
+
+        Session(Realm *realm, QObject *object);
+        virtual ~Session();
+
+        void open();
+
+        SignInStage signInStage() const { return m_signInStage; }
+        bool authenticated() const { return m_signInStage == SignedIn; }
+
+        Player *player() const { return m_player; }
+
+        void processSignIn(const QString &data);
+
+    public slots:
+        void onUserInput(QString data);
+
+    signals:
+        void write(const QString &data);
+
+        void terminate();
+
+    private:
+        SignInStage m_signInStage;
 
         class SignUpData;
         SignUpData *m_signUpData;
@@ -55,8 +60,6 @@ class Session : public QObject {
         Player *m_player;
 
         CommandInterpreter *m_interpreter;
-
-        void processSignIn(const QString &data);
 
         void showColumns(const QStringList &items);
 };

@@ -43,6 +43,7 @@ SOURCES += \
     engine/scriptfunctionmap.cpp \
     engine/scriptwindow.cpp \
     engine/session.cpp \
+    engine/signinevent.cpp \
     engine/timerevent.cpp \
     engine/util.cpp \
     engine/commands/buycommand.cpp \
@@ -122,6 +123,7 @@ HEADERS += \
     engine/scriptfunctionmap.h \
     engine/scriptwindow.h \
     engine/session.h \
+    engine/signinevent.h \
     engine/timerevent.h \
     engine/util.h \
     engine/commands/buycommand.h \

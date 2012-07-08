@@ -43,6 +43,9 @@ void SetPropCommand::execute(const QString &command) {
         case QVariant::Int:
             variant = value.toInt();
             break;
+        case QVariant::Double:
+            variant = value.toDouble();
+            break;
         case QVariant::String:
             variant = value.replace("\\n", "\n");
             break;

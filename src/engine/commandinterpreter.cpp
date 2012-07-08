@@ -290,7 +290,7 @@ void CommandInterpreter::showHelp(const QString &command) {
                       "        this.go(this.currentArea.exits.named('north'));\n"
                       "    }\n"
                       "\n"
-                      "The above example is a trigger that works on a character, and will will him "
+                      "The above example is a trigger that works on a character, and will let him "
                       "walk north, if possible.\n"
                       "\n"
                       "*Timers*\n"
