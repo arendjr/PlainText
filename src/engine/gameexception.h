@@ -18,7 +18,8 @@ class GameException : public std::exception {
             NullPointerReference,
             InvalidGameObjectCast,
             InvalidFunctionCode,
-            InvalidCharacterStats
+            InvalidCharacterStats,
+            InvalidCombatMessage
         };
 
         GameException(Cause cause);

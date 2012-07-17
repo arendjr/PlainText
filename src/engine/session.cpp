@@ -27,11 +27,16 @@ class Session::SignUpData {
         Race *race;
         Class *characterClass;
         QString gender;
+
         CharacterStats stats;
+        int height;
+        int weight;
 
         SignUpData() :
             race(nullptr),
-            characterClass(nullptr) {
+            characterClass(nullptr),
+            height(0),
+            weight(0) {
         }
 };
 
@@ -40,7 +45,8 @@ Session::Session(Realm *realm, QObject *parent) :
     m_signInStage(SessionClosed),
     m_signUpData(nullptr),
     m_realm(realm),
-    m_player(nullptr) {
+    m_player(nullptr),
+    m_interpreter(nullptr) {
 }
 
 Session::~Session() {
@@ -49,6 +55,8 @@ Session::~Session() {
         m_player->setSession(nullptr);
     }
     delete m_signUpData;
+
+    delete m_interpreter;
 }
 
 void Session::open() {
@@ -72,7 +80,9 @@ void Session::processSignIn(const QString &data) {
     QMap<QString, GameObjectPtr> classes;
     if (m_signInStage == AskingRace) {
         for (const GameObjectPtr &racePtr : m_realm->races()) {
-            races[racePtr->name()] = racePtr;
+            if (racePtr.cast<Race *>()->playerSelectable()) {
+                races[racePtr->name()] = racePtr;
+            }
         }
     } else if (m_signInStage == AskingClass) {
         for (const GameObjectPtr &classPtr : m_signUpData->race->classes()) {
@@ -256,8 +266,8 @@ void Session::processSignIn(const QString &data) {
 
                 m_signUpData->stats += stats;
 
-                m_signUpData->stats.height += stats.intelligence - (stats.dexterity / 2);
-                m_signUpData->stats.weight += stats.strength;
+                m_signUpData->height += stats.intelligence - (stats.dexterity / 2);
+                m_signUpData->weight += stats.strength;
 
                 write(Util::colorize("\nYour character stats have been recorded.\n", Green));
                 m_signInStage = AskingSignupConfirmation;
@@ -279,6 +289,8 @@ void Session::processSignIn(const QString &data) {
                 m_player->setClass(m_signUpData->characterClass);
                 m_player->setGender(m_signUpData->gender);
                 m_player->setStats(m_signUpData->stats);
+                m_player->setHeight(m_signUpData->height);
+                m_player->setWeight(m_signUpData->weight);
                 m_player->setCurrentArea(m_signUpData->race->startingArea());
 
                 m_player->setHp(m_player->maxHp());
@@ -304,28 +316,38 @@ void Session::processSignIn(const QString &data) {
 
     if (m_signInStage == AskingRace && races.isEmpty()) {
         for (const GameObjectPtr &racePtr : m_realm->races()) {
-            races[racePtr->name()] = racePtr;
+            if (racePtr.cast<Race *>()->playerSelectable()) {
+                races[racePtr->name()] = racePtr;
+            }
         }
     } else if (m_signInStage == AskingClass && classes.isEmpty()) {
         for (const GameObjectPtr &classPtr : m_signUpData->race->classes()) {
             classes[classPtr->name()] = classPtr;
         }
     } else if (m_signInStage == AskingExtraStats) {
-        CharacterStats raceStats = m_signUpData->race->stats();
-        CharacterStats classStats = m_signUpData->characterClass->stats();
+        m_signUpData->stats = m_signUpData->race->stats() + m_signUpData->characterClass->stats();
+        m_signUpData->height = m_signUpData->race->height();
+        m_signUpData->weight = m_signUpData->race->weight();
 
-        m_signUpData->stats = raceStats + classStats;
+        if (m_signUpData->characterClass->name() == "knight") {
+            m_signUpData->weight += 10;
+        }
+        if (m_signUpData->characterClass->name() == "warrior" ||
+            m_signUpData->characterClass->name() == "soldier" ||
+            barbarian) {
+            m_signUpData->weight += 5;
+        }
 
         if (barbarian) {
             m_signUpData->stats.intelligence = 0;
         }
         if (m_signUpData->gender == "male") {
             m_signUpData->stats.strength++;
-            m_signUpData->stats.height += 10;
-            m_signUpData->stats.weight += 10;
+            m_signUpData->height += 10;
+            m_signUpData->weight += 10;
         } else {
             m_signUpData->stats.dexterity++;
-            m_signUpData->stats.weight -= 10;
+            m_signUpData->weight -= 10;
         }
     }
 
@@ -462,7 +484,7 @@ void Session::processSignIn(const QString &data) {
             m_player->setSession(this);
             connect(m_player, SIGNAL(write(QString)), this, SIGNAL(write(QString)));
 
-            m_interpreter = new CommandInterpreter(m_player, this);
+            m_interpreter = new CommandInterpreter(m_player);
             connect(m_interpreter, SIGNAL(quit()), this, SIGNAL(terminate()));
             m_player->enter(m_player->currentArea());
             break;

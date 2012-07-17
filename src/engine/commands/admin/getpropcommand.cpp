@@ -67,11 +67,10 @@ void GetPropCommand::execute(const QString &command) {
                     break;
                 } else if (value.userType() == QMetaType::type("CharacterStats")) {
                     CharacterStats stats = value.value<CharacterStats>();
-                    player()->send(QString("[ %1, %2, %3, %4, %5, %6, %7, %8 ]")
+                    player()->send(QString("[ %1, %2, %3, %4, %5, %6 ]")
                                    .arg(stats.strength).arg(stats.dexterity)
                                    .arg(stats.vitality).arg(stats.endurance)
-                                   .arg(stats.intelligence).arg(stats.faith)
-                                   .arg(stats.height).arg(stats.weight));
+                                   .arg(stats.intelligence).arg(stats.faith));
                     break;
                 }
             default:

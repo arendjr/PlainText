@@ -19,9 +19,6 @@ class CharacterStats {
         int intelligence;
         int faith;
 
-        int height;
-        int weight;
-
         inline int total() const {
             return strength + dexterity + vitality + endurance + intelligence + faith;
         }
@@ -32,6 +29,8 @@ class CharacterStats {
 
         CharacterStats operator+(const CharacterStats &other) const;
         CharacterStats &operator+=(const CharacterStats &other);
+
+        bool isNull() const;
 
         QString toString() const;
         static CharacterStats fromString(const QString &string);

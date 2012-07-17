@@ -2,7 +2,10 @@
   "name": "human",
   "description": "Humans are a very average race. They are mostly neutral, but are at odds with giants and are at active war with the goblins.",
   "adjective": "human",
-  "stats": [5, 5, 5, 5, 6, 4, 170, 70],
+  "stats": [5, 5, 5, 5, 6, 4],
+  "height": 170,
+  "weight": 70,
   "classes": [ "class:49", "class:51", "class:53", "class:54", "class:55", "class:56" ],
-  "startingArea": "area:1"
+  "startingArea": "area:1",
+  "playerSelectable": true
 }

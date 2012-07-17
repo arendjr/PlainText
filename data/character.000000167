@@ -7,16 +7,20 @@
   "portable": false,
   "weight": 8,
   "cost": 0,
-  "currentArea": "area:125",
+  "stats": [3, 60, 4, 2, 0, 0],
+  "height": 30,
+  "currentArea": "area:132",
   "race": "0",
   "characterClass": "class:147",
   "gender": "male",
-  "stats": [3, 60, 4, 2, 0, 0, 30, 8],
   "respawnTime": 120000,
   "respawnTimeVariation": 180000,
   "hp": 8,
   "maxHp": 8,
   "mp": 0,
   "maxMp": 0,
-  "gold": 0
+  "gold": 0,
+  "weapon": "0",
+  "secondaryWeapon": "0",
+  "shield": "0"
 }

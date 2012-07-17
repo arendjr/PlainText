@@ -21,6 +21,7 @@ SOURCES += \
     engine/character.cpp \
     engine/characterstats.cpp \
     engine/class.cpp \
+    engine/combatmessage.cpp \
     engine/commandevent.cpp \
     engine/commandinterpreter.cpp \
     engine/deleteobjectevent.cpp \
@@ -43,12 +44,16 @@ SOURCES += \
     engine/scriptfunctionmap.cpp \
     engine/scriptwindow.cpp \
     engine/session.cpp \
+    engine/shield.cpp \
     engine/signinevent.cpp \
+    engine/statsitem.cpp \
     engine/timerevent.cpp \
     engine/util.cpp \
+    engine/weapon.cpp \
     engine/commands/buycommand.cpp \
     engine/commands/closecommand.cpp \
     engine/commands/command.cpp \
+    engine/commands/descriptioncommand.cpp \
     engine/commands/drinkcommand.cpp \
     engine/commands/dropcommand.cpp \
     engine/commands/eatcommand.cpp \
@@ -71,6 +76,8 @@ SOURCES += \
     engine/commands/admin/addcharactercommand.cpp \
     engine/commands/admin/addexitcommand.cpp \
     engine/commands/admin/additemcommand.cpp \
+    engine/commands/admin/addshieldcommand.cpp \
+    engine/commands/admin/addweaponcommand.cpp \
     engine/commands/admin/admincommand.cpp \
     engine/commands/admin/copyitemcommand.cpp \
     engine/commands/admin/execscriptcommand.cpp \
@@ -100,6 +107,7 @@ HEADERS += \
     engine/character.h \
     engine/characterstats.h \
     engine/class.h \
+    engine/combatmessage.h \
     engine/commandevent.h \
     engine/commandinterpreter.h \
     engine/constants.h \
@@ -123,12 +131,16 @@ HEADERS += \
     engine/scriptfunctionmap.h \
     engine/scriptwindow.h \
     engine/session.h \
+    engine/shield.h \
     engine/signinevent.h \
+    engine/statsitem.h \
     engine/timerevent.h \
     engine/util.h \
+    engine/weapon.h \
     engine/commands/buycommand.h \
     engine/commands/closecommand.h \
     engine/commands/command.h \
+    engine/commands/descriptioncommand.h \
     engine/commands/drinkcommand.h \
     engine/commands/dropcommand.h \
     engine/commands/eatcommand.h \
@@ -151,6 +163,8 @@ HEADERS += \
     engine/commands/admin/addcharactercommand.h \
     engine/commands/admin/addexitcommand.h \
     engine/commands/admin/additemcommand.h \
+    engine/commands/admin/addshieldcommand.h \
+    engine/commands/admin/addweaponcommand.h \
     engine/commands/admin/admincommand.h \
     engine/commands/admin/copyitemcommand.h \
     engine/commands/admin/execscriptcommand.h \

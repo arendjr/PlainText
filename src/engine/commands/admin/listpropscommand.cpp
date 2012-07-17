@@ -26,8 +26,10 @@ void ListPropsCommand::execute(const QString &command) {
     }
 
     GameObjectPtr object = objects[0];
-    player()->send(QString("These are all known properties of %1:\n"
-                           "\n").arg(Util::highlight(QString("object #%1").arg(object->id()))));
+    send(QString("These are all known properties of %1:\n"
+                 "\n").arg(Util::highlight(QString("object #%1").arg(object->id()))));
+
+    const int lineLength = 45;
 
     for (const QMetaProperty &metaProperty : object->storedMetaProperties()) {
         const char *name = metaProperty.name();
@@ -46,7 +48,19 @@ void ListPropsCommand::execute(const QString &command) {
                     valueLines << QString::number(value.toDouble());
                     break;
                 case QVariant::String:
-                    valueLines = Util::splitLines(value.toString(), 44);
+                    valueLines = Util::splitLines(value.toString(), lineLength);
+                    break;
+                case QVariant::StringList:
+                    valueLines = value.toStringList();
+                    for (int i = 0; i < valueLines.length(); i++) {
+                        if (valueLines[i].length() > lineLength) {
+                            QStringList lines = Util::splitLines(valueLines[i], lineLength);
+                            valueLines.removeAt(i);
+                            for (int j = 0; j < lines.length(); j++) {
+                                valueLines.insert(i, lines[j]);
+                            }
+                        }
+                    }
                     break;
                 case QVariant::UserType:
                     if (value.userType() == QMetaType::type("GameObjectPtr")) {
@@ -62,15 +76,14 @@ void ListPropsCommand::execute(const QString &command) {
                         for (GameObjectPtr pointer : value.value<GameObjectPtrList>()) {
                             strings << pointer.toString();
                         }
-                        valueLines = Util::splitLines("[ " + strings.join(", ") + " ]", 44);
+                        valueLines = Util::splitLines("[ " + strings.join(", ") + " ]", lineLength);
                         break;
                     } else if (value.userType() == QMetaType::type("CharacterStats")) {
                         CharacterStats stats = value.value<CharacterStats>();
-                        valueLines << QString("[ %1, %2, %3, %4, %5, %6, %7, %8 ]")
+                        valueLines << QString("[ %1, %2, %3, %4, %5, %6 ]")
                                       .arg(stats.strength).arg(stats.dexterity)
                                       .arg(stats.vitality).arg(stats.endurance)
-                                      .arg(stats.intelligence).arg(stats.faith)
-                                      .arg(stats.height).arg(stats.weight);
+                                      .arg(stats.intelligence).arg(stats.faith);
                         break;
                     }
                 default:
@@ -88,12 +101,11 @@ void ListPropsCommand::execute(const QString &command) {
             valueLines[valueLines.size() - 1].append(" (read-only)");
         }
 
-        player()->send("  " + Util::highlight(QString(name).leftJustified(30)) +
-                       "  " + valueLines[0]);
+        send("  " + Util::highlight(QString(name).leftJustified(30)) + "  " + valueLines[0]);
         for (int i = 1; i < valueLines.size(); i++) {
-            player()->send("                                  " + valueLines[i]);
+            send("                                  " + valueLines[i]);
         }
     }
 
-    player()->send("\n");
+    send("\n");
 }

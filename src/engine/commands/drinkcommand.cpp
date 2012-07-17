@@ -27,7 +27,7 @@ void DrinkCommand::execute(const QString &command) {
 
     GameObjectPtrList allItems = player()->inventory() + currentArea()->items();
     GameObjectPtrList items = takeObjects(allItems);
-    if (!requireSome(items, "That's not here.")) {
+    if (!requireSome(items, "You don't have that.")) {
         return;
     }
 

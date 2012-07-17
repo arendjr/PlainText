@@ -13,7 +13,7 @@ class CommandInterpreter : public QObject {
     Q_OBJECT
 
     public:
-        explicit CommandInterpreter(Player *player, QObject *parent = 0);
+        explicit CommandInterpreter(Player *player);
         virtual ~CommandInterpreter();
 
         void execute(const QString &command);
@@ -28,6 +28,7 @@ class CommandInterpreter : public QObject {
         QMap<QString, QString> m_triggers;
 
         void showHelp(const QString &command = QString());
+        QString showAdminHelp(const QString &command);
 
         static QString formatColumns(const QStringList &commandNames);
 };

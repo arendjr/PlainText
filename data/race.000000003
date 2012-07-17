@@ -2,7 +2,10 @@
   "name": "giant",
   "description": "Giants are stronger, tougher and more aggressive than all other races. They are about one and a half times the size of an ordinary man. Their aggression has gotten them disliked by all of the other races, except for the elves who are far enough away to not be really bothered by them.",
   "adjective": "giant",
-  "stats": [9, 2, 6, 8, 3, 2, 260, 160],
+  "stats": [9, 2, 6, 8, 3, 2],
+  "height": 260,
+  "weight": 160,
   "classes": [ "class:50", "class:51", "class:53", "class:54", "class:55", "class:56" ],
-  "startingArea": "area:1"
+  "startingArea": "area:1",
+  "playerSelectable": true
 }

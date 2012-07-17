@@ -27,9 +27,9 @@ void StatsCommand::execute(const QString &command) {
                                           "| %1 |\n"
                                           "\\=================================================/\n")
                                   .arg(Util::center(QString("%1, a %2 %3")
-                                                    .arg(player()->name(),
-                                                         player()->race().cast<Race *>()->adjective(),
-                                                         player()->characterClass()->name()), 47)), Green));
+                                       .arg(player()->name(),
+                                            player()->race().cast<Race *>()->adjective(),
+                                            player()->characterClass()->name()), 47)), Green));
     player()->send(Util::colorize(QString(" /===== Physique ======\\   /==== Attributes =====\\ \n"
                                           " | Gender:  %7     |   | STR:  %1   DEX:  %2 | \n"
                                           " | Height:  %8      |   | VIT:  %3   END:  %4 | \n"
@@ -42,7 +42,8 @@ void StatsCommand::execute(const QString &command) {
                                        QString::number(stats.intelligence).rightJustified(2),
                                        QString::number(stats.faith).rightJustified(2),
                                        Util::capitalize(player()->gender()).leftJustified(6),
-                                       Util::formatHeight(stats.height).leftJustified(5),
-                                       Util::formatWeight(stats.weight).leftJustified(5)), Olive) +
+                                       Util::formatHeight(player()->height()).leftJustified(5),
+                                       Util::formatWeight(player()->weight()).leftJustified(5)),
+                                  Olive) +
                    "\n");
 }

@@ -1,6 +1,7 @@
 #include "lookcommand.h"
 
 #include "engine/item.h"
+#include "engine/race.h"
 #include "engine/util.h"
 
 
@@ -34,18 +35,82 @@ void LookCommand::execute(const QString &command) {
     }
 
     GameObjectPtrList pool = player()->inventory() + currentArea()->objects();
-    GameObjectPtrList objects = takeObjects(pool);
-    if (!requireSome(objects, "That's not here.")) {
+    GameObjectPtr object = takeObject(pool);
+    if (!requireSome(object, "That's not here.")) {
         return;
     }
 
-    QString description = objects[0]->description();
-    if (description.isEmpty()) {
-        QString name;
-        if (objects[0]->isExit()) {
-            name = "the " + objects[0]->name();
+    QString description = object->description();
+
+    if (player()->id() == object->id()) {
+        QString m = "You look at yourself.\n";
+        if (!description.isEmpty()) {
+            m += description + "\n";
+        }
+        send(m);
+        return;
+    }
+
+    if (object->isCharacter()) {
+        Character *character = object.cast<Character *>();
+
+        QString m;
+        if (character->isPlayer()) {
+            m = QString("You look at %1, a %2 %3.\n")
+                .arg(character->definiteName(pool),
+                     character->race().cast<Race *>()->adjective(),
+                     character->characterClass()->name());
         } else {
-            name = objects[0].cast<Item *>()->definiteName(pool);
+            m = QString("You look at %1.\n").arg(character->definiteName(pool));
+        }
+
+        if (!description.isEmpty()) {
+            m += description + "\n";
+        }
+
+        int statsDiff = player()->stats().total() - character->stats().total();
+        if (statsDiff > 25) {
+            if (player()->race()->name() == "giant" && character->race()->name() != "giant") {
+                m += QString("You should be careful not to accidentally step on %1.\n")
+                     .arg(character->objectPronoun());
+            } else if (player()->race()->name() == "goblin" &&
+                       character->race()->name() != "goblin") {
+                m += QString("%1 should be thankful if you don't kill %2.\n")
+                     .arg(Util::capitalize(character->subjectPronoun()),
+                          character->objectPronoun());
+            } else {
+                m += QString("If it came to a fight with %1, %2 would be wise to get %3 friends "
+                             "first.\n")
+                     .arg(character->objectPronoun(), character->subjectPronoun(),
+                          character->possessiveAdjective());
+            }
+        } else if (statsDiff > 15) {
+            m += QString("%1 is not much of a match for you.\nå")
+                 .arg(Util::capitalize(character->subjectPronoun()));
+        } else if (statsDiff > 5) {
+            m += QString("You appear to be a bit stronger than %1.\n")
+                 .arg(Util::capitalize(character->objectPronoun()));
+        } else if (statsDiff < -25) {
+            m += QString("%1 could kill you with a needle.\n")
+                 .arg(Util::capitalize(character->subjectPronoun()));
+        } else if (statsDiff < -15) {
+            m += QString("%1 appears like %2 could put up one hell of a fight.\n")
+                 .arg(Util::capitalize(character->subjectPronoun()), character->subjectPronoun());
+        } else if (statsDiff < -5) {
+            m += QString("You should think twice before attacking %2.\n")
+                 .arg(character->objectPronoun());
+        } else {
+            m += QString("%1 appears to be about as strong as you are.\n")
+                 .arg(Util::capitalize(character->subjectPronoun()));
+        }
+
+        send(m);
+    } else if (description.isEmpty()) {
+        QString name;
+        if (object->isItem()) {
+            name = object.cast<Item *>()->definiteName(pool);
+        } else {
+            name = "the " + object->name();
         }
         send(QString("There's nothing special about %1.").arg(name));
     } else {

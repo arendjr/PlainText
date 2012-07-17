@@ -6,7 +6,9 @@
 #include "exit.h"
 #include "player.h"
 #include "realm.h"
+#include "shield.h"
 #include "util.h"
+#include "weapon.h"
 
 
 #define NOT_NULL(pointer) \
@@ -30,10 +32,11 @@ Character::Character(Realm *realm, uint id, Options options) :
 }
 
 Character::Character(Realm *realm, const char *objectType, uint id, Options options) :
-    Item(realm, objectType, id, options),
+    StatsItem(realm, objectType, id, options),
     m_gender("male"),
     m_subjectPronoun("he"),
     m_objectPronoun("him"),
+    m_possessiveAdjective("his"),
     m_respawnTime(0),
     m_respawnTimeVariation(0),
     m_respawnTimerId(0),
@@ -43,7 +46,6 @@ Character::Character(Realm *realm, const char *objectType, uint id, Options opti
     m_maxMp(0),
     m_gold(0.0),
     m_effectsTimerId(0),
-    m_modifiersTimerId(0),
     m_secondsStunned(0),
     m_stunTimerId(0),
     m_leaveOnActive(false),
@@ -61,11 +63,20 @@ Character::~Character() {
 
 void Character::setName(const QString &newName) {
 
-    Item::setName(newName);
+    StatsItem::setName(newName);
 
     if (newName.toLower() != newName) {
         setIndefiniteArticle("");
     }
+}
+
+int Character::totalWeight() const {
+
+    int totalWeight = weight();
+    for (const GameObjectPtr &item : m_inventory) {
+        totalWeight += item.cast<Item *>()->weight();
+    }
+    return totalWeight;
 }
 
 void Character::setCurrentArea(const GameObjectPtr &currentArea) {
@@ -82,8 +93,6 @@ void Character::addInventoryItem(const GameObjectPtr &item) {
     if (!m_inventory.contains(item)) {
         m_inventory << item;
 
-        adjustWeight(item.cast<Item *>()->weight());
-
         setModified();
     }
 }
@@ -91,8 +100,6 @@ void Character::addInventoryItem(const GameObjectPtr &item) {
 void Character::removeInventoryItem(const GameObjectPtr &item) {
 
     if (m_inventory.removeOne(item)) {
-        adjustWeight(-item.cast<Item *>()->weight());
-
         setModified();
     }
 }
@@ -101,14 +108,6 @@ void Character::setInventory(const GameObjectPtrList &inventory) {
 
     if (m_inventory != inventory) {
         m_inventory = inventory;
-
-        if (mayReferenceOtherProperties()) {
-            int weight = m_stats.weight;
-            for (const GameObjectPtr &item : m_inventory) {
-                weight += item.cast<Item *>()->weight();
-            }
-            setWeight(weight);
-        }
 
         setModified();
     }
@@ -161,8 +160,16 @@ void Character::setGender(const QString &gender) {
 
     if (m_gender != gender) {
         m_gender = gender;
-        m_subjectPronoun = (m_gender == "male" ? "he" : "she");
-        m_objectPronoun = (m_gender == "male" ? "him" : "her");
+
+        if (m_gender == "male") {
+            m_subjectPronoun = "he";
+            m_objectPronoun = "him";
+            m_possessiveAdjective = "his";
+        } else {
+            m_subjectPronoun = "she";
+            m_objectPronoun = "her";
+            m_possessiveAdjective = "her";
+        }
 
         setModified();
     }
@@ -170,19 +177,35 @@ void Character::setGender(const QString &gender) {
 
 void Character::setStats(const CharacterStats &stats) {
 
-    if (m_stats != stats) {
-        m_stats = stats;
+    if (Character::stats() != stats) {
+        StatsItem::setStats(stats);
 
-        if (mayReferenceOtherProperties()) {
-            setMaxHp(2 * m_stats.vitality);
-            setMaxMp(m_stats.intelligence);
+        setMaxHp(2 * stats.vitality);
+        setMaxMp(stats.intelligence);
+    }
+}
 
-            int weight = m_stats.weight;
-            for (const GameObjectPtr &item : m_inventory) {
-                weight += item.cast<Item *>()->weight();
-            }
-            setWeight(weight);
-        }
+CharacterStats Character::totalStats() const {
+
+    CharacterStats totalStats = StatsItem::totalStats();
+    if (!m_weapon.isNull()) {
+        totalStats += m_weapon.cast<Weapon *>()->totalStats();
+    }
+    if (!m_secondaryWeapon.isNull()) {
+        totalStats += m_secondaryWeapon.cast<Weapon *>()->totalStats();
+    }
+    if (!m_shield.isNull()) {
+        totalStats += m_shield.cast<Shield *>()->totalStats();
+    }
+    return totalStats;
+}
+
+void Character::setHeight(int height) {
+
+    if (m_height != height) {
+        m_height = height;
+
+        setModified();
     }
 }
 
@@ -272,6 +295,33 @@ void Character::setGold(double gold) {
     }
 }
 
+void Character::setWeapon(const GameObjectPtr &weapon) {
+
+    if (m_weapon != weapon) {
+        m_weapon = weapon;
+
+        setModified();
+    }
+}
+
+void Character::setSecondaryWeapon(const GameObjectPtr &secondaryWeapon) {
+
+    if (m_secondaryWeapon != secondaryWeapon) {
+        m_secondaryWeapon = secondaryWeapon;
+
+        setModified();
+    }
+}
+
+void Character::setShield(const GameObjectPtr &shield) {
+
+    if (m_shield != shield) {
+        m_shield = shield;
+
+        setModified();
+    }
+}
+
 void Character::addEffect(const Effect &effect) {
 
     qint64 now = QDateTime::currentMSecsSinceEpoch();
@@ -311,49 +361,6 @@ void Character::clearNegativeEffects() {
 
     if (m_effects.length() == 0) {
         clearEffects();
-    }
-}
-
-void Character::addModifier(const Modifier &modifier) {
-
-    qint64 now = QDateTime::currentMSecsSinceEpoch();
-    int nextTimeout = updateModifiers(now);
-
-    if (nextTimeout == -1 || modifier.duration < nextTimeout) {
-        if (m_modifiersTimerId) {
-            realm()->stopTimer(m_modifiersTimerId);
-        }
-        m_modifiersTimerId = realm()->startTimer(this, modifier.duration);
-    }
-
-    m_modifiers.append(modifier);
-    m_modifiers.last().started = now;
-}
-
-void Character::clearModifiers() {
-
-    m_modifiers.clear();
-    if (m_modifiersTimerId) {
-        realm()->stopTimer(m_modifiersTimerId);
-        m_modifiersTimerId = 0;
-    }
-}
-
-void Character::clearNegativeModifiers() {
-
-    for (int i = 0; i < m_modifiers.length(); i++) {
-        Modifier &modifier = m_modifiers[i];
-        CharacterStats &stats = modifier.stats;
-
-        if (stats.total() < 0)  {
-            m_modifiers.removeAt(i);
-            i--;
-            continue;
-        }
-    }
-
-    if (m_modifiers.length() == 0) {
-        clearModifiers();
     }
 }
 
@@ -748,9 +755,6 @@ void Character::invokeTimer(int timerId) {
     } else if (timerId == m_effectsTimerId) {
         int nextTimeout = updateEffects(QDateTime::currentMSecsSinceEpoch());
         m_effectsTimerId = (nextTimeout > -1 ? realm()->startTimer(this, nextTimeout) : 0);
-    } else if (timerId == m_modifiersTimerId) {
-        int nextTimeout = updateModifiers(QDateTime::currentMSecsSinceEpoch());
-        m_modifiersTimerId = (nextTimeout > -1 ? realm()->startTimer(this, nextTimeout) : 0);
     } else if (timerId == m_stunTimerId) {
         m_secondsStunned--;
 
@@ -769,13 +773,13 @@ void Character::invokeTimer(int timerId) {
     } else if (timerId == m_regenerationIntervalId) {
         adjustHp(qMax(stats().vitality / 15, 1));
     } else {
-        Item::invokeTimer(timerId);
+        StatsItem::invokeTimer(timerId);
     }
 }
 
 void Character::killAllTimers() {
 
-    Item::killAllTimers();
+    StatsItem::killAllTimers();
 
     if (m_respawnTimerId) {
         realm()->stopTimer(m_respawnTimerId);
@@ -783,7 +787,6 @@ void Character::killAllTimers() {
     }
 
     clearEffects();
-    clearModifiers();
 
     if (m_stunTimerId) {
         realm()->stopTimer(m_stunTimerId);
@@ -816,26 +819,6 @@ int Character::updateEffects(qint64 now) {
 
         if (msecsLeft > 0 && (nextTimeout == -1 || msecsLeft < nextTimeout)) {
             nextTimeout = msecsLeft;
-        }
-    }
-
-    return nextTimeout;
-}
-
-int Character::updateModifiers(qint64 now) {
-
-    int nextTimeout = -1;
-    for (int i = 0; i < m_modifiers.length(); i++) {
-        Modifier &modifier = m_modifiers[i];
-
-        int msecsLeft = (modifier.started + modifier.duration) - now;
-        if (msecsLeft > 0) {
-            if (nextTimeout == -1 || msecsLeft < nextTimeout) {
-                nextTimeout = msecsLeft;
-            }
-        } else {
-            m_modifiers.removeAt(i);
-            i--;
         }
     }
 

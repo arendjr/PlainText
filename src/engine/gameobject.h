@@ -37,6 +37,9 @@ class GameObject : public QObject {
         Q_INVOKABLE bool isCharacter() const;
         Q_INVOKABLE bool isPlayer() const;
         Q_INVOKABLE bool isRace() const;
+        Q_INVOKABLE bool isShield() const;
+        Q_INVOKABLE bool isWeapon() const;
+        Q_INVOKABLE bool hasStats() const;
         Q_PROPERTY(const char *objectType READ objectType STORED false)
 
         uint id() const { return m_id; }

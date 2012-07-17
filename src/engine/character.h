@@ -3,14 +3,12 @@
 
 #include <QString>
 
-#include "characterstats.h"
 #include "effect.h"
 #include "gameobjectptr.h"
-#include "item.h"
-#include "modifier.h"
+#include "statsitem.h"
 
 
-class Character : public Item {
+class Character : public StatsItem {
 
     Q_OBJECT
 
@@ -20,6 +18,15 @@ class Character : public Item {
         virtual ~Character();
 
         virtual void setName(const QString &newName);
+
+        Q_INVOKABLE virtual int totalWeight() const;
+
+        virtual void setStats(const CharacterStats &stats);
+        Q_INVOKABLE virtual CharacterStats totalStats() const;
+
+        int height() const { return m_height; }
+        virtual void setHeight(int height);
+        Q_PROPERTY(int height READ height WRITE setHeight)
 
         const GameObjectPtr &currentArea() const { return m_currentArea; }
         virtual void setCurrentArea(const GameObjectPtr &currentArea);
@@ -55,9 +62,8 @@ class Character : public Item {
         const QString &objectPronoun() const { return m_objectPronoun; }
         Q_PROPERTY(QString objectPronoun READ objectPronoun STORED false)
 
-        const CharacterStats &stats() const { return m_stats; }
-        virtual void setStats(const CharacterStats &stats);
-        Q_PROPERTY(CharacterStats stats READ stats WRITE setStats)
+        const QString &possessiveAdjective() const { return m_possessiveAdjective; }
+        Q_PROPERTY(QString possessiveAdjective READ possessiveAdjective STORED false)
 
         int respawnTime() const { return m_respawnTime; }
         virtual void setRespawnTime(int respawnTime);
@@ -90,17 +96,23 @@ class Character : public Item {
         virtual void setGold(double gold);
         Q_PROPERTY(double gold READ gold WRITE setGold)
 
+        const GameObjectPtr &weapon() const { return m_weapon; }
+        virtual void setWeapon(const GameObjectPtr &weapon);
+        Q_PROPERTY(GameObjectPtr weapon READ weapon WRITE setWeapon)
+
+        const GameObjectPtr &secondaryWeapon() const { return m_secondaryWeapon; }
+        virtual void setSecondaryWeapon(const GameObjectPtr &secondaryWeapon);
+        Q_PROPERTY(GameObjectPtr secondaryWeapon READ secondaryWeapon WRITE setSecondaryWeapon)
+
+        const GameObjectPtr &shield() const { return m_shield; }
+        virtual void setShield(const GameObjectPtr &shield);
+        Q_PROPERTY(GameObjectPtr shield READ shield WRITE setShield)
+
         EffectList effects() const { return m_effects; }
         Q_INVOKABLE void addEffect(const Effect &effect);
         Q_INVOKABLE void clearEffects();
         Q_INVOKABLE void clearNegativeEffects();
         Q_PROPERTY(EffectList effects READ effects STORED false)
-
-        ModifierList modifiers() const { return m_modifiers; }
-        Q_INVOKABLE void addModifier(const Modifier &modifier);
-        Q_INVOKABLE void clearModifiers();
-        Q_INVOKABLE void clearNegativeModifiers();
-        Q_PROPERTY(ModifierList modifiers READ modifiers STORED false)
 
         Q_INVOKABLE virtual void open(const GameObjectPtr &exit);
         Q_INVOKABLE virtual void close(const GameObjectPtr &exit);
@@ -129,6 +141,8 @@ class Character : public Item {
         virtual void killAllTimers();
 
     private:
+        int m_height;
+
         GameObjectPtr m_currentArea;
 
         GameObjectPtrList m_inventory;
@@ -139,8 +153,7 @@ class Character : public Item {
         QString m_gender;
         QString m_subjectPronoun;
         QString m_objectPronoun;
-
-        CharacterStats m_stats;
+        QString m_possessiveAdjective;
 
         int m_respawnTime;
         int m_respawnTimeVariation;
@@ -154,11 +167,12 @@ class Character : public Item {
 
         double m_gold;
 
+        GameObjectPtr m_weapon;
+        GameObjectPtr m_secondaryWeapon;
+        GameObjectPtr m_shield;
+
         EffectList m_effects;
         int m_effectsTimerId;
-
-        ModifierList m_modifiers;
-        int m_modifiersTimerId;
 
         int m_secondsStunned;
         int m_stunTimerId;
@@ -167,7 +181,6 @@ class Character : public Item {
         int m_regenerationIntervalId;
 
         int updateEffects(qint64 now);
-        int updateModifiers(qint64 now);
 };
 
 #endif // CHARACTER_H

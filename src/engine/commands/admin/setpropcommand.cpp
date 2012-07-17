@@ -69,7 +69,7 @@ void SetPropCommand::execute(const QString &command) {
                 break;
             } else if (variant.userType() == QMetaType::type("CharacterStats")) {
                 QStringList stringList = value.mid(1, value.length() - 2).split(',');
-                if (stringList.length() == 8) {
+                if (stringList.length() == 6) {
                     CharacterStats stats;
                     stats.strength = stringList[0].toInt();
                     stats.dexterity = stringList[1].toInt();
@@ -77,11 +77,9 @@ void SetPropCommand::execute(const QString &command) {
                     stats.endurance = stringList[3].toInt();
                     stats.intelligence = stringList[4].toInt();
                     stats.faith = stringList[5].toInt();
-                    stats.height = stringList[6].toInt();
-                    stats.weight = stringList[7].toInt();
                     variant = QVariant::fromValue(stats);
                 } else {
-                    send("Property of type CharacterStats takes the form [ <str>, <dex>, <vit>, <end>, <int>, <fai>, <hei>, <wei> ].");
+                    send("Property of type CharacterStats takes the form [ <str>, <dex>, <vit>, <end>, <int>, <fai> ].");
                     return;
                 }
                 break;

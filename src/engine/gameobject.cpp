@@ -20,6 +20,7 @@
 #include "character.h"
 #include "characterstats.h"
 #include "class.h"
+#include "combatmessage.h"
 #include "deleteobjectevent.h"
 #include "exit.h"
 #include "gameexception.h"
@@ -82,7 +83,7 @@ bool GameObject::isExit() const {
 
 bool GameObject::isItem() const {
 
-    return strcmp(m_objectType, "item") == 0 || isCharacter();
+    return strcmp(m_objectType, "item") == 0 || isCharacter() || isShield() || isWeapon();
 }
 
 bool GameObject::isCharacter() const {
@@ -98,6 +99,21 @@ bool GameObject::isPlayer() const {
 bool GameObject::isRace() const {
 
     return strcmp(m_objectType, "race") == 0;
+}
+
+bool GameObject::isShield() const {
+
+    return strcmp(m_objectType, "shield") == 0;
+}
+
+bool GameObject::isWeapon() const {
+
+    return strcmp(m_objectType, "weapon") == 0;
+}
+
+bool GameObject::hasStats() const {
+
+    return isCharacter() || isShield() || isWeapon();
 }
 
 void GameObject::setName(const QString &name) {
@@ -335,9 +351,8 @@ bool GameObject::save() {
             }
             case QVariant::UserType:
                 if (metaProperty.userType() == QMetaType::type("GameObjectPtr")) {
-                    dumpedProperties << v.arg(name,
-                                              Util::jsString(property(name)
-                                                             .value<GameObjectPtr>().toString()));
+                    dumpedProperties << v.arg(name, Util::jsString(property(name)
+                                                    .value<GameObjectPtr>().toString()));
                     break;
                 } else if (metaProperty.userType() == QMetaType::type("GameObjectPtrList")) {
                     QStringList stringList;
@@ -365,6 +380,15 @@ bool GameObject::save() {
                 } else if (metaProperty.userType() == QMetaType::type("CharacterStats")) {
                     dumpedProperties << v.arg(name,
                                               property(name).value<CharacterStats>().toString());
+                    break;
+                } else if (metaProperty.userType() == QMetaType::type("CombatMessageList")) {
+                    QStringList stringList;
+                    for (const CombatMessage &message : property(name).value<CombatMessageList>()) {
+                        stringList << message.toString();
+                    }
+                    if (!stringList.isEmpty()) {
+                        dumpedProperties << l.arg(name, stringList.join(", "));
+                    }
                     break;
                 }
                 // fall-through
@@ -452,6 +476,13 @@ bool GameObject::load(const QString &path) {
                     setProperty(name,
                                 QVariant::fromValue(CharacterStats::fromVariantList(map[name]
                                                                                     .toList())));
+                    break;
+                } else if (metaProperty.userType() == QMetaType::type("CombatMessageList")) {
+                    CombatMessageList messageList;
+                    for (const QVariant &variant : map[name].toList()) {
+                        messageList << CombatMessage::fromVariantList(variant.toList());
+                    }
+                    setProperty(name, QVariant::fromValue(messageList));
                     break;
                 }
                 // fall-through

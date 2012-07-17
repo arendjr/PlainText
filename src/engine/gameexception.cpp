@@ -13,7 +13,8 @@ const char *GameException::s_messages[] = {
     "Null pointer referenced",
     "Game object pointer casted to invalid type",
     "Invalid function code (Parse Error)",
-    "Invalid character stats"
+    "Invalid character stats",
+    "Invalid combat message"
 };
 
 GameException::GameException(Cause cause) :

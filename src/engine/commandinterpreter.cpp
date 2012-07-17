@@ -12,6 +12,7 @@
 #include "util.h"
 #include "commands/buycommand.h"
 #include "commands/closecommand.h"
+#include "commands/descriptioncommand.h"
 #include "commands/drinkcommand.h"
 #include "commands/dropcommand.h"
 #include "commands/eatcommand.h"
@@ -34,6 +35,8 @@
 #include "commands/admin/addcharactercommand.h"
 #include "commands/admin/addexitcommand.h"
 #include "commands/admin/additemcommand.h"
+#include "commands/admin/addshieldcommand.h"
+#include "commands/admin/addweaponcommand.h"
 #include "commands/admin/copyitemcommand.h"
 #include "commands/admin/execscriptcommand.h"
 #include "commands/admin/getpropcommand.h"
@@ -49,8 +52,8 @@
 #include "commands/admin/unsettriggercommand.h"
 
 
-CommandInterpreter::CommandInterpreter(Player *player, QObject *parent) :
-    QObject(parent),
+CommandInterpreter::CommandInterpreter(Player *player) :
+    QObject(),
     m_player(player) {
 
     Command *get = new GetCommand(player, this);
@@ -62,6 +65,7 @@ CommandInterpreter::CommandInterpreter(Player *player, QObject *parent) :
     m_commands.insert("attack", kill);
     m_commands.insert("buy", new BuyCommand(player, this));
     m_commands.insert("close", new CloseCommand(player, this));
+    m_commands.insert("description", new DescriptionCommand(player, this));
     m_commands.insert("drink", new DrinkCommand(player, this));
     m_commands.insert("drop", new DropCommand(player, this));
     m_commands.insert("eat", new EatCommand(player, this));
@@ -88,8 +92,10 @@ CommandInterpreter::CommandInterpreter(Player *player, QObject *parent) :
 
     if (m_player->isAdmin()) {
         m_commands.insert("add-character", new AddCharacterCommand(player, this));
-        m_commands.insert("add-item", new AddItemCommand(player, this));
         m_commands.insert("add-exit", new AddExitCommand(player, this));
+        m_commands.insert("add-item", new AddItemCommand(player, this));
+        m_commands.insert("add-shield", new AddShieldCommand(player, this));
+        m_commands.insert("add-weapon", new AddWeaponCommand(player, this));
         m_commands.insert("copy-item", new CopyItemCommand(player, this));
         m_commands.insert("exec-script", new ExecScriptCommand(player, this));
         m_commands.insert("get-prop", new GetPropCommand(player, this));
@@ -228,134 +234,166 @@ void CommandInterpreter::execute(const QString &command) {
 
 void CommandInterpreter::showHelp(const QString &command) {
 
-    QString message;
+    QString m;
 
     if (command.isEmpty()) {
-        message = "\n"
-                  "Type *help commands* to see a list of all commands.\n"
-                  "Type *help <command>* to see help about a particular command.";
+
+        m = "\n"
+            "Type *help commands* to see a list of all commands.\n"
+            "Type *help <command>* to see help about a particular command.";
+
     } else if (command == "commands") {
         QStringList commandNames = m_commands.keys();
 
-        message = "\n"
-                  "Here is a list of all the commands you can use:\n"
-                  "\n" +
-                  formatColumns(commandNames.filter(QRegExp("^\\w+$"))) +
-                  "\n"
-                  "Type *help <command>* to see help about a particular command.";
+        m = "\n"
+            "Here is a list of all the commands you can use:\n"
+            "\n" +
+            formatColumns(commandNames.filter(QRegExp("^\\w+$"))) +
+            "\n"
+            "Type *help <command>* to see help about a particular command.";
 
         if (m_player->isAdmin()) {
-            message += "\n"
-                       "To see all the admin commands you can use, type *help admin-commands*.";
-        }
-    } else if (command == "admin-commands") {
-        if (m_player->isAdmin()) {
-            QStringList commandNames = m_commands.keys();
-
-            message = "\n"
-                      "Here is a list of all the commands you can use as an admin:\n"
-                      "\n"
-                      "*Remember: With great power comes great responsibility!*\n"
-                      "\n" +
-                      formatColumns(commandNames.filter("-")) +
-                      "\n"
-                      "Type *help <command>* to see help about a particular command.";
-        } else {
-            message = "Sorry, but you don't look much like an admin to me.";
-        }
-    } else if (command == "triggers") {
-        if (m_player->isAdmin()) {
-            message = "\n"
-                      "Here is a list of all the triggers which are available:\n"
-                      "\n";
-            for (const QString &triggerName : m_triggers.keys()) {
-                message += "  " + Util::highlight(triggerName) + "\n";
-            }
-            message += "\n"
-                       "Type *help <trigger>* to see help about a particular trigger.\n"
-                       "Type *help scripts* to see information about writing scripts for triggers.";
-        } else {
-            message = "Sorry, but you don't look much like an admin to me.";
-        }
-    } else if (command == "scripts") {
-        if (m_player->isAdmin()) {
-            message = "\n"
-                      "Writing scripts is pretty straightforward, but there are a few things you "
-                      "should know. Most importantly, any trigger is just a JavaScript function. "
-                      "So if you know JavaScript, you will be able to write triggers just fine. "
-                      "Still, there are some differences from writing JavaScript in a webbrowser "
-                      "of course. Here's an example of a very basic trigger:\n"
-                      "\n"
-                      "    function() {\n"
-                      "        this.go(this.currentArea.exits.named('north'));\n"
-                      "    }\n"
-                      "\n"
-                      "The above example is a trigger that works on a character, and will let him "
-                      "walk north, if possible.\n"
-                      "\n"
-                      "*Timers*\n"
-                      "\n"
-                      "Ever so often, you will want to write a trigger that performs some action "
-                      "in a delayed fashion. Possibly you will want to have that action be "
-                      "repeated at an interval. For these purposes, there are setTimeout() and "
-                      "setInterval() functions which work just like those in your webbrowser, with "
-                      "one difference only: The functions are attached to any game object rather "
-                      "than to the global window object as you may be used to. So, to make the "
-                      "character from above walk north with a delay of half a second, we could "
-                      "write this trigger:\n"
-                      "\n"
-                      "    function() {\n"
-                      "        this.setTimeout(function() {\n"
-                      "            this.go(this.currentArea.exits.named('north'));\n"
-                      "        }, 500);\n"
-                      "    }\n"
-                      "\n"
-                      "*Return values*\n"
-                      "\n"
-                      "In many cases, triggers have the ability to cancel the action that "
-                      "triggered them. Whenever this is the case, you can have your trigger return "
-                      "the value false, and the action will be canceled. Canceling the action is "
-                      "supported by any trigger that lists the bool return type in the overview "
-                      "given by *help triggers*. For example, if the following function is "
-                      "attached to an item's onopen trigger, the item cannot be opened:\n"
-                      "\n"
-                      "    function(activator) {\n"
-                      "        activator.send('The lid appears to be stuck.');\n"
-                      "        return false;\n"
-                      "    }\n"
-                      "\n";
-        } else {
-            message = "Sorry, but you don't look much like an admin to me.";
+            m += "\n"
+                 "To see all the admin commands you can use, type *help admin-commands*.";
         }
     } else {
         if (m_commands.contains(command)) {
-            message = "\n" + Util::highlight(command) + "\n"
-                      "  " + Util::splitLines(m_commands[command]->description(), 78)
-                             .join("\n  ") + "\n\n";
-        } else {
-            if (m_player->isAdmin()) {
-                for (const QString &triggerName : m_triggers.keys()) {
-                    if (triggerName.startsWith(command)) {
-                        m_player->send("\n" + Util::highlight(triggerName) + "\n"
-                                       "  " + Util::splitLines(m_triggers[triggerName],
-                                                               78).join("\n  ") + "\n\n");
-                        return;
-                    }
-                }
-            }
 
-            message = QString("The command \"%1\" is not recognized.\n"
-                              "Type *help commands* to see a list of all commands.").arg(command);
+            m = "\n" +
+                Util::highlight(command) + "\n"
+                "  " + Util::splitLines(m_commands[command]->description(), 78).join("\n  ") +
+                "\n\n";
+
+        } else if (m_player->isAdmin()) {
+            m = showAdminHelp(command);
+        }
+
+        if (m.isEmpty()) {
+            m = QString("The command \"%1\" is not recognized.\n"
+                        "Type *help commands* to see a list of all commands.").arg(command);
         }
     }
 
-    static QRegExp bold("\\*([\\w <>:!-]+)\\*");
+    static QRegExp bold("\\*([\\w <>:#@!.,-]+)\\*");
     int pos = 0;
-    while ((pos = bold.indexIn(message)) != -1) {
-        message = message.replace(pos, bold.matchedLength(), Util::highlight(bold.cap(1)));
+    while ((pos = bold.indexIn(m)) != -1) {
+        m = m.replace(pos, bold.matchedLength(), Util::highlight(bold.cap(1)));
     }
 
-    m_player->send(message);
+    m_player->send(m);
+}
+
+QString CommandInterpreter::showAdminHelp(const QString &command) {
+
+    QString m;
+
+    if (command == "admin-commands") {
+        QStringList commandNames = m_commands.keys();
+
+        m = "\n"
+            "Here is a list of all the commands you can use as an admin:\n"
+            "\n"
+            "*Remember: With great power comes great responsibility!*\n"
+            "\n" +
+            formatColumns(commandNames.filter("-")) +
+            "\n"
+            "Type *help <command>* to see help about a particular command.\n"
+            "Type *help admin-tips* to see some general tips for being an admin.";
+
+    } else if (command == "admin-tips") {
+
+        m = "\n"
+            "*Admin Tips*\n"
+            "\n"
+            "Now that you are an admin, you can actively modify the game world. Obviously, great "
+            "care should be taken, as many modifications are not revertable. Now, trusting you "
+            "will do the right thing, here as some tips for you:\n"
+            "\n"
+            "When referring to an object, you can use *#<id>* rather than referring to them by "
+            "name. For example, *set-prop #35 description This is the object with ID 35.*.\n"
+            "\n"
+            "Similarly, you can always use the word *area* to refer to the current area you are "
+            "in. But, to make editing of areas even easier, you can use *@<property>* as a "
+            "shortcut for *set-prop area <property>*. Thus, you can simply type: *@description As "
+            "you stand just outside the South Gate, the walls of the city look higher and mightier "
+            "than you imagined.*\n"
+            "\n"
+            "Not listed in the admin commands overview, but very useful: *edit-prop* and "
+            "*edit-trigger* are available for more convenient editing of properties and triggers. "
+            "The usage is the same as for *get-prop* and *get-trigger*. Note that these commands "
+            "are only available if you use the web interface (not supported when using telnet).\n"
+            "\n";
+
+    } else if (command == "triggers") {
+
+        m = "\n"
+            "*Triggers*\n"
+            "\n"
+            "Writing triggers is pretty straightforward, but there are a few things you should "
+            "know. Most importantly, any trigger is just a JavaScript function. So if you know "
+            "JavaScript, you will be able to write triggers just fine. Still, there are some "
+            "differences from writing JavaScript in a webbrowser of course. Here's an example of a "
+            "very basic trigger:\n"
+            "\n"
+            "    function() {\n"
+            "        this.go(this.currentArea.exits.named('north'));\n"
+            "    }\n"
+            "\n"
+            "The above example is a trigger that works on a character, and will let him walk "
+            "north, if possible.\n"
+            "\n"
+            "*Timers*\n"
+            "\n"
+            "Ever so often, you will want to write a trigger that performs some action in a "
+            "delayed fashion. Possibly you will want to have that action be repeated at an "
+            "interval. For these purposes, there are setTimeout() and setInterval() functions "
+            "which work just like those in your webbrowser, with one difference only: The "
+            "functions are attached to any game object rather than to the global window object as "
+            "you may be used to. So, to make the character from above walk north with a delay of "
+            "half a second, we could write this trigger:\n"
+            "\n"
+            "    function() {\n"
+            "        this.setTimeout(function() {\n"
+            "            this.go(this.currentArea.exits.named('north'));\n"
+            "        }, 500);\n"
+            "    }\n"
+            "\n"
+            "*Return values*\n"
+            "\n"
+            "In many cases, triggers have the ability to cancel the action that triggered them. "
+            "Whenever this is the case, you can have your trigger return the value false, and the "
+            "action will be canceled. Canceling the action is supported by any trigger that lists "
+            "the bool return type in the overview given below. For example, if the following "
+            "function is attached to an item's onopen trigger, the item cannot be opened:\n"
+            "\n"
+            "    function(activator) {\n"
+            "        activator.send('The lid appears to be stuck.');\n"
+            "        return false;\n"
+            "    }\n"
+            "\n"
+            "*Overview*\n"
+            "\n"
+            "Here is a list of all the triggers which are available:\n"
+            "\n";
+        for (const QString &triggerName : m_triggers.keys()) {
+            m += "  " + Util::highlight(triggerName) + "\n";
+        }
+        m += "\n"
+             "Type *help <trigger>* to see help about a particular trigger.\n";
+
+    } else {
+        for (const QString &triggerName : m_triggers.keys()) {
+            if (triggerName.startsWith(command)) {
+                m = "\n" +
+                    Util::highlight(triggerName) + "\n"
+                    "  " + Util::splitLines(m_triggers[triggerName], 78).join("\n  ") +
+                    "\n\n";
+                break;
+            }
+        }
+    }
+
+    return m;
 }
 
 QString CommandInterpreter::formatColumns(const QStringList &commandNames) {

@@ -5,16 +5,20 @@
   "portable": false,
   "weight": 0,
   "cost": 0,
+  "stats": [0, 0, 0, 0, 0, 0],
+  "height": 0,
   "currentArea": "area:85",
   "race": "race:2",
   "characterClass": "class:147",
   "gender": "female",
-  "stats": [0, 0, 0, 0, 0, 0, 0, 0],
   "respawnTime": 0,
   "respawnTimeVariation": 0,
   "hp": 1,
   "maxHp": 1,
   "mp": 0,
   "maxMp": 0,
-  "gold": 0
+  "gold": 0,
+  "weapon": "0",
+  "secondaryWeapon": "0",
+  "shield": "0"
 }

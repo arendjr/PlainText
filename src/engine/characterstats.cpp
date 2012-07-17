@@ -14,9 +14,7 @@ CharacterStats::CharacterStats() :
     vitality(0),
     endurance(0),
     intelligence(0),
-    faith(0),
-    height(0),
-    weight(0) {
+    faith(0) {
 }
 
 CharacterStats &CharacterStats::operator=(const CharacterStats &other) {
@@ -44,8 +42,6 @@ CharacterStats CharacterStats::operator+(const CharacterStats &other) const {
     stats.endurance = endurance + other.endurance;
     stats.intelligence = intelligence + other.intelligence;
     stats.faith = faith + other.faith;
-    stats.height = height + other.height;
-    stats.weight = weight + other.weight;
     return stats;
 }
 
@@ -57,9 +53,13 @@ CharacterStats &CharacterStats::operator+=(const CharacterStats &other) {
     endurance += other.endurance;
     intelligence += other.intelligence;
     faith += other.faith;
-    height += other.height;
-    weight += other.weight;
     return *this;
+}
+
+bool CharacterStats::isNull() const {
+
+    return strength == 0 && dexterity == 0 && vitality == 0 &&
+           endurance == 0 && intelligence == 0 && faith == 0;
 }
 
 QString CharacterStats::toString() const {
@@ -71,8 +71,6 @@ QString CharacterStats::toString() const {
     components << QString::number(endurance);
     components << QString::number(intelligence);
     components << QString::number(faith);
-    components << QString::number(height);
-    components << QString::number(weight);
     return "[" + components.join(", ") + "]";
 }
 
@@ -83,7 +81,7 @@ CharacterStats CharacterStats::fromString(const QString &string) {
     }
 
     QStringList components = string.mid(1, -1).split(',');
-    if (components.length() != 8) {
+    if (components.length() != 6) {
         throw GameException(GameException::InvalidCharacterStats);
     }
 
@@ -94,14 +92,12 @@ CharacterStats CharacterStats::fromString(const QString &string) {
     stats.endurance = components[3].trimmed().toInt();
     stats.intelligence = components[4].trimmed().toInt();
     stats.faith = components[5].trimmed().toInt();
-    stats.height = components[6].trimmed().toInt();
-    stats.weight = components[7].trimmed().toInt();
     return stats;
 }
 
 CharacterStats CharacterStats::fromVariantList(const QVariantList &variantList) {
 
-    if (variantList.length() != 8) {
+    if (variantList.length() != 6) {
         throw GameException(GameException::InvalidCharacterStats);
     }
 
@@ -112,8 +108,6 @@ CharacterStats CharacterStats::fromVariantList(const QVariantList &variantList) 
     stats.endurance = variantList[3].toInt();
     stats.intelligence = variantList[4].toInt();
     stats.faith = variantList[5].toInt();
-    stats.height = variantList[6].toInt();
-    stats.weight = variantList[7].toInt();
     return stats;
 }
 
@@ -126,8 +120,6 @@ QScriptValue CharacterStats::toScriptValue(QScriptEngine *engine, const Characte
     object.setProperty("endurance", stats.endurance);
     object.setProperty("intelligence", stats.intelligence);
     object.setProperty("faith", stats.faith);
-    object.setProperty("height", stats.height);
-    object.setProperty("weight", stats.weight);
     return object;
 }
 
@@ -139,6 +131,4 @@ void CharacterStats::fromScriptValue(const QScriptValue &object, CharacterStats 
     stats.endurance = object.property("endurance").toInt32();
     stats.intelligence = object.property("intelligence").toInt32();
     stats.faith = object.property("faith").toInt32();
-    stats.height = object.property("height").toInt32();
-    stats.weight = object.property("weight").toInt32();
 }
