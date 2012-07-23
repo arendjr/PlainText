@@ -9,7 +9,7 @@ class EatCommand : public Command {
     Q_OBJECT
 
     public:
-        explicit EatCommand(Player *player, QObject *parent = 0);
+        EatCommand(Player *player, QObject *parent = 0);
         virtual ~EatCommand();
 
         virtual void execute(const QString &command);

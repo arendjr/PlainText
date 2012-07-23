@@ -65,6 +65,7 @@ SOURCES += \
     engine/commands/lookcommand.cpp \
     engine/commands/opencommand.cpp \
     engine/commands/quitcommand.cpp \
+    engine/commands/removecommand.cpp \
     engine/commands/saycommand.cpp \
     engine/commands/shoutcommand.cpp \
     engine/commands/slashmecommand.cpp \
@@ -73,6 +74,7 @@ SOURCES += \
     engine/commands/tellcommand.cpp \
     engine/commands/usecommand.cpp \
     engine/commands/whocommand.cpp \
+    engine/commands/wieldcommand.cpp \
     engine/commands/admin/addcharactercommand.cpp \
     engine/commands/admin/addexitcommand.cpp \
     engine/commands/admin/additemcommand.cpp \
@@ -83,6 +85,7 @@ SOURCES += \
     engine/commands/admin/execscriptcommand.cpp \
     engine/commands/admin/getpropcommand.cpp \
     engine/commands/admin/gettriggercommand.cpp \
+    engine/commands/admin/listmethodscommand.cpp \
     engine/commands/admin/listpropscommand.cpp \
     engine/commands/admin/removeexitcommand.cpp \
     engine/commands/admin/removeitemcommand.cpp \
@@ -152,6 +155,7 @@ HEADERS += \
     engine/commands/lookcommand.h \
     engine/commands/opencommand.h \
     engine/commands/quitcommand.h \
+    engine/commands/removecommand.h \
     engine/commands/saycommand.h \
     engine/commands/shoutcommand.h \
     engine/commands/slashmecommand.h \
@@ -160,6 +164,7 @@ HEADERS += \
     engine/commands/tellcommand.h \
     engine/commands/usecommand.h \
     engine/commands/whocommand.h \
+    engine/commands/wieldcommand.h \
     engine/commands/admin/addcharactercommand.h \
     engine/commands/admin/addexitcommand.h \
     engine/commands/admin/additemcommand.h \
@@ -170,6 +175,7 @@ HEADERS += \
     engine/commands/admin/execscriptcommand.h \
     engine/commands/admin/getpropcommand.h \
     engine/commands/admin/gettriggercommand.h \
+    engine/commands/admin/listmethodscommand.h \
     engine/commands/admin/listpropscommand.h \
     engine/commands/admin/removeexitcommand.h \
     engine/commands/admin/removeitemcommand.h \

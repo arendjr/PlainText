@@ -9,7 +9,7 @@ class DrinkCommand : public Command {
     Q_OBJECT
 
     public:
-        explicit DrinkCommand(Player *player, QObject *parent = 0);
+        DrinkCommand(Player *player, QObject *parent = 0);
         virtual ~DrinkCommand();
 
         virtual void execute(const QString &command);

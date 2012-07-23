@@ -27,6 +27,11 @@ var keys = {
     KEY_INSERT:   45
 }
 
+String.prototype.contains = function(string) {
+
+    return this.indexOf(string) > -1;
+};
+
 String.prototype.startsWith = function(string) {
 
     return this.substr(0, string.length) === string;
@@ -71,8 +76,8 @@ function elements(selector) {
 }
 
 var isPhoneGap = (getQueryParam("phonegap") === "true");
-var isIPad = (navigator.userAgent.toLowerCase().indexOf("ipad") > -1);
-var isIPhone = (navigator.userAgent.toLowerCase().indexOf("iphone") > -1);
+var isIPad = navigator.userAgent.toLowerCase().contains("ipad");
+var isIPhone = navigator.userAgent.toLowerCase().contains("iphone");
 
 var controller;
 
@@ -208,7 +213,7 @@ Controller.prototype.writeToScreen = function(message) {
         return;
     }
 
-    var containsExits = (message.indexOf("Obvious exits:") > -1);
+    var containsExits = message.contains("Obvious exits:");
 
     var div = document.createElement("div");
 

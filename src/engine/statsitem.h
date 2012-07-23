@@ -28,7 +28,6 @@ class StatsItem : public Item {
 
         virtual void invokeTimer(int timerId);
 
-    protected:
         virtual void killAllTimers();
 
     private:

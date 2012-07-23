@@ -11,10 +11,10 @@
             if (line.startsWith("  \x1B[37;1m")) {
                 var trigger = line.substring(9, line.indexOf("\x1B[0m"));
                 var triggerName;
-                if (trigger.indexOf("(") === -1) {
-                    triggerName = trigger.substr(0, trigger.indexOf(" : "));
-                } else {
+                if (trigger.contains("(")) {
                     triggerName = trigger.substr(0, trigger.indexOf("("));
+                } else {
+                    triggerName = trigger.substr(0, trigger.indexOf(" : "));
                 }
 
                 triggers[triggerName] = trigger;
@@ -49,6 +49,10 @@
                 overwriteHistory = true;
 
                 var triggerName = command.split(/\s+/)[2];
+                if (parseInt(triggerName, 10) > 0) {
+                    triggerName = command.split(/\s+/)[3];
+                }
+
                 if (triggers.hasOwnProperty(triggerName)) {
                     self.setCommand = "set" + command.substr(4);
                     self.commandInput.value = "get" + command.substr(4);
@@ -58,9 +62,7 @@
 
                         if (message.startsWith("No trigger set for")) {
                             var trigger = triggers[triggerName];
-                            if (trigger.indexOf("(") === -1) {
-                                message = "(function() {\n    \n})";
-                            } else {
+                            if (trigger.contains("(")) {
                                 var arguments = trigger.substring(trigger.indexOf("(") + 1,
                                                                   trigger.indexOf(")"));
                                 var args = [];
@@ -68,6 +70,8 @@
                                     args.push(arg.substr(0, arg.indexOf(" : ")));
                                 });
                                 message = "(function(" + args.join(", ") + ") {\n    \n})";
+                            } else {
+                                message = "(function() {\n    \n})";
                             }
                         }
 
@@ -88,10 +92,22 @@
                     self.writeToScreen("There is no trigger named " + triggerName + ".");
                     self.commandInput.value = "";
                 }
+            } else if (command === "exec-script") {
+                overwriteHistory = true;
+
+                self.setCommand = "exec-script";
+                self.commandInput.value = "";
+
+                self.editScreen.style.display = "block";
+                self.editField.focus();
             } else if (command.startsWith("@")) {
                 overwriteHistory = true;
 
-                self.commandInput.value = "set-prop area " + command.substr(1);
+                if (command.contains(" ")) {
+                    self.commandInput.value = "set-prop area " + command.substr(1);
+                } else {
+                    self.commandInput.value = "get-prop area " + command.substr(1);
+                }
             }
 
             onkeypress(event);
@@ -113,6 +129,8 @@
     document.getElementById("edit-submit-button").onclick = function() {
         if (self.setCommand.startsWith("set-prop")) {
             self.socket.send(self.setCommand + " " + self.editField.value.replace(/\n/g, "\\n"));
+        } else if (self.setCommand.startsWith("exec-script")) {
+            self.socket.send(self.setCommand + " " + self.editField.value.replace(/\s+/g, " "));
         } else {
             self.socket.send(self.setCommand + " " + self.editField.value);
         }

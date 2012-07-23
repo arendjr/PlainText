@@ -400,7 +400,6 @@ GameObjectPtrList::~GameObjectPtrList() {
 void GameObjectPtrList::append(const GameObjectPtr &value) {
 
     if (value.isNull()) {
-        qDebug() << "Adding null value to GameObjectPtrList. Ignored.";
         return;
     }
 

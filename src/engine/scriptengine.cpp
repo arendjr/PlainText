@@ -5,6 +5,7 @@
 #include <QMetaType>
 
 #include "characterstats.h"
+#include "combatmessage.h"
 #include "effect.h"
 #include "gameobject.h"
 #include "modifier.h"
@@ -22,6 +23,8 @@ ScriptEngine::ScriptEngine() :
 
     qScriptRegisterMetaType(&m_jsEngine, CharacterStats::toScriptValue,
                                          CharacterStats::fromScriptValue);
+    qScriptRegisterMetaType(&m_jsEngine, CombatMessage::toScriptValue,
+                                         CombatMessage::fromScriptValue);
     qScriptRegisterMetaType(&m_jsEngine, Effect::toScriptValue, Effect::fromScriptValue);
     qScriptRegisterMetaType(&m_jsEngine, GameObject::toScriptValue, GameObject::fromScriptValue);
     qScriptRegisterMetaType(&m_jsEngine, GameObjectPtr::toScriptValue,
@@ -32,6 +35,7 @@ ScriptEngine::ScriptEngine() :
     qScriptRegisterMetaType(&m_jsEngine, ScriptFunctionMap::toScriptValue,
                                          ScriptFunctionMap::fromScriptValue);
     qScriptRegisterSequenceMetaType<CharacterStatsList>(&m_jsEngine);
+    qScriptRegisterSequenceMetaType<CombatMessageList>(&m_jsEngine);
     qScriptRegisterSequenceMetaType<EffectList>(&m_jsEngine);
     qScriptRegisterSequenceMetaType<GameObjectPtrList>(&m_jsEngine);
     qScriptRegisterSequenceMetaType<ModifierList>(&m_jsEngine);

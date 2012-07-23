@@ -33,7 +33,7 @@ void Command::setCommand(const QString &_command) {
             m_words << command.section(whitespace, 1);
             return;
         }
-        if (m_words[0] == "set-trigger") {
+        if (m_words[0] == "get-trigger" || m_words[0] == "set-trigger") {
             m_words.clear();
             m_words << command.section(whitespace, 0, 0);
             m_words << command.section(whitespace, 1, 1);

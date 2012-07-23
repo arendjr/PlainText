@@ -3,6 +3,7 @@
 #include "engine/item.h"
 #include "engine/race.h"
 #include "engine/util.h"
+#include "engine/weapon.h"
 
 
 LookCommand::LookCommand(Player *character, QObject *parent) :
@@ -47,6 +48,13 @@ void LookCommand::execute(const QString &command) {
         if (!description.isEmpty()) {
             m += description + "\n";
         }
+        GameObjectPtrList wieldedItems;
+        wieldedItems << player()->weapon()
+                     << player()->secondaryWeapon()
+                     << player()->shield();
+        if (!wieldedItems.isEmpty()) {
+            m += QString("You are wielding %1.\n").arg(wieldedItems.joinFancy());
+        }
         send(m);
         return;
     }
@@ -68,7 +76,26 @@ void LookCommand::execute(const QString &command) {
             m += description + "\n";
         }
 
-        int statsDiff = player()->stats().total() - character->stats().total();
+        GameObjectPtrList wieldedItems;
+        wieldedItems << character->weapon()
+                     << character->secondaryWeapon()
+                     << character->shield();
+        if (!wieldedItems.isEmpty()) {
+            m += QString("%1 is wielding %2.\n")
+                 .arg(Util::capitalize(character->subjectPronoun()))
+                 .arg(wieldedItems.joinFancy());
+        }
+
+        int playerStatsTotal = player()->stats().total();
+        if (!player()->weapon().isNull()) {
+            playerStatsTotal += player()->weapon().cast<Weapon *>()->stats().total();
+        }
+        int characterStatsTotal = character->stats().total();
+        if (!character->weapon().isNull()) {
+            characterStatsTotal += character->weapon().cast<Weapon *>()->stats().total();
+        }
+        int statsDiff = playerStatsTotal - characterStatsTotal;
+
         if (statsDiff > 25) {
             if (player()->race()->name() == "giant" && character->race()->name() != "giant") {
                 m += QString("You should be careful not to accidentally step on %1.\n")

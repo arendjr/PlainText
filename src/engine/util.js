@@ -1,4 +1,9 @@
 
+Array.prototype.contains = function(element) {
+
+    return this.indexOf(element) > -1;
+};
+
 Array.prototype.named = function(name) {
 
     for (var i = 0; i < this.length; i++) {
@@ -43,12 +48,33 @@ String.prototype.capitalized = function() {
     return Util.capitalize(this);
 }
 
+String.prototype.contains = function(string) {
+
+    return this.indexOf(string) > -1;
+};
+
+String.prototype.endsWith = function(string) {
+
+    return this.substr(this.length - string.length) === string;
+};
+
 String.prototype.highlighted = function() {
 
     return Util.highlight(this);
 }
 
+String.prototype.startsWith = function(string) {
+
+    return this.substr(0, string.length) === string;
+};
+
 String.prototype.trimmed = function() {
 
     return this.replace(/^\s+|\s+$/g, "");
 };
+
+function $(identifier) {
+
+    var split = identifier.split(":");
+    return Realm.getObject(split[0], parseInt(split[1], 10));
+}

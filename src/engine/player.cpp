@@ -21,10 +21,6 @@ Player::~Player() {
     if (~options() & Copy) {
         realm()->unregisterPlayer(this);
     }
-
-    if (m_regenerationIntervalId) {
-        realm()->stopInterval(m_regenerationIntervalId);
-    }
 }
 
 void Player::setName(const QString &newName) {
@@ -207,6 +203,8 @@ void Player::die(const GameObjectPtr &attacker) {
 
     area->removePlayer(this);
     enter(race().cast<Race *>()->startingArea());
+
+    stun(5000);
 }
 
 void Player::invokeTimer(int timerId) {

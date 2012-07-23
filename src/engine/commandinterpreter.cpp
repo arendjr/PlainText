@@ -41,6 +41,7 @@
 #include "commands/admin/execscriptcommand.h"
 #include "commands/admin/getpropcommand.h"
 #include "commands/admin/gettriggercommand.h"
+#include "commands/admin/listmethodscommand.h"
 #include "commands/admin/listpropscommand.h"
 #include "commands/admin/removeexitcommand.h"
 #include "commands/admin/removeitemcommand.h"
@@ -100,6 +101,7 @@ CommandInterpreter::CommandInterpreter(Player *player) :
         m_commands.insert("exec-script", new ExecScriptCommand(player, this));
         m_commands.insert("get-prop", new GetPropCommand(player, this));
         m_commands.insert("get-trigger", new GetTriggerCommand(player, this));
+        m_commands.insert("list-methods", new ListMethodsCommand(player, this));
         m_commands.insert("list-props", new ListPropsCommand(player, this));
         m_commands.insert("remove-exit", new RemoveExitCommand(player, this));
         m_commands.insert("remove-item", new RemoveItemCommand(player, this));
@@ -144,12 +146,13 @@ CommandInterpreter::CommandInterpreter(Player *player) :
                           "The ondrink trigger is invoked on any item when it's eaten.");
         m_triggers.insert("onenter(activator : character) : bool",
                           "The onenter trigger is invoked on any exit when it's entered.");
-        m_triggers.insert("onexit(activator : character, exitName : string) : bool",
+        m_triggers.insert("oncharacterexit(activator : character, exitName : string) : bool",
                           "The onexit trigger is invoked on any character in an area when another "
                           "character leaves that area.");
         m_triggers.insert("oninit : void",
                           "The oninit trigger is invoked once on every object when the game server "
-                          "is started.");
+                          "is started. Note: For characters that do have an onspawn trigger, but "
+                          "no oninit trigger, onspawn is triggered instead.");
         m_triggers.insert("onopen(activator : character) : bool",
                           "The onopen trigger is invoked on any item or exit when it's opened.");
         m_triggers.insert("onreceive(giver : character, item : item or item list or amount) : bool",
@@ -274,7 +277,7 @@ void CommandInterpreter::showHelp(const QString &command) {
         }
     }
 
-    static QRegExp bold("\\*([\\w <>:#@!.,-]+)\\*");
+    static QRegExp bold("\\*([\\w \"'<>():@#$!.,-]+)\\*");
     int pos = 0;
     while ((pos = bold.indexIn(m)) != -1) {
         m = m.replace(pos, bold.matchedLength(), Util::highlight(bold.cap(1)));
@@ -314,9 +317,9 @@ QString CommandInterpreter::showAdminHelp(const QString &command) {
             "\n"
             "Similarly, you can always use the word *area* to refer to the current area you are "
             "in. But, to make editing of areas even easier, you can use *@<property>* as a "
-            "shortcut for *set-prop area <property>*. Thus, you can simply type: *@description As "
-            "you stand just outside the South Gate, the walls of the city look higher and mightier "
-            "than you imagined.*\n"
+            "shortcut for *get-* or *set-prop area <property>*. Thus, you can simply type: "
+            "*@id* to get the ID of the current area. Or, to set the description: *@description As "
+            "you stand just outside the South Gate, ...*\n"
             "\n"
             "Not listed in the admin commands overview, but very useful: *edit-prop* and "
             "*edit-trigger* are available for more convenient editing of properties and triggers. "
@@ -371,7 +374,17 @@ QString CommandInterpreter::showAdminHelp(const QString &command) {
             "        return false;\n"
             "    }\n"
             "\n"
-            "*Overview*\n"
+            "*Testing scripts*\n"
+            "\n"
+            "If you simply want to test whether some script works as expected, you can use the "
+            "*exec-script* command. In addition to testing, this command is also useful to clean "
+            "up game data and objects when some script had unintended side-effects. If you want to "
+            "execute some script on a specific object, you can use this function for getting the "
+            "object: *$('<object-type>:<object-id>')*. Example:\n"
+            "\n"
+            "    exec-script $('character:167').say('Miauw')\n"
+            "\n"
+            "*Trigger Overview*\n"
             "\n"
             "Here is a list of all the triggers which are available:\n"
             "\n";

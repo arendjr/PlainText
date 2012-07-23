@@ -28,10 +28,10 @@ void ExecScriptCommand::execute(const QString &command) {
     ScriptEngine *scriptEngine = ScriptEngine::instance();
     QScriptValue value = scriptEngine->evaluate(takeRest());
     if (scriptEngine->hasUncaughtException()) {
-        player()->send("Exception: " + value.toString());
+        send("Exception: " + value.toString());
         scriptEngine->evaluate("");
         return;
     }
 
-    player()->send("Result: " + value.toString());
+    send("Result: " + value.toString());
 }

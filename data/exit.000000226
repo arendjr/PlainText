@@ -1,0 +1,7 @@
+{
+  "name": "shoe store",
+  "destinationArea": "area:225",
+  "oppositeExit": "exit:227",
+  "door": false,
+  "hidden": false
+}

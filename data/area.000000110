@@ -1,4 +1,5 @@
 {
-  "name": "Middle Port Plaza",
-  "exits": [ "exit:112", "exit:114" ]
+  "name": "Main Street / Market Street",
+  "exits": [ "exit:112", "exit:114" ],
+  "items": [ "item:229" ]
 }

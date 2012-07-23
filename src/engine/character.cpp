@@ -76,6 +76,15 @@ int Character::totalWeight() const {
     for (const GameObjectPtr &item : m_inventory) {
         totalWeight += item.cast<Item *>()->weight();
     }
+    if (!m_weapon.isNull()) {
+        totalWeight += m_weapon.cast<Item *>()->weight();
+    }
+    if (!m_secondaryWeapon.isNull()) {
+        totalWeight += m_secondaryWeapon.cast<Item *>()->weight();
+    }
+    if (!m_shield.isNull()) {
+        totalWeight += m_shield.cast<Item *>()->weight();
+    }
     return totalWeight;
 }
 
@@ -435,7 +444,7 @@ void Character::go(const GameObjectPtr &exitPtr) {
 
     Area *area = currentArea().cast<Area *>();
     for (const GameObjectPtr &character : area->npcs()) {
-        if (!character->invokeTrigger("onexit", this, exit->name())) {
+        if (!character->invokeTrigger("oncharacterexit", this, exit->name())) {
             return;
         }
     }
@@ -501,31 +510,32 @@ void Character::leave(const GameObjectPtr &areaPtr, const QString &exitName) {
 
 void Character::say(const QString &message) {
 
-    QString text;
-    if (message.endsWith(".") || message.endsWith("?") || message.endsWith("!")) {
-        text = QString("%1 says, \"%2\"").arg(name(), Util::capitalize(message));
-    } else {
-        text = QString("%1 says, \"%2.\"").arg(name(), Util::capitalize(message));
-    }
-    currentArea().cast<Area *>()->players().send(text);
+    QString text = (message.endsWith(".") || message.endsWith("?") || message.endsWith("!")) ?
+                   "%1 says, \"%2\"" : "%1 says, \"%2.\"";
+
+    Area *area = currentArea().cast<Area *>();
+    area->players().send(text.arg(definiteName(area->characters(), Capitalized),
+                                  Util::capitalize(message)));
 }
 
-void Character::shout(const QString &message) {
+void Character::shout(const QString &msg) {
 
     Area *area = currentArea().cast<Area *>();
 
-    GameObjectPtrList players = area->players();
-    players.send(QString("%1 shouts, \"%2\".").arg(definiteName(area->characters(),
-                                                                Capitalized), message));
+    QString message = (msg.endsWith(".") || msg.endsWith("?") || msg.endsWith("!")) ?
+                      Util::capitalize(msg) : Util::capitalize(msg + ".");
 
-    GameObjectPtrList adjacentPlayers;
+    GameObjectPtrList players = area->players();
+    players.send(QString("%1 shouts, \"%2\".").arg(definiteName(area->characters(), Capitalized),
+                                                   message));
+
     for (const GameObjectPtr &exitPtr : area->exits()) {
         Exit *exit = exitPtr.cast<Exit *>();
         Area *adjacentArea = exit->destinationArea().cast<Area *>();
 
-        adjacentPlayers << adjacentArea->players();
+        adjacentArea->players().send(QString("You hear %1 shouting, \"%2\".").arg(indefiniteName(),
+                                                                                  message));
     }
-    adjacentPlayers.send(QString("You hear %1 shouting, \"%2\".").arg(indefiniteName(), message));
 }
 
 void Character::talk(const GameObjectPtr &characterPtr, const QString &message) {
@@ -556,6 +566,93 @@ void Character::tell(const GameObjectPtr &playerPtr, const QString &message) {
     send(QString("You tell %1, \"%2\".").arg(player->name(), message));
 }
 
+void Character::take(const GameObjectPtrList &items) {
+
+    Area *area = currentArea().cast<Area *>();
+
+    GameObjectPtrList takenItems;
+    for (const GameObjectPtr &itemPtr : items) {
+        Item *item = itemPtr.cast<Item *>();
+        if (item->isPortable()) {
+            addInventoryItem(itemPtr);
+            area->removeItem(itemPtr);
+            takenItems << itemPtr;
+        } else {
+            send(QString("You can't take %2.").arg(item->definiteName(area->items())));
+        }
+    }
+
+    if (takenItems.length() > 0) {
+        QString description = takenItems.joinFancy(DefiniteArticles);
+        send(QString("You take %2.").arg(description));
+
+        GameObjectPtrList others = area->players();
+        others.removeOne(this);
+        others.send(QString("%1 takes %3.").arg(name(), description));
+    }
+}
+
+void Character::wield(const GameObjectPtr &item) {
+
+    NOT_NULL(item)
+
+    if (!m_inventory.contains(item)) {
+        return;
+    }
+
+    if (item->isWeapon()) {
+        if (m_weapon.isNull()) {
+            send(QString("You wield your %1.").arg(item->name()));
+            m_weapon = item;
+        } else {
+            if (m_class->name() == "wanderer" && m_secondaryWeapon.isNull()) {
+                send(QString("You wield your %1 as secondary weapon.").arg(item->name()));
+                m_secondaryWeapon = item;
+            } else if (m_weapon->name() == item->name()) {
+                send(QString("You swap your %1 for another %1.")
+                     .arg(m_weapon->name(), item->name()));
+                m_weapon = item;
+            } else {
+                send(QString("You remove your %1 and wield your %1.")
+                     .arg(m_weapon->name(), item->name()));
+                m_weapon = item;
+            }
+        }
+        m_inventory.removeOne(item);
+    } else if (item->isShield()) {
+        if (m_shield.isNull()) {
+            send(QString("You wield your %1.").arg(item->name()));
+            m_shield = item;
+        } else {
+            send(QString("You remove your %1 and wield your %1.")
+                 .arg(m_shield->name(), item->name()));
+            m_shield = item;
+        }
+        m_inventory.removeOne(item);
+    } else {
+        send("You cannot wield that.");
+    }
+}
+
+void Character::remove(const GameObjectPtr &item) {
+
+    NOT_NULL(item)
+
+    if (m_weapon == item) {
+        send(QString("You remove your %1.").arg(item->name()));
+        m_inventory << item;
+        m_weapon = GameObjectPtr();
+    } else if (m_secondaryWeapon == item) {
+        send(QString("You remove your %1.").arg(item->name()));
+        m_inventory << item;
+        m_secondaryWeapon = GameObjectPtr();
+    } else if (m_shield == item) {
+        send(QString("You remove your %1.").arg(item->name()));
+        m_inventory << item;
+        m_shield = GameObjectPtr();
+    }
+}
+
 void Character::kill(const GameObjectPtr &characterPtr) {
 
     NOT_NULL(characterPtr)
@@ -575,11 +672,14 @@ void Character::kill(const GameObjectPtr &characterPtr) {
     QString myName = definiteName(area->characters(), Capitalized);
     QString enemyName = character->definiteName(area->characters());
 
-    qreal hitChance = 100 * ((80 + stats().dexterity) / 160.0) *
-                            ((100 - character->stats().dexterity) / 100.0);
+    CharacterStats myStats = totalStats();
+    CharacterStats enemyStats = character->totalStats();
+
+    qreal hitChance = 100 * ((80 + myStats.dexterity) / 160.0) *
+                            ((100 - enemyStats.dexterity) / 100.0);
     if (qrand() % 100 < hitChance) {
-        int damage = qrand() % (int) (20.0 * (stats().strength / 40.0) *
-                                             ((80 - character->stats().endurance) / 80.0)) + 1;
+        int damage = qrand() % (int) (20.0 * (myStats.strength / 40.0) *
+                                             ((80 - enemyStats.endurance) / 80.0)) + 1;
 
         character->adjustHp(-damage);
 
@@ -637,7 +737,7 @@ void Character::kill(const GameObjectPtr &characterPtr) {
         }
     }
 
-    stun(4000 - (25 * stats().dexterity));
+    stun(4000 - (25 * myStats.dexterity));
 
     others = currentArea().cast<Area *>()->characters();
     others.removeOne(this);
@@ -736,7 +836,30 @@ void Character::init() {
         area->addNPC(this);
     }
 
-    GameObject::init();
+    if (hasTrigger("oninit")) {
+        StatsItem::init();
+    } else {
+        invokeTrigger("onspawn");
+    }
+}
+
+GameObject *Character::copy() {
+
+    Character *other = qobject_cast<Character *>(StatsItem::copy());
+    if (!m_weapon.isNull()) {
+        other->setWeapon(m_weapon->copy());
+    }
+    if (!m_secondaryWeapon.isNull()) {
+        other->setSecondaryWeapon(m_secondaryWeapon->copy());
+    }
+    if (!m_shield.isNull()) {
+        other->setShield(m_shield->copy());
+    }
+    other->setInventory(GameObjectPtrList());
+    for (const GameObjectPtr &item : m_inventory) {
+        other->addInventoryItem(item->copy());
+    }
+    return other;
 }
 
 void Character::invokeTimer(int timerId) {
@@ -788,6 +911,7 @@ void Character::killAllTimers() {
 
     clearEffects();
 
+    m_secondsStunned = 0;
     if (m_stunTimerId) {
         realm()->stopTimer(m_stunTimerId);
         m_stunTimerId = 0;

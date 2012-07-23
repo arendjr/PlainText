@@ -1,5 +1,5 @@
 {
-  "name": "clothes stall",
+  "name": "clothing stall",
   "destinationArea": "area:79",
   "oppositeExit": "0",
   "door": false,

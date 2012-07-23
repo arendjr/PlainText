@@ -135,9 +135,9 @@ class GameObject : public QObject {
 
         virtual void invokeTimer(int timerId);
 
-    protected:
         virtual void killAllTimers();
 
+    protected:
         bool mayReferenceOtherProperties() const;
         void setModified();
 

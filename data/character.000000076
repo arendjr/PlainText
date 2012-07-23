@@ -1,5 +1,6 @@
 {
   "name": "shopper",
+  "triggers": { "onspawn": "(function() {\n    this.setInterval(function() {\n        var exit = this.currentArea.exits.randomElement();\n        if (exit.name.endsWith('stall') || exit.destinationArea.name.contains('Market')) {\n            this.go(exit);\n        }\n    }, 21333);\n\n    this.gold = randomInt(5, 21);\n})" },
   "plural": "shoppers",
   "indefiniteArticle": "a",
   "portable": false,
@@ -8,7 +9,7 @@
   "stats": [0, 0, 0, 0, 0, 0],
   "height": 0,
   "currentArea": "area:65",
-  "race": "0",
+  "race": "race:2",
   "characterClass": "class:147",
   "gender": "male",
   "respawnTime": 900000,
@@ -17,7 +18,7 @@
   "maxHp": 1,
   "mp": 0,
   "maxMp": 0,
-  "gold": 0,
+  "gold": 14,
   "weapon": "0",
   "secondaryWeapon": "0",
   "shield": "0"

@@ -1,5 +1,5 @@
 {
   "name": "Market Street",
   "description": "Leading up to the market square, the street is filled with little shops that hope to get attention from those going to and from the market.",
-  "exits": [ "exit:94", "exit:99", "exit:170" ]
+  "exits": [ "exit:94", "exit:99", "exit:170", "exit:226" ]
 }

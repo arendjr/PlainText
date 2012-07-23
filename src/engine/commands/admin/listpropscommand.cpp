@@ -6,7 +6,7 @@
 ListPropsCommand::ListPropsCommand(Player *character, QObject *parent) :
     AdminCommand(character, parent) {
 
-    setDescription("Lists all properties of an object, with their values.\n"
+    setDescription("List all properties of an object, with their values.\n"
                    "\n"
                    "Usage: list-props <object-name> [#]");
 }

@@ -31,7 +31,9 @@
 #include "realm.h"
 #include "scriptengine.h"
 #include "scriptfunctionmap.h"
+#include "shield.h"
 #include "util.h"
+#include "weapon.h"
 
 
 GameObject::GameObject(Realm *realm, const char *objectType, uint id, Options options) :
@@ -121,6 +123,7 @@ void GameObject::setName(const QString &name) {
     if (m_name != name) {
         m_name = name;
 
+        setObjectName(name);
         setModified();
     }
 }
@@ -546,6 +549,10 @@ GameObject *GameObject::createByObjectType(Realm *realm, const QString &objectTy
         return new Race(realm, id, options);
     } else if (objectType == "realm") {
         return new Realm(options);
+    } else if (objectType == "shield") {
+        return new Shield(realm, id, options);
+    } else if (objectType == "weapon") {
+        return new Weapon(realm, id, options);
     } else {
        throw GameException(GameException::UnknownGameObjectType);
     }

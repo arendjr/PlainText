@@ -1,4 +1,5 @@
 {
   "name": "Market Street",
+  "description": "This is the beginning of the Market Street. The Market Square is at the far south end of the street.",
   "exits": [ "exit:100", "exit:102", "exit:111" ]
 }

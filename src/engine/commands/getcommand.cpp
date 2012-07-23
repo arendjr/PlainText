@@ -26,30 +26,10 @@ void GetCommand::execute(const QString &command) {
 
     takeWord("the");
 
-    GameObjectPtrList allItems = currentArea()->items();
-    GameObjectPtrList items = takeObjects(allItems);
+    GameObjectPtrList items = takeObjects(currentArea()->items());
     if (!requireSome(items, "That's not here.")) {
         return;
     }
 
-    GameObjectPtrList takenItems;
-    for (const GameObjectPtr &itemPtr : items) {
-        Item *item = itemPtr.cast<Item *>();
-        if (item->isPortable()) {
-            player()->addInventoryItem(itemPtr);
-            currentArea()->removeItem(itemPtr);
-            takenItems << itemPtr;
-        } else {
-            send(QString("You can't take %2.").arg(item->definiteName(allItems)));
-        }
-    }
-
-    if (takenItems.length() > 0) {
-        QString description = takenItems.joinFancy(DefiniteArticles);
-        send(QString("You %1 %2.").arg(alias, description));
-
-        GameObjectPtrList others = currentArea()->players();
-        others.removeOne(player());
-        others.send(QString("%1 %2s %3.").arg(player()->name(), alias, description));
-    }
+    player()->take(items);
 }

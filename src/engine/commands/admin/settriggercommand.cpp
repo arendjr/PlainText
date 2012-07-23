@@ -31,13 +31,13 @@ void SetTriggerCommand::execute(const QString &command) {
     QString triggerName = takeWord().toLower();
 
     if (!triggerName.startsWith("on")) {
-        player()->send("Not a valid trigger name.");
+        send("Not a valid trigger name.");
         return;
     }
 
     QString source = takeRest();
     if (source.isEmpty()) {
-        player()->send("No source for trigger.");
+        send("No source for trigger.");
         return;
     }
 
@@ -47,5 +47,12 @@ void SetTriggerCommand::execute(const QString &command) {
 
     ScriptFunction trigger = ScriptFunction::fromString(source);
     objects[0]->setTrigger(triggerName, trigger);
-    player()->send(QString("Trigger %1 set.").arg(triggerName));
+    send(QString("Trigger %1 set.").arg(triggerName));
+
+    if (triggerName == "onspawn") {
+        objects[0]->killAllTimers();
+        objects[0]->invokeTrigger(triggerName);
+        send(QString("Respawn emulated for %1.")
+             .arg(Util::highlight(QString("object #%1").arg(objects[0]->id()))));
+    }
 }

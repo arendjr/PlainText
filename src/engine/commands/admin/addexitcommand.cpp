@@ -8,10 +8,16 @@
 AddExitCommand::AddExitCommand(Player *character, QObject *parent) :
     AdminCommand(character, parent) {
 
-    setDescription("Add an exit to the current area. Use \"new\" instead of an "
-                   "destination area ID to create a new destination area.\n"
+    setDescription("Add an exit to the current area.\n"
                    "\n"
-                   "Usage: add-exit <exit-name> <destination-area-id>");
+                   "Usage: add-exit <exit-name> <destination-area-id>\n"
+                   "\n"
+                   "Use \"new\" instead of a destination area ID to create a new destination "
+                   "area.\n"
+                   "\n"
+                   "You can create a bi-directional exit (the destination area will get an exit "
+                   "back to the current area) by using a direction (north, up, etc.) as exit name "
+                   "or by specifying two exit names, separated by a dash, instead of one.\n");
 }
 
 AddExitCommand::~AddExitCommand() {
@@ -36,9 +42,20 @@ void AddExitCommand::execute(const QString &command) {
         destinationArea = qobject_cast<Area *>(realm()->getObject("area",
                                                                   destinationAreaId.toInt()));
         if (!destinationArea) {
-            player()->send(QString("No area with ID %1.").arg(destinationAreaId));
+            send(QString("No area with ID %1.").arg(destinationAreaId));
             return;
         }
+    }
+
+    QString oppositeExitName;
+    if (Util::isDirection(exitName)) {
+        oppositeExitName = Util::opposingDirection(exitName);
+    } else if (exitName.contains('-')) {
+        oppositeExitName = exitName.section('-', 1);
+        exitName = exitName.section('-', 0, 0);
+    } else if (destinationAreaId == "new") {
+        send("When adding an exit to a new area, the exit has to be bi-directional.");
+        return;
     }
 
     Exit *exit = GameObject::createByObjectType<Exit *>(realm(), "exit");
@@ -46,16 +63,16 @@ void AddExitCommand::execute(const QString &command) {
     exit->setDestinationArea(destinationArea);
     currentArea()->addExit(exit);
 
-    if (Util::isDirection(exitName)) {
+    send(QString("Exit %1 added.").arg(exitName));
+
+    if (!oppositeExitName.isEmpty()) {
         Exit *oppositeExit = GameObject::createByObjectType<Exit *>(realm(), "exit");
-        oppositeExit->setName(Util::opposingDirection(exitName));
+        oppositeExit->setName(oppositeExitName);
         oppositeExit->setDestinationArea(currentArea());
         oppositeExit->setOppositeExit(exit);
         destinationArea->addExit(oppositeExit);
         exit->setOppositeExit(oppositeExit);
 
-        player()->send(QString("Bi-directional exit %1-%2 added.").arg(exitName, oppositeExit->name()));
-    } else {
-        player()->send(QString("Exit %1 added.").arg(exitName));
+        send(QString("Opposite exit %1 added.").arg(oppositeExit->name()));
     }
 }

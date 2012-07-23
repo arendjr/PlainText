@@ -118,13 +118,19 @@ class Character : public StatsItem {
         Q_INVOKABLE virtual void close(const GameObjectPtr &exit);
         Q_INVOKABLE virtual void go(const GameObjectPtr &exit);
 
-        virtual void enter(const GameObjectPtr &area);
-        virtual void leave(const GameObjectPtr &area, const QString &exitName = QString());
+        Q_INVOKABLE virtual void enter(const GameObjectPtr &area);
+        Q_INVOKABLE virtual void leave(const GameObjectPtr &area,
+                                       const QString &exitName = QString());
 
         Q_INVOKABLE virtual void say(const QString &message);
         Q_INVOKABLE virtual void shout(const QString &message);
         Q_INVOKABLE virtual void talk(const GameObjectPtr &character, const QString &message);
         Q_INVOKABLE virtual void tell(const GameObjectPtr &player, const QString &message);
+
+        Q_INVOKABLE virtual void take(const GameObjectPtrList &items);
+
+        Q_INVOKABLE virtual void wield(const GameObjectPtr &item);
+        Q_INVOKABLE virtual void remove(const GameObjectPtr &item);
 
         Q_INVOKABLE virtual void kill(const GameObjectPtr &character);
         Q_INVOKABLE virtual void die(const GameObjectPtr &attacker = GameObjectPtr());
@@ -135,9 +141,10 @@ class Character : public StatsItem {
 
         virtual void init();
 
+        virtual GameObject *copy();
+
         virtual void invokeTimer(int timerId);
 
-    protected:
         virtual void killAllTimers();
 
     private:
