@@ -46,6 +46,10 @@ void Command::setCommand(const QString &_command) {
             }
             return;
         }
+        if (m_words[0] == "set-prop" &&
+            m_words.length() >= 3 && m_words[2] == "description") {
+            return;
+        }
     }
 
     for (int i = 0; i < m_words.length(); i++) {

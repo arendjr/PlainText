@@ -1,0 +1,10 @@
+{
+  "name": "knife",
+  "description": "It's a decent knife... for skinning a cow.",
+  "plural": "knives",
+  "indefiniteArticle": "a",
+  "portable": true,
+  "weight": 1,
+  "cost": 15,
+  "stats": [8, 0, 0, 0, 0, 0]
+}

@@ -15,6 +15,16 @@ Array.prototype.named = function(name) {
     return undefined;
 }
 
+Array.prototype.send = function(message) {
+
+    for (var i = 0; i < this.length; i++) {
+        var element = this[i];
+        if (element && typeof element === "object" && element.send) {
+            element.send(message);
+        }
+    }
+}
+
 Array.prototype.withId = function(id) {
 
     for (var i = 0; i < this.length; i++) {

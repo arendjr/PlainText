@@ -41,10 +41,10 @@ bool Engine::start() {
         m_util = new Util();
 
         m_realm->setScriptEngine(m_scriptEngine);
-        m_realm->init();
-
         m_scriptEngine->setGlobalObject("Realm", m_realm);
         m_scriptEngine->setGlobalObject("Util", m_util);
+
+        m_realm->init();
 
         m_telnetServer = new TelnetServer(m_realm, 4801);
         m_webSocketServer = new WebSocketServer(m_realm, 4802);

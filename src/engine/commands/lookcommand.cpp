@@ -116,7 +116,7 @@ void LookCommand::execute(const QString &command) {
                  .arg(Util::capitalize(character->subjectPronoun()));
         } else if (statsDiff > 5) {
             m += QString("You appear to be a bit stronger than %1.\n")
-                 .arg(Util::capitalize(character->objectPronoun()));
+                 .arg(character->objectPronoun());
         } else if (statsDiff < -25) {
             m += QString("%1 could kill you with a needle.\n")
                  .arg(Util::capitalize(character->subjectPronoun()));
