@@ -1,8 +1,10 @@
 #include "weapon.h"
 
 
+#define super StatsItem
+
 Weapon::Weapon(Realm *realm, uint id, Options options) :
-    StatsItem(realm, "weapon", id, options) {
+    super(realm, "weapon", id, options) {
 
     setPortable(true);
 }

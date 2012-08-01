@@ -14,7 +14,7 @@ class Class : public GameObject {
         virtual ~Class();
 
         const CharacterStats &stats() const { return m_stats; }
-        virtual void setStats(const CharacterStats &stats);
+        void setStats(const CharacterStats &stats);
         Q_PROPERTY(CharacterStats stats READ stats WRITE setStats)
 
     private:

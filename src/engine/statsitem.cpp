@@ -5,8 +5,10 @@
 #include "realm.h"
 
 
+#define super Item
+
 StatsItem::StatsItem(Realm *realm, const char *objectType, uint id, Options options) :
-    Item(realm, objectType, id, options),
+    super(realm, objectType, id, options),
     m_modifiersTimerId(0) {
 }
 
@@ -19,6 +21,8 @@ void StatsItem::setStats(const CharacterStats &stats) {
         m_stats = stats;
 
         setModified();
+
+        changeStats(m_stats);
     }
 }
 
@@ -80,15 +84,20 @@ void StatsItem::invokeTimer(int timerId) {
         int nextTimeout = updateModifiers(QDateTime::currentMSecsSinceEpoch());
         m_modifiersTimerId = (nextTimeout > -1 ? realm()->startTimer(this, nextTimeout) : 0);
     } else {
-        Item::invokeTimer(timerId);
+        super::invokeTimer(timerId);
     }
 }
 
 void StatsItem::killAllTimers() {
 
-    Item::killAllTimers();
+    super::killAllTimers();
 
     clearModifiers();
+}
+
+void StatsItem::changeStats(const CharacterStats &newStats) {
+
+    Q_UNUSED(newStats);
 }
 
 int StatsItem::updateModifiers(qint64 now) {

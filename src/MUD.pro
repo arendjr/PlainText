@@ -1,6 +1,11 @@
 QT += core network script
 QT -= gui
 
+macx {
+    QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.7
+    INCLUDEPATH += /Applications/Xcode.app//Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk/usr/include/
+    LIBS += -L/Applications/Xcode.app//Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk/usr/lib/
+}
 !macx {
     QMAKE_CXX = clang++
 }
@@ -24,6 +29,7 @@ SOURCES += \
     engine/combatmessage.cpp \
     engine/commandevent.cpp \
     engine/commandinterpreter.cpp \
+    engine/conversionutil.cpp \
     engine/deleteobjectevent.cpp \
     engine/effect.cpp \
     engine/engine.cpp \
@@ -114,6 +120,7 @@ HEADERS += \
     engine/commandevent.h \
     engine/commandinterpreter.h \
     engine/constants.h \
+    engine/conversionutil.h \
     engine/deleteobjectevent.h \
     engine/effect.h \
     engine/engine.h \
@@ -195,13 +202,13 @@ HEADERS += \
     ../3rdparty/qtwebsocket/QtWebSocket/QWsSocket.h
 
 OTHER_FILES += \
+    engine/util.js \
     ../web/admin.js \
     ../web/index.html \
     ../web/main.css \
     ../web/main.js \
     ../web/notifications.js \
     ../web/tappable.js \
-    engine/util.js \
     ../DESIGN.txt
 
 INCLUDEPATH += \

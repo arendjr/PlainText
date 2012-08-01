@@ -1,7 +1,7 @@
 #include "combatmessage.h"
 
+#include "conversionutil.h"
 #include "gameexception.h"
-#include "util.h"
 
 #include <QScriptEngine>
 
@@ -34,9 +34,9 @@ bool CombatMessage::operator!=(const CombatMessage &other) const {
 QString CombatMessage::toString() const {
 
     return QString("[ %1, %2, %3 ]")
-           .arg(Util::jsString(attackerMessage),
-                Util::jsString(defendantMessage),
-                Util::jsString(observerMessage));
+           .arg(ConversionUtil::jsString(attackerMessage),
+                ConversionUtil::jsString(defendantMessage),
+                ConversionUtil::jsString(observerMessage));
 }
 
 CombatMessage CombatMessage::fromVariantList(const QVariantList &variantList) {

@@ -1,5 +1,6 @@
 #include "getpropcommand.h"
 
+#include "engine/conversionutil.h"
 #include "engine/util.h"
 
 
@@ -28,53 +29,9 @@ void GetPropCommand::execute(const QString &command) {
     QString propertyName = Util::toCamelCase(takeWord());
 
     if (propertyName == "id") {
-        player()->send(QString::number(objects[0]->id()));
+        send(QString::number(objects[0]->id()));
     } else {
         QVariant value = objects[0]->property(propertyName.toAscii().constData());
-        if (!value.isValid()) {
-            player()->send("Property is not set on object.");
-            return;
-        }
-
-        switch (value.type()) {
-            case QVariant::Bool:
-                player()->send(value.toBool() ? "true" : "false");
-                break;
-            case QVariant::Int:
-                player()->send(QString::number(value.toInt()));
-                break;
-            case QVariant::Double:
-                player()->send(QString::number(value.toDouble()));
-                break;
-            case QVariant::String:
-                player()->send(value.toString());
-                break;
-            case QVariant::UserType:
-                if (value.userType() == QMetaType::type("GameObjectPtr")) {
-                    GameObjectPtr pointer = value.value<GameObjectPtr>();
-                    if (pointer.isNull()) {
-                        player()->send(pointer.toString());
-                    } else {
-                        player()->send(pointer.toString() + QString(" (%1)").arg(pointer->name()));
-                    }
-                    break;
-                } else if (value.userType() == QMetaType::type("GameObjectPtrList")) {
-                    QStringList strings;
-                    for (const GameObjectPtr &pointer : value.value<GameObjectPtrList>()) {
-                        strings << pointer.toString();
-                    }
-                    player()->send("[ " + strings.join(", ") + " ]");
-                    break;
-                } else if (value.userType() == QMetaType::type("CharacterStats")) {
-                    CharacterStats stats = value.value<CharacterStats>();
-                    player()->send(QString("[ %1, %2, %3, %4, %5, %6 ]")
-                                   .arg(stats.strength).arg(stats.dexterity)
-                                   .arg(stats.vitality).arg(stats.endurance)
-                                   .arg(stats.intelligence).arg(stats.faith));
-                    break;
-                }
-            default:
-                player()->send("Cannot show property of unknown type.");
-        }
+        send(ConversionUtil::toUserString(value));
     }
 }

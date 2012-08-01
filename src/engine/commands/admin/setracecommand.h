@@ -9,7 +9,7 @@ class SetRaceCommand : public AdminCommand {
     Q_OBJECT
 
     public:
-        explicit SetRaceCommand(Player *player, QObject *parent = 0);
+        SetRaceCommand(Player *player, QObject *parent = 0);
         virtual ~SetRaceCommand();
 
         virtual void execute(const QString &command);

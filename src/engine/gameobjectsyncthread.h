@@ -14,7 +14,7 @@ class GameObjectSyncThread : public QThread {
     Q_OBJECT
 
     public:
-        explicit GameObjectSyncThread();
+        GameObjectSyncThread();
         virtual ~GameObjectSyncThread();
 
         void enqueueObject(const GameObject *object);

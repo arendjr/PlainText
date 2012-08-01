@@ -9,7 +9,7 @@ class SayCommand : public Command {
     Q_OBJECT
 
     public:
-        explicit SayCommand(Player *player, QObject *parent = 0);
+        SayCommand(Player *player, QObject *parent = 0);
         virtual ~SayCommand();
 
         virtual void execute(const QString &command);

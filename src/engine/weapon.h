@@ -15,11 +15,11 @@ class Weapon : public StatsItem {
         virtual ~Weapon();
 
         const CombatMessageList &hitMessages() const { return m_hitMessages; }
-        virtual void setHitMessages(const CombatMessageList &hitMessages);
+        void setHitMessages(const CombatMessageList &hitMessages);
         Q_PROPERTY(CombatMessageList hitMessages READ hitMessages WRITE setHitMessages)
 
         const CombatMessageList &missMessages() const { return m_missMessages; }
-        virtual void setMissMessages(const CombatMessageList &missMessages);
+        void setMissMessages(const CombatMessageList &missMessages);
         Q_PROPERTY(CombatMessageList missMessages READ missMessages WRITE setMissMessages)
 
     private:

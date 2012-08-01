@@ -231,13 +231,6 @@ QStringList Util::splitLines(const QString &string, int maxLineLength) {
     return lines;
 }
 
-QString Util::jsString(QString string) {
-
-    return "\"" + string.replace('\\', "\\\\")
-                        .replace('"', "\\\"")
-                        .replace('\n', "\\n") + "\"";
-}
-
 static const char *colorMap[] = {
     "37;1", "37",
     "30;1", "30",
@@ -288,6 +281,23 @@ QString Util::toCamelCase(QString string) {
         string = string.left(index) + string[index + 1].toUpper() + string.mid(index + 2);
     }
     return string;
+}
+
+QString Util::fromCamelCase(const QString &string) {
+
+    QString result;
+    for (int i = 0; i < string.length(); i++) {
+        if (string[i].isUpper()) {
+            if (i == 0) {
+                result += string[i].toLower();
+            } else {
+                result += "-" + string[i].toLower();
+            }
+        } else {
+            result += string[i];
+        }
+    }
+    return result;
 }
 
 QString Util::randomString(int length) {

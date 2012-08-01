@@ -23,6 +23,8 @@
     }
 
 
+#define super StatsItem
+
 Character::Character(Realm *realm, uint id, Options options) :
     Character(realm, "character", id, options) {
 
@@ -32,7 +34,7 @@ Character::Character(Realm *realm, uint id, Options options) :
 }
 
 Character::Character(Realm *realm, const char *objectType, uint id, Options options) :
-    StatsItem(realm, objectType, id, options),
+    super(realm, objectType, id, options),
     m_gender("male"),
     m_subjectPronoun("he"),
     m_objectPronoun("him"),
@@ -58,15 +60,6 @@ Character::~Character() {
 
     if (m_regenerationIntervalId) {
         realm()->stopInterval(m_regenerationIntervalId);
-    }
-}
-
-void Character::setName(const QString &newName) {
-
-    StatsItem::setName(newName);
-
-    if (newName.toLower() != newName) {
-        setIndefiniteArticle("");
     }
 }
 
@@ -184,19 +177,9 @@ void Character::setGender(const QString &gender) {
     }
 }
 
-void Character::setStats(const CharacterStats &stats) {
-
-    if (Character::stats() != stats) {
-        StatsItem::setStats(stats);
-
-        setMaxHp(2 * stats.vitality);
-        setMaxMp(stats.intelligence);
-    }
-}
-
 CharacterStats Character::totalStats() const {
 
-    CharacterStats totalStats = StatsItem::totalStats();
+    CharacterStats totalStats = super::totalStats();
     if (!m_weapon.isNull()) {
         totalStats += m_weapon.cast<Weapon *>()->totalStats();
     }
@@ -831,13 +814,13 @@ void Character::init() {
     // limbo if we died and a server termination killed the respawn timers.
     // in addition, this allows Area::npcs to become a non-stored property,
     // saving many disk writes when NPCs walk around
-    if (!isPlayer()) {
+    if (!isPlayer() && !currentArea().isNull()) {
         Area *area = currentArea().cast<Area *>();
         area->addNPC(this);
     }
 
     if (hasTrigger("oninit")) {
-        StatsItem::init();
+        super::init();
     } else {
         invokeTrigger("onspawn");
     }
@@ -845,7 +828,7 @@ void Character::init() {
 
 GameObject *Character::copy() {
 
-    Character *other = qobject_cast<Character *>(StatsItem::copy());
+    Character *other = qobject_cast<Character *>(super::copy());
     if (!m_weapon.isNull()) {
         other->setWeapon(m_weapon->copy());
     }
@@ -896,13 +879,13 @@ void Character::invokeTimer(int timerId) {
     } else if (timerId == m_regenerationIntervalId) {
         adjustHp(qMax(stats().vitality / 15, 1));
     } else {
-        StatsItem::invokeTimer(timerId);
+        super::invokeTimer(timerId);
     }
 }
 
 void Character::killAllTimers() {
 
-    StatsItem::killAllTimers();
+    super::killAllTimers();
 
     if (m_respawnTimerId) {
         realm()->stopTimer(m_respawnTimerId);
@@ -916,6 +899,23 @@ void Character::killAllTimers() {
         realm()->stopTimer(m_stunTimerId);
         m_stunTimerId = 0;
     }
+}
+
+void Character::changeName(const QString &newName) {
+
+    super::changeName(newName);
+
+    if (newName.toLower() != newName) {
+        setIndefiniteArticle("");
+    }
+}
+
+void Character::changeStats(const CharacterStats &newStats) {
+
+    super::changeStats(newStats);
+
+    setMaxHp(2 * newStats.vitality);
+    setMaxMp(newStats.intelligence);
 }
 
 int Character::updateEffects(qint64 now) {

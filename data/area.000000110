@@ -1,5 +1,6 @@
 {
   "name": "Main Street / Market Street",
-  "exits": [ "exit:112", "exit:114" ],
+  "description": "You're at the junction of Main Street and the Market Street. On the north side of the junction is a little field with a well.",
+  "exits": [ "exit:112", "exit:114", "exit:277" ],
   "items": [ "item:229" ]
 }

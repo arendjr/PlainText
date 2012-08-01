@@ -9,7 +9,7 @@ class CloseCommand : public Command {
     Q_OBJECT
 
     public:
-        explicit CloseCommand(Player *player, QObject *parent = 0);
+        CloseCommand(Player *player, QObject *parent = 0);
         virtual ~CloseCommand();
 
         virtual void execute(const QString &command);

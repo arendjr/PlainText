@@ -9,7 +9,7 @@ class QuitCommand : public Command {
     Q_OBJECT
 
     public:
-        explicit QuitCommand(Player *player, QObject *parent = 0);
+        QuitCommand(Player *player, QObject *parent = 0);
         virtual ~QuitCommand();
 
         virtual void execute(const QString &command);

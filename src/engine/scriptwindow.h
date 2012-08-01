@@ -14,7 +14,7 @@ class ScriptWindow : public QObject {
     Q_OBJECT
 
     public:
-        explicit ScriptWindow(const QScriptValue &originalWindow, QObject *parent = 0);
+        ScriptWindow(const QScriptValue &originalWindow, QObject *parent = 0);
         virtual ~ScriptWindow();
 
         QScriptValue toScriptValue();

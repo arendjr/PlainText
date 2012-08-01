@@ -40,7 +40,10 @@ void ListMethodsCommand::execute(const QString &command) {
     while (it.hasNext()) {
         it.next();
         QString key = it.value().toString();
-        if (key.contains('(') && !key.startsWith("destroyed(")) {
+        if (key.contains('(') && !key.startsWith("destroyed(") &&
+            !key.contains(QRegExp("[(,]Color\\)")) && !key.contains(QRegExp("[(,]Options\\)"))) {
+            key = key.replace("QString", "string").replace("QScriptValue", "value")
+                     .replace("GameObjectPtr", "GameObject").replace(",", ", ");
             send(QString("  %1\n").arg(Util::highlight(key)));
         }
     }

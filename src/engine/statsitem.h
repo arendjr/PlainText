@@ -15,7 +15,7 @@ class StatsItem : public Item {
         virtual ~StatsItem();
 
         const CharacterStats &stats() const { return m_stats; }
-        virtual void setStats(const CharacterStats &stats);
+        void setStats(const CharacterStats &stats);
         Q_PROPERTY(CharacterStats stats READ stats WRITE setStats)
 
         Q_INVOKABLE virtual CharacterStats totalStats() const;
@@ -29,6 +29,9 @@ class StatsItem : public Item {
         virtual void invokeTimer(int timerId);
 
         virtual void killAllTimers();
+
+    protected:
+        virtual void changeStats(const CharacterStats &newStats);
 
     private:
         CharacterStats m_stats;

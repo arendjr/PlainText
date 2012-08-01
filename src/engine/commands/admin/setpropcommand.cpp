@@ -79,7 +79,8 @@ void SetPropCommand::execute(const QString &command) {
                     stats.faith = stringList[5].toInt();
                     variant = QVariant::fromValue(stats);
                 } else {
-                    send("Property of type CharacterStats takes the form [ <str>, <dex>, <vit>, <end>, <int>, <fai> ].");
+                    send("Property of type CharacterStats takes the form [ <str>, <dex>, <vit>, "
+                         "<end>, <int>, <fai> ].");
                     return;
                 }
                 break;
@@ -94,14 +95,15 @@ void SetPropCommand::execute(const QString &command) {
 
         send(QString("Property %1 modified.").arg(propertyName));
 
-        try {
+        if (objects[0]->isItem()) {
             Item *item = objects[0].cast<Item *>();
-            if (propertyName == "name" || propertyName == "plural" || propertyName == "indefiniteArticle") {
-                send(QString("New forms: one %1, two %2, %3 %4.").arg(item->name(), item->plural(),
-                                                                      item->indefiniteArticle(), item->name()));
+            if (propertyName == "name" || propertyName == "plural" ||
+                propertyName == "indefiniteArticle") {
+                send(QString("New forms: %1 %2, one %3, two %4.").arg(item->indefiniteArticle(),
+                                                                      item->name(),
+                                                                      item->name(),
+                                                                      item->plural()));
             }
-        } catch (const GameException &exception) {
-            Q_UNUSED(exception);
         }
     }
 }

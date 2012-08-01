@@ -7,8 +7,10 @@
 #include "util.h"
 
 
+#define super Character
+
 Player::Player(Realm *realm, uint id, Options options) :
-    Character(realm, "player", id, options),
+    super(realm, "player", id, options),
     m_regenerationIntervalId(0),
     m_admin(false),
     m_session(0) {
@@ -20,17 +22,6 @@ Player::~Player() {
 
     if (~options() & Copy) {
         realm()->unregisterPlayer(this);
-    }
-}
-
-void Player::setName(const QString &newName) {
-
-    Q_ASSERT(name().isEmpty());
-
-    GameObject::setName(newName);
-
-    if (~options() & Copy) {
-        realm()->registerPlayer(this);
     }
 }
 
@@ -213,6 +204,15 @@ void Player::invokeTimer(int timerId) {
         adjustHp(qMax(stats().vitality / 15, 1));
         send("");
     } else {
-        Character::invokeTimer(timerId);
+        super::invokeTimer(timerId);
+    }
+}
+
+void Player::changeName(const QString &newName) {
+
+    super::changeName(newName);
+
+    if (~options() & Copy) {
+        realm()->registerPlayer(this);
     }
 }

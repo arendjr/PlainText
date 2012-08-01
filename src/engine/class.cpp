@@ -1,8 +1,10 @@
 #include "class.h"
 
 
+#define super GameObject
+
 Class::Class(Realm *realm, int id, Options options) :
-    GameObject(realm, "class", id, options) {
+    super(realm, "class", id, options) {
 
     setAutoDelete(false);
 }

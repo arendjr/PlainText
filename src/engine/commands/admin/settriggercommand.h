@@ -9,7 +9,7 @@ class SetTriggerCommand : public AdminCommand {
     Q_OBJECT
 
     public:
-        explicit SetTriggerCommand(Player *player, QObject *parent = 0);
+        SetTriggerCommand(Player *player, QObject *parent = 0);
         virtual ~SetTriggerCommand();
 
         virtual void execute(const QString &command);

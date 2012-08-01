@@ -7,6 +7,7 @@
 #include <QObject>
 #include <QScriptEngine>
 #include <QScriptValue>
+#include <QVariantMap>
 
 #include "constants.h"
 #include "scriptfunctionmap.h"
@@ -46,19 +47,28 @@ class GameObject : public QObject {
         Q_PROPERTY(uint id READ id STORED false)
 
         const QString &name() const { return m_name; }
-        virtual void setName(const QString &name);
+        void setName(const QString &name);
         Q_PROPERTY(QString name READ name WRITE setName)
 
         const QString &description() const { return m_description; }
-        virtual void setDescription(const QString &description);
+        void setDescription(const QString &description);
         Q_PROPERTY(QString description READ description WRITE setDescription)
+
+        const QVariantMap &data() const { return m_data; }
+        void setData(const QVariantMap &data);
+        Q_INVOKABLE void setBoolData(const QString &name, bool value);
+        Q_INVOKABLE void setIntData(const QString &name, int value);
+        Q_INVOKABLE void setStringData(const QString &name, const QString &value);
+        Q_INVOKABLE void setGameObjectData(const QString &name, const GameObjectPtr &value);
+        Q_INVOKABLE void setGameObjectListData(const QString &name, const GameObjectPtrList &value);
+        Q_PROPERTY(QVariantMap data READ data WRITE setData)
 
         const ScriptFunctionMap &triggers() const { return m_triggers; }
         ScriptFunction trigger(const QString &name) const { return m_triggers[name]; }
         bool hasTrigger(const QString &name) const { return m_triggers.contains(name); }
-        virtual void setTrigger(const QString &name, const ScriptFunction &function);
-        virtual void unsetTrigger(const QString &name);
-        virtual void setTriggers(const ScriptFunctionMap &triggers);
+        void setTrigger(const QString &name, const ScriptFunction &function);
+        void unsetTrigger(const QString &name);
+        void setTriggers(const ScriptFunctionMap &triggers);
         Q_PROPERTY(ScriptFunctionMap triggers READ triggers WRITE setTriggers)
 
         Q_INVOKABLE bool invokeTrigger(const QString &triggerName,
@@ -148,6 +158,8 @@ class GameObject : public QObject {
         void registerPointer(GameObjectPtr *pointer);
         void unregisterPointer(GameObjectPtr *pointer);
 
+        virtual void changeName(const QString &newName);
+
         static QString saveDirPath();
         static QString saveObjectPath(const char *objectType, uint id);
 
@@ -163,6 +175,7 @@ class GameObject : public QObject {
 
         QString m_name;
         QString m_description;
+        QVariantMap m_data;
         ScriptFunctionMap m_triggers;
 
         bool m_deleted;

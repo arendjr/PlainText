@@ -9,7 +9,7 @@ class GetCommand : public Command {
     Q_OBJECT
 
     public:
-        explicit GetCommand(Player *player, QObject *parent = 0);
+        GetCommand(Player *player, QObject *parent = 0);
         virtual ~GetCommand();
 
         virtual void execute(const QString &command);

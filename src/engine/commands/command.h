@@ -24,7 +24,7 @@ class Command : public QObject {
             IfNotLast = 0x01
         };
 
-        explicit Command(Player *player, QObject *parent = 0);
+        Command(Player *player, QObject *parent = 0);
         virtual ~Command();
 
         const QString &description() const { return m_description; }

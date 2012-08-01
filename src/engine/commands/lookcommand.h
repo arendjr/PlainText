@@ -9,7 +9,7 @@ class LookCommand : public Command {
     Q_OBJECT
 
     public:
-        explicit LookCommand(Player *player, QObject *parent = 0);
+        LookCommand(Player *player, QObject *parent = 0);
         virtual ~LookCommand();
 
         virtual void execute(const QString &command);

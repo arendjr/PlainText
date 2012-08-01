@@ -9,7 +9,7 @@ class TalkCommand : public Command {
     Q_OBJECT
 
     public:
-        explicit TalkCommand(Player *player, QObject *parent = 0);
+        TalkCommand(Player *player, QObject *parent = 0);
         virtual ~TalkCommand();
 
         virtual void execute(const QString &command);

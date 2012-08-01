@@ -9,7 +9,7 @@ class TellCommand : public Command {
     Q_OBJECT
 
     public:
-        explicit TellCommand(Player *player, QObject *parent = 0);
+        TellCommand(Player *player, QObject *parent = 0);
         virtual ~TellCommand();
 
         virtual void execute(const QString &command);

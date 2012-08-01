@@ -9,7 +9,7 @@ class UnsetTriggerCommand : public AdminCommand {
     Q_OBJECT
 
     public:
-        explicit UnsetTriggerCommand(Player *player, QObject *parent = 0);
+        UnsetTriggerCommand(Player *player, QObject *parent = 0);
         virtual ~UnsetTriggerCommand();
 
         virtual void execute(const QString &command);

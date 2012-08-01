@@ -9,7 +9,7 @@ class GetPropCommand : public AdminCommand {
     Q_OBJECT
 
     public:
-        explicit GetPropCommand(Player *player, QObject *parent = 0);
+        GetPropCommand(Player *player, QObject *parent = 0);
         virtual ~GetPropCommand();
 
         virtual void execute(const QString &command);

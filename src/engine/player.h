@@ -16,24 +16,23 @@ class Player : public Character {
         Player(Realm *realm, uint id, Options options = NoOptions);
         virtual ~Player();
 
-        virtual void setName(const QString &name);
-
         const QString &passwordSalt() const { return m_passwordSalt; }
-        virtual void setPasswordSalt(const QString &passwordSalt);
+        void setPasswordSalt(const QString &passwordSalt);
         Q_PROPERTY(QString passwordSalt READ passwordSalt WRITE setPasswordSalt)
 
         const QString &passwordHash() const { return m_passwordHash; }
-        virtual void setPasswordHash(const QString &passwordHash);
+        void setPasswordHash(const QString &passwordHash);
         Q_PROPERTY(QString passwordHash READ passwordHash WRITE setPasswordHash)
 
         bool isAdmin() const { return m_admin; }
-        virtual void setAdmin(bool admin);
+        void setAdmin(bool admin);
         Q_PROPERTY(bool admin READ isAdmin WRITE setAdmin)
 
         Session *session() const { return m_session; }
         void setSession(Session *session);
 
         virtual void send(const QString &message, Color color = Silver) const;
+
         Q_INVOKABLE void sendSellableItemsList(const GameObjectPtrList &items);
 
         virtual void enter(const GameObjectPtr &area);
@@ -47,6 +46,9 @@ class Player : public Character {
 
     signals:
         void write(const QString &data) const;
+
+    protected:
+        virtual void changeName(const QString &name);
 
     private:
         QString m_passwordSalt;

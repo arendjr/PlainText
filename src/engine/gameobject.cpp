@@ -18,9 +18,8 @@
 
 #include "area.h"
 #include "character.h"
-#include "characterstats.h"
 #include "class.h"
-#include "combatmessage.h"
+#include "conversionutil.h"
 #include "deleteobjectevent.h"
 #include "exit.h"
 #include "gameexception.h"
@@ -30,7 +29,6 @@
 #include "race.h"
 #include "realm.h"
 #include "scriptengine.h"
-#include "scriptfunctionmap.h"
 #include "shield.h"
 #include "util.h"
 #include "weapon.h"
@@ -125,6 +123,8 @@ void GameObject::setName(const QString &name) {
 
         setObjectName(name);
         setModified();
+
+        changeName(m_name);
     }
 }
 
@@ -132,6 +132,67 @@ void GameObject::setDescription(const QString &description) {
 
     if (m_description != description) {
         m_description = description;
+
+        setModified();
+    }
+}
+
+void GameObject::setData(const QVariantMap &data) {
+
+    if (m_data != data) {
+        m_data = data;
+
+        setModified();
+    }
+}
+
+void GameObject::setBoolData(const QString &name, bool value) {
+
+    if (!m_data.contains(name) || m_data[name].type() != QVariant::Bool ||
+        m_data[name].toBool() != value) {
+        m_data[name] = value;
+
+        setModified();
+    }
+}
+
+void GameObject::setIntData(const QString &name, int value) {
+
+    if (!m_data.contains(name) || m_data[name].type() != QVariant::Int ||
+        m_data[name].toInt() != value) {
+        m_data[name] = value;
+
+        setModified();
+    }
+}
+
+void GameObject::setStringData(const QString &name, const QString &value) {
+
+    if (!m_data.contains(name) || m_data[name].type() != QVariant::String ||
+        m_data[name].toString() != value) {
+        m_data[name] = value;
+
+        setModified();
+    }
+}
+
+void GameObject::setGameObjectData(const QString &name, const GameObjectPtr &value) {
+
+    if (!m_data.contains(name) || m_data[name].type() != QVariant::UserType ||
+        m_data[name].userType() != QMetaType::type("GameObjectPtr") ||
+        m_data[name].value<GameObjectPtr>() != value) {
+        m_data[name] = QVariant::fromValue(value);
+
+        setModified();
+    }
+}
+
+void GameObject::setGameObjectListData(const QString &name, const GameObjectPtrList &value) {
+
+    if (!m_data.contains(name) || m_data[name].type() != QVariant::UserType ||
+        m_data[name].userType() != QMetaType::type("GameObjectPtrList") ||
+        m_data[name].value<GameObjectPtrList>() != value) {
+        m_data[name] = QVariant::fromValue(value);
 
         setModified();
     }
@@ -313,90 +374,13 @@ bool GameObject::save() {
         return QFile::remove(saveObjectPath(m_objectType, m_id));
     }
 
-    const QString v("  \"%1\": %2");
-    const QString o("  \"%1\": { %2 }");
-    const QString l("  \"%1\": [ %2 ]");
-    const QString k("%1: %2");
-
     QStringList dumpedProperties;
     for (const QMetaProperty &metaProperty : storedMetaProperties()) {
         const char *name = metaProperty.name();
 
-        switch (metaProperty.type()) {
-            case QVariant::Bool:
-                dumpedProperties << v.arg(name, property(name).toBool() ? "true" : "false");
-                break;
-            case QVariant::Int:
-                dumpedProperties << v.arg(name).arg(property(name).toInt());
-                break;
-            case QVariant::Double:
-                dumpedProperties << v.arg(name).arg(property(name).toDouble());
-                break;
-            case QVariant::String:
-                if (!property(name).toString().isEmpty()) {
-                    dumpedProperties << v.arg(name, Util::jsString(property(name).toString()));
-                }
-                break;
-            case QVariant::StringList: {
-                QStringList stringList;
-                for (const QString &string : property(name).toStringList()) {
-                    stringList << Util::jsString(string);
-                }
-                if (!stringList.isEmpty()) {
-                    dumpedProperties << l.arg(name, stringList.join(", "));
-                }
-                break;
-            }
-            case QVariant::DateTime: {
-                dumpedProperties << v.arg(name).arg(property(name).toDateTime()
-                                                    .toMSecsSinceEpoch());
-                break;
-            }
-            case QVariant::UserType:
-                if (metaProperty.userType() == QMetaType::type("GameObjectPtr")) {
-                    dumpedProperties << v.arg(name, Util::jsString(property(name)
-                                                    .value<GameObjectPtr>().toString()));
-                    break;
-                } else if (metaProperty.userType() == QMetaType::type("GameObjectPtrList")) {
-                    QStringList stringList;
-                    for (const GameObjectPtr &pointer : property(name).value<GameObjectPtrList>()) {
-                        if (pointer.isNull()) {
-                            continue;
-                        }
-                        stringList << Util::jsString(pointer.toString());
-                    }
-                    if (!stringList.isEmpty()) {
-                        dumpedProperties << l.arg(name, stringList.join(", "));
-                    }
-                    break;
-                } else if (metaProperty.userType() == QMetaType::type("ScriptFunctionMap")) {
-                    QStringList stringList;
-                    ScriptFunctionMap functionMap = property(name).value<ScriptFunctionMap>();
-                    for (const QString &key : functionMap.keys()) {
-                        stringList << k.arg(Util::jsString(key),
-                                            Util::jsString(functionMap[key].toString()));
-                    }
-                    if (!stringList.isEmpty()) {
-                        dumpedProperties << o.arg(name, stringList.join(", "));
-                    }
-                    break;
-                } else if (metaProperty.userType() == QMetaType::type("CharacterStats")) {
-                    dumpedProperties << v.arg(name,
-                                              property(name).value<CharacterStats>().toString());
-                    break;
-                } else if (metaProperty.userType() == QMetaType::type("CombatMessageList")) {
-                    QStringList stringList;
-                    for (const CombatMessage &message : property(name).value<CombatMessageList>()) {
-                        stringList << message.toString();
-                    }
-                    if (!stringList.isEmpty()) {
-                        dumpedProperties << l.arg(name, stringList.join(", "));
-                    }
-                    break;
-                }
-                // fall-through
-            default:
-                qDebug() << "Unknown type: " << metaProperty.type();
+        QString propertyString = ConversionUtil::toJSON(property(name));
+        if (!propertyString.isNull()) {
+            dumpedProperties << QString("  \"%1\": %2").arg(name, propertyString);
         }
     }
 
@@ -420,78 +404,23 @@ bool GameObject::load(const QString &path) {
 
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly)) {
-       throw GameException(GameException::CouldNotOpenGameObjectFile);
+        throw GameException(GameException::CouldNotOpenGameObjectFile, path.toUtf8().constData());
     }
 
     bool error;
     JSonDriver driver;
     QVariantMap map = driver.parse(&file, &error).toMap();
     if (error) {
-       throw GameException(GameException::CorruptGameObjectFile);
+        throw GameException(GameException::CorruptGameObjectFile, path.toUtf8().constData());
     }
 
-    for (const QMetaProperty &metaProperty : storedMetaProperties()) {
-        const char *name = metaProperty.name();
+    for (const QMetaProperty &meta : storedMetaProperties()) {
+        const char *name = meta.name();
         if (!map.contains(name)) {
             continue;
         }
 
-        switch (metaProperty.type()) {
-            case QVariant::Bool:
-            case QVariant::Int:
-            case QVariant::Double:
-            case QVariant::String:
-                setProperty(name, map[name]);
-                break;
-            case QVariant::StringList: {
-                QStringList stringList;
-                for (const QVariant &variant : map[name].toList()) {
-                    stringList << variant.toString();
-                }
-                setProperty(name, stringList);
-                break;
-            }
-            case QVariant::DateTime:
-                setProperty(name, QDateTime::fromMSecsSinceEpoch(map[name].toLongLong()));
-                break;
-            case QVariant::UserType:
-                if (metaProperty.userType() == QMetaType::type("GameObjectPtr")) {
-                    setProperty(name, QVariant::fromValue(GameObjectPtr::fromString(m_realm,
-                                                                                    map[name]
-                                                                                    .toString())));
-                    break;
-                } else if (metaProperty.userType() == QMetaType::type("GameObjectPtrList")) {
-                    GameObjectPtrList pointerList;
-                    for (const QVariant &variant : map[name].toList()) {
-                        pointerList << GameObjectPtr::fromString(m_realm, variant.toString());
-                    }
-                    setProperty(name, QVariant::fromValue(pointerList));
-                    break;
-                } else if (metaProperty.userType() == QMetaType::type("ScriptFunctionMap")) {
-                    ScriptFunctionMap functionMap;
-                    QVariantMap variantMap = map[name].toMap();
-                    for (const QString &key : variantMap.keys()) {
-                        functionMap[key] = ScriptFunction::fromString(variantMap[key].toString());
-                    }
-                    setProperty(name, QVariant::fromValue(functionMap));
-                    break;
-                } else if (metaProperty.userType() == QMetaType::type("CharacterStats")) {
-                    setProperty(name,
-                                QVariant::fromValue(CharacterStats::fromVariantList(map[name]
-                                                                                    .toList())));
-                    break;
-                } else if (metaProperty.userType() == QMetaType::type("CombatMessageList")) {
-                    CombatMessageList messageList;
-                    for (const QVariant &variant : map[name].toList()) {
-                        messageList << CombatMessage::fromVariantList(variant.toList());
-                    }
-                    setProperty(name, QVariant::fromValue(messageList));
-                    break;
-                }
-                // fall-through
-            default:
-                qDebug() << "Unknown type: " << metaProperty.type();
-        }
+        setProperty(name, ConversionUtil::fromVariant(meta.type(), meta.userType(), map[name]));
     }
 
     return true;
@@ -703,6 +632,11 @@ void GameObject::unregisterPointer(GameObjectPtr *pointer) {
     if (m_autoDelete && m_pointers.isEmpty()) {
         setDeleted();
     }
+}
+
+void GameObject::changeName(const QString &newName) {
+
+    Q_UNUSED(newName);
 }
 
 QString GameObject::saveDirPath() {

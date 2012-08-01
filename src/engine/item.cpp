@@ -3,46 +3,20 @@
 #include "util.h"
 
 
+#define super GameObject
+
 Item::Item(Realm *realm, uint id, Options options) :
     Item(realm, "item", id, options) {
 }
 
 Item::Item(Realm *realm, const char *objectType, uint id, Options options) :
-    GameObject(realm, objectType, id, options),
+    super(realm, objectType, id, options),
     m_portable(false),
     m_weight(0),
     m_cost(0.0) {
 }
 
 Item::~Item() {
-}
-
-void Item::setName(const QString &newName) {
-
-    if (name() != newName) {
-        if (newName.length() > 0) {
-            if (newName.endsWith("y")) {
-                m_plural = newName.left(newName.length() - 1) + "ies";
-            } else if (newName.endsWith("f")) {
-                m_plural = newName.left(newName.length() - 1) + "ves";
-            } else if (newName.endsWith("fe")) {
-                m_plural = newName.left(newName.length() - 2) + "ves";
-            } else if (newName.endsWith("is")) {
-                m_plural = newName.left(newName.length() - 2) + "es";
-            } else {
-                m_plural = newName + "s";
-            }
-
-            if (newName[0] == 'a' || newName[0] == 'e' || newName[0] == 'i' ||
-                newName[0] == 'o' || newName[0] == 'u') {
-                m_indefiniteArticle = "an";
-            } else {
-                m_indefiniteArticle = "a";
-            }
-        }
-
-        GameObject::setName(newName);
-    }
 }
 
 QString Item::definiteName(const GameObjectPtrList &pool, Options options) {
@@ -74,8 +48,7 @@ QString Item::indefiniteName(Options options) {
         return name();
     } else {
         return (options & Capitalized ? Util::capitalize(m_indefiniteArticle) :
-                                        m_indefiniteArticle) + " " +
-               name();
+                                        m_indefiniteArticle) + " " + name();
     }
 }
 
@@ -126,5 +99,31 @@ void Item::setCost(double cost) {
         m_cost = cost;
 
         setModified();
+    }
+}
+
+void Item::changeName(const QString &newName) {
+
+    super::changeName(newName);
+
+    if (newName.length() > 0) {
+        if (newName.endsWith("y")) {
+            m_plural = newName.left(newName.length() - 1) + "ies";
+        } else if (newName.endsWith("f")) {
+            m_plural = newName.left(newName.length() - 1) + "ves";
+        } else if (newName.endsWith("fe")) {
+            m_plural = newName.left(newName.length() - 2) + "ves";
+        } else if (newName.endsWith("is")) {
+            m_plural = newName.left(newName.length() - 2) + "es";
+        } else {
+            m_plural = newName + "s";
+        }
+
+        if (newName[0] == 'a' || newName[0] == 'e' || newName[0] == 'i' ||
+            newName[0] == 'o' || newName[0] == 'u') {
+            m_indefiniteArticle = "an";
+        } else {
+            m_indefiniteArticle = "a";
+        }
     }
 }

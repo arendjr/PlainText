@@ -15,7 +15,7 @@ class Shield : public StatsItem {
         virtual ~Shield();
 
         const CombatMessageList &deflectMessages() const { return m_deflectMessages; }
-        virtual void setDeflectMessages(const CombatMessageList &deflectMessages);
+        void setDeflectMessages(const CombatMessageList &deflectMessages);
         Q_PROPERTY(CombatMessageList deflectMessages READ deflectMessages WRITE setDeflectMessages)
 
     private:

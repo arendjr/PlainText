@@ -22,12 +22,14 @@ GameObjectPtr::GameObjectPtr() :
 }
 
 GameObjectPtr::GameObjectPtr(GameObject *gameObject) :
-    m_gameObject(gameObject),
-    m_objectType(strdup(gameObject->objectType())),
-    m_id(gameObject->id()),
-    m_list(nullptr) {
+    GameObjectPtr() {
 
-    m_gameObject->registerPointer(this);
+    if (gameObject) {
+        m_gameObject = gameObject;
+        m_objectType = strdup(gameObject->objectType());
+        m_id = gameObject->id();
+        m_gameObject->registerPointer(this);
+    }
 }
 
 GameObjectPtr::GameObjectPtr(Realm *realm, const char *objectType, uint id) :

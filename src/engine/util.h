@@ -32,8 +32,6 @@ class Util : public QObject {
 
         static QStringList splitLines(const QString &string, int maxLineLength = 80);
 
-        static QString jsString(QString string);
-
         static QString colorize(const QString &string, Color color);
 
         Q_INVOKABLE static QString highlight(const QString &string);
@@ -47,6 +45,7 @@ class Util : public QObject {
         static QString direction(const QString &abbreviation);
 
         static QString toCamelCase(QString string);
+        static QString fromCamelCase(const QString &string);
 
         Q_INVOKABLE static QString randomString(int length);
 };

@@ -6,9 +6,9 @@
 #include <QWsServer.h>
 #include <QWsSocket.h>
 
+#include "engine/conversionutil.h"
 #include "engine/player.h"
 #include "engine/session.h"
-#include "engine/util.h"
 
 
 WebSocketServer::WebSocketServer(Realm *realm, quint16 port, QObject *parent) :
@@ -78,14 +78,15 @@ void WebSocketServer::onSessionOutput(const QString &data) {
 
         socket->write(QString("{ "
                                 "\"player\": { "
-                                "\"name\": %1, "
-                                "\"isAdmin\": %2, "
-                                "\"hp\": %3, "
-                                "\"maxHp\": %4, "
-                                "\"mp\": %5, "
-                                "\"maxMp\": %6 } "
+                                  "\"name\": %1, "
+                                  "\"isAdmin\": %2, "
+                                  "\"hp\": %3, "
+                                  "\"maxHp\": %4, "
+                                  "\"mp\": %5, "
+                                  "\"maxMp\": %6 "
+                                "} "
                               "}")
-                      .arg(Util::jsString(player->name()),
+                      .arg(ConversionUtil::jsString(player->name()),
                            player->isAdmin() ? "true" : "false",
                            QString::number(player->hp()),
                            QString::number(player->maxHp()),

@@ -9,7 +9,7 @@ class SlashMeCommand : public Command {
     Q_OBJECT
 
     public:
-        explicit SlashMeCommand(Player *player, QObject *parent = 0);
+        SlashMeCommand(Player *player, QObject *parent = 0);
         virtual ~SlashMeCommand();
 
         virtual void execute(const QString &command);

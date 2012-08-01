@@ -10,8 +10,10 @@
 static Realm *s_instance = nullptr;
 
 
+#define super GameObject
+
 Realm::Realm(Options options) :
-    GameObject(this, "realm", 0, options),
+    super(this, "realm", 0, options),
     m_initialized(false),
     m_nextId(1),
     m_timeIntervalId(0),
@@ -56,7 +58,7 @@ void Realm::init() {
     QDir dir(saveDirPath());
     for (const QString &fileName : dir.entryList(QDir::Files)) {
         if (!fileName.startsWith("realm.")) {
-            GameObject::createFromFile(this, dir.path() + "/" + fileName);
+            createFromFile(this, dir.path() + "/" + fileName);
         }
     }
 
@@ -68,6 +70,8 @@ void Realm::init() {
     m_gameThread.start(QThread::HighestPriority);
 
     m_initialized = true;
+
+    super::init();
 
     for (GameObject *object : m_objectMap) {
         object->init();
@@ -212,6 +216,6 @@ void Realm::invokeTimer(int timerId) {
             emit dayPassed(m_dateTime);
         }
     } else {
-        GameObject::invokeTimer(timerId);
+        super::invokeTimer(timerId);
     }
 }

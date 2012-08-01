@@ -1,8 +1,10 @@
 #include "race.h"
 
 
+#define super GameObject
+
 Race::Race(Realm *realm, uint id, Options options) :
-    GameObject(realm, "race", id, options),
+    super(realm, "race", id, options),
     m_playerSelectable(false) {
 
     setAutoDelete(false);

@@ -9,7 +9,7 @@ class StatsCommand : public Command {
     Q_OBJECT
 
     public:
-        explicit StatsCommand(Player *player, QObject *parent = 0);
+        StatsCommand(Player *player, QObject *parent = 0);
         virtual ~StatsCommand();
 
         virtual void execute(const QString &command);

@@ -9,7 +9,7 @@ class StopServerCommand : public AdminCommand {
     Q_OBJECT
 
     public:
-        explicit StopServerCommand(Player *player, QObject *parent = 0);
+        StopServerCommand(Player *player, QObject *parent = 0);
         virtual ~StopServerCommand();
 
         virtual void execute(const QString &command);

@@ -9,7 +9,7 @@ class ShoutCommand : public Command {
     Q_OBJECT
 
     public:
-        explicit ShoutCommand(Player *player, QObject *parent = 0);
+        ShoutCommand(Player *player, QObject *parent = 0);
         virtual ~ShoutCommand();
 
         virtual void execute(const QString &command);

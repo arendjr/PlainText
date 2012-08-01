@@ -1,8 +1,10 @@
 #include "shield.h"
 
 
+#define super StatsItem
+
 Shield::Shield(Realm *realm, uint id, Options options) :
-    StatsItem(realm, "shield", id, options) {
+    super(realm, "shield", id, options) {
 
     setPortable(true);
 }

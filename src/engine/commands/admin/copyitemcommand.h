@@ -9,7 +9,7 @@ class CopyItemCommand : public AdminCommand {
     Q_OBJECT
 
     public:
-        explicit CopyItemCommand(Player *player, QObject *parent = 0);
+        CopyItemCommand(Player *player, QObject *parent = 0);
         virtual ~CopyItemCommand();
 
         virtual void execute(const QString &command);

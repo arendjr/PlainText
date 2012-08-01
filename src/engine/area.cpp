@@ -3,8 +3,10 @@
 #include "character.h"
 
 
+#define super GameObject
+
 Area::Area(Realm *realm, uint id, Options options) :
-    GameObject(realm, "area", id, options) {
+    super(realm, "area", id, options) {
 }
 
 Area::~Area() {

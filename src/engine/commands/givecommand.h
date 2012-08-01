@@ -9,7 +9,7 @@ class GiveCommand : public Command {
     Q_OBJECT
 
     public:
-        explicit GiveCommand(Player *player, QObject *parent = 0);
+        GiveCommand(Player *player, QObject *parent = 0);
         virtual ~GiveCommand();
 
         virtual void execute(const QString &command);
