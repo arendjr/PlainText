@@ -11,3 +11,10 @@ Technology
    objects.
  * The game is accessible over telnet, but also hosts a web interface
    over HTTP which connects to the game using WebSockets.
+
+License
+-------
+
+This software is licensed under GPLv3.
+
+For details, see LICENSE.GPL.txt.
