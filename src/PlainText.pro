@@ -44,6 +44,7 @@ SOURCES += \
     engine/gameobjectptr.cpp \
     engine/gameobjectsyncthread.cpp \
     engine/gamethread.cpp \
+    engine/group.cpp \
     engine/item.cpp \
     engine/modifier.cpp \
     engine/player.cpp \
@@ -64,15 +65,20 @@ SOURCES += \
     engine/commands/closecommand.cpp \
     engine/commands/command.cpp \
     engine/commands/descriptioncommand.cpp \
+    engine/commands/disbandcommand.cpp \
     engine/commands/drinkcommand.cpp \
     engine/commands/dropcommand.cpp \
     engine/commands/eatcommand.cpp \
+    engine/commands/followcommand.cpp \
     engine/commands/getcommand.cpp \
     engine/commands/givecommand.cpp \
     engine/commands/gocommand.cpp \
+    engine/commands/groupcommand.cpp \
+    engine/commands/gtalkcommand.cpp \
     engine/commands/inventorycommand.cpp \
     engine/commands/killcommand.cpp \
     engine/commands/lookcommand.cpp \
+    engine/commands/losecommand.cpp \
     engine/commands/opencommand.cpp \
     engine/commands/quitcommand.cpp \
     engine/commands/removecommand.cpp \
@@ -136,6 +142,7 @@ HEADERS += \
     engine/gameobjectptr.h \
     engine/gameobjectsyncthread.h \
     engine/gamethread.h \
+    engine/group.h \
     engine/item.h \
     engine/modifier.h \
     engine/player.h \
@@ -156,15 +163,20 @@ HEADERS += \
     engine/commands/closecommand.h \
     engine/commands/command.h \
     engine/commands/descriptioncommand.h \
+    engine/commands/disbandcommand.h \
     engine/commands/drinkcommand.h \
     engine/commands/dropcommand.h \
     engine/commands/eatcommand.h \
+    engine/commands/followcommand.h \
     engine/commands/getcommand.h \
     engine/commands/givecommand.h \
     engine/commands/gocommand.h \
+    engine/commands/groupcommand.h \
+    engine/commands/gtalkcommand.h \
     engine/commands/inventorycommand.h \
     engine/commands/killcommand.h \
     engine/commands/lookcommand.h \
+    engine/commands/losecommand.h \
     engine/commands/opencommand.h \
     engine/commands/quitcommand.h \
     engine/commands/removecommand.h \

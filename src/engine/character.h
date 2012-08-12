@@ -105,6 +105,9 @@ class Character : public StatsItem {
         void setShield(const GameObjectPtr &shield);
         Q_PROPERTY(GameObjectPtr shield READ shield WRITE setShield)
 
+        const GameObjectPtr &group() const { return m_group; }
+        Q_PROPERTY(GameObjectPtr group READ group STORED false)
+
         EffectList effects() const { return m_effects; }
         Q_INVOKABLE void addEffect(const Effect &effect);
         Q_INVOKABLE void clearEffects();
@@ -131,6 +134,10 @@ class Character : public StatsItem {
 
         Q_INVOKABLE virtual void kill(const GameObjectPtr &character);
         Q_INVOKABLE virtual void die(const GameObjectPtr &attacker = GameObjectPtr());
+
+        Q_INVOKABLE virtual void follow(const GameObjectPtr &character);
+        Q_INVOKABLE virtual void lose(const GameObjectPtr &character = GameObjectPtr());
+        Q_INVOKABLE virtual void disband();
 
         int secondsStunned() const { return m_secondsStunned; }
         Q_INVOKABLE virtual void stun(int timeout);
@@ -178,6 +185,8 @@ class Character : public StatsItem {
         GameObjectPtr m_weapon;
         GameObjectPtr m_secondaryWeapon;
         GameObjectPtr m_shield;
+
+        GameObjectPtr m_group;
 
         EffectList m_effects;
         int m_effectsTimerId;

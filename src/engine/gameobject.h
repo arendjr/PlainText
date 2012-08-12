@@ -36,6 +36,7 @@ class GameObject : public QObject {
         Q_INVOKABLE bool isExit() const;
         Q_INVOKABLE bool isItem() const;
         Q_INVOKABLE bool isCharacter() const;
+        Q_INVOKABLE bool isGroup() const;
         Q_INVOKABLE bool isPlayer() const;
         Q_INVOKABLE bool isRace() const;
         Q_INVOKABLE bool isShield() const;

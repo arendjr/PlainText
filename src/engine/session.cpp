@@ -98,7 +98,19 @@ void Session::processSignIn(const QString &data) {
 
     switch (m_signInStage) {
         case AskingUserName: {
-            QString userName = Util::capitalize(answer.left(12));
+            QString userName;
+            for (int i = 0; i < answer.length(); i++) {
+                if (answer[i].isLetter()) {
+                    if (userName.isEmpty()) {
+                        userName.append(answer[i].toUpper());
+                    } else {
+                        userName.append(answer[i]);
+                        if (userName.length() >= 12) {
+                            break;
+                        }
+                    }
+                }
+            }
             m_player = m_realm->getPlayer(userName);
             if (m_player) {
                 m_signInStage = AskingPassword;

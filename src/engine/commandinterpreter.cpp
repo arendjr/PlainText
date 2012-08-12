@@ -13,15 +13,20 @@
 #include "commands/buycommand.h"
 #include "commands/closecommand.h"
 #include "commands/descriptioncommand.h"
+#include "commands/disbandcommand.h"
 #include "commands/drinkcommand.h"
 #include "commands/dropcommand.h"
 #include "commands/eatcommand.h"
+#include "commands/followcommand.h"
 #include "commands/getcommand.h"
 #include "commands/givecommand.h"
 #include "commands/gocommand.h"
+#include "commands/groupcommand.h"
+#include "commands/gtalkcommand.h"
 #include "commands/inventorycommand.h"
 #include "commands/killcommand.h"
 #include "commands/lookcommand.h"
+#include "commands/losecommand.h"
 #include "commands/opencommand.h"
 #include "commands/quitcommand.h"
 #include "commands/saycommand.h"
@@ -68,18 +73,23 @@ CommandInterpreter::CommandInterpreter(Player *player) :
     m_commands.insert("buy", new BuyCommand(player, this));
     m_commands.insert("close", new CloseCommand(player, this));
     m_commands.insert("description", new DescriptionCommand(player, this));
+    m_commands.insert("disband", new DisbandCommand(player, this));
     m_commands.insert("drink", new DrinkCommand(player, this));
     m_commands.insert("drop", new DropCommand(player, this));
     m_commands.insert("eat", new EatCommand(player, this));
     m_commands.insert("enter", go);
+    m_commands.insert("follow", new FollowCommand(player, this));
     m_commands.insert("get", get);
     m_commands.insert("give", new GiveCommand(player, this));
     m_commands.insert("go", go);
     m_commands.insert("goodbye", quit);
+    m_commands.insert("group", new GroupCommand(player, this));
+    m_commands.insert("gtalk", new GtalkCommand(player, this));
     m_commands.insert("inventory", new InventoryCommand(player, this));
     m_commands.insert("kill", kill);
     m_commands.insert("l", look);
     m_commands.insert("look", look);
+    m_commands.insert("lose", new LoseCommand(player, this));
     m_commands.insert("open", new OpenCommand(player, this));
     m_commands.insert("quit", quit);
     m_commands.insert("say", new SayCommand(player, this));

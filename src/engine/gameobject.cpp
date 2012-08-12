@@ -24,6 +24,7 @@
 #include "exit.h"
 #include "gameexception.h"
 #include "gameobjectptr.h"
+#include "group.h"
 #include "item.h"
 #include "player.h"
 #include "race.h"
@@ -89,6 +90,11 @@ bool GameObject::isItem() const {
 bool GameObject::isCharacter() const {
 
     return strcmp(m_objectType, "character") == 0 || isPlayer();
+}
+
+bool GameObject::isGroup() const {
+
+    return strcmp(m_objectType, "group") == 0;
 }
 
 bool GameObject::isPlayer() const {
@@ -449,7 +455,9 @@ void GameObject::setDeleted() {
     if (~m_options & Copy) {
         m_deleted = true;
 
-        m_realm->addModifiedObject(this);
+        if (~m_options & DontSave) {
+            m_realm->addModifiedObject(this);
+        }
 
         m_realm->enqueueEvent(new DeleteObjectEvent(this));
     }
@@ -470,6 +478,8 @@ GameObject *GameObject::createByObjectType(Realm *realm, const QString &objectTy
         return new Class(realm, id, options);
     } else if (objectType == "exit") {
         return new Exit(realm, id, options);
+    } else if (objectType == "group") {
+        return new Group(realm, id, options);
     } else if (objectType == "item") {
         return new Item(realm, id, options);
     } else if (objectType == "player") {
@@ -608,7 +618,7 @@ bool GameObject::mayReferenceOtherProperties() const {
 
 void GameObject::setModified() {
 
-    if (~m_options & Copy) {
+    if (~m_options & (Copy | DontSave)) {
         m_realm->addModifiedObject(this);
     }
 }

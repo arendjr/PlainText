@@ -37,7 +37,11 @@ void TalkCommand::execute(const QString &command) {
         } else {
             name = "The " + description.first;
         }
-        player()->send(QString("%1 is not here.").arg(name));
+        send(QString("\"%1\" is not here.").arg(name));
+        return;
+    }
+
+    if (!assertWordsLeft("Say what?")) {
         return;
     }
 

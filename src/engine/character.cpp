@@ -4,6 +4,7 @@
 
 #include "area.h"
 #include "exit.h"
+#include "group.h"
 #include "player.h"
 #include "realm.h"
 #include "shield.h"
@@ -789,6 +790,125 @@ void Character::die(const GameObjectPtr &attacker) {
     } else {
         setDeleted();
     }
+}
+
+void Character::follow(const GameObjectPtr &characterPtr) {
+
+    NOT_NULL(characterPtr);
+
+    Character *character = characterPtr.cast<Character *>();
+
+    if (isPlayer() && !characterPtr->isPlayer()) {
+        GameObjectPtrList characters = currentArea().cast<Area *>()->characters();
+        QString name = character->definiteName(characters, DefiniteArticles);
+        send(QString("You cannot follow %1.").arg(name));
+        return;
+    }
+
+    if (!m_group.isNull()) {
+        Group *group = m_group.cast<Group *>();
+        if (group->leader() == characterPtr) {
+            send(QString("You are already following %1.").arg(character->name()));
+            return;
+        }
+        if (group->members().contains(characterPtr)) {
+            send(QString("You are already in the same group as %1.").arg(character->name()));
+            return;
+        }
+
+        lose();
+    }
+
+    Group *group;
+    if (character->m_group.isNull()) {
+        group = GameObject::createByObjectType<Group *>(realm(), "group");
+        group->setLeader(characterPtr);
+    } else {
+        group = character->m_group.cast<Group *>();
+    }
+
+    if (group->members().length() == 0) {
+        send(QString("You started following %1.").arg(character->name()));
+        character->send(QString("%1 started following you.").arg(name()));
+    } else {
+        send(QString("You joined the group of %1, led by %2.").arg(group->members().joinFancy(),
+                                                                   group->leader()->name()));
+        group->send(QString("%1 joined your group.").arg(name()));
+    }
+
+    group->addMember(this);
+}
+
+void Character::lose(const GameObjectPtr &character) {
+
+    if (m_group.isNull()) {
+        send("You're not part of any group.");
+        return;
+    }
+
+    Group *group = m_group.cast<Group *>();
+
+    if (character.isNull()) {
+        if (group->leader() == this) {
+            disband();
+        } else {
+            if (group->members().length() > 1) {
+                group->removeMember(this);
+                group->send(QString("%1 left the group.").arg(name()));
+                send("You left the group.");
+            } else {
+                Character *leader = group->leader().cast<Character *>();
+                leader->send(QString("%1 has stopped following you.").arg(name()));
+                leader->m_group = GameObjectPtr();
+                group->setDeleted();
+                send(QString("You stopped following %1.").arg(group->leader()->name()));
+            }
+        }
+        m_group = GameObjectPtr();
+    } else {
+        if (character == this) {
+            lose();
+        } else {
+            if (group->leader() == this) {
+                if (group->members().contains(character)) {
+                    if (group->members().length() > 1) {
+                        group->removeMember(character);
+                        character->send(QString("%1 has removed you from the group.").arg(name()));
+                        send(QString("You removed %1 from the group.").arg(character->name()));
+                    } else {
+                        disband();
+                    }
+                } else {
+                    send(QString("%1 is not a member of the group.").arg(character->name()));
+                }
+            } else {
+                send("Only the group leader can lose people from the group.");
+            }
+        }
+    }
+}
+
+void Character::disband() {
+
+    if (m_group.isNull()) {
+        send("You're not part of any group.");
+        return;
+    }
+
+    Group *group = m_group.cast<Group *>();
+    if (group->leader() != this) {
+        send("Only the group leader can disband the group.");
+        return;
+    }
+
+    for (const GameObjectPtr &memberPtr : group->members()) {
+        Character *member = memberPtr.cast<Character *>();
+        member->send(QString("%1 has disbanded the group.").arg(name()));
+        member->m_group = GameObjectPtr();
+    }
+
+    group->setDeleted();
+    send("You disbanded the group.");
 }
 
 void Character::stun(int timeout) {
