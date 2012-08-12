@@ -1,6 +1,6 @@
 # Qt Creator build
-MUD-build-desktop
-MUD.pro.user
+PlainText-build-desktop*
+PlainText.pro.user
 moc_*.cpp
 
 # XCode project

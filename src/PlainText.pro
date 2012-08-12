@@ -2,18 +2,22 @@ QT += core network script
 QT -= gui
 
 macx {
-    QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.7
-    INCLUDEPATH += /Applications/Xcode.app//Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk/usr/include/
-    LIBS += -L/Applications/Xcode.app//Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk/usr/lib/
-}
-!macx {
+    DEPLOYMENT_TARGET = 10.7
+    MAC_SDK  = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX$${DEPLOYMENT_TARGET}.sdk
+    if (!exists($$MAC_SDK)) {
+        error("The selected Mac OS X SDK does not exist at $$MAC_SDK!")
+    }
+    QMAKE_MACOSX_DEPLOYMENT_TARGET = $$DEPLOYMENT_TARGET
+    QMAKE_MAC_SDK = $$MAC_SDK
+    LIBS += -L$$MAC_SDK/usr/lib/ -lc++
+} else {
     QMAKE_CXX = clang++
 }
 QMAKE_CXXFLAGS = -std=c++11 -stdlib=libc++
 
 DEFINES *= QT_USE_QSTRINGBUILDER
 
-TARGET = MUD
+TARGET = PlainText
 CONFIG += console
 CONFIG -= app_bundle
 
@@ -104,8 +108,8 @@ SOURCES += \
     interface/httpserver.cpp \
     interface/telnetserver.cpp \
     interface/websocketserver.cpp \
-    ../3rdparty/qjson/json_driver.cc \
-    ../3rdparty/qjson/json_parser.cc \
+    ../3rdparty/qjson/json_driver.cpp \
+    ../3rdparty/qjson/json_parser.cpp \
     ../3rdparty/qjson/json_scanner.cpp \
     ../3rdparty/qtwebsocket/QtWebSocket/QWsServer.cpp \
     ../3rdparty/qtwebsocket/QtWebSocket/QWsSocket.cpp
