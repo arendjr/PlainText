@@ -27,8 +27,9 @@ void SearchCommand::execute(const QString &command) {
     }
 
     CharacterStats stats = player()->totalStats();
-    int searchSkill = qMin(stats.intelligence + stats.faith, 100) +
-                      (player()->race()->name() == "wanderer" ? 30 : 0);
+    bool isWanderer = (player()->characterClass()->name() == "wanderer");
+
+    int searchSkill = qMin(stats.intelligence + stats.faith, 100) + (isWanderer ? 30 : 0);
 
     Exit *foundExit = nullptr;
     for (const GameObjectPtr &exitPtr : currentArea()->exits()) {
@@ -45,6 +46,6 @@ void SearchCommand::execute(const QString &command) {
         send(QString("You found an exit: %1.").arg(foundExit->name()));
     } else {
         send("You didn't find anything.");
-        player()->stun(4000);
+        player()->stun(isWanderer ? 3000 : 4000);
     }
 }
