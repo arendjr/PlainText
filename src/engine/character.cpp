@@ -18,7 +18,7 @@
 
 #define NO_STUN \
     if (m_secondsStunned > 0) { \
-        send(Util::colorize(QString("Please wait %1 seconds.").arg(m_secondsStunned), Olive)); \
+        send(QString("Please wait %1 seconds.").arg(m_secondsStunned), Olive); \
         return; \
     }
 

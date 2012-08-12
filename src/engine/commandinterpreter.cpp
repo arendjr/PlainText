@@ -25,6 +25,7 @@
 #include "commands/opencommand.h"
 #include "commands/quitcommand.h"
 #include "commands/saycommand.h"
+#include "commands/searchcommand.h"
 #include "commands/shoutcommand.h"
 #include "commands/slashmecommand.h"
 #include "commands/statscommand.h"
@@ -82,6 +83,7 @@ CommandInterpreter::CommandInterpreter(Player *player) :
     m_commands.insert("open", new OpenCommand(player, this));
     m_commands.insert("quit", quit);
     m_commands.insert("say", new SayCommand(player, this));
+    m_commands.insert("search", new SearchCommand(player, this));
     m_commands.insert("shout", new ShoutCommand(player, this));
     m_commands.insert("stats", new StatsCommand(player, this));
     m_commands.insert("take", get);

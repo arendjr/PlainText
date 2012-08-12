@@ -77,6 +77,7 @@ SOURCES += \
     engine/commands/quitcommand.cpp \
     engine/commands/removecommand.cpp \
     engine/commands/saycommand.cpp \
+    engine/commands/searchcommand.cpp \
     engine/commands/shoutcommand.cpp \
     engine/commands/slashmecommand.cpp \
     engine/commands/statscommand.cpp \
@@ -168,6 +169,7 @@ HEADERS += \
     engine/commands/quitcommand.h \
     engine/commands/removecommand.h \
     engine/commands/saycommand.h \
+    engine/commands/searchcommand.h \
     engine/commands/shoutcommand.h \
     engine/commands/slashmecommand.h \
     engine/commands/statscommand.h \

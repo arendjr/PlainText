@@ -106,8 +106,7 @@ void LookCommand::execute(const QString &command) {
                      .arg(Util::capitalize(character->subjectPronoun()),
                           character->objectPronoun());
             } else {
-                m += QString("If it came to a fight with %1, %2 would be wise to get %3 friends "
-                             "first.\n")
+                m += QString("If it came to a fight with %1, %2'd better get %3 friends first.\n")
                      .arg(character->objectPronoun(), character->subjectPronoun(),
                           character->possessiveAdjective());
             }
