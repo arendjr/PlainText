@@ -511,6 +511,9 @@ void Character::shout(const QString &msg) {
     GameObjectPtrList players = area->players();
     players.send(QString("%1 shouts, \"%2\".").arg(definiteName(area->characters(), Capitalized),
                                                    message));
+    for (const GameObjectPtr &npc : area->npcs()) {
+        npc->invokeTrigger("onshout", this, message);
+    }
 
     for (const GameObjectPtr &exitPtr : area->exits()) {
         Exit *exit = exitPtr.cast<Exit *>();
@@ -518,6 +521,9 @@ void Character::shout(const QString &msg) {
 
         adjacentArea->players().send(QString("You hear %1 shouting, \"%2\".").arg(indefiniteName(),
                                                                                   message));
+        for (const GameObjectPtr &npc : adjacentArea->npcs()) {
+            npc->invokeTrigger("onshout", this, message);
+        }
     }
 }
 

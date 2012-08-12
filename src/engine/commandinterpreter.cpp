@@ -162,6 +162,9 @@ CommandInterpreter::CommandInterpreter(Player *player) :
                           "being given to it. Note that item may be a number instead of an item "
                           "object when an amount of gold is being given, or a list of items when "
                           "multiple items are being given.");
+        m_triggers.insert("onshout(activator : character, message : string) : void",
+                          "The onshout trigger is invoked on any character when it hears someone "
+                          "shout.");
         m_triggers.insert("onspawn : void",
                           "The onspawn trigger is invoked on any character when it respawns.");
         m_triggers.insert("ontalk(speaker : character, message : string) : void",
