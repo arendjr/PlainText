@@ -641,7 +641,7 @@ void GameObject::changeName(const QString &newName) {
 
 QString GameObject::saveDirPath() {
 
-    return QDir::homePath() + "/.mud";
+    return qgetenv("PT_DATA_DIR");
 }
 
 QString GameObject::saveObjectPath(const char *objectType, uint id) {
