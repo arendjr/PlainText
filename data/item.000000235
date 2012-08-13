@@ -1,9 +1,9 @@
 {
-  "name": "empty bucket",
-  "description": "It's a bucket. It's empty.",
-  "plural": "empty buckets",
-  "indefiniteArticle": "an",
+  "name": "bucket full of water",
+  "description": "It's a bucket. It's filled with water.",
+  "plural": "buckets full of water",
+  "indefiniteArticle": "a",
   "portable": true,
-  "weight": 1,
+  "weight": 10,
   "cost": 0
 }
