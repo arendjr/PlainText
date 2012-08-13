@@ -618,7 +618,7 @@ bool GameObject::mayReferenceOtherProperties() const {
 
 void GameObject::setModified() {
 
-    if (~m_options & (Copy | DontSave)) {
+    if ((m_options & (Copy | DontSave)) == 0) {
         m_realm->addModifiedObject(this);
     }
 }

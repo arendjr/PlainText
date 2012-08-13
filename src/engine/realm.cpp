@@ -67,7 +67,6 @@ void Realm::init() {
     }
 
     m_syncThread.start(QThread::LowestPriority);
-    m_gameThread.start(QThread::HighestPriority);
 
     m_initialized = true;
 
@@ -78,6 +77,8 @@ void Realm::init() {
     }
 
     m_timeIntervalId = startInterval(this, 150000);
+
+    m_gameThread.start(QThread::HighestPriority);
 }
 
 void Realm::registerObject(GameObject *gameObject) {

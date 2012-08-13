@@ -114,33 +114,36 @@ class Character : public StatsItem {
         Q_INVOKABLE void clearNegativeEffects();
         Q_PROPERTY(EffectList effects READ effects STORED false)
 
-        Q_INVOKABLE virtual void open(const GameObjectPtr &exit);
-        Q_INVOKABLE virtual void close(const GameObjectPtr &exit);
-        Q_INVOKABLE virtual void go(const GameObjectPtr &exit);
+        Q_INVOKABLE void open(const GameObjectPtr &exit);
+        Q_INVOKABLE void close(const GameObjectPtr &exit);
+        Q_INVOKABLE void go(const GameObjectPtr &exit);
 
-        Q_INVOKABLE virtual void enter(const GameObjectPtr &area);
-        Q_INVOKABLE virtual void leave(const GameObjectPtr &area,
-                                       const QString &exitName = QString());
+        Q_INVOKABLE void enter(const GameObjectPtr &area,
+                               const GameObjectPtrList &followers = GameObjectPtrList());
+        Q_INVOKABLE void leave(const GameObjectPtr &area, const QString &exitName = QString(),
+                               const GameObjectPtrList &followers = GameObjectPtrList());
 
-        Q_INVOKABLE virtual void say(const QString &message);
-        Q_INVOKABLE virtual void shout(const QString &message);
-        Q_INVOKABLE virtual void talk(const GameObjectPtr &character, const QString &message);
-        Q_INVOKABLE virtual void tell(const GameObjectPtr &player, const QString &message);
+        Q_INVOKABLE void say(const QString &message);
+        Q_INVOKABLE void shout(const QString &message);
+        Q_INVOKABLE void talk(const GameObjectPtr &character, const QString &message);
+        Q_INVOKABLE void tell(const GameObjectPtr &player, const QString &message);
 
-        Q_INVOKABLE virtual void take(const GameObjectPtrList &items);
+        Q_INVOKABLE void take(const GameObjectPtrList &items);
 
-        Q_INVOKABLE virtual void wield(const GameObjectPtr &item);
-        Q_INVOKABLE virtual void remove(const GameObjectPtr &item);
+        Q_INVOKABLE void wield(const GameObjectPtr &item);
+        Q_INVOKABLE void remove(const GameObjectPtr &item);
 
-        Q_INVOKABLE virtual void kill(const GameObjectPtr &character);
-        Q_INVOKABLE virtual void die(const GameObjectPtr &attacker = GameObjectPtr());
+        Q_INVOKABLE void kill(const GameObjectPtr &character);
+        Q_INVOKABLE void die(const GameObjectPtr &attacker = GameObjectPtr());
 
-        Q_INVOKABLE virtual void follow(const GameObjectPtr &character);
-        Q_INVOKABLE virtual void lose(const GameObjectPtr &character = GameObjectPtr());
-        Q_INVOKABLE virtual void disband();
+        Q_INVOKABLE void follow(const GameObjectPtr &character);
+        Q_INVOKABLE void lose(const GameObjectPtr &character = GameObjectPtr());
+        Q_INVOKABLE void disband();
+
+        Q_INVOKABLE void stun(int timeout);
 
         int secondsStunned() const { return m_secondsStunned; }
-        Q_INVOKABLE virtual void stun(int timeout);
+
         void setLeaveOnActive(bool leaveOnActive);
 
         virtual void init();
@@ -154,6 +157,8 @@ class Character : public StatsItem {
     protected:
         virtual void changeName(const QString &newName);
         virtual void changeStats(const CharacterStats &newStats);
+
+        virtual void enteredArea();
 
     private:
         int m_height;

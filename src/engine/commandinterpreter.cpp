@@ -158,6 +158,9 @@ CommandInterpreter::CommandInterpreter(Player *player) :
                           "The ondrink trigger is invoked on any item when it's eaten.");
         m_triggers.insert("onenter(activator : character) : bool",
                           "The onenter trigger is invoked on any exit when it's entered.");
+        m_triggers.insert("onentered : void",
+                          "The onentered trigger is invoked on any character when it entered a new "
+                          "area.");
         m_triggers.insert("oncharacterexit(activator : character, exitName : string) : bool",
                           "The onexit trigger is invoked on any character in an area when another "
                           "character leaves that area.");

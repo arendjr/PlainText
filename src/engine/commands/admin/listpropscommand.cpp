@@ -36,25 +36,22 @@ void ListPropsCommand::execute(const QString &command) {
         const char *name = metaProperty.name();
 
         QString value = ConversionUtil::toUserString(object->property(name));
-
-        QStringList valueLines;
         if (value.isEmpty()) {
-            valueLines << "(empty string)";
-        } else {
-            valueLines = value.split('\n');
-            for (int i = 0; i < valueLines.length(); i++) {
-                if (valueLines[i].length() > lineLength) {
-                    QStringList lines = Util::splitLines(valueLines[i], lineLength);
-                    valueLines.removeAt(i);
-                    for (int j = 0; j < lines.length(); j++, i++) {
-                        valueLines.insert(i, lines[j]);
-                    }
-                }
-            }
+            value = "(empty string)";
+        }
+        if (!metaProperty.isWritable()) {
+            value += " (read-only)";
         }
 
-        if (!metaProperty.isWritable()) {
-            valueLines[valueLines.size() - 1].append(" (read-only)");
+        QStringList valueLines = value.split('\n');
+        for (int i = 0; i < valueLines.length(); i++) {
+            if (valueLines[i].length() > lineLength) {
+                QStringList lines = Util::splitLines(valueLines[i], lineLength);
+                valueLines.removeAt(i);
+                for (int j = 0; j < lines.length(); j++, i++) {
+                    valueLines.insert(i, lines[j]);
+                }
+            }
         }
 
         send("  " + Util::highlight(QString(name).leftJustified(30)) + "  " + valueLines[0]);

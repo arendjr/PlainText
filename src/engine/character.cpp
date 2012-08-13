@@ -6,6 +6,7 @@
 #include "exit.h"
 #include "group.h"
 #include "player.h"
+#include "race.h"
 #include "realm.h"
 #include "shield.h"
 #include "util.h"
@@ -437,58 +438,139 @@ void Character::go(const GameObjectPtr &exitPtr) {
         return;
     }
 
-    leave(currentArea(), exit->name());
-    enter(exit->destinationArea());
+    GameObjectPtrList followers;
+    if (!m_group.isNull()) {
+        Group *group = m_group.cast<Group *>();
+        if (group->leader() == this) {
+            for (const GameObjectPtr &member : group->members()) {
+                if (member.cast<Character *>()->currentArea() != area) {
+                    continue;
+                }
+
+                bool blocked = false;
+
+                for (const GameObjectPtr &character : area->npcs()) {
+                    if (!character->invokeTrigger("oncharacterexit", member, exit->name())) {
+                        blocked = true;
+                        break;
+                    }
+                }
+
+                if (blocked || !exit->invokeTrigger("onenter", member)) {
+                    continue;
+                }
+
+                followers << member;
+            }
+        }
+    }
+
+    leave(currentArea(), exit->name(), followers);
+    enter(exit->destinationArea(), followers);
 }
 
-void Character::enter(const GameObjectPtr &areaPtr) {
+void Character::enter(const GameObjectPtr &areaPtr, const GameObjectPtrList &followers) {
+
+    setCurrentArea(areaPtr);
+
+    for (const GameObjectPtr &follower : followers) {
+        follower.cast<Character *>()->setCurrentArea(areaPtr);
+    }
 
     Area *area = areaPtr.cast<Area *>();
+    GameObjectPtrList npcs = area->npcs();
+    GameObjectPtrList players = area->players();
 
-    setCurrentArea(area);
+    if (isPlayer()) {
+        area->addPlayer(this);
 
-    area->addNPC(this);
+        for (const GameObjectPtr &follower : followers) {
+            area->addPlayer(follower);
+        }
+    } else {
+        area->addNPC(this);
 
-    area->players().send(QString("%1 arrived.").arg(indefiniteName(Capitalized)));
+        for (const GameObjectPtr &follower : followers) {
+            area->addNPC(follower);
+        }
+    }
 
-    for (const GameObjectPtr &character : area->npcs()) {
+    if (!players.isEmpty()) {
+        QString arrivalsName;
+        if (followers.isEmpty()) {
+            arrivalsName = indefiniteName(Capitalized);
+        } else {
+            GameObjectPtrList arrivals;
+            arrivals << this;
+            arrivals << followers;
+            arrivalsName = arrivals.joinFancy(Capitalized);
+        }
+
+        players.send(QString("%1 arrived.").arg(arrivalsName));
+    }
+
+    enteredArea();
+
+    for (const GameObjectPtr &follower : followers) {
+        follower.cast<Character *>()->enteredArea();
+    }
+
+    for (const GameObjectPtr &character : npcs) {
         character->invokeTrigger("oncharacterentered", this);
+
+        for (const GameObjectPtr &follower : followers) {
+            character->invokeTrigger("oncharacterentered", follower);
+        }
     }
 }
 
-void Character::leave(const GameObjectPtr &areaPtr, const QString &exitName) {
+void Character::leave(const GameObjectPtr &areaPtr, const QString &exitName,
+                      const GameObjectPtrList &followers) {
 
     Area *area = areaPtr.cast<Area *>();
 
-    area->removeNPC(this);
+    if (isPlayer()) {
+        area->removePlayer(this);
 
-    if (area->players().length() > 0) {
-        QString text;
-        QString article = indefiniteArticle();
-        if (article.isEmpty()) {
-            text = (exitName.isEmpty() ?
-                    QString("%1 left.").arg(name()) :
-                    QString("%1 left to the %2.").arg(name(), exitName));
-        } else {
+        for (const GameObjectPtr &follower : followers) {
+            area->removePlayer(follower);
+        }
+    } else {
+        area->removeNPC(this);
+
+        for (const GameObjectPtr &follower : followers) {
+            area->removeNPC(follower);
+        }
+    }
+
+    GameObjectPtrList npcs = area->npcs();
+    GameObjectPtrList players = area->players();
+
+    if (!players.isEmpty()) {
+        QString departuresName;
+        if (followers.isEmpty()) {
             bool unique = true;
-            for (const GameObjectPtr &other : area->npcs()) {
+            for (const GameObjectPtr &other : npcs) {
                 if (other->name() == name()) {
                     unique = false;
                     break;
                 }
             }
             if (unique) {
-                text = (exitName.isEmpty() ?
-                        QString("The %1 left.").arg(name()) :
-                        QString("The %1 left to the %2.").arg(name(), exitName));
+                departuresName = definiteName(npcs, Capitalized);
             } else {
-                text = (exitName.isEmpty() ?
-                        QString("%1 %2 left.").arg(Util::capitalize(article), name()) :
-                        QString("%1 %2 left to the %3.").arg(Util::capitalize(article), name(),
-                                                             exitName));
+                departuresName = indefiniteName(Capitalized);
             }
+        } else {
+            GameObjectPtrList departures;
+            departures << this;
+            departures << followers;
+            departuresName = departures.joinFancy(Capitalized);
         }
-        area->players().send(text);
+
+        players.send(exitName.isEmpty() ?
+                     QString("%1 left.").arg(departuresName) :
+                     QString("%1 left to the %2.").arg(departuresName, exitName));
     }
 }
 
@@ -743,52 +825,61 @@ void Character::die(const GameObjectPtr &attacker) {
         return;
     }
 
+    send("You died.", Maroon);
+
     Area *area = currentArea().cast<Area *>();
 
-    GameObjectPtrList players = area->players();
+    GameObjectPtrList others = area->characters();
+    others.removeOne(this);
 
     QString myName = definiteName(area->characters(), Capitalized);
-    players.send(QString("%1 died.").arg(myName), Teal);
+    others.send(QString("%1 died.").arg(myName), Teal);
 
     if (inventory().length() > 0 || m_gold > 0.0) {
-        QString inventoryStr;
+        QString inventoryString;
         if (inventory().length() > 0) {
-            inventoryStr = inventory().joinFancy();
+            inventoryString = inventory().joinFancy();
         }
         if (m_gold > 0.0) {
-            if (!inventoryStr.isEmpty()) {
-                inventoryStr += " and ";
+            if (!inventoryString.isEmpty()) {
+                inventoryString += " and ";
             }
-            inventoryStr += QString("$%1 worth of gold").arg(m_gold);
+            inventoryString += QString("$%1 worth of gold").arg(m_gold);
         }
 
-        players.send(QString("%1 was carrying %2.").arg(myName, inventoryStr), Teal);
+        others.send(QString("%1 was carrying %2.").arg(myName, inventoryString), Teal);
 
         for (const GameObjectPtr &item : inventory()) {
             area->addItem(item);
         }
     }
 
-    GameObjectPtrList others = area->characters();
-    others.removeOne(this);
     for (const GameObjectPtr &other : others) {
         other->invokeTrigger("oncharacterdied", this, attacker);
     }
 
-    area->removeNPC(this);
+    killAllTimers();
 
-    if (m_respawnTime) {
-        setInventory(GameObjectPtrList());
+    if (isPlayer()) {
+        area->removePlayer(this);
+        enter(race().cast<Race *>()->startingArea());
 
-        killAllTimers();
-
-        int respawnTime = m_respawnTime;
-        if (m_respawnTimeVariation) {
-            respawnTime += qrand() % m_respawnTimeVariation;
-        }
-        m_respawnTimerId = realm()->startTimer(this, respawnTime);
+        setHp(1);
+        stun(5000);
     } else {
-        setDeleted();
+        area->removeNPC(this);
+
+        if (m_respawnTime) {
+            setInventory(GameObjectPtrList());
+
+            int respawnTime = m_respawnTime;
+            if (m_respawnTimeVariation) {
+                respawnTime += qrand() % m_respawnTimeVariation;
+            }
+            m_respawnTimerId = realm()->startTimer(this, respawnTime);
+        } else {
+            setDeleted();
+        }
     }
 }
 
@@ -798,11 +889,21 @@ void Character::follow(const GameObjectPtr &characterPtr) {
 
     Character *character = characterPtr.cast<Character *>();
 
-    if (isPlayer() && !characterPtr->isPlayer()) {
-        GameObjectPtrList characters = currentArea().cast<Area *>()->characters();
-        QString name = character->definiteName(characters, DefiniteArticles);
-        send(QString("You cannot follow %1.").arg(name));
+    if (character == this) {
+        send("You cannot follow yourself.");
         return;
+    }
+    if (isPlayer()) {
+        if (!characterPtr->isPlayer()) {
+            GameObjectPtrList characters = currentArea().cast<Area *>()->characters();
+            QString name = character->definiteName(characters, DefiniteArticles);
+            send(QString("You cannot follow %1.").arg(name));
+            return;
+        }
+    } else {
+        if (characterPtr->isPlayer()) {
+            return;
+        }
     }
 
     if (!m_group.isNull()) {
@@ -823,6 +924,7 @@ void Character::follow(const GameObjectPtr &characterPtr) {
     if (character->m_group.isNull()) {
         group = GameObject::createByObjectType<Group *>(realm(), "group");
         group->setLeader(characterPtr);
+        character->m_group = group;
     } else {
         group = character->m_group.cast<Group *>();
     }
@@ -837,6 +939,7 @@ void Character::follow(const GameObjectPtr &characterPtr) {
     }
 
     group->addMember(this);
+    m_group = group;
 }
 
 void Character::lose(const GameObjectPtr &character) {
@@ -1042,6 +1145,11 @@ void Character::changeStats(const CharacterStats &newStats) {
 
     setMaxHp(2 * newStats.vitality);
     setMaxMp(newStats.intelligence);
+}
+
+void Character::enteredArea() {
+
+    invokeTrigger("onentered");
 }
 
 int Character::updateEffects(qint64 now) {

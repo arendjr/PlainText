@@ -35,12 +35,7 @@ class Player : public Character {
 
         Q_INVOKABLE void sendSellableItemsList(const GameObjectPtrList &items);
 
-        virtual void enter(const GameObjectPtr &area);
-        virtual void leave(const GameObjectPtr &area, const QString &exitName = QString());
-
-        virtual void look();
-
-        virtual void die(const GameObjectPtr &attacker);
+        Q_INVOKABLE void look();
 
         virtual void invokeTimer(int timerId);
 
@@ -49,6 +44,8 @@ class Player : public Character {
 
     protected:
         virtual void changeName(const QString &name);
+
+        virtual void enteredArea();
 
     private:
         QString m_passwordSalt;

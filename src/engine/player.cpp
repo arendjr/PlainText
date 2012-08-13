@@ -2,7 +2,6 @@
 
 #include "area.h"
 #include "exit.h"
-#include "race.h"
 #include "realm.h"
 #include "util.h"
 
@@ -97,34 +96,6 @@ void Player::sendSellableItemsList(const GameObjectPtrList &items) {
     write(message);
 }
 
-void Player::enter(const GameObjectPtr &areaPtr) {
-
-    Area *area = areaPtr.cast<Area *>();
-
-    setCurrentArea(area);
-
-    area->players().send(QString("%1 arrived.").arg(name()));
-
-    area->addPlayer(this);
-
-    look();
-
-    for (const GameObjectPtr &character : area->npcs()) {
-        character->invokeTrigger("oncharacterentered", this);
-    }
-}
-
-void Player::leave(const GameObjectPtr &areaPtr, const QString &exitName) {
-
-    Area *area = areaPtr.cast<Area *>();
-
-    area->removePlayer(this);
-
-    area->players().send(exitName.isEmpty() ?
-                         QString("%1 left.").arg(name()) :
-                         QString("%1 left to the %2.").arg(name(), exitName));
-}
-
 void Player::look() {
 
     Area *area = currentArea().cast<Area *>();
@@ -172,32 +143,6 @@ void Player::look() {
     send(text);
 }
 
-void Player::die(const GameObjectPtr &attacker) {
-
-    Q_UNUSED(attacker)
-
-    send("You died.", Maroon);
-
-    Area *area = currentArea().cast<Area *>();
-    GameObjectPtrList others = area->characters();
-    others.removeOne(this);
-
-    others.send(QString("%1 died.").arg(name()), Teal);
-
-    for (const GameObjectPtr &other : others) {
-        other->invokeTrigger("oncharacterdied", this, attacker);
-    }
-
-    killAllTimers();
-
-    setHp(1);
-
-    area->removePlayer(this);
-    enter(race().cast<Race *>()->startingArea());
-
-    stun(5000);
-}
-
 void Player::invokeTimer(int timerId) {
 
     if (timerId == m_regenerationIntervalId) {
@@ -215,4 +160,9 @@ void Player::changeName(const QString &newName) {
     if (~options() & Copy) {
         realm()->registerPlayer(this);
     }
+}
+
+void Player::enteredArea() {
+
+    look();
 }
