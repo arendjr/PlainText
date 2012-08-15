@@ -1,6 +1,8 @@
 (function() {
 
     var self = controller;
+    self.editScreen = element(".edit-screen");
+    self.editField = element("#edit-field");
 
     var triggers = {};
     self.onMessageHook = function(message) {
@@ -20,7 +22,7 @@
                 triggers[triggerName] = trigger;
             }
         });
-    }
+    };
     self.socket.send("help triggers");
 
     var onkeypress = controller.commandInput.onkeypress;
@@ -118,15 +120,15 @@
         } else {
             onkeypress(event);
         }
-    }
+    };
 
     controller.commandInput.removeAttribute("maxlength");
 
-    document.getElementById("edit-cancel-button").onclick = function() {
+    element("#edit-cancel-button").onclick = function() {
         self.editScreen.style.display = "none";
         self.commandInput.focus();
-    }
-    document.getElementById("edit-submit-button").onclick = function() {
+    };
+    element("#edit-submit-button").onclick = function() {
         if (self.setCommand.startsWith("set-prop")) {
             self.socket.send(self.setCommand + " " + self.editField.value.replace(/\n/g, "\\n"));
         } else if (self.setCommand.startsWith("exec-script")) {
@@ -137,7 +139,7 @@
 
         self.editScreen.style.display = "none";
         self.commandInput.focus();
-    }
+    };
     controller.editField.onkeydown = function(event) {
         if (event.keyCode === keys.KEY_TAB) {
             var value = self.editField.value;
@@ -177,6 +179,6 @@
 
             return false;
         }
-    }
+    };
 
 })();

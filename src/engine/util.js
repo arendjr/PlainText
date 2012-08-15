@@ -48,6 +48,18 @@ Array.prototype.withoutId = function(id) {
     return result;
 }
 
+Array.prototype.findFirstAmong = function(array) {
+
+    for (var i = 0; i < this.length; i++) {
+        for (var j = 0; j < array.length; j++) {
+            if (this[i] === array[j]) {
+                return this[i];
+            }
+        }
+    }
+    return null;
+}
+
 Array.prototype.randomElement = function() {
 
     return this[randomInt(0, this.length)];
@@ -87,4 +99,9 @@ function $(identifier) {
 
     var split = identifier.split(":");
     return Realm.getObject(split[0], parseInt(split[1], 10));
+}
+
+function byChance(n, p) {
+
+    return randomInt(0, p) < n;
 }

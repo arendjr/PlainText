@@ -25,7 +25,7 @@ var keys = {
     KEY_PAGEUP:   33,
     KEY_PAGEDOWN: 34,
     KEY_INSERT:   45
-}
+};
 
 String.prototype.contains = function(string) {
 
@@ -97,8 +97,6 @@ function Controller() {
     this.historyIndex = 0;
     this.currentCommand = "";
 
-    this.editScreen = element(".edit-screen");
-    this.editField = element("#edit-field");
     this.setCommand = "";
     this.onMessageHook = null;
 
@@ -118,7 +116,7 @@ function Controller() {
                 self.historyIndex = 0;
             }
         }
-    }
+    };
     this.commandInput.onkeydown = function(event) {
         if (event.keyCode === keys.KEY_UP) {
             if (self.historyIndex === 0) {
@@ -142,7 +140,7 @@ function Controller() {
                 }
             }
         }
-    }
+    };
 
     this.socket = new WebSocket("ws://" + document.location.hostname + ":4802");
     this.socket.onopen = function(message) {
@@ -194,10 +192,10 @@ function Controller() {
     this.commandInput.onfocus = function() {
         self.updateLayout();
         self.screen.scrollTop = self.screen.scrollHeight;
-    }
+    };
     this.commandInput.onblur = function() {
         self.updateLayout();
-    }
+    };
 
     if (isPhoneGap) {
         element(".status-header").style.backgroundColor = "#c0c0c0";

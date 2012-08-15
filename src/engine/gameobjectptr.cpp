@@ -194,6 +194,10 @@ GameObjectPtr GameObjectPtr::fromString(Realm *realm, const QString &string) {
 
 void swap(GameObjectPtr &first, GameObjectPtr &second) {
 
+    if (first.m_gameObject == second.m_gameObject) {
+        return;
+    }
+
     if (first.m_gameObject) {
         first.m_gameObject->registerPointer(&second);
         first.m_gameObject->unregisterPointer(&first);
