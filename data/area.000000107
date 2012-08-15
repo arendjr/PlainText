@@ -1,4 +1,5 @@
 {
   "name": "Boatman's Street",
-  "exits": [ "exit:109" ]
+  "description": "You are the end of the Boatman's Street. You can see the entrance to the large shipyard that stretches out across most of the southside of the street.",
+  "exits": [ "exit:109", "exit:305" ]
 }

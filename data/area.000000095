@@ -1,4 +1,5 @@
 {
   "name": "Boatman's Street",
+  "description": "The Boatman's Street is named after Rupert D'Allain, also known as \"The Boatman\" for his shipyard at the end of the street. About every reliable ship that sails the nearby seas was built in Rupert's shipyard.\n\nHere, almost at the corner of the street, you can find O'Malley's Bar. A lot of different folks can be found at the bar, but definitely not any upper class. The place tends to get really crowded when work at the shipyard ends.",
   "exits": [ "exit:97", "exit:105", "exit:177" ]
 }

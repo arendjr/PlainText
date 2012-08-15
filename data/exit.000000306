@@ -1,0 +1,7 @@
+{
+  "name": "street",
+  "destinationArea": "area:107",
+  "oppositeExit": "exit:305",
+  "door": false,
+  "hidden": false
+}

@@ -1,0 +1,5 @@
+{
+  "name": "Shipyard",
+  "description": "This is the entrance to the shipyard. The shipyard belongs to Rupert Deschain, also known as \"The Boatman\".",
+  "exits": [ "exit:306" ]
+}

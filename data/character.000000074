@@ -1,6 +1,6 @@
 {
   "name": "shopper",
-  "triggers": { "onspawn": "(function() {\n    this.setInterval(function() {\n        var exit = this.currentArea.exits.randomElement();\n        if (exit.name.endsWith('stall') || exit.destinationArea.name.contains('Market')) {\n            this.go(exit);\n        }\n    }, 19222);\n\n    this.gold = randomInt(10, 31);\n})" },
+  "triggers": { "onattack": "(function(attacker) {\n    this.shout('Help! Guards!');\n})", "onspawn": "(function() {\n    this.setInterval(function() {\n        var exit = this.currentArea.exits.randomElement();\n        if (exit.name.endsWith('stall') || exit.destinationArea.name.contains('Market')) {\n            this.go(exit);\n        }\n    }, 19222);\n\n    this.gold = randomInt(10, 31);\n})" },
   "plural": "shoppers",
   "indefiniteArticle": "a",
   "portable": false,
@@ -8,7 +8,7 @@
   "cost": 0,
   "stats": [8, 7, 7, 7, 7, 7],
   "height": 0,
-  "currentArea": "area:79",
+  "currentArea": "area:92",
   "race": "race:2",
   "characterClass": "class:147",
   "gender": "female",
@@ -18,7 +18,7 @@
   "maxHp": 14,
   "mp": 0,
   "maxMp": 7,
-  "gold": 21,
+  "gold": 19,
   "weapon": "0",
   "secondaryWeapon": "0",
   "shield": "0"

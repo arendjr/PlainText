@@ -1,4 +1,5 @@
 {
   "name": "Boatman's Street",
+  "description": "The street takes a bit of a turn here to move around the large shipyard that owns this street its name.",
   "exits": [ "exit:106", "exit:108" ]
 }
