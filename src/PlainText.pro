@@ -11,6 +11,7 @@ macx {
     QMAKE_MAC_SDK = $$MAC_SDK
     LIBS += -L$$MAC_SDK/usr/lib/ -lc++
 } else {
+    LIBS += -lc++
     QMAKE_CXX = clang++
 }
 QMAKE_CXXFLAGS = -std=c++11 -stdlib=libc++
