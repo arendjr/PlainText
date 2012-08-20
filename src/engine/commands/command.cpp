@@ -173,11 +173,6 @@ GameObjectPtrList Command::objectsByDescription(const QPair<QString, uint> &desc
     } else {
         for (const GameObjectPtr &object : pool) {
             QString loweredName = object->name().toLower();
-            if (loweredName == description.first) {
-                objects.clear();
-                objects << object;
-                break;
-            }
             for (const QString &word : loweredName.split(' ')) {
                 if (word.startsWith(description.first)) {
                     objects << object;
