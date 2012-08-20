@@ -32,7 +32,7 @@ void ListPropsCommand::execute(const QString &command) {
 
     const int lineLength = 45;
 
-    for (const QMetaProperty &metaProperty : object->storedMetaProperties()) {
+    for (const QMetaProperty &metaProperty : object->metaProperties()) {
         const char *name = metaProperty.name();
 
         QString value = ConversionUtil::toUserString(object->property(name));

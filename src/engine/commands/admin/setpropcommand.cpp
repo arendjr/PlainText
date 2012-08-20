@@ -22,12 +22,16 @@ void SetPropCommand::execute(const QString &command) {
 
     /*QString alias = */takeWord();
 
-    GameObjectPtrList objects = takeObjects(currentArea()->objects());
-    if (!requireUnique(objects, "Object not found.", "Object is not unique.")) {
+    GameObjectPtr object = takeObject(currentArea()->objects());
+    if (!requireSome(object, "Object not found.")) {
         return;
     }
 
-    QString propertyName = Util::toCamelCase(takeWord());
+    QString propertyName = Util::fullPropertyName(object.cast<GameObject *>(), takeWord());
+    if (propertyName == "not unique") {
+        send("Property name is not unique.");
+        return;
+    }
 
     if (!assertWordsLeft("Usage: set-prop <object-name> [#] <property-name> <value>")) {
         return;
@@ -35,7 +39,7 @@ void SetPropCommand::execute(const QString &command) {
 
     QString value = takeRest();
 
-    QVariant variant = objects[0]->property(propertyName.toAscii().constData());
+    QVariant variant = object->property(propertyName.toAscii().constData());
     switch (variant.type()) {
         case QVariant::Bool:
             variant = (value == "true");
@@ -91,12 +95,12 @@ void SetPropCommand::execute(const QString &command) {
     }
 
     if (variant.isValid()) {
-        objects[0]->setProperty(propertyName.toAscii().constData(), variant);
+        object->setProperty(propertyName.toAscii().constData(), variant);
 
         send(QString("Property %1 modified.").arg(propertyName));
 
-        if (objects[0]->isItem()) {
-            Item *item = objects[0].cast<Item *>();
+        if (object->isItem()) {
+            Item *item = object.cast<Item *>();
             if (propertyName == "name" || propertyName == "plural" ||
                 propertyName == "indefiniteArticle") {
                 send(QString("New forms: %1 %2, one %3, two %4.").arg(item->indefiniteArticle(),

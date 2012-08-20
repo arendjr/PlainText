@@ -142,6 +142,7 @@ class GameObject : public QObject {
         static QScriptValue toScriptValue(QScriptEngine *engine, GameObject *const &gameObject);
         static void fromScriptValue(const QScriptValue &object, GameObject *&gameObject);
 
+        QList<QMetaProperty> metaProperties() const;
         QList<QMetaProperty> storedMetaProperties() const;
 
         virtual void invokeTimer(int timerId);

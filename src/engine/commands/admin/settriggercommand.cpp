@@ -23,8 +23,8 @@ void SetTriggerCommand::execute(const QString &command) {
 
     /*QString alias = */takeWord();
 
-    GameObjectPtrList objects = takeObjects(currentArea()->objects());
-    if (!requireUnique(objects, "Object not found.", "Object is not unique.")) {
+    GameObjectPtr object = takeObject(currentArea()->objects());
+    if (!requireSome(object, "Object not found.")) {
         return;
     }
 
@@ -46,13 +46,13 @@ void SetTriggerCommand::execute(const QString &command) {
     }
 
     ScriptFunction trigger = ScriptFunction::fromString(source);
-    objects[0]->setTrigger(triggerName, trigger);
+    object->setTrigger(triggerName, trigger);
     send(QString("Trigger %1 set.").arg(triggerName));
 
     if (triggerName == "onspawn") {
-        objects[0]->killAllTimers();
-        objects[0]->invokeTrigger(triggerName);
+        object->killAllTimers();
+        object->invokeTrigger(triggerName);
         send(QString("Respawn emulated for %1.")
-             .arg(Util::highlight(QString("object #%1").arg(objects[0]->id()))));
+             .arg(Util::highlight(QString("object #%1").arg(object->id()))));
     }
 }

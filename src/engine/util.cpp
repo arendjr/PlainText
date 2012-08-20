@@ -300,6 +300,29 @@ QString Util::fromCamelCase(const QString &string) {
     return result;
 }
 
+QString Util::fullPropertyName(QObject *object, const QString &propertyName) {
+
+    QString name = Util::toCamelCase(propertyName);
+
+    QString fullPropertyName;
+    const QMetaObject *metaObject = object->metaObject();
+    int count = metaObject->propertyCount(),
+        offset = GameObject::staticMetaObject.propertyOffset();
+    for (int i = offset; i < count; i++) {
+        QMetaProperty metaProperty = metaObject->property(i);
+        QString metaPropertyName = metaProperty.name();
+        if (metaPropertyName.startsWith(name)) {
+            if (fullPropertyName.isEmpty()) {
+                fullPropertyName = metaPropertyName;
+            } else {
+                fullPropertyName = "not unique";
+                break;
+            }
+        }
+    }
+    return fullPropertyName;
+}
+
 QString Util::randomString(int length) {
 
     QString string;

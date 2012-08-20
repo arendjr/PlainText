@@ -47,6 +47,8 @@ class Util : public QObject {
         static QString toCamelCase(QString string);
         static QString fromCamelCase(const QString &string);
 
+        static QString fullPropertyName(QObject *object, const QString &propertyName);
+
         Q_INVOKABLE static QString randomString(int length);
 };
 

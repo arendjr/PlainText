@@ -554,6 +554,17 @@ void GameObject::fromScriptValue(const QScriptValue &object, GameObject *&gameOb
     Q_ASSERT(gameObject);
 }
 
+QList<QMetaProperty> GameObject::metaProperties() const {
+
+    QList<QMetaProperty> properties;
+    int count = metaObject()->propertyCount(),
+        offset = GameObject::staticMetaObject.propertyOffset();
+    for (int i = offset; i < count; i++) {
+        properties << metaObject()->property(i);
+    }
+    return properties;
+}
+
 QList<QMetaProperty> GameObject::storedMetaProperties() const {
 
     QList<QMetaProperty> properties;

@@ -21,17 +21,21 @@ void GetPropCommand::execute(const QString &command) {
 
     /*QString alias = */takeWord();
 
-    GameObjectPtrList objects = takeObjects(currentArea()->objects());
-    if (!requireUnique(objects, "Object not found.", "Object is not unique.")) {
+    GameObjectPtr object = takeObject(currentArea()->objects());
+    if (!requireSome(object, "Object not found.")) {
         return;
     }
 
-    QString propertyName = Util::toCamelCase(takeWord());
+    QString propertyName = Util::fullPropertyName(object.cast<GameObject *>(), takeWord());
+    if (propertyName == "not unique") {
+        send("Property name is not unique.");
+        return;
+    }
 
     if (propertyName == "id") {
-        send(QString::number(objects[0]->id()));
+        send(QString::number(object->id()));
     } else {
-        QVariant value = objects[0]->property(propertyName.toAscii().constData());
+        QVariant value = object->property(propertyName.toAscii().constData());
         send(ConversionUtil::toUserString(value));
     }
 }

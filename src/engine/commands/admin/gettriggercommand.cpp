@@ -23,8 +23,8 @@ void GetTriggerCommand::execute(const QString &command) {
 
     /*QString alias = */takeWord();
 
-    GameObjectPtrList objects = takeObjects(currentArea()->objects());
-    if (!requireUnique(objects, "Object not found.", "Object is not unique.")) {
+    GameObjectPtr object = takeObject(currentArea()->objects());
+    if (!requireSome(object, "Object not found.")) {
         return;
     }
 
@@ -35,7 +35,7 @@ void GetTriggerCommand::execute(const QString &command) {
         return;
     }
 
-    ScriptFunction trigger = objects[0]->trigger(triggerName);
+    ScriptFunction trigger = object->trigger(triggerName);
     if (trigger.source.isEmpty()) {
         player()->send(QString("No trigger set for %1.").arg(triggerName));
     } else {

@@ -111,7 +111,7 @@ void LookCommand::execute(const QString &command) {
                           character->possessiveAdjective());
             }
         } else if (statsDiff > 15) {
-            m += QString("%1 is not much of a match for you.\nå")
+            m += QString("%1 is not much of a match for you.\n")
                  .arg(Util::capitalize(character->subjectPronoun()));
         } else if (statsDiff > 5) {
             m += QString("You appear to be a bit stronger than %1.\n")
