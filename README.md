@@ -40,6 +40,22 @@ Run the following commands from the src/ directory:
 \* *Due to usage of new C++11 features. You might get lucky with GCC 4.7 too,
     but you will need to update the PlainText.pro file yourself.*
 
+Playing the game
+----------------
+
+### Connect to your own server ###
+
+If you have just compiled your own server, you can connect to it through telnet
+or using your webbrowser. The ports to connect to are displayed on the console
+when you start your server.
+
+### Connect to the demo server ###
+
+If you do not have your own server, feel free to connect to the demo server:
+
+ * Point your webbrowser to http://mud.yunocloud.com:8080/ *or*
+ * Connect with telnet to mud.yunocloud.com on port 4801.
+
 License
 -------
 
