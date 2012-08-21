@@ -1,17 +1,13 @@
 
-  GAME MECHANICS
+GAME MECHANICS
 
   -  Finish combat mechanics.
   -  Implement spell casting and learning.
   -  Implement quests and leveling.
 
-  TECHNOLOGY
+TECHNOLOGY
 
   -  Migrate to Qt5 after release.
      -  Use QCryptographicHash::Sha512 for password encryption.
      -  Use QLatin1String / QStringLiteral where it makes sense.
   -  Implement MSSP protocol.
-
-  MISCELLANEOUS
-
-  -  Automatically make first registered member admin.

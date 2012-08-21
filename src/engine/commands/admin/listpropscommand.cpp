@@ -34,6 +34,9 @@ void ListPropsCommand::execute(const QString &command) {
 
     for (const QMetaProperty &metaProperty : object->metaProperties()) {
         const char *name = metaProperty.name();
+        if (strcmp(name, "objectType") == 0 || strcmp(name, "id") == 0) {
+            continue;
+        }
 
         QString value = ConversionUtil::toUserString(object->property(name));
         if (value.isEmpty()) {

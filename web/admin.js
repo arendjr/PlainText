@@ -125,6 +125,7 @@
     controller.commandInput.removeAttribute("maxlength");
 
     element("#edit-cancel-button").onclick = function() {
+        self.editField.selectionStart = self.editField.selectionEnd = 0;
         self.editScreen.style.display = "none";
         self.commandInput.focus();
     };
@@ -137,6 +138,7 @@
             self.socket.send(self.setCommand + " " + self.editField.value);
         }
 
+        self.editField.selectionStart = self.editField.selectionEnd = 0;
         self.editScreen.style.display = "none";
         self.commandInput.focus();
     };

@@ -76,6 +76,8 @@ body,input {
         width: -moz-calc(100% - 46px);
         width: calc(100% - 46px);
         height: 300px;
+
+        resize: none;
     }
     .edit-screen .button-list {
         padding: 0 20px 10px;

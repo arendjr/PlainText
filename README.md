@@ -49,6 +49,9 @@ If you have just compiled your own server, you can connect to it through telnet
 or using your webbrowser. The ports to connect to are displayed on the console
 when you start your server.
 
+The first character you register on your own server will automatically become an
+admin.
+
 ### Connect to the demo server ###
 
 If you do not have your own server, feel free to connect to the demo server:

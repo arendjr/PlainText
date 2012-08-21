@@ -228,7 +228,9 @@ OTHER_FILES += \
     ../web/main.js \
     ../web/notifications.js \
     ../web/tappable.js \
-    ../DESIGN.txt
+    ../DESIGN.txt \
+    ../README.md \
+    ../TODO.txt
 
 INCLUDEPATH += \
     $$PWD/../3rdparty \
