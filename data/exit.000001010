@@ -1,0 +1,8 @@
+{
+  "name": "brothel",
+  "description": "The entrance to the brothel is slightly raised from street level, with a little stairs on the side. Above the high door is a golden window with the symbol of two kissing doves engraved in it. Next to it hangs a big golden lantern covered with green glasses.",
+  "destinationArea": "area:1009",
+  "oppositeExit": "exit:1011",
+  "door": false,
+  "hidden": false
+}

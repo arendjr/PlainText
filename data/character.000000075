@@ -1,6 +1,6 @@
 {
   "name": "beggar",
-  "triggers": { "oncharacterentered": "(function(activator) {\n    if (activator.name === 'city guard' || activator.race.name === 'animal' || this.dontBeg) {\n        return;\n    }\n\n    this.dontBeg = true;\n\n    this.setTimeout(function() {\n        if (activator.currentArea !== this.currentArea) {\n            return;\n        }\n\n        switch (randomInt(0, 3)) {\n            case 0:\n                this.say('Can you share me a dollar, ' + (activator.gender == 'male' ? 'sir' : 'ma\\'am') + '?');\n                break;\n            case 1:\n                this.say('You got something to spare?');\n                break;\n            case 2:\n                this.say('Please, ' + (activator.gender == 'male' ? 'sir' : 'ma\\'am') + ', show me some generosity.');\n                break;\n        }\n    }, 500);\n\n    this.setTimeout(function() {\n        delete this.dontBeg;\n    }, 3500);\n})" },
+  "triggers": { "onactive": "(function() {\n    var enemy = this.enemies.findFirstAmong(this.currentArea.characters);\n    if (enemy) {\n        this.kill(enemy);\n    }\n})", "onattack": "(function(attacker) {\n    if (!this.enemies.contains(attacker)) {\n        this.enemies.push(attacker);\n    }\n    this.setTimeout(function() {\n        this.invokeTrigger('onactive');\n    }, 200);\n})", "oncharacterentered": "(function(activator) {\n    if (activator.name === 'city guard' || activator.race.name === 'animal' || this.dontBeg) {\n        return;\n    }\n\n    this.dontBeg = true;\n\n    this.setTimeout(function() {\n        if (activator.currentArea !== this.currentArea) {\n            return;\n        }\n\n        if (this.enemies.contains(activator)) {\n            this.kill(activator);\n            return;\n        }\n\n        switch (randomInt(0, 3)) {\n            case 0:\n                this.say('Can you share me a dollar, ' + (activator.gender == 'male' ? 'sir' : 'ma\\'am') + '?');\n                break;\n            case 1:\n                this.say('You got something to spare?');\n                break;\n            case 2:\n                this.say('Please, ' + (activator.gender == 'male' ? 'sir' : 'ma\\'am') + ', show me some generosity.');\n                break;\n        }\n    }, 500);\n\n    this.setTimeout(function() {\n        delete this.dontBeg;\n    }, 3500);\n})", "onspawn": "(function() {\n    this.enemies = [];\n})" },
   "plural": "beggars",
   "indefiniteArticle": "a",
   "portable": false,
@@ -16,7 +16,7 @@
   "respawnTimeVariation": 600000,
   "hp": 22,
   "maxHp": 22,
-  "mp": 0,
+  "mp": 11,
   "maxMp": 11,
   "gold": 0,
   "weapon": "0",

@@ -1,0 +1,5 @@
+{
+  "name": "Main Street",
+  "description": "From here you have a good look on Castle Blackwater's Keep, towering above the castle's walls across the canal that runs north of the street.\n\nOn the southside there are large and beautiful houses, as well as the city's brothel.",
+  "exits": [ "exit:1006", "exit:1010" ]
+}

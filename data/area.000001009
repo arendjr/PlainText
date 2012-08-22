@@ -1,0 +1,5 @@
+{
+  "name": "Yab Yum Brothel",
+  "description": "If the exterior hadn't convinced you yet, your last doubts are now removed: This brothel is not meant for the ordinary man out of town. You enter into the bar area of the brothel, from where you can move to the private rooms further in the back.\n\nThe bar itself is two-sided, like two opposing half moons with an opening in between. The stools are made of thick engraved copper with white seats. On both sides of the opening in the bar are two statues of angels, holding glass plates that serve for placing drinks. At the back wall at the end of the bar is a large mirror, with bright white statues of naked women eating grapes.",
+  "exits": [ "exit:1011", "exit:1022", "exit:1025" ]
+}
