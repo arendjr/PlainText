@@ -6,12 +6,11 @@
 LoseCommand::LoseCommand(Player *player, QObject *parent) :
     Command(player, parent) {
 
-    setDescription(QString("Remove yourself or someone else from a group. If you are a group "
-                           "leader, you can remove anyone from your group by using %1. You can "
-                           "always remove yourself from a group using simply %2.\n"
-                           "\n"
-                           "Examples: lose Mia, lose")
-                   .arg(Util::highlight("lose <name>"), Util::highlight("lose")));
+    setDescription("Remove yourself or someone else from a group. If you are a group leader, you "
+                   "can remove anyone from your group by using *lose <name>*. You can always "
+                   "remove yourself from a group using simply *lose*.\n"
+                   "\n"
+                   "Examples: lose mia, lose");
 }
 
 LoseCommand::~LoseCommand() {

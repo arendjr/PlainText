@@ -36,6 +36,8 @@ class Util : public QObject {
 
         Q_INVOKABLE static QString highlight(const QString &string);
 
+        static QString processHighlights(QString string);
+
         Q_INVOKABLE static bool isDirection(const QString &string);
 
         Q_INVOKABLE static QString opposingDirection(const QString &direction);

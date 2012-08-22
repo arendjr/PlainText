@@ -295,13 +295,7 @@ void CommandInterpreter::showHelp(const QString &command) {
         }
     }
 
-    static QRegExp bold("\\*([\\w \"'<>():@#$!.,-]+)\\*");
-    int pos = 0;
-    while ((pos = bold.indexIn(m)) != -1) {
-        m = m.replace(pos, bold.matchedLength(), Util::highlight(bold.cap(1)));
-    }
-
-    m_player->send(m);
+    m_player->send(Util::processHighlights(m));
 }
 
 QString CommandInterpreter::showAdminHelp(const QString &command) {

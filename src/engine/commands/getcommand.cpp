@@ -6,8 +6,7 @@
 GetCommand::GetCommand(Player *character, QObject *parent) :
     Command(character, parent) {
 
-    setDescription("Take an item or gold from the current area and put it in "
-                   "your inventory.\n"
+    setDescription("Take an item or gold from the current area and put it in your inventory.\n"
                    "\n"
                    "Examples: get stick, take stick, get gold");
 }

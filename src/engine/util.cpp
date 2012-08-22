@@ -190,6 +190,7 @@ QStringList Util::splitLines(const QString &string, int maxLineLength) {
     QStringList words = string.split(' ');
     QStringList lines;
     QString currentLine;
+    int currentLineLength = 0;
 
     for (QString word : words) {
         int index;
@@ -214,14 +215,17 @@ QStringList Util::splitLines(const QString &string, int maxLineLength) {
             continue;
         }
 
-        if (currentLine.length() + word.length() + 1 > maxLineLength) {
+        int wordLength = word.length() - 4 * word.count("\x1B[");
+        if (currentLineLength + wordLength + 1 > maxLineLength) {
             lines << currentLine;
             currentLine = word;
+            currentLineLength = wordLength;
         } else {
             if (!currentLine.isEmpty()) {
                 currentLine += " ";
             }
             currentLine += word;
+            currentLineLength += wordLength + 1;
         }
     }
     if (!currentLine.isEmpty()) {
@@ -250,6 +254,16 @@ QString Util::colorize(const QString &string, Color color) {
 QString Util::highlight(const QString &string) {
 
     return colorize(string, White);
+}
+
+QString Util::processHighlights(QString string) {
+
+    static QRegExp bold("\\*([^*]+)\\*");
+    int pos = 0;
+    while ((pos = bold.indexIn(string)) != -1) {
+        string = string.replace(pos, bold.matchedLength(), Util::highlight(bold.cap(1)));
+    }
+    return string;
 }
 
 bool Util::isDirection(const QString &string) {

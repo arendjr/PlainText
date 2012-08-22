@@ -6,13 +6,11 @@
 BuyCommand::BuyCommand(Player *character, QObject *parent) :
     Command(character, parent) {
 
-    setDescription(QString("Buy an item from a character. Use %1 to enquiry what goods a \n"
-                           "character has for sale. Use %2 to buy a specific item \n"
-                           "from a character.\n"
-                           "\n"
-                           "Examples: buy from shopkeeper, buy book from shopkeeper")
-                   .arg(Util::highlight("buy from <character>"))
-                   .arg(Util::highlight("buy <item> from <character>")));
+    setDescription("Buy an item from a character. Use *buy from <character>* to enquiry what goods "
+                   "a character has for sale. Use *buy <item> from <character>* to buy a specific "
+                   "item from a character.\n"
+                   "\n"
+                   "Examples: buy from shopkeeper, buy book from shopkeeper");
 }
 
 BuyCommand::~BuyCommand() {

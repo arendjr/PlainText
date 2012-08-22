@@ -9,8 +9,7 @@
 LookCommand::LookCommand(Player *character, QObject *parent) :
     Command(character, parent) {
 
-    setDescription("Look at something (any object, character, or the current "
-                   "area).\n"
+    setDescription("Look at something (any object, character, or the current area).\n"
                    "\n"
                    "Examples: look, look door, look earl");
 }

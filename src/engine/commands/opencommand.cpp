@@ -4,8 +4,8 @@
 OpenCommand::OpenCommand(Player *player, QObject *parent) :
     Command(player, parent) {
 
-    setDescription("Open an exit, typically a door. Note that doors "
-                   "automatically close after a while.\n"
+    setDescription("Open an exit, typically a door. Note that doors automatically close after a "
+                   "while.\n"
                    "\n"
                    "Example: open door");
 }

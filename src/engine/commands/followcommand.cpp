@@ -9,7 +9,7 @@ FollowCommand::FollowCommand(Player *player, QObject *parent) :
     setDescription("Form or join a group by following another player. The first person being "
                    "followed automatically becomes the group leader.\n"
                    "\n"
-                   "Example: follow Mia");
+                   "Example: follow mia");
 }
 
 FollowCommand::~FollowCommand() {

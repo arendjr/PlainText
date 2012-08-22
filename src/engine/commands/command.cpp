@@ -17,7 +17,7 @@ Command::~Command() {
 
 void Command::setDescription(const QString &description) {
 
-    m_description = description;
+    m_description = Util::processHighlights(description);
 }
 
 void Command::setCommand(const QString &_command) {
