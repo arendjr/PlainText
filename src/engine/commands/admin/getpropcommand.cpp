@@ -27,10 +27,6 @@ void GetPropCommand::execute(const QString &command) {
     }
 
     QString propertyName = Util::fullPropertyName(object.cast<GameObject *>(), takeWord());
-    if (propertyName == "not unique") {
-        send("Property name is not unique.");
-        return;
-    }
 
     if (propertyName == "id") {
         send(QString::number(object->id()));

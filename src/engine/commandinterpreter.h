@@ -25,12 +25,6 @@ class CommandInterpreter : public QObject {
         Player *m_player;
 
         QMap<QString, Command *> m_commands;
-        QMap<QString, QString> m_triggers;
-
-        void showHelp(const QString &command = QString());
-        QString showAdminHelp(const QString &command);
-
-        static QString formatColumns(const QStringList &commandNames);
 };
 
 #endif // COMMANDINTERPRETER_H

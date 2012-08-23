@@ -28,10 +28,6 @@ void SetPropCommand::execute(const QString &command) {
     }
 
     QString propertyName = Util::fullPropertyName(object.cast<GameObject *>(), takeWord());
-    if (propertyName == "not unique") {
-        send("Property name is not unique.");
-        return;
-    }
 
     if (!assertWordsLeft("Usage: set-prop <object-name> [#] <property-name> <value>")) {
         return;

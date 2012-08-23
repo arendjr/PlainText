@@ -69,8 +69,13 @@ QScriptValue ScriptEngine::evaluate(const QString &program,
 ScriptFunction ScriptEngine::defineFunction(const QString &program,
                                             const QString &fileName, int lineNumber) {
 
+    QString source = program;
+    if (source.startsWith("function")) {
+        source = "(" + source + ")";
+    }
+
     ScriptFunction function;
-    function.value = m_jsEngine.evaluate(program, fileName, lineNumber);
+    function.value = m_jsEngine.evaluate(source, fileName, lineNumber);
     function.source = program;
     return function;
 }

@@ -76,6 +76,7 @@ SOURCES += \
     engine/commands/gocommand.cpp \
     engine/commands/groupcommand.cpp \
     engine/commands/gtalkcommand.cpp \
+    engine/commands/helpcommand.cpp \
     engine/commands/inventorycommand.cpp \
     engine/commands/killcommand.cpp \
     engine/commands/lookcommand.cpp \
@@ -174,6 +175,7 @@ HEADERS += \
     engine/commands/gocommand.h \
     engine/commands/groupcommand.h \
     engine/commands/gtalkcommand.h \
+    engine/commands/helpcommand.h \
     engine/commands/inventorycommand.h \
     engine/commands/killcommand.h \
     engine/commands/lookcommand.h \

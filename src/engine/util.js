@@ -4,6 +4,11 @@ Array.prototype.contains = function(element) {
     return this.indexOf(element) > -1;
 };
 
+Array.prototype.isEmpty = function() {
+
+    return this.length === 0;
+};
+
 Array.prototype.named = function(name) {
 
     for (var i = 0; i < this.length; i++) {
@@ -84,6 +89,11 @@ String.prototype.highlighted = function() {
 
     return Util.highlight(this);
 }
+
+String.prototype.isEmpty = function() {
+
+    return this.length === 0;
+};
 
 String.prototype.startsWith = function(string) {
 

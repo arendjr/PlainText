@@ -24,7 +24,7 @@ void BuyCommand::execute(const QString &command) {
 
     GameObjectPtrList sellers;
     for (const GameObjectPtr &npc : currentArea()->npcs()) {
-        if (npc.cast<Character *>()->sellableItems().length() > 0) {
+        if (npc->hasTrigger("onbuy")) {
             sellers << npc;
         }
     }

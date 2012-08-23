@@ -31,6 +31,7 @@ class Realm : public GameObject {
         void unregisterObject(GameObject *gameObject);
         GameObject *getObject(const char *objectType, uint id) const;
         Q_INVOKABLE GameObject *getObject(const QString &objectType, uint id) const;
+        Q_INVOKABLE GameObject *createObject(const QString &objectType);
 
         Q_INVOKABLE GameObjectPtrList players() const;
         Q_INVOKABLE GameObjectPtrList onlinePlayers() const;

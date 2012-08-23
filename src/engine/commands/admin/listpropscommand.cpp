@@ -39,9 +39,7 @@ void ListPropsCommand::execute(const QString &command) {
         }
 
         QString value = ConversionUtil::toUserString(object->property(name));
-        if (value.isEmpty()) {
-            value = "(empty string)";
-        }
+
         if (!metaProperty.isWritable()) {
             value += " (read-only)";
         }

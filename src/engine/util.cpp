@@ -200,15 +200,18 @@ QStringList Util::splitLines(const QString &string, int maxLineLength) {
                 if (currentLine.length() + left.length() + 1 > maxLineLength) {
                     lines << currentLine;
                     currentLine = left;
+                    currentLineLength = left.length();
                 } else {
                     if (!currentLine.isEmpty()) {
                         currentLine += " ";
                     }
                     currentLine += left;
+                    currentLineLength += left.length();
                 }
             }
             lines << currentLine;
             currentLine = "";
+            currentLineLength = 0;
             word = word.mid(index + 1);
         }
         if (word.isEmpty()) {
@@ -318,7 +321,6 @@ QString Util::fullPropertyName(QObject *object, const QString &propertyName) {
 
     QString name = Util::toCamelCase(propertyName);
 
-    QString fullPropertyName;
     const QMetaObject *metaObject = object->metaObject();
     int count = metaObject->propertyCount(),
         offset = GameObject::staticMetaObject.propertyOffset();
@@ -326,15 +328,10 @@ QString Util::fullPropertyName(QObject *object, const QString &propertyName) {
         QMetaProperty metaProperty = metaObject->property(i);
         QString metaPropertyName = metaProperty.name();
         if (metaPropertyName.startsWith(name)) {
-            if (fullPropertyName.isEmpty()) {
-                fullPropertyName = metaPropertyName;
-            } else {
-                fullPropertyName = "not unique";
-                break;
-            }
+            return metaPropertyName;
         }
     }
-    return fullPropertyName;
+    return QString();
 }
 
 QString Util::randomString(int length) {
