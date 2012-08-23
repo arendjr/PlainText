@@ -1,6 +1,6 @@
 {
   "name": "cup of herbal tea",
-  "triggers": { "ondrink": "(function(character) { character.addEffect({ 'delay': 45000, 'numOccurrences': 1, 'hpDelta': 2, 'mpDelta': 1, 'message': 'You feel the healing effect of the herbal tea.' }); character.send('You drank the tea.'); })" },
+  "triggers": { "ondrink": "(function(character) {\n    character.addEffect({\n        'delay': 45000,\n        'numOccurrences': 1,\n        'hpDelta': 2,\n        'mpDelta': 1,\n        'message': 'You feel the healing effect of the herbal tea.'\n    });\n    character.send('You drank the tea.');\n})" },
   "plural": "cups of herbal tea",
   "indefiniteArticle": "a",
   "portable": false,

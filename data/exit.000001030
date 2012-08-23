@@ -1,0 +1,8 @@
+{
+  "name": "bakery",
+  "description": "The bakery's building is made of a light yellow stone. There's a big window through which bread may be sold directly to people on the street, though the shutter is currently closed.",
+  "destinationArea": "area:1029",
+  "oppositeExit": "exit:1031",
+  "door": false,
+  "hidden": false
+}

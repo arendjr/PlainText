@@ -1,5 +1,6 @@
 {
   "name": "west",
+  "description": "There's an alley to the west. It appears a dead end.",
   "destinationArea": "area:101",
   "oppositeExit": "exit:103",
   "door": false,

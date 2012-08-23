@@ -1,3 +1,5 @@
 {
-  "exits": [ "exit:103" ]
+  "name": "Baker's Alley",
+  "description": "This alley runs around the back of the bakery on the corner of Main Street and Market Street. As a result, this alley actually has a pleasant smell of fresh-baked bread to it.\n\nOther than a few empty boxes, there appears to be little in this alley but a dead end.",
+  "exits": [ "exit:103", "exit:1046" ]
 }

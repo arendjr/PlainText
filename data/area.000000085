@@ -1,4 +1,5 @@
 {
   "name": "Bread Stall",
+  "description": "The stall looks plain and simple, but the breads that are here smell very good indeed.",
   "exits": [ "exit:91" ]
 }

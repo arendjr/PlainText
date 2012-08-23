@@ -1,0 +1,7 @@
+{
+  "name": "alley",
+  "destinationArea": "area:101",
+  "oppositeExit": "exit:1046",
+  "door": false,
+  "hidden": false
+}
