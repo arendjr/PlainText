@@ -1,4 +1,3 @@
-
 GAME MECHANICS
 
   -  Finish combat mechanics.
@@ -11,3 +10,4 @@ TECHNOLOGY
      -  Use QCryptographicHash::Sha512 for password encryption.
      -  Use QLatin1String / QStringLiteral where it makes sense.
   -  Implement MSSP protocol.
+  -  Implement MCCP protocol.
