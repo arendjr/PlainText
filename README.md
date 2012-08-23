@@ -43,6 +43,13 @@ Run the following commands from the src/ directory:
 Playing the game
 ----------------
 
+**Note**: If you want to play the game using your webbrowser, you should have a
+modern standards compliant browser. These are the browsers that *should* work:
+ * Chrome
+ * Firefox 4 or higher
+ * Internet Explorer 10
+ * Safari
+
 ### Connect to your own server ###
 
 If you have just compiled your own server, you can connect to it through telnet
