@@ -39,6 +39,8 @@ class Item : public GameObject {
         void setCost(double cost);
         Q_PROPERTY(double cost READ cost WRITE setCost)
 
+        static Item *createGold(Realm *realm, double amount);
+
     protected:
         virtual void changeName(const QString &newName);
 

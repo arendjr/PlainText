@@ -21,19 +21,48 @@ void DropCommand::execute(const QString &command) {
         return;
     }
 
-    takeWord("the");
+    QString description;
+    GameObjectPtrList items;
+    double gold = 0.0;
 
-    GameObjectPtrList items = takeObjects(player()->inventory());
-    if (!requireSome(items, "You don't have that.")) {
-        return;
+    QString word = takeWord();
+    if (word.startsWith("$")) {
+        QRegExp currencyRegExp("\\$\\d+(\\.5)?");
+        if (!currencyRegExp.exactMatch(word)) {
+            send(QString("%1 is not a valid currency description.").arg(word));
+            return;
+        }
+        gold = word.mid(1).toDouble();
+        if (gold == 0.0) {
+            send("You drop nothing.");
+            return;
+        }
+        if (gold > player()->gold()) {
+            send("You don't have that much gold.");
+            return;
+        }
+
+        currentArea()->addGold(gold);
+        player()->adjustGold(-gold);
+
+        description = QString("$%1 worth of gold").arg(gold);
+    } else {
+        prependWord(word);
+        takeWord("the");
+
+        items = takeObjects(player()->inventory());
+        if (!requireSome(items, "You don't have that.")) {
+            return;
+        }
+
+        for (const GameObjectPtr &item : items) {
+            currentArea()->addItem(item);
+            player()->removeInventoryItem(item);
+        }
+
+        description = items.joinFancy(DefiniteArticles);
     }
 
-    for (const GameObjectPtr &item : items) {
-        currentArea()->addItem(item);
-        player()->removeInventoryItem(item);
-    }
-
-    QString description = items.joinFancy(DefiniteArticles);
     send(QString("You drop %2.").arg(description));
 
     GameObjectPtrList others = currentArea()->players();

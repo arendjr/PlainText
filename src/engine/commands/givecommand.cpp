@@ -22,8 +22,6 @@ void GiveCommand::execute(const QString &command) {
         return;
     }
 
-    takeWord("the");
-
     GameObjectPtrList items;
     double gold = 0.0;
 
@@ -49,6 +47,7 @@ void GiveCommand::execute(const QString &command) {
         }
     } else {
         prependWord(word);
+        takeWord("the");
 
         items = takeObjects(player()->inventory());
         if (!requireSome(items, "You don't have that.")) {

@@ -1,5 +1,6 @@
 #include "lookcommand.h"
 
+#include "engine/exit.h"
 #include "engine/item.h"
 #include "engine/race.h"
 #include "engine/util.h"
@@ -127,6 +128,19 @@ void LookCommand::execute(const QString &command) {
         } else {
             m += QString("%1 appears to be about as strong as you are.\n")
                  .arg(Util::capitalize(character->subjectPronoun()));
+        }
+
+        send(m);
+    } else if (object->isExit()) {
+        Exit *exit = object.cast<Exit *>();
+
+        QString m;
+        if (!description.isEmpty()) {
+            m = description + "\n";
+        }
+        if (exit->isDoor()) {
+            m += QString("The %1 is %2.\n")
+                 .arg(exit->name()).arg(exit->isOpen() ? "open" : "closed");
         }
 
         send(m);

@@ -38,6 +38,8 @@ class Util : public QObject {
 
         static QString processHighlights(QString string);
 
+        static bool isVowel(const QChar &character);
+
         Q_INVOKABLE static bool isDirection(const QString &string);
 
         Q_INVOKABLE static QString opposingDirection(const QString &direction);

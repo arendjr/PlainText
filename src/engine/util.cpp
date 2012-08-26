@@ -269,6 +269,12 @@ QString Util::processHighlights(QString string) {
     return string;
 }
 
+bool Util::isVowel(const QChar &character) {
+
+    return (character == 'a' || character == 'e' || character == 'i' ||
+            character == 'o' || character == 'u');
+}
+
 bool Util::isDirection(const QString &string) {
 
     return indexOfDirection(string) > -1;

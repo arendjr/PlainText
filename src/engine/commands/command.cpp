@@ -147,7 +147,19 @@ QPair<QString, uint> Command::takeObjectsDescription() {
     QPair<QString, uint> description;
     if (m_words.length() > 0) {
         description.first = m_words.takeFirst().toLower();
-        if (m_words.length() > 0) {
+        if (description.first == "first" && m_words.length() > 0) {
+            description.first = m_words.takeFirst().toLower();
+            description.second = 1;
+        } else if (description.first == "second" && m_words.length() > 0) {
+            description.first = m_words.takeFirst().toLower();
+            description.second = 2;
+        } else if (description.first == "third" && m_words.length() > 0) {
+            description.first = m_words.takeFirst().toLower();
+            description.second = 3;
+        } else if (description.first == "fourth" && m_words.length() > 0) {
+            description.first = m_words.takeFirst().toLower();
+            description.second = 4;
+        } else if (m_words.length() > 0) {
             description.second = m_words.first().toInt();
             if (description.second > 0) {
                 m_words.removeFirst();

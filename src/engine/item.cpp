@@ -102,25 +102,37 @@ void Item::setCost(double cost) {
     }
 }
 
+Item *Item::createGold(Realm *realm, double amount) {
+
+    Item *gold = super::createByObjectType<Item *>(realm, "item");
+    gold->setName(QString("$%1 worth of gold").arg(amount));
+    gold->setCost(amount);
+    gold->setPortable(true);
+    return gold;
+}
+
 void Item::changeName(const QString &newName) {
 
     super::changeName(newName);
 
-    if (newName.length() > 0) {
-        if (newName.endsWith("y")) {
-            m_plural = newName.left(newName.length() - 1) + "ies";
+    int length = newName.length();
+    if (length > 0 && !newName.startsWith('$')) {
+        if (newName.endsWith("y") && length > 1 && !Util::isVowel(newName[length - 2])) {
+            m_plural = newName.left(length - 1) + "ies";
         } else if (newName.endsWith("f")) {
-            m_plural = newName.left(newName.length() - 1) + "ves";
+            m_plural = newName.left(length - 1) + "ves";
         } else if (newName.endsWith("fe")) {
-            m_plural = newName.left(newName.length() - 2) + "ves";
-        } else if (newName.endsWith("is")) {
-            m_plural = newName.left(newName.length() - 2) + "es";
+            m_plural = newName.left(length - 2) + "ves";
+        } else if (newName.endsWith("s") || newName.endsWith("x") ||
+                   newName.endsWith("sh") || newName.endsWith("ch")) {
+            m_plural = newName.left(length - 2) + "es";
+        } else if (newName.endsWith("ese")) {
+            m_plural = newName;
         } else {
             m_plural = newName + "s";
         }
 
-        if (newName[0] == 'a' || newName[0] == 'e' || newName[0] == 'i' ||
-            newName[0] == 'o' || newName[0] == 'u') {
+        if (Util::isVowel(newName[0])) {
             m_indefiniteArticle = "an";
         } else {
             m_indefiniteArticle = "a";

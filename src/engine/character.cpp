@@ -645,7 +645,11 @@ void Character::take(const GameObjectPtrList &items) {
     GameObjectPtrList takenItems;
     for (const GameObjectPtr &itemPtr : items) {
         Item *item = itemPtr.cast<Item *>();
-        if (item->isPortable()) {
+        if (item->name().endsWith("worth of gold")) {
+            adjustGold(item->cost());
+            area->removeItem(itemPtr);
+            takenItems << itemPtr;
+        } else if (item->isPortable()) {
             addInventoryItem(itemPtr);
             area->removeItem(itemPtr);
             takenItems << itemPtr;
@@ -660,7 +664,8 @@ void Character::take(const GameObjectPtrList &items) {
 
         GameObjectPtrList others = area->players();
         others.removeOne(this);
-        others.send(QString("%1 takes %3.").arg(name(), description));
+        others.send(QString("%1 takes %3.").arg(definiteName(area->characters(), Capitalized),
+                                                description));
     }
 }
 
@@ -836,22 +841,30 @@ void Character::die(const GameObjectPtr &attacker) {
     others.send(QString("%1 died.").arg(myName), Teal);
 
     if (inventory().length() > 0 || m_gold > 0.0) {
-        QString inventoryString;
+        QString droppedItemsDescription;
+
         if (inventory().length() > 0) {
-            inventoryString = inventory().joinFancy();
-        }
-        if (m_gold > 0.0) {
-            if (!inventoryString.isEmpty()) {
-                inventoryString += " and ";
+            for (const GameObjectPtr &item : inventory()) {
+                area->addItem(item);
             }
-            inventoryString += QString("$%1 worth of gold").arg(m_gold);
+
+            droppedItemsDescription = inventory().joinFancy();
+
+            setInventory(GameObjectPtrList());
         }
 
-        others.send(QString("%1 was carrying %2.").arg(myName, inventoryString), Teal);
+        if (m_gold > 0.0) {
+            area->addGold(m_gold);
 
-        for (const GameObjectPtr &item : inventory()) {
-            area->addItem(item);
+            if (!droppedItemsDescription.isEmpty()) {
+                droppedItemsDescription += " and ";
+            }
+            droppedItemsDescription += QString("$%1 worth of gold").arg(m_gold);
+
+            m_gold = 0.0;
         }
+
+        others.send(QString("%1 was carrying %2.").arg(myName, droppedItemsDescription), Teal);
     }
 
     for (const GameObjectPtr &other : others) {

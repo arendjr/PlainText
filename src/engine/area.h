@@ -37,6 +37,8 @@ class Area : public GameObject {
         void setItems(const GameObjectPtrList &items);
         Q_PROPERTY(GameObjectPtrList items READ items WRITE setItems)
 
+        Q_INVOKABLE void addGold(double amount);
+
         GameObjectPtrList characters() const { return m_players + m_npcs; }
         Q_PROPERTY(GameObjectPtrList characters READ characters STORED false)
 
