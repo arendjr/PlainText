@@ -173,7 +173,7 @@ QString ConversionUtil::toUserString(const QVariant &variant) {
             for (const QString &key : map.keys()) {
                 stringList << QString("%1: %2").arg(jsString(key), toUserString(map[key]));
             }
-            return stringList.isEmpty() ? "(empty list)" : stringList.join("\n");
+            return stringList.isEmpty() ? "(empty)" : stringList.join("\n");
         }
         case QVariant::UserType:
             if (variant.userType() == QMetaType::type("GameObjectPtr")) {
