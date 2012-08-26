@@ -16,9 +16,10 @@
 
 GameObjectPtr::GameObjectPtr() :
     m_gameObject(nullptr),
-    m_objectType(nullptr),
     m_id(0),
     m_list(nullptr) {
+
+    m_objectType[0] = '\0';
 }
 
 GameObjectPtr::GameObjectPtr(GameObject *gameObject) :
@@ -26,7 +27,7 @@ GameObjectPtr::GameObjectPtr(GameObject *gameObject) :
 
     if (gameObject) {
         m_gameObject = gameObject;
-        m_objectType = strdup(gameObject->objectType());
+        strcpy(m_objectType, gameObject->objectType());
         m_id = gameObject->id();
         m_gameObject->registerPointer(this);
     }
@@ -38,7 +39,7 @@ GameObjectPtr::GameObjectPtr(Realm *realm, const char *objectType, uint id) :
     m_id = id;
 
     if (objectType) {
-        m_objectType = strdup(objectType);
+        strcpy(m_objectType, objectType);
     }
 
     if (realm->isInitialized()) {
@@ -48,13 +49,10 @@ GameObjectPtr::GameObjectPtr(Realm *realm, const char *objectType, uint id) :
 
 GameObjectPtr::GameObjectPtr(const GameObjectPtr &other) :
     m_gameObject(other.m_gameObject),
-    m_objectType(other.m_objectType),
     m_id(other.m_id),
     m_list(nullptr) {
 
-    if (m_objectType) {
-        m_objectType = strdup(m_objectType);
-    }
+    strcpy(m_objectType, other.m_objectType);
 
     if (m_gameObject) {
         m_gameObject->registerPointer(this);
@@ -72,8 +70,6 @@ GameObjectPtr::~GameObjectPtr() {
     if (m_gameObject) {
         m_gameObject->unregisterPointer(this);
     }
-
-    delete[] m_objectType;
 }
 
 bool GameObjectPtr::isNull() const {
@@ -88,10 +84,8 @@ GameObjectPtr &GameObjectPtr::operator=(const GameObjectPtr &other) {
             m_gameObject->unregisterPointer(this);
         }
 
-        delete[] m_objectType;
-
         m_gameObject = other.m_gameObject;
-        m_objectType = other.m_objectType ? strdup(other.m_objectType) : nullptr;
+        strcpy(m_objectType, other.m_objectType);
         m_id = other.m_id;
 
         if (m_gameObject) {
@@ -143,12 +137,12 @@ void GameObjectPtr::resolve(Realm *realm) {
         return;
     }
 
-    m_gameObject = realm->getObject(m_objectType, m_id);
+    m_gameObject = realm->getObject(m_objectType[0] == '\0' ? nullptr : m_objectType, m_id);
     if (!m_gameObject) {
         throw GameException(GameException::InvalidGameObjectPointer, m_objectType, m_id);
     }
-    if (!m_objectType) {
-        m_objectType = strdup(m_gameObject->objectType());
+    if (m_objectType[0] == '\0') {
+        strcpy(m_objectType, m_gameObject->objectType());
     }
 
     m_gameObject->registerPointer(this);
@@ -162,6 +156,14 @@ void GameObjectPtr::unresolve(bool unregister) {
         }
         m_gameObject = nullptr;
     }
+}
+
+GameObjectPtr GameObjectPtr::copyUnresolved() const {
+
+    GameObjectPtr copy;
+    copy.m_id = m_id;
+    strcpy(copy.m_objectType, m_objectType);
+    return copy;
 }
 
 void GameObjectPtr::setOwnerList(GameObjectPtrList *list) {
@@ -509,6 +511,16 @@ GameObjectPtrList::const_iterator GameObjectPtrList::end() const {
     }
 }
 
+GameObjectPtr &GameObjectPtrList::first() {
+
+    return m_items[0];
+}
+
+const GameObjectPtr &GameObjectPtrList::first() const {
+
+    return m_items[0];
+}
+
 int GameObjectPtrList::indexOf(const GameObjectPtr &value, int from) const {
 
     for (int i = from; i < m_size; i++) {
@@ -527,6 +539,24 @@ int GameObjectPtrList::indexOf(const GameObjectPtr &value, int from) const {
 bool GameObjectPtrList::isEmpty() const {
 
     return m_size == 0;
+}
+
+GameObjectPtr &GameObjectPtrList::last() {
+
+    if (m_nextList) {
+        return m_nextList->last();
+    } else {
+        return m_items[m_size - 1];
+    }
+}
+
+const GameObjectPtr &GameObjectPtrList::last() const {
+
+    if (m_nextList) {
+        return m_nextList->last();
+    } else {
+        return m_items[m_size - 1];
+    }
 }
 
 int GameObjectPtrList::length() const {
@@ -724,6 +754,21 @@ void GameObjectPtrList::unresolvePointers() {
     if (m_nextList) {
         m_nextList->unresolvePointers();
     }
+}
+
+GameObjectPtrList GameObjectPtrList::copyUnresolved() const {
+
+    GameObjectPtrList copy;
+    copy.m_size = m_size;
+
+    for (int i = 0; i < m_size; i++) {
+        copy.m_items[i] = m_items[i].copyUnresolved();
+    }
+
+    if (m_nextList) {
+        copy.m_nextList = new GameObjectPtrList(m_nextList->copyUnresolved());
+    }
+    return copy;
 }
 
 void GameObjectPtrList::send(const QString &message, Color color) const {

@@ -64,6 +64,8 @@ class GameObjectPtr {
         void resolve(Realm *realm);
         void unresolve(bool unregister = true);
 
+        GameObjectPtr copyUnresolved() const;
+
         void setOwnerList(GameObjectPtrList *list);
 
         QString toString() const;
@@ -78,7 +80,7 @@ class GameObjectPtr {
     private:
         GameObject *m_gameObject;
 
-        const char *m_objectType;
+        char m_objectType[10];
         uint m_id;
 
         GameObjectPtrList *m_list;
@@ -173,9 +175,15 @@ class GameObjectPtrList {
         iterator end();
         const_iterator end() const;
 
+        GameObjectPtr &first();
+        const GameObjectPtr &first() const;
+
         int indexOf(const GameObjectPtr &value, int from = 0) const;
 
         bool isEmpty() const;
+
+        GameObjectPtr &last();
+        const GameObjectPtr &last() const;
 
         int length() const;
 
@@ -213,6 +221,8 @@ class GameObjectPtrList {
 
         void resolvePointers(Realm *realm);
         void unresolvePointers();
+
+        GameObjectPtrList copyUnresolved() const;
 
         void send(const QString &message, Color color = Silver) const;
 
