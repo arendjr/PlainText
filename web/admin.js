@@ -6,6 +6,10 @@
 
     var triggers = {};
     self.onMessageHook = function(message) {
+        if (!message.contains("Trigger Overview")) {
+            return false;
+        }
+
         message = message.trimmed();
 
         var lines = message.split("\n");

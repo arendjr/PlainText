@@ -173,8 +173,12 @@ function Controller() {
                 }
             }
         } else if (self.onMessageHook) {
-            self.onMessageHook(message.data);
-            self.onMessageHook = null;
+            var result = self.onMessageHook(message.data);
+            if (result === false) {
+                self.writeToScreen(message.data);
+            } else {
+                self.onMessageHook = null;
+            }
         } else {
             self.writeToScreen(message.data);
         }
