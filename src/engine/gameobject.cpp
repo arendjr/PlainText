@@ -519,23 +519,22 @@ GameObject *GameObject::createCopy(const GameObject *other) {
 
     for (const QMetaProperty &metaProperty : other->storedMetaProperties()) {
         const char *name = metaProperty.name();
-        QVariant value = other->property(name);
 
         // game object pointers need to be unresolved to avoid them being
         // registrated in the other thread
         if (metaProperty.type() == QVariant::UserType) {
             if (metaProperty.userType() == QMetaType::type("GameObjectPtr")) {
-                GameObjectPtr pointer = value.value<GameObjectPtr>();
-                pointer.unresolve();
-                value = QVariant::fromValue(pointer);
+                GameObjectPtr pointer = other->property(name).value<GameObjectPtr>();
+                copy->setProperty(name, QVariant::fromValue(pointer.copyUnresolved()));
             } else if (metaProperty.userType() == QMetaType::type("GameObjectPtrList")) {
-                GameObjectPtrList pointerList = value.value<GameObjectPtrList>();
-                pointerList.unresolvePointers();
-                value = QVariant::fromValue(pointerList);
+                GameObjectPtrList list = other->property(name).value<GameObjectPtrList>();
+                copy->setProperty(name, QVariant::fromValue(list.copyUnresolved()));
+            } else {
+                copy->setProperty(name, other->property(name));
             }
+        } else {
+            copy->setProperty(name, other->property(name));
         }
-
-        copy->setProperty(name, value);
     }
 
     return copy;
