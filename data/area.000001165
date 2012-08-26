@@ -1,0 +1,5 @@
+{
+  "name": "Main Street",
+  "exits": [ "exit:1167" ],
+  "items": [ "item:1080", "item:1081", "item:1082", "item:1087", "item:1088", "item:1089", "item:1153", "item:1154", "item:1155" ]
+}

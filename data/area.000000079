@@ -1,4 +1,5 @@
 {
   "name": "Clothes Stall",
-  "exits": [ "exit:88" ]
+  "exits": [ "exit:88" ],
+  "items": [ "item:1169" ]
 }
