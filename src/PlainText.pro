@@ -36,6 +36,7 @@ SOURCES += \
     engine/commandinterpreter.cpp \
     engine/conversionutil.cpp \
     engine/deleteobjectevent.cpp \
+    engine/diskutil.cpp \
     engine/effect.cpp \
     engine/engine.cpp \
     engine/event.cpp \
@@ -135,6 +136,7 @@ HEADERS += \
     engine/constants.h \
     engine/conversionutil.h \
     engine/deleteobjectevent.h \
+    engine/diskutil.h \
     engine/effect.h \
     engine/engine.h \
     engine/event.h \

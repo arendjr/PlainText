@@ -29,6 +29,6 @@ void RemoveItemCommand::execute(const QString &command) {
     for (const GameObjectPtr &item : items) {
         item->setDeleted();
 
-        player()->send(QString("Item %1 removed.").arg(item->name()));
+        send(QString("Item %1 removed.").arg(item->name()));
     }
 }

@@ -570,7 +570,9 @@ void Character::leave(const GameObjectPtr &areaPtr, const QString &exitName,
 
         players.send(exitName.isEmpty() ?
                      QString("%1 left.").arg(departuresName) :
-                     QString("%1 left to the %2.").arg(departuresName, exitName));
+                     QString("%1 left %2%3.").arg(departuresName,
+                                                  Util::isDirection(exitName) ? "" : "to the ",
+                                                  exitName));
     }
 }
 

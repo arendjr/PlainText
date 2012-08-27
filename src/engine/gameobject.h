@@ -162,9 +162,6 @@ class GameObject : public QObject {
 
         virtual void changeName(const QString &newName);
 
-        static QString saveDirPath();
-        static QString saveObjectPath(const char *objectType, uint id);
-
     private:
         Realm *m_realm;
 

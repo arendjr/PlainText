@@ -1,11 +1,9 @@
 #include "gameobject.h"
 
 #include <cstring>
-#include <unistd.h>
 
 #include <QDateTime>
 #include <QDebug>
-#include <QDir>
 #include <QFile>
 #include <QFileInfo>
 #include <QMetaProperty>
@@ -21,6 +19,7 @@
 #include "class.h"
 #include "conversionutil.h"
 #include "deleteobjectevent.h"
+#include "diskutil.h"
 #include "exit.h"
 #include "gameexception.h"
 #include "gameobjectptr.h"
@@ -377,7 +376,7 @@ GameObject *GameObject::copy() {
 bool GameObject::save() {
 
     if (m_deleted) {
-        return QFile::remove(saveObjectPath(m_objectType, m_id));
+        return QFile::remove(DiskUtil::gameObjectPath(m_objectType, m_id));
     }
 
     QStringList dumpedProperties;
@@ -390,20 +389,8 @@ bool GameObject::save() {
         }
     }
 
-    QFile file(saveObjectPath(m_objectType, m_id));
-    if (!file.open(QIODevice::WriteOnly)) {
-        qWarning() << "Could not open file" << file.fileName() << "for writing.";
-        return false;
-    }
-
-    file.write("{\n" + dumpedProperties.join(",\n").toUtf8() + "\n}\n");
-    file.flush();
-#ifdef Q_OS_LINUX
-    fdatasync(file.handle());
-#else
-    fsync(file.handle());
-#endif
-    return true;
+    return DiskUtil::writeGameObject(m_objectType, m_id,
+                                     "{\n" + dumpedProperties.join(",\n") + "\n}\n");
 }
 
 bool GameObject::load(const QString &path) {
@@ -657,14 +644,4 @@ void GameObject::unregisterPointer(GameObjectPtr *pointer) {
 void GameObject::changeName(const QString &newName) {
 
     Q_UNUSED(newName);
-}
-
-QString GameObject::saveDirPath() {
-
-    return qgetenv("PT_DATA_DIR");
-}
-
-QString GameObject::saveObjectPath(const char *objectType, uint id) {
-
-    return QString(saveDirPath() + "/%1.%2").arg(objectType).arg(id, 9, 10, QChar('0'));
 }

@@ -2,8 +2,7 @@
 
 #include <cstring>
 
-#include <QDir>
-
+#include "diskutil.h"
 #include "player.h"
 
 
@@ -53,12 +52,11 @@ Realm *Realm::instance() {
 
 void Realm::init() {
 
-    load(saveObjectPath(objectType(), id()));
+    load(DiskUtil::gameObjectPath(objectType(), id()));
 
-    QDir dir(saveDirPath());
-    for (const QString &fileName : dir.entryList(QDir::Files)) {
+    for (const QString &fileName : DiskUtil::dataDirFileList()) {
         if (!fileName.startsWith("realm.")) {
-            createFromFile(this, dir.path() + "/" + fileName);
+            createFromFile(this, DiskUtil::dataDir() + "/" + fileName);
         }
     }
 
@@ -125,7 +123,7 @@ GameObject *Realm::getObject(const QString &objectType, uint id) const {
 
 GameObject *Realm::createObject(const QString &objectType) {
 
-    return GameObject::createByObjectType(this, objectType.toUtf8().data());
+    return GameObject::createByObjectType(this, objectType);
 }
 
 GameObjectPtrList Realm::players() const {
