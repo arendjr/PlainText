@@ -274,23 +274,19 @@ void Session::askForUserName() {
 
 void Session::processUserName(const QString &answer) {
 
-    QString userName;
-    for (int i = 0; i < answer.length(); i++) {
-        if (answer[i].isLetter() || answer[i] == '\'' || answer[i] == '-') {
-            if (userName.isEmpty()) {
-                userName.append(answer[i].toUpper());
-            } else {
-                userName.append(answer[i]);
-                if (userName.length() >= 12) {
-                    break;
-                }
-            }
+    QString userName = Util::validateUserName(answer);
+    if (userName.length() < 3) {
+        if (!userName.isEmpty()) {
+            write("I'm sorry, but your name should consist of at least 3 letters.\n");
         }
+        return;
     }
 
     m_player = m_realm->getPlayer(userName);
     if (m_player) {
         setSignInStage(AskingPassword);
+    } else if (m_realm->reservedNames().contains(userName)) {
+        write("Yeah right, like I believe that...\n");
     } else {
         m_signUpData = new SignUpData();
         m_signUpData->userName = userName;

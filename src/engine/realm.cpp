@@ -4,6 +4,7 @@
 
 #include "diskutil.h"
 #include "player.h"
+#include "util.h"
 
 
 static Realm *s_instance = nullptr;
@@ -165,6 +166,14 @@ Player *Realm::getPlayer(const QString &name) const {
     }
 
     return 0;
+}
+
+void Realm::addReservedName(const QString &name) {
+
+    QString userName = Util::validateUserName(name);
+    if (!m_reservedNames.contains(userName)) {
+        m_reservedNames << userName;
+    }
 }
 
 void Realm::setDateTime(const QDateTime &dateTime) {

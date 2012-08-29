@@ -269,6 +269,34 @@ QString Util::processHighlights(QString string) {
     return string;
 }
 
+QString Util::validateUserName(const QString &string) {
+
+    QString userName;
+    int numSpecialChars = 0;
+    for (int i = 0; i < string.length(); i++) {
+        if (string[i].isLetter()) {
+            if (userName.isEmpty()) {
+                userName.append(string[i].toUpper());
+            } else {
+                userName.append(string[i]);
+                if (userName.length() >= 12) {
+                    break;
+                }
+            }
+        } else if (i > 0 && numSpecialChars == 0 && (string[i] == '\'' || string[i] == '-')) {
+            userName.append(string[i]);
+            numSpecialChars++;
+            if (userName.length() >= 12) {
+                break;
+            }
+        }
+    }
+    if (userName.endsWith('\'') || userName.endsWith('-')) {
+        userName = userName.left(userName.length() - 1);
+    }
+    return userName;
+}
+
 bool Util::isVowel(const QChar &character) {
 
     return (character == 'a' || character == 'e' || character == 'i' ||

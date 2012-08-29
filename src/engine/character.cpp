@@ -1152,6 +1152,8 @@ void Character::changeName(const QString &newName) {
     if (newName.toLower() != newName) {
         setIndefiniteArticle("");
     }
+
+    realm()->addReservedName(newName);
 }
 
 void Character::changeStats(const CharacterStats &newStats) {

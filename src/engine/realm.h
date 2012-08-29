@@ -3,6 +3,7 @@
 
 #include <QDateTime>
 #include <QHash>
+#include <QStringList>
 
 #include "gameobject.h"
 #include "gameobjectptr.h"
@@ -38,6 +39,9 @@ class Realm : public GameObject {
         void registerPlayer(Player *player);
         void unregisterPlayer(Player *player);
         Player *getPlayer(const QString &name) const;
+
+        void addReservedName(const QString &name);
+        const QStringList &reservedNames() const { return m_reservedNames; }
 
         const QDateTime &dateTime() const { return m_dateTime; }
         virtual void setDateTime(const QDateTime &dateTime);
@@ -84,6 +88,8 @@ class Realm : public GameObject {
         uint m_nextId;
         QHash<uint, GameObject *> m_objectMap;
         QHash<QString, Player *> m_playerMap;
+
+        QStringList m_reservedNames;
 
         GameObjectPtrList m_races;
         GameObjectPtrList m_classes;
