@@ -1,8 +1,6 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#define GAME_TITLE "Lands of Yold"
-
 enum Color {
     White = 0,
     Silver,

@@ -104,7 +104,13 @@ void Realm::unregisterObject(GameObject *gameObject) {
     m_objectMap.remove(gameObject->id());
 }
 
-GameObject *Realm::getObject(const char *objectType, uint id) const {
+GameObject *Realm::getObject(const char *objectType, uint id) {
+
+    if (id == 0) {
+        if (!objectType || strcmp(this->objectType(), objectType) == 0) {
+            return this;
+        }
+    }
 
     if (m_objectMap.contains(id)) {
         GameObject *object = m_objectMap[id];
@@ -117,7 +123,7 @@ GameObject *Realm::getObject(const char *objectType, uint id) const {
     return 0;
 }
 
-GameObject *Realm::getObject(const QString &objectType, uint id) const {
+GameObject *Realm::getObject(const QString &objectType, uint id) {
 
     return getObject(objectType.toAscii().constData(), id);
 }
