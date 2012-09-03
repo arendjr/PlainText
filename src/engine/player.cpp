@@ -72,7 +72,8 @@ void Player::setSession(Session *session) {
 void Player::send(const QString &_message, Color color) const {
 
     QString message;
-    if (_message.endsWith("\n")) {
+    if (_message.endsWith("\n") ||
+        (_message.startsWith("{") && _message.endsWith("}"))) {
         message = _message;
     } else {
         message = _message + "\n";

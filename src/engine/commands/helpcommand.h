@@ -1,8 +1,6 @@
 #ifndef HELPCOMMAND_H
 #define HELPCOMMAND_H
 
-#include <QMap>
-
 #include "command.h"
 
 
@@ -18,7 +16,6 @@ class HelpCommand : public Command {
 
     private:
         const QMap<QString, Command *> &m_commands;
-        QMap<QString, QString> m_triggers;
 
         QString showAdminHelp(const QString &commandName);
 

@@ -373,11 +373,7 @@ GameObject *GameObject::copy() {
     return object;
 }
 
-bool GameObject::save() {
-
-    if (m_deleted) {
-        return QFile::remove(DiskUtil::gameObjectPath(m_objectType, m_id));
-    }
+QString GameObject::toJSON() const {
 
     QStringList dumpedProperties;
     for (const QMetaProperty &metaProperty : storedMetaProperties()) {
@@ -388,9 +384,16 @@ bool GameObject::save() {
             dumpedProperties << QString("  \"%1\": %2").arg(name, propertyString);
         }
     }
+    return "{\n" + dumpedProperties.join(",\n") + "\n}";
+}
 
-    return DiskUtil::writeGameObject(m_objectType, m_id,
-                                     "{\n" + dumpedProperties.join(",\n") + "\n}\n");
+bool GameObject::save() {
+
+    if (m_deleted) {
+        return QFile::remove(DiskUtil::gameObjectPath(m_objectType, m_id));
+    } else {
+        return DiskUtil::writeGameObject(m_objectType, m_id, toJSON());
+    }
 }
 
 bool GameObject::load(const QString &path) {

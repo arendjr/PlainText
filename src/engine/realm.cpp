@@ -174,6 +174,17 @@ Player *Realm::getPlayer(const QString &name) const {
     return 0;
 }
 
+GameObjectPtrList Realm::allAreas() const {
+
+    GameObjectPtrList areas;
+    for (GameObject *object : m_objectMap) {
+        if (object->isArea()) {
+            areas << object;
+        }
+    }
+    return areas;
+}
+
 void Realm::addReservedName(const QString &name) {
 
     QString userName = Util::validateUserName(name);

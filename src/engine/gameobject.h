@@ -115,6 +115,8 @@ class GameObject : public QObject {
 
         Q_INVOKABLE virtual GameObject *copy();
 
+        QString toJSON() const;
+
         bool save();
         bool load(const QString &path);
 

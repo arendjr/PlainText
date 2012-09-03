@@ -72,7 +72,8 @@ void WebSocketServer::onSessionOutput(const QString &data) {
         socket->write(data);
     }
 
-    if (session->authenticated()) {
+    if (session->authenticated() &&
+        !(data.startsWith("{") && data.endsWith("}"))) {
         Player *player = session->player();
         Q_ASSERT(player);
 

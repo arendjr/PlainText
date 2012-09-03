@@ -97,8 +97,7 @@ function Controller() {
     this.historyIndex = 0;
     this.currentCommand = "";
 
-    this.setCommand = "";
-    this.onMessageHook = null;
+    this.pendingRequests = {};
 
     var self = this;
     this.commandInput = element(".command-input");
@@ -149,7 +148,16 @@ function Controller() {
     this.socket.onmessage = function(message) {
         if (message.data.substr(0, 1) === "{" && message.data.substr(-1) === "}") {
             var data = JSON.parse(message.data);
-            if (data && data.player) {
+            if (!data) {
+                return;
+            }
+
+            var requestId = data.requestId;
+
+            if (self.pendingRequests.hasOwnProperty(requestId)) {
+                self.pendingRequests[requestId](data.data);
+                delete self.pendingRequests[requestId];
+            } else if (data.player) {
                 if (!self.player.isAdmin && data.player.isAdmin) {
                     loadScript("admin.js");
                 }
@@ -272,6 +280,15 @@ Controller.prototype.writeToScreen = function(message) {
     this.screen.appendChild(div);
 
     this.screen.scrollTop = this.screen.scrollHeight;
+}
+
+Controller.prototype.sendApiCall = function(requestId, command, callback) {
+
+    this.pendingRequests[requestId] = callback;
+
+    var parts = command.split(" ");
+    parts.splice(1, 0, requestId);
+    this.socket.send("api-" + parts.join(" "));
 }
 
 Controller.prototype.updateLayout = function() {

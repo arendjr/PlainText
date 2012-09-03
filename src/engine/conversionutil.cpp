@@ -88,6 +88,17 @@ QString ConversionUtil::toJSON(const QVariant &variant) {
             } else {
                 return jsString(variant.toString());
             }
+        case QVariant::List: {
+            QStringList stringList;
+            for (const QVariant &variant : variant.toList()) {
+                stringList << ConversionUtil::toJSON(variant);
+            }
+            if (stringList.isEmpty()) {
+                return QString();
+            } else {
+                return "[ " + stringList.join(", ") + " ]";
+            }
+        }
         case QVariant::StringList: {
             QStringList stringList;
             for (const QString &string : variant.toStringList()) {
@@ -114,7 +125,9 @@ QString ConversionUtil::toJSON(const QVariant &variant) {
             return stringList.isEmpty() ? QString() : "{ " + stringList.join(", ") + " }";
         }
         case QVariant::UserType:
-            if (variant.userType() == QMetaType::type("GameObjectPtr")) {
+            if (variant.userType() == QMetaType::type("GameObject *")) {
+                return variant.value<GameObject *>()->toJSON();
+            } else if (variant.userType() == QMetaType::type("GameObjectPtr")) {
                 return jsString(variant.value<GameObjectPtr>().toString());
             } else if (variant.userType() == QMetaType::type("GameObjectPtrList")) {
                 QStringList stringList;

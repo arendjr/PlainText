@@ -5,29 +5,18 @@
     self.editField = element("#edit-field");
 
     var triggers = {};
-    self.onMessageHook = function(message) {
-        if (!message.contains("Trigger Overview")) {
-            return false;
-        }
-
-        message = message.trimmed();
-
-        var lines = message.split("\n");
-        lines.forEach(function(line) {
-            if (line.startsWith("  \x1B[37;1m")) {
-                var trigger = line.substring(9, line.indexOf("\x1B[0m"));
-                var triggerName;
-                if (trigger.contains("(")) {
-                    triggerName = trigger.substr(0, trigger.indexOf("("));
-                } else {
-                    triggerName = trigger.substr(0, trigger.indexOf(" : "));
-                }
-
-                triggers[triggerName] = trigger;
+    self.sendApiCall("triggers1", "list-triggers", function(data) {
+        for (var i = 0; i < data.length; i++) {
+            var trigger = data[i];
+            var triggerName;
+            if (trigger.contains("(")) {
+                triggerName = trigger.substr(0, trigger.indexOf("("));
+            } else {
+                triggerName = trigger.substr(0, trigger.indexOf(" : "));
             }
-        });
-    };
-    self.socket.send("help triggers");
+            triggers[triggerName] = trigger;
+        }
+    });
 
     var onkeypress = controller.commandInput.onkeypress;
 
