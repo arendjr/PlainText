@@ -27,9 +27,19 @@ var keys = {
     KEY_INSERT:   45
 };
 
+Array.prototype.isEmpty = function() {
+
+    return this.length === 0;
+};
+
 String.prototype.contains = function(string) {
 
     return this.indexOf(string) > -1;
+};
+
+String.prototype.isEmpty = function() {
+
+    return this.length === 0;
 };
 
 String.prototype.startsWith = function(string) {
@@ -155,7 +165,12 @@ function Controller() {
             var requestId = data.requestId;
 
             if (self.pendingRequests.hasOwnProperty(requestId)) {
-                self.pendingRequests[requestId](data.data);
+                if (data.errorCode === 0) {
+                    self.pendingRequests[requestId](data.data);
+                } else {
+                    self.writeToScreen("Error: " + data.errorMessage);
+                }
+
                 delete self.pendingRequests[requestId];
             } else if (data.player) {
                 if (!self.player.isAdmin && data.player.isAdmin) {
@@ -179,13 +194,6 @@ function Controller() {
                 } else {
                     self.statusHeader.mp.style.color = "";
                 }
-            }
-        } else if (self.onMessageHook) {
-            var result = self.onMessageHook(message.data);
-            if (result === false) {
-                self.writeToScreen(message.data);
-            } else {
-                self.onMessageHook = null;
             }
         } else {
             self.writeToScreen(message.data);
@@ -250,7 +258,8 @@ Controller.prototype.writeToScreen = function(message) {
                     break;
                 }
 
-                span.appendChild(document.createTextNode(message.substring(startIndex, array.index + 2)));
+                span.appendChild(document.createTextNode(message.substring(startIndex,
+                                                                           array.index + 2)));
 
                 var anchor = document.createElement("a");
                 anchor.className = "go";

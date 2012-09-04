@@ -116,9 +116,12 @@ SOURCES += \
     engine/commands/admin/stopservercommand.cpp \
     engine/commands/admin/unsettriggercommand.cpp \
     engine/commands/api/apicommand.cpp \
-    engine/commands/api/listareascommand.cpp \
-    engine/commands/api/listexitscommand.cpp \
-    engine/commands/api/listtriggerscommand.cpp \
+    engine/commands/api/areaslistcommand.cpp \
+    engine/commands/api/exitslistcommand.cpp \
+    engine/commands/api/propertygetcommand.cpp \
+    engine/commands/api/triggergetcommand.cpp \
+    engine/commands/api/triggersetcommand.cpp \
+    engine/commands/api/triggerslistcommand.cpp \
     interface/httpserver.cpp \
     interface/telnetserver.cpp \
     interface/websocketserver.cpp \
@@ -220,9 +223,12 @@ HEADERS += \
     engine/commands/admin/stopservercommand.h \
     engine/commands/admin/unsettriggercommand.h \
     engine/commands/api/apicommand.h \
-    engine/commands/api/listareascommand.h \
-    engine/commands/api/listexitscommand.h \
-    engine/commands/api/listtriggerscommand.h \
+    engine/commands/api/areaslistcommand.h \
+    engine/commands/api/exitslistcommand.h \
+    engine/commands/api/propertygetcommand.h \
+    engine/commands/api/triggergetcommand.h \
+    engine/commands/api/triggersetcommand.h \
+    engine/commands/api/triggerslistcommand.h \
     interface/httpserver.h \
     interface/telnetserver.h \
     interface/websocketserver.h \

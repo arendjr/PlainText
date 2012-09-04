@@ -1,18 +1,20 @@
-#include "listareascommand.h"
+#include "areaslistcommand.h"
 
 #include "engine/realm.h"
 
 
 #define super ApiCommand
 
-ListAreasCommand::ListAreasCommand(Player *player, QObject *parent) :
+AreasListCommand::AreasListCommand(Player *player, QObject *parent) :
     super(player, parent) {
+
+    setDescription("Syntax: api-areas-list <request-id>");
 }
 
-ListAreasCommand::~ListAreasCommand() {
+AreasListCommand::~AreasListCommand() {
 }
 
-void ListAreasCommand::execute(const QString &command) {
+void AreasListCommand::execute(const QString &command) {
 
     super::execute(command);
 

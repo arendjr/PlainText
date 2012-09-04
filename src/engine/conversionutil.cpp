@@ -73,21 +73,19 @@ QVariant ConversionUtil::fromVariant(QVariant::Type type, int userType, const QV
     }
 }
 
-QString ConversionUtil::toJSON(const QVariant &variant) {
+QString ConversionUtil::toJSON(const QVariant &variant, Options options) {
 
     switch (variant.type()) {
         case QVariant::Bool:
             return variant.toBool() ? "true" : "false";
         case QVariant::Int:
             return QString::number(variant.toInt());
+        case QVariant::UInt:
+            return QString::number(variant.toUInt());
         case QVariant::Double:
             return QString::number(variant.toDouble());
         case QVariant::String:
-            if (variant.toString().isEmpty()) {
-                return QString();
-            } else {
-                return jsString(variant.toString());
-            }
+            return jsString(variant.toString());
         case QVariant::List: {
             QStringList stringList;
             for (const QVariant &variant : variant.toList()) {
@@ -117,10 +115,13 @@ QString ConversionUtil::toJSON(const QVariant &variant) {
             QVariantMap map = variant.toMap();
             for (const QString &key : map.keys()) {
                 QVariant value = map[key];
-                stringList << QString("%1: [ %2, %3, %4 ]").arg(jsString(key),
-                                                                QString::number(value.type()),
-                                                                QString::number(value.userType()),
-                                                                toJSON(value));
+                if (options & DontIncludeTypeInfo) {
+                    stringList << QString("%1: %2").arg(jsString(key), toJSON(value, options));
+                } else {
+                    stringList << QString("%1: [ %2, %3, %4 ]")
+                                  .arg(jsString(key), QString::number(value.type()),
+                                       QString::number(value.userType()), toJSON(value, options));
+                }
             }
             return stringList.isEmpty() ? QString() : "{ " + stringList.join(", ") + " }";
         }

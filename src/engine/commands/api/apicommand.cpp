@@ -5,7 +5,7 @@
 
 
 ApiCommand::ApiCommand(Player *character, QObject *parent) :
-    Command(character, parent) {
+    AdminCommand(character, parent) {
 }
 
 ApiCommand::~ApiCommand() {
@@ -27,7 +27,7 @@ void ApiCommand::sendReply(const QVariant &variant) {
                  "\"errorCode\": 0, "
                  "\"errorMessage\": \"\", "
                  "\"data\": %2 "
-                 "}").arg(m_requestId, ConversionUtil::toJSON(variant)));
+                 "}").arg(m_requestId, ConversionUtil::toJSON(variant, DontIncludeTypeInfo)));
 }
 
 void ApiCommand::sendError(int errorCode, const QString &errorMessage) {

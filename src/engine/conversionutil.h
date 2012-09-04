@@ -5,13 +5,15 @@
 #include <QString>
 #include <QVariant>
 
+#include "constants.h"
+
 
 class ConversionUtil {
 
     public:
         static QVariant fromVariant(QVariant::Type type, int userType, const QVariant &variant);
 
-        static QString toJSON(const QVariant &variant);
+        static QString toJSON(const QVariant &variant, Options options = NoOptions);
 
         static QString toUserString(const QVariant &variant);
 

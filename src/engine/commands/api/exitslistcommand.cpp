@@ -1,18 +1,20 @@
-#include "listexitscommand.h"
+#include "exitslistcommand.h"
 
 #include "engine/realm.h"
 
 
 #define super ApiCommand
 
-ListExitsCommand::ListExitsCommand(Player *player, QObject *parent) :
+ExitsListCommand::ExitsListCommand(Player *player, QObject *parent) :
     super(player, parent) {
+
+    setDescription("Syntax: api-exits-list <request-id>");
 }
 
-ListExitsCommand::~ListExitsCommand() {
+ExitsListCommand::~ExitsListCommand() {
 }
 
-void ListExitsCommand::execute(const QString &command) {
+void ExitsListCommand::execute(const QString &command) {
 
     super::execute(command);
 

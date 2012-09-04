@@ -1,10 +1,10 @@
 #ifndef APICOMMAND_H
 #define APICOMMAND_H
 
-#include "engine/commands/command.h"
+#include "engine/commands/admin/admincommand.h"
 
 
-class ApiCommand : public Command {
+class ApiCommand : public AdminCommand {
 
     Q_OBJECT
 

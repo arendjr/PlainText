@@ -58,9 +58,12 @@
 #include "commands/admin/settriggercommand.h"
 #include "commands/admin/stopservercommand.h"
 #include "commands/admin/unsettriggercommand.h"
-#include "commands/api/listareascommand.h"
-#include "commands/api/listexitscommand.h"
-#include "commands/api/listtriggerscommand.h"
+#include "commands/api/areaslistcommand.h"
+#include "commands/api/exitslistcommand.h"
+#include "commands/api/propertygetcommand.h"
+#include "commands/api/triggergetcommand.h"
+#include "commands/api/triggersetcommand.h"
+#include "commands/api/triggerslistcommand.h"
 
 
 CommandInterpreter::CommandInterpreter(Player *player) :
@@ -129,9 +132,12 @@ CommandInterpreter::CommandInterpreter(Player *player) :
         m_commands.insert("stop-server", new StopServerCommand(player, this));
         m_commands.insert("unset-trigger", new UnsetTriggerCommand(player, this));
 
-        m_commands.insert("api-list-areas", new ListAreasCommand(player, this));
-        m_commands.insert("api-list-exits", new ListExitsCommand(player, this));
-        m_commands.insert("api-list-triggers", new ListTriggersCommand(player, this));
+        m_commands.insert("api-areas-list", new AreasListCommand(player, this));
+        m_commands.insert("api-exits-list", new ExitsListCommand(player, this));
+        m_commands.insert("api-property-get", new PropertyGetCommand(player, this));
+        m_commands.insert("api-trigger-get", new TriggerGetCommand(player, this));
+        m_commands.insert("api-trigger-set", new TriggerSetCommand(player, this));
+        m_commands.insert("api-triggers-list", new TriggersListCommand(player, this));
     }
 
     connect(quit, SIGNAL(quit()), this, SIGNAL(quit()));

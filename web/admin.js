@@ -1,11 +1,25 @@
 (function() {
 
     var self = controller;
-    self.editScreen = element(".edit-screen");
-    self.editField = element("#edit-field");
+
+    var editScreen = element(".edit-screen");
+    editScreen.textarea = element("#edit-field");
+    editScreen.show = function(value) {
+        this.style.display = "block";
+        if (value) {
+            this.textarea.value = value.trimmed();
+        }
+        this.textarea.focus();
+    };
+    editScreen.hide = function() {
+        this.textarea.selectionStart = 0;
+        this.textarea.selectionEnd = 0;
+        this.style.display = "none";
+        self.commandInput.focus();
+    };
 
     var triggers = {};
-    self.sendApiCall("triggers1", "list-triggers", function(data) {
+    self.sendApiCall("triggers1", "triggers-list", function(data) {
         for (var i = 0; i < data.length; i++) {
             var trigger = data[i];
             var triggerName;
@@ -19,29 +33,40 @@
     });
 
     var onkeypress = controller.commandInput.onkeypress;
+    function substituteCommand(event, commandToExecute, commandToPushToHistory) {
+        self.commandInput.value = commandToExecute;
+        if (commandToExecute.isEmpty()) {
+            self.history.push(commandToPushToHistory);
+        } else {
+            onkeypress(event);
+            self.history[self.history.length - 1] = commandToPushToHistory;
+        }
+    }
+
+    var saveCommand;
 
     controller.commandInput.onkeypress = function(event) {
         if (event.keyCode === keys.KEY_RETURN) {
-            var overwriteHistory = false;
-
             var command = self.commandInput.value;
             var commandName = command.split(" ")[0];
-            if (commandName === "edit-prop") {
-                overwriteHistory = true;
+            var rest = command.substr(commandName.length);
 
-                self.setCommand = "set" + command.substr(4);
-                self.commandInput.value = "get" + command.substr(4);
+            if (commandName === "edit-prop" || commandName === "edit-p") {
+                substituteCommand(event, "", command);
 
-                self.editScreen.style.display = "block";
+                self.sendApiCall("prop1", "property-get" + rest, function(data) {
+                    var propertyName = data.propertyName;
+                    if (data.readOnly) {
+                        self.writeToScreen("Property " + propertyName + " is read-only.");
+                        return;
+                    }
 
-                self.onMessageHook = function(message) {
-                    message = message.trimmed();
+                    editScreen.show(data[propertyName]);
 
-                    self.editField.value = message;
-                    self.editField.focus();
-                }
-            } else if (commandName === "edit-trigger") {
-                overwriteHistory = true;
+                    saveCommand = "set-prop #" + data.id + " " + propertyName;
+                });
+            } else if (commandName === "edit-trigger" || commandName === "edit-t") {
+                substituteCommand(event, "", command);
 
                 var triggerName = command.split(/\s+/)[2];
                 if (parseInt(triggerName, 10) > 0) {
@@ -49,13 +74,9 @@
                 }
 
                 if (triggers.hasOwnProperty(triggerName)) {
-                    self.setCommand = "set" + command.substr(4);
-                    self.commandInput.value = "get" + command.substr(4);
-
-                    self.onMessageHook = function(message) {
-                        message = message.trimmed();
-
-                        if (message.startsWith("No trigger set for")) {
+                    self.sendApiCall("trigger1", "trigger-get" + rest, function(data) {
+                        var triggerSource = data.triggerSource;
+                        if (triggerSource.isEmpty()) {
                             var trigger = triggers[triggerName];
                             if (trigger.contains("(")) {
                                 var arguments = trigger.substring(trigger.indexOf("(") + 1,
@@ -64,82 +85,72 @@
                                 arguments.split(", ").forEach(function(arg) {
                                     args.push(arg.substr(0, arg.indexOf(" : ")));
                                 });
-                                message = "(function(" + args.join(", ") + ") {\n    \n})";
+                                triggerSource = "(function(" + args.join(", ") + ") {\n    \n})";
                             } else {
-                                message = "(function() {\n    \n})";
+                                triggerSource = "(function() {\n    \n})";
                             }
                         }
 
-                        if (message === "Object not found.") {
-                            self.writeToScreen(message);
-                        } else {
-                            self.editScreen.style.display = "block";
+                        editScreen.show(triggerSource);
+                        editScreen.textarea.selectionStart = triggerSource.length - 3;
+                        editScreen.textarea.selectionEnd = triggerSource.length - 3;
 
-                            self.editField.value = message;
-
-                            self.editField.selectionStart = message.length - 3;
-                            self.editField.selectionEnd = self.editField.selectionStart;
-
-                            self.editField.focus();
-                        }
-                    }
+                        saveCommand = "api-trigger-set #" + data.id + " " + triggerName;
+                    });
                 } else {
                     self.writeToScreen("There is no trigger named " + triggerName + ".");
-                    self.commandInput.value = "";
                 }
             } else if (command === "exec-script") {
-                overwriteHistory = true;
+                substituteCommand(event, "", command);
 
-                self.setCommand = "exec-script";
-                self.commandInput.value = "";
+                editScreen.show();
 
-                self.editScreen.style.display = "block";
-                self.editField.focus();
+                saveCommand = "exec-script";
             } else if (command.startsWith("@")) {
-                overwriteHistory = true;
-
                 if (command.contains(" ")) {
-                    self.commandInput.value = "set-prop area " + command.substr(1);
+                    substituteCommand(event, "set-prop area " + command.substr(1), command);
                 } else {
-                    self.commandInput.value = "get-prop area " + command.substr(1);
+                    substituteCommand(event, "get-prop area " + command.substr(1), command);
                 }
-            }
-
-            onkeypress(event);
-
-            if (overwriteHistory) {
-                self.history[self.history.length - 1] = command;
+            } else {
+                onkeypress(event);
             }
         } else {
             onkeypress(event);
         }
     };
 
-    controller.commandInput.removeAttribute("maxlength");
+    self.commandInput.removeAttribute("maxlength");
 
     element("#edit-cancel-button").onclick = function() {
-        self.editField.selectionStart = self.editField.selectionEnd = 0;
-        self.editScreen.style.display = "none";
-        self.commandInput.focus();
+        editScreen.hide();
     };
     element("#edit-submit-button").onclick = function() {
-        if (self.setCommand.startsWith("set-prop")) {
-            self.socket.send(self.setCommand + " " + self.editField.value.replace(/\n/g, "\\n"));
-        } else if (self.setCommand.startsWith("exec-script")) {
-            self.socket.send(self.setCommand + " " + self.editField.value.replace(/\s+/g, " "));
-        } else {
-            self.socket.send(self.setCommand + " " + self.editField.value);
+        var value = editScreen.textarea.value;
+        if (saveCommand.startsWith("set-prop")) {
+            value = value.replace(/\n/g, "\\n");
+        } else if (saveCommand.startsWith("exec-script")) {
+            value = value.replace(/\s+/g, " ");
         }
 
-        self.editField.selectionStart = self.editField.selectionEnd = 0;
-        self.editScreen.style.display = "none";
-        self.commandInput.focus();
+        if (saveCommand.startsWith("api-")) {
+            self.sendApiCall("save1", saveCommand.substr(4) + " " + value, function(data) {
+                self.writeToScreen(data);
+
+                editScreen.hide();
+            });
+        } else {
+            self.socket.send(saveCommand + " " + value);
+
+            editScreen.hide();
+        }
     };
-    controller.editField.onkeydown = function(event) {
+
+    editScreen.textarea.onkeydown = function(event) {
         if (event.keyCode === keys.KEY_TAB) {
-            var value = self.editField.value;
-            var start = self.editField.selectionStart;
-            var end = self.editField.selectionEnd;
+            var value = this.value;
+            var start = this.selectionStart;
+            var end = this.selectionEnd;
 
             var content;
             var sizeDiff;
@@ -162,14 +173,14 @@
                 sizeDiff += content.length;
             }
 
-            self.editField.value = value.substr(0, start) + content + value.substr(end);
+            this.value = value.substr(0, start) + content + value.substr(end);
 
             if (start === end) {
-                self.editField.selectionStart = start + 4;
-                self.editField.selectionEnd = start + 4;
+                this.selectionStart = start + 4;
+                this.selectionEnd = start + 4;
             } else {
-                self.editField.selectionStart = start;
-                self.editField.selectionEnd = end + sizeDiff;
+                this.selectionStart = start;
+                this.selectionEnd = end + sizeDiff;
             }
 
             return false;
