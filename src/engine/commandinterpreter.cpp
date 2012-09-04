@@ -59,6 +59,7 @@
 #include "commands/admin/stopservercommand.h"
 #include "commands/admin/unsettriggercommand.h"
 #include "commands/api/listareascommand.h"
+#include "commands/api/listexitscommand.h"
 #include "commands/api/listtriggerscommand.h"
 
 
@@ -129,6 +130,7 @@ CommandInterpreter::CommandInterpreter(Player *player) :
         m_commands.insert("unset-trigger", new UnsetTriggerCommand(player, this));
 
         m_commands.insert("api-list-areas", new ListAreasCommand(player, this));
+        m_commands.insert("api-list-exits", new ListExitsCommand(player, this));
         m_commands.insert("api-list-triggers", new ListTriggersCommand(player, this));
     }
 

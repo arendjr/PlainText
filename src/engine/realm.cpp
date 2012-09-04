@@ -185,6 +185,17 @@ GameObjectPtrList Realm::allAreas() const {
     return areas;
 }
 
+GameObjectPtrList Realm::allExits() const {
+
+    GameObjectPtrList exits;
+    for (GameObject *object : m_objectMap) {
+        if (object->isExit()) {
+            exits << object;
+        }
+    }
+    return exits;
+}
+
 void Realm::addReservedName(const QString &name) {
 
     QString userName = Util::validateUserName(name);

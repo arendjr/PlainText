@@ -373,9 +373,12 @@ GameObject *GameObject::copy() {
     return object;
 }
 
-QString GameObject::toJSON() const {
+QString GameObject::toJSON(Options options) const {
 
     QStringList dumpedProperties;
+    if (options & IncludeId) {
+        dumpedProperties << QString("  \"id\": %1").arg(m_id);
+    }
     for (const QMetaProperty &metaProperty : storedMetaProperties()) {
         const char *name = metaProperty.name();
 

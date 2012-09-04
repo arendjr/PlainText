@@ -117,6 +117,7 @@ SOURCES += \
     engine/commands/admin/unsettriggercommand.cpp \
     engine/commands/api/apicommand.cpp \
     engine/commands/api/listareascommand.cpp \
+    engine/commands/api/listexitscommand.cpp \
     engine/commands/api/listtriggerscommand.cpp \
     interface/httpserver.cpp \
     interface/telnetserver.cpp \
@@ -220,6 +221,7 @@ HEADERS += \
     engine/commands/admin/unsettriggercommand.h \
     engine/commands/api/apicommand.h \
     engine/commands/api/listareascommand.h \
+    engine/commands/api/listexitscommand.h \
     engine/commands/api/listtriggerscommand.h \
     interface/httpserver.h \
     interface/telnetserver.h \

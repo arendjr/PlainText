@@ -126,7 +126,7 @@ QString ConversionUtil::toJSON(const QVariant &variant) {
         }
         case QVariant::UserType:
             if (variant.userType() == QMetaType::type("GameObject *")) {
-                return variant.value<GameObject *>()->toJSON();
+                return variant.value<GameObject *>()->toJSON(IncludeId);
             } else if (variant.userType() == QMetaType::type("GameObjectPtr")) {
                 return jsString(variant.value<GameObjectPtr>().toString());
             } else if (variant.userType() == QMetaType::type("GameObjectPtrList")) {
