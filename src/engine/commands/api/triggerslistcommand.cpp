@@ -1,6 +1,6 @@
 #include "triggerslistcommand.h"
 
-#include "engine/scriptengine.h"
+#include "scriptengine.h"
 
 
 #define super ApiCommand

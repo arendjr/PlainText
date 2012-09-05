@@ -36,14 +36,10 @@ Realm::~Realm() {
     m_gameThread.wait();
 
     m_syncThread.terminate();
-
-    if (m_initialized) {
-        for (GameObject *object : m_objectMap) {
-            delete object;
-        }
-    }
+    m_logThread.terminate();
 
     m_syncThread.wait();
+    m_logThread.wait();
 }
 
 Realm *Realm::instance() {
@@ -66,6 +62,7 @@ void Realm::init() {
     }
 
     m_syncThread.start(QThread::LowestPriority);
+    m_logThread.start(QThread::LowestPriority);
 
     m_initialized = true;
 

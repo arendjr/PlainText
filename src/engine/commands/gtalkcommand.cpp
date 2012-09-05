@@ -1,6 +1,6 @@
 #include "gtalkcommand.h"
 
-#include "engine/util.h"
+#include "util.h"
 
 
 GtalkCommand::GtalkCommand(Player *player, QObject *parent) :

@@ -1,6 +1,6 @@
 #include "descriptioncommand.h"
 
-#include "engine/util.h"
+#include "util.h"
 
 
 DescriptionCommand::DescriptionCommand(Player *character, QObject *parent) :

@@ -1,7 +1,7 @@
 #include "groupcommand.h"
 
-#include "engine/group.h"
-#include "engine/util.h"
+#include "group.h"
+#include "util.h"
 
 
 GroupCommand::GroupCommand(Player *player, QObject *parent) :

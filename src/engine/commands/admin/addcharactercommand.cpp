@@ -1,8 +1,8 @@
 #include "addcharactercommand.h"
 
-#include "engine/character.h"
-#include "engine/realm.h"
-#include "engine/util.h"
+#include "character.h"
+#include "realm.h"
+#include "util.h"
 
 
 AddCharacterCommand::AddCharacterCommand(Player *character, QObject *parent) :

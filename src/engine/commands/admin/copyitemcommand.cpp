@@ -1,7 +1,7 @@
 #include "copyitemcommand.h"
 
-#include "engine/item.h"
-#include "engine/util.h"
+#include "item.h"
+#include "util.h"
 
 
 CopyItemCommand::CopyItemCommand(Player *character, QObject *parent) :

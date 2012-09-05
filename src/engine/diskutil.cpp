@@ -45,3 +45,8 @@ QString DiskUtil::gameObjectPath(const char *objectType, uint id) {
 
     return dataDir() + QString("/%1.%2").arg(objectType).arg(id, 9, 10, QChar('0'));
 }
+
+QString DiskUtil::logDir() {
+
+    return qgetenv("PT_LOG_DIR");
+}

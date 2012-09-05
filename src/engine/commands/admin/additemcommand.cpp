@@ -1,7 +1,7 @@
 #include "additemcommand.h"
 
-#include "engine/item.h"
-#include "engine/util.h"
+#include "item.h"
+#include "util.h"
 
 
 AddItemCommand::AddItemCommand(Player *character, QObject *parent) :

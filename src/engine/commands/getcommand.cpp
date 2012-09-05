@@ -1,6 +1,6 @@
 #include "getcommand.h"
 
-#include "engine/util.h"
+#include "util.h"
 
 
 GetCommand::GetCommand(Player *character, QObject *parent) :

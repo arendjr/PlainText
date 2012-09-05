@@ -1,6 +1,6 @@
 #include "exitslistcommand.h"
 
-#include "engine/realm.h"
+#include "realm.h"
 
 
 #define super ApiCommand

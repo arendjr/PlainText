@@ -1,7 +1,7 @@
 #include "tellcommand.h"
 
-#include "engine/realm.h"
-#include "engine/util.h"
+#include "realm.h"
+#include "util.h"
 
 
 TellCommand::TellCommand(Player *character, QObject *parent) :

@@ -1,7 +1,7 @@
 #include "setclasscommand.h"
 
-#include "engine/character.h"
-#include "engine/realm.h"
+#include "character.h"
+#include "realm.h"
 
 
 SetClassCommand::SetClassCommand(Player *character, QObject *parent) :

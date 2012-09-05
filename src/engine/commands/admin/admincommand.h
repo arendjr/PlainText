@@ -1,7 +1,7 @@
 #ifndef ADMINCOMMAND_H
 #define ADMINCOMMAND_H
 
-#include "engine/commands/command.h"
+#include "command.h"
 
 
 class AdminCommand : public Command {

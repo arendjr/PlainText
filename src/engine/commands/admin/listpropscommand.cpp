@@ -1,7 +1,7 @@
 #include "listpropscommand.h"
 
-#include "engine/conversionutil.h"
-#include "engine/util.h"
+#include "conversionutil.h"
+#include "util.h"
 
 
 ListPropsCommand::ListPropsCommand(Player *character, QObject *parent) :

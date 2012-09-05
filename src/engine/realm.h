@@ -9,6 +9,7 @@
 #include "gameobjectptr.h"
 #include "gameobjectsyncthread.h"
 #include "gamethread.h"
+#include "logthread.h"
 
 
 class Event;
@@ -20,7 +21,7 @@ class Realm : public GameObject {
     Q_OBJECT
 
     public:
-        explicit Realm(Options options = NoOptions);
+        Realm(Options options = NoOptions);
         virtual ~Realm();
 
         static Realm *instance();
@@ -104,6 +105,8 @@ class Realm : public GameObject {
 
         GameObjectSyncThread m_syncThread;
         QList<GameObject *> m_modifiedObjects;
+
+        LogThread m_logThread;
 
         ScriptEngine *m_scriptEngine;
 };

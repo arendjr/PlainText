@@ -1,6 +1,6 @@
 #include "followcommand.h"
 
-#include "engine/util.h"
+#include "util.h"
 
 
 FollowCommand::FollowCommand(Player *player, QObject *parent) :

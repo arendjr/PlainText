@@ -1,7 +1,7 @@
 #include "addweaponcommand.h"
 
-#include "engine/util.h"
-#include "engine/weapon.h"
+#include "util.h"
+#include "weapon.h"
 
 
 AddWeaponCommand::AddWeaponCommand(Player *character, QObject *parent) :

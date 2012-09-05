@@ -1,10 +1,10 @@
 #include "lookcommand.h"
 
-#include "engine/exit.h"
-#include "engine/item.h"
-#include "engine/race.h"
-#include "engine/util.h"
-#include "engine/weapon.h"
+#include "exit.h"
+#include "item.h"
+#include "race.h"
+#include "util.h"
+#include "weapon.h"
 
 
 LookCommand::LookCommand(Player *character, QObject *parent) :

@@ -1,6 +1,6 @@
 #include "disbandcommand.h"
 
-#include "engine/util.h"
+#include "util.h"
 
 
 DisbandCommand::DisbandCommand(Player *player, QObject *parent) :

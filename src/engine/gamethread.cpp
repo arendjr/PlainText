@@ -30,7 +30,7 @@ void GameThread::enqueueEvent(Event *event) {
 
 void GameThread::terminate() {
 
-    m_quit = false;
+    m_quit = true;
     m_waitCondition.wakeAll();
 }
 

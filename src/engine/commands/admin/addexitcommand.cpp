@@ -1,8 +1,8 @@
 #include "addexitcommand.h"
 
-#include "engine/exit.h"
-#include "engine/realm.h"
-#include "engine/util.h"
+#include "exit.h"
+#include "realm.h"
+#include "util.h"
 
 
 AddExitCommand::AddExitCommand(Player *character, QObject *parent) :

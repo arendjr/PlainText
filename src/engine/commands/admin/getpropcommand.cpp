@@ -1,7 +1,7 @@
 #include "getpropcommand.h"
 
-#include "engine/conversionutil.h"
-#include "engine/util.h"
+#include "conversionutil.h"
+#include "util.h"
 
 
 GetPropCommand::GetPropCommand(Player *character, QObject *parent) :

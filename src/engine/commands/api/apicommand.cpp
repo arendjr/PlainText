@@ -1,7 +1,7 @@
 #include "apicommand.h"
 
-#include "engine/conversionutil.h"
-#include "engine/realm.h"
+#include "conversionutil.h"
+#include "realm.h"
 
 
 ApiCommand::ApiCommand(Player *character, QObject *parent) :

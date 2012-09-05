@@ -1,6 +1,6 @@
 #include "quitcommand.h"
 
-#include "engine/util.h"
+#include "util.h"
 
 
 QuitCommand::QuitCommand(Player *character, QObject *parent) :

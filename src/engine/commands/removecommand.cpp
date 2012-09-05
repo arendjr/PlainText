@@ -1,6 +1,6 @@
 #include "removecommand.h"
 
-#include "engine/util.h"
+#include "util.h"
 
 
 RemoveCommand::RemoveCommand(Player *character, QObject *parent) :

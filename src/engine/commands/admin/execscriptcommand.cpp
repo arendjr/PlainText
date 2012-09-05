@@ -2,7 +2,7 @@
 
 #include <QScriptValue>
 
-#include "engine/scriptengine.h"
+#include "scriptengine.h"
 
 
 ExecScriptCommand::ExecScriptCommand(Player *character, QObject *parent) :

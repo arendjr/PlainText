@@ -1,7 +1,7 @@
 #include "addshieldcommand.h"
 
-#include "engine/shield.h"
-#include "engine/util.h"
+#include "shield.h"
+#include "util.h"
 
 
 AddShieldCommand::AddShieldCommand(Player *character, QObject *parent) :

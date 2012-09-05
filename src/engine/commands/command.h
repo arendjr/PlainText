@@ -5,9 +5,9 @@
 #include <QPair>
 #include <QStringList>
 
-#include "engine/area.h"
-#include "engine/gameobjectptr.h"
-#include "engine/player.h"
+#include "area.h"
+#include "gameobjectptr.h"
+#include "player.h"
 
 
 class QRegExp;

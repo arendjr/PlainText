@@ -2,7 +2,7 @@
 
 #include <QRegExp>
 
-#include "engine/util.h"
+#include "util.h"
 
 
 Command::Command(Player *player, QObject *parent) :

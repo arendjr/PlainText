@@ -1,6 +1,6 @@
 #include "whocommand.h"
 
-#include "engine/realm.h"
+#include "realm.h"
 
 
 WhoCommand::WhoCommand(Player *character, QObject *parent) :

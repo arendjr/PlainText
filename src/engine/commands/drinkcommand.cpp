@@ -1,6 +1,6 @@
 #include "drinkcommand.h"
 
-#include "engine/util.h"
+#include "util.h"
 
 
 DrinkCommand::DrinkCommand(Player *character, QObject *parent) :

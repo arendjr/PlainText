@@ -30,7 +30,7 @@ class Session : public QObject {
             SignInAborted
         };
 
-        Session(Realm *realm, QObject *object);
+        Session(Realm *realm, QObject *parent);
         virtual ~Session();
 
         void open();

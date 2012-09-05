@@ -1,8 +1,8 @@
 #include "setpropcommand.h"
 
-#include "engine/characterstats.h"
-#include "engine/item.h"
-#include "engine/util.h"
+#include "characterstats.h"
+#include "item.h"
+#include "util.h"
 
 
 SetPropCommand::SetPropCommand(Player *character, QObject *parent) :

@@ -16,6 +16,8 @@ class DiskUtil {
         static QStringList dataDirFileList(const QString &subdirectory = "/");
 
         static QString gameObjectPath(const char *objectType, uint id);
+
+        static QString logDir();
 };
 
 #endif // DISKUTIL_H

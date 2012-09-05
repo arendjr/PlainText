@@ -2,8 +2,8 @@
 
 #include <QScriptValueIterator>
 
-#include "engine/scriptengine.h"
-#include "engine/util.h"
+#include "scriptengine.h"
+#include "util.h"
 
 
 ListMethodsCommand::ListMethodsCommand(Player *character, QObject *parent) :

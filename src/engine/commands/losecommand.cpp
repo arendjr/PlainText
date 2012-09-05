@@ -1,6 +1,6 @@
 #include "losecommand.h"
 
-#include "engine/util.h"
+#include "util.h"
 
 
 LoseCommand::LoseCommand(Player *player, QObject *parent) :

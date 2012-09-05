@@ -1,6 +1,6 @@
 #include "searchcommand.h"
 
-#include "engine/exit.h"
+#include "exit.h"
 
 
 SearchCommand::SearchCommand(Player *player, QObject *parent) :

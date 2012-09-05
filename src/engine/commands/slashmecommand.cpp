@@ -1,7 +1,5 @@
 #include "slashmecommand.h"
 
-#include "engine/util.h"
-
 
 SlashMeCommand::SlashMeCommand(Player *character, QObject *parent) :
     Command(character, parent) {

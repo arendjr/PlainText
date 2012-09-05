@@ -1,7 +1,7 @@
 #include "helpcommand.h"
 
-#include "engine/scriptengine.h"
-#include "engine/util.h"
+#include "scriptengine.h"
+#include "util.h"
 
 
 HelpCommand::HelpCommand(Player *character, const QMap<QString, Command *> &commands,

@@ -1,6 +1,6 @@
 #include "gettriggercommand.h"
 
-#include "engine/util.h"
+#include "util.h"
 
 
 GetTriggerCommand::GetTriggerCommand(Player *character, QObject *parent) :

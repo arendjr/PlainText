@@ -1,6 +1,6 @@
 #include "buycommand.h"
 
-#include "engine/util.h"
+#include "util.h"
 
 
 BuyCommand::BuyCommand(Player *character, QObject *parent) :

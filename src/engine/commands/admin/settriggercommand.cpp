@@ -1,6 +1,6 @@
 #include "settriggercommand.h"
 
-#include "engine/util.h"
+#include "util.h"
 
 
 SetTriggerCommand::SetTriggerCommand(Player *character, QObject *parent) :

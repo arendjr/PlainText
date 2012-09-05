@@ -1,7 +1,7 @@
 #ifndef APICOMMAND_H
 #define APICOMMAND_H
 
-#include "engine/commands/admin/admincommand.h"
+#include "admincommand.h"
 
 
 class ApiCommand : public AdminCommand {

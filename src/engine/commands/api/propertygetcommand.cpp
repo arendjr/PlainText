@@ -1,6 +1,6 @@
 #include "propertygetcommand.h"
 
-#include "engine/util.h"
+#include "util.h"
 
 
 #define super ApiCommand

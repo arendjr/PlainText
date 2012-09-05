@@ -1,6 +1,6 @@
 #include "admincommand.h"
 
-#include "engine/realm.h"
+#include "realm.h"
 
 
 AdminCommand::AdminCommand(Player *character, QObject *parent) :

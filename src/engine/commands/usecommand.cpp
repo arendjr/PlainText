@@ -1,6 +1,6 @@
 #include "usecommand.h"
 
-#include "engine/util.h"
+#include "util.h"
 
 
 UseCommand::UseCommand(Player *character, QObject *parent) :

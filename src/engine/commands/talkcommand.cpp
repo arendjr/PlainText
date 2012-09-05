@@ -1,6 +1,6 @@
 #include "talkcommand.h"
 
-#include "engine/util.h"
+#include "util.h"
 
 
 TalkCommand::TalkCommand(Player *player, QObject *parent) :

@@ -1,6 +1,6 @@
 #include "killcommand.h"
 
-#include "engine/util.h"
+#include "util.h"
 
 
 KillCommand::KillCommand(Player *player, QObject *parent) :

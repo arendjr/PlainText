@@ -1,6 +1,6 @@
 #include "wieldcommand.h"
 
-#include "engine/util.h"
+#include "util.h"
 
 
 WieldCommand::WieldCommand(Player *character, QObject *parent) :

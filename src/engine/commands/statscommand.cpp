@@ -1,8 +1,8 @@
 #include "statscommand.h"
 
-#include "engine/race.h"
-#include "engine/realm.h"
-#include "engine/util.h"
+#include "race.h"
+#include "realm.h"
+#include "util.h"
 
 
 StatsCommand::StatsCommand(Player *character, QObject *parent) :

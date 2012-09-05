@@ -1,6 +1,6 @@
 #include "eatcommand.h"
 
-#include "engine/util.h"
+#include "util.h"
 
 
 EatCommand::EatCommand(Player *character, QObject *parent) :
