@@ -17,12 +17,12 @@ Running your own server
 
 ### Supported platforms ###
 
- * Linux (tested on Gentoo Linux)
+ * Linux (tested on Gentoo Linux and openSUSE 12.2)
  * Mac OS X 10.7 and up (recently only tested on OS X 10.8)
 
 ### Dependencies ###
 
- * Clang compiler version 3.1 or higher*
+ * Clang 3.1 or higher, or GCC 4.7 or higher
  * Qt framework 4.7 or higher
 
 ### Compiling ###
@@ -36,9 +36,6 @@ Run the following commands from the src/ directory:
 
  * Set the PT_DATA_DIR environment variable to point to the data/ directory.
  * Run your compiled PlainText executable.
-
-\* *Due to usage of new C++11 features. You might get lucky with GCC 4.7 too,
-    but you will need to update the PlainText.pro file yourself.*
 
 Playing the game
 ----------------
