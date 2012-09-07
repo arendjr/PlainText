@@ -9,12 +9,16 @@ macx {
     }
     QMAKE_MACOSX_DEPLOYMENT_TARGET = $$DEPLOYMENT_TARGET
     QMAKE_MAC_SDK = $$MAC_SDK
+    QMAKE_CXXFLAGS = -stdlib=libc++
     LIBS += -L$$MAC_SDK/usr/lib/ -lc++
 } else {
-    LIBS += -lc++
-    QMAKE_CXX = clang++
+    system(which clang++ 2> /dev/null) {
+        LIBS += -lc++
+        QMAKE_CXX = clang++
+	QMAKE_CXXFLAGS = -stdlib=libc++
+    }
 }
-QMAKE_CXXFLAGS = -std=c++11 -stdlib=libc++
+QMAKE_CXXFLAGS += -std=c++11
 
 DEFINES *= QT_USE_QSTRINGBUILDER
 
@@ -32,14 +36,11 @@ SOURCES += \
     engine/characterstats.cpp \
     engine/class.cpp \
     engine/combatmessage.cpp \
-    engine/commandevent.cpp \
     engine/commandinterpreter.cpp \
     engine/conversionutil.cpp \
-    engine/deleteobjectevent.cpp \
     engine/diskutil.cpp \
     engine/effect.cpp \
     engine/engine.cpp \
-    engine/event.cpp \
     engine/exit.cpp \
     engine/gameexception.cpp \
     engine/gameobject.cpp \
@@ -48,6 +49,8 @@ SOURCES += \
     engine/gamethread.cpp \
     engine/group.cpp \
     engine/item.cpp \
+    engine/logthread.cpp \
+    engine/logutil.cpp \
     engine/modifier.cpp \
     engine/player.cpp \
     engine/race.cpp \
@@ -58,9 +61,7 @@ SOURCES += \
     engine/scriptwindow.cpp \
     engine/session.cpp \
     engine/shield.cpp \
-    engine/signinevent.cpp \
     engine/statsitem.cpp \
-    engine/timerevent.cpp \
     engine/util.cpp \
     engine/weapon.cpp \
     engine/commands/buycommand.cpp \
@@ -122,6 +123,13 @@ SOURCES += \
     engine/commands/api/triggergetcommand.cpp \
     engine/commands/api/triggersetcommand.cpp \
     engine/commands/api/triggerslistcommand.cpp \
+    engine/events/commandevent.cpp \
+    engine/events/deleteobjectevent.cpp \
+    engine/events/event.cpp \
+    engine/events/signinevent.cpp \
+    engine/events/timerevent.cpp \
+    engine/logmessages/commandlogmessage.cpp \
+    engine/logmessages/logmessage.cpp \
     interface/httpserver.cpp \
     interface/telnetserver.cpp \
     interface/websocketserver.cpp \
@@ -138,15 +146,12 @@ HEADERS += \
     engine/characterstats.h \
     engine/class.h \
     engine/combatmessage.h \
-    engine/commandevent.h \
     engine/commandinterpreter.h \
     engine/constants.h \
     engine/conversionutil.h \
-    engine/deleteobjectevent.h \
     engine/diskutil.h \
     engine/effect.h \
     engine/engine.h \
-    engine/event.h \
     engine/exit.h \
     engine/gameexception.h \
     engine/gameobject.h \
@@ -155,6 +160,8 @@ HEADERS += \
     engine/gamethread.h \
     engine/group.h \
     engine/item.h \
+    engine/logthread.h \
+    engine/logutil.h \
     engine/modifier.h \
     engine/player.h \
     engine/race.h \
@@ -165,9 +172,7 @@ HEADERS += \
     engine/scriptwindow.h \
     engine/session.h \
     engine/shield.h \
-    engine/signinevent.h \
     engine/statsitem.h \
-    engine/timerevent.h \
     engine/util.h \
     engine/weapon.h \
     engine/commands/buycommand.h \
@@ -229,6 +234,13 @@ HEADERS += \
     engine/commands/api/triggergetcommand.h \
     engine/commands/api/triggersetcommand.h \
     engine/commands/api/triggerslistcommand.h \
+    engine/events/commandevent.h \
+    engine/events/deleteobjectevent.h \
+    engine/events/event.h \
+    engine/events/signinevent.h \
+    engine/events/timerevent.h \
+    engine/logmessages/commandlogmessage.h \
+    engine/logmessages/logmessage.h \
     interface/httpserver.h \
     interface/telnetserver.h \
     interface/websocketserver.h \
@@ -251,6 +263,13 @@ OTHER_FILES += \
     ../TODO.txt
 
 INCLUDEPATH += \
+    . \
+    engine \
+    engine/commands \
+    engine/commands/admin \
+    engine/commands/api \
+    engine/events \
+    engine/logmessages \
     $$PWD/../3rdparty \
     $$PWD/../3rdparty/qtwebsocket/QtWebSocket
 

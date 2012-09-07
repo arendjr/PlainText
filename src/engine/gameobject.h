@@ -23,6 +23,7 @@ class GameObject : public QObject {
 
     friend class GameObjectPtr;
     friend void swap(GameObjectPtr &first, GameObjectPtr &second);
+    friend void swapWithinList(GameObjectPtr &first, GameObjectPtr &second);
 
     public:
         GameObject(Realm *realm, const char *objectType, uint id, Options options = NoOptions);

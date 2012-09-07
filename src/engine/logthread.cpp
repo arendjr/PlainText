@@ -1,5 +1,7 @@
 #include "logthread.h"
 
+#include "logmessage.h"
+
 
 LogThread::LogThread() :
     QThread(),
@@ -21,11 +23,11 @@ void LogThread::run() {
         m_mutex.lock();
         m_waitCondition.wait(&m_mutex);
 
-        while (!m_quit && !m_eventQueue.isEmpty()) {
-            LogEvent *event = m_eventQueue.dequeue();
+        while (!m_quit && !m_messageQueue.isEmpty()) {
+            LogMessage *message = m_messageQueue.dequeue();
             m_mutex.unlock();
 
-            logEvent(event);
+            logMessage(message);
 
             m_mutex.lock();
         }
@@ -33,13 +35,13 @@ void LogThread::run() {
         m_mutex.unlock();
     }
 
-    while (!m_eventQueue.isEmpty()) {
-        LogEvent *event = m_eventQueue.dequeue();
-        logEvent(event);
+    while (!m_messageQueue.isEmpty()) {
+        LogMessage *message = m_messageQueue.dequeue();
+        logMessage(message);
     }
 }
 
-void LogThread::logEvent(LogEvent *event) {
+void LogThread::logMessage(LogMessage *message) {
 
-    delete event;
+    delete message;
 }

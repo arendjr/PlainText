@@ -46,8 +46,8 @@ QVariant ConversionUtil::fromVariant(QVariant::Type type, int userType, const QV
                 return QVariant::fromValue(GameObjectPtr::fromString(realm, variant.toString()));
             } else if (userType == QMetaType::type("GameObjectPtrList")) {
                 GameObjectPtrList pointerList;
-                for (const QVariant &variant : variant.toList()) {
-                    pointerList << GameObjectPtr::fromString(realm, variant.toString());
+                for (const QVariant &item : variant.toList()) {
+                    pointerList << GameObjectPtr::fromString(realm, item.toString());
                 }
                 return QVariant::fromValue(pointerList);
             } else if (userType == QMetaType::type("ScriptFunctionMap")) {
@@ -61,8 +61,8 @@ QVariant ConversionUtil::fromVariant(QVariant::Type type, int userType, const QV
                 return QVariant::fromValue(CharacterStats::fromVariantList(variant.toList()));
             } else if (userType == QMetaType::type("CombatMessageList")) {
                 CombatMessageList messageList;
-                for (const QVariant &variant : variant.toList()) {
-                    messageList << CombatMessage::fromVariantList(variant.toList());
+                for (const QVariant &item : variant.toList()) {
+                    messageList << CombatMessage::fromVariantList(item.toList());
                 }
                 return QVariant::fromValue(messageList);
             }
@@ -88,8 +88,8 @@ QString ConversionUtil::toJSON(const QVariant &variant, Options options) {
             return jsString(variant.toString());
         case QVariant::List: {
             QStringList stringList;
-            for (const QVariant &variant : variant.toList()) {
-                stringList << ConversionUtil::toJSON(variant);
+            for (const QVariant &item : variant.toList()) {
+                stringList << ConversionUtil::toJSON(item);
             }
             if (stringList.isEmpty()) {
                 return QString();

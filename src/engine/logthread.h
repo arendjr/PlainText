@@ -7,7 +7,7 @@
 #include <QWaitCondition>
 
 
-class LogEvent;
+class LogMessage;
 
 class LogThread : public QThread {
 
@@ -27,9 +27,9 @@ class LogThread : public QThread {
         QMutex m_mutex;
         volatile bool m_quit;
 
-        QQueue<LogEvent *> m_eventQueue;
+        QQueue<LogMessage *> m_messageQueue;
 
-        void logEvent(LogEvent *event);
+        void logMessage(LogMessage *message);
 };
 
 #endif // LOGTHREAD_H
