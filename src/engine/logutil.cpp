@@ -1,10 +1,25 @@
 #include "logutil.h"
 
-#include "logthread.h"
+#include "commandlogmessage.h"
+#include "diskutil.h"
+#include "npctalklogmessage.h"
+#include "realm.h"
 
 
-void LogUtil::LogCommand(const QString &playerName, const QString &command) {
+void LogUtil::logCommand(const QString &playerName, const QString &command) {
 
-    Q_UNUSED(playerName)
-    Q_UNUSED(command)
+    if (DiskUtil::logDir().isEmpty()) {
+        return;
+    }
+
+    Realm::instance()->enqueueLogMessage(new CommandLogMessage(playerName, command));
+}
+
+void LogUtil::logNpcTalk(const QString &npcName, const QString &message) {
+
+    if (DiskUtil::logDir().isEmpty()) {
+        return;
+    }
+
+    Realm::instance()->enqueueLogMessage(new NpcTalkLogMessage(npcName, message));
 }

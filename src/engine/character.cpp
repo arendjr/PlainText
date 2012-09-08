@@ -5,6 +5,7 @@
 #include "area.h"
 #include "exit.h"
 #include "group.h"
+#include "logutil.h"
 #include "player.h"
 #include "race.h"
 #include "realm.h"
@@ -617,10 +618,10 @@ void Character::talk(const GameObjectPtr &characterPtr, const QString &message) 
     NOT_NULL(characterPtr)
 
     Character *character = characterPtr.cast<Character *>();
-    Player *player = qobject_cast<Player *>(character);
-    if (player) {
-        tell(player, message);
+    if (character->isPlayer()) {
+        tell(character, message);
     } else {
+        LogUtil::logNpcTalk(character->name(), message);
         character->invokeTrigger("ontalk", this, message);
     }
 }

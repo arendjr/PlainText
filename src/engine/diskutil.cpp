@@ -2,9 +2,12 @@
 
 #include <unistd.h>
 
+#include <QDate>
 #include <QDebug>
 #include <QDir>
 #include <QFile>
+#include <QMap>
+#include <QTime>
 
 
 bool DiskUtil::writeFile(const QString &path, const QString &content) {
@@ -44,6 +47,44 @@ QStringList DiskUtil::dataDirFileList(const QString &subdirectory) {
 QString DiskUtil::gameObjectPath(const char *objectType, uint id) {
 
     return dataDir() + QString("/%1.%2").arg(objectType).arg(id, 9, 10, QChar('0'));
+}
+
+void DiskUtil::appendToLogFile(const QString &fileName, const QString &line) {
+
+    static QDate today = QDate::currentDate();
+    static QMap<QString, QFile *> openFiles;
+
+    if (today != QDate::currentDate()) {
+        for (QFile *file : openFiles) {
+            file->close();
+            delete file;
+        }
+        openFiles.clear();
+        today = QDate::currentDate();
+    }
+
+    QFile *file;
+    if (openFiles.contains(fileName)) {
+        file = openFiles[fileName];
+    } else {
+        QString dirPath = logDir() + "/" + today.toString("yyyyMMdd");
+        if (!QDir(dirPath).exists() && !QDir(logDir()).mkpath(today.toString("yyyyMMdd"))) {
+            qWarning() << "Could not create log directory:" << dirPath;
+            return;
+        }
+
+        QString path = dirPath + "/" + fileName;
+        file = new QFile(path);
+        if (!file->open(QIODevice::WriteOnly | QIODevice::Append)) {
+            qWarning() << "Could not open log file:" << path;
+            return;
+        }
+
+        openFiles[fileName] = file;
+    }
+
+    file->write(QString(QTime::currentTime().toString("HH:mm:ss.zzz ") + line + "\n").toUtf8());
+    file->flush();
 }
 
 QString DiskUtil::logDir() {

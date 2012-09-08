@@ -239,6 +239,11 @@ void Realm::enqueueModifiedObjects() {
     m_modifiedObjects.clear();
 }
 
+void Realm::enqueueLogMessage(LogMessage *message) {
+
+    m_logThread.enqueueMessage(message);
+}
+
 void Realm::setScriptEngine(ScriptEngine *scriptEngine) {
 
     m_scriptEngine = scriptEngine;

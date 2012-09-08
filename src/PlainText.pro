@@ -130,6 +130,7 @@ SOURCES += \
     engine/events/timerevent.cpp \
     engine/logmessages/commandlogmessage.cpp \
     engine/logmessages/logmessage.cpp \
+    engine/logmessages/npctalklogmessage.cpp \
     interface/httpserver.cpp \
     interface/telnetserver.cpp \
     interface/websocketserver.cpp \
@@ -241,6 +242,7 @@ HEADERS += \
     engine/events/timerevent.h \
     engine/logmessages/commandlogmessage.h \
     engine/logmessages/logmessage.h \
+    engine/logmessages/npctalklogmessage.h \
     interface/httpserver.h \
     interface/telnetserver.h \
     interface/websocketserver.h \
@@ -263,7 +265,6 @@ OTHER_FILES += \
     ../TODO.txt
 
 INCLUDEPATH += \
-    . \
     engine \
     engine/commands \
     engine/commands/admin \

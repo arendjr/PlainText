@@ -35,6 +35,8 @@ Run the following commands from the src/ directory:
 ### Running ###
 
  * Set the PT_DATA_DIR environment variable to point to the data/ directory.
+ * If you want to enable logging, set the PT_LOG_DIR variable to the directory
+   where you want your logs to be stored.
  * Run your compiled PlainText executable.
 
 Playing the game

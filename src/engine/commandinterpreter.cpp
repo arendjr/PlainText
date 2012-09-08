@@ -7,6 +7,7 @@
 #include "exit.h"
 #include "gameexception.h"
 #include "gameobjectptr.h"
+#include "logutil.h"
 #include "player.h"
 #include "realm.h"
 #include "util.h"
@@ -141,14 +142,20 @@ CommandInterpreter::CommandInterpreter(Player *player) :
     }
 
     connect(quit, SIGNAL(quit()), this, SIGNAL(quit()));
+
+    LogUtil::logCommand(m_player->name(), "(signed in)");
 }
 
 CommandInterpreter::~CommandInterpreter() {
+
+    LogUtil::logCommand(m_player->name(), "(signed out)");
 }
 
 void CommandInterpreter::execute(const QString &command) {
 
     try {
+        LogUtil::logCommand(m_player->name(), command);
+
         QStringList words = command.trimmed().split(QRegExp("\\s+"));
         QString commandName = words[0].toLower();
         if (commandName.isEmpty()) {

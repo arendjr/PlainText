@@ -11,6 +11,15 @@ LogThread::LogThread() :
 LogThread::~LogThread() {
 }
 
+void LogThread::enqueueMessage(LogMessage *message) {
+
+    m_mutex.lock();
+    m_messageQueue.enqueue(message);
+    m_mutex.unlock();
+
+    m_waitCondition.wakeAll();
+}
+
 void LogThread::terminate() {
 
     m_quit = true;
@@ -43,5 +52,6 @@ void LogThread::run() {
 
 void LogThread::logMessage(LogMessage *message) {
 
+    message->process();
     delete message;
 }

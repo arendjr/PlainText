@@ -1,5 +1,7 @@
 #include "commandlogmessage.h"
 
+#include "diskutil.h"
+
 
 CommandLogMessage::CommandLogMessage(const QString &playerName, const QString &command) :
     LogMessage(),
@@ -11,4 +13,6 @@ CommandLogMessage::~CommandLogMessage() {
 }
 
 void CommandLogMessage::process() {
+
+    DiskUtil::appendToLogFile("commands." + m_playerName, m_command);
 }

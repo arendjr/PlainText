@@ -13,6 +13,7 @@
 
 
 class Event;
+class LogMessage;
 class Player;
 class ScriptEngine;
 
@@ -60,6 +61,8 @@ class Realm : public GameObject {
 
         void addModifiedObject(GameObject *object);
         void enqueueModifiedObjects();
+
+        void enqueueLogMessage(LogMessage *message);
 
         ScriptEngine *scriptEngine() const { return m_scriptEngine; }
         void setScriptEngine(ScriptEngine *scriptEngine);

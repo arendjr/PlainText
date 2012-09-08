@@ -17,6 +17,8 @@ class DiskUtil {
 
         static QString gameObjectPath(const char *objectType, uint id);
 
+        static void appendToLogFile(const QString &fileName, const QString &line);
+
         static QString logDir();
 };
 

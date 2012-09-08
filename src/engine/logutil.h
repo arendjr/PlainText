@@ -7,7 +7,9 @@
 class LogUtil {
 
     public:
-        static void LogCommand(const QString &playerName, const QString &command);
+        static void logCommand(const QString &playerName, const QString &command);
+
+        static void logNpcTalk(const QString &npcName, const QString &message);
 };
 
 #endif // LOGUTIL_H

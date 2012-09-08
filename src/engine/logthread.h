@@ -17,6 +17,8 @@ class LogThread : public QThread {
         LogThread();
         virtual ~LogThread();
 
+        void enqueueMessage(LogMessage *message);
+
         void terminate();
 
     protected:
