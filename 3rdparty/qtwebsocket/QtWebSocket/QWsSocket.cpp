@@ -1,166 +1,250 @@
 #include "QWsSocket.h"
 
+#include <QCryptographicHash>
+#include <QtEndian>
+
+#include "QWsServer.h"
+
 int QWsSocket::maxBytesPerFrame = 1400;
 
-QWsSocket::QWsSocket(QTcpSocket * socket, int version, QObject * parent) :
+QWsSocket::QWsSocket( QObject * parent, QTcpSocket * socket, EWebsocketVersion ws_v ) :
 	QAbstractSocket( QAbstractSocket::UnknownSocketType, parent ),
 	tcpSocket( socket ),
-	version( version )
+	_version( ws_v ),
+	_hostPort( -1 ),
+	closingHandshakeSent( false ),
+	closingHandshakeReceived( false ),
+	readingState( HeaderPending ),
+	isFinalFragment( false ),
+	hasMask( false ),
+	payloadLength( 0 ),
+	maskingKey( 4, 0 )
 {
-	//setSocketState( QAbstractSocket::UnconnectedState );
-	setSocketState( socket->state() );
+	tcpSocket->setParent( this );
 
-	connect( tcpSocket, SIGNAL(readyRead()), this, SLOT(dataReceived()) );
-	connect( tcpSocket, SIGNAL(disconnected()), this, SLOT(tcpSocketDisconnected()) );
-	connect( tcpSocket, SIGNAL(aboutToClose()), this, SLOT(tcpSocketAboutToClose()) );
+	setSocketState( tcpSocket->state() );
+
+	if ( _version == WS_V0 )
+		connect( tcpSocket, SIGNAL(readyRead()), this, SLOT(processDataV0()) );
+	else if ( _version >= WS_V4 )
+		connect( tcpSocket, SIGNAL(readyRead()), this, SLOT(processDataV4()) );
+	connect( tcpSocket, SIGNAL(error(QAbstractSocket::SocketError)), this, SIGNAL(error(QAbstractSocket::SocketError)) );
+	connect( tcpSocket, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)), this, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)) );
+	connect( tcpSocket, SIGNAL(stateChanged(QAbstractSocket::SocketState)), this, SLOT(processTcpStateChanged(QAbstractSocket::SocketState)) );
+	connect( tcpSocket, SIGNAL(readChannelFinished()), this, SIGNAL(readChannelFinished()) );
 }
 
 QWsSocket::~QWsSocket()
 {
+	QAbstractSocket::SocketState socketState = state();
+	if ( state() == QAbstractSocket::ConnectedState )
+	{
+		qDebug() << "CloseAway, socket destroyed in server";
+		close( CloseGoingAway, "socket destroyed in server" );
+	}
 }
 
-void QWsSocket::dataReceived()
+void QWsSocket::processDataV4()
 {
-	quint8 byte; // currentByteBuffer
-
-	if ( version >= 6 )
-	{
-		QByteArray BA; // ReadBuffer
+	while (true) switch ( readingState ) {
+	case HeaderPending: {
+		if (tcpSocket->bytesAvailable() < 2)
+			return;
 
 		// FIN, RSV1-3, Opcode
-        BA = tcpSocket->read(2);
-		byte = BA[0];
-		quint8 FIN = (byte >> 7);
-		EOpcode Opcode = (EOpcode)(byte & 0x0F);
+		char header[2];
+		tcpSocket->read(header, 2); // XXX: Handle return value
+		isFinalFragment = (header[0] & 0x80) != 0;
+		opcode = static_cast<EOpcode>(header[0] & 0x0F);
 
 		// Mask, PayloadLength
-        byte = BA[1];
-		quint8 Mask = (byte >> 7);
-		quint64 PayloadLength = (byte & 0x7F);
-		// Extended PayloadLength
-		if ( PayloadLength == 126 )
-		{
-			BA = tcpSocket->read(2);
-			PayloadLength = ((quint8)BA[0] << 8) + (quint8)BA[1];
+		hasMask = (header[1] & 0x80) != 0;
+		quint8 length = (header[1] & 0x7F);
+
+		switch (length) {
+		case 126:
+			readingState = PayloadLengthPending;
+			break;
+		case 127:
+			readingState = BigPayloadLenghPending;
+			break;
+		default:
+			payloadLength = length;
+			readingState = MaskPending;
+			break;
 		}
-		else if ( PayloadLength == 127 )
-		{
-			BA = tcpSocket->read(8);
-			PayloadLength = 0;
-			quint64 plbyte;
-			for ( int i=0 ; i<8 ; i++ )
-			{
-				plbyte = (quint8)BA[i];
-				PayloadLength += ( plbyte << (7-i)*8 );
-			}
+	}; break;
+	case PayloadLengthPending: {
+		if (tcpSocket->bytesAvailable() < 2)
+			return;
+
+		uchar length[2];
+		tcpSocket->read(reinterpret_cast<char *>(length), 2); // XXX: Handle return value
+		payloadLength = qFromBigEndian<quint16>(reinterpret_cast<const uchar *>(length));
+		readingState = MaskPending;
+	}; break;
+	case BigPayloadLenghPending: {
+		if (tcpSocket->bytesAvailable() < 8)
+			return;
+
+		uchar length[8];
+		tcpSocket->read(reinterpret_cast<char *>(length), 8); // XXX: Handle return value
+		// Most significant bit must be set to 0 as per http://tools.ietf.org/html/rfc6455#section-5.2
+		// XXX: Check for that?
+		payloadLength = qFromBigEndian<quint64>(length) & ~(1LL << 63);
+		readingState = MaskPending;
+	}; break;
+	case MaskPending: {
+		if (!hasMask) {
+			readingState = PayloadBodyPending;
+			break;
 		}
 
-		// MaskingKey
-		QByteArray MaskingKey;
-		if ( Mask )
-		{
-			MaskingKey = tcpSocket->read(4);
-		}
+		if (tcpSocket->bytesAvailable() < 4)
+			return;
+
+		tcpSocket->read(maskingKey.data(), 4); // XXX: Handle return value
+		readingState = PayloadBodyPending;
+	}; /* Intentional fall-through */
+	case PayloadBodyPending: {
+		// TODO: Handle large payloads
+		if (tcpSocket->bytesAvailable() < static_cast<qint32>(payloadLength))
+			return;
 
 		// Extension // UNSUPPORTED FOR NOW
+		QByteArray ApplicationData = tcpSocket->read( payloadLength );
+		if ( hasMask )
+			ApplicationData = QWsSocket::mask( ApplicationData, maskingKey );
+		currentFrame.append( ApplicationData );
 
-		// ApplicationData
-		if ( PayloadLength )
-		{
-			QByteArray ApplicationData = tcpSocket->read( PayloadLength );
-			if ( Mask )
-				ApplicationData = QWsSocket::mask( ApplicationData, MaskingKey );
-			currentFrame.append( ApplicationData );
-		}
+		readingState = HeaderPending;
 
-		if ( FIN )
+		if ( !isFinalFragment )
+			break;
+
+		switch ( opcode )
 		{
-			if ( Opcode == OpBinary )
-			{
+			case OpBinary:
 				emit frameReceived( currentFrame );
-			}
-			else if ( Opcode == OpText )
-			{
-                emit frameReceived( QString(currentFrame) );
-			}
-			else if ( Opcode == OpPing )
-			{
-				QByteArray pongRequest = QWsSocket::composeHeader( true, OpPong, 0 );
-				write( pongRequest );
-			}
-			else if ( Opcode == OpPong )
-			{
-				quint64 ms = pingTimer.elapsed();
-				emit pong(ms);
-			}
-			else if ( Opcode == OpClose )
-			{
-				tcpSocket->close();
-			}
-			currentFrame.clear();
+				break;
+			case OpText:
+				emit frameReceived( QString::fromAscii(currentFrame) );
+				break;
+			case OpPing:
+				write( QWsSocket::composeHeader( true, OpPong, 0 ) );
+				break;
+			case OpPong:
+				emit pong( pingTimer.elapsed() );
+				break;
+			case OpClose:
+				closingHandshakeReceived = true;
+				close();
+				break;
 		}
-	}
-	else
+
+		currentFrame.clear();
+	}; break;
+	} /* while (true) switch */
+}
+
+void QWsSocket::processDataV0()
+{
+	QByteArray BA, buffer;
+	quint8 type, b = 0x00;
+
+	BA = tcpSocket->read(1);
+	type = BA[0];
+
+	if ( ( type & 0x80 ) == 0x00 ) // MSB of type not set
 	{
-		if ( !currentFrame.isEmpty() )
-			byte = 0x00; // continue previous frame
-		else
-			tcpSocket->read((char *) &byte, 1);
-
-		if ( byte == 0x00 )
+		if ( type != 0x00 )
 		{
-			// TEXT FRAME
-			if ( tcpSocket->read((char *) &byte, 1) == 0 )
-				return; // out of bytes
+			// ABORT CONNEXION
+			tcpSocket->readAll();
+			return;
+		}
+		
+		// read data
+		do
+		{
+			BA = tcpSocket->read(1);
+			b = BA[0];
+			if ( b != 0xFF )
+				buffer.append( b );
+		} while ( b != 0xFF );
 
-			while ( byte != 0xFF )
+		currentFrame.append( buffer );
+	}
+	else // MSB of type set
+	{
+		if ( type != 0xFF )
+		{
+			// ERROR, ABORT CONNEXION
+			close();
+			return;
+		}
+
+		quint8 length = 0x00;
+		
+		bool bIsNotZero = true;
+		do
+		{
+			BA = tcpSocket->read(1);
+			b = BA[0];
+			bIsNotZero = ( b != 0x00 ? true : false );
+			if ( bIsNotZero ) // b must be != 0
 			{
-				currentFrame.append(byte);
-
-				if ( tcpSocket->read((char *) &byte, 1) == 0 )
-					return; // out of bytes
+				quint8 b_v = b & 0x7F;
+				length *= 128;
+				length += b_v;
 			}
+		} while ( ( ( b & 0x80 ) == 0x80 ) && bIsNotZero );
 
-			emit frameReceived( QString( currentFrame ) );
-			currentFrame.clear();
-		}
-		else if ( byte == 0xFF )
-		{
-			// CLOSING FRAME
-			tcpSocket->read((char *) &byte, 1);
+		BA = tcpSocket->read(length); // discard this bytes
+	}
 
-			if ( byte == 0x00 )
-				tcpSocket->write(QByteArray("\xFF\x00", 2));
-
-			tcpSocket->close();
-		}
-		else
-		{
-			// INVALID
-			tcpSocket->close();
-		}
+	if ( currentFrame.size() > 0 )
+	{
+		QString byteString;
+		byteString.reserve( currentFrame.size() );
+		for (int i=0 ; i<currentFrame.size() ; i++)
+			byteString[i] = currentFrame[i];
+		emit frameReceived( byteString );
+		currentFrame.clear();
 	}
 
 	if ( tcpSocket->bytesAvailable() )
-		dataReceived();
+		processDataV0();
 }
 
-qint64 QWsSocket::write ( const QString & string, int maxFrameBytes )
+qint64 QWsSocket::write ( const QString & string )
 {
-	if ( maxFrameBytes == 0 )
-		maxFrameBytes = maxBytesPerFrame;
+	if ( _version == WS_V0 )
+	{
+		return QWsSocket::write( string.toAscii() );
+	}
 
-	QList<QByteArray> framesList = QWsSocket::composeFrames( string.toUtf8(), false, maxFrameBytes, version );
+    const QList<QByteArray> & framesList = QWsSocket::composeFrames( string.toAscii(), false, maxBytesPerFrame );
 	return writeFrames( framesList );
 }
 
-qint64 QWsSocket::write ( const QByteArray & byteArray, int maxFrameBytes )
+qint64 QWsSocket::write ( const QByteArray & byteArray )
 {
-	if ( maxFrameBytes == 0 )
-		maxFrameBytes = maxBytesPerFrame;
+	if ( _version == WS_V0 )
+	{
+		QByteArray BA;
+		BA.append( (char)0x00 );
+		BA.append( byteArray );
+		BA.append( (char)0xFF );
+		return writeFrame( BA );
+	}
 
-	QList<QByteArray> framesList = QWsSocket::composeFrames( byteArray, true, maxFrameBytes, version );
-	return writeFrames( framesList );
+    const QList<QByteArray> & framesList = QWsSocket::composeFrames( byteArray, true, maxBytesPerFrame );
+
+	qint64 nbBytesWritten = writeFrames( framesList );
+	emit bytesWritten( nbBytesWritten );
+
+	return nbBytesWritten;
 }
 
 qint64 QWsSocket::writeFrame ( const QByteArray & byteArray )
@@ -168,7 +252,7 @@ qint64 QWsSocket::writeFrame ( const QByteArray & byteArray )
 	return tcpSocket->write( byteArray );
 }
 
-qint64 QWsSocket::writeFrames ( QList<QByteArray> framesList )
+qint64 QWsSocket::writeFrames ( const QList<QByteArray> & framesList )
 {
 	qint64 nbBytesWritten = 0;
 	for ( int i=0 ; i<framesList.size() ; i++ )
@@ -178,36 +262,96 @@ qint64 QWsSocket::writeFrames ( QList<QByteArray> framesList )
 	return nbBytesWritten;
 }
 
-void QWsSocket::close()
+void QWsSocket::processTcpStateChanged( QAbstractSocket::SocketState tcpSocketState )
 {
-	if ( version >= 6 )
+	QAbstractSocket::SocketState wsSocketState = state();
+	switch ( tcpSocketState )
 	{
-		// Compose and send close frame
-		QByteArray BA;
-
-		QByteArray header = QWsSocket::composeHeader( true, OpClose, 0 );
-		BA.append( header );
-
-		// Reason // UNSUPPORTED FOR NOW
-
-		tcpSocket->write( BA );
+		case QAbstractSocket::ClosingState:
+		{
+			if ( wsSocketState == QAbstractSocket::ConnectedState )
+			{
+				close( CloseGoingAway );
+				setSocketState( QAbstractSocket::ClosingState );
+				emit stateChanged( QAbstractSocket::ClosingState );
+				emit aboutToClose();
+			}
+			break;
+		}
+		case QAbstractSocket::UnconnectedState:
+		{
+			if ( wsSocketState == QAbstractSocket::ConnectedState || wsSocketState == QAbstractSocket::ClosingState )
+			{
+				setSocketState( QAbstractSocket::UnconnectedState );
+				emit stateChanged( QAbstractSocket::UnconnectedState );
+				emit disconnected();
+			}
+			break;
+		}
 	}
-	else
-	{
-		tcpSocket->write(QByteArray("\xFF\x00", 2));
-	}
-
-	tcpSocket->close();
 }
 
-void QWsSocket::tcpSocketAboutToClose()
+void QWsSocket::close( ECloseStatusCode closeStatusCode, QString reason )
 {
-	emit aboutToClose();
-}
+	if ( ! closingHandshakeSent )
+	{
+		switch ( _version )
+		{
+			case WS_V4:
+			case WS_V5:
+			case WS_V6:
+			case WS_V7:
+			case WS_V8:
+			case WS_V13:
+			{
+				// Compose and send close frame
+				QByteArray BA;
 
-void QWsSocket::tcpSocketDisconnected()
-{
-	emit disconnected();
+				// Close code
+				BA.append( QWsSocket::composeHeader( true, OpClose, 0 ) );
+
+				// Close status code (optional)
+				BA.append( QWsServer::serializeInt( (int)closeStatusCode, 2 ) );
+
+				// Reason (optional)
+				if ( reason.size() )
+					BA.append( reason.toAscii() );
+				
+				// Send closing handshake
+				tcpSocket->write( BA );
+				tcpSocket->flush();
+
+				break;
+			}
+			case WS_V0:
+			{
+				QByteArray closeFrame;
+				closeFrame.append( (char)0xFF );
+				closeFrame.append( (char)0x00 );
+				tcpSocket->write( closeFrame );
+				tcpSocket->flush();
+				break;
+			}
+			default:
+			{
+				//DO NOTHING
+				break;
+			}
+		}		
+
+		closingHandshakeSent = true;
+
+		setSocketState( QAbstractSocket::ClosingState );
+		emit aboutToClose();
+	}
+	
+	if ( closingHandshakeSent && closingHandshakeReceived )
+	{
+		setSocketState( QAbstractSocket::UnconnectedState );
+		emit disconnected();
+		tcpSocket->close();
+		return;
+	}
 }
 
 QByteArray QWsSocket::generateMaskingKey()
@@ -217,11 +361,17 @@ QByteArray QWsSocket::generateMaskingKey()
 	{
 		key.append( qrand() % 0x100 );
 	}
-
 	return key;
 }
 
-QByteArray QWsSocket::mask( QByteArray data, QByteArray maskingKey )
+QByteArray QWsSocket::generateMaskingKeyV4( QString key, QString nonce )
+{
+	QString concat = key + nonce + "61AC5F19-FBBA-4540-B96F-6561F1AB40A8";
+	QByteArray hash = QCryptographicHash::hash ( concat.toAscii(), QCryptographicHash::Sha1 );
+	return hash;
+}
+
+QByteArray QWsSocket::mask( QByteArray & data, QByteArray & maskingKey )
 {
 	for ( int i=0 ; i<data.size() ; i++ )
 	{
@@ -231,82 +381,55 @@ QByteArray QWsSocket::mask( QByteArray data, QByteArray maskingKey )
 	return data;
 }
 
-QList<QByteArray> QWsSocket::composeFrames( QByteArray byteArray, bool asBinary, int maxFrameBytes, int version )
+QList<QByteArray> QWsSocket::composeFrames( QByteArray byteArray, bool asBinary, int maxFrameBytes )
 {
 	if ( maxFrameBytes == 0 )
 		maxFrameBytes = maxBytesPerFrame;
 
-	int nbFrames = byteArray.size() / maxFrameBytes + 1;
-
 	QList<QByteArray> framesList;
 
-	if (version >= 6)
+	QByteArray maskingKey;
+
+	int nbFrames = byteArray.size() / maxFrameBytes + 1;
+
+	for ( int i=0 ; i<nbFrames ; i++ )
 	{
-        QByteArray maskingKey;// = generateMaskingKey(); /// DISABLED FOR NOW
+		QByteArray BA;
 
-		for ( int i=0 ; i<nbFrames ; i++ )
+		// fin, size
+		bool fin = false;
+		quint64 size = maxFrameBytes;
+		EOpcode opcode = OpContinue;
+		if ( i == nbFrames-1 ) // for multi-frames
 		{
-			QByteArray BA;
-
-			// fin, size
-			bool fin = false;
-			quint64 size = maxFrameBytes;
-			EOpcode opcode = OpContinue;
-			if ( i == nbFrames-1 ) // for multi-frames
-			{
-				fin = true;
-				size = byteArray.size();
-			}
-			if ( i == 0 )
-			{
-				if ( asBinary )
-					opcode = OpBinary;
-				else
-					opcode = OpText;
-			}
-
-			// Header
-			QByteArray header = QWsSocket::composeHeader( fin, opcode, size, maskingKey );
-			BA.append( header );
-
-			// Application Data
-			QByteArray dataForThisFrame = byteArray.left( size );
-			byteArray.remove( 0, size );
-
-			dataForThisFrame = QWsSocket::mask( dataForThisFrame, maskingKey );
-			BA.append( dataForThisFrame );
-
-			framesList << BA;
+			fin = true;
+			size = byteArray.size();
 		}
-	}
-	else
-	{
-        if ( asBinary )
+		if ( i == 0 )
 		{
-			// NOT SUPPORTED
+			if ( asBinary )
+				opcode = OpBinary;
+			else
+				opcode = OpText;
 		}
-		else
-		{
-			for ( int i=0 ; i<nbFrames ; i++ )
-			{
-				quint64 size = maxFrameBytes;
-				if ( i == nbFrames-1 ) // for multi-frames
-				{
-					size = byteArray.size();
-				}
-
-				QByteArray BA = QByteArray( 1, 0x00 ) + byteArray.left( size ) + QByteArray( 1, 0xFF );
-				byteArray.remove( 0, size );
-
-				framesList << BA;
-			}
-		}
+		
+		// Header
+		BA.append( QWsSocket::composeHeader( fin, opcode, size, maskingKey ) );
+		
+		// Application Data
+		QByteArray dataForThisFrame = byteArray.left( size );
+		byteArray.remove( 0, size );
+		
+		//dataForThisFrame = QWsSocket::mask( dataForThisFrame, maskingKey );
+		BA.append( dataForThisFrame );
+		
+		framesList << BA;
 	}
 
 	return framesList;
 }
 
-QByteArray QWsSocket::composeHeader( bool fin, EOpcode opcode, quint64 payloadLength, QByteArray maskingKey )
+QByteArray QWsSocket::composeHeader( bool fin, EOpcode opcode, quint64 payloadLength, const QByteArray & maskingKey )
 {
 	QByteArray BA;
 	quint8 byte;
@@ -370,4 +493,94 @@ void QWsSocket::ping()
 	pingTimer.restart();
 	QByteArray pingFrame = QWsSocket::composeHeader( true, OpPing, 0 );
 	writeFrame( pingFrame );
+}
+
+void QWsSocket::setResourceName( QString rn )
+{
+	_resourceName = rn;
+}
+
+void QWsSocket::setHost( QString h )
+{
+	_host = h;
+}
+
+void QWsSocket::setHostAddress( QString ha )
+{
+	_hostAddress = ha;
+}
+
+void QWsSocket::setHostPort( int hp )
+{
+	_hostPort = hp;
+}
+
+void QWsSocket::setOrigin( QString o )
+{
+	_origin = o;
+}
+
+void QWsSocket::setProtocol( QString p )
+{
+	_protocol = p;
+}
+
+void QWsSocket::setExtensions( QString e )
+{
+	_extensions = e;
+}
+
+EWebsocketVersion QWsSocket::version()
+{
+	return _version;
+}
+
+QString QWsSocket::resourceName()
+{
+	return _resourceName;
+}
+
+QString QWsSocket::host()
+{
+	return _host;
+}
+
+QString QWsSocket::hostAddress()
+{
+	return _hostAddress;
+}
+
+int QWsSocket::hostPort()
+{
+	return _hostPort;
+}
+
+QString QWsSocket::origin()
+{
+	return _origin;
+}
+
+QString QWsSocket::protocol()
+{
+	return _protocol;
+}
+
+QString QWsSocket::extensions()
+{
+	return _extensions;
+}
+
+QString QWsSocket::composeOpeningHandShake( QString resourceName, QString host, QString origin, QString extensions, QString key )
+{
+	QString hs;
+	hs.append("GET " + resourceName + " HTTP/1.1\r\n");
+	hs.append("Host: " + host + "\r\n");
+	hs.append("Upgrade: websocket\r\n");
+	hs.append("Connection: Upgrade\r\n");
+	hs.append("Sec-WebSocket-Key: " + key + "\r\n");
+	hs.append("Origin: " + origin + "\r\n");
+	hs.append("Sec-WebSocket-Extensions: " + extensions + "\r\n");
+	hs.append("Sec-WebSocket-Version: 13\r\n");
+	hs.append("\r\n");
+	return hs;
 }

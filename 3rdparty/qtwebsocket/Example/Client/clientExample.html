@@ -21,6 +21,7 @@
 			var debugTextArea = document.getElementById("debugTextArea");
 			function debug(message)
 			{
+				//console.log( "string received :", '"'+message+'"' );
 				debugTextArea.value += message + "\n";
 				debugTextArea.scrollTop = debugTextArea.scrollHeight;
 			}
@@ -34,6 +35,7 @@
 				{
 					document.getElementById("inputText").value = "";
 					websocket.send( strToSend );
+					console.log( "string sent :", '"'+strToSend+'"' );
 				}
 			}
 			
@@ -45,7 +47,9 @@
 				try {
 					if (typeof MozWebSocket == 'function')
 						WebSocket = MozWebSocket;
-					websocket = new WebSocket(wsUri);
+					if ( websocket && websocket.readyState == 1 )
+						websocket.close();
+					websocket = new WebSocket( wsUri );
 					websocket.onopen = function (evt) {
 						debug("CONNECTED");
 					};
@@ -53,6 +57,7 @@
 						debug("DISCONNECTED");
 					};
 					websocket.onmessage = function (evt) {
+						console.log( "Message received :", evt.data );
 						debug( evt.data );
 					};
 					websocket.onerror = function (evt) {

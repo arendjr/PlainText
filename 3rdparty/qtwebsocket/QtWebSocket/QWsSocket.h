@@ -1,9 +1,20 @@
 #ifndef QWSSOCKET_H
 #define QWSSOCKET_H
 
-#include <QAbstractSocket>
 #include <QTcpSocket>
 #include <QTime>
+
+enum EWebsocketVersion
+{
+	WS_VUnknow = -1,
+	WS_V0 = 0,
+	WS_V4 = 4,
+	WS_V5 = 5,
+	WS_V6 = 6,
+	WS_V7 = 7,
+	WS_V8 = 8,
+	WS_V13 = 13
+};
 
 class QWsSocket : public QAbstractSocket
 {
@@ -15,33 +26,66 @@ public:
 		OpContinue = 0x0,
 		OpText = 0x1,
 		OpBinary = 0x2,
-		OpReserved1 = 0x3,
-		OpReserved2 = 0x4,
-		OpReserved3 = 0x5,
-		OpReserved4 = 0x6,
-		OpReserved5 = 0x7,
+		OpReserved3 = 0x3,
+		OpReserved4 = 0x4,
+		OpReserved5 = 0x5,
+		OpReserved6 = 0x6,
+		OpReserved7 = 0x7,
 		OpClose = 0x8,
 		OpPing = 0x9,
 		OpPong = 0xA,
-		OpReserved6 = 0xB,
-		OpReserved7 = 0xC,
-		OpReserved8 = 0xD,
-		OpReserved9 = 0xE,
-		OpReserved10 = 0xF
+		OpReservedB = 0xB,
+		OpReservedV = 0xC,
+		OpReservedD = 0xD,
+		OpReservedE = 0xE,
+		OpReservedF = 0xF
+	};
+	enum ECloseStatusCode
+	{
+		CloseNormal = 1000,
+		CloseGoingAway = 1001,
+		CloseProtocolError = 1002,
+		CloseDataTypeNotSupported = 1003,
+		CloseReserved1004 = 1004,
+		CloseMissingStatusCode = 1005,
+		CloseAbnormalDisconnection = 1006,
+		CloseWrongDataType = 1007,
+		ClosePolicyViolated = 1008,
+		CloseTooMuchData = 1009,
+		CloseMissingExtension = 1010,
+		CloseBadOperation = 1011,
+		CloseTLSHandshakeFailed = 1015
 	};
 
 public:
 	// ctor
-	QWsSocket(QTcpSocket * socket = 0, int version = 6, QObject * parent = 0);
+	QWsSocket( QObject * parent = 0, QTcpSocket * socket = 0, EWebsocketVersion ws_v = WS_V13 );
 	// dtor
 	virtual ~QWsSocket();
 
 	// Public methods
-	qint64 write ( const QString & string, int maxFrameBytes = 0 ); // write data as text
-	qint64 write ( const QByteArray & byteArray, int maxFrameBytes = 0 ); // write data as binary
+	EWebsocketVersion version();
+	QString resourceName();
+	QString host();
+	QString hostAddress();
+	int hostPort();
+	QString origin();
+	QString protocol();
+	QString extensions();
+
+	void setResourceName( QString rn );
+	void setHost( QString h );
+	void setHostAddress( QString ha );
+	void setHostPort( int hp );
+	void setOrigin( QString o );
+	void setProtocol( QString p );
+	void setExtensions( QString e );
+
+	qint64 write ( const QString & string ); // write data as text
+	qint64 write ( const QByteArray & byteArray ); // write data as binary
 
 public slots:
-    virtual void close();
+	virtual void close( ECloseStatusCode closeStatusCode = CloseNormal, QString reason = QString() );
 	void ping();
 
 signals:
@@ -50,30 +94,56 @@ signals:
 	void pong(quint64 elapsedTime);
 
 protected:
-	qint64 writeFrames ( QList<QByteArray> framesList );
+	qint64 writeFrames ( const QList<QByteArray> & framesList );
 	qint64 writeFrame ( const QByteArray & byteArray );
 
 protected slots:
-	void dataReceived();
-
-private slots:
-	// private func
-	void tcpSocketAboutToClose();
-	void tcpSocketDisconnected();
+	void processDataV0();
+	void processDataV4();
+	void processTcpStateChanged( QAbstractSocket::SocketState socketState );
 
 private:
+	enum EReadingState
+	{
+		HeaderPending,
+		PayloadLengthPending,
+		BigPayloadLenghPending,
+		MaskPending,
+		PayloadBodyPending
+	};
+
 	// private vars
 	QTcpSocket * tcpSocket;
 	QByteArray currentFrame;
 	QTime pingTimer;
-	int version;
+
+	EWebsocketVersion _version;
+	QString _resourceName;
+	QString _host;
+	QString _hostAddress;
+	int _hostPort;
+	QString _origin;
+	QString _protocol;
+	QString _extensions;
+
+	bool closingHandshakeSent;
+	bool closingHandshakeReceived;
+
+	EReadingState readingState;
+	EOpcode opcode;
+	bool isFinalFragment;
+	bool hasMask;
+	quint64 payloadLength;
+	QByteArray maskingKey;
 
 public:
 	// Static functions
 	static QByteArray generateMaskingKey();
-	static QByteArray mask( QByteArray data, QByteArray maskingKey );
-	static QList<QByteArray> composeFrames( QByteArray byteArray, bool asBinary = false, int maxFrameBytes = 0, int version = 6 );
-	static QByteArray composeHeader( bool fin, EOpcode opcode, quint64 payloadLength, QByteArray maskingKey = QByteArray() );
+	static QByteArray generateMaskingKeyV4( QString key, QString nonce );
+	static QByteArray mask( QByteArray & data, QByteArray & maskingKey );
+	static QList<QByteArray> composeFrames( QByteArray byteArray, bool asBinary = false, int maxFrameBytes = 0 );
+    static QByteArray composeHeader( bool fin, EOpcode opcode, quint64 payloadLength, const QByteArray & maskingKey = QByteArray() );
+	static QString composeOpeningHandShake( QString resourceName, QString host, QString origin, QString extensions, QString key );
 
 	// static vars
 	static int maxBytesPerFrame;

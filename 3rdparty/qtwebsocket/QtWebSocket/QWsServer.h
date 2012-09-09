@@ -1,13 +1,13 @@
 #ifndef QWSSERVER_H
 #define QWSSERVER_H
 
-#include <QObject>
 #include <QTcpServer>
 #include <QTcpSocket>
-#include <QString>
-#include <QRegExp>
-#include <QQueue>
 #include <QNetworkProxy>
+#include <QString>
+#include <QStringList>
+#include <QMap>
+#include <QQueue>
 
 #include "QWsSocket.h"
 
@@ -50,18 +50,38 @@ protected:
 private slots:
 	// private slots
 	void newTcpConnection();
+	void closeTcpConnection();
 	void dataReceived();
 
 private:
 	// private attributes
 	QTcpServer * tcpServer;
 	QQueue<QWsSocket*> pendingConnections;
+	QMap<const QTcpSocket*, QStringList> headerBuffer;
 
 public:
 	// public static functions
-	static QString computeAcceptV2( QString key );
-	static QString computeAcceptV1( QString key1, QString key2, QString thirdPart );
 	static QString serializeInt( quint32 number, quint8 nbBytes = 4 );
+	static QString computeAcceptV0( QString key1, QString key2, QString thirdPart );
+	static QString computeAcceptV4( QString key );
+	static QString generateNonce();
+	static QString composeOpeningHandshakeResponseV0( QString accept, QString origin, QString hostAddress, QString hostPort, QString resourceName, QString protocol = "" );
+	static QString composeOpeningHandshakeResponseV4( QString accept, QString nonce, QString protocol = "", QString extensions = "" );
+	static QString composeOpeningHandshakeResponseV6( QString accept, QString protocol = "", QString extensions = "" );
+	static QString composeBadRequestResponse( QList<EWebsocketVersion> versions = QList<EWebsocketVersion>() );
+
+	// public static vars
+	static const QString regExpResourceNameStr;
+	static const QString regExpHostStr;
+	static const QString regExpKeyStr;
+	static const QString regExpKey1Str;
+	static const QString regExpKey2Str;
+	static const QString regExpKey3Str;
+	static const QString regExpVersionStr;
+	static const QString regExpOriginStr;
+	static const QString regExpOrigin2Str;
+	static const QString regExpProtocolStr;
+	static const QString regExpExtensionsStr;
 };
 
 #endif // QWSSERVER_H
