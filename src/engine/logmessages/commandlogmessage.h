@@ -12,7 +12,7 @@ class CommandLogMessage : public LogMessage {
         CommandLogMessage(const QString &playerName, const QString &command);
         virtual ~CommandLogMessage();
 
-        virtual void process();
+        virtual void log();
 
     private:
         QString m_playerName;

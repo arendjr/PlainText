@@ -131,6 +131,7 @@ SOURCES += \
     engine/logmessages/commandlogmessage.cpp \
     engine/logmessages/logmessage.cpp \
     engine/logmessages/npctalklogmessage.cpp \
+    engine/logmessages/sessionlogmessage.cpp \
     interface/httpserver.cpp \
     interface/telnetserver.cpp \
     interface/websocketserver.cpp \
@@ -243,6 +244,7 @@ HEADERS += \
     engine/logmessages/commandlogmessage.h \
     engine/logmessages/logmessage.h \
     engine/logmessages/npctalklogmessage.h \
+    engine/logmessages/sessionlogmessage.h \
     interface/httpserver.h \
     interface/telnetserver.h \
     interface/websocketserver.h \

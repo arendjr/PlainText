@@ -12,7 +12,7 @@ class NpcTalkLogMessage : public LogMessage {
         NpcTalkLogMessage(const QString &npcName, const QString &message);
         virtual ~NpcTalkLogMessage();
 
-        virtual void process();
+        virtual void log();
 
     private:
         QString m_npcName;

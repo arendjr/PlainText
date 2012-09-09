@@ -12,7 +12,7 @@ CommandLogMessage::CommandLogMessage(const QString &playerName, const QString &c
 CommandLogMessage::~CommandLogMessage() {
 }
 
-void CommandLogMessage::process() {
+void CommandLogMessage::log() {
 
     DiskUtil::appendToLogFile("commands." + m_playerName, m_command);
 }

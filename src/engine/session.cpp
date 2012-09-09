@@ -11,6 +11,7 @@
 #include "commandinterpreter.h"
 #include "constants.h"
 #include "gameobjectptr.h"
+#include "logutil.h"
 #include "player.h"
 #include "race.h"
 #include "realm.h"
@@ -42,16 +43,21 @@ struct Session::SignUpData {
     }
 };
 
-Session::Session(Realm *realm, QObject *parent) :
+Session::Session(Realm *realm, const QString &source, QObject *parent) :
     QObject(parent),
+    m_source(source),
     m_signInStage(SessionClosed),
     m_signUpData(nullptr),
     m_realm(realm),
     m_player(nullptr),
     m_interpreter(nullptr) {
+
+    LogUtil::logSessionEvent(m_source, "Session opened");
 }
 
 Session::~Session() {
+
+    LogUtil::logSessionEvent(m_source, "Session closed");
 
     if (m_player && m_player->session() == this) {
         m_player->setSession(nullptr);
@@ -326,10 +332,14 @@ void Session::processPassword(const QString &input) {
     QByteArray data = QString(m_player->passwordSalt() + input).toUtf8();
     QString passwordHash = QCryptographicHash::hash(data, QCryptographicHash::Sha1).toBase64();
     if (m_player->passwordHash() == passwordHash) {
+        LogUtil::logSessionEvent(m_source, "Authentication success for player " + m_player->name());
+
         write(QString("Welcome back, %1. Type %2 if you're feeling lost.\n").arg(m_player->name(),
               Util::highlight("help")));
         setSignInStage(SignedIn);
     }  else {
+        LogUtil::logSessionEvent(m_source, "Authentication failed for player " + m_player->name());
+
         write("Password incorrect.\n");
     }
 }
@@ -692,6 +702,8 @@ void Session::processSignupConfirmation(const QString &answer) {
 
         delete m_signUpData;
         m_signUpData = 0;
+
+        LogUtil::logSessionEvent(m_source, "Character created for player " + m_player->name());
 
         write(QString("\nWelcome to " + m_realm->name() + ", %1.\n").arg(m_player->name()));
         setSignInStage(SignedIn);

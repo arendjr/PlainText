@@ -35,7 +35,14 @@ bool DiskUtil::writeGameObject(const char *objectType, uint id, const QString &c
 
 QString DiskUtil::dataDir() {
 
-    return qgetenv("PT_DATA_DIR");
+    static QString path;
+    static bool defined = false;
+
+    if (!defined) {
+        path = qgetenv("PT_DATA_DIR");
+        defined = true;
+    }
+    return path;
 }
 
 QStringList DiskUtil::dataDirFileList(const QString &subdirectory) {
@@ -89,5 +96,12 @@ void DiskUtil::appendToLogFile(const QString &fileName, const QString &line) {
 
 QString DiskUtil::logDir() {
 
-    return qgetenv("PT_LOG_DIR");
+    static QString path;
+    static bool defined = false;
+
+    if (!defined) {
+        path = qgetenv("PT_LOG_DIR");
+        defined = true;
+    }
+    return path;
 }

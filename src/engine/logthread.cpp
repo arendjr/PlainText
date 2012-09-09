@@ -52,6 +52,6 @@ void LogThread::run() {
 
 void LogThread::logMessage(LogMessage *message) {
 
-    message->process();
+    message->log();
     delete message;
 }

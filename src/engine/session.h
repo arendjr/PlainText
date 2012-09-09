@@ -30,7 +30,7 @@ class Session : public QObject {
             SignInAborted
         };
 
-        Session(Realm *realm, QObject *parent);
+        Session(Realm *realm, const QString &source, QObject *parent);
         virtual ~Session();
 
         void open();
@@ -51,6 +51,8 @@ class Session : public QObject {
         void terminate();
 
     private:
+        QString m_source;
+
         SignInStage m_signInStage;
 
         struct SignUpData;

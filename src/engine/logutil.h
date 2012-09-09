@@ -10,6 +10,8 @@ class LogUtil {
         static void logCommand(const QString &playerName, const QString &command);
 
         static void logNpcTalk(const QString &npcName, const QString &message);
+
+        static void logSessionEvent(const QString &source, const QString &message);
 };
 
 #endif // LOGUTIL_H

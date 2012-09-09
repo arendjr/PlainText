@@ -10,7 +10,7 @@ class LogMessage {
         LogMessage();
         virtual ~LogMessage();
 
-        virtual void process() = 0;
+        virtual void log() = 0;
 };
 
 #endif // LOGMESSAGE_H

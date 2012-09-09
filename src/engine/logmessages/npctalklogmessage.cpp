@@ -12,7 +12,7 @@ NpcTalkLogMessage::NpcTalkLogMessage(const QString &npcName, const QString &mess
 NpcTalkLogMessage::~NpcTalkLogMessage() {
 }
 
-void NpcTalkLogMessage::process() {
+void NpcTalkLogMessage::log() {
 
     DiskUtil::appendToLogFile("npctalk." + m_npcName,
                               m_message.isEmpty() ? "(no message)" : m_message);
