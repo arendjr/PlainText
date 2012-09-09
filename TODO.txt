@@ -10,5 +10,3 @@ TECHNOLOGY
      -  Use QCryptographicHash::Sha512 for password encryption.
      -  Use QLatin1String / QStringLiteral where it makes sense.
   -  Make commands implementable in JavaScript.
-  -  Implement MSSP protocol.
-  -  Implement MCCP protocol.

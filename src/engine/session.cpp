@@ -171,11 +171,6 @@ void Session::processSignIn(const QString &data) {
             break;
 
         case SignedIn:
-            if (m_player->session()) {
-                write("Cannot sign you in because you're already signed in from another location.");
-                terminate();
-                break;
-            }
             m_player->setSession(this);
             connect(m_player, SIGNAL(write(QString)), this, SIGNAL(write(QString)));
 
@@ -333,6 +328,13 @@ void Session::processPassword(const QString &input) {
     QString passwordHash = QCryptographicHash::hash(data, QCryptographicHash::Sha1).toBase64();
     if (m_player->passwordHash() == passwordHash) {
         LogUtil::logSessionEvent(m_source, "Authentication success for player " + m_player->name());
+
+        if (m_player->session()) {
+            write("Cannot sign you in because you're already signed in from another location.\n");
+            setSignInStage(SessionClosed);
+            terminate();
+            return;
+        }
 
         write(QString("Welcome back, %1. Type %2 if you're feeling lost.\n").arg(m_player->name(),
               Util::highlight("help")));

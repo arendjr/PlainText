@@ -4,8 +4,31 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 
-#include "engine/player.h"
-#include "engine/session.h"
+#include <QtIOCompressor>
+
+#include "player.h"
+#include "realm.h"
+#include "session.h"
+
+
+#define SE   "\xF0"
+#define SB   "\xFA"
+#define WILL "\xFB"
+#define WONT "\xFC"
+#define DO   "\xFD"
+#define DONT "\xFE"
+#define IAC  "\xFF"
+
+#define MCCP "\x56"
+
+#define MSSP     "\x46"
+#define MSSP_VAR "\x01"
+#define MSSP_VAL "\x02"
+
+#define BYTE(x) x[0]
+
+
+Q_DECLARE_METATYPE(QtIOCompressor *)
 
 
 TelnetServer::TelnetServer(Realm *realm, quint16 port, QObject *parent) :
@@ -37,7 +60,12 @@ void TelnetServer::onClientConnected() {
 
     session->open();
 
+    socket->write(IAC WILL MCCP
+                  IAC WILL MSSP);
+
     socket->setProperty("session", QVariant::fromValue(session));
+    socket->setProperty("compressor", QVariant::fromValue((QtIOCompressor *) nullptr));
+
     m_clients << socket;
 }
 
@@ -51,17 +79,60 @@ void TelnetServer::onReadyRead() {
     QByteArray buffer = socket->property("buffer").toByteArray();
     buffer.append(socket->readAll());
 
-    int index;
-    while ((index = buffer.indexOf("\r\n")) > -1) {
-        QByteArray line = buffer.left(index);
+    for (int i = 0; i < buffer.length(); i++) {
+        if (buffer[i] == '\n') {
+            if (i > 0) {
+                Session *session = socket->property("session").value<Session *>();
+                session->onUserInput(buffer.left(i));
+            }
 
-        if (!line.isEmpty()) {
-            Session *session = socket->property("session").value<Session *>();
-            Q_ASSERT(session);
-            session->onUserInput(line);
+            buffer.remove(0, i + 1);
+            i--;
+        } else {
+            if (i == buffer.length() - 1) {
+                break;
+            }
+
+            if (buffer[i] == '\r' && buffer[i + 1] == '\n') {
+                if (i > 0) {
+                    Session *session = socket->property("session").value<Session *>();
+                    session->onUserInput(buffer.left(i));
+                }
+
+                buffer.remove(0, i + 2);
+                i--;
+            } else if (buffer[i] == BYTE(IAC)) {
+                int length;
+                switch (buffer[i + 1]) {
+                    case BYTE(IAC):
+                        buffer.remove(i, 1);
+                        break;
+                    case BYTE(SB):
+                        length = buffer.indexOf(IAC SE) - i + 2;
+                        if (length > 1) {
+                            handleCommand(socket, buffer.mid(i, length));
+                            buffer.remove(i, length);
+                            i--;
+                        }
+                        break;
+                    case BYTE(WILL):
+                    case BYTE(WONT):
+                    case BYTE(DO):
+                    case BYTE(DONT):
+                        if (i < buffer.length() - 2) {
+                            handleCommand(socket, buffer.mid(i, 3));
+                            buffer.remove(i, 3);
+                            i--;
+                        }
+                        break;
+                    default:
+                        handleCommand(socket, buffer.mid(i, 2));
+                        buffer.remove(i, 2);
+                        i--;
+                        break;
+                }
+            }
         }
-
-        buffer.remove(0, index + 2);
     }
 
     socket->setProperty("buffer", buffer);
@@ -95,12 +166,90 @@ void TelnetServer::onSessionOutput(QString data) {
         return;
     }
 
-    socket->write(data.replace("\n", "\r\n").toUtf8());
+    write(socket, data.replace("\n", "\r\n").toUtf8());
 
     if (session->authenticated()) {
         Player *player = session->player();
         Q_ASSERT(player);
 
-        socket->write(QString("(%1H) ").arg(player->hp()).toUtf8());
+        write(socket, QString("(%1H) ").arg(player->hp()).toUtf8());
+    }
+}
+
+void TelnetServer::handleCommand(QTcpSocket *socket, const QByteArray &command) {
+
+    switch (command[1]) {
+        case BYTE(DO):
+            if (command[2] == BYTE(MCCP)) {
+                qDebug() << "Enabling compression...";
+                write(socket, IAC SB MCCP IAC SE);
+                QtIOCompressor *compressor = new QtIOCompressor(socket);
+                compressor->open(QIODevice::WriteOnly);
+                socket->setProperty("compressor", QVariant::fromValue(compressor));
+            } else if (command[2] == BYTE(MSSP)) {
+                sendMSSP(socket);
+            }
+            break;
+        case BYTE(DONT):
+            if (command[2] == BYTE(MCCP)) {
+                QtIOCompressor *compressor = socket->property("compressor")
+                                             .value<QtIOCompressor *>();
+                if (compressor) {
+                    delete compressor;
+                    compressor = nullptr;
+                    socket->setProperty("compressor", QVariant::fromValue(compressor));
+                }
+            }
+            break;
+        default:
+            break;
+    }
+}
+
+void TelnetServer::sendMSSP(QTcpSocket *socket) {
+
+    QByteArray name = m_realm->name().toUtf8();
+    QByteArray players = QByteArray::number(m_realm->onlinePlayers().length());
+    QByteArray uptime = "-1";
+    QByteArray crawlDelay = "-1";
+    QByteArray port = QByteArray::number(m_server->serverPort());
+
+    write(socket, IAC SB MSSP
+                  MSSP_VAR "NAME" MSSP_VAL + name +
+                  MSSP_VAR "PLAYERS" MSSP_VAL + players +
+                  MSSP_VAR "UPTIME" MSSP_VAL + uptime +
+                  MSSP_VAR "CRAWL DELAY" MSSP_VAL + crawlDelay +
+                  MSSP_VAR "PORT" MSSP_VAL + port +
+                  MSSP_VAR "CODEBASE" MSSP_VAL "PlainText"
+                  MSSP_VAR "LANGUAGE" MSSP_VAL "English"
+                  MSSP_VAR "FAMILY" MSSP_VAL "Custom"
+                  MSSP_VAR "GENRE" MSSP_VAL "Fantasy"
+                  MSSP_VAR "GAMEPLAY" MSSP_VAL "Adventure"
+                  MSSP_VAR "GAMEPLAY" MSSP_VAL "Hack and Slash"
+                  MSSP_VAR "GAMEPLAY" MSSP_VAL "Player versus Player"
+                  MSSP_VAR "GAMEPLAY" MSSP_VAL "Player versus Environment"
+                  MSSP_VAR "GAMEPLAY" MSSP_VAL "Roleplaying"
+                  MSSP_VAR "ANSI" MSSP_VAL "1"
+                  MSSP_VAR "GMCP" MSSP_VAL "0"
+                  MSSP_VAR "MCCP" MSSP_VAL "1"
+                  MSSP_VAR "MCP" MSSP_VAL "0"
+                  MSSP_VAR "MSDP" MSSP_VAL "0"
+                  MSSP_VAR "MSP" MSSP_VAL "0"
+                  MSSP_VAR "MXP" MSSP_VAL "0"
+                  MSSP_VAR "PUEBLO" MSSP_VAL "0"
+                  MSSP_VAR "UTF-8" MSSP_VAL "1"
+                  MSSP_VAR "VT100" MSSP_VAL "0"
+                  MSSP_VAR "XTERM 256 COLORS" MSSP_VAL "0"
+                  IAC SE);
+}
+
+void TelnetServer::write(QTcpSocket *socket, const QByteArray &data) {
+
+    QtIOCompressor *compressor = socket->property("compressor").value<QtIOCompressor *>();
+    if (compressor) {
+        compressor->write(data);
+        compressor->flush();
+    } else {
+        socket->write(data);
     }
 }

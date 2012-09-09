@@ -19,6 +19,7 @@ macx {
     }
 }
 QMAKE_CXXFLAGS += -std=c++11
+LIBS += -lz
 
 DEFINES *= QT_USE_QSTRINGBUILDER
 
@@ -140,6 +141,7 @@ SOURCES += \
     ../3rdparty/qjson/json_driver.cpp \
     ../3rdparty/qjson/json_parser.cpp \
     ../3rdparty/qjson/json_scanner.cpp \
+    ../3rdparty/qtiocompressor/qtiocompressor.cpp \
     ../3rdparty/qtwebsocket/QtWebSocket/QWsServer.cpp \
     ../3rdparty/qtwebsocket/QtWebSocket/QWsSocket.cpp
 
@@ -255,6 +257,7 @@ HEADERS += \
     ../3rdparty/qjson/json_parser.hh \
     ../3rdparty/qjson/json_driver.hh \
     ../3rdparty/qjson/json_scanner.h \
+    ../3rdparty/qtiocompressor/qtiocompressor.h \
     ../3rdparty/qtwebsocket/QtWebSocket/QWsServer.h \
     ../3rdparty/qtwebsocket/QtWebSocket/QWsSocket.h
 
@@ -278,6 +281,7 @@ INCLUDEPATH += \
     engine/events \
     engine/logmessages \
     $$PWD/../3rdparty \
+    $$PWD/../3rdparty/qtiocompressor \
     $$PWD/../3rdparty/qtwebsocket/QtWebSocket
 
 RESOURCES += \

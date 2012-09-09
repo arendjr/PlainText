@@ -29,6 +29,11 @@ class TelnetServer : public QObject {
 
         QTcpServer *m_server;
         QList<QTcpSocket *> m_clients;
+
+        void handleCommand(QTcpSocket *socket, const QByteArray &command);
+        void sendMSSP(QTcpSocket *socket);
+
+        static void write(QTcpSocket *socket, const QByteArray &data);
 };
 
 #endif // TELNETSERVER_H

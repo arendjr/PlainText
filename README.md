@@ -9,8 +9,9 @@ Technology
  * The engine is written in C++, using the Qt toolkit.
  * A JavaScript engine is embedded for providing scripting to game
    objects.
- * The game is accessible over telnet, but also hosts a web interface
-   over HTTP which connects to the game using WebSockets.
+ * The game is accessible over telnet (with support for ANSI colors and the MCCP
+   and MSSP extension protocols), but also hosts a web interface over HTTP which
+   connects to the game using WebSockets.
 
 Running your own server
 -----------------------
@@ -24,6 +25,7 @@ Running your own server
 
  * Clang 3.1 or higher, or GCC 4.7 or higher
  * Qt framework 4.7 or higher
+ * Zlib development package
 
 ### Compiling ###
 
