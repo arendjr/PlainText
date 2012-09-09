@@ -63,6 +63,8 @@ void GiveCommand::execute(const QString &command) {
     }
 
     Character *recipient = recipients[0].cast<Character *>();
+    QString recipientName = recipient->definiteName(currentArea()->characters());
+
     QString description;
 
     if (gold > 0.0) {
@@ -85,21 +87,30 @@ void GiveCommand::execute(const QString &command) {
             }
         }
 
-        for (const GameObjectPtr &item : items) {
-            recipient->addInventoryItem(item);
-            player()->removeInventoryItem(item);
+        GameObjectPtrList givenItems;
+        for (const GameObjectPtr &itemPtr : items) {
+            Item *item = itemPtr.cast<Item *>();
+            if (recipient->inventoryWeight() + item->weight() <= recipient->maxInventoryWeight()) {
+                recipient->addInventoryItem(itemPtr);
+                givenItems << itemPtr;
+            } else {
+                send(QString("%1 is too heavy for %2.")
+                     .arg(item->definiteName(player()->inventory(), Capitalized), recipientName));
+            }
         }
 
-        description = items.joinFancy();
+        description = givenItems.joinFancy();
+
+        for (const GameObjectPtr &itemPtr : givenItems) {
+            player()->removeInventoryItem(itemPtr);
+        }
     }
 
-    QString recipientName = recipient->definiteName(recipients);
     send(QString("You give %1 to %2.").arg(description, recipientName));
     recipient->send(QString("%1 gives you %2.").arg(player()->name(), description));
 
     GameObjectPtrList others = currentArea()->players();
     others.removeOne(player());
     others.removeOne(recipient);
-    others.send(QString("%1 gives %2 to %3.")
-                .arg(player()->name(), description, recipientName));
+    others.send(QString("%1 gives %2 to %3.").arg(player()->name(), description, recipientName));
 }

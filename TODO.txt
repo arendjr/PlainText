@@ -12,4 +12,3 @@ TECHNOLOGY
   -  Make commands implementable in JavaScript.
   -  Implement MSSP protocol.
   -  Implement MCCP protocol.
-  -  Implement logging and statistics.

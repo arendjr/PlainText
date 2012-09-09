@@ -66,22 +66,22 @@ Character::~Character() {
     }
 }
 
-int Character::totalWeight() const {
+CharacterStats Character::totalStats() const {
 
-    int totalWeight = weight();
-    for (const GameObjectPtr &item : m_inventory) {
-        totalWeight += item.cast<Item *>()->weight();
-    }
+    CharacterStats totalStats = super::totalStats();
     if (!m_weapon.isNull()) {
-        totalWeight += m_weapon.cast<Item *>()->weight();
+        totalStats += m_weapon.cast<Weapon *>()->totalStats();
     }
     if (!m_secondaryWeapon.isNull()) {
-        totalWeight += m_secondaryWeapon.cast<Item *>()->weight();
+        totalStats += m_secondaryWeapon.cast<Weapon *>()->totalStats();
     }
     if (!m_shield.isNull()) {
-        totalWeight += m_shield.cast<Item *>()->weight();
+        totalStats += m_shield.cast<Shield *>()->totalStats();
     }
-    return totalWeight;
+
+    totalStats.dexterity = qMax(totalStats.dexterity - (inventoryWeight() / 5), 0);
+
+    return totalStats;
 }
 
 void Character::setCurrentArea(const GameObjectPtr &currentArea) {
@@ -178,21 +178,6 @@ void Character::setGender(const QString &gender) {
 
         setModified();
     }
-}
-
-CharacterStats Character::totalStats() const {
-
-    CharacterStats totalStats = super::totalStats();
-    if (!m_weapon.isNull()) {
-        totalStats += m_weapon.cast<Weapon *>()->totalStats();
-    }
-    if (!m_secondaryWeapon.isNull()) {
-        totalStats += m_secondaryWeapon.cast<Weapon *>()->totalStats();
-    }
-    if (!m_shield.isNull()) {
-        totalStats += m_shield.cast<Shield *>()->totalStats();
-    }
-    return totalStats;
 }
 
 void Character::setHeight(int height) {
@@ -315,6 +300,34 @@ void Character::setShield(const GameObjectPtr &shield) {
 
         setModified();
     }
+}
+
+int Character::inventoryWeight() const {
+
+    int inventoryWeight = 0;
+    for (const GameObjectPtr &item : m_inventory) {
+        inventoryWeight += item.cast<Item *>()->weight();
+    }
+    if (!m_weapon.isNull()) {
+        inventoryWeight += m_weapon.cast<Item *>()->weight();
+    }
+    if (!m_secondaryWeapon.isNull()) {
+        inventoryWeight += m_secondaryWeapon.cast<Item *>()->weight();
+    }
+    if (!m_shield.isNull()) {
+        inventoryWeight += m_shield.cast<Item *>()->weight();
+    }
+    return inventoryWeight;
+}
+
+int Character::maxInventoryWeight() const {
+
+    return 20 + ((stats().strength + stats().endurance) / 2);
+}
+
+int Character::totalWeight() const {
+
+    return weight() + inventoryWeight();
 }
 
 void Character::addEffect(const Effect &effect) {
@@ -655,9 +668,14 @@ void Character::take(const GameObjectPtrList &items) {
             area->removeItem(itemPtr);
             takenItems << itemPtr;
         } else if (item->isPortable()) {
-            addInventoryItem(itemPtr);
-            area->removeItem(itemPtr);
-            takenItems << itemPtr;
+            if (inventoryWeight() + item->weight() <= maxInventoryWeight()) {
+                addInventoryItem(itemPtr);
+                area->removeItem(itemPtr);
+                takenItems << itemPtr;
+            } else {
+                send(QString("You can't take %2, because it's too heavy.")
+                     .arg(item->definiteName(area->items())));
+            }
         } else {
             send(QString("You can't take %2.").arg(item->definiteName(area->items())));
         }

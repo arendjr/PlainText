@@ -16,7 +16,25 @@ void InventoryCommand::execute(const QString &command) {
 
     setCommand(command);
 
-    send(QString("You carry %1.\n"
-                 "You've got $%2 worth of gold.")
-         .arg(player()->inventory().joinFancy(), QString::number(player()->gold())));
+    QString carriedInventoryString;
+    if (player()->inventory().isEmpty()) {
+        carriedInventoryString = "You don't carry anything.\n";
+    } else if (player()->inventory().length() == 1) {
+        carriedInventoryString = QString("You carry %1, weighing %2kg.\n")
+                                 .arg(player()->inventory().joinFancy(),
+                                      QString::number(player()->inventoryWeight()));
+    } else {
+        carriedInventoryString = QString("You carry %1, weighing a total of %2kg.\n")
+                                 .arg(player()->inventory().joinFancy(),
+                                      QString::number(player()->inventoryWeight()));
+    }
+
+    QString carriedGoldString;
+    if (player()->gold() == 0.0) {
+        carriedGoldString = "You don't have any gold.\n";
+    } else {
+        carriedGoldString = QString("You've got $%1 worth of gold.\n").arg(player()->gold());
+    }
+
+    send(carriedInventoryString + carriedGoldString);
 }

@@ -17,8 +17,6 @@ class Character : public StatsItem {
         Character(Realm *realm, const char *objectType, uint id, Options options = NoOptions);
         virtual ~Character();
 
-        Q_INVOKABLE virtual int totalWeight() const;
-
         Q_INVOKABLE virtual CharacterStats totalStats() const;
 
         int height() const { return m_height; }
@@ -104,6 +102,12 @@ class Character : public StatsItem {
         const GameObjectPtr &shield() const { return m_shield; }
         void setShield(const GameObjectPtr &shield);
         Q_PROPERTY(GameObjectPtr shield READ shield WRITE setShield)
+
+        Q_INVOKABLE int inventoryWeight() const;
+
+        Q_INVOKABLE int maxInventoryWeight() const;
+
+        Q_INVOKABLE int totalWeight() const;
 
         const GameObjectPtr &group() const { return m_group; }
         Q_PROPERTY(GameObjectPtr group READ group STORED false)
