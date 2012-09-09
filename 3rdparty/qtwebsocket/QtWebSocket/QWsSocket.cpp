@@ -23,6 +23,8 @@ QWsSocket::QWsSocket( QObject * parent, QTcpSocket * socket, EWebsocketVersion w
 	tcpSocket->setParent( this );
 
 	setSocketState( tcpSocket->state() );
+    setPeerAddress( tcpSocket->peerAddress() );
+    setPeerPort( tcpSocket->peerPort() );
 
 	if ( _version == WS_V0 )
 		connect( tcpSocket, SIGNAL(readyRead()), this, SLOT(processDataV0()) );
