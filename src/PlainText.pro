@@ -128,9 +128,11 @@ SOURCES += \
     engine/events/event.cpp \
     engine/events/signinevent.cpp \
     engine/events/timerevent.cpp \
+    engine/logmessages/areavisitstatslogmessage.cpp \
     engine/logmessages/commandlogmessage.cpp \
     engine/logmessages/logmessage.cpp \
     engine/logmessages/npctalklogmessage.cpp \
+    engine/logmessages/playerdeathstatslogmessage.cpp \
     engine/logmessages/sessionlogmessage.cpp \
     interface/httpserver.cpp \
     interface/telnetserver.cpp \
@@ -241,9 +243,11 @@ HEADERS += \
     engine/events/event.h \
     engine/events/signinevent.h \
     engine/events/timerevent.h \
+    engine/logmessages/areavisitstatslogmessage.h \
     engine/logmessages/commandlogmessage.h \
     engine/logmessages/logmessage.h \
     engine/logmessages/npctalklogmessage.h \
+    engine/logmessages/playerdeathstatslogmessage.h \
     engine/logmessages/sessionlogmessage.h \
     interface/httpserver.h \
     interface/telnetserver.h \

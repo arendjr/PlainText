@@ -1,8 +1,10 @@
 #include "logutil.h"
 
+#include "areavisitstatslogmessage.h"
 #include "commandlogmessage.h"
 #include "diskutil.h"
 #include "npctalklogmessage.h"
+#include "playerdeathstatslogmessage.h"
 #include "realm.h"
 #include "sessionlogmessage.h"
 
@@ -32,4 +34,22 @@ void LogUtil::logSessionEvent(const QString &source, const QString &message) {
     }
 
     Realm::instance()->enqueueLogMessage(new SessionLogMessage(source, message));
+}
+
+void LogUtil::countAreaVisit(const QString &identifier, int count) {
+
+    if (DiskUtil::logDir().isEmpty()) {
+        return;
+    }
+
+    Realm::instance()->enqueueLogMessage(new AreaVisitStatsLogMessage(identifier, count));
+}
+
+void LogUtil::countPlayerDeath(const QString &identifier, int count) {
+
+    if (DiskUtil::logDir().isEmpty()) {
+        return;
+    }
+
+    Realm::instance()->enqueueLogMessage(new PlayerDeathStatsLogMessage(identifier, count));
 }

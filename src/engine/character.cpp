@@ -488,6 +488,8 @@ void Character::enter(const GameObjectPtr &areaPtr, const GameObjectPtrList &fol
         for (const GameObjectPtr &follower : followers) {
             area->addPlayer(follower);
         }
+
+        LogUtil::countAreaVisit(areaPtr.toString(), 1 + followers.length());
     } else {
         area->addNPC(this);
 
@@ -877,6 +879,8 @@ void Character::die(const GameObjectPtr &attacker) {
     killAllTimers();
 
     if (isPlayer()) {
+        LogUtil::countPlayerDeath(currentArea().toString());
+
         area->removePlayer(this);
         enter(race().cast<Race *>()->startingArea());
 
