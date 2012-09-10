@@ -1,5 +1,5 @@
 {
   "name": "Main Street",
-  "exits": [ "exit:1167" ],
-  "items": [ ]
+  "description": "",
+  "exits": [ "exit:1167" ]
 }

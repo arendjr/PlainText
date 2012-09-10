@@ -10,7 +10,7 @@
   "stats": [10, 10, 7, 10, 7, 7],
   "height": 170,
   "currentArea": "area:85",
-  "sellableItems": [ "item:1156", "item:1157", "item:1158" ],
+  "sellableItems": [ "item:1157", "item:1158" ],
   "race": "race:2",
   "characterClass": "class:147",
   "gender": "female",

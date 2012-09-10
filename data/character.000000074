@@ -1,6 +1,7 @@
 {
   "name": "shopper",
-  "triggers": { "onattack": "(function(attacker) {\n    this.shout('Help! Guards!');\n})", "onspawn": "(function() {\n    this.setInterval(function() {\n        var exit = this.currentArea.exits.randomElement();\n        if (exit.name.endsWith('stall') || exit.destinationArea.name.contains('Market')) {\n            this.go(exit);\n        }\n    }, 19222);\n\n    this.gold = randomInt(10, 31);\n})" },
+  "description": "",
+  "triggers": { "onattack": "(function(attacker) {\n    this.shout('Help! Guards!');\n})", "onspawn": "(function() {\n    var self = this;\n\n    function getGold() {\n        self.setTimeout(function() {\n            var items = this.currentArea.items;\n            for (var i = 0; i < items.length; i++) {\n                if (items[i].name.contains(\"gold\")) {\n                    this.take([ items[i] ]);\n                }\n            }\n        }, randomInt(1000, 10000));\n    }\n\n    this.setInterval(function() {\n        var exit = this.currentArea.exits.randomElement();\n        if (exit.name.endsWith('stall') || exit.destinationArea.name.contains('Market')) {\n            this.go(exit);\n            getGold();\n        }\n    }, 19222);\n\n    this.gold = randomInt(10, 31);\n})" },
   "plural": "shoppers",
   "indefiniteArticle": "a",
   "portable": false,
@@ -8,7 +9,7 @@
   "cost": 0,
   "stats": [8, 7, 7, 7, 7, 7],
   "height": 0,
-  "currentArea": "area:65",
+  "currentArea": "area:110",
   "race": "race:2",
   "characterClass": "class:147",
   "gender": "female",
@@ -18,7 +19,7 @@
   "maxHp": 14,
   "mp": 7,
   "maxMp": 7,
-  "gold": 15,
+  "gold": 19,
   "weapon": "0",
   "secondaryWeapon": "0",
   "shield": "0"

@@ -184,11 +184,10 @@ const QMap<QString, QString> &ScriptEngine::triggers() {
                         "no oninit trigger, onspawn is triggered instead.");
         triggers.insert("onopen(activator : character) : bool",
                         "The onopen trigger is invoked on any item or exit when it's opened.");
-        triggers.insert("onreceive(giver : character, item : item or item list or amount) : bool",
+        triggers.insert("onreceive(giver : character, item : item or amount) : bool",
                         "The onreceive trigger is invoked on any character when something is "
                         "being given to it. Note that item may be a number instead of an item "
-                        "object when an amount of gold is being given, or a list of items when "
-                        "multiple items are being given.");
+                        "object when an amount of gold is being given.");
         triggers.insert("onshout(activator : character, message : string) : void",
                         "The onshout trigger is invoked on any character when it hears someone "
                         "shout.");

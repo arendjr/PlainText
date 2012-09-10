@@ -22,32 +22,31 @@ void Command::setDescription(const QString &description) {
 
 void Command::setCommand(const QString &_command) {
 
-    QRegExp whitespace("\\s+");
-    QString command = _command.trimmed();
+    static QRegExp whitespace("\\s+");
 
+    QString command = _command.trimmed();
     m_words = command.split(whitespace);
+
     if (m_player->isAdmin()) {
-        if (m_words[0] == "exec-script") {
+        if (command.startsWith("exec-script ")) {
             m_words.clear();
             m_words << command.section(whitespace, 0, 0);
             m_words << command.section(whitespace, 1);
             return;
-        }
-        if (m_words[0] == "get-trigger" || m_words[0] == "set-trigger") {
+        } else if (command.startsWith("api-trigger-set ")) {
             m_words.clear();
             m_words << command.section(whitespace, 0, 0);
             m_words << command.section(whitespace, 1, 1);
             m_words << command.section(whitespace, 2, 2);
+            m_words << command.section(whitespace, 3, 3);
             if (m_words.last().toInt() > 0) {
-                m_words << command.section(whitespace, 3, 3);
-                m_words << command.section(whitespace, 4);
+                m_words << command.section(whitespace, 4, 4);
+                m_words << command.section(whitespace, 5);
             } else {
-                m_words << command.section(whitespace, 3);
+                m_words << command.section(whitespace, 4);
             }
             return;
-        }
-        if (m_words[0] == "set-prop" &&
-            m_words.length() >= 3 && m_words[2] == "description") {
+        } else if (command.startsWith("set-prop ") && command.contains(" description ")) {
             return;
         }
     }

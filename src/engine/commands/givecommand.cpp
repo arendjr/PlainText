@@ -56,6 +56,7 @@ void GiveCommand::execute(const QString &command) {
     }
 
     takeWord("to", IfNotLast);
+    takeWord("the", IfNotLast);
 
     GameObjectPtrList recipients = takeObjects(currentArea()->characters());
     if (!requireSome(recipients, "That recipient is not here.")) {
@@ -77,25 +78,17 @@ void GiveCommand::execute(const QString &command) {
 
         description = word;
     } else {
-        if (items.length() == 1) {
-            if (!recipient->invokeTrigger("onreceive", player(), items[0])) {
-                return;
-            }
-        } else {
-            if (!recipient->invokeTrigger("onreceive", player(), items)) {
-                return;
-            }
-        }
-
         GameObjectPtrList givenItems;
         for (const GameObjectPtr &itemPtr : items) {
             Item *item = itemPtr.cast<Item *>();
-            if (recipient->inventoryWeight() + item->weight() <= recipient->maxInventoryWeight()) {
-                recipient->addInventoryItem(itemPtr);
-                givenItems << itemPtr;
-            } else {
+            if (recipient->inventoryWeight() + item->weight() > recipient->maxInventoryWeight()) {
                 send(QString("%1 is too heavy for %2.")
                      .arg(item->definiteName(player()->inventory(), Capitalized), recipientName));
+            } else if (!recipient->invokeTrigger("onreceive", player(), itemPtr)) {
+                continue;
+            } else {
+                recipient->addInventoryItem(itemPtr);
+                givenItems << itemPtr;
             }
         }
 

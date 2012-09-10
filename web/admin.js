@@ -6,9 +6,7 @@
     editScreen.textarea = element("#edit-field");
     editScreen.show = function(value) {
         this.style.display = "block";
-        if (value) {
-            this.textarea.value = value.trimmed();
-        }
+        this.textarea.value = (value !== undefined ? value.trimmed() : "");
         this.textarea.focus();
     };
     editScreen.hide = function() {

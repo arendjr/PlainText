@@ -2,6 +2,7 @@
   "name": "Siobhan",
   "description": "O'Malley's daughter Siobhan looks like a bit of a joke amongst the town folk, but she pulls the best beer in town.",
   "plural": "Siobhans",
+  "indefiniteArticle": "",
   "portable": false,
   "weight": 0,
   "cost": 0,

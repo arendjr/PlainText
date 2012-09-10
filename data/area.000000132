@@ -1,6 +1,5 @@
 {
   "name": "Main Street",
   "description": "The houses in this part of Main Street are simple, yet large and in good condition. Clearly, the people living here are not among the poorest folks of town.",
-  "exits": [ "exit:134", "exit:135" ],
-  "items": [ "item:235" ]
+  "exits": [ "exit:134", "exit:135" ]
 }

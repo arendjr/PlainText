@@ -153,10 +153,12 @@ CommandInterpreter::~CommandInterpreter() {
 
 void CommandInterpreter::execute(const QString &command) {
 
+    static QRegExp whitespace("\\s+");
+
     try {
         LogUtil::logCommand(m_player->name(), command);
 
-        QStringList words = command.trimmed().split(QRegExp("\\s+"));
+        QStringList words = command.trimmed().split(whitespace);
         QString commandName = words[0].toLower();
         if (commandName.isEmpty()) {
             return;
