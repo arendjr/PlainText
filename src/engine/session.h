@@ -40,6 +40,8 @@ class Session : public QObject {
 
         Player *player() const { return m_player; }
 
+        QStringList commandNames() const;
+
         void processSignIn(const QString &data);
 
     public slots:

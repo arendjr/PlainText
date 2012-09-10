@@ -21,6 +21,14 @@
 
 #define MCCP "\x56"
 
+#define MSDP             "\x45"
+#define MSDP_VAR         "\x01"
+#define MSDP_VAL         "\x02"
+#define MSDP_TABLE_OPEN  "\x03"
+#define MSDP_TABLE_CLOSE "\x04"
+#define MSDP_ARRAY_OPEN  "\x05"
+#define MSDP_ARRAY_CLOSE "\x06"
+
 #define MSSP     "\x46"
 #define MSSP_VAR "\x01"
 #define MSSP_VAL "\x02"
@@ -61,10 +69,13 @@ void TelnetServer::onClientConnected() {
     session->open();
 
     socket->write(IAC WILL MCCP
+                  IAC WILL MSDP
                   IAC WILL MSSP);
 
     socket->setProperty("session", QVariant::fromValue(session));
     socket->setProperty("compressor", QVariant::fromValue((QtIOCompressor *) nullptr));
+    socket->setProperty("msdp", false);
+    socket->setProperty("msdpSent", false);
 
     m_clients << socket;
 }
@@ -83,54 +94,40 @@ void TelnetServer::onReadyRead() {
         if (buffer[i] == '\n') {
             if (i > 0) {
                 Session *session = socket->property("session").value<Session *>();
-                session->onUserInput(buffer.left(i));
+                session->onUserInput(buffer.left(buffer[i - 1] == '\r' ? i - 1 : i));
             }
 
             buffer.remove(0, i + 1);
             i--;
-        } else {
-            if (i == buffer.length() - 1) {
-                break;
-            }
-
-            if (buffer[i] == '\r' && buffer[i + 1] == '\n') {
-                if (i > 0) {
-                    Session *session = socket->property("session").value<Session *>();
-                    session->onUserInput(buffer.left(i));
-                }
-
-                buffer.remove(0, i + 2);
-                i--;
-            } else if (buffer[i] == BYTE(IAC)) {
-                int length;
-                switch (buffer[i + 1]) {
-                    case BYTE(IAC):
-                        buffer.remove(i, 1);
-                        break;
-                    case BYTE(SB):
-                        length = buffer.indexOf(IAC SE) - i + 2;
-                        if (length > 1) {
-                            handleCommand(socket, buffer.mid(i, length));
-                            buffer.remove(i, length);
-                            i--;
-                        }
-                        break;
-                    case BYTE(WILL):
-                    case BYTE(WONT):
-                    case BYTE(DO):
-                    case BYTE(DONT):
-                        if (i < buffer.length() - 2) {
-                            handleCommand(socket, buffer.mid(i, 3));
-                            buffer.remove(i, 3);
-                            i--;
-                        }
-                        break;
-                    default:
-                        handleCommand(socket, buffer.mid(i, 2));
-                        buffer.remove(i, 2);
+        } else if (i < buffer.length() - 1 && buffer[i] == BYTE(IAC)) {
+            int length;
+            switch (buffer[i + 1]) {
+                case BYTE(IAC):
+                    buffer.remove(i, 1);
+                    break;
+                case BYTE(SB):
+                    length = buffer.indexOf(IAC SE) - i + 2;
+                    if (length > 1) {
+                        handleCommand(socket, buffer.mid(i, length));
+                        buffer.remove(i, length);
                         i--;
-                        break;
-                }
+                    }
+                    break;
+                case BYTE(WILL):
+                case BYTE(WONT):
+                case BYTE(DO):
+                case BYTE(DONT):
+                    if (i < buffer.length() - 2) {
+                        handleCommand(socket, buffer.mid(i, 3));
+                        buffer.remove(i, 3);
+                        i--;
+                    }
+                    break;
+                default:
+                    handleCommand(socket, buffer.mid(i, 2));
+                    buffer.remove(i, 2);
+                    i--;
+                    break;
             }
         }
     }
@@ -172,7 +169,15 @@ void TelnetServer::onSessionOutput(QString data) {
         Player *player = session->player();
         Q_ASSERT(player);
 
-        write(socket, QString("(%1H) ").arg(player->hp()).toUtf8());
+        if (socket->property("msdp").toBool()) {
+            if (!socket->property("msdpSent").toBool()) {
+                sendMSDP(socket, player);
+                socket->setProperty("msdpSent", true);
+            }
+            sendMSDPUpdate(socket, player);
+        } else {
+            write(socket, QString("(%1H %2M) ").arg(player->hp()).arg(player->mp()).toUtf8());
+        }
     }
 }
 
@@ -181,11 +186,13 @@ void TelnetServer::handleCommand(QTcpSocket *socket, const QByteArray &command) 
     switch (command[1]) {
         case BYTE(DO):
             if (command[2] == BYTE(MCCP)) {
-                qDebug() << "Enabling compression...";
                 write(socket, IAC SB MCCP IAC SE);
                 QtIOCompressor *compressor = new QtIOCompressor(socket);
                 compressor->open(QIODevice::WriteOnly);
                 socket->setProperty("compressor", QVariant::fromValue(compressor));
+            } else if (command[2] == BYTE(MSDP)) {
+                qDebug() << "Enabling MSDP...";
+                socket->setProperty("msdp", true);
             } else if (command[2] == BYTE(MSSP)) {
                 sendMSSP(socket);
             }
@@ -199,6 +206,14 @@ void TelnetServer::handleCommand(QTcpSocket *socket, const QByteArray &command) 
                     compressor = nullptr;
                     socket->setProperty("compressor", QVariant::fromValue(compressor));
                 }
+            } else if (command[2] == BYTE(MSDP)) {
+                socket->setProperty("msdp", false);
+                socket->setProperty("msdpSent", false);
+            }
+            break;
+        case BYTE(SB):
+            if (command == IAC SB MSDP MSDP_VAR "LIST" MSDP_VAL "COMMANDS" IAC SE) {
+                sendMSDPCommands(socket);
             }
             break;
         default:
@@ -233,7 +248,7 @@ void TelnetServer::sendMSSP(QTcpSocket *socket) {
                   MSSP_VAR "GMCP" MSSP_VAL "0"
                   MSSP_VAR "MCCP" MSSP_VAL "1"
                   MSSP_VAR "MCP" MSSP_VAL "0"
-                  MSSP_VAR "MSDP" MSSP_VAL "0"
+                  MSSP_VAR "MSDP" MSSP_VAL "1"
                   MSSP_VAR "MSP" MSSP_VAL "0"
                   MSSP_VAR "MXP" MSSP_VAL "0"
                   MSSP_VAR "PUEBLO" MSSP_VAL "0"
@@ -241,6 +256,46 @@ void TelnetServer::sendMSSP(QTcpSocket *socket) {
                   MSSP_VAR "VT100" MSSP_VAL "0"
                   MSSP_VAR "XTERM 256 COLORS" MSSP_VAL "0"
                   IAC SE);
+}
+
+void TelnetServer::sendMSDP(QTcpSocket *socket, Player *player) {
+
+    QByteArray name = player->name().toUtf8();
+    QByteArray serverId = m_realm->name().toUtf8();
+
+    write(socket, IAC SB MSDP MSDP_VAR "ACCOUNT_NAME" MSDP_VAL + name + IAC SE
+                  IAC SB MSDP MSDP_VAR "CHARACTER_NAME" MSDP_VAL + name + IAC SE
+                  IAC SB MSDP MSDP_VAR "SERVER_ID" MSDP_VAL + serverId + IAC SE);
+}
+
+void TelnetServer::sendMSDPUpdate(QTcpSocket *socket, Player *player) {
+
+    QByteArray health = QByteArray::number(player->hp());
+    QByteArray healthMax = QByteArray::number(player->maxHp());
+    QByteArray mana = QByteArray::number(player->mp());
+    QByteArray manaMax = QByteArray::number(player->maxMp());
+    QByteArray money = QByteArray::number(player->gold());
+
+    write(socket, IAC SB MSDP MSDP_VAR "HEALTH" MSDP_VAL + health + IAC SE
+                  IAC SB MSDP MSDP_VAR "HEALTH_MAX" MSDP_VAL + healthMax + IAC SE
+                  IAC SB MSDP MSDP_VAR "MANA" MSDP_VAL + mana + IAC SE
+                  IAC SB MSDP MSDP_VAR "MANA_MAX" MSDP_VAL + manaMax + IAC SE
+                  IAC SB MSDP MSDP_VAR "MONEY" MSDP_VAL + money + IAC SE);
+}
+
+void TelnetServer::sendMSDPCommands(QTcpSocket *socket) {
+
+    Session *session = socket->property("session").value<Session *>();
+
+    QByteArray commands = MSDP_ARRAY_OPEN;
+    for (const QString &commandName : session->commandNames()) {
+        if (!commandName.startsWith("api-")) {
+            commands += MSDP_VAL + commandName;
+        }
+    }
+    commands += MSDP_ARRAY_CLOSE;
+
+    write(socket, IAC SB MSDP MSDP_VAR "COMMANDS" MSDP_VAL + commands + IAC SE);
 }
 
 void TelnetServer::write(QTcpSocket *socket, const QByteArray &data) {

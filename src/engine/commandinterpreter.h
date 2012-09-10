@@ -3,6 +3,7 @@
 
 #include <QMap>
 #include <QObject>
+#include <QStringList>
 
 
 class Player;
@@ -17,6 +18,8 @@ class CommandInterpreter : public QObject {
         virtual ~CommandInterpreter();
 
         void execute(const QString &command);
+
+        QStringList commandNames() const { return m_commands.keys(); }
 
     signals:
         void quit();

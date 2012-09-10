@@ -73,6 +73,11 @@ void Session::open() {
     askForUserName();
 }
 
+QStringList Session::commandNames() const {
+
+    return m_interpreter ? m_interpreter->commandNames() : QStringList();
+}
+
 void Session::processSignIn(const QString &data) {
 
     if (m_signInStage == SignedIn) {
@@ -357,15 +362,15 @@ void Session::askForSignupPassword() {
 void Session::processSignupPassword(const QString &input) {
 
     if (input.length() < 6) {
-        write(Util::colorize("Please choose a password of at least 6 characters.\n", Maroon));
+        write(Util::colorize("Please choose a password of at least 6 characters.\n", Red));
         return;
     }
     if (input.toLower() == m_signUpData->userName.toLower()) {
-        write(Util::colorize("Your password and your username may not be the same.\n", Maroon));
+        write(Util::colorize("Your password and your username may not be the same.\n", Red));
         return;
     }
     if (input == "123456" || input == "654321") {
-        write(Util::colorize("Sorry, that password is too simple.\n", Maroon));
+        write(Util::colorize("Sorry, that password is too simple.\n", Red));
         return;
     }
     m_signUpData->password = input;
@@ -386,7 +391,7 @@ void Session::processSignupPasswordConfirmation(const QString &input) {
         write(Util::colorize("Password confirmed.\n", Green));
         setSignInStage(AskingRace);
     } else {
-        write(Util::colorize("Passwords don't match.\n", Maroon));
+        write(Util::colorize("Passwords don't match.\n", Red));
         setSignInStage(AskingSignupPassword);
     }
 }
@@ -639,7 +644,7 @@ void Session::processExtraStats(const QString &answer) {
         stats.faith = qMax(attributes[barbarian ? 4 : 5].toInt(), 0);
 
         if (stats.total() != 9) {
-            write(Util::colorize("\nThe total of attributes should be 9.\n", Maroon));
+            write(Util::colorize("\nThe total of attributes should be 9.\n", Red));
             return;
         }
 

@@ -786,7 +786,7 @@ void Character::kill(const GameObjectPtr &characterPtr) {
         switch (qrand() % 3) {
             case 0:
                 character->send(QString("%1 deals you a sweeping punch, causing %2 damage.")
-                                .arg(myName).arg(damage), Maroon);
+                                .arg(myName).arg(damage), Red);
                 send(QString("You deal a sweeping punch to %1, causing %2 damage.")
                      .arg(enemyName).arg(damage), Teal);
                 others.send(QString("%1 deals a sweeping punch to %2.").arg(myName, enemyName),
@@ -794,14 +794,14 @@ void Character::kill(const GameObjectPtr &characterPtr) {
                 break;
             case 1:
                 character->send(QString("%1 hits you on the jaw for %2 damage.")
-                                .arg(myName).arg(damage), Maroon);
+                                .arg(myName).arg(damage), Red);
                 send(QString("You hit %1 on the jaw for %2 damage.").arg(enemyName).arg(damage),
                      Teal);
                 others.send(QString("%1 hits %2 on the jaw.").arg(myName, enemyName), Teal);
                 break;
             case 2:
                 character->send(QString("%1 kicks you for %2 damage.").arg(myName).arg(damage),
-                                Maroon);
+                                Red);
                 send(QString("You kick %1 for %2 damage.").arg(enemyName).arg(damage), Teal);
                 others.send(QString("%1 kicks %2.").arg(myName, enemyName), Teal);
                 break;
@@ -853,7 +853,7 @@ void Character::die(const GameObjectPtr &attacker) {
         return;
     }
 
-    send("You died.", Maroon);
+    send("You died.", Red);
 
     Area *area = currentArea().cast<Area *>();
 

@@ -7,6 +7,7 @@
 class QTcpServer;
 class QTcpSocket;
 
+class Player;
 class Realm;
 
 class TelnetServer : public QObject {
@@ -31,7 +32,12 @@ class TelnetServer : public QObject {
         QList<QTcpSocket *> m_clients;
 
         void handleCommand(QTcpSocket *socket, const QByteArray &command);
+
         void sendMSSP(QTcpSocket *socket);
+
+        void sendMSDP(QTcpSocket *socket, Player *player);
+        void sendMSDPUpdate(QTcpSocket *socket, Player *player);
+        void sendMSDPCommands(QTcpSocket *socket);
 
         static void write(QTcpSocket *socket, const QByteArray &data);
 };
