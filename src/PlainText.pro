@@ -104,6 +104,7 @@ SOURCES += \
     engine/commands/admin/addweaponcommand.cpp \
     engine/commands/admin/admincommand.cpp \
     engine/commands/admin/copyitemcommand.cpp \
+    engine/commands/admin/copytriggerscommand.cpp \
     engine/commands/admin/execscriptcommand.cpp \
     engine/commands/admin/getpropcommand.cpp \
     engine/commands/admin/gettriggercommand.cpp \
@@ -220,6 +221,7 @@ HEADERS += \
     engine/commands/admin/addweaponcommand.h \
     engine/commands/admin/admincommand.h \
     engine/commands/admin/copyitemcommand.h \
+    engine/commands/admin/copytriggerscommand.h \
     engine/commands/admin/execscriptcommand.h \
     engine/commands/admin/getpropcommand.h \
     engine/commands/admin/gettriggercommand.h \

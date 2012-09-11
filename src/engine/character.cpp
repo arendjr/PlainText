@@ -39,9 +39,6 @@ Character::Character(Realm *realm, uint id, Options options) :
 Character::Character(Realm *realm, const char *objectType, uint id, Options options) :
     super(realm, objectType, id, options),
     m_gender("male"),
-    m_subjectPronoun("he"),
-    m_objectPronoun("him"),
-    m_possessiveAdjective("his"),
     m_respawnTime(0),
     m_respawnTimeVariation(0),
     m_respawnTimerId(0),
@@ -166,18 +163,29 @@ void Character::setGender(const QString &gender) {
     if (m_gender != gender) {
         m_gender = gender;
 
-        if (m_gender == "male") {
-            m_subjectPronoun = "he";
-            m_objectPronoun = "him";
-            m_possessiveAdjective = "his";
-        } else {
-            m_subjectPronoun = "she";
-            m_objectPronoun = "her";
-            m_possessiveAdjective = "her";
-        }
-
         setModified();
     }
+}
+
+QString Character::subjectPronoun() const {
+
+    return m_race.isNull() || m_race->name() != "animal" ?
+           m_gender == "male" ?
+           "he" : "she" : "it";
+}
+
+QString Character::objectPronoun() const {
+
+    return m_race.isNull() || m_race->name() != "animal" ?
+           m_gender == "male" ?
+           "him" : "her" : "it";
+}
+
+QString Character::possessiveAdjective() const {
+
+    return m_race.isNull() || m_race->name() != "animal" ?
+           m_gender == "male" ?
+           "his" : "her" : "its";
 }
 
 void Character::setHeight(int height) {

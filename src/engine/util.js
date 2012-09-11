@@ -4,6 +4,11 @@ Array.prototype.contains = function(element) {
     return this.indexOf(element) > -1;
 };
 
+Array.prototype.containsAny = function(array) {
+
+    return this.findFirstAmong(array) !== null;
+};
+
 Array.prototype.isEmpty = function() {
 
     return this.length === 0;
@@ -18,6 +23,13 @@ Array.prototype.named = function(name) {
         }
     }
     return undefined;
+}
+
+Array.prototype.pushIfNecessary = function(element) {
+
+    if (!this.contains(element)) {
+        this.push(element);
+    }
 }
 
 Array.prototype.send = function(message) {

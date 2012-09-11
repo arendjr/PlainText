@@ -51,13 +51,13 @@ class Character : public StatsItem {
         void setGender(const QString &gender);
         Q_PROPERTY(QString gender READ gender WRITE setGender)
 
-        const QString &subjectPronoun() const { return m_subjectPronoun; }
+        QString subjectPronoun() const;
         Q_PROPERTY(QString subjectPronoun READ subjectPronoun STORED false)
 
-        const QString &objectPronoun() const { return m_objectPronoun; }
+        QString objectPronoun() const;
         Q_PROPERTY(QString objectPronoun READ objectPronoun STORED false)
 
-        const QString &possessiveAdjective() const { return m_possessiveAdjective; }
+        QString possessiveAdjective() const;
         Q_PROPERTY(QString possessiveAdjective READ possessiveAdjective STORED false)
 
         int respawnTime() const { return m_respawnTime; }
@@ -175,9 +175,6 @@ class Character : public StatsItem {
         GameObjectPtr m_race;
         GameObjectPtr m_class;
         QString m_gender;
-        QString m_subjectPronoun;
-        QString m_objectPronoun;
-        QString m_possessiveAdjective;
 
         int m_respawnTime;
         int m_respawnTimeVariation;

@@ -1,6 +1,5 @@
 {
   "name": "Butcher's Stall",
   "description": "",
-  "exits": [ "exit:90" ],
-  "items": [ "item:1202" ]
+  "exits": [ "exit:90" ]
 }

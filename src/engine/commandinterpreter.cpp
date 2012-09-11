@@ -46,6 +46,7 @@
 #include "commands/admin/addshieldcommand.h"
 #include "commands/admin/addweaponcommand.h"
 #include "commands/admin/copyitemcommand.h"
+#include "commands/admin/copytriggerscommand.h"
 #include "commands/admin/execscriptcommand.h"
 #include "commands/admin/getpropcommand.h"
 #include "commands/admin/gettriggercommand.h"
@@ -119,6 +120,7 @@ CommandInterpreter::CommandInterpreter(Player *player) :
         m_commands.insert("add-shield", new AddShieldCommand(player, this));
         m_commands.insert("add-weapon", new AddWeaponCommand(player, this));
         m_commands.insert("copy-item", new CopyItemCommand(player, this));
+        m_commands.insert("copy-triggers", new CopyTriggersCommand(player, this));
         m_commands.insert("exec-script", new ExecScriptCommand(player, this));
         m_commands.insert("get-prop", new GetPropCommand(player, this));
         m_commands.insert("get-trigger", new GetTriggerCommand(player, this));

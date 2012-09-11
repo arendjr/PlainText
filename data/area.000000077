@@ -1,5 +1,5 @@
 {
   "name": "Fruit Stall",
-  "exits": [ "exit:87" ],
-  "items": [ "item:1184" ]
+  "description": "",
+  "exits": [ "exit:87" ]
 }
