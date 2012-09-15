@@ -5,16 +5,48 @@
     var editScreen = element(".edit-screen");
     editScreen.textarea = element("#edit-field");
     editScreen.show = function(value) {
+        if (value.trimmed().startsWith("(function")) {
+            this.editor.setOption("mode", "javascript");
+        } else {
+            this.editor.setOption("mode", "null");
+        }
+
         this.style.display = "block";
-        this.textarea.value = (value !== undefined ? value.trimmed() : "");
-        this.textarea.focus();
+        this.editor.setValue(value !== undefined ? value.trimmed() : "");
+        this.editor.focus();
     };
     editScreen.hide = function() {
-        this.textarea.selectionStart = 0;
-        this.textarea.selectionEnd = 0;
         this.style.display = "none";
         self.commandInput.focus();
     };
+
+    function loadEditor() {
+        loadScript("codemirror/codemirror.js");
+        loadStyle("codemirror/codemirror.css");
+
+        function initEditor() {
+            if (!window.CodeMirror) {
+                setTimeout(initEditor, 50);
+                return;
+            }
+
+            loadScript("codemirror/javascript.js");
+            loadScript("codemirror/util/simple-hint.js");
+            loadScript("codemirror/util/javascript-hint.js");
+            loadStyle("codemirror/util/simple-hint.css");
+
+            editScreen.editor = CodeMirror.fromTextArea(editScreen.textarea, {
+                lineNumbers: true,
+                matchBrackets: true,
+                tabSize: 4,
+                indentWithTabs: false
+            });
+        }
+
+        setTimeout(initEditor, 50);
+    }
+
+    loadEditor();
 
     var triggers = {};
     self.sendApiCall("triggers1", "triggers-list", function(data) {
@@ -124,7 +156,7 @@
         editScreen.hide();
     };
     element("#edit-submit-button").onclick = function() {
-        var value = editScreen.textarea.value;
+        var value = editScreen.editor.getValue();
         if (saveCommand.startsWith("set-prop")) {
             value = value.replace(/\n/g, "\\n");
         } else if (saveCommand.startsWith("exec-script")) {
@@ -143,46 +175,4 @@
             editScreen.hide();
         }
     };
-
-    editScreen.textarea.onkeydown = function(event) {
-        if (event.keyCode === keys.KEY_TAB) {
-            var value = this.value;
-            var start = this.selectionStart;
-            var end = this.selectionEnd;
-
-            var content;
-            var sizeDiff;
-            if (start === end) {
-                content = "    ";
-            } else {
-                content = value.substring(start, end);
-                sizeDiff = -content.length;
-                if (event.shiftKey) {
-                    content = content.replace(/\n    /g, "\n");
-                    if (content.substr(0, 4) === "    ") {
-                        content = content.substr(4);
-                    }
-                } else {
-                    content = "    " + content.replace(/\n/g, "\n    ");
-                    if (content.substr(-5) === "\n    ") {
-                        content = content.substr(0, content.length - 4);
-                    }
-                }
-                sizeDiff += content.length;
-            }
-
-            this.value = value.substr(0, start) + content + value.substr(end);
-
-            if (start === end) {
-                this.selectionStart = start + 4;
-                this.selectionEnd = start + 4;
-            } else {
-                this.selectionStart = start;
-                this.selectionEnd = end + sizeDiff;
-            }
-
-            return false;
-        }
-    };
-
 })();

@@ -46,7 +46,8 @@ void HttpServer::onReadyRead() {
                 return;
             }
 
-            if (!tokens[1].startsWith('/') || tokens[1].count('/') != 1) {
+            QString path = tokens[1];
+            if (!path.startsWith('/') || path.contains("/.")) {
                 os << "HTTP/1.0 403 Forbidden\r\n"
                       "Content-Type: text/html; charset=\"utf-8\"\r\n"
                       "\r\n"
@@ -55,7 +56,6 @@ void HttpServer::onReadyRead() {
                 return;
             }
 
-            QString path = tokens[1];
             if (path.contains('?')) {
                 path = path.section('?', 0, 0);
             }

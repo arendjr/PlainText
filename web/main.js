@@ -60,6 +60,14 @@ function loadScript(fileName) {
     document.head.appendChild(script);
 }
 
+function loadStyle(fileName) {
+
+    var link = document.createElement("link");
+    link.setAttribute("rel", "stylesheet");
+    link.setAttribute("href", fileName);
+    document.head.appendChild(link);
+}
+
 function getQueryParam(name, defaultValue) {
 
     var params = window.location.search.substr(1).split("&");
