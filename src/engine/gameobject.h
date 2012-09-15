@@ -40,6 +40,7 @@ class GameObject : public QObject {
         Q_INVOKABLE bool isGroup() const;
         Q_INVOKABLE bool isPlayer() const;
         Q_INVOKABLE bool isRace() const;
+        Q_INVOKABLE bool isRealm() const;
         Q_INVOKABLE bool isShield() const;
         Q_INVOKABLE bool isWeapon() const;
         Q_INVOKABLE bool hasStats() const;
@@ -90,6 +91,11 @@ class GameObject : public QObject {
                            const QScriptValue &arg4 = QScriptValue());
         bool invokeTrigger(const QString &triggerName,
                            GameObject *arg1,
+                           const GameObjectPtr &arg2,
+                           const GameObjectPtrList &arg3,
+                           const QScriptValue &arg4 = QScriptValue());
+        bool invokeTrigger(const QString &triggerName,
+                           GameObject *arg1,
                            const QScriptValue &arg2 = QScriptValue(),
                            const QScriptValue &arg3 = QScriptValue(),
                            const QScriptValue &arg4 = QScriptValue());
@@ -104,7 +110,7 @@ class GameObject : public QObject {
                            const QScriptValue &arg3 = QScriptValue(),
                            const QScriptValue &arg4 = QScriptValue());
 
-        Q_INVOKABLE virtual void send(const QString &message, Color color = Silver) const;
+        Q_INVOKABLE virtual void send(const QString &message, int color = Silver) const;
 
         Q_INVOKABLE int setInterval(const QScriptValue &function, int delay);
         Q_INVOKABLE void clearInterval(int intervalId);

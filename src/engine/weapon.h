@@ -1,8 +1,6 @@
 #ifndef WEAPON_H
 #define WEAPON_H
 
-#include "characterstats.h"
-#include "combatmessage.h"
 #include "statsitem.h"
 
 
@@ -14,17 +12,12 @@ class Weapon : public StatsItem {
         Weapon(Realm *realm, uint id, Options options = NoOptions);
         virtual ~Weapon();
 
-        const CombatMessageList &hitMessages() const { return m_hitMessages; }
-        void setHitMessages(const CombatMessageList &hitMessages);
-        Q_PROPERTY(CombatMessageList hitMessages READ hitMessages WRITE setHitMessages)
-
-        const CombatMessageList &missMessages() const { return m_missMessages; }
-        void setMissMessages(const CombatMessageList &missMessages);
-        Q_PROPERTY(CombatMessageList missMessages READ missMessages WRITE setMissMessages)
+        const QString &category() const { return m_category; }
+        void setCategory(const QString &category);
+        Q_PROPERTY(QString category READ category WRITE setCategory)
 
     private:
-        CombatMessageList m_hitMessages;
-        CombatMessageList m_missMessages;
+        QString m_category;
 };
 
 #endif // WEAPON_H

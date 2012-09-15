@@ -12,19 +12,10 @@ Weapon::Weapon(Realm *realm, uint id, Options options) :
 Weapon::~Weapon() {
 }
 
-void Weapon::setHitMessages(const CombatMessageList &hitMessages) {
+void Weapon::setCategory(const QString &category) {
 
-    if (m_hitMessages != hitMessages) {
-        m_hitMessages = hitMessages;
-
-        setModified();
-    }
-}
-
-void Weapon::setMissMessages(const CombatMessageList &missMessages) {
-
-    if (m_missMessages != missMessages) {
-        m_missMessages = missMessages;
+    if (m_category != category) {
+        m_category = category;
 
         setModified();
     }

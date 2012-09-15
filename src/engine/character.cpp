@@ -777,72 +777,25 @@ void Character::kill(const GameObjectPtr &characterPtr) {
     others.removeOne(this);
     others.removeOne(characterPtr);
 
-    QString myName = definiteName(area->characters(), Capitalized);
-    QString enemyName = character->definiteName(area->characters());
-
     CharacterStats myStats = totalStats();
     CharacterStats enemyStats = character->totalStats();
 
     qreal hitChance = 100 * ((80 + myStats.dexterity) / 160.0) *
                             ((100 - enemyStats.dexterity) / 100.0);
+    int damage = 0;
     if (qrand() % 100 < hitChance) {
-        int damage = qrand() % (int) (20.0 * (myStats.strength / 40.0) *
-                                             ((80 - enemyStats.endurance) / 80.0)) + 1;
+        damage = qrand() % (int) (20.0 * (myStats.strength / 40.0) *
+                                          ((80 - enemyStats.endurance) / 80.0)) + 1;
 
         character->adjustHp(-damage);
+    }
 
-        switch (qrand() % 3) {
-            case 0:
-                character->send(QString("%1 deals you a sweeping punch, causing %2 damage.")
-                                .arg(myName).arg(damage), Red);
-                send(QString("You deal a sweeping punch to %1, causing %2 damage.")
-                     .arg(enemyName).arg(damage), Teal);
-                others.send(QString("%1 deals a sweeping punch to %2.").arg(myName, enemyName),
-                            Teal);
-                break;
-            case 1:
-                character->send(QString("%1 hits you on the jaw for %2 damage.")
-                                .arg(myName).arg(damage), Red);
-                send(QString("You hit %1 on the jaw for %2 damage.").arg(enemyName).arg(damage),
-                     Teal);
-                others.send(QString("%1 hits %2 on the jaw.").arg(myName, enemyName), Teal);
-                break;
-            case 2:
-                character->send(QString("%1 kicks you for %2 damage.").arg(myName).arg(damage),
-                                Red);
-                send(QString("You kick %1 for %2 damage.").arg(enemyName).arg(damage), Teal);
-                others.send(QString("%1 kicks %2.").arg(myName, enemyName), Teal);
-                break;
-        }
-
-        if (character->hp() == 0) {
-            character->die(this);
-        }
-    } else {
-        switch (qrand() % 3) {
-            case 0:
-                character->send(QString("%1 tries to punch you, but misses.").arg(myName), Green);
-                send(QString("You try to punch %1, but miss.").arg(enemyName), Teal);
-                others.send(QString("%1 tries to punch %2, but misses.")
-                                 .arg(myName, enemyName), Teal);
-                break;
-            case 1:
-                character->send(QString("%1 tries to grab you, but you shake %2 off.")
-                                .arg(myName, objectPronoun()), Green);
-                send(QString("You try to grab %1, but %2 shakes you off.")
-                     .arg(enemyName, character->subjectPronoun()), Teal);
-                others.send(QString("%1 tries to grab %2, but gets shaken off.")
-                            .arg(myName, enemyName), Teal);
-                break;
-            case 2:
-                character->send(QString("%1 kicks at you, but fails to hurt you.")
-                                .arg(myName), Green);
-                send(QString("You kick at %1, but fail to hurt %2.")
-                     .arg(enemyName, character->objectPronoun()), Teal);
-                others.send(QString("%1 kicks at %2, but fails to hurt %3.")
-                            .arg(myName, enemyName, character->objectPronoun()), Teal);
-                break;
-        }
+    bool invoked = false;
+    if (area->hasTrigger("oncombat")) {
+        invoked = area->invokeTrigger("oncombat", this, characterPtr, others, damage);
+    }
+    if (!invoked) {
+        realm()->invokeTrigger("oncombat", this, characterPtr, others, damage);
     }
 
     stun(4000 - (25 * myStats.dexterity));
@@ -852,6 +805,10 @@ void Character::kill(const GameObjectPtr &characterPtr) {
     others.removeOne(characterPtr);
     for (const GameObjectPtr &other : others) {
         other->invokeTrigger("oncharacterattacked", this, characterPtr);
+    }
+
+    if (damage > 0 && character->hp() == 0) {
+        character->die(this);
     }
 }
 

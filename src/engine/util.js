@@ -1,4 +1,23 @@
 
+var Color = {
+    White: 0,
+    Silver: 1,
+    Gray: 2,
+    Black: 3,
+    Red: 4,
+    Maroon: 5,
+    Yellow: 6,
+    Olive: 7,
+    Lime: 8,
+    Green: 9,
+    Aqua: 10,
+    Teal: 11,
+    Blue: 12,
+    Navy: 13,
+    Fuchsia: 14,
+    Purple: 15
+};
+
 Array.prototype.contains = function(element) {
 
     return this.indexOf(element) > -1;
@@ -105,6 +124,15 @@ String.prototype.highlighted = function() {
 String.prototype.isEmpty = function() {
 
     return this.length === 0;
+};
+
+String.prototype.replaceAll = function(before, after) {
+
+    var result = this;
+    while (result.contains(before)) {
+        result = result.replace(before, after);
+    }
+    return result;
 };
 
 String.prototype.startsWith = function(string) {

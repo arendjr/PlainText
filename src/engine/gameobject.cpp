@@ -106,6 +106,11 @@ bool GameObject::isRace() const {
     return strcmp(m_objectType, "race") == 0;
 }
 
+bool GameObject::isRealm() const {
+
+    return strcmp(m_objectType, "realm") == 0;
+}
+
 bool GameObject::isShield() const {
 
     return strcmp(m_objectType, "shield") == 0;
@@ -281,6 +286,16 @@ bool GameObject::invokeTrigger(const QString &triggerName,
 }
 
 bool GameObject::invokeTrigger(const QString &triggerName,
+                               GameObject *arg1, const GameObjectPtr &arg2,
+                               const GameObjectPtrList &arg3, const QScriptValue &arg4) {
+
+    ScriptEngine *engine = m_realm->scriptEngine();
+    return invokeTrigger(triggerName,
+                         engine->toScriptValue(arg1), engine->toScriptValue(arg2),
+                         engine->toScriptValue(arg3), arg4);
+}
+
+bool GameObject::invokeTrigger(const QString &triggerName,
                                GameObject *arg1, const QScriptValue &arg2,
                                const QScriptValue &arg3, const QScriptValue &arg4) {
 
@@ -305,7 +320,7 @@ bool GameObject::invokeTrigger(const QString &triggerName,
     return invokeTrigger(triggerName, engine->toScriptValue(arg1), arg2, arg3, arg4);
 }
 
-void GameObject::send(const QString &message, Color color) const {
+void GameObject::send(const QString &message, int color) const {
 
     Q_UNUSED(message)
     Q_UNUSED(color)

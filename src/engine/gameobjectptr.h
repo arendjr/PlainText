@@ -224,7 +224,7 @@ class GameObjectPtrList {
 
         GameObjectPtrList copyUnresolved() const;
 
-        void send(const QString &message, Color color = Silver) const;
+        void send(const QString &message, int color = Silver) const;
 
         QString joinFancy(Options options = NoOptions) const;
 

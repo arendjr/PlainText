@@ -23,6 +23,8 @@ Realm::Realm(Options options) :
     if (~options & Copy) {
         s_instance = this;
     }
+
+    setAutoDelete(false);
 }
 
 Realm::~Realm() {

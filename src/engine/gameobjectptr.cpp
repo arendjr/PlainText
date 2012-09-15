@@ -1,6 +1,7 @@
 #include "gameobjectptr.h"
 
 #include <algorithm>
+#include <climits>
 #include <cstring>
 #include <utility>
 
@@ -28,7 +29,7 @@ GameObjectPtr::GameObjectPtr(GameObject *gameObject) :
     if (gameObject) {
         m_gameObject = gameObject;
         strcpy(m_objectType, gameObject->objectType());
-        m_id = gameObject->id();
+        m_id = gameObject->id() ? gameObject->id() : UINT_MAX;
         m_gameObject->registerPointer(this);
     }
 }
@@ -771,7 +772,7 @@ GameObjectPtrList GameObjectPtrList::copyUnresolved() const {
     return copy;
 }
 
-void GameObjectPtrList::send(const QString &message, Color color) const {
+void GameObjectPtrList::send(const QString &message, int color) const {
 
     for (int i = 0; i < m_size; i++) {
         m_items[i]->send(message, color);

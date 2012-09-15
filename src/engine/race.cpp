@@ -67,24 +67,6 @@ void Race::setStartingArea(const GameObjectPtr &startingArea) {
     }
 }
 
-void Race::setHitMessages(const CombatMessageList &hitMessages) {
-
-    if (m_hitMessages != hitMessages) {
-        m_hitMessages = hitMessages;
-
-        setModified();
-    }
-}
-
-void Race::setMissMessages(const CombatMessageList &missMessages) {
-
-    if (m_missMessages != missMessages) {
-        m_missMessages = missMessages;
-
-        setModified();
-    }
-}
-
 void Race::setPlayerSelectable(bool playerSelectable) {
 
     if (m_playerSelectable != playerSelectable) {

@@ -9,7 +9,7 @@
   "cost": 0,
   "stats": [8, 7, 7, 7, 7, 7],
   "height": 0,
-  "currentArea": "area:79",
+  "currentArea": "area:81",
   "race": "race:2",
   "characterClass": "class:147",
   "gender": "female",
@@ -19,7 +19,7 @@
   "maxHp": 14,
   "mp": 7,
   "maxMp": 7,
-  "gold": 10,
+  "gold": 5,
   "weapon": "0",
   "secondaryWeapon": "0",
   "shield": "0"

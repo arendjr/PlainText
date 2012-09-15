@@ -5,7 +5,6 @@
 #include <QStringList>
 
 #include "characterstats.h"
-#include "combatmessage.h"
 #include "gameobjectptr.h"
 #include "realm.h"
 #include "scriptfunctionmap.h"
@@ -59,12 +58,6 @@ QVariant ConversionUtil::fromVariant(QVariant::Type type, int userType, const QV
                 return QVariant::fromValue(functionMap);
             } else if (userType == QMetaType::type("CharacterStats")) {
                 return QVariant::fromValue(CharacterStats::fromVariantList(variant.toList()));
-            } else if (userType == QMetaType::type("CombatMessageList")) {
-                CombatMessageList messageList;
-                for (const QVariant &item : variant.toList()) {
-                    messageList << CombatMessage::fromVariantList(item.toList());
-                }
-                return QVariant::fromValue(messageList);
             }
             // fall-through
         default:
@@ -146,12 +139,6 @@ QString ConversionUtil::toJSON(const QVariant &variant, Options options) {
                 return stringList.isEmpty() ? QString() : "{ " + stringList.join(", ") + " }";
             } else if (variant.userType() == QMetaType::type("CharacterStats")) {
                 return variant.value<CharacterStats>().toString();
-            } else if (variant.userType() == QMetaType::type("CombatMessageList")) {
-                QStringList stringList;
-                for (const CombatMessage &message : variant.value<CombatMessageList>()) {
-                    stringList << message.toString();
-                }
-                return stringList.isEmpty() ? QString() : "[ " + stringList.join(", ") + " ]";
             }
             // fall-through
         default:

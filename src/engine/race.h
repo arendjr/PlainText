@@ -2,7 +2,6 @@
 #define RACE_H
 
 #include "characterstats.h"
-#include "combatmessage.h"
 #include "gameobject.h"
 #include "gameobjectptr.h"
 
@@ -39,14 +38,6 @@ class Race : public GameObject {
         void setStartingArea(const GameObjectPtr &startingArea);
         Q_PROPERTY(GameObjectPtr startingArea READ startingArea WRITE setStartingArea)
 
-        const CombatMessageList &hitMessages() const { return m_hitMessages; }
-        void setHitMessages(const CombatMessageList &hitMessages);
-        Q_PROPERTY(CombatMessageList hitMessages READ hitMessages WRITE setHitMessages)
-
-        const CombatMessageList &missMessages() const { return m_missMessages; }
-        void setMissMessages(const CombatMessageList &missMessages);
-        Q_PROPERTY(CombatMessageList missMessages READ missMessages WRITE setMissMessages)
-
         bool playerSelectable() const { return m_playerSelectable; }
         void setPlayerSelectable(bool playerSelectable);
         Q_PROPERTY(bool playerSelectable READ playerSelectable WRITE setPlayerSelectable)
@@ -60,9 +51,6 @@ class Race : public GameObject {
 
         GameObjectPtrList m_classes;
         GameObjectPtr m_startingArea;
-
-        CombatMessageList m_hitMessages;
-        CombatMessageList m_missMessages;
 
         bool m_playerSelectable;
 };

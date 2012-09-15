@@ -5,7 +5,6 @@
 #include <QMetaType>
 
 #include "characterstats.h"
-#include "combatmessage.h"
 #include "effect.h"
 #include "gameobject.h"
 #include "modifier.h"
@@ -23,8 +22,6 @@ ScriptEngine::ScriptEngine() :
 
     qScriptRegisterMetaType(&m_jsEngine, CharacterStats::toScriptValue,
                                          CharacterStats::fromScriptValue);
-    qScriptRegisterMetaType(&m_jsEngine, CombatMessage::toScriptValue,
-                                         CombatMessage::fromScriptValue);
     qScriptRegisterMetaType(&m_jsEngine, Effect::toScriptValue, Effect::fromScriptValue);
     qScriptRegisterMetaType(&m_jsEngine, GameObject::toScriptValue, GameObject::fromScriptValue);
     qScriptRegisterMetaType(&m_jsEngine, GameObjectPtr::toScriptValue,
@@ -35,7 +32,6 @@ ScriptEngine::ScriptEngine() :
     qScriptRegisterMetaType(&m_jsEngine, ScriptFunctionMap::toScriptValue,
                                          ScriptFunctionMap::fromScriptValue);
     qScriptRegisterSequenceMetaType<CharacterStatsList>(&m_jsEngine);
-    qScriptRegisterSequenceMetaType<CombatMessageList>(&m_jsEngine);
     qScriptRegisterSequenceMetaType<EffectList>(&m_jsEngine);
     qScriptRegisterSequenceMetaType<GameObjectPtrList>(&m_jsEngine);
     qScriptRegisterSequenceMetaType<ModifierList>(&m_jsEngine);
@@ -162,6 +158,15 @@ const QMap<QString, QString> &ScriptEngine::triggers() {
                         "when another character enters that area.");
         triggers.insert("onclose(activator : character) : bool",
                         "The onclose trigger is invoked on any item or exit when it's closed.");
+        triggers.insert("oncombat(attacker : character, defendant : character, observers : list, "
+                        "damage : integer) : bool",
+                        "This trigger is defined on the realm, and may be defined on individual "
+                        "areas. Its primary responsibility is generating the messages that are "
+                        "displayed during combat, but it may also provide special combat effects. "
+                        "If the area in which the combat takes place has this trigger defined, it "
+                        "is used instead of the generic trigger from the realm. For this trigger, "
+                        "the return value cannot be used to cancel the combat, but if an area's "
+                        "trigger returns false it will fall back to the realm's trigger.");
         triggers.insert("ondie(attacker : optional character) : bool",
                         "The ondie trigger is invoked on any character when it dies. When "
                         "attacker is omitted, the character died because of a non-combat cause "

@@ -69,7 +69,7 @@ void Player::setSession(Session *session) {
     }
 }
 
-void Player::send(const QString &_message, Color color) const {
+void Player::send(const QString &_message, int color) const {
 
     QString message;
     if (_message.endsWith("\n") ||
@@ -79,8 +79,8 @@ void Player::send(const QString &_message, Color color) const {
         message = _message + "\n";
     }
 
-    if (color != Silver) {
-        message = Util::colorize(message, color);
+    if ((Color) color != Silver) {
+        message = Util::colorize(message, (Color) color);
     }
 
     write(message);

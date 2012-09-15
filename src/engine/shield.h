@@ -1,8 +1,6 @@
 #ifndef SHIELD_H
 #define SHIELD_H
 
-#include "characterstats.h"
-#include "combatmessage.h"
 #include "statsitem.h"
 
 
@@ -14,12 +12,12 @@ class Shield : public StatsItem {
         Shield(Realm *realm, uint id, Options options = NoOptions);
         virtual ~Shield();
 
-        const CombatMessageList &deflectMessages() const { return m_deflectMessages; }
-        void setDeflectMessages(const CombatMessageList &deflectMessages);
-        Q_PROPERTY(CombatMessageList deflectMessages READ deflectMessages WRITE setDeflectMessages)
+        const QString &category() const { return m_category; }
+        void setCategory(const QString &category);
+        Q_PROPERTY(QString category READ category WRITE setCategory)
 
     private:
-        CombatMessageList m_deflectMessages;
+        QString m_category;
 };
 
 #endif // SHIELD_H

@@ -23,7 +23,7 @@ class Group : public GameObject {
         void setMembers(const GameObjectPtrList &members);
         Q_PROPERTY(GameObjectPtrList members READ members WRITE setMembers)
 
-        virtual void send(const QString &message, Color color = Silver) const;
+        virtual void send(const QString &message, int color = Silver) const;
 
     private:
         GameObjectPtr m_leader;

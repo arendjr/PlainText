@@ -12,10 +12,10 @@ Shield::Shield(Realm *realm, uint id, Options options) :
 Shield::~Shield() {
 }
 
-void Shield::setDeflectMessages(const CombatMessageList &deflectMessages) {
+void Shield::setCategory(const QString &category) {
 
-    if (m_deflectMessages != deflectMessages) {
-        m_deflectMessages = deflectMessages;
+    if (m_category != category) {
+        m_category = category;
 
         setModified();
     }

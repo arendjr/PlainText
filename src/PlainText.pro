@@ -36,7 +36,6 @@ SOURCES += \
     engine/character.cpp \
     engine/characterstats.cpp \
     engine/class.cpp \
-    engine/combatmessage.cpp \
     engine/commandinterpreter.cpp \
     engine/conversionutil.cpp \
     engine/diskutil.cpp \
@@ -152,7 +151,6 @@ HEADERS += \
     engine/character.h \
     engine/characterstats.h \
     engine/class.h \
-    engine/combatmessage.h \
     engine/commandinterpreter.h \
     engine/constants.h \
     engine/conversionutil.h \

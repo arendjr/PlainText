@@ -36,7 +36,7 @@ void Group::setMembers(const GameObjectPtrList &members) {
     }
 }
 
-void Group::send(const QString &message, Color color) const {
+void Group::send(const QString &message, int color) const {
 
     m_leader->send(message, color);
     for (const GameObjectPtr &member : m_members) {
