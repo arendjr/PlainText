@@ -5,7 +5,7 @@
     var editScreen = element(".edit-screen");
     editScreen.textarea = element("#edit-field");
     editScreen.show = function(value) {
-        if (value.trimmed().startsWith("(function")) {
+        if (value && value.trimmed().startsWith("(function")) {
             this.editor.setOption("mode", "javascript");
         } else {
             this.editor.setOption("mode", "null");
@@ -39,6 +39,7 @@
                 lineNumbers: true,
                 matchBrackets: true,
                 tabSize: 4,
+                indentUnit: 4,
                 indentWithTabs: false
             });
         }
