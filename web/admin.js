@@ -7,8 +7,10 @@
     editScreen.show = function(value) {
         if (value && value.trimmed().startsWith("(function")) {
             this.editor.setOption("mode", "javascript");
+            this.editor.setOption("lineWrapping", false);
         } else {
             this.editor.setOption("mode", "null");
+            this.editor.setOption("lineWrapping", true);
         }
 
         this.style.display = "block";
