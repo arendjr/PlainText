@@ -87,17 +87,12 @@
             mapEditor.style.display = "block";
             mapEditor.canvas = element(".map-editor .canvas");
 
-            var stage = new Kinetic.Stage({
+            mapEditor.stage = new Kinetic.Stage({
                 container: mapEditor.canvas,
                 width: mapEditor.canvas.clientWidth,
-                height: mapEditor.canvas.clientHeight
+                height: mapEditor.canvas.clientHeight,
+                draggable: true
             });
-
-            var layer = new Kinetic.Layer();
-
-            stage.add(layer);
-
-            mapEditor.mainLayer = layer;
 
             initMap();
         }
@@ -134,7 +129,13 @@
 
                     for (var i = 0; i < data.length; i++) {
                         var exit = data[i];
-                        map.exits[objectId(exit.id)] = exit;
+                        var destinationArea = map.areas[objectId(exit.destinationArea)];
+                        if (destinationArea) {
+                            exit.destinationArea = destinationArea;
+                            map.exits[objectId(exit.id)] = exit;
+                        } else {
+                            console.log("Exit " + exit.id + " has a non-existant destination area");
+                        }
                     }
 
                     layoutAreas();
@@ -193,8 +194,7 @@
                 var verticalExits = [];
                 var otherExits = [];
                 for (var i = 0; i < area.exits.length; i++) {
-                    var exit =  map.exits[objectId(area.exits[i])];
-                    console.log(exit);
+                    var exit = map.exits[objectId(area.exits[i])];
                     if (directions.hasOwnProperty(exit.name)) {
                         directionalExits.push(exit);
                     } else if (verticals.hasOwnProperty(exit.name)) {
@@ -205,78 +205,45 @@
                 }
 
                 var takenSpots = {};
-                for (i = 0; i < directionalExits.length; i++) {
-                    exit = directionalExits[i];
-                    var destinationArea = map.areas[objectId(exit.destinationArea)];
-                    if (!destinationArea) {
-                        console.log("Exit \"" + exit.name + "\" from area \"" + area.name + "\" has a non-existant destination area");
-                        continue;
-                    }
-
-                    var spot = directions[exit.name].x + ":" + directions[exit.name].y;
-                    takenSpots[spot] = true;
-
-                    if (!visited.hasOwnProperty(destinationArea.id)) {
-                        visitArea(destinationArea, x + directions[exit.name].x, y + directions[exit.name].y);
-                    }
-                }
-
-                for (i = 0; i < verticalExits.length; i++) {
-                    exit = verticalExits[i];
-                    destinationArea = map.areas[objectId(exit.destinationArea)];
-                    if (!destinationArea) {
-                        console.log("Exit \"" + exit.name + "\" from area \"" + area.name + "\" has a non-existant destination area");
-                        continue;
-                    }
-
-                    spot = verticals[exit.name].x + ":" + verticals[exit.name].y;
+                function findSpot(preferredX, preferredY) {
+                    var spot = preferredX + ":" + preferredY;
                     if (takenSpots.hasOwnProperty(spot)) {
-                        var freeSpot;
                         for (var key in directions) {
-                            spot = directions[key].x + ":" + directions[key].y;
+                            var direction = directions[key];
+                            spot = direction.x + ":" + direction.y;
                             if (!takenSpots.hasOwnProperty(spot)) {
-                                freeSpot = spot;
-                                break;
+                                takenSpots[spot] = true;
+                                return { "x": direction.x, "y": direction.y };
                             }
                         }
-                        if (!freeSpot) {
-                            console.log("There are no more free spots for exit \"" + exit.name + "\" in area \"" + area.name + "\"");
-                            break;
-                        }
-                        spot = freeSpot;
-                    }
-                    takenSpots[spot] = true;
-
-                    if (!visited.hasOwnProperty(destinationArea.id)) {
-                        visitArea(destinationArea, x + parseInt(spot.split(":")[0], 10), y + parseInt(spot.split(":")[1], 10));
+                        console.log("There are no more free spots in area \"" + area.name + "\"");
+                        return {};
+                    } else {
+                        takenSpots[spot] = true;
+                        return { "x": preferredX, "y": preferredY };
                     }
                 }
 
-                for (i = 0; i < otherExits.length; i++) {
-                    exit = otherExits[i];
-                    destinationArea = map.areas[objectId(exit.destinationArea)];
-                    if (!destinationArea) {
-                        console.log("Exit \"" + exit.name + "\" from area \"" + area.name + "\" has a non-existant destination area");
-                        continue;
+                directionalExits.forEach(function(exit) {
+                    var spot = findSpot(directions[exit.name].x, directions[exit.name].y);
+                    if (!visited.hasOwnProperty(exit.destinationArea.id)) {
+                        visitArea(exit.destinationArea, x + spot.x, y + spot.y);
                     }
+                });
 
-                    for (var key in directions) {
-                        spot = directions[key].x + ":" + directions[key].y;
-                        if (!takenSpots.hasOwnProperty(spot)) {
-                            freeSpot = spot;
-                            break;
-                        }
+                verticalExits.forEach(function(exit) {
+                    var spot = findSpot(verticals[exit.name].x, verticals[exit.name].y);
+                    if (!visited.hasOwnProperty(exit.destinationArea.id)) {
+                        visitArea(exit.destinationArea, x + spot.x, y + spot.y);
                     }
-                    if (!freeSpot) {
-                        console.log("There are no more free spots for exit \"" + exit.name + "\" in area \"" + area.name + "\"");
-                        break;
-                    }
-                    takenSpots[freeSpot] = true;
+                });
 
-                    if (!visited.hasOwnProperty(destinationArea.id)) {
-                        visitArea(destinationArea, x + parseInt(freeSpot.split(":")[0], 10), y + parseInt(freeSpot.split(":")[1], 10));
+                otherExits.forEach(function(exit) {
+                    var spot = findSpot(-1, 0);
+                    if (!visited.hasOwnProperty(exit.destinationArea.id)) {
+                        visitArea(exit.destinationArea, x + spot.x, y + spot.y);
                     }
-                }
+                });
             }
 
             visitArea(area, 0, 0);
@@ -295,6 +262,10 @@
 
             var visited = {};
 
+            var layer = new Kinetic.Layer();
+            var centerX = mapEditor.canvas.clientWidth / 2;
+            var centerY = mapEditor.canvas.clientWidth / 2;
+
             function visitArea(area) {
                 visited[area.id] = true;
 
@@ -303,25 +274,26 @@
                 }
 
                 for (var i = 0; i < area.exits.length; i++) {
-                    var exit = area.exits[i];
-                    var destinationArea = map.areas[objectId(exit.destinationArea)];
-                    if (visited.hasOwnProperty(destinationArea.id)) {
+                    var exit = map.exits[objectId(area.exits[i])];
+                    if (visited.hasOwnProperty(exit.destinationArea.id)) {
                         var line = new Kinetic.Line({
-                            points: [mapEditor.canvas.clientWidth / 2 + 40 * area.x, mapEditor.canvas.clientHeight / 2 + 40 * area.y,
-                                     mapEditor.canvas.clientWidth / 2 + 40 * destinationArea.x, mapEditor.canvas.clientHeight / 2 + 40 * destinationArea.y],
+                            points: [centerX + 40 * area.x,
+                                     centerY + 40 * area.y,
+                                     centerX + 40 * exit.destinationArea.x,
+                                     centerY + 40 * exit.destinationArea.y],
                             stroke: "red",
-                            strokeWidth: 2,
-                            lineCap: "round",
-                            lineJoin: "round"
+                            strokeWidth: 2
                         });
-                        mapEditor.mainLayer.add(line);
+                        layer.add(line);
                     } else {
-                        visitArea(destinationArea);
+                        visitArea(exit.destinationArea);
                     }
                 }
             }
 
             visitArea(area);
+
+            mapEditor.stage.add(layer);
         }
 
         var editMapLink = document.createElement("a");
@@ -332,6 +304,8 @@
         var statusHeader = element(".status-header");
         statusHeader.appendChild(document.createTextNode(" "));
         statusHeader.appendChild(editMapLink);
+
+        element(".map-editor .close").onclick = closeMap;
     }
 
     loadPropertyEditor();

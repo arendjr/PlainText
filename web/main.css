@@ -106,6 +106,18 @@ body,input {
         border: 2px solid #000;
         background-color: white;
     }
+    .map-editor .close {
+        position: absolute;
+        top: 0;
+        right: 0;
+
+        padding: 4px 7px;
+
+        font: bold 18px "Andale Mono", "Courier";
+        color: black;
+
+        cursor: pointer;
+    }
 
 @media screen and (max-width: 660px) {
     body {
