@@ -84,6 +84,8 @@
 
         function openMap() {
 
+            element(".selected-area").style.display = "none";
+
             mapEditor.style.display = "block";
             mapEditor.canvas = element(".map-editor .canvas");
 
@@ -100,6 +102,14 @@
         function closeMap() {
 
             mapEditor.style.display = "none";
+        }
+
+        function selectArea(areaId) {
+
+            var area = map.areas[areaId];
+            element(".selected-area .name").value = area.name;
+            element(".selected-area .description").value = area.description;
+            element(".selected-area").style.display = "block";
         }
 
         function objectId(string) {
@@ -167,6 +177,8 @@
                 "west":      { "x": -1, "y":  0 },
                 "northwest": { "x": -1, "y": -1 }
             };
+            var orderedDirections = [ "north", "northeast", "east", "southeast",
+                                      "south", "southwest", "west", "northwest" ];
             var verticals = {
                 "up":   { "x":  1, "y": -1 },
                 "down": { "x": -1, "y":  1 }
@@ -180,10 +192,10 @@
 
                 visited[area.id] = true;
 
-                map.top = (map.top > y ? y : map.top);
-                map.left = (map.left > x ? x : map.left);
-                map.bottom = (map.bottom < y ? y : map.bottom);
-                map.right = (map.right < x ? x : map.right);
+                map.top = (y < map.top ? y : map.top);
+                map.left = (x < map.left ? x : map.left);
+                map.bottom = (y > map.bottom ? y : map.bottom);
+                map.right = (x > map.right ? x : map.right);
 
                 if (!area.exits) {
                     console.log("Area \"" + area.name + "\" has no exits");
@@ -208,8 +220,10 @@
                 function findSpot(preferredX, preferredY) {
                     var spot = preferredX + ":" + preferredY;
                     if (takenSpots.hasOwnProperty(spot)) {
-                        for (var key in directions) {
-                            var direction = directions[key];
+                        var start = (preferredY === 1 ? 4 : 0);
+                        var length = orderedDirections.length;
+                        for (var i = start; i < start + length; i++) {
+                            var direction = directions[orderedDirections[i % length]];
                             spot = direction.x + ":" + direction.y;
                             if (!takenSpots.hasOwnProperty(spot)) {
                                 takenSpots[spot] = true;
@@ -262,9 +276,11 @@
 
             var visited = {};
 
+            var gridSize = 60;
+
             var layer = new Kinetic.Layer();
-            var centerX = mapEditor.canvas.clientWidth / 2;
-            var centerY = mapEditor.canvas.clientWidth / 2;
+            var centerX = mapEditor.canvas.clientWidth / 2 - gridSize * (map.right + map.left);
+            var centerY = mapEditor.canvas.clientWidth / 2 - gridSize * (map.bottom + map.top);
 
             function visitArea(area) {
                 visited[area.id] = true;
@@ -277,11 +293,11 @@
                     var exit = map.exits[objectId(area.exits[i])];
                     if (visited.hasOwnProperty(exit.destinationArea.id)) {
                         var line = new Kinetic.Line({
-                            points: [centerX + 40 * area.x,
-                                     centerY + 40 * area.y,
-                                     centerX + 40 * exit.destinationArea.x,
-                                     centerY + 40 * exit.destinationArea.y],
-                            stroke: "red",
+                            points: [centerX + gridSize * area.x,
+                                     centerY + gridSize * area.y,
+                                     centerX + gridSize * exit.destinationArea.x,
+                                     centerY + gridSize * exit.destinationArea.y],
+                            stroke: "blue",
                             strokeWidth: 2
                         });
                         layer.add(line);
@@ -289,10 +305,27 @@
                         visitArea(exit.destinationArea);
                     }
                 }
+
+                var rect = new Kinetic.Rect({
+                    id: objectId(area.id),
+                    x: centerX + gridSize * area.x - 15,
+                    y: centerY + gridSize * area.y - 15,
+                    width: gridSize / 2,
+                    height: gridSize / 2,
+                    stroke: "black",
+                    strokeWidth: 2,
+                    fill: "grey"
+                });
+                layer.add(rect);
             }
 
             visitArea(area);
 
+            layer.on("click", function(event) {
+                if (event.shape.getId()) {
+                    selectArea(event.shape.getId());
+                }
+            });
             mapEditor.stage.add(layer);
         }
 
