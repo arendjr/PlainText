@@ -27,6 +27,11 @@ var keys = {
     KEY_INSERT:   45
 };
 
+Array.prototype.contains = function(element) {
+
+    return this.indexOf(element) > -1;
+};
+
 Array.prototype.isEmpty = function() {
 
     return this.length === 0;

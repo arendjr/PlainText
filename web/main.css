@@ -56,7 +56,7 @@ body,input {
     border-radius: 0;
 }
 
-.edit-screen {
+.property-editor {
     display: none;
 
     position: absolute;
@@ -67,11 +67,44 @@ body,input {
     border: 1px solid #000;
     background-color: white;
 }
-    .edit-screen .button-list {
+    .property-editor .button-list {
         padding: 5px 10px 5px;
         background-color: #ccc;
 
         text-align: right;
+    }
+
+.map-editor {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    display: none;
+}
+    .map-editor .canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 80%;
+        height: 100%;
+
+        background-color: white;
+    }
+    .map-editor .sidebar {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: -webkit-calc(20% - 4px);
+        width: -moz-calc(20% - 4px);
+        width: calc(20% - 4px);
+        height: -webkit-calc(100% - 4px);
+        height: -moz-calc(100% - 4px);
+        height: calc(100% - 4px);
+
+        border: 2px solid #000;
+        background-color: white;
     }
 
 @media screen and (max-width: 660px) {
