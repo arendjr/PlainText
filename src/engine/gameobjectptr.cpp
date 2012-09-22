@@ -417,7 +417,6 @@ void GameObjectPtrList::append(const GameObjectPtr &value) {
         m_size++;
     } else {
         if (!m_nextList) {
-            qDebug() << "Expanding GameObjectPtrList.";
             m_nextList = new GameObjectPtrList();
         }
 
