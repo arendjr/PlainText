@@ -267,6 +267,7 @@ OTHER_FILES += \
     ../web/index.html \
     ../web/main.css \
     ../web/main.js \
+    ../web/mapeditor.js \
     ../web/notifications.js \
     ../web/tappable.js \
     ../DESIGN.txt \
