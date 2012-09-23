@@ -1,5 +1,18 @@
 (function() {
 
+    function Spot(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    Spot.prototype.take = function(area) {
+        area.spots[4 + this.x + 3 * this.y] = 1;
+    };
+
+    Spot.prototype.isAvailable = function(area) {
+        return area.spots[4 + this.x + 3 * this.y] === 0;
+    };
+
     var self = controller;
 
     var mapEditor = element(".map-editor");
@@ -94,37 +107,40 @@
         var positions = {};
 
         var directions = {
-            "north":     { "x":  0, "y": -1 },
-            "northeast": { "x":  1, "y": -1 },
-            "east":      { "x":  1, "y":  0 },
-            "southeast": { "x":  1, "y":  1 },
-            "south":     { "x":  0, "y":  1 },
-            "southwest": { "x": -1, "y":  1 },
-            "west":      { "x": -1, "y":  0 },
-            "northwest": { "x": -1, "y": -1 }
+            "north":     new Spot( 0, -1),
+            "northeast": new Spot( 1, -1),
+            "east":      new Spot( 1,  0),
+            "southeast": new Spot( 1,  1),
+            "south":     new Spot( 0,  1),
+            "southwest": new Spot(-1,  1),
+            "west":      new Spot(-1,  0),
+            "northwest": new Spot(-1, -1)
         };
         var orderedDirections = [ "north", "east", "south", "west",
                                   "northeast", "southeast", "southwest", "northwest" ];
         var verticals = {
-            "up":   { "x":  1, "y": -1 },
-            "down": { "x": -1, "y":  1 }
+            "up":   new Spot( 1, -1),
+            "down": new Spot(-1,  1)
         };
 
         map.top = map.left = map.bottom = map.right = 0;
 
         function visitArea(area, x, y) {
-            console.log("Visting area \"" + area.name + "\"");
+            //console.log("Visting area \"" + area.name + "\"");
 
             area.x = x;
             area.y = y;
-            positions[x + ":" + y] = true;
+            area.spots = [0, 0, 0,
+                          0, 0, 0,
+                          0, 0, 0];
+            positions[x + ":" + y] = area;
 
             var visitIndex = visitedAreas.length;
-            visitedAreas.push(area.id);
+            visitedAreas.push(area);
 
             function unwindVisitedAreas() {
                 for (var i = visitIndex, length = visitedAreas.length; i < length; i++) {
-                    var visitedArea = map.areas[visitedAreas[i]];
+                    var visitedArea = visitedAreas[i];
                     delete positions[visitedArea.x + ":" + visitedArea.y];
                 }
                 visitedAreas.splice(visitIndex);
@@ -154,47 +170,38 @@
                 }
             }
 
-            var takenSpots = {};
             function findSpot(preferredSpot) {
-                if (spotIsAvailable(preferredSpot)) {
-                    takeSpot(preferredSpot);
+                if (preferredSpot.isAvailable(area)) {
+                    preferredSpot.take(area);
                     return preferredSpot;
                 } else {
                     var start = (preferredSpot.y === 1 ? 2 : 0);
                     var length = orderedDirections.length;
                     for (var i = start; i < start + length; i++) {
                         var spot = directions[orderedDirections[i % length]];
-                        if (spotIsAvailable(spot)) {
-                            takeSpot(spot);
+                        if (spot.isAvailable(area)) {
+                            spot.take(area);
                             return spot;
                         }
                     }
                     console.log("There are no more free spots in area \"" + area.name + "\"");
-                    return undefined;
+                    return null;
                 }
             }
 
             function spotForDestination(destinationArea, originArea) {
-                var spotX = destinationArea.x - originArea.x;
-                var spotY = destinationArea.y - originArea.y;
-                if (spotX !== 0 && spotY !== 0 && Math.abs(spotX) !== Math.abs(spotY)) {
-                    return undefined;
+                var x = destinationArea.x - originArea.x;
+                var y = destinationArea.y - originArea.y;
+                if (x !== 0 && y !== 0 && Math.abs(x) !== Math.abs(y)) {
+                    return null;
                 }
-                if (spotX !== 0) {
-                    spotX /= Math.abs(spotX);
+                if (x !== 0) {
+                    x /= Math.abs(x);
                 }
-                if (spotY !== 0) {
-                    spotY /= Math.abs(spotY);
+                if (y !== 0) {
+                    y /= Math.abs(y);
                 }
-                return { "x": spotX, "y": spotY };
-            }
-
-            function takeSpot(spot) {
-                takenSpots[spot.x + ":" + spot.y] = true;
-            }
-
-            function spotIsAvailable(spot) {
-                return !takenSpots.hasOwnProperty(spot.x + ":" + spot.y);
+                return new Spot(x, y);
             }
 
             function attemptToVisitArea(area, spot) {
@@ -204,6 +211,24 @@
                     if (positions.hasOwnProperty(destX + ":" + destY)) {
                         return false;
                     }
+
+                    // skim the area
+                    for (var dx = -1; dx <= 1; dx++) {
+                        for (var dy = -1; dy <= 1; dy++) {
+                            if ((dx === 0 && dy === 0) ||
+                                (dx === -spot.x && dy === -spot.y)) {
+                                continue;
+                            }
+                            var position = (destX + dx) + ":" + (destY + dy);
+                            if (positions.hasOwnProperty(position)) {
+                                var adjacentArea = positions[position];
+                                if (!(new Spot(-dx, -dy)).isAvailable(adjacentArea)) {
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+
                     if (visitArea(area, destX, destY)) {
                         return true;
                     }
@@ -218,41 +243,41 @@
                     return;
                 }
 
-                if (visitedAreas.contains(exit.destinationArea.id)) {
+                if (visitedAreas.contains(exit.destinationArea)) {
                     var spot = spotForDestination(exit.destinationArea, area);
-                    if (spot === undefined) {
+                    if (spot === null) {
                         succeeded = false;
-                        console.log("  Exit \"" + exit.name + "\" is currently located at " +
-                                      "a non-reachable position.");
+                        //console.log("  Exit \"" + exit.name + "\" is currently located at " +
+                        //              "a non-reachable position.");
                         return;
                     }
-                    console.log("  Exit \"" + exit.name + "\" is currently located at " +
-                                spot.x + "," + spot.y);
-                    if (spotIsAvailable(spot)) {
-                        takeSpot(spot);
+                    //console.log("  Exit \"" + exit.name + "\" is currently located at " +
+                    //            spot.x + "," + spot.y);
+                    if (spot.isAvailable(area)) {
+                        spot.take(area);
                     } else {
                         succeeded = false;
-                        console.log("    ... but that spot is already taken");
+                        //console.log("    ... but that spot is already taken");
                     }
                 } else {
                     do {
                         if (directions.hasOwnProperty(exit.name)) {
-                            if (spotIsAvailable(directions[exit.name])) {
+                            if (directions[exit.name].isAvailable(area)) {
                                 spot = directions[exit.name];
-                                takeSpot(spot);
+                                spot.take(area);
                             } else {
-                                spot = undefined;
+                                spot = null;
                             }
                         } else {
                             spot = findSpot(verticals.hasOwnProperty(exit.name) ?
-                                            verticals[exit.name] : { "x": -1, "y": 0 });
+                                            verticals[exit.name] : new Spot(-1, 0));
                         }
-                        if (spot === undefined) {
+                        if (spot === null) {
                             succeeded = false;
                             break;
                         }
-                        console.log("  Exit \"" + exit.name + "\" is going to be at " +
-                                    spot.x + "," + spot.y);
+                        //console.log("  Exit \"" + exit.name + "\" is going to be at " +
+                        //            spot.x + "," + spot.y);
                     } while (!attemptToVisitArea(exit.destinationArea, spot));
                 }
             }
