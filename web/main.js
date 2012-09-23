@@ -37,6 +37,16 @@ Array.prototype.isEmpty = function() {
     return this.length === 0;
 };
 
+Element.prototype.hide = function() {
+
+    this.style.display = "none";
+}
+
+Element.prototype.show = function() {
+
+    this.style.display = "block";
+}
+
 String.prototype.contains = function(string) {
 
     return this.indexOf(string) > -1;

@@ -3,6 +3,10 @@
     var self = controller;
 
     var propertyEditor = element(".property-editor");
+    self.propertyEditor = propertyEditor;
+
+    var saveCommand;
+    var saveCallback;
 
     function loadPropertyEditor() {
         loadScript("codemirror/codemirror.js");
@@ -25,12 +29,27 @@
             this.style.display = "none";
             self.commandInput.focus();
         };
+        propertyEditor.edit = function(description, onSaved) {
+            self.sendApiCall("prop1", "property-get " + description, function(data) {
+                var propertyName = data.propertyName;
+                if (data.readOnly) {
+                    self.writeToScreen("Property " + propertyName + " is read-only.");
+                    return;
+                }
 
-        element("#edit-cancel-button").onclick = function() {
-            propertyEditor.hide();
+                propertyEditor.show(data[propertyName]);
+
+                saveCommand = "set-prop #" + data.id + " " + propertyName;
+                saveCallback = onSaved;
+            });
         };
-        element("#edit-submit-button").onclick = function() {
+
+        propertyEditor.querySelector(".cancel-button").addEventListener("click", function() {
+            propertyEditor.hide();
+        }, false);
+        propertyEditor.querySelector(".save-button").addEventListener("click", function() {
             var value = propertyEditor.editor.getValue();
+            var originalValue = value;
             if (saveCommand.startsWith("set-prop")) {
                 value = value.replace(/\n/g, "\\n");
             } else if (saveCommand.startsWith("exec-script")) {
@@ -42,13 +61,21 @@
                     self.writeToScreen(data);
 
                     propertyEditor.hide();
+                    if (saveCallback) {
+                        saveCallback(originalValue);
+                        saveCallback = undefined;
+                    }
                 });
             } else {
                 self.socket.send(saveCommand + " " + value);
 
                 propertyEditor.hide();
+                if (saveCallback) {
+                    saveCallback(originalValue);
+                    saveCallback = undefined;
+                }
             }
-        };
+        }, false);
 
         function initCodeMirror() {
             if (!window.CodeMirror) {
@@ -105,29 +132,17 @@
         }
     }
 
-    var saveCommand;
-
     controller.commandInput.onkeypress = function(event) {
         if (event.keyCode === keys.KEY_RETURN) {
             var command = self.commandInput.value;
             var commandName = command.split(" ")[0];
-            var rest = command.substr(commandName.length);
+            var rest = command.substr(commandName.length + 1);
 
-            if (commandName === "edit-prop" || commandName === "edit-p") {
+            if (commandName.startsWith("edit-p") && "edit-property".startsWith(commandName)) {
                 substituteCommand(event, "", command);
 
-                self.sendApiCall("prop1", "property-get" + rest, function(data) {
-                    var propertyName = data.propertyName;
-                    if (data.readOnly) {
-                        self.writeToScreen("Property " + propertyName + " is read-only.");
-                        return;
-                    }
-
-                    propertyEditor.show(data[propertyName]);
-
-                    saveCommand = "set-prop #" + data.id + " " + propertyName;
-                });
-            } else if (commandName === "edit-trigger" || commandName === "edit-t") {
+                propertyEditor.edit(rest);
+            } else if (commandName.startsWith("edit-t") && "edit-trigger".startsWith(commandName)) {
                 substituteCommand(event, "", command);
 
                 var triggerName = command.split(/\s+/)[2];
@@ -136,7 +151,7 @@
                 }
 
                 if (triggers.hasOwnProperty(triggerName)) {
-                    self.sendApiCall("trigger1", "trigger-get" + rest, function(data) {
+                    self.sendApiCall("trigger1", "trigger-get " + rest, function(data) {
                         var triggerSource = data.triggerSource;
                         if (triggerSource.isEmpty()) {
                             var trigger = triggers[triggerName];

@@ -58,6 +58,7 @@ body,input {
 
 .property-editor {
     display: none;
+    z-index: 3;
 
     position: absolute;
     top: 150px;
@@ -74,6 +75,46 @@ body,input {
         text-align: right;
     }
 
+.exit-editor {
+    display: none;
+    z-index: 3;
+
+    position: absolute;
+    top: 180px;
+    left: -webkit-calc(50% - 200px);
+    left: -moz-calc(50% - 200px);
+    left: calc(50% - 200px);
+    right: -webkit-calc(50% - 200px);
+    right: -moz-calc(50% - 200px);
+    right: calc(50% - 200px);
+
+    border: 1px solid #000;
+    background-color: white;
+}
+    .exit-editor .label {
+        display: inline-block;
+        width: 80px;
+        font-weight: bold;
+        text-align: right;
+    }
+    .exit-editor .button-list {
+        position: relative;
+
+        padding: 5px 10px 5px;
+        background-color: #ccc;
+
+        text-align: right;
+    }
+        .exit-editor .delete-button {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+
+            background-color: red;
+            color: white;
+            font-weight: bold;
+        }
+
 .map-editor {
     position: absolute;
     top: 0;
@@ -82,6 +123,7 @@ body,input {
     bottom: 0;
 
     display: none;
+    z-index: 2;
 }
     .map-editor .canvas {
         position: absolute;
@@ -109,12 +151,11 @@ body,input {
 
         font-family: "Helvetica", "Arial", sans-serif;
     }
-        .map-editor .sidebar input {
-            width: 94%;
+        .sidebar .add,.sidebar .edit {
+            font-size: 75%;
         }
-        .map-editor .sidebar textarea {
-            width: 94%;
-            height: 16em;
+        .sidebar .description {
+            white-space: pre-line;
         }
     .map-editor .close {
         position: absolute;

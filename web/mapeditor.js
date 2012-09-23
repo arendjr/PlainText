@@ -13,9 +13,27 @@
         return area.spots[4 + this.x + 3 * this.y] === 0;
     };
 
+    Spot.prototype.equals = function(spot) {
+        return spot.x === this.x && spot.y === this.y
+    }
+
     var self = controller;
 
     var mapEditor = element(".map-editor");
+    var selectedArea = mapEditor.querySelector(".selected-area");
+
+    var exitEditor = element(".exit-editor");
+    exitEditor.querySelector(".delete-button").addEventListener("click", function() {
+        // TODO
+    }, false);
+    exitEditor.querySelector(".cancel-button").addEventListener("click", function() {
+        exitEditor.hide();
+    }, false);
+    exitEditor.querySelector(".save-button").addEventListener("click", function() {
+        // TODO
+    }, false);
+
+    var selectedAreaId = null;
 
     loadScript("kinetic.js");
 
@@ -24,34 +42,137 @@
         exits: {}
     };
 
+    var directions = {
+        "north":     new Spot( 0, -1),
+        "northeast": new Spot( 1, -1),
+        "east":      new Spot( 1,  0),
+        "southeast": new Spot( 1,  1),
+        "south":     new Spot( 0,  1),
+        "southwest": new Spot(-1,  1),
+        "west":      new Spot(-1,  0),
+        "northwest": new Spot(-1, -1)
+    };
+    var orderedDirections = [ "north", "northeast", "east", "southeast",
+                              "south", "southwest", "west", "northwest" ];
+    var preferredDirections = [ "north", "east", "south", "west",
+                                "northeast", "southeast", "southwest", "northwest" ];
+    var verticals = {
+        "up":   new Spot( 1, -1),
+        "down": new Spot(-1,  1)
+    };
+
     function openMap() {
-        element(".selected-area").style.display = "none";
 
-        mapEditor.style.display = "block";
-        mapEditor.canvas = element(".map-editor .canvas");
+        selectedArea.hide();
 
-        mapEditor.stage = new Kinetic.Stage({
-            container: mapEditor.canvas,
-            width: mapEditor.canvas.clientWidth,
-            height: mapEditor.canvas.clientHeight,
-            draggable: true
-        });
+        mapEditor.show();
+        mapEditor.canvas = mapEditor.querySelector(".canvas");
+
+        if (mapEditor.stage) {
+            mapEditor.stage.removeChildren();
+        } else {
+            mapEditor.stage = new Kinetic.Stage({
+                container: mapEditor.canvas,
+                width: mapEditor.canvas.clientWidth,
+                height: mapEditor.canvas.clientHeight,
+                draggable: true
+            });
+        }
 
         loadMap();
     }
 
     function closeMap() {
-        mapEditor.style.display = "none";
+
+        mapEditor.hide();
     }
 
     function selectArea(areaId) {
-        var area = map.areas[areaId];
-        element(".selected-area .name").value = area.name;
-        element(".selected-area .description").value = area.description;
-        element(".selected-area").style.display = "block";
+
+        if (areaId) {
+            var area = map.areas[areaId];
+            selectedArea.querySelector(".id").textContent = area.id;
+            selectedArea.querySelector(".x").textContent = area.x;
+            selectedArea.querySelector(".y").textContent = area.y;
+            selectedArea.querySelector(".name").textContent = area.name;
+            selectedArea.querySelector(".description").textContent = area.description;
+
+            var exitsSpan = selectedArea.querySelector(".exits");
+            exitsSpan.innerHTML = "";
+            for (var i = 0, length = area.exits.length; i < length; i++) {
+                var exit = map.exits[objectId(area.exits[i])];
+                var exitSpan = document.createElement("a");
+                exitSpan.setAttribute("class", "exit");
+                exitSpan.setAttribute("data-exit-id", exit.id);
+                exitSpan.setAttribute("href", "javascript:void(0)");
+                exitSpan.textContent = exit.name;
+                exitsSpan.appendChild(exitSpan);
+                exitSpan.addEventListener("click", editExit, false);
+
+                if (i < length - 1) {
+                    exitsSpan.appendChild(document.createTextNode(", "));
+                }
+            }
+
+            selectedArea.show();
+
+            selectedAreaId = areaId;
+        } else {
+            selectedArea.hide();
+
+            selectedAreaId = null;
+        }
+    }
+
+    function addExit() {
+
+        var directionSelect = exitEditor.querySelector(".direction");
+        directionSelect.innerHTML = "<option></option>";
+        orderedDirections.forEach(function(direction) {
+            var option = document.createElement("option");
+            option.textContent = direction;
+            directionSelect.appendChild(option);
+        });
+
+        exitEditor.querySelector(".name").value = "";
+
+        exitEditor.querySelector(".delete-button").hide();
+
+        exitEditor.show();
+    }
+
+    function editExit(event) {
+
+        var exitId = event.target.getAttribute("data-exit-id");
+        var exit = map.exits[exitId];
+
+        var directionSelect = exitEditor.querySelector(".direction");
+        directionSelect.innerHTML = "<option></option>";
+        orderedDirections.forEach(function(direction) {
+            var option = document.createElement("option");
+            if (direction === exit.name || exit.data && exit.data.directionHint === direction) {
+                option.setAttribute("selected", "selected");
+            }
+            option.textContent = direction;
+            directionSelect.appendChild(option);
+        });
+
+        exitEditor.querySelector(".name").value = exit.name;
+
+        exitEditor.querySelector(".delete-button").show();
+
+        exitEditor.show();
+    }
+
+    function editProperty(propertyName, onSaved) {
+
+        if (selectedAreaId) {
+            self.propertyEditor.edit("#" + selectedAreaId + " " + propertyName, onSaved);
+        }
     }
 
     function objectId(string) {
+
         if (typeof string === "string") {
             if (string.contains(":")) {
                 return parseInt(string.split(":")[1], 10);
@@ -64,6 +185,7 @@
     }
 
     function loadMap() {
+
         self.sendApiCall("areas1", "areas-list", function(data) {
             console.log("Received areas");
 
@@ -93,6 +215,7 @@
     }
 
     function layoutAreas() {
+
         var area;
         for (var key in map.areas) {
             area = map.areas[key];
@@ -106,24 +229,26 @@
         var visitedAreas = [];
         var positions = {};
 
-        var directions = {
-            "north":     new Spot( 0, -1),
-            "northeast": new Spot( 1, -1),
-            "east":      new Spot( 1,  0),
-            "southeast": new Spot( 1,  1),
-            "south":     new Spot( 0,  1),
-            "southwest": new Spot(-1,  1),
-            "west":      new Spot(-1,  0),
-            "northwest": new Spot(-1, -1)
-        };
-        var orderedDirections = [ "north", "east", "south", "west",
-                                  "northeast", "southeast", "southwest", "northwest" ];
-        var verticals = {
-            "up":   new Spot( 1, -1),
-            "down": new Spot(-1,  1)
-        };
-
-        map.top = map.left = map.bottom = map.right = 0;
+        function oppositeDirection(direction) {
+            if (directions.hasOwnProperty(direction)) {
+                var spot = directions[direction];
+                var oppositeSpot = new Spot(-spot.x, -spot.y);
+                for (var key in directions) {
+                    if (oppositeSpot.equals(directions[key])) {
+                        return key;
+                    }
+                }
+            } else if (verticals.hasOwnProperty(direction)) {
+                spot = verticals[direction];
+                oppositeSpot = new Spot(-spot.x, -spot.y);
+                for (key in verticals) {
+                    if (oppositeSpot.equals(verticals[key])) {
+                        return key;
+                    }
+                }
+            }
+            return undefined;
+        }
 
         function visitArea(area, x, y) {
             //console.log("Visting area \"" + area.name + "\"");
@@ -145,11 +270,6 @@
                 }
                 visitedAreas.splice(visitIndex);
             }
-
-            map.top = (y < map.top ? y : map.top);
-            map.left = (x < map.left ? x : map.left);
-            map.bottom = (y > map.bottom ? y : map.bottom);
-            map.right = (x > map.right ? x : map.right);
 
             if (!area.exits) {
                 console.log("Area \"" + area.name + "\" has no exits");
@@ -176,9 +296,9 @@
                     return preferredSpot;
                 } else {
                     var start = (preferredSpot.y === 1 ? 2 : 0);
-                    var length = orderedDirections.length;
+                    var length = preferredDirections.length;
                     for (var i = start; i < start + length; i++) {
-                        var spot = directions[orderedDirections[i % length]];
+                        var spot = directions[preferredDirections[i % length]];
                         if (spot.isAvailable(area)) {
                             spot.take(area);
                             return spot;
@@ -212,7 +332,7 @@
                         return false;
                     }
 
-                    // skim the area
+                    // skim the area and make sure this position isn't crossed by other exits
                     for (var dx = -1; dx <= 1; dx++) {
                         for (var dy = -1; dy <= 1; dy++) {
                             if ((dx === 0 && dy === 0) ||
@@ -225,6 +345,22 @@
                                 if (!(new Spot(-dx, -dy)).isAvailable(adjacentArea)) {
                                     return false;
                                 }
+                            }
+                        }
+                    }
+                    if (spot.x !== 0 && spot.y !== 0) {
+                        position = (x) + ":" + (y - spot.y);
+                        if (positions.hasOwnProperty(position)) {
+                            adjacentArea = positions[position];
+                            if (!(new Spot(spot.x, -spot.y)).isAvailable(adjacentArea)) {
+                                return false;
+                            }
+                        }
+                        position = (x - spot.x) + ":" + (y);
+                        if (positions.hasOwnProperty(position)) {
+                            adjacentArea = positions[position];
+                            if (!(new Spot(-spot.x, spot.y)).isAvailable(adjacentArea)) {
+                                return false;
                             }
                         }
                     }
@@ -261,16 +397,35 @@
                     }
                 } else {
                     do {
-                        if (directions.hasOwnProperty(exit.name)) {
-                            if (directions[exit.name].isAvailable(area)) {
-                                spot = directions[exit.name];
+                        var direction = exit.name;
+                        if (directions.hasOwnProperty(exit.name) ||
+                            verticals.hasOwnProperty(exit.name)) {
+                            // yay!
+                        } else if (exit.data && exit.data.directionHint) {
+                            direction = exit.data.directionHint;
+                        } else if (exit.oppositeExit && exit.oppositeExit !== "0") {
+                            var oppositeExit = map.exits[objectId(exit.oppositeExit)];
+                            if (directions.hasOwnProperty(oppositeExit.name) ||
+                                verticals.hasOwnProperty(oppositeExit.name)) {
+                                direction = oppositeDirection(oppositeExit.name);
+                            } else if (oppositeExit.data && oppositeExit.data.directionHint) {
+                                var opposite = oppositeDirection(oppositeExit.data.directionHint);
+                                if (opposite) {
+                                    direction = opposite;
+                                }
+                            }
+                        }
+
+                        if (directions.hasOwnProperty(direction)) {
+                            if (directions[direction].isAvailable(area)) {
+                                spot = directions[direction];
                                 spot.take(area);
                             } else {
                                 spot = null;
                             }
                         } else {
-                            spot = findSpot(verticals.hasOwnProperty(exit.name) ?
-                                            verticals[exit.name] : new Spot(-1, 0));
+                            spot = findSpot(verticals.hasOwnProperty(direction) ?
+                                            verticals[direction] : new Spot(-1, 0));
                         }
                         if (spot === null) {
                             succeeded = false;
@@ -299,10 +454,17 @@
     }
 
     function drawMap() {
+
+        map.top = map.left = map.bottom = map.right = 0;
+
         var area;
         for (var key in map.areas) {
             area = map.areas[key];
-            break;
+
+            map.top = (area.y < map.top ? area.y : map.top);
+            map.left = (area.x < map.left ? area.x : map.left);
+            map.bottom = (area.y > map.bottom ? area.y : map.bottom);
+            map.right = (area.x > map.right ? area.x : map.right);
         }
         if (!area) {
             console.log("No areas to draw");
@@ -310,12 +472,13 @@
         }
 
         var visited = {};
+        var areaShapes = [];
 
         var gridSize = 60;
 
         var layer = new Kinetic.Layer();
-        var centerX = mapEditor.canvas.clientWidth / 2 - gridSize * (map.right + map.left);
-        var centerY = mapEditor.canvas.clientWidth / 2 - gridSize * (map.bottom + map.top);
+        var centerX = mapEditor.canvas.clientWidth / 2 - gridSize * (map.right + map.left) / 2;
+        var centerY = mapEditor.canvas.clientHeight / 2 - gridSize * (map.bottom + map.top) / 2;
 
         function visitArea(area) {
             visited[area.id] = true;
@@ -333,7 +496,8 @@
                                  centerX + gridSize * exit.destinationArea.x,
                                  centerY + gridSize * exit.destinationArea.y],
                         stroke: "blue",
-                        strokeWidth: 2
+                        strokeWidth: 2,
+                        listening: false
                     });
                     layer.add(line);
                 } else {
@@ -352,15 +516,31 @@
                 fill: "grey"
             });
             layer.add(rect);
+            areaShapes.push(rect);
         }
 
         visitArea(area);
 
+        areaShapes.forEach(function(shape) {
+            shape.moveToTop();
+        });
+
+        var selectedShape = null;
         layer.on("click", function(event) {
+            if (selectedShape) {
+                selectedShape.setFill("grey");
+            }
+
             if (event.shape.getId()) {
+                selectedShape = event.shape;
+                selectedShape.setFill("blue");
+
                 selectArea(event.shape.getId());
             }
+
+            layer.draw();
         });
+
         mapEditor.stage.add(layer);
     }
 
@@ -372,6 +552,20 @@
     var statusHeader = element(".status-header");
     statusHeader.appendChild(document.createTextNode(" "));
     statusHeader.appendChild(editMapLink);
+
+    selectedArea.querySelector(".edit.name").addEventListener("click", function() {
+        editProperty("name", function(newValue) {
+            map.areas[selectedAreaId].name = newValue;
+            selectedArea.querySelector(".name").textContent = newValue;
+        });
+    }, false);
+    selectedArea.querySelector(".edit.description").addEventListener("click", function() {
+        editProperty("description", function(newValue) {
+            map.areas[selectedAreaId].description = newValue;
+            selectedArea.querySelector(".description").textContent = newValue;
+        });
+    }, false);
+    selectedArea.querySelector(".add.exit").addEventListener("click", addExit, false);
 
     element(".map-editor .close").onclick = closeMap;
 

@@ -20,18 +20,39 @@
         <div class="property-editor">
             <textarea id="edit-field"></textarea>
             <div class="button-list">
-                <button id="edit-cancel-button">Cancel</button>
-                <button id="edit-submit-button">Save</button>
+                <button class="cancel-button">Cancel</button>
+                <button class="save-button">Save</button>
             </div>
         </div>
-	<div class="map-editor">
+        <div class="exit-editor">
+            <div>
+                <p><span class="label">Direction:</span>
+                    <select class="direction"></select></p>
+                <p><span class="label">Name:</span>
+                    <input type="text" class="name"></p>
+            </div>
+            <div class="button-list">
+                <button class="delete-button">Delete</button>
+                <button class="cancel-button">Cancel</button>
+                <button class="save-button">Save</button>
+            </div>
+        </div>
+        <div class="map-editor">
             <div class="canvas"></div>
             <div class="sidebar">
                 <div class="selected-area">
-                    <p><strong>Name:</strong><br>
-                        <input type="text" class="name"></p>
+                    <p><strong>Area #<span class="id"></span>
+                        (<span class="x"></span>, <span class="y"></span>)</strong></p>
+                    <p><strong>Name:</strong>
+                        <span class="name"></span>
+                        <a href="javascript:void(0)" class="edit name">(edit)</a></p>
                     <p><strong>Description:</strong><br>
-                        <textarea class="description"></textarea></p>
+                        <span class="description"></span>
+                        <a href="javascript:void(0)" class="edit description">(edit)</a></p>
+                    <p><strong>Exits:</strong><br>
+                        <span class="exits"></span>
+                        <a href="javascript:void(0)" class="add exit">(add)</a>
+                        </p>
                 </div>
             </div>
             <div class="close">x</div>
