@@ -61,6 +61,8 @@
 #include "commands/admin/stopservercommand.h"
 #include "commands/admin/unsettriggercommand.h"
 #include "commands/api/areaslistcommand.h"
+#include "commands/api/datagetcommand.h"
+#include "commands/api/datasetcommand.h"
 #include "commands/api/exitslistcommand.h"
 #include "commands/api/propertygetcommand.h"
 #include "commands/api/triggergetcommand.h"
@@ -136,6 +138,8 @@ CommandInterpreter::CommandInterpreter(Player *player) :
         m_commands.insert("unset-trigger", new UnsetTriggerCommand(player, this));
 
         m_commands.insert("api-areas-list", new AreasListCommand(player, this));
+        m_commands.insert("api-data-get", new DataGetCommand(player, this));
+        m_commands.insert("api-data-set", new DataSetCommand(player, this));
         m_commands.insert("api-exits-list", new ExitsListCommand(player, this));
         m_commands.insert("api-property-get", new PropertyGetCommand(player, this));
         m_commands.insert("api-trigger-get", new TriggerGetCommand(player, this));
