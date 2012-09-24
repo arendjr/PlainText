@@ -42,6 +42,8 @@
         exits: {}
     };
 
+    var areaShapes = [];
+
     var directions = {
         "north":     new Spot( 0, -1),
         "northeast": new Spot( 1, -1),
@@ -472,7 +474,6 @@
         }
 
         var visited = {};
-        var areaShapes = [];
 
         var gridSize = 60;
 
@@ -544,6 +545,34 @@
         mapEditor.stage.add(layer);
     }
 
+    function plotStats(type) {
+        self.sendApiCall("log1", "log-retrieve stats " + type + " 100", function(data) {
+            console.log("Received stats");
+
+            var maxCount = 0;
+            for (var key in data) {
+                var count = data[key];
+                if (count > maxCount) {
+                    maxCount = count;
+                }
+            }
+
+            areaShapes.forEach(function(shape) {
+                var key = "area:" + shape.getId();
+                if (data.hasOwnProperty(key)) {
+                    var count = data[key];
+                    var red = Math.floor(255 * count / maxCount);
+                    var blue = 255 - red;
+                    shape.setFill("rgb(" + red + ", 0, " + blue + ")");
+                } else {
+                    shape.setFill("rgb(0, 0, 255)");
+                }
+            });
+
+            mapEditor.stage.draw();
+        });
+    }
+
     var editMapLink = document.createElement("a");
     editMapLink.setAttribute("href", "javascript:void(0)");
     editMapLink.textContent = "Edit Map";
@@ -567,6 +596,14 @@
     }, false);
     selectedArea.querySelector(".add.exit").addEventListener("click", addExit, false);
 
-    element(".map-editor .close").onclick = closeMap;
+    mapEditor.querySelector(".plot.areavisit").addEventListener("click", function() {
+        plotStats("areavisit");
+    }, false);
+
+    mapEditor.querySelector(".plot.playerdeath").addEventListener("click", function() {
+        plotStats("playerdeath");
+    }, false);
+
+    mapEditor.querySelector(".close").addEventListener("click", closeMap, false);
 
 })();
