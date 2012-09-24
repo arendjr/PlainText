@@ -529,12 +529,12 @@
         var selectedShape = null;
         layer.on("click", function(event) {
             if (selectedShape) {
-                selectedShape.setFill("grey");
+                selectedShape.setStroke("black");
             }
 
             if (event.shape.getId()) {
                 selectedShape = event.shape;
-                selectedShape.setFill("blue");
+                selectedShape.setStroke("orange");
 
                 selectArea(event.shape.getId());
             }
