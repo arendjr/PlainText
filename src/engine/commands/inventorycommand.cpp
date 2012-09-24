@@ -4,7 +4,7 @@
 InventoryCommand::InventoryCommand(Player *player, QObject *parent) :
     Command(player, parent) {
 
-    setDescription("Shows your current inventory.\n"
+    setDescription("View your current inventory.\n"
                    "\n"
                    "Example: inventory");
 }

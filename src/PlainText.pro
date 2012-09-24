@@ -72,6 +72,7 @@ SOURCES += \
     engine/commands/drinkcommand.cpp \
     engine/commands/dropcommand.cpp \
     engine/commands/eatcommand.cpp \
+    engine/commands/equipmentcommand.cpp \
     engine/commands/followcommand.cpp \
     engine/commands/getcommand.cpp \
     engine/commands/givecommand.cpp \
@@ -190,6 +191,7 @@ HEADERS += \
     engine/commands/drinkcommand.h \
     engine/commands/dropcommand.h \
     engine/commands/eatcommand.h \
+    engine/commands/equipmentcommand.h \
     engine/commands/followcommand.h \
     engine/commands/getcommand.h \
     engine/commands/givecommand.h \

@@ -18,6 +18,7 @@
 #include "commands/drinkcommand.h"
 #include "commands/dropcommand.h"
 #include "commands/eatcommand.h"
+#include "commands/equipmentcommand.h"
 #include "commands/followcommand.h"
 #include "commands/getcommand.h"
 #include "commands/givecommand.h"
@@ -89,6 +90,7 @@ CommandInterpreter::CommandInterpreter(Player *player) :
     m_commands.insert("drop", new DropCommand(player, this));
     m_commands.insert("eat", new EatCommand(player, this));
     m_commands.insert("enter", go);
+    m_commands.insert("equipment", new EquipmentCommand(player, this));
     m_commands.insert("follow", new FollowCommand(player, this));
     m_commands.insert("get", get);
     m_commands.insert("give", new GiveCommand(player, this));
