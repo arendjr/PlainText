@@ -123,10 +123,12 @@ SOURCES += \
     engine/commands/api/datagetcommand.cpp \
     engine/commands/api/datasetcommand.cpp \
     engine/commands/api/exitslistcommand.cpp \
+    engine/commands/api/logretrievecommand.cpp \
     engine/commands/api/propertygetcommand.cpp \
     engine/commands/api/triggergetcommand.cpp \
     engine/commands/api/triggersetcommand.cpp \
     engine/commands/api/triggerslistcommand.cpp \
+    engine/events/asyncreplyevent.cpp \
     engine/events/commandevent.cpp \
     engine/events/deleteobjectevent.cpp \
     engine/events/event.cpp \
@@ -137,6 +139,7 @@ SOURCES += \
     engine/logmessages/logmessage.cpp \
     engine/logmessages/npctalklogmessage.cpp \
     engine/logmessages/playerdeathstatslogmessage.cpp \
+    engine/logmessages/retrievestatslogmessage.cpp \
     engine/logmessages/sessionlogmessage.cpp \
     interface/httpserver.cpp \
     interface/telnetserver.cpp \
@@ -242,10 +245,12 @@ HEADERS += \
     engine/commands/api/datagetcommand.h \
     engine/commands/api/datasetcommand.h \
     engine/commands/api/exitslistcommand.h \
+    engine/commands/api/logretrievecommand.h \
     engine/commands/api/propertygetcommand.h \
     engine/commands/api/triggergetcommand.h \
     engine/commands/api/triggersetcommand.h \
     engine/commands/api/triggerslistcommand.h \
+    engine/events/asyncreplyevent.h \
     engine/events/commandevent.h \
     engine/events/deleteobjectevent.h \
     engine/events/event.h \
@@ -256,6 +261,7 @@ HEADERS += \
     engine/logmessages/logmessage.h \
     engine/logmessages/npctalklogmessage.h \
     engine/logmessages/playerdeathstatslogmessage.h \
+    engine/logmessages/retrievestatslogmessage.h \
     engine/logmessages/sessionlogmessage.h \
     interface/httpserver.h \
     interface/telnetserver.h \

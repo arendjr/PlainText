@@ -65,6 +65,7 @@
 #include "commands/api/datagetcommand.h"
 #include "commands/api/datasetcommand.h"
 #include "commands/api/exitslistcommand.h"
+#include "commands/api/logretrievecommand.h"
 #include "commands/api/propertygetcommand.h"
 #include "commands/api/triggergetcommand.h"
 #include "commands/api/triggersetcommand.h"
@@ -143,6 +144,7 @@ CommandInterpreter::CommandInterpreter(Player *player) :
         m_commands.insert("api-data-get", new DataGetCommand(player, this));
         m_commands.insert("api-data-set", new DataSetCommand(player, this));
         m_commands.insert("api-exits-list", new ExitsListCommand(player, this));
+        m_commands.insert("api-log-retrieve", new LogRetrieveCommand(player, this));
         m_commands.insert("api-property-get", new PropertyGetCommand(player, this));
         m_commands.insert("api-trigger-get", new TriggerGetCommand(player, this));
         m_commands.insert("api-trigger-set", new TriggerSetCommand(player, this));

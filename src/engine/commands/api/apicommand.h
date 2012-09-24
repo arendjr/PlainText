@@ -14,6 +14,8 @@ class ApiCommand : public AdminCommand {
 
         virtual void execute(const QString &command);
 
+        const QString &requestId() const { return m_requestId; }
+
     protected:
         void sendReply(const QVariant &variant);
         void sendError(int errorCode, const QString &errorMessage);
