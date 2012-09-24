@@ -3,6 +3,15 @@ GAME MECHANICS
   -  Finish combat mechanics.
   -  Implement spell casting and learning.
   -  Implement quests and leveling.
+  -  Suggestions for commands to implement:
+     -  cast
+     -  commands
+     -  equipment
+     -  practice
+     -  score
+     -  skills
+     -  spells
+     -  unread
 
 TECHNOLOGY
 
