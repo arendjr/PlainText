@@ -187,6 +187,16 @@
                 } else {
                     substituteCommand(event, "get-prop area " + command.substr(1), command);
                 }
+            } else if (command.startsWith("api-")) {
+                var parts = command.split(" ");
+                var requestId = parts[1];
+                parts.splice(1, 1);
+
+                self.sendApiCall(requestId, parts.join(" ").substr(4), function(data) {
+                    self.writeToScreen(JSON.stringify(data, null, 2));
+                });
+
+                substituteCommand(event, "", command);
             } else {
                 onkeypress(event);
             }
