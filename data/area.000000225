@@ -1,3 +1,5 @@
 {
+  "name": "Shoe Store",
+  "description": "The store consists of a few shelves on which a bunch of ready made shoes are positioned for viewing. There are leather boots, wooden clogs as well as a more expensive-looking pair of wooden soled clogs with leather uppers.\n\nIn the back there's a working bench where the owner of the store is usually busy fabricating new shoes or repairing old ones.",
   "exits": [ "exit:227" ]
 }

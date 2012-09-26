@@ -2,5 +2,5 @@
   "name": "Main Street / Market Street",
   "description": "You're at the junction of Main Street and the Market Street. On the north side of the junction is a little field with a well.\n\nAt the southwest corner is the city's bakery.",
   "exits": [ "exit:112", "exit:114", "exit:277", "exit:1030" ],
-  "items": [ "item:229", "item:1199" ]
+  "items": [ "item:229", "item:1199", "item:1257" ]
 }

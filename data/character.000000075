@@ -15,11 +15,11 @@
   "gender": "male",
   "respawnTime": 1200000,
   "respawnTimeVariation": 600000,
-  "hp": 22,
+  "hp": 19,
   "maxHp": 22,
   "mp": 11,
   "maxMp": 11,
-  "gold": 17,
+  "gold": 0,
   "weapon": "0",
   "secondaryWeapon": "0",
   "shield": "0"

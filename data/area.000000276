@@ -1,5 +1,5 @@
 {
   "name": "Main Street",
-  "description": "The southside of the street is populated with beautiful houses, one more impressive than the next. One of these houses belongs to Markus Kagir, by far the wealthiest man of the city.\n\nOn the northside there's a canal, separating the street from the walls of Castle Blackwater.",
+  "description": "The southside of the street is populated with beautiful houses, one more impressive than the next. One of these houses belongs to Markus Kagir, by far the wealthiest man of the city.\n\nOn the northside there's a canal, separating the street from the walls of Castle Blackwater. Blablabla.",
   "exits": [ "exit:278", "exit:1005" ]
 }
