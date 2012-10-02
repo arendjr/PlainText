@@ -5,8 +5,10 @@
 #include "util.h"
 
 
-AddExitCommand::AddExitCommand(Player *character, QObject *parent) :
-    AdminCommand(character, parent) {
+#define super AdminCommand
+
+AddExitCommand::AddExitCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Add an exit to the current area.\n"
                    "\n"
@@ -23,11 +25,10 @@ AddExitCommand::AddExitCommand(Player *character, QObject *parent) :
 AddExitCommand::~AddExitCommand() {
 }
 
-void AddExitCommand::execute(const QString &command) {
+void AddExitCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
+    super::execute(player, command);
 
-    /*QString alias = */takeWord();
     QString exitName = takeWord();
     if (!assertWordsLeft("Usage: add-exit <exit-name> <destination-area-id>")) {
         return;

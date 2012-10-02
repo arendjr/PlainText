@@ -49,8 +49,7 @@ Session::Session(Realm *realm, const QString &source, QObject *parent) :
     m_signInStage(SessionClosed),
     m_signUpData(nullptr),
     m_realm(realm),
-    m_player(nullptr),
-    m_interpreter(nullptr) {
+    m_player(nullptr) {
 
     LogUtil::logSessionEvent(m_source, "Session opened");
 }
@@ -60,11 +59,11 @@ Session::~Session() {
     LogUtil::logSessionEvent(m_source, "Session closed");
 
     if (m_player && m_player->session() == this) {
+        LogUtil::logCommand(m_player->name(), "(signed out)");
+
         m_player->setSession(nullptr);
     }
     delete m_signUpData;
-
-    delete m_interpreter;
 }
 
 void Session::open() {
@@ -73,16 +72,13 @@ void Session::open() {
     askForUserName();
 }
 
-QStringList Session::commandNames() const {
-
-    return m_interpreter ? m_interpreter->commandNames() : QStringList();
-}
-
 void Session::processSignIn(const QString &data) {
 
     if (m_signInStage == SignedIn) {
-        CommandEvent event(m_interpreter, data);
+        CommandEvent event(m_player, data);
         event.process();
+        return;
+    } else if (m_signInStage == SessionClosed) {
         return;
     }
 
@@ -179,14 +175,12 @@ void Session::processSignIn(const QString &data) {
             m_player->setSession(this);
             connect(m_player, SIGNAL(write(QString)), this, SIGNAL(write(QString)));
 
-            m_interpreter = new CommandInterpreter(m_player);
-            connect(m_interpreter, SIGNAL(quit()), this, SIGNAL(terminate()));
             m_player->enter(m_player->currentArea());
             break;
 
         case SignInAborted:
             write("Ok. Bye.");
-            terminate();
+            emit terminate();
             break;
 
         default:
@@ -194,9 +188,15 @@ void Session::processSignIn(const QString &data) {
     }
 }
 
+void Session::signOut() {
+
+    setSignInStage(SessionClosed);
+    emit terminate();
+}
+
 void Session::onUserInput(QString data) {
 
-    if (m_signInStage == SessionClosed) {
+    if (m_signInStage == SessionClosed || m_signInStage == SignInAborted) {
         qDebug() << "User input on closed session";
         return;
     }
@@ -209,8 +209,8 @@ void Session::onUserInput(QString data) {
         data = data.left(160);
     }
 
-    if (m_signInStage == SignedIn && m_interpreter) {
-        m_realm->enqueueEvent(new CommandEvent(m_interpreter, data));
+    if (m_signInStage == SignedIn) {
+        m_realm->enqueueEvent(new CommandEvent(m_player, data));
     } else {
         m_realm->enqueueEvent(new SignInEvent(this, data));
     }
@@ -333,11 +333,12 @@ void Session::processPassword(const QString &input) {
     QString passwordHash = QCryptographicHash::hash(data, QCryptographicHash::Sha1).toBase64();
     if (m_player->passwordHash() == passwordHash) {
         LogUtil::logSessionEvent(m_source, "Authentication success for player " + m_player->name());
+        LogUtil::logCommand(m_player->name(), "(signed in)");
 
         if (m_player->session()) {
             write("Cannot sign you in because you're already signed in from another location.\n");
             setSignInStage(SessionClosed);
-            terminate();
+            emit terminate();
             return;
         }
 

@@ -9,10 +9,10 @@ class RemoveExitCommand : public AdminCommand {
     Q_OBJECT
 
     public:
-        RemoveExitCommand(Player *player, QObject *parent = 0);
+        RemoveExitCommand(QObject *parent = 0);
         virtual ~RemoveExitCommand();
 
-        virtual void execute(const QString &command);
+        virtual void execute(Player *player, const QString &command);
 };
 
 #endif // REMOVEEXITCOMMAND_H

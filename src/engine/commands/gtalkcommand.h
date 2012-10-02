@@ -9,10 +9,10 @@ class GtalkCommand : public Command {
     Q_OBJECT
 
     public:
-        GtalkCommand(Player *player, QObject *parent = 0);
+        GtalkCommand(QObject *parent = 0);
         virtual ~GtalkCommand();
 
-        virtual void execute(const QString &command);
+        virtual void execute(Player *player, const QString &command);
 };
 
 #endif // GTALKCOMMAND_H

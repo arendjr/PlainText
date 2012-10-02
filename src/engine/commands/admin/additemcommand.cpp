@@ -1,11 +1,12 @@
 #include "additemcommand.h"
 
 #include "item.h"
-#include "util.h"
 
 
-AddItemCommand::AddItemCommand(Player *character, QObject *parent) :
-    AdminCommand(character, parent) {
+#define super AdminCommand
+
+AddItemCommand::AddItemCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Add an item to the current area.\n"
                    "\n"
@@ -15,11 +16,10 @@ AddItemCommand::AddItemCommand(Player *character, QObject *parent) :
 AddItemCommand::~AddItemCommand() {
 }
 
-void AddItemCommand::execute(const QString &command) {
+void AddItemCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
+    super::execute(player, command);
 
-    /*QString alias = */takeWord();
     if (!assertWordsLeft("Usage: add-item <item-name>")) {
         return;
     }

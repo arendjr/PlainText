@@ -3,8 +3,10 @@
 #include "realm.h"
 
 
-AdminCommand::AdminCommand(Player *character, QObject *parent) :
-    Command(character, parent) {
+#define super Command
+
+AdminCommand::AdminCommand(QObject *parent) :
+    super(parent) {
 }
 
 AdminCommand::~AdminCommand() {
@@ -30,5 +32,5 @@ GameObjectPtrList AdminCommand::objectsByDescription(const QPair<QString, uint> 
         }
     }
 
-    return Command::objectsByDescription(description, pool);
+    return super::objectsByDescription(description, pool);
 }

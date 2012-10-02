@@ -1,8 +1,10 @@
 #include "closecommand.h"
 
 
-CloseCommand::CloseCommand(Player *player, QObject *parent) :
-    Command(player, parent) {
+#define super Command
+
+CloseCommand::CloseCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Close an exit, typically a door.\n"
                    "\n"
@@ -12,11 +14,10 @@ CloseCommand::CloseCommand(Player *player, QObject *parent) :
 CloseCommand::~CloseCommand() {
 }
 
-void CloseCommand::execute(const QString &command) {
+void CloseCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
+    super::execute(player, command);
 
-    /*QString alias = */takeWord();
     if (!assertWordsLeft("Close what?")) {
         return;
     }
@@ -28,5 +29,5 @@ void CloseCommand::execute(const QString &command) {
         return;
     }
 
-    player()->close(exit);
+    player->close(exit);
 }

@@ -3,8 +3,10 @@
 #include "util.h"
 
 
-GtalkCommand::GtalkCommand(Player *player, QObject *parent) :
-    Command(player, parent) {
+#define super Command
+
+GtalkCommand::GtalkCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Talk to everyone who's in the same group.\n"
                    "\n"
@@ -14,22 +16,21 @@ GtalkCommand::GtalkCommand(Player *player, QObject *parent) :
 GtalkCommand::~GtalkCommand() {
 }
 
-void GtalkCommand::execute(const QString &command) {
+void GtalkCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
+    super::execute(player, command);
 
-    /*QString alias = */takeWord();
     if (!assertWordsLeft("Say what?")) {
         return;
     }
 
-    if (player()->group().isNull()) {
+    if (player->group().isNull()) {
         send("You are not in a group.");
     } else {
         QString message = takeRest();
         QString text = (message.endsWith(".") || message.endsWith("?") || message.endsWith("!")) ?
                        "(Group) %1 mentioned, \"%2\"" : "(Group) %1 mentioned, \"%2.\"";
 
-        player()->group()->send(text.arg(player()->name(), message));
+        player->group()->send(text.arg(player->name(), message));
     }
 }

@@ -1,11 +1,12 @@
 #include "copyitemcommand.h"
 
 #include "item.h"
-#include "util.h"
 
 
-CopyItemCommand::CopyItemCommand(Player *character, QObject *parent) :
-    AdminCommand(character, parent) {
+#define super AdminCommand
+
+CopyItemCommand::CopyItemCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Copies an item or character.\n"
                    "\n"
@@ -15,11 +16,10 @@ CopyItemCommand::CopyItemCommand(Player *character, QObject *parent) :
 CopyItemCommand::~CopyItemCommand() {
 }
 
-void CopyItemCommand::execute(const QString &command) {
+void CopyItemCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
+    super::execute(player, command);
 
-    /*QString alias = */takeWord();
     if (!assertWordsLeft("Usage: copy-item <item-name> [#]")) {
         return;
     }

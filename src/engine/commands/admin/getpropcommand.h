@@ -9,10 +9,10 @@ class GetPropCommand : public AdminCommand {
     Q_OBJECT
 
     public:
-        GetPropCommand(Player *player, QObject *parent = 0);
+        GetPropCommand(QObject *parent = 0);
         virtual ~GetPropCommand();
 
-        virtual void execute(const QString &command);
+        virtual void execute(Player *player, const QString &command);
 };
 
 #endif // GETPROPCOMMAND_H

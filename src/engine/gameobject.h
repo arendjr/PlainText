@@ -68,7 +68,7 @@ class GameObject : public QObject {
 
         const ScriptFunctionMap &triggers() const { return m_triggers; }
         ScriptFunction trigger(const QString &name) const { return m_triggers[name]; }
-        bool hasTrigger(const QString &name) const { return m_triggers.contains(name); }
+        Q_INVOKABLE bool hasTrigger(const QString &name) const { return m_triggers.contains(name); }
         void setTrigger(const QString &name, const ScriptFunction &function);
         void unsetTrigger(const QString &name);
         void setTriggers(const ScriptFunctionMap &triggers);
@@ -129,7 +129,7 @@ class GameObject : public QObject {
 
         void resolvePointers();
 
-        void setDeleted();
+        Q_INVOKABLE void setDeleted();
 
         static GameObject *createByObjectType(Realm *realm, const QString &objectType, uint id = 0,
                                               Options options = NoOptions);

@@ -9,10 +9,10 @@ class GoCommand : public Command {
     Q_OBJECT
 
     public:
-        GoCommand(Player *player, QObject *parent = 0);
+        GoCommand(QObject *parent = 0);
         virtual ~GoCommand();
 
-        virtual void execute(const QString &command);
+        virtual void execute(Player *player, const QString &command);
 };
 
 #endif // GOCOMMAND_H

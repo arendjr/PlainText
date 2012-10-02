@@ -3,8 +3,10 @@
 #include "util.h"
 
 
-RemoveCommand::RemoveCommand(Player *character, QObject *parent) :
-    Command(character, parent) {
+#define super Command
+
+RemoveCommand::RemoveCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Remove an item that is currently worn or wielded and put it back in your "
                    "inventory.\n"
@@ -15,11 +17,10 @@ RemoveCommand::RemoveCommand(Player *character, QObject *parent) :
 RemoveCommand::~RemoveCommand() {
 }
 
-void RemoveCommand::execute(const QString &command) {
+void RemoveCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
+    super::execute(player, command);
 
-    /*QString alias = */takeWord();
     if (!assertWordsLeft("Remove what?")) {
         return;
     }
@@ -27,14 +28,14 @@ void RemoveCommand::execute(const QString &command) {
     takeWord("(the|my)");
 
     GameObjectPtrList allItems;
-    allItems << player()->weapon()
-             << player()->secondaryWeapon()
-             << player()->shield();
+    allItems << player->weapon()
+             << player->secondaryWeapon()
+             << player->shield();
 
     GameObjectPtr item = takeObject(allItems);
     if (!requireSome(item, "You're not wearing or wielding that.")) {
         return;
     }
 
-    player()->remove(item);
+    player->remove(item);
 }

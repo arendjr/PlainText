@@ -1,8 +1,10 @@
 #include "opencommand.h"
 
 
-OpenCommand::OpenCommand(Player *player, QObject *parent) :
-    Command(player, parent) {
+#define super Command
+
+OpenCommand::OpenCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Open an exit, typically a door. Note that doors automatically close after a "
                    "while.\n"
@@ -13,11 +15,10 @@ OpenCommand::OpenCommand(Player *player, QObject *parent) :
 OpenCommand::~OpenCommand() {
 }
 
-void OpenCommand::execute(const QString &command) {
+void OpenCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
+    super::execute(player, command);
 
-    /*QString alias = */takeWord();
     if (!assertWordsLeft("Open what?")) {
         return;
     }
@@ -29,5 +30,5 @@ void OpenCommand::execute(const QString &command) {
         return;
     }
 
-    player()->open(exit);
+    player->open(exit);
 }

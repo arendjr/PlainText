@@ -6,6 +6,7 @@
 
 #include <QtIOCompressor>
 
+#include "commandregistry.h"
 #include "player.h"
 #include "realm.h"
 #include "session.h"
@@ -285,13 +286,9 @@ void TelnetServer::sendMSDPUpdate(QTcpSocket *socket, Player *player) {
 
 void TelnetServer::sendMSDPCommands(QTcpSocket *socket) {
 
-    Session *session = socket->property("session").value<Session *>();
-
     QByteArray commands = MSDP_ARRAY_OPEN;
-    for (const QString &commandName : session->commandNames()) {
-        if (!commandName.startsWith("api-")) {
-            commands += MSDP_VAL + commandName;
-        }
+    for (const QString &commandName : m_realm->commandRegistry()->commandNames()) {
+        commands += MSDP_VAL + commandName;
     }
     commands += MSDP_ARRAY_CLOSE;
 

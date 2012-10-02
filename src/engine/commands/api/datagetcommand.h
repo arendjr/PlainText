@@ -7,10 +7,10 @@
 class DataGetCommand : public ApiCommand {
 
     public:
-        DataGetCommand(Player *player, QObject *parent = 0);
+        DataGetCommand(QObject *parent = 0);
         virtual ~DataGetCommand();
 
-        virtual void execute(const QString &command);
+        virtual void execute(Player *player, const QString &command);
 };
 
 #endif // DATAGETCOMMAND_H

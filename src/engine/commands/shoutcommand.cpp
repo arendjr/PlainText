@@ -1,8 +1,10 @@
 #include "shoutcommand.h"
 
 
-ShoutCommand::ShoutCommand(Player *character, QObject *parent) :
-    Command(character, parent) {
+#define super Command
+
+ShoutCommand::ShoutCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Shout a message. Everyone in the same area and every "
                    "adjacent area can hear it.\n"
@@ -13,16 +15,15 @@ ShoutCommand::ShoutCommand(Player *character, QObject *parent) :
 ShoutCommand::~ShoutCommand() {
 }
 
-void ShoutCommand::execute(const QString &command) {
+void ShoutCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
+    super::execute(player, command);
 
-    /*QString alias = */takeWord();
     if (!assertWordsLeft("Shout what?")) {
         return;
     }
 
     QString message = takeRest();
 
-    player()->shout(message);
+    player->shout(message);
 }

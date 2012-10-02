@@ -9,10 +9,10 @@ class UseCommand : public Command {
     Q_OBJECT
 
     public:
-        UseCommand(Player *player, QObject *parent = 0);
+        UseCommand(QObject *parent = 0);
         virtual ~UseCommand();
 
-        virtual void execute(const QString &command);
+        virtual void execute(Player *player, const QString &command);
 };
 
 #endif // USECOMMAND_H

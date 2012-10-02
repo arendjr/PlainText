@@ -9,10 +9,10 @@ class CopyTriggersCommand : public AdminCommand {
     Q_OBJECT
 
     public:
-        CopyTriggersCommand(Player *player, QObject *parent = 0);
+        CopyTriggersCommand(QObject *parent = 0);
         virtual ~CopyTriggersCommand();
 
-        virtual void execute(const QString &command);
+        virtual void execute(Player *player, const QString &command);
 };
 
 #endif // COPYTRIGGERSCOMMAND_H

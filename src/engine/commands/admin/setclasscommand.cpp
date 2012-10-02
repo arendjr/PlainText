@@ -4,8 +4,10 @@
 #include "realm.h"
 
 
-SetClassCommand::SetClassCommand(Player *character, QObject *parent) :
-    AdminCommand(character, parent) {
+#define super AdminCommand
+
+SetClassCommand::SetClassCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Set the class of some character.\n"
                    "\n"
@@ -15,11 +17,9 @@ SetClassCommand::SetClassCommand(Player *character, QObject *parent) :
 SetClassCommand::~SetClassCommand() {
 }
 
-void SetClassCommand::execute(const QString &command) {
+void SetClassCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
-
-    /*QString alias = */takeWord();
+    super::execute(player, command);
 
     GameObjectPtrList characters = takeObjects(currentArea()->characters());
     if (!requireUnique(characters, "Character not found.", "Character is not unique.")) {

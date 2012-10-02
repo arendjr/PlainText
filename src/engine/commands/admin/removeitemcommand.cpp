@@ -1,8 +1,10 @@
 #include "removeitemcommand.h"
 
 
-RemoveItemCommand::RemoveItemCommand(Player *character, QObject *parent) :
-    AdminCommand(character, parent) {
+#define super AdminCommand
+
+RemoveItemCommand::RemoveItemCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Remove an item from the current area.\n"
                    "\n"
@@ -12,11 +14,9 @@ RemoveItemCommand::RemoveItemCommand(Player *character, QObject *parent) :
 RemoveItemCommand::~RemoveItemCommand() {
 }
 
-void RemoveItemCommand::execute(const QString &command) {
+void RemoveItemCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
-
-    /*QString alias = */takeWord();
+    super::execute(player, command);
     if (!assertWordsLeft("Usage: remove-item <item-name> [#]")) {
         return;
     }

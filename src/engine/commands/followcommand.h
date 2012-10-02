@@ -9,10 +9,10 @@ class FollowCommand : public Command {
     Q_OBJECT
 
     public:
-        FollowCommand(Player *player, QObject *parent = 0);
+        FollowCommand(QObject *parent = 0);
         virtual ~FollowCommand();
 
-        virtual void execute(const QString &command);
+        virtual void execute(Player *player, const QString &command);
 };
 
 #endif // FOLLOWCOMMAND_H

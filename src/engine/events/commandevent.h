@@ -4,12 +4,12 @@
 #include "event.h"
 
 
-class CommandInterpreter;
+class Player;
 
 class CommandEvent : public Event {
 
     public:
-        CommandEvent(CommandInterpreter *interpreter, const QString &command);
+        CommandEvent(Player *player, const QString &command);
         virtual ~CommandEvent();
 
         virtual void process();
@@ -17,7 +17,7 @@ class CommandEvent : public Event {
         virtual QString toString() const;
 
     private:
-        CommandInterpreter *m_interpreter;
+        Player *m_player;
         QString m_command;
 };
 

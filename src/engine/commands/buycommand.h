@@ -9,10 +9,10 @@ class BuyCommand : public Command {
     Q_OBJECT
 
     public:
-        BuyCommand(Player *player, QObject *parent = 0);
+        BuyCommand(QObject *parent = 0);
         virtual ~BuyCommand();
 
-        virtual void execute(const QString &command);
+        virtual void execute(Player *player, const QString &command);
 };
 
 #endif // BUYCOMMAND_H

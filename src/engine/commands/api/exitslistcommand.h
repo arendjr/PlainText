@@ -7,10 +7,10 @@
 class ExitsListCommand : public ApiCommand {
 
     public:
-        ExitsListCommand(Player *player, QObject *parent = 0);
+        ExitsListCommand(QObject *parent = 0);
         virtual ~ExitsListCommand();
 
-        virtual void execute(const QString &command);
+        virtual void execute(Player *player, const QString &command);
 };
 
 #endif // EXITSLISTCOMMAND_H

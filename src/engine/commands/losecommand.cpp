@@ -3,8 +3,10 @@
 #include "util.h"
 
 
-LoseCommand::LoseCommand(Player *player, QObject *parent) :
-    Command(player, parent) {
+#define super Command
+
+LoseCommand::LoseCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Remove yourself or someone else from a group. If you are a group leader, you "
                    "can remove anyone from your group by using *lose <name>*. You can always "
@@ -16,11 +18,9 @@ LoseCommand::LoseCommand(Player *player, QObject *parent) :
 LoseCommand::~LoseCommand() {
 }
 
-void LoseCommand::execute(const QString &command) {
+void LoseCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
-
-    /*QString alias = */takeWord();
+    super::execute(player, command);
 
     if (hasWordsLeft()) {
         QPair <QString, uint> description = takeObjectsDescription();
@@ -30,9 +30,9 @@ void LoseCommand::execute(const QString &command) {
         if (characters.isEmpty()) {
             send(QString("\"%1\" is not here.").arg(Util::capitalize(description.first)));
         } else {
-            player()->lose(characters[0]);
+            player->lose(characters[0]);
         }
     } else {
-        player()->lose();
+        player->lose();
     }
 }

@@ -9,10 +9,10 @@ class SearchCommand : public Command {
     Q_OBJECT
 
     public:
-        SearchCommand(Player *player, QObject *parent = 0);
+        SearchCommand(QObject *parent = 0);
         virtual ~SearchCommand();
 
-        virtual void execute(const QString &command);
+        virtual void execute(Player *player, const QString &command);
 };
 
 #endif // SEARCHCOMMAND_H

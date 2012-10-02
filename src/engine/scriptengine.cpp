@@ -1,10 +1,12 @@
 #include "scriptengine.h"
 
 #include <QDebug>
+#include <QDir>
 #include <QFile>
 #include <QMetaType>
 
 #include "characterstats.h"
+#include "diskutil.h"
 #include "effect.h"
 #include "gameobject.h"
 #include "modifier.h"
@@ -38,14 +40,6 @@ ScriptEngine::ScriptEngine() :
 
     ScriptWindow *window = new ScriptWindow(m_jsEngine.globalObject(), this);
     m_jsEngine.setGlobalObject(window->toScriptValue());
-
-    QFile utilJs(":/script/util.js");
-    if (utilJs.open(QIODevice::ReadOnly)) {
-        m_jsEngine.evaluate(utilJs.readAll(), "util.js");
-        utilJs.close();
-    } else {
-        qWarning() << "Could not open util.js.";
-    }
 }
 
 ScriptEngine::~ScriptEngine() {
@@ -54,6 +48,48 @@ ScriptEngine::~ScriptEngine() {
 ScriptEngine *ScriptEngine::instance() {
 
     return s_instance;
+}
+
+void ScriptEngine::loadScripts() {
+
+    QFile utilJs(":/script/util.js");
+    if (utilJs.open(QIODevice::ReadOnly)) {
+        m_jsEngine.evaluate(utilJs.readAll(), "util.js");
+        utilJs.close();
+        if (m_jsEngine.hasUncaughtException()) {
+            qWarning() << "Exception while evaluating util.js: "
+                       << m_jsEngine.uncaughtException().toString();
+        }
+    } else {
+        qWarning() << "Could not open util.js";
+    }
+
+    QFile commandJs(":/script/commands/command.js");
+    if (commandJs.open(QIODevice::ReadOnly)) {
+        m_jsEngine.evaluate(commandJs.readAll(), "commands/command.js");
+        commandJs.close();
+        if (m_jsEngine.hasUncaughtException()) {
+            qWarning() << "Exception while evaluating command.js: "
+                       << m_jsEngine.uncaughtException().toString();
+        }
+    } else {
+        qWarning() << "Could not open command.js";
+    }
+
+    QDir dir(DiskUtil::dataDir() + "/commands");
+    for (const QString &entry : dir.entryList(QDir::Files)) {
+        QFile userCommandJs(dir.path() + "/" + entry);
+        if (userCommandJs.open(QIODevice::ReadOnly)) {
+            m_jsEngine.evaluate(userCommandJs.readAll(), "commands/" + entry);
+            userCommandJs.close();
+            if (m_jsEngine.hasUncaughtException()) {
+                qWarning() << "Exception while evaluating " << entry << ": "
+                           << m_jsEngine.uncaughtException().toString();
+            }
+        } else {
+            qWarning() << "Could not open " << entry;
+        }
+    }
 }
 
 QScriptValue ScriptEngine::evaluate(const QString &program,

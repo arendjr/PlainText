@@ -3,8 +3,10 @@
 #include "util.h"
 
 
-KillCommand::KillCommand(Player *player, QObject *parent) :
-    Command(player, parent) {
+#define super Command
+
+KillCommand::KillCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Attacks another character.\n"
                    "\n"
@@ -14,11 +16,10 @@ KillCommand::KillCommand(Player *player, QObject *parent) :
 KillCommand::~KillCommand() {
 }
 
-void KillCommand::execute(const QString &command) {
+void KillCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
+    super::execute(player, command);
 
-    /*QString alias = */takeWord();
     if (!assertWordsLeft("Kill who?")) {
         return;
     }
@@ -32,5 +33,5 @@ void KillCommand::execute(const QString &command) {
         return;
     }
 
-    player()->kill(characters[0]);
+    player->kill(characters[0]);
 }

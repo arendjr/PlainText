@@ -17,4 +17,3 @@ TECHNOLOGY
   -  Migrate to Qt5 after release.
      -  Use QCryptographicHash::Sha512 for password encryption.
      -  Use QLatin1String / QStringLiteral where it makes sense.
-  -  Make commands implementable in JavaScript.

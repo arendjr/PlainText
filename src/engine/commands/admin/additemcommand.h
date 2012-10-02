@@ -9,10 +9,10 @@ class AddItemCommand : public AdminCommand {
     Q_OBJECT
 
     public:
-        AddItemCommand(Player *player, QObject *parent = 0);
+        AddItemCommand(QObject *parent = 0);
         virtual ~AddItemCommand();
 
-        virtual void execute(const QString &command);
+        virtual void execute(Player *player, const QString &command);
 };
 
 #endif // ADDITEMCOMMAND_H

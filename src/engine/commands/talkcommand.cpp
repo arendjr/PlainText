@@ -3,8 +3,10 @@
 #include "util.h"
 
 
-TalkCommand::TalkCommand(Player *player, QObject *parent) :
-    Command(player, parent) {
+#define super Command
+
+TalkCommand::TalkCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Talk to a specific character who's in the same area. Only "
                    "this character will hear you.\n"
@@ -15,11 +17,10 @@ TalkCommand::TalkCommand(Player *player, QObject *parent) :
 TalkCommand::~TalkCommand() {
 }
 
-void TalkCommand::execute(const QString &command) {
+void TalkCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
+    super::execute(player, command);
 
-    /*QString alias = */takeWord();
     if (!assertWordsLeft("Talk to who?")) {
         return;
     }
@@ -47,5 +48,5 @@ void TalkCommand::execute(const QString &command) {
 
     QString message = takeRest();
 
-    player()->talk(characters[0], message);
+    player->talk(characters[0], message);
 }

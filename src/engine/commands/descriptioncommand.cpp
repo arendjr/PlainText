@@ -3,8 +3,10 @@
 #include "util.h"
 
 
-DescriptionCommand::DescriptionCommand(Player *character, QObject *parent) :
-    Command(character, parent) {
+#define super Command
+
+DescriptionCommand::DescriptionCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Change the description of your own character (max. 140 characters). Others "
                    "will see this description when they look at you.\n"
@@ -16,11 +18,10 @@ DescriptionCommand::DescriptionCommand(Player *character, QObject *parent) :
 DescriptionCommand::~DescriptionCommand() {
 }
 
-void DescriptionCommand::execute(const QString &command) {
+void DescriptionCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
+    super::execute(player, command);
 
-    /*QString alias = */takeWord();
     if (!assertWordsLeft("Set your description to what?")) {
         return;
     }
@@ -30,7 +31,7 @@ void DescriptionCommand::execute(const QString &command) {
         description.append(".");
     }
 
-    player()->setDescription(description);
+    player->setDescription(description);
 
     send("Your description has been changed to:\n" + description);
 }

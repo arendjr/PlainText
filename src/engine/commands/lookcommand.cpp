@@ -7,8 +7,10 @@
 #include "weapon.h"
 
 
-LookCommand::LookCommand(Player *character, QObject *parent) :
-    Command(character, parent) {
+#define super Command
+
+LookCommand::LookCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Look at something (any object, character, or the current area).\n"
                    "\n"
@@ -18,13 +20,12 @@ LookCommand::LookCommand(Player *character, QObject *parent) :
 LookCommand::~LookCommand() {
 }
 
-void LookCommand::execute(const QString &command) {
+void LookCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
+    super::execute(player, command);
 
-    /*QString alias = */takeWord();
     if (!hasWordsLeft()) {
-        player()->look();
+        player->look();
         return;
     }
 
@@ -35,7 +36,7 @@ void LookCommand::execute(const QString &command) {
         return;
     }
 
-    GameObjectPtrList pool = player()->inventory() + currentArea()->objects();
+    GameObjectPtrList pool = player->inventory() + currentArea()->objects();
     GameObjectPtr object = takeObject(pool);
     if (!requireSome(object, "That's not here.")) {
         return;
@@ -43,15 +44,15 @@ void LookCommand::execute(const QString &command) {
 
     QString description = object->description();
 
-    if (player()->id() == object->id()) {
+    if (player->id() == object->id()) {
         QString m = "You look at yourself.\n";
         if (!description.isEmpty()) {
             m += description + "\n";
         }
         GameObjectPtrList wieldedItems;
-        wieldedItems << player()->weapon()
-                     << player()->secondaryWeapon()
-                     << player()->shield();
+        wieldedItems << player->weapon()
+                     << player->secondaryWeapon()
+                     << player->shield();
         if (!wieldedItems.isEmpty()) {
             m += QString("You are wielding %1.\n").arg(wieldedItems.joinFancy());
         }
@@ -86,9 +87,9 @@ void LookCommand::execute(const QString &command) {
                  .arg(wieldedItems.joinFancy());
         }
 
-        int playerStatsTotal = player()->stats().total();
-        if (!player()->weapon().isNull()) {
-            playerStatsTotal += player()->weapon().cast<Weapon *>()->stats().total();
+        int playerStatsTotal = player->stats().total();
+        if (!player->weapon().isNull()) {
+            playerStatsTotal += player->weapon().cast<Weapon *>()->stats().total();
         }
         int characterStatsTotal = character->stats().total();
         if (!character->weapon().isNull()) {
@@ -97,10 +98,10 @@ void LookCommand::execute(const QString &command) {
         int statsDiff = playerStatsTotal - characterStatsTotal;
 
         if (statsDiff > 25) {
-            if (player()->race()->name() == "giant" && character->race()->name() != "giant") {
+            if (player->race()->name() == "giant" && character->race()->name() != "giant") {
                 m += QString("You should be careful not to accidentally step on %1.\n")
                      .arg(character->objectPronoun());
-            } else if (player()->race()->name() == "goblin" &&
+            } else if (player->race()->name() == "goblin" &&
                        character->race()->name() != "goblin") {
                 m += QString("%1 should be thankful if you don't kill %2.\n")
                      .arg(Util::capitalize(character->subjectPronoun()),

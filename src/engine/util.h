@@ -36,7 +36,7 @@ class Util : public QObject {
 
         Q_INVOKABLE static QString highlight(const QString &string);
 
-        static QString processHighlights(QString string);
+        Q_INVOKABLE static QString processHighlights(const QString &string);
 
         static QString validateUserName(const QString &string);
 

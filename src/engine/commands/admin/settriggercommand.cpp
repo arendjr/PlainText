@@ -3,25 +3,24 @@
 #include "util.h"
 
 
-SetTriggerCommand::SetTriggerCommand(Player *character, QObject *parent) :
-    AdminCommand(character, parent) {
+#define super AdminCommand
 
-    setDescription(QString("Set the script for some object's trigger.\n"
-                           "\n"
-                           "Usage: set-trigger <object-name> [#] <trigger-name> <script>\n"
-                           "\n"
-                           "Type %1 to see a list of all available triggers.")
-                   .arg(Util::highlight("help triggers")));
+SetTriggerCommand::SetTriggerCommand(QObject *parent) :
+    super(parent) {
+
+    setDescription("Set the script for some object's trigger.\n"
+                   "\n"
+                   "Usage: set-trigger <object-name> [#] <trigger-name> <script>\n"
+                   "\n"
+                   "Type *help triggers* to see a list of all available triggers.");
 }
 
 SetTriggerCommand::~SetTriggerCommand() {
 }
 
-void SetTriggerCommand::execute(const QString &command) {
+void SetTriggerCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
-
-    /*QString alias = */takeWord();
+    super::execute(player, command);
 
     GameObjectPtr object = takeObject(currentArea()->objects());
     if (!requireSome(object, "Object not found.")) {

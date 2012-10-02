@@ -9,10 +9,10 @@ class ApiCommand : public AdminCommand {
     Q_OBJECT
 
     public:
-        ApiCommand(Player *player, QObject *parent = 0);
+        ApiCommand(QObject *parent = 0);
         virtual ~ApiCommand();
 
-        virtual void execute(const QString &command);
+        virtual void execute(Player *player, const QString &command);
 
         const QString &requestId() const { return m_requestId; }
 

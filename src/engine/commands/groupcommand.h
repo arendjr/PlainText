@@ -9,10 +9,10 @@ class GroupCommand : public Command {
     Q_OBJECT
 
     public:
-        GroupCommand(Player *player, QObject *parent = 0);
+        GroupCommand(QObject *parent = 0);
         virtual ~GroupCommand();
 
-        virtual void execute(const QString &command);
+        virtual void execute(Player *player, const QString &command);
 };
 
 #endif // GROUPCOMMAND_H

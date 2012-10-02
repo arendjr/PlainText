@@ -5,11 +5,10 @@
 #include "util.h"
 
 
-Command::Command(Player *player, QObject *parent) :
-    QObject(parent),
-    m_player(player) {
+#define super QObject
 
-    Q_ASSERT(m_player);
+Command::Command(QObject *parent) :
+    super(parent) {
 }
 
 Command::~Command() {
@@ -20,51 +19,12 @@ void Command::setDescription(const QString &description) {
     m_description = Util::processHighlights(description);
 }
 
-void Command::setCommand(const QString &_command) {
+void Command::execute(Player *player, const QString &command) {
 
-    static QRegExp whitespace("\\s+");
+    setPlayer(player);
+    setCommand(command);
 
-    QString command = _command.trimmed();
-    m_words = command.split(whitespace);
-
-    if (m_player->isAdmin()) {
-        if (command.startsWith("exec-script ")) {
-            m_words.clear();
-            m_words << command.section(whitespace, 0, 0);
-            m_words << command.section(whitespace, 1);
-            return;
-        } else if (command.startsWith("api-trigger-set ")) {
-            m_words.clear();
-            m_words << command.section(whitespace, 0, 0);
-            m_words << command.section(whitespace, 1, 1);
-            m_words << command.section(whitespace, 2, 2);
-            m_words << command.section(whitespace, 3, 3);
-            if (m_words.last().toInt() > 0) {
-                m_words << command.section(whitespace, 4, 4);
-                m_words << command.section(whitespace, 5);
-            } else {
-                m_words << command.section(whitespace, 4);
-            }
-            return;
-        } else if (command.startsWith("set-prop ") && command.contains(" description ")) {
-            return;
-        }
-    }
-
-    for (int i = 0; i < m_words.length(); i++) {
-        QString word = m_words[i];
-        if (word.startsWith("\"")) {
-            while (i < m_words.length() - 1 && !word.endsWith("\"")) {
-                word += " " + m_words[i + 1];
-                m_words.removeAt(i);
-            }
-            if (word.endsWith("\"")) {
-                m_words[i] = word.mid(1, word.length() - 2);
-            } else {
-                m_words[i] = word.mid(1);
-            }
-        }
-    }
+    m_alias = takeWord();
 }
 
 void Command::prependWord(const QString &word) {
@@ -146,22 +106,24 @@ QPair<QString, uint> Command::takeObjectsDescription() {
     QPair<QString, uint> description;
     if (m_words.length() > 0) {
         description.first = m_words.takeFirst().toLower();
-        if (description.first == "first" && m_words.length() > 0) {
-            description.first = m_words.takeFirst().toLower();
-            description.second = 1;
-        } else if (description.first == "second" && m_words.length() > 0) {
-            description.first = m_words.takeFirst().toLower();
-            description.second = 2;
-        } else if (description.first == "third" && m_words.length() > 0) {
-            description.first = m_words.takeFirst().toLower();
-            description.second = 3;
-        } else if (description.first == "fourth" && m_words.length() > 0) {
-            description.first = m_words.takeFirst().toLower();
-            description.second = 4;
-        } else if (m_words.length() > 0) {
-            description.second = m_words.first().toInt();
-            if (description.second > 0) {
-                m_words.removeFirst();
+        if (m_words.length() > 0) {
+            if (description.first == "first") {
+                description.first = m_words.takeFirst().toLower();
+                description.second = 1;
+            } else if (description.first == "second") {
+                description.first = m_words.takeFirst().toLower();
+                description.second = 2;
+            } else if (description.first == "third") {
+                description.first = m_words.takeFirst().toLower();
+                description.second = 3;
+            } else if (description.first == "fourth") {
+                description.first = m_words.takeFirst().toLower();
+                description.second = 4;
+            } else {
+                description.second = m_words.first().toInt();
+                if (description.second > 0) {
+                    m_words.removeFirst();
+                }
             }
         }
     }
@@ -237,5 +199,57 @@ bool Command::requireUnique(const GameObjectPtrList &objects,
         return false;
     } else {
         return true;
+    }
+}
+
+void Command::setPlayer(Player *player) {
+
+    m_player = player;
+}
+
+void Command::setCommand(const QString &_command) {
+
+    static QRegExp whitespace("\\s+");
+
+    QString command = _command.trimmed();
+    m_words = command.split(whitespace);
+
+    if (m_player->isAdmin()) {
+        if (command.startsWith("exec-script ")) {
+            m_words.clear();
+            m_words << command.section(whitespace, 0, 0);
+            m_words << command.section(whitespace, 1);
+            return;
+        } else if (command.startsWith("api-trigger-set ")) {
+            m_words.clear();
+            m_words << command.section(whitespace, 0, 0);
+            m_words << command.section(whitespace, 1, 1);
+            m_words << command.section(whitespace, 2, 2);
+            m_words << command.section(whitespace, 3, 3);
+            if (m_words.last().toInt() > 0) {
+                m_words << command.section(whitespace, 4, 4);
+                m_words << command.section(whitespace, 5);
+            } else {
+                m_words << command.section(whitespace, 4);
+            }
+            return;
+        } else if (command.startsWith("set-prop ") && command.contains(" description ")) {
+            return;
+        }
+    }
+
+    for (int i = 0; i < m_words.length(); i++) {
+        QString word = m_words[i];
+        if (word.startsWith("\"")) {
+            while (i < m_words.length() - 1 && !word.endsWith("\"")) {
+                word += " " + m_words[i + 1];
+                m_words.removeAt(i);
+            }
+            if (word.endsWith("\"")) {
+                m_words[i] = word.mid(1, word.length() - 2);
+            } else {
+                m_words[i] = word.mid(1);
+            }
+        }
     }
 }

@@ -5,8 +5,8 @@
 
 #define super ApiCommand
 
-TriggersListCommand::TriggersListCommand(Player *player, QObject *parent) :
-    super(player, parent) {
+TriggersListCommand::TriggersListCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Syntax: api-triggers-list <request-id>");
 }
@@ -14,9 +14,9 @@ TriggersListCommand::TriggersListCommand(Player *player, QObject *parent) :
 TriggersListCommand::~TriggersListCommand() {
 }
 
-void TriggersListCommand::execute(const QString &command) {
+void TriggersListCommand::execute(Player *player, const QString &command) {
 
-    super::execute(command);
+    super::execute(player, command);
 
     sendReply(QStringList(ScriptEngine::triggers().keys()));
 }

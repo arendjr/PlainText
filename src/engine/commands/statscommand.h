@@ -9,10 +9,10 @@ class StatsCommand : public Command {
     Q_OBJECT
 
     public:
-        StatsCommand(Player *player, QObject *parent = 0);
+        StatsCommand(QObject *parent = 0);
         virtual ~StatsCommand();
 
-        virtual void execute(const QString &command);
+        virtual void execute(Player *player, const QString &command);
 };
 
 #endif // STATSCOMMAND_H

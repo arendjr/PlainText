@@ -4,18 +4,18 @@
 #include "realm.h"
 
 
-ApiCommand::ApiCommand(Player *character, QObject *parent) :
-    AdminCommand(character, parent) {
+#define super AdminCommand
+
+ApiCommand::ApiCommand(QObject *parent) :
+    super(parent) {
 }
 
 ApiCommand::~ApiCommand() {
 }
 
-void ApiCommand::execute(const QString &command) {
+void ApiCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
-
-    /*QString alias = */takeWord();
+    super::execute(player, command);
 
     m_requestId = takeWord();
 }

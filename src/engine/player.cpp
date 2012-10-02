@@ -1,8 +1,10 @@
 #include "player.h"
 
 #include "area.h"
+#include "commandinterpreter.h"
 #include "exit.h"
 #include "realm.h"
+#include "session.h"
 #include "util.h"
 
 
@@ -142,6 +144,23 @@ void Player::look() {
     }
 
     send(text);
+}
+
+void Player::execute(const QString &command) {
+
+    realm()->commandInterpreter()->execute(this, command);
+}
+
+void Player::quit() {
+
+    if (m_session != nullptr) {
+        if (secondsStunned() > 0) {
+            send(QString("Please wait %1 seconds.").arg(secondsStunned()), Olive);
+        } else {
+            m_session->signOut();
+            m_session = nullptr;
+        }
+    }
 }
 
 void Player::invokeTimer(int timerId) {

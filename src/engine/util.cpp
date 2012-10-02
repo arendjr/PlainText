@@ -259,14 +259,15 @@ QString Util::highlight(const QString &string) {
     return colorize(string, White);
 }
 
-QString Util::processHighlights(QString string) {
+QString Util::processHighlights(const QString &string) {
 
     static QRegExp bold("\\*([^*]+)\\*");
+    QString result = string;
     int pos = 0;
-    while ((pos = bold.indexIn(string)) != -1) {
-        string = string.replace(pos, bold.matchedLength(), Util::highlight(bold.cap(1)));
+    while ((pos = bold.indexIn(result)) != -1) {
+        result = result.replace(pos, bold.matchedLength(), Util::highlight(bold.cap(1)));
     }
-    return string;
+    return result;
 }
 
 QString Util::validateUserName(const QString &string) {

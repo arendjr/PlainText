@@ -9,10 +9,10 @@ class WieldCommand : public Command {
     Q_OBJECT
 
     public:
-        WieldCommand(Player *player, QObject *parent = 0);
+        WieldCommand(QObject *parent = 0);
         virtual ~WieldCommand();
 
-        virtual void execute(const QString &command);
+        virtual void execute(Player *player, const QString &command);
 };
 
 #endif // WIELDCOMMAND_H

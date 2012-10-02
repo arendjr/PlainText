@@ -7,10 +7,10 @@
 class AreasListCommand : public ApiCommand {
 
     public:
-        AreasListCommand(Player *player, QObject *parent = 0);
+        AreasListCommand(QObject *parent = 0);
         virtual ~AreasListCommand();
 
-        virtual void execute(const QString &command);
+        virtual void execute(Player *player, const QString &command);
 };
 
 #endif // AREASLISTCOMMAND_H

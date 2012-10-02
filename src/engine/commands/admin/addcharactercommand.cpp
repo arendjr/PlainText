@@ -2,11 +2,12 @@
 
 #include "character.h"
 #include "realm.h"
-#include "util.h"
 
 
-AddCharacterCommand::AddCharacterCommand(Player *character, QObject *parent) :
-    AdminCommand(character, parent) {
+#define super AdminCommand
+
+AddCharacterCommand::AddCharacterCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Add a character to the current area.\n"
                    "\n"
@@ -16,11 +17,10 @@ AddCharacterCommand::AddCharacterCommand(Player *character, QObject *parent) :
 AddCharacterCommand::~AddCharacterCommand() {
 }
 
-void AddCharacterCommand::execute(const QString &command) {
+void AddCharacterCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
+    super::execute(player, command);
 
-    /*QString alias = */takeWord();
     if (!assertWordsLeft("Usage: add-character <character-name>")) {
         return;
     }
@@ -32,5 +32,5 @@ void AddCharacterCommand::execute(const QString &command) {
     character->setCurrentArea(currentArea());
     currentArea()->addNPC(character);
 
-    player()->send(QString("Character %1 added.").arg(characterName));
+    send(QString("Character %1 added.").arg(characterName));
 }

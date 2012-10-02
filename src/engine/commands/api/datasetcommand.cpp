@@ -5,8 +5,8 @@
 
 #define super ApiCommand
 
-DataSetCommand::DataSetCommand(Player *player, QObject *parent) :
-    super(player, parent) {
+DataSetCommand::DataSetCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Syntax: api-data-set <request-id> <object-id> <key> <type> <value>");
 }
@@ -14,9 +14,9 @@ DataSetCommand::DataSetCommand(Player *player, QObject *parent) :
 DataSetCommand::~DataSetCommand() {
 }
 
-void DataSetCommand::execute(const QString &command) {
+void DataSetCommand::execute(Player *player, const QString &command) {
 
-    super::execute(command);
+    super::execute(player, command);
 
     GameObjectPtr object = takeObject(currentArea()->objects());
     if (object.isNull()) {

@@ -37,6 +37,10 @@ class Player : public Character {
 
         Q_INVOKABLE void look();
 
+        Q_INVOKABLE void execute(const QString &command);
+
+        Q_INVOKABLE void quit();
+
         virtual void invokeTimer(int timerId);
 
     signals:

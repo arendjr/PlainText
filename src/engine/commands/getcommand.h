@@ -9,10 +9,10 @@ class GetCommand : public Command {
     Q_OBJECT
 
     public:
-        GetCommand(Player *player, QObject *parent = 0);
+        GetCommand(QObject *parent = 0);
         virtual ~GetCommand();
 
-        virtual void execute(const QString &command);
+        virtual void execute(Player *player, const QString &command);
 };
 
 #endif // GETCOMMAND_H

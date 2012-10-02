@@ -9,10 +9,10 @@ class RemoveItemCommand : public AdminCommand {
     Q_OBJECT
 
     public:
-        RemoveItemCommand(Player *player, QObject *parent = 0);
+        RemoveItemCommand(QObject *parent = 0);
         virtual ~RemoveItemCommand();
 
-        virtual void execute(const QString &command);
+        virtual void execute(Player *player, const QString &command);
 };
 
 #endif // REMOVEITEMCOMMAND_H

@@ -9,10 +9,10 @@ class DropCommand : public Command {
     Q_OBJECT
 
     public:
-        DropCommand(Player *player, QObject *parent = 0);
+        DropCommand(QObject *parent = 0);
         virtual ~DropCommand();
 
-        virtual void execute(const QString &command);
+        virtual void execute(Player *player, const QString &command);
 };
 
 #endif // DROPCOMMAND_H

@@ -12,6 +12,8 @@
 #include "logthread.h"
 
 
+class CommandInterpreter;
+class CommandRegistry;
 class Event;
 class LogMessage;
 class Player;
@@ -64,9 +66,6 @@ class Realm : public GameObject {
 
         void enqueueLogMessage(LogMessage *message);
 
-        ScriptEngine *scriptEngine() const { return m_scriptEngine; }
-        void setScriptEngine(ScriptEngine *scriptEngine);
-
         inline int startTimer(GameObject *object, int timeout) {
             return m_gameThread.startTimer(object, timeout);
         }
@@ -84,6 +83,12 @@ class Realm : public GameObject {
         }
 
         virtual void invokeTimer(int timerId);
+
+        ScriptEngine *scriptEngine() const { return m_scriptEngine; }
+        void setScriptEngine(ScriptEngine *scriptEngine);
+
+        CommandRegistry *commandRegistry() const { return m_commandRegistry; }
+        CommandInterpreter *commandInterpreter() const { return m_commandInterpreter; }
 
     signals:
         void hourPassed(const QDateTime &dateTime);
@@ -112,6 +117,9 @@ class Realm : public GameObject {
         LogThread m_logThread;
 
         ScriptEngine *m_scriptEngine;
+
+        CommandRegistry *m_commandRegistry;
+        CommandInterpreter *m_commandInterpreter;
 };
 
 #endif // REALM_H

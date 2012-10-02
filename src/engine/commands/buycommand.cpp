@@ -3,8 +3,10 @@
 #include "util.h"
 
 
-BuyCommand::BuyCommand(Player *character, QObject *parent) :
-    Command(character, parent) {
+#define super Command
+
+BuyCommand::BuyCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Buy an item from a character. Use *buy from <character>* to enquiry what goods "
                    "a character has for sale. Use *buy <item> from <character>* to buy a specific "
@@ -16,11 +18,9 @@ BuyCommand::BuyCommand(Player *character, QObject *parent) :
 BuyCommand::~BuyCommand() {
 }
 
-void BuyCommand::execute(const QString &command) {
+void BuyCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
-
-    /*QString alias = */takeWord();
+    super::execute(player, command);
 
     GameObjectPtrList sellers;
     for (const GameObjectPtr &npc : currentArea()->npcs()) {
@@ -104,7 +104,7 @@ void BuyCommand::execute(const QString &command) {
     }
 
     if (itemDescription.first.isEmpty()) {
-        seller->invokeTrigger("onbuy", player());
+        seller->invokeTrigger("onbuy", player);
         return;
     }
 
@@ -114,17 +114,17 @@ void BuyCommand::execute(const QString &command) {
     }
 
     Item *item = items[0].cast<Item *>();
-    if (item->cost() > player()->gold()) {
+    if (item->cost() > player->gold()) {
         send("You don't have enough gold to buy that.");
         return;
     }
 
-    if (!seller->invokeTrigger("onbuy", player(), items[0])) {
+    if (!seller->invokeTrigger("onbuy", player, items[0])) {
         return;
     }
 
-    player()->adjustGold(-item->cost());
-    player()->addInventoryItem(item->copy());
+    player->adjustGold(-item->cost());
+    player->addInventoryItem(item->copy());
 
     send(QString("You bought %1.").arg(item->indefiniteName()));
 }

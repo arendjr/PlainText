@@ -9,10 +9,10 @@ class LoseCommand : public Command {
     Q_OBJECT
 
     public:
-        LoseCommand(Player *player, QObject *parent = 0);
+        LoseCommand(QObject *parent = 0);
         virtual ~LoseCommand();
 
-        virtual void execute(const QString &command);
+        virtual void execute(Player *player, const QString &command);
 };
 
 #endif // LOSECOMMAND_H

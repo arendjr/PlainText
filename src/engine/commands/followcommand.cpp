@@ -3,8 +3,10 @@
 #include "util.h"
 
 
-FollowCommand::FollowCommand(Player *player, QObject *parent) :
-    Command(player, parent) {
+#define super Command
+
+FollowCommand::FollowCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Form or join a group by following another player. The first person being "
                    "followed automatically becomes the group leader.\n"
@@ -15,11 +17,10 @@ FollowCommand::FollowCommand(Player *player, QObject *parent) :
 FollowCommand::~FollowCommand() {
 }
 
-void FollowCommand::execute(const QString &command) {
+void FollowCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
+    super::execute(player, command);
 
-    /*QString alias = */takeWord();
     if (!assertWordsLeft("Follow who?")) {
         return;
     }
@@ -30,6 +31,6 @@ void FollowCommand::execute(const QString &command) {
     if (characters.isEmpty()) {
         send(QString("\"%1\" is not here.").arg(Util::capitalize(description.first)));
     } else {
-        player()->follow(characters[0]);
+        player->follow(characters[0]);
     }
 }

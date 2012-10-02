@@ -5,7 +5,6 @@
 #include <QObject>
 
 
-class CommandInterpreter;
 class Player;
 class Realm;
 
@@ -40,9 +39,9 @@ class Session : public QObject {
 
         Player *player() const { return m_player; }
 
-        QStringList commandNames() const;
-
         void processSignIn(const QString &data);
+
+        void signOut();
 
     public slots:
         void onUserInput(QString data);
@@ -62,8 +61,6 @@ class Session : public QObject {
 
         Realm *m_realm;
         Player *m_player;
-
-        CommandInterpreter *m_interpreter;
 
         void setSignInStage(SignInStage signInStage);
 

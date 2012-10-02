@@ -5,8 +5,8 @@
 
 #define super ApiCommand
 
-AreasListCommand::AreasListCommand(Player *player, QObject *parent) :
-    super(player, parent) {
+AreasListCommand::AreasListCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Syntax: api-areas-list <request-id>");
 }
@@ -14,13 +14,13 @@ AreasListCommand::AreasListCommand(Player *player, QObject *parent) :
 AreasListCommand::~AreasListCommand() {
 }
 
-void AreasListCommand::execute(const QString &command) {
+void AreasListCommand::execute(Player *player, const QString &command) {
 
-    super::execute(command);
+    super::execute(player, command);
 
     QVariantList data;
     for (const GameObjectPtr &area : realm()->allAreas()) {
-        data << QVariant::fromValue(area.cast<GameObject *>());
+        data << area->toJSON(IncludeId | DontIncludeTypeInfo);
     }
     sendReply(data);
 }

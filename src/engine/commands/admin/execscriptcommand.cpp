@@ -5,8 +5,10 @@
 #include "scriptengine.h"
 
 
-ExecScriptCommand::ExecScriptCommand(Player *character, QObject *parent) :
-    AdminCommand(character, parent) {
+#define super AdminCommand
+
+ExecScriptCommand::ExecScriptCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Executes a script.\n"
                    "\n"
@@ -16,11 +18,10 @@ ExecScriptCommand::ExecScriptCommand(Player *character, QObject *parent) :
 ExecScriptCommand::~ExecScriptCommand() {
 }
 
-void ExecScriptCommand::execute(const QString &command) {
+void ExecScriptCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
+    super::execute(player, command);
 
-    /*QString alias = */takeWord();
     if (!assertWordsLeft("Usage: exec-script <script>")) {
         return;
     }

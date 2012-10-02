@@ -9,14 +9,12 @@ class HelpCommand : public Command {
     Q_OBJECT
 
     public:
-        HelpCommand(Player *player, const QMap<QString, Command *> &commands, QObject *parent = 0);
+        HelpCommand(QObject *parent = 0);
         virtual ~HelpCommand();
 
-        virtual void execute(const QString &command);
+        virtual void execute(Player *player, const QString &command);
 
     private:
-        const QMap<QString, Command *> &m_commands;
-
         QString showAdminHelp(const QString &commandName);
 
         static QString formatColumns(const QStringList &commandNames);

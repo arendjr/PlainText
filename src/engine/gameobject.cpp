@@ -397,7 +397,8 @@ QString GameObject::toJSON(Options options) const {
     for (const QMetaProperty &metaProperty : storedMetaProperties()) {
         const char *name = metaProperty.name();
 
-        QString propertyString = ConversionUtil::toJSON(property(name));
+        QString propertyString = ConversionUtil::toJSON(property(name),
+                                                        options & DontIncludeTypeInfo);
         if (!propertyString.isNull()) {
             dumpedProperties << QString("  \"%1\": %2").arg(name, propertyString);
         }

@@ -5,6 +5,7 @@
 #include <QMetaType>
 
 #include "characterstats.h"
+#include "commandregistry.h"
 #include "gameexception.h"
 #include "gameobject.h"
 #include "gameobjectptr.h"
@@ -41,9 +42,11 @@ bool Engine::start() {
         m_util = new Util();
 
         m_realm->setScriptEngine(m_scriptEngine);
+        m_scriptEngine->setGlobalObject("CommandRegistry", m_realm->commandRegistry());
         m_scriptEngine->setGlobalObject("Realm", m_realm);
         m_scriptEngine->setGlobalObject("Util", m_util);
 
+        m_scriptEngine->loadScripts();
         m_realm->init();
 
         m_telnetServer = new TelnetServer(m_realm, 4801);

@@ -3,8 +3,10 @@
 #include "util.h"
 
 
-EatCommand::EatCommand(Player *character, QObject *parent) :
-    Command(character, parent) {
+#define super Command
+
+EatCommand::EatCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Eat an item in the current area or your inventory.\n"
                    "\n"
@@ -14,18 +16,17 @@ EatCommand::EatCommand(Player *character, QObject *parent) :
 EatCommand::~EatCommand() {
 }
 
-void EatCommand::execute(const QString &command) {
+void EatCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
+    super::execute(player, command);
 
-    /*QString alias = */takeWord();
     if (!assertWordsLeft("Eat what?")) {
         return;
     }
 
     takeWord("the");
 
-    GameObjectPtrList allItems = player()->inventory() + currentArea()->items();
+    GameObjectPtrList allItems = player->inventory() + currentArea()->items();
     GameObjectPtrList items = takeObjects(allItems);
     if (!requireSome(items, "You don't have that.")) {
         return;
@@ -37,7 +38,7 @@ void EatCommand::execute(const QString &command) {
         return;
     }
 
-    if (!item->invokeTrigger("oneat", player())) {
+    if (!item->invokeTrigger("oneat", player)) {
         return;
     }
 

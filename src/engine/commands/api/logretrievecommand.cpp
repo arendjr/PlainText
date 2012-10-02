@@ -8,8 +8,8 @@
 
 #define super ApiCommand
 
-LogRetrieveCommand::LogRetrieveCommand(Player *player, QObject *parent) :
-    super(player, parent) {
+LogRetrieveCommand::LogRetrieveCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Syntax: api-log-retrieve <request-id> stats <stats-type> <number-of-days>");
 }
@@ -17,9 +17,9 @@ LogRetrieveCommand::LogRetrieveCommand(Player *player, QObject *parent) :
 LogRetrieveCommand::~LogRetrieveCommand() {
 }
 
-void LogRetrieveCommand::execute(const QString &command) {
+void LogRetrieveCommand::execute(Player *player, const QString &command) {
 
-    super::execute(command);
+    super::execute(player, command);
 
     if (takeWord() != "stats") {
         sendError(400, "First argument should be stats");
@@ -34,6 +34,6 @@ void LogRetrieveCommand::execute(const QString &command) {
         return;
     }
 
-    Realm::instance()->enqueueLogMessage(new RetrieveStatsLogMessage(player(), requestId(),
+    Realm::instance()->enqueueLogMessage(new RetrieveStatsLogMessage(player, requestId(),
                                                                      statsType, numDays));
 }

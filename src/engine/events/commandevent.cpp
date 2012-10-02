@@ -2,12 +2,12 @@
 
 #include <QDebug>
 
-#include "commandinterpreter.h"
+#include "player.h"
 
 
-CommandEvent::CommandEvent(CommandInterpreter *interpreter, const QString &command) :
+CommandEvent::CommandEvent(Player *player, const QString &command) :
     Event(),
-    m_interpreter(interpreter),
+    m_player(player),
     m_command(command) {
 }
 
@@ -16,12 +16,12 @@ CommandEvent::~CommandEvent() {
 
 void CommandEvent::process() {
 
-    if (!m_interpreter || m_command.isEmpty()) {
+    if (!m_player || m_command.isEmpty()) {
         qWarning() << "Processing uninitialized command event. Skipped.";
         return;
     }
 
-    m_interpreter->execute(m_command);
+    m_player->execute(m_command);
 }
 
 QString CommandEvent::toString() const {

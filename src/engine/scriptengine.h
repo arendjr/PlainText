@@ -23,6 +23,8 @@ class ScriptEngine : public QObject {
 
         static ScriptEngine *instance();
 
+        void loadScripts();
+
         QScriptValue evaluate(const QString &program,
                               const QString &fileName = QString(), int lineNumber = 1);
         ScriptFunction defineFunction(const QString &program,

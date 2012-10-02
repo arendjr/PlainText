@@ -1,10 +1,10 @@
 #include "disbandcommand.h"
 
-#include "util.h"
 
+#define super Command
 
-DisbandCommand::DisbandCommand(Player *player, QObject *parent) :
-    Command(player, parent) {
+DisbandCommand::DisbandCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Disband your group. Only the group leader can disband a group.\n"
                    "\n"
@@ -14,11 +14,9 @@ DisbandCommand::DisbandCommand(Player *player, QObject *parent) :
 DisbandCommand::~DisbandCommand() {
 }
 
-void DisbandCommand::execute(const QString &command) {
+void DisbandCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
+    super::execute(player, command);
 
-    /*QString alias = */takeWord();
-
-    player()->disband();
+    player->disband();
 }

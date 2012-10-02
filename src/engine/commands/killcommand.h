@@ -9,10 +9,10 @@ class KillCommand : public Command {
     Q_OBJECT
 
     public:
-        KillCommand(Player *player, QObject *parent = 0);
+        KillCommand(QObject *parent = 0);
         virtual ~KillCommand();
 
-        virtual void execute(const QString &command);
+        virtual void execute(Player *player, const QString &command);
 };
 
 #endif // KILLCOMMAND_H

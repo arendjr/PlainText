@@ -1,11 +1,13 @@
 #include "setracecommand.h"
 
-#include "engine/character.h"
-#include "engine/realm.h"
+#include "character.h"
+#include "realm.h"
 
 
-SetRaceCommand::SetRaceCommand(Player *character, QObject *parent) :
-    AdminCommand(character, parent) {
+#define super AdminCommand
+
+SetRaceCommand::SetRaceCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Set the race of some character.\n"
                    "\n"
@@ -15,11 +17,9 @@ SetRaceCommand::SetRaceCommand(Player *character, QObject *parent) :
 SetRaceCommand::~SetRaceCommand() {
 }
 
-void SetRaceCommand::execute(const QString &command) {
+void SetRaceCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
-
-    /*QString alias = */takeWord();
+    super::execute(player, command);
 
     GameObjectPtrList characters = takeObjects(currentArea()->characters());
     if (!requireUnique(characters, "Character not found.", "Character is not unique.")) {

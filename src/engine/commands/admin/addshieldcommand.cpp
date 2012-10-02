@@ -1,11 +1,12 @@
 #include "addshieldcommand.h"
 
 #include "shield.h"
-#include "util.h"
 
 
-AddShieldCommand::AddShieldCommand(Player *character, QObject *parent) :
-    AdminCommand(character, parent) {
+#define super AdminCommand
+
+AddShieldCommand::AddShieldCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Add a shield to the current area.\n"
                    "\n"
@@ -15,11 +16,10 @@ AddShieldCommand::AddShieldCommand(Player *character, QObject *parent) :
 AddShieldCommand::~AddShieldCommand() {
 }
 
-void AddShieldCommand::execute(const QString &command) {
+void AddShieldCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
+    super::execute(player, command);
 
-    /*QString alias = */takeWord();
     if (!assertWordsLeft("Usage: add-shield <shield-name>")) {
         return;
     }

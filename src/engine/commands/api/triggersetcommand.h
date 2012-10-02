@@ -7,10 +7,10 @@
 class TriggerSetCommand : public ApiCommand {
 
     public:
-        TriggerSetCommand(Player *player, QObject *parent = 0);
+        TriggerSetCommand(QObject *parent = 0);
         virtual ~TriggerSetCommand();
 
-        virtual void execute(const QString &command);
+        virtual void execute(Player *player, const QString &command);
 };
 
 #endif // TRIGGERSETCOMMAND_H

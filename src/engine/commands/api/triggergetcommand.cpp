@@ -3,8 +3,8 @@
 
 #define super ApiCommand
 
-TriggerGetCommand::TriggerGetCommand(Player *player, QObject *parent) :
-    super(player, parent) {
+TriggerGetCommand::TriggerGetCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Syntax: api-trigger-get <request-id> <object-id> <trigger-name>");
 }
@@ -12,9 +12,9 @@ TriggerGetCommand::TriggerGetCommand(Player *player, QObject *parent) :
 TriggerGetCommand::~TriggerGetCommand() {
 }
 
-void TriggerGetCommand::execute(const QString &command) {
+void TriggerGetCommand::execute(Player *player, const QString &command) {
 
-    super::execute(command);
+    super::execute(player, command);
 
     GameObjectPtr object = takeObject(currentArea()->objects());
     if (object.isNull()) {

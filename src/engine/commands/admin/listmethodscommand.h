@@ -9,10 +9,10 @@ class ListMethodsCommand : public AdminCommand {
     Q_OBJECT
 
     public:
-        ListMethodsCommand(Player *player, QObject *parent = 0);
+        ListMethodsCommand(QObject *parent = 0);
         virtual ~ListMethodsCommand();
 
-        virtual void execute(const QString &command);
+        virtual void execute(Player *player, const QString &command);
 };
 
 #endif // LISTMETHODSCOMMAND_H

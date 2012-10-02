@@ -3,8 +3,10 @@
 #include "util.h"
 
 
-GetCommand::GetCommand(Player *character, QObject *parent) :
-    Command(character, parent) {
+#define super Command
+
+GetCommand::GetCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Take an item or gold from the current area and put it in your inventory.\n"
                    "\n"
@@ -14,12 +16,11 @@ GetCommand::GetCommand(Player *character, QObject *parent) :
 GetCommand::~GetCommand() {
 }
 
-void GetCommand::execute(const QString &command) {
+void GetCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
+    super::execute(player, command);
 
-    QString alias = takeWord();
-    if (!assertWordsLeft(QString("%1 what?").arg(Util::capitalize(alias)))) {
+    if (!assertWordsLeft(QString("%1 what?").arg(Util::capitalize(alias())))) {
         return;
     }
 
@@ -30,5 +31,5 @@ void GetCommand::execute(const QString &command) {
         return;
     }
 
-    player()->take(items);
+    player->take(items);
 }

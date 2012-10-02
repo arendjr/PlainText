@@ -4,11 +4,13 @@
 #include "util.h"
 
 
-TellCommand::TellCommand(Player *character, QObject *parent) :
-    Command(character, parent) {
+#define super Command
 
-    setDescription("Tell something to another online player (no need to be in "
-                   "the same area). Only this player will hear you.\n"
+TellCommand::TellCommand(QObject *parent) :
+    super(parent) {
+
+    setDescription("Tell something to another online player (no need to be in the same area). Only "
+                   "this player will hear you.\n"
                    "\n"
                    "Example: tell earl Hey Earl, where are you?");
 }
@@ -16,11 +18,10 @@ TellCommand::TellCommand(Player *character, QObject *parent) :
 TellCommand::~TellCommand() {
 }
 
-void TellCommand::execute(const QString &command) {
+void TellCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
+    super::execute(player, command);
 
-    /*QString alias = */takeWord();
     if (!assertWordsLeft("Tell who?")) {
         return;
     }
@@ -28,11 +29,11 @@ void TellCommand::execute(const QString &command) {
     QString userName = Util::capitalize(takeWord());
     Player *other = Realm::instance()->getPlayer(userName);
     if (!other || !other->session()) {
-        player()->send(QString("%1 is not online.").arg(userName));
+        send(QString("%1 is not online.").arg(userName));
         return;
     }
 
     QString message = takeRest();
 
-    player()->tell(other, message);
+    player->tell(other, message);
 }

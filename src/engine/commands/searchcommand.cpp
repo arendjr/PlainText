@@ -3,8 +3,10 @@
 #include "exit.h"
 
 
-SearchCommand::SearchCommand(Player *player, QObject *parent) :
-    Command(player, parent) {
+#define super Command
+
+SearchCommand::SearchCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Search the area for secret exits. It may take multiple searches to find an "
                    "exit.\n"
@@ -15,19 +17,17 @@ SearchCommand::SearchCommand(Player *player, QObject *parent) :
 SearchCommand::~SearchCommand() {
 }
 
-void SearchCommand::execute(const QString &command) {
+void SearchCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
+    super::execute(player, command);
 
-    /*QString alias = */takeWord();
-
-    if (player()->secondsStunned() > 0) {
-        player()->send(QString("Please wait %1 seconds.").arg(player()->secondsStunned()), Olive);
+    if (player->secondsStunned() > 0) {
+        player->send(QString("Please wait %1 seconds.").arg(player->secondsStunned()), Olive);
         return;
     }
 
-    CharacterStats stats = player()->totalStats();
-    bool isWanderer = (player()->characterClass()->name() == "wanderer");
+    CharacterStats stats = player->totalStats();
+    bool isWanderer = (player->characterClass()->name() == "wanderer");
 
     int searchSkill = qMin(stats.intelligence + stats.faith, 100) + (isWanderer ? 30 : 0);
 
@@ -46,6 +46,6 @@ void SearchCommand::execute(const QString &command) {
         send(QString("You found an exit: %1.").arg(foundExit->name()));
     } else {
         send("You didn't find anything.");
-        player()->stun(isWanderer ? 3000 : 4000);
+        player->stun(isWanderer ? 3000 : 4000);
     }
 }

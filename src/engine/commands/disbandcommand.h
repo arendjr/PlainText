@@ -9,10 +9,10 @@ class DisbandCommand : public Command {
     Q_OBJECT
 
     public:
-        DisbandCommand(Player *player, QObject *parent = 0);
+        DisbandCommand(QObject *parent = 0);
         virtual ~DisbandCommand();
 
-        virtual void execute(const QString &command);
+        virtual void execute(Player *player, const QString &command);
 };
 
 #endif // DISBANDCOMMAND_H

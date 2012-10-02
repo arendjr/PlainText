@@ -9,10 +9,10 @@ class SlashMeCommand : public Command {
     Q_OBJECT
 
     public:
-        SlashMeCommand(Player *player, QObject *parent = 0);
+        SlashMeCommand(QObject *parent = 0);
         virtual ~SlashMeCommand();
 
-        virtual void execute(const QString &command);
+        virtual void execute(Player *player, const QString &command);
 };
 
 #endif // SLASHMECOMMAND_H

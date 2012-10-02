@@ -9,10 +9,10 @@ class CloseCommand : public Command {
     Q_OBJECT
 
     public:
-        CloseCommand(Player *player, QObject *parent = 0);
+        CloseCommand(QObject *parent = 0);
         virtual ~CloseCommand();
 
-        virtual void execute(const QString &command);
+        virtual void execute(Player *player, const QString &command);
 };
 
 #endif // GOCOMMAND_H

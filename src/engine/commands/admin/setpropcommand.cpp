@@ -5,8 +5,10 @@
 #include "util.h"
 
 
-SetPropCommand::SetPropCommand(Player *character, QObject *parent) :
-    AdminCommand(character, parent) {
+#define super AdminCommand
+
+SetPropCommand::SetPropCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Set the value of some object's property.\n"
                    "\n"
@@ -16,11 +18,9 @@ SetPropCommand::SetPropCommand(Player *character, QObject *parent) :
 SetPropCommand::~SetPropCommand() {
 }
 
-void SetPropCommand::execute(const QString &command) {
+void SetPropCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
-
-    /*QString alias = */takeWord();
+    super::execute(player, command);
 
     GameObjectPtr object = takeObject(currentArea()->objects());
     if (!requireSome(object, "Object not found.")) {

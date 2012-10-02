@@ -1,8 +1,10 @@
 #include "equipmentcommand.h"
 
 
-EquipmentCommand::EquipmentCommand(Player *player, QObject *parent) :
-    Command(player, parent) {
+#define super Command
+
+EquipmentCommand::EquipmentCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("View any equipment you are currently wielding.\n"
                    "\n"
@@ -12,19 +14,19 @@ EquipmentCommand::EquipmentCommand(Player *player, QObject *parent) :
 EquipmentCommand::~EquipmentCommand() {
 }
 
-void EquipmentCommand::execute(const QString &command) {
+void EquipmentCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
+    super::execute(player, command);
 
     GameObjectPtrList wieldedEquipment;
-    if (!player()->weapon().isNull()) {
-        wieldedEquipment << player()->weapon();
+    if (!player->weapon().isNull()) {
+        wieldedEquipment << player->weapon();
     }
-    if (!player()->secondaryWeapon().isNull()) {
-        wieldedEquipment << player()->secondaryWeapon();
+    if (!player->secondaryWeapon().isNull()) {
+        wieldedEquipment << player->secondaryWeapon();
     }
-    if (!player()->shield().isNull()) {
-        wieldedEquipment << player()->shield();
+    if (!player->shield().isNull()) {
+        wieldedEquipment << player->shield();
     }
 
     if (wieldedEquipment.isEmpty()) {

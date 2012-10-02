@@ -3,8 +3,10 @@
 #include "util.h"
 
 
-UseCommand::UseCommand(Player *character, QObject *parent) :
-    Command(character, parent) {
+#define super Command
+
+UseCommand::UseCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Use an item from the current area or your inventory.\n"
                    "\n"
@@ -14,28 +16,26 @@ UseCommand::UseCommand(Player *character, QObject *parent) :
 UseCommand::~UseCommand() {
 }
 
-void UseCommand::execute(const QString &command) {
+void UseCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
+    super::execute(player, command);
 
-    /*QString alias = */takeWord();
     if (!assertWordsLeft("Use what?")) {
         return;
     }
 
     takeWord("the");
 
-    GameObjectPtrList allItems = player()->inventory() + currentArea()->items();
-    GameObjectPtrList items = takeObjects(allItems);
-    if (!requireSome(items, "You don't have that.")) {
+    GameObjectPtrList allItems = player->inventory() + currentArea()->items();
+    GameObjectPtr item = takeObject(allItems);
+    if (!requireSome(item, "You don't have that.")) {
         return;
     }
 
-    Item *item = items[0].cast<Item *>();
     if (!item->hasTrigger("onuse")) {
         send("You cannot use that.");
         return;
     }
 
-    item->invokeTrigger("onuse", player());
+    item->invokeTrigger("onuse", player);
 }

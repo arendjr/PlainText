@@ -9,10 +9,10 @@ class ShoutCommand : public Command {
     Q_OBJECT
 
     public:
-        ShoutCommand(Player *player, QObject *parent = 0);
+        ShoutCommand(QObject *parent = 0);
         virtual ~ShoutCommand();
 
-        virtual void execute(const QString &command);
+        virtual void execute(Player *player, const QString &command);
 };
 
 #endif // SHOUTCOMMAND_H

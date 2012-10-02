@@ -1,33 +1,26 @@
 #ifndef COMMANDINTERPRETER_H
 #define COMMANDINTERPRETER_H
 
-#include <QMap>
 #include <QObject>
-#include <QStringList>
 
 
+class CommandRegistry;
 class Player;
-class Command;
 
 class CommandInterpreter : public QObject {
 
     Q_OBJECT
 
     public:
-        explicit CommandInterpreter(Player *player);
+        explicit CommandInterpreter(QObject *parent = 0);
         virtual ~CommandInterpreter();
 
-        void execute(const QString &command);
+        void setRegistry(CommandRegistry *registry);
 
-        QStringList commandNames() const { return m_commands.keys(); }
-
-    signals:
-        void quit();
+        void execute(Player *player, const QString &command);
 
     private:
-        Player *m_player;
-
-        QMap<QString, Command *> m_commands;
+        CommandRegistry *m_registry;
 };
 
 #endif // COMMANDINTERPRETER_H

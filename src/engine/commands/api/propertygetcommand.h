@@ -7,10 +7,10 @@
 class PropertyGetCommand : public ApiCommand {
 
     public:
-        PropertyGetCommand(Player *player, QObject *parent = 0);
+        PropertyGetCommand(QObject *parent = 0);
         virtual ~PropertyGetCommand();
 
-        virtual void execute(const QString &command);
+        virtual void execute(Player *player, const QString &command);
 };
 
 #endif // PROPERTYGETCOMMAND_H

@@ -9,10 +9,10 @@ class EquipmentCommand : public Command {
     Q_OBJECT
 
     public:
-        EquipmentCommand(Player *player, QObject *parent = 0);
+        EquipmentCommand(QObject *parent = 0);
         virtual ~EquipmentCommand();
 
-        virtual void execute(const QString &command);
+        virtual void execute(Player *player, const QString &command);
 };
 
 #endif // EQUIPMENTCOMMAND_H

@@ -37,6 +37,7 @@ SOURCES += \
     engine/characterstats.cpp \
     engine/class.cpp \
     engine/commandinterpreter.cpp \
+    engine/commandregistry.cpp \
     engine/conversionutil.cpp \
     engine/diskutil.cpp \
     engine/effect.cpp \
@@ -69,7 +70,6 @@ SOURCES += \
     engine/commands/command.cpp \
     engine/commands/descriptioncommand.cpp \
     engine/commands/disbandcommand.cpp \
-    engine/commands/drinkcommand.cpp \
     engine/commands/dropcommand.cpp \
     engine/commands/eatcommand.cpp \
     engine/commands/equipmentcommand.cpp \
@@ -88,6 +88,7 @@ SOURCES += \
     engine/commands/quitcommand.cpp \
     engine/commands/removecommand.cpp \
     engine/commands/saycommand.cpp \
+    engine/commands/scriptcommand.cpp \
     engine/commands/searchcommand.cpp \
     engine/commands/shoutcommand.cpp \
     engine/commands/slashmecommand.cpp \
@@ -122,6 +123,7 @@ SOURCES += \
     engine/commands/api/areaslistcommand.cpp \
     engine/commands/api/datagetcommand.cpp \
     engine/commands/api/datasetcommand.cpp \
+    engine/commands/api/exitsetcommand.cpp \
     engine/commands/api/exitslistcommand.cpp \
     engine/commands/api/logretrievecommand.cpp \
     engine/commands/api/propertygetcommand.cpp \
@@ -158,6 +160,7 @@ HEADERS += \
     engine/characterstats.h \
     engine/class.h \
     engine/commandinterpreter.h \
+    engine/commandregistry.h \
     engine/constants.h \
     engine/conversionutil.h \
     engine/diskutil.h \
@@ -191,7 +194,6 @@ HEADERS += \
     engine/commands/command.h \
     engine/commands/descriptioncommand.h \
     engine/commands/disbandcommand.h \
-    engine/commands/drinkcommand.h \
     engine/commands/dropcommand.h \
     engine/commands/eatcommand.h \
     engine/commands/equipmentcommand.h \
@@ -210,6 +212,7 @@ HEADERS += \
     engine/commands/quitcommand.h \
     engine/commands/removecommand.h \
     engine/commands/saycommand.h \
+    engine/commands/scriptcommand.h \
     engine/commands/searchcommand.h \
     engine/commands/shoutcommand.h \
     engine/commands/slashmecommand.h \
@@ -244,6 +247,7 @@ HEADERS += \
     engine/commands/api/areaslistcommand.h \
     engine/commands/api/datagetcommand.h \
     engine/commands/api/datasetcommand.h \
+    engine/commands/api/exitsetcommand.h \
     engine/commands/api/exitslistcommand.h \
     engine/commands/api/logretrievecommand.h \
     engine/commands/api/propertygetcommand.h \
@@ -275,6 +279,8 @@ HEADERS += \
 
 OTHER_FILES += \
     engine/util.js \
+    engine/commands/command.js \
+    ../data/commands/drinkcommand.js \
     ../web/admin.js \
     ../web/index.html \
     ../web/main.css \

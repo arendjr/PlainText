@@ -1,11 +1,12 @@
 #include "addweaponcommand.h"
 
-#include "util.h"
 #include "weapon.h"
 
 
-AddWeaponCommand::AddWeaponCommand(Player *character, QObject *parent) :
-    AdminCommand(character, parent) {
+#define super AdminCommand
+
+AddWeaponCommand::AddWeaponCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Add a weapon to the current area.\n"
                    "\n"
@@ -15,11 +16,10 @@ AddWeaponCommand::AddWeaponCommand(Player *character, QObject *parent) :
 AddWeaponCommand::~AddWeaponCommand() {
 }
 
-void AddWeaponCommand::execute(const QString &command) {
+void AddWeaponCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
+    super::execute(player, command);
 
-    /*QString alias = */takeWord();
     if (!assertWordsLeft("Usage: add-weapon <weapon-name>")) {
         return;
     }

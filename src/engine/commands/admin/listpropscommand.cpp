@@ -4,8 +4,10 @@
 #include "util.h"
 
 
-ListPropsCommand::ListPropsCommand(Player *character, QObject *parent) :
-    AdminCommand(character, parent) {
+#define super AdminCommand
+
+ListPropsCommand::ListPropsCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("List all properties of an object, with their values.\n"
                    "\n"
@@ -15,11 +17,9 @@ ListPropsCommand::ListPropsCommand(Player *character, QObject *parent) :
 ListPropsCommand::~ListPropsCommand() {
 }
 
-void ListPropsCommand::execute(const QString &command) {
+void ListPropsCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
-
-    /*QString alias = */takeWord();
+    super::execute(player, command);
 
     GameObjectPtrList objects = takeObjects(currentArea()->objects());
     if (!requireUnique(objects, "Object not found.", "Object is not unique.")) {

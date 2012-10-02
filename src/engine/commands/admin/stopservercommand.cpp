@@ -3,8 +3,10 @@
 #include <QCoreApplication>
 
 
-StopServerCommand::StopServerCommand(Player *character, QObject *parent) :
-    AdminCommand(character, parent) {
+#define super AdminCommand
+
+StopServerCommand::StopServerCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Terminate the game server.\n"
                    "\n"
@@ -14,8 +16,9 @@ StopServerCommand::StopServerCommand(Player *character, QObject *parent) :
 StopServerCommand::~StopServerCommand() {
 }
 
-void StopServerCommand::execute(const QString &command) {
+void StopServerCommand::execute(Player *player, const QString &command) {
 
+    Q_UNUSED(player);
     Q_UNUSED(command);
 
     qApp->quit();

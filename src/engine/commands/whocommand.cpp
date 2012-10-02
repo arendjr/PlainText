@@ -3,8 +3,10 @@
 #include "realm.h"
 
 
-WhoCommand::WhoCommand(Player *character, QObject *parent) :
-    Command(character, parent) {
+#define super Command
+
+WhoCommand::WhoCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Show who is currently online.\n"
                    "\n"
@@ -14,11 +16,11 @@ WhoCommand::WhoCommand(Player *character, QObject *parent) :
 WhoCommand::~WhoCommand() {
 }
 
-void WhoCommand::execute(const QString &command) {
+void WhoCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
+    super::execute(player, command);
 
-    GameObjectPtrList players = Realm::instance()->onlinePlayers();
+    GameObjectPtrList players = realm()->onlinePlayers();
     if (players.length() == 1) {
         send("Only you are online.");
     } else {

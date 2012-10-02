@@ -4,8 +4,10 @@
 #include "util.h"
 
 
-GroupCommand::GroupCommand(Player *player, QObject *parent) :
-    Command(player, parent) {
+#define super Command
+
+GroupCommand::GroupCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Show information about the group you are in.\n"
                    "\n"
@@ -15,16 +17,14 @@ GroupCommand::GroupCommand(Player *player, QObject *parent) :
 GroupCommand::~GroupCommand() {
 }
 
-void GroupCommand::execute(const QString &command) {
+void GroupCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
+    super::execute(player, command);
 
-    /*QString alias = */takeWord();
-
-    if (player()->group().isNull()) {
+    if (player->group().isNull()) {
         send("You are not in a group.");
     } else {
-        Group *group = player()->group().cast<Group *>();
+        Group *group = player->group().cast<Group *>();
 
         Character *leader = group->leader().cast<Character *>();
         Color hpColor = (leader->hp() < leader->maxHp() / 4 ? Maroon : Silver);

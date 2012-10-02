@@ -18,6 +18,16 @@ var Color = {
     Purple: 15
 };
 
+var Options = {
+    None: 0,
+    IfNotLast: 1
+};
+
+Array.prototype.clear = function() {
+
+    return this.splice(0, this.length);
+};
+
 Array.prototype.contains = function(element) {
 
     return this.indexOf(element) > -1;
@@ -28,9 +38,24 @@ Array.prototype.containsAny = function(array) {
     return this.findFirstAmong(array) !== null;
 };
 
+Array.prototype.first = function() {
+
+    return this[0];
+};
+
 Array.prototype.isEmpty = function() {
 
     return this.length === 0;
+};
+
+Array.prototype.last = function() {
+
+    return this[this.length - 1];
+};
+
+Array.prototype.mid = function(begin, end) {
+
+    return this.slice(begin, end - begin);
 };
 
 Array.prototype.named = function(name) {
@@ -42,14 +67,24 @@ Array.prototype.named = function(name) {
         }
     }
     return undefined;
-}
+};
 
 Array.prototype.pushIfNecessary = function(element) {
 
     if (!this.contains(element)) {
         this.push(element);
     }
-}
+};
+
+Array.prototype.removeFirst = function() {
+
+    this.splice(0, 1);
+};
+
+Array.prototype.removeLast = function() {
+
+    this.splice(this.length - 1, 1);
+};
 
 Array.prototype.send = function(message) {
 
@@ -59,7 +94,17 @@ Array.prototype.send = function(message) {
             element.send(message);
         }
     }
-}
+};
+
+Array.prototype.takeFirst = function() {
+
+    return this.splice(0, 1)[0];
+};
+
+Array.prototype.takeLast = function() {
+
+    return this.splice(this.length - 1, 1)[0];
+};
 
 Array.prototype.withId = function(id) {
 
@@ -70,7 +115,7 @@ Array.prototype.withId = function(id) {
         }
     }
     return undefined;
-}
+};
 
 Array.prototype.withoutId = function(id) {
 
@@ -82,7 +127,7 @@ Array.prototype.withoutId = function(id) {
         }
     }
     return result;
-}
+};
 
 Array.prototype.findFirstAmong = function(array) {
 
@@ -94,17 +139,22 @@ Array.prototype.findFirstAmong = function(array) {
         }
     }
     return null;
-}
+};
 
 Array.prototype.randomElement = function() {
 
     return this[randomInt(0, this.length)];
+};
+
+Array.prototype.removeAt = function(index) {
+
+    this.splice(index, 1);
 }
 
 String.prototype.capitalized = function() {
 
     return Util.capitalize(this);
-}
+};
 
 String.prototype.contains = function(string) {
 
@@ -119,11 +169,16 @@ String.prototype.endsWith = function(string) {
 String.prototype.highlighted = function() {
 
     return Util.highlight(this);
-}
+};
 
 String.prototype.isEmpty = function() {
 
     return this.length === 0;
+};
+
+String.prototype.mid = function(begin, end) {
+
+    return this.substr(begin, end);
 };
 
 String.prototype.replaceAll = function(before, after) {
@@ -138,6 +193,21 @@ String.prototype.replaceAll = function(before, after) {
 String.prototype.startsWith = function(string) {
 
     return this.substr(0, string.length) === string;
+};
+
+String.prototype.toInt = function() {
+
+    return parseInt(this, 10);
+};
+
+String.prototype.toLower = function() {
+
+    return this.toLowerCase();
+};
+
+String.prototype.toUpper = function() {
+
+    return this.toUpperCase();
 };
 
 String.prototype.trimmed = function() {

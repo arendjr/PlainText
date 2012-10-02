@@ -24,23 +24,20 @@ class Command : public QObject {
             IfNotLast = 0x01
         };
 
-        Command(Player *player, QObject *parent = 0);
+        Command(QObject *parent = 0);
         virtual ~Command();
 
         const QString &description() const { return m_description; }
         void setDescription(const QString &description);
 
-        virtual void execute(const QString &command) = 0;
-
-    signals:
-        void quit();
+        virtual void execute(Player *player, const QString &command);
 
     protected:
-        inline Player *player() { return m_player; }
-        inline Area *currentArea() { return m_player->currentArea().cast<Area *>(); }
-        inline Realm *realm() { return m_player->realm(); }
+        inline Player *player() const { return m_player; }
+        inline Area *currentArea() const { return m_player->currentArea().cast<Area *>(); }
+        inline Realm *realm() const { return m_player->realm(); }
+        inline const QString &alias() const { return m_alias; }
 
-        void setCommand(const QString &command);
         void prependWord(const QString &word);
         void appendWord(const QString &word);
 
@@ -70,11 +67,17 @@ class Command : public QObject {
         inline void send(const QString &message) { m_player->send(message); }
 
     private:
-        Player *m_player;
+        void setPlayer(Player *player);
+
+        void setCommand(const QString &command);
 
         QString m_description;
 
+        Player *m_player;
+
         QStringList m_words;
+
+        QString m_alias;
 };
 
 #endif // COMMAND_H

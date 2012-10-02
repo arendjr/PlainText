@@ -5,8 +5,8 @@
 
 #define super ApiCommand
 
-ExitsListCommand::ExitsListCommand(Player *player, QObject *parent) :
-    super(player, parent) {
+ExitsListCommand::ExitsListCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Syntax: api-exits-list <request-id>");
 }
@@ -14,13 +14,13 @@ ExitsListCommand::ExitsListCommand(Player *player, QObject *parent) :
 ExitsListCommand::~ExitsListCommand() {
 }
 
-void ExitsListCommand::execute(const QString &command) {
+void ExitsListCommand::execute(Player *player, const QString &command) {
 
-    super::execute(command);
+    super::execute(player, command);
 
     QVariantList data;
     for (const GameObjectPtr &exit : realm()->allExits()) {
-        data << QVariant::fromValue(exit.cast<GameObject *>());
+        data << exit->toJSON(IncludeId | DontIncludeTypeInfo);
     }
     sendReply(data);
 }

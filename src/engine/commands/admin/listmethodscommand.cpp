@@ -6,8 +6,10 @@
 #include "util.h"
 
 
-ListMethodsCommand::ListMethodsCommand(Player *character, QObject *parent) :
-    AdminCommand(character, parent) {
+#define super AdminCommand
+
+ListMethodsCommand::ListMethodsCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("List all JavaScript-accessible methods of an object.\n"
                    "\n"
@@ -17,11 +19,9 @@ ListMethodsCommand::ListMethodsCommand(Player *character, QObject *parent) :
 ListMethodsCommand::~ListMethodsCommand() {
 }
 
-void ListMethodsCommand::execute(const QString &command) {
+void ListMethodsCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
-
-    /*QString alias = */takeWord();
+    super::execute(player, command);
 
     GameObjectPtrList objects = takeObjects(currentArea()->objects());
     if (!requireUnique(objects, "Object not found.", "Object is not unique.")) {

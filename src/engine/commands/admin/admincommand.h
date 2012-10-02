@@ -9,7 +9,7 @@ class AdminCommand : public Command {
     Q_OBJECT
 
     public:
-        AdminCommand(Player *player, QObject *parent = 0);
+        AdminCommand(QObject *parent = 0);
         virtual ~AdminCommand();
 
     protected:

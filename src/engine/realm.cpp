@@ -2,6 +2,8 @@
 
 #include <cstring>
 
+#include "commandinterpreter.h"
+#include "commandregistry.h"
 #include "diskutil.h"
 #include "player.h"
 #include "util.h"
@@ -25,6 +27,11 @@ Realm::Realm(Options options) :
     }
 
     setAutoDelete(false);
+
+    m_commandRegistry = new CommandRegistry(this);
+
+    m_commandInterpreter = new CommandInterpreter(this);
+    m_commandInterpreter->setRegistry(m_commandRegistry);
 }
 
 Realm::~Realm() {
@@ -119,7 +126,7 @@ GameObject *Realm::getObject(const char *objectType, uint id) {
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 GameObject *Realm::getObject(const QString &objectType, uint id) {

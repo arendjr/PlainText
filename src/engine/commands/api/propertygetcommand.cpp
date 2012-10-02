@@ -5,8 +5,8 @@
 
 #define super ApiCommand
 
-PropertyGetCommand::PropertyGetCommand(Player *player, QObject *parent) :
-    super(player, parent) {
+PropertyGetCommand::PropertyGetCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Syntax: api-property-get <request-id> <object-id> <property-name>");
 }
@@ -14,9 +14,9 @@ PropertyGetCommand::PropertyGetCommand(Player *player, QObject *parent) :
 PropertyGetCommand::~PropertyGetCommand() {
 }
 
-void PropertyGetCommand::execute(const QString &command) {
+void PropertyGetCommand::execute(Player *player, const QString &command) {
 
-    super::execute(command);
+    super::execute(player, command);
 
     GameObjectPtr object = takeObject(currentArea()->objects());
     if (object.isNull()) {

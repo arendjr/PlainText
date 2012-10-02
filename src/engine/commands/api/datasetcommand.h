@@ -7,10 +7,10 @@
 class DataSetCommand : public ApiCommand {
 
     public:
-        DataSetCommand(Player *player, QObject *parent = 0);
+        DataSetCommand(QObject *parent = 0);
         virtual ~DataSetCommand();
 
-        virtual void execute(const QString &command);
+        virtual void execute(Player *player, const QString &command);
 };
 
 #endif // DATASETCOMMAND_H

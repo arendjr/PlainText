@@ -1,8 +1,10 @@
 #include "gocommand.h"
 
 
-GoCommand::GoCommand(Player *player, QObject *parent) :
-    Command(player, parent) {
+#define super Command
+
+GoCommand::GoCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Go to or enter an exit.\n"
                    "\n"
@@ -12,12 +14,11 @@ GoCommand::GoCommand(Player *player, QObject *parent) :
 GoCommand::~GoCommand() {
 }
 
-void GoCommand::execute(const QString &command) {
+void GoCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
+    super::execute(player, command);
 
-    QString alias = takeWord();
-    if (alias == "go") {
+    if (alias() == "go") {
         takeWord("to", IfNotLast);
     }
     takeWord("the");
@@ -31,5 +32,5 @@ void GoCommand::execute(const QString &command) {
         return;
     }
 
-    player()->go(exits[0]);
+    player->go(exits[0]);
 }

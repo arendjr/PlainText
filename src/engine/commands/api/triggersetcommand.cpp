@@ -5,8 +5,8 @@
 
 #define super ApiCommand
 
-TriggerSetCommand::TriggerSetCommand(Player *player, QObject *parent) :
-    super(player, parent) {
+TriggerSetCommand::TriggerSetCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Syntax: api-trigger-set <request-id> <object-id> <trigger-name> "
                    "<trigger-source>");
@@ -15,9 +15,9 @@ TriggerSetCommand::TriggerSetCommand(Player *player, QObject *parent) :
 TriggerSetCommand::~TriggerSetCommand() {
 }
 
-void TriggerSetCommand::execute(const QString &command) {
+void TriggerSetCommand::execute(Player *player, const QString &command) {
 
-    super::execute(command);
+    super::execute(player, command);
 
     GameObjectPtr object = takeObject(currentArea()->objects());
     if (object.isNull()) {

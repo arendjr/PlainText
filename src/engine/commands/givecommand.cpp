@@ -1,11 +1,12 @@
 #include "givecommand.h"
 
 
-GiveCommand::GiveCommand(Player *player, QObject *parent) :
-    Command(player, parent) {
+#define super Command
 
-    setDescription("Give an item or gold from your inventory to another "
-                   "character.\n"
+GiveCommand::GiveCommand(QObject *parent) :
+    super(parent) {
+
+    setDescription("Give an item or gold from your inventory to another character.\n"
                    "\n"
                    "Examples: give stick earl, give $5 to beggar");
 }
@@ -13,11 +14,10 @@ GiveCommand::GiveCommand(Player *player, QObject *parent) :
 GiveCommand::~GiveCommand() {
 }
 
-void GiveCommand::execute(const QString &command) {
+void GiveCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
+    super::execute(player, command);
 
-    /*QString alias = */takeWord();
     if (!assertWordsLeft("Give what?")) {
         return;
     }
@@ -34,14 +34,14 @@ void GiveCommand::execute(const QString &command) {
         }
         gold = word.mid(1).toDouble();
         if (gold == 0.0) {
-            if (player()->gender() == "male") {
+            if (player->gender() == "male") {
                 send("Be a gentleman, and give at least some gold.");
             } else {
                 send("Be a lady, and give at least some gold.");
             }
             return;
         }
-        if (gold > player()->gold()) {
+        if (gold > player->gold()) {
             send("You don't have that much gold.");
             return;
         }
@@ -49,7 +49,7 @@ void GiveCommand::execute(const QString &command) {
         prependWord(word);
         takeWord("the");
 
-        items = takeObjects(player()->inventory());
+        items = takeObjects(player->inventory());
         if (!requireSome(items, "You don't have that.")) {
             return;
         }
@@ -69,12 +69,12 @@ void GiveCommand::execute(const QString &command) {
     QString description;
 
     if (gold > 0.0) {
-        if (!recipient->invokeTrigger("onreceive", player(), gold)) {
+        if (!recipient->invokeTrigger("onreceive", player, gold)) {
             return;
         }
 
         recipient->adjustGold(gold);
-        player()->adjustGold(-gold);
+        player->adjustGold(-gold);
 
         description = word;
     } else {
@@ -83,8 +83,8 @@ void GiveCommand::execute(const QString &command) {
             Item *item = itemPtr.cast<Item *>();
             if (recipient->inventoryWeight() + item->weight() > recipient->maxInventoryWeight()) {
                 send(QString("%1 is too heavy for %2.")
-                     .arg(item->definiteName(player()->inventory(), Capitalized), recipientName));
-            } else if (!recipient->invokeTrigger("onreceive", player(), itemPtr)) {
+                     .arg(item->definiteName(player->inventory(), Capitalized), recipientName));
+            } else if (!recipient->invokeTrigger("onreceive", player, itemPtr)) {
                 continue;
             } else {
                 recipient->addInventoryItem(itemPtr);
@@ -95,15 +95,15 @@ void GiveCommand::execute(const QString &command) {
         description = givenItems.joinFancy();
 
         for (const GameObjectPtr &itemPtr : givenItems) {
-            player()->removeInventoryItem(itemPtr);
+            player->removeInventoryItem(itemPtr);
         }
     }
 
     send(QString("You give %1 to %2.").arg(description, recipientName));
-    recipient->send(QString("%1 gives you %2.").arg(player()->name(), description));
+    recipient->send(QString("%1 gives you %2.").arg(player->name(), description));
 
     GameObjectPtrList others = currentArea()->players();
-    others.removeOne(player());
+    others.removeOne(player);
     others.removeOne(recipient);
-    others.send(QString("%1 gives %2 to %3.").arg(player()->name(), description, recipientName));
+    others.send(QString("%1 gives %2 to %3.").arg(player->name(), description, recipientName));
 }

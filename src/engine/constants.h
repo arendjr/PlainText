@@ -1,6 +1,9 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
+#include <qglobal.h>
+
+
 enum Color {
     White = 0,
     Silver,
@@ -20,7 +23,7 @@ enum Color {
     Purple
 };
 
-enum Options {
+enum Option {
     NoOptions = 0x00,
     Capitalized = 0x01,
     DefiniteArticles = 0x02,
@@ -29,5 +32,7 @@ enum Options {
     IncludeId = 010,
     DontIncludeTypeInfo = 0x20
 };
+Q_DECLARE_FLAGS(Options, Option)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Options)
 
 #endif // CONSTANTS_H

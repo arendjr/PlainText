@@ -3,11 +3,12 @@
 #include "util.h"
 
 
-QuitCommand::QuitCommand(Player *character, QObject *parent) :
-    Command(character, parent) {
+#define super Command
 
-    setDescription("Quit the game. Your progress and current location will be "
-                   "saved.\n"
+QuitCommand::QuitCommand(QObject *parent) :
+    super(parent) {
+
+    setDescription("Quit the game. Your progress and current location will be saved.\n"
                    "\n"
                    "Examples: quit, goodbye");
 }
@@ -15,13 +16,9 @@ QuitCommand::QuitCommand(Player *character, QObject *parent) :
 QuitCommand::~QuitCommand() {
 }
 
-void QuitCommand::execute(const QString &command) {
+void QuitCommand::execute(Player *player, const QString &command) {
 
-    Q_UNUSED(command);
+    super::execute(player, command);
 
-    if (player()->secondsStunned() > 0) {
-        player()->send(Util::colorize(QString("Please wait %1 seconds.").arg(player()->secondsStunned()), Olive));
-    } else {
-        emit quit();
-    }
+    player->quit();
 }

@@ -4,8 +4,10 @@
 #include "util.h"
 
 
-CopyTriggersCommand::CopyTriggersCommand(Player *character, QObject *parent) :
-    AdminCommand(character, parent) {
+#define super AdminCommand
+
+CopyTriggersCommand::CopyTriggersCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Copies the triggers of one item to another.\n"
                    "\n"
@@ -15,11 +17,10 @@ CopyTriggersCommand::CopyTriggersCommand(Player *character, QObject *parent) :
 CopyTriggersCommand::~CopyTriggersCommand() {
 }
 
-void CopyTriggersCommand::execute(const QString &command) {
+void CopyTriggersCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
+    super::execute(player, command);
 
-    /*QString alias = */takeWord();
     if (!assertWordsLeft("Usage: copy-triggers <source-item> [#] <destination-item> [#]")) {
         return;
     }

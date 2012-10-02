@@ -1,8 +1,10 @@
 #include "dropcommand.h"
 
 
-DropCommand::DropCommand(Player *character, QObject *parent) :
-    Command(character, parent) {
+#define super Command
+
+DropCommand::DropCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Drop an item or money from your inventory.\n"
                    "\n"
@@ -12,11 +14,10 @@ DropCommand::DropCommand(Player *character, QObject *parent) :
 DropCommand::~DropCommand() {
 }
 
-void DropCommand::execute(const QString &command) {
+void DropCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
+    super::execute(player, command);
 
-    /*QString alias = */takeWord();
     if (!assertWordsLeft("Drop what?")) {
         return;
     }
@@ -37,27 +38,27 @@ void DropCommand::execute(const QString &command) {
             send("You drop nothing.");
             return;
         }
-        if (gold > player()->gold()) {
+        if (gold > player->gold()) {
             send("You don't have that much gold.");
             return;
         }
 
         currentArea()->addGold(gold);
-        player()->adjustGold(-gold);
+        player->adjustGold(-gold);
 
         description = QString("$%1 worth of gold").arg(gold);
     } else {
         prependWord(word);
         takeWord("the");
 
-        items = takeObjects(player()->inventory());
+        items = takeObjects(player->inventory());
         if (!requireSome(items, "You don't have that.")) {
             return;
         }
 
         for (const GameObjectPtr &item : items) {
             currentArea()->addItem(item);
-            player()->removeInventoryItem(item);
+            player->removeInventoryItem(item);
         }
 
         description = items.joinFancy(DefiniteArticles);
@@ -66,6 +67,6 @@ void DropCommand::execute(const QString &command) {
     send(QString("You drop %2.").arg(description));
 
     GameObjectPtrList others = currentArea()->players();
-    others.removeOne(player());
-    others.send(QString("%1 drops %2.").arg(player()->name(), description));
+    others.removeOne(player);
+    others.send(QString("%1 drops %2.").arg(player->name(), description));
 }

@@ -3,8 +3,10 @@
 #include "util.h"
 
 
-WieldCommand::WieldCommand(Player *character, QObject *parent) :
-    Command(character, parent) {
+#define super Command
+
+WieldCommand::WieldCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Wield a weapon or shield that's in your inventory.\n"
                    "\n"
@@ -14,22 +16,21 @@ WieldCommand::WieldCommand(Player *character, QObject *parent) :
 WieldCommand::~WieldCommand() {
 }
 
-void WieldCommand::execute(const QString &command) {
+void WieldCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
+    super::execute(player, command);
 
-    /*QString alias = */takeWord();
     if (!assertWordsLeft("Wield what?")) {
         return;
     }
 
     takeWord("(the|my)");
 
-    GameObjectPtrList allItems = player()->inventory();
+    GameObjectPtrList allItems = player->inventory();
     GameObjectPtr item = takeObject(allItems);
     if (!requireSome(item, "You don't have that.")) {
         return;
     }
 
-    player()->wield(item);
+    player->wield(item);
 }

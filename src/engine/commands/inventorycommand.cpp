@@ -1,8 +1,12 @@
 #include "inventorycommand.h"
 
+#include "util.h"
 
-InventoryCommand::InventoryCommand(Player *player, QObject *parent) :
-    Command(player, parent) {
+
+#define super Command
+
+InventoryCommand::InventoryCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("View your current inventory.\n"
                    "\n"
@@ -12,28 +16,28 @@ InventoryCommand::InventoryCommand(Player *player, QObject *parent) :
 InventoryCommand::~InventoryCommand() {
 }
 
-void InventoryCommand::execute(const QString &command) {
+void InventoryCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
+    super::execute(player, command);
 
     QString carriedInventoryString;
-    if (player()->inventory().isEmpty()) {
+    if (player->inventory().isEmpty()) {
         carriedInventoryString = "You don't carry anything.\n";
-    } else if (player()->inventory().length() == 1) {
-        carriedInventoryString = QString("You carry %1, weighing %2kg.\n")
-                                 .arg(player()->inventory().joinFancy(),
-                                      QString::number(player()->inventoryWeight()));
+    } else if (player->inventory().length() == 1) {
+        carriedInventoryString = QString("You carry %1, weighing %2.\n")
+                                 .arg(player->inventory().joinFancy(),
+                                      Util::formatWeight(player->inventoryWeight()));
     } else {
-        carriedInventoryString = QString("You carry %1, weighing a total of %2kg.\n")
-                                 .arg(player()->inventory().joinFancy(),
-                                      QString::number(player()->inventoryWeight()));
+        carriedInventoryString = QString("You carry %1, weighing a total of %2.\n")
+                                 .arg(player->inventory().joinFancy(),
+                                      Util::formatWeight(player->inventoryWeight()));
     }
 
     QString carriedGoldString;
-    if (player()->gold() == 0.0) {
+    if (player->gold() == 0.0) {
         carriedGoldString = "You don't have any gold.\n";
     } else {
-        carriedGoldString = QString("You've got $%1 worth of gold.\n").arg(player()->gold());
+        carriedGoldString = QString("You've got $%1 worth of gold.\n").arg(player->gold());
     }
 
     send(carriedInventoryString + carriedGoldString);

@@ -1,8 +1,10 @@
 #include "removeexitcommand.h"
 
 
-RemoveExitCommand::RemoveExitCommand(Player *character, QObject *parent) :
-    AdminCommand(character, parent) {
+#define super AdminCommand
+
+RemoveExitCommand::RemoveExitCommand(QObject *parent) :
+    super(parent) {
 
     setDescription("Remove an exit from the current area.\n"
                    "\n"
@@ -12,11 +14,10 @@ RemoveExitCommand::RemoveExitCommand(Player *character, QObject *parent) :
 RemoveExitCommand::~RemoveExitCommand() {
 }
 
-void RemoveExitCommand::execute(const QString &command) {
+void RemoveExitCommand::execute(Player *player, const QString &command) {
 
-    setCommand(command);
+    super::execute(player, command);
 
-    /*QString alias = */takeWord();
     if (!assertWordsLeft("Usage: remove-exit <exit-name> [#]")) {
         return;
     }
@@ -28,5 +29,5 @@ void RemoveExitCommand::execute(const QString &command) {
 
     exits[0]->setDeleted();
 
-    player()->send(QString("Exit %1 removed.").arg(exits[0]->name()));
+    send(QString("Exit %1 removed.").arg(exits[0]->name()));
 }
