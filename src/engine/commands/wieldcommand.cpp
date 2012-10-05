@@ -18,7 +18,7 @@ WieldCommand::~WieldCommand() {
 
 void WieldCommand::execute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     if (!assertWordsLeft("Wield what?")) {
         return;

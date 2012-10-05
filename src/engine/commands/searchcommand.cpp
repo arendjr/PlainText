@@ -19,7 +19,7 @@ SearchCommand::~SearchCommand() {
 
 void SearchCommand::execute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     if (player->secondsStunned() > 0) {
         player->send(QString("Please wait %1 seconds.").arg(player->secondsStunned()), Olive);

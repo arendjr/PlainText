@@ -30,9 +30,11 @@ class Command : public QObject {
         const QString &description() const { return m_description; }
         void setDescription(const QString &description);
 
-        virtual void execute(Player *player, const QString &command);
+        virtual void execute(Player *player, const QString &command) = 0;
 
     protected:
+        virtual void prepareExecute(Player *player, const QString &command);
+
         inline Player *player() const { return m_player; }
         inline Area *currentArea() const { return m_player->currentArea().cast<Area *>(); }
         inline Realm *realm() const { return m_player->realm(); }

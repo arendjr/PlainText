@@ -20,7 +20,7 @@ BuyCommand::~BuyCommand() {
 
 void BuyCommand::execute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     GameObjectPtrList sellers;
     for (const GameObjectPtr &npc : currentArea()->npcs()) {

@@ -16,7 +16,7 @@ DisbandCommand::~DisbandCommand() {
 
 void DisbandCommand::execute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     player->disband();
 }

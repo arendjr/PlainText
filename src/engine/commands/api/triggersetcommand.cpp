@@ -17,7 +17,7 @@ TriggerSetCommand::~TriggerSetCommand() {
 
 void TriggerSetCommand::execute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     GameObjectPtr object = takeObject(currentArea()->objects());
     if (object.isNull()) {

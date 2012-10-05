@@ -19,7 +19,7 @@ GroupCommand::~GroupCommand() {
 
 void GroupCommand::execute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     if (player->group().isNull()) {
         send("You are not in a group.");

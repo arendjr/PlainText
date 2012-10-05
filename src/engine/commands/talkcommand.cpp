@@ -19,7 +19,7 @@ TalkCommand::~TalkCommand() {
 
 void TalkCommand::execute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     if (!assertWordsLeft("Talk to who?")) {
         return;

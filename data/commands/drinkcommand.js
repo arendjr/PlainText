@@ -10,10 +10,8 @@ DrinkCommand.prototype.constructor = DrinkCommand;
 
 DrinkCommand.prototype.execute = function(player, command) {
 
-    this.setPlayer(player);
-    this.setCommand(command);
+    this.prepareExecute(player, command);
 
-    this.takeWord();
     if (!this.assertWordsLeft("Drink what?")) {
         return;
     }

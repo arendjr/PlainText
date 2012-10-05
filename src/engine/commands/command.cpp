@@ -19,7 +19,7 @@ void Command::setDescription(const QString &description) {
     m_description = Util::processHighlights(description);
 }
 
-void Command::execute(Player *player, const QString &command) {
+void Command::prepareExecute(Player *player, const QString &command) {
 
     setPlayer(player);
     setCommand(command);

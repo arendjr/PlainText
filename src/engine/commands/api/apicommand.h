@@ -12,11 +12,11 @@ class ApiCommand : public AdminCommand {
         ApiCommand(QObject *parent = 0);
         virtual ~ApiCommand();
 
-        virtual void execute(Player *player, const QString &command);
-
         const QString &requestId() const { return m_requestId; }
 
     protected:
+        virtual void prepareExecute(Player *player, const QString &command);
+
         void sendReply(const QVariant &variant);
         void sendError(int errorCode, const QString &errorMessage);
 

@@ -19,7 +19,7 @@ FollowCommand::~FollowCommand() {
 
 void FollowCommand::execute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     if (!assertWordsLeft("Follow who?")) {
         return;

@@ -18,7 +18,7 @@ AddWeaponCommand::~AddWeaponCommand() {
 
 void AddWeaponCommand::execute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     if (!assertWordsLeft("Usage: add-weapon <weapon-name>")) {
         return;

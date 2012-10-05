@@ -18,7 +18,7 @@ GetCommand::~GetCommand() {
 
 void GetCommand::execute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     if (!assertWordsLeft(QString("%1 what?").arg(Util::capitalize(alias())))) {
         return;

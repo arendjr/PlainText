@@ -16,7 +16,7 @@ RemoveExitCommand::~RemoveExitCommand() {
 
 void RemoveExitCommand::execute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     if (!assertWordsLeft("Usage: remove-exit <exit-name> [#]")) {
         return;

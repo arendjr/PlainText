@@ -18,7 +18,7 @@ InventoryCommand::~InventoryCommand() {
 
 void InventoryCommand::execute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     QString carriedInventoryString;
     if (player->inventory().isEmpty()) {

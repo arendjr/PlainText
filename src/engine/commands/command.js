@@ -20,6 +20,14 @@ Command.prototype.setDescription = function(description) {
 
 Command.prototype.execute = null;
 
+Command.prototype.prepareExecute = function(player, command) {
+
+    this.setPlayer(player);
+    this.setCommand(command);
+
+    this._alias = this.takeWord();
+};
+
 Command.prototype.setPlayer = function(player) {
 
     this._player = player;

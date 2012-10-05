@@ -16,7 +16,7 @@ GiveCommand::~GiveCommand() {
 
 void GiveCommand::execute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     if (!assertWordsLeft("Give what?")) {
         return;

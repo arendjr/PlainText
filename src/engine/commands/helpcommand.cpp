@@ -21,7 +21,7 @@ HelpCommand::~HelpCommand() {
 
 void HelpCommand::execute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     CommandRegistry *registry = realm()->commandRegistry();
     QString m;

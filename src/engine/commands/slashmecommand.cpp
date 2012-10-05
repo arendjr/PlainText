@@ -12,7 +12,7 @@ SlashMeCommand::~SlashMeCommand() {
 
 void SlashMeCommand::execute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     if (!assertWordsLeft("Try being a little bit more creative...")) {
         return;

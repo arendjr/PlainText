@@ -18,7 +18,7 @@ WhoCommand::~WhoCommand() {
 
 void WhoCommand::execute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     GameObjectPtrList players = realm()->onlinePlayers();
     if (players.length() == 1) {

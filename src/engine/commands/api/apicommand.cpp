@@ -13,9 +13,9 @@ ApiCommand::ApiCommand(QObject *parent) :
 ApiCommand::~ApiCommand() {
 }
 
-void ApiCommand::execute(Player *player, const QString &command) {
+void ApiCommand::prepareExecute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     m_requestId = takeWord();
 }

@@ -18,7 +18,7 @@ AddShieldCommand::~AddShieldCommand() {
 
 void AddShieldCommand::execute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     if (!assertWordsLeft("Usage: add-shield <shield-name>")) {
         return;

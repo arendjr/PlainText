@@ -19,7 +19,7 @@ LogRetrieveCommand::~LogRetrieveCommand() {
 
 void LogRetrieveCommand::execute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     if (takeWord() != "stats") {
         sendError(400, "First argument should be stats");

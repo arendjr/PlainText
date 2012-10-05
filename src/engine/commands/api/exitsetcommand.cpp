@@ -21,7 +21,7 @@ ExitSetCommand::~ExitSetCommand() {
 
 void ExitSetCommand::execute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     QString exitId = takeWord();
     QString areaFromId = takeWord();

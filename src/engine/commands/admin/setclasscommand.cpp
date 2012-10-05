@@ -19,7 +19,7 @@ SetClassCommand::~SetClassCommand() {
 
 void SetClassCommand::execute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     GameObjectPtrList characters = takeObjects(currentArea()->characters());
     if (!requireUnique(characters, "Character not found.", "Character is not unique.")) {

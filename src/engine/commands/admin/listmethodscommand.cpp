@@ -21,7 +21,7 @@ ListMethodsCommand::~ListMethodsCommand() {
 
 void ListMethodsCommand::execute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     GameObjectPtrList objects = takeObjects(currentArea()->objects());
     if (!requireUnique(objects, "Object not found.", "Object is not unique.")) {

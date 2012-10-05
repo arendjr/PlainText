@@ -20,7 +20,7 @@ TellCommand::~TellCommand() {
 
 void TellCommand::execute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     if (!assertWordsLeft("Tell who?")) {
         return;

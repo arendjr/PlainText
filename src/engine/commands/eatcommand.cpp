@@ -18,7 +18,7 @@ EatCommand::~EatCommand() {
 
 void EatCommand::execute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     if (!assertWordsLeft("Eat what?")) {
         return;
@@ -27,12 +27,11 @@ void EatCommand::execute(Player *player, const QString &command) {
     takeWord("the");
 
     GameObjectPtrList allItems = player->inventory() + currentArea()->items();
-    GameObjectPtrList items = takeObjects(allItems);
-    if (!requireSome(items, "You don't have that.")) {
+    GameObjectPtr item = takeObject(allItems);
+    if (!requireSome(item, "You don't have that.")) {
         return;
     }
 
-    Item *item = items[0].cast<Item *>();
     if (!item->hasTrigger("oneat")) {
         send("You cannot eat that.");
         return;

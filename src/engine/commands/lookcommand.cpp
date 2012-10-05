@@ -22,7 +22,7 @@ LookCommand::~LookCommand() {
 
 void LookCommand::execute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     if (!hasWordsLeft()) {
         player->look();

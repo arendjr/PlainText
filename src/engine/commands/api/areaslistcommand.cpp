@@ -16,7 +16,7 @@ AreasListCommand::~AreasListCommand() {
 
 void AreasListCommand::execute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     QVariantList data;
     for (const GameObjectPtr &area : realm()->allAreas()) {

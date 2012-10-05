@@ -19,7 +19,7 @@ AddCharacterCommand::~AddCharacterCommand() {
 
 void AddCharacterCommand::execute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     if (!assertWordsLeft("Usage: add-character <character-name>")) {
         return;

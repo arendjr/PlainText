@@ -16,7 +16,7 @@ DropCommand::~DropCommand() {
 
 void DropCommand::execute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     if (!assertWordsLeft("Drop what?")) {
         return;

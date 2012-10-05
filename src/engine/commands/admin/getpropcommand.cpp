@@ -19,7 +19,7 @@ GetPropCommand::~GetPropCommand() {
 
 void GetPropCommand::execute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     GameObjectPtr object = takeObject(currentArea()->objects());
     if (!requireSome(object, "Object not found.")) {

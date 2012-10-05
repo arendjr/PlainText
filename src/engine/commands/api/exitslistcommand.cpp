@@ -16,7 +16,7 @@ ExitsListCommand::~ExitsListCommand() {
 
 void ExitsListCommand::execute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     QVariantList data;
     for (const GameObjectPtr &exit : realm()->allExits()) {

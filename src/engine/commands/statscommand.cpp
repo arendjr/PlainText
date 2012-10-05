@@ -20,7 +20,7 @@ StatsCommand::~StatsCommand() {
 
 void StatsCommand::execute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     CharacterStats stats = player->stats();
 

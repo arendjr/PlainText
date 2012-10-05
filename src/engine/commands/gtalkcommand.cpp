@@ -18,7 +18,7 @@ GtalkCommand::~GtalkCommand() {
 
 void GtalkCommand::execute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     if (!assertWordsLeft("Say what?")) {
         return;

@@ -27,7 +27,7 @@ AddExitCommand::~AddExitCommand() {
 
 void AddExitCommand::execute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     QString exitName = takeWord();
     if (!assertWordsLeft("Usage: add-exit <exit-name> <destination-area-id>")) {

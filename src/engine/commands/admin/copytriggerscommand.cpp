@@ -19,7 +19,7 @@ CopyTriggersCommand::~CopyTriggersCommand() {
 
 void CopyTriggersCommand::execute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     if (!assertWordsLeft("Usage: copy-triggers <source-item> [#] <destination-item> [#]")) {
         return;

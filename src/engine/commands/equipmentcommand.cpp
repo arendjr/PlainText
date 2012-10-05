@@ -16,7 +16,7 @@ EquipmentCommand::~EquipmentCommand() {
 
 void EquipmentCommand::execute(Player *player, const QString &command) {
 
-    super::execute(player, command);
+    super::prepareExecute(player, command);
 
     GameObjectPtrList wieldedEquipment;
     if (!player->weapon().isNull()) {
