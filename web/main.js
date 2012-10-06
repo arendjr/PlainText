@@ -27,6 +27,7 @@ var keys = {
     KEY_INSERT:   45
 };
 
+
 Array.prototype.contains = function(element) {
 
     return this.indexOf(element) > -1;
@@ -37,15 +38,20 @@ Array.prototype.isEmpty = function() {
     return this.length === 0;
 };
 
+
 Element.prototype.hide = function() {
 
     this.style.display = "none";
-}
+};
 
 Element.prototype.show = function() {
 
     this.style.display = "block";
-}
+};
+
+
+Object.defineProperty(Object.prototype, "contains", { value: Object.prototype.hasOwnProperty });
+
 
 String.prototype.contains = function(string) {
 
@@ -66,6 +72,7 @@ String.prototype.trimmed = function() {
 
     return this.replace(/^\s+|\s+$/g, "");
 };
+
 
 function loadScript(fileName) {
 
@@ -108,9 +115,11 @@ function elements(selector) {
     return document.querySelectorAll(selector);
 }
 
+
 var isPhoneGap = (getQueryParam("phonegap") === "true");
 var isIPad = navigator.userAgent.toLowerCase().contains("ipad");
 var isIPhone = navigator.userAgent.toLowerCase().contains("iphone");
+
 
 var controller;
 
@@ -131,6 +140,7 @@ function Controller() {
     this.currentCommand = "";
 
     this.pendingRequests = {};
+    this.requestId = 1;
 
     var self = this;
     this.commandInput = element(".command-input");
@@ -314,13 +324,16 @@ Controller.prototype.writeToScreen = function(message) {
     this.screen.scrollTop = this.screen.scrollHeight;
 }
 
-Controller.prototype.sendApiCall = function(requestId, command, callback) {
+Controller.prototype.sendApiCall = function(command, callback) {
 
+    var requestId = "request" + this.requestId;
     this.pendingRequests[requestId] = callback;
 
     var parts = command.split(" ");
     parts.splice(1, 0, requestId);
     this.socket.send("api-" + parts.join(" "));
+
+    this.requestId++;
 }
 
 Controller.prototype.updateLayout = function() {
@@ -357,6 +370,7 @@ Controller.prototype.setFocus = function() {
 
     this.commandInput.focus();
 }
+
 
 function main() {
 

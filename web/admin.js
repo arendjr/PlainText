@@ -30,7 +30,7 @@
             self.commandInput.focus();
         };
         propertyEditor.edit = function(description, onSaved) {
-            self.sendApiCall("prop1", "property-get " + description, function(data) {
+            self.sendApiCall("property-get " + description, function(data) {
                 var propertyName = data.propertyName;
                 if (data.readOnly) {
                     self.writeToScreen("Property " + propertyName + " is read-only.");
@@ -57,7 +57,7 @@
             }
 
             if (saveCommand.startsWith("api-")) {
-                self.sendApiCall("save1", saveCommand.substr(4) + " " + value, function(data) {
+                self.sendApiCall(saveCommand.substr(4) + " " + value, function(data) {
                     self.writeToScreen(data);
 
                     propertyEditor.hide();
@@ -108,7 +108,7 @@
     loadMapEditor();
 
     var triggers = {};
-    self.sendApiCall("triggers1", "triggers-list", function(data) {
+    self.sendApiCall("triggers-list", function(data) {
         for (var i = 0; i < data.length; i++) {
             var trigger = data[i];
             var triggerName;
@@ -151,7 +151,7 @@
                 }
 
                 if (triggers.hasOwnProperty(triggerName)) {
-                    self.sendApiCall("trigger1", "trigger-get " + rest, function(data) {
+                    self.sendApiCall("trigger-get " + rest, function(data) {
                         var triggerSource = data.triggerSource;
                         if (triggerSource.isEmpty()) {
                             var trigger = triggers[triggerName];
@@ -188,11 +188,7 @@
                     substituteCommand(event, "get-prop area " + command.substr(1), command);
                 }
             } else if (command.startsWith("api-")) {
-                var parts = command.split(" ");
-                var requestId = parts[1];
-                parts.splice(1, 1);
-
-                self.sendApiCall(requestId, parts.join(" ").substr(4), function(data) {
+                self.sendApiCall(command.substr(4), function(data) {
                     self.writeToScreen(JSON.stringify(data, null, 2));
                 });
 

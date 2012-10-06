@@ -67,6 +67,8 @@ body,input {
 
     border: 1px solid #000;
     background-color: white;
+
+    font-family: "Helvetica", "Arial", sans-serif;
 }
     .property-editor .button-list {
         padding: 5px 10px 5px;
@@ -90,6 +92,8 @@ body,input {
 
     border: 1px solid #000;
     background-color: white;
+
+    font-family: "Helvetica", "Arial", sans-serif;
 }
     .exit-editor .label {
         display: inline-block;

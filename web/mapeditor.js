@@ -1,5 +1,8 @@
 (function() {
 
+    loadScript("kinetic.js");
+
+
     function Spot(x, y) {
         this.x = x;
         this.y = y;
@@ -33,9 +36,9 @@
         // TODO
     }, false);
 
+
     var selectedAreaId = null;
 
-    loadScript("kinetic.js");
 
     var map = {
         areas: {},
@@ -126,6 +129,7 @@
         }
     }
 
+
     function addExit() {
 
         var directionSelect = exitEditor.querySelector(".direction");
@@ -173,6 +177,7 @@
         }
     }
 
+
     function objectId(string) {
 
         if (typeof string === "string") {
@@ -186,21 +191,22 @@
         }
     }
 
+
     function loadMap() {
 
-        self.sendApiCall("areas1", "areas-list", function(data) {
+        self.sendApiCall("areas-list", function(data) {
             console.log("Received areas");
 
             for (var i = 0; i < data.length; i++) {
-                var area = data[i];
+                var area = JSON.parse(data[i]);
                 map.areas[objectId(area.id)] = area;
             }
 
-            self.sendApiCall("exits1", "exits-list", function(data) {
+            self.sendApiCall("exits-list", function(data) {
                 console.log("Received exits");
 
                 for (var i = 0; i < data.length; i++) {
-                    var exit = data[i];
+                    var exit = JSON.parse(data[i]);
                     var destinationArea = map.areas[objectId(exit.destinationArea)];
                     if (destinationArea) {
                         exit.destinationArea = destinationArea;
@@ -215,6 +221,7 @@
             });
         });
     }
+
 
     function layoutAreas() {
 
@@ -232,7 +239,7 @@
         var positions = {};
 
         function oppositeDirection(direction) {
-            if (directions.hasOwnProperty(direction)) {
+            if (directions.contains(direction)) {
                 var spot = directions[direction];
                 var oppositeSpot = new Spot(-spot.x, -spot.y);
                 for (var key in directions) {
@@ -240,7 +247,7 @@
                         return key;
                     }
                 }
-            } else if (verticals.hasOwnProperty(direction)) {
+            } else if (verticals.contains(direction)) {
                 spot = verticals[direction];
                 oppositeSpot = new Spot(-spot.x, -spot.y);
                 for (key in verticals) {
@@ -283,9 +290,9 @@
             var otherExits = [];
             for (var i = 0; i < area.exits.length; i++) {
                 var exit = map.exits[objectId(area.exits[i])];
-                if (directions.hasOwnProperty(exit.name)) {
+                if (directions.contains(exit.name)) {
                     directionalExits.push(exit);
-                } else if (verticals.hasOwnProperty(exit.name)) {
+                } else if (verticals.contains(exit.name)) {
                     verticalExits.push(exit);
                 } else {
                     otherExits.push(exit);
@@ -330,7 +337,7 @@
                 for (var i = 1; i <= 3; i++) {
                     var destX = x + i * spot.x;
                     var destY = y + i * spot.y;
-                    if (positions.hasOwnProperty(destX + ":" + destY)) {
+                    if (positions.contains(destX + ":" + destY)) {
                         return false;
                     }
 
@@ -342,7 +349,7 @@
                                 continue;
                             }
                             var position = (destX + dx) + ":" + (destY + dy);
-                            if (positions.hasOwnProperty(position)) {
+                            if (positions.contains(position)) {
                                 var adjacentArea = positions[position];
                                 if (!(new Spot(-dx, -dy)).isAvailable(adjacentArea)) {
                                     return false;
@@ -352,14 +359,14 @@
                     }
                     if (spot.x !== 0 && spot.y !== 0) {
                         position = (x) + ":" + (y - spot.y);
-                        if (positions.hasOwnProperty(position)) {
+                        if (positions.contains(position)) {
                             adjacentArea = positions[position];
                             if (!(new Spot(spot.x, -spot.y)).isAvailable(adjacentArea)) {
                                 return false;
                             }
                         }
                         position = (x - spot.x) + ":" + (y);
-                        if (positions.hasOwnProperty(position)) {
+                        if (positions.contains(position)) {
                             adjacentArea = positions[position];
                             if (!(new Spot(-spot.x, spot.y)).isAvailable(adjacentArea)) {
                                 return false;
@@ -400,15 +407,15 @@
                 } else {
                     do {
                         var direction = exit.name;
-                        if (directions.hasOwnProperty(exit.name) ||
-                            verticals.hasOwnProperty(exit.name)) {
+                        if (directions.contains(exit.name) ||
+                            verticals.contains(exit.name)) {
                             // yay!
                         } else if (exit.data && exit.data.directionHint) {
                             direction = exit.data.directionHint;
                         } else if (exit.oppositeExit && exit.oppositeExit !== "0") {
                             var oppositeExit = map.exits[objectId(exit.oppositeExit)];
-                            if (directions.hasOwnProperty(oppositeExit.name) ||
-                                verticals.hasOwnProperty(oppositeExit.name)) {
+                            if (directions.contains(oppositeExit.name) ||
+                                verticals.contains(oppositeExit.name)) {
                                 direction = oppositeDirection(oppositeExit.name);
                             } else if (oppositeExit.data && oppositeExit.data.directionHint) {
                                 var opposite = oppositeDirection(oppositeExit.data.directionHint);
@@ -418,7 +425,7 @@
                             }
                         }
 
-                        if (directions.hasOwnProperty(direction)) {
+                        if (directions.contains(direction)) {
                             if (directions[direction].isAvailable(area)) {
                                 spot = directions[direction];
                                 spot.take(area);
@@ -426,7 +433,7 @@
                                 spot = null;
                             }
                         } else {
-                            spot = findSpot(verticals.hasOwnProperty(direction) ?
+                            spot = findSpot(verticals.contains(direction) ?
                                             verticals[direction] : new Spot(-1, 0));
                         }
                         if (spot === null) {
@@ -454,6 +461,7 @@
             console.log("No satisfying solution found");
         }
     }
+
 
     function drawMap() {
 
@@ -490,7 +498,7 @@
 
             for (var i = 0; i < area.exits.length; i++) {
                 var exit = map.exits[objectId(area.exits[i])];
-                if (visited.hasOwnProperty(exit.destinationArea.id)) {
+                if (visited.contains(exit.destinationArea.id)) {
                     var line = new Kinetic.Line({
                         points: [centerX + gridSize * area.x,
                                  centerY + gridSize * area.y,
@@ -545,8 +553,9 @@
         mapEditor.stage.add(layer);
     }
 
+
     function plotStats(type) {
-        self.sendApiCall("log1", "log-retrieve stats " + type + " 100", function(data) {
+        self.sendApiCall("log-retrieve stats " + type + " 100", function(data) {
             console.log("Received stats");
 
             var maxCount = 0;
@@ -559,7 +568,7 @@
 
             areaShapes.forEach(function(shape) {
                 var key = "area:" + shape.getId();
-                if (data.hasOwnProperty(key)) {
+                if (data.contains(key)) {
                     var count = data[key];
                     var red = Math.floor(255 * count / maxCount);
                     var blue = 255 - red;
