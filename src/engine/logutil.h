@@ -13,7 +13,7 @@ class LogUtil {
 
         static void logSessionEvent(const QString &source, const QString &message);
 
-        static void countAreaVisit(const QString &identifier, int count = 1);
+        static void countRoomVisit(const QString &identifier, int count = 1);
 
         static void countPlayerDeath(const QString &identifier, int count = 1);
 };

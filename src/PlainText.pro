@@ -15,7 +15,7 @@ macx {
     system(which clang++ 2> /dev/null) {
         LIBS += -lc++
         QMAKE_CXX = clang++
-	QMAKE_CXXFLAGS = -stdlib=libc++
+        QMAKE_CXXFLAGS = -stdlib=libc++
     }
 }
 QMAKE_CXXFLAGS += -std=c++11
@@ -126,6 +126,7 @@ SOURCES += \
     engine/commands/api/exitslistcommand.cpp \
     engine/commands/api/logretrievecommand.cpp \
     engine/commands/api/propertygetcommand.cpp \
+    engine/commands/api/propertysetcommand.cpp \
     engine/commands/api/roomslistcommand.cpp \
     engine/commands/api/triggergetcommand.cpp \
     engine/commands/api/triggersetcommand.cpp \
@@ -136,12 +137,12 @@ SOURCES += \
     engine/events/event.cpp \
     engine/events/signinevent.cpp \
     engine/events/timerevent.cpp \
-    engine/logmessages/areavisitstatslogmessage.cpp \
     engine/logmessages/commandlogmessage.cpp \
     engine/logmessages/logmessage.cpp \
     engine/logmessages/npctalklogmessage.cpp \
     engine/logmessages/playerdeathstatslogmessage.cpp \
     engine/logmessages/retrievestatslogmessage.cpp \
+    engine/logmessages/roomvisitstatslogmessage.cpp \
     engine/logmessages/sessionlogmessage.cpp \
     interface/httpserver.cpp \
     interface/telnetserver.cpp \
@@ -250,6 +251,7 @@ HEADERS += \
     engine/commands/api/exitslistcommand.h \
     engine/commands/api/logretrievecommand.h \
     engine/commands/api/propertygetcommand.h \
+    engine/commands/api/propertysetcommand.h \
     engine/commands/api/roomslistcommand.h \
     engine/commands/api/triggergetcommand.h \
     engine/commands/api/triggersetcommand.h \
@@ -260,12 +262,12 @@ HEADERS += \
     engine/events/event.h \
     engine/events/signinevent.h \
     engine/events/timerevent.h \
-    engine/logmessages/areavisitstatslogmessage.h \
     engine/logmessages/commandlogmessage.h \
     engine/logmessages/logmessage.h \
     engine/logmessages/npctalklogmessage.h \
     engine/logmessages/playerdeathstatslogmessage.h \
     engine/logmessages/retrievestatslogmessage.h \
+    engine/logmessages/roomvisitstatslogmessage.h \
     engine/logmessages/sessionlogmessage.h \
     interface/httpserver.h \
     interface/telnetserver.h \

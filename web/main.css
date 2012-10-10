@@ -145,6 +145,7 @@ body,input {
         width: -webkit-calc(20% - 4px);
         width: -moz-calc(20% - 4px);
         width: calc(20% - 4px);
+        min-width: 18em;
         height: -webkit-calc(100% - 14px);
         height: -moz-calc(100% - 14px);
         height: calc(100% - 14px);
@@ -155,6 +156,9 @@ body,input {
 
         font-family: "Helvetica", "Arial", sans-serif;
     }
+        .sidebar .x,.sidebar .y,.sidebar .z {
+            width: 5em;
+        }
         .sidebar .add,.sidebar .edit {
             font-size: 75%;
         }

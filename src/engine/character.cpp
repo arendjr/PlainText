@@ -510,7 +510,7 @@ void Character::enter(const GameObjectPtr &roomPtr, const GameObjectPtrList &fol
             area->addPlayer(follower);
         }
 
-        LogUtil::countAreaVisit(roomPtr.toString(), 1 + followers.length());
+        LogUtil::countRoomVisit(roomPtr.toString(), 1 + followers.length());
     } else {
         area->addNPC(this);
 

@@ -1,5 +1,8 @@
 {
   "name": "O'Malley's Bar",
   "description": "O'Malley's is a large bar, immediately characterized by a large and long wooden counter. O'Malley himself usually stands right behind the counter, pouring drinks for those that are thirsty for one of the many strong spirits which are displayed on a shelf to his back.\n\nA lot of different folks can be found at the bar, though you should be surprised to find any upper class. Typically, this place will get fairly crowded when work at the shipyard ends.",
+  "x": -200,
+  "y": -250,
+  "z": 0,
   "exits": [ "exit:178" ]
 }

@@ -1,5 +1,8 @@
 {
   "name": "Private Room",
   "description": "As you walk in there's no mistake what this room is made for. Two large two person beds are placed sideways. At the head of both beds are two opposing, golden statues of naked woman lying belly down. For those that want extra entertainment, there's a pole from ceiling till floor in the middle of the room.",
+  "x": -250,
+  "y": -450,
+  "z": 10,
   "exits": [ "exit:1026" ]
 }

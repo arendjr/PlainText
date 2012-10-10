@@ -32,9 +32,9 @@
                     <input type="text" class="name"></p>
                 <p><span class="label">Destination:</span>
                     <input type="radio" name="destination" class="destination">
-                    New area
+                    New room
                     <input type="radio" name="destination" class="destination">
-                    Area #<input type="text" size="8" class="destination-area-id"></p>
+                    Room #<input type="text" size="8" class="destination-id"></p>
                 <p><span class="label">Opposite:</span>
                     <input type="text" class="opposite"></p>
             </div>
@@ -47,9 +47,11 @@
         <div class="map-editor">
             <div class="canvas"></div>
             <div class="sidebar">
-                <div class="selected-area">
-                    <p><strong>Area #<span class="id"></span>
-                        (<span class="x"></span>, <span class="y"></span>)</strong></p>
+                <div class="selected-room">
+                    <p><strong>Room #<span class="id"></span></strong></p>
+                    <p><input type="number" class="x" step="100">,
+                        <input type="number" class="y" step="100">,
+                        <input type="number" class="z" step="100"></p>
                     <p><strong>Name:</strong>
                         <span class="name"></span>
                         <a href="javascript:void(0)" class="edit name">(edit)</a></p>
@@ -62,7 +64,8 @@
                         </p>
                 </div>
                 <div class="plot-options">
-                    <p><a href="javascript:void(0)" class="plot areavisit">Plot area visit
+                    <p><a href="javascript:void(0)" class="plot altitude">Plot altitude</a></p>
+                    <p><a href="javascript:void(0)" class="plot roomvisit">Plot room visit
                         frequency</a></p>
                     <p><a href="javascript:void(0)" class="plot playerdeath">Plot player death
                         frequency</a></p>

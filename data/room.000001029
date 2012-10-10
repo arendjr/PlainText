@@ -1,5 +1,8 @@
 {
   "name": "Bakery",
   "description": "The bakery is a long building, with a small counter adjacent to the closed window that would otherwise serve to sell breads to the people on the street. Behind the counter, you can discern a long wooden table on which the breads are kneaded. The back of the building is dominated by a large round oven, with the openings shielded to keep the inside temperature as constant as possible.",
+  "x": -150,
+  "y": -450,
+  "z": 0,
   "exits": [ "exit:1031" ]
 }

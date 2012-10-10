@@ -327,7 +327,9 @@ Controller.prototype.writeToScreen = function(message) {
 Controller.prototype.sendApiCall = function(command, callback) {
 
     var requestId = "request" + this.requestId;
-    this.pendingRequests[requestId] = callback;
+    if (callback) {
+        this.pendingRequests[requestId] = callback;
+    }
 
     var parts = command.split(" ");
     parts.splice(1, 0, requestId);

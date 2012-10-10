@@ -1,5 +1,8 @@
 {
   "name": "Private Room",
   "description": "This room is large and luxeous. There are many fine decorations on the walls, and there are large, comfortable, white couches and chairs, accompanied by marmer tables used for placing drinks and ash trays.\n\nIn fact, this room looks more appropriate for meetings with high class noblemen, rather than for the enjoyment of a woman's flesh.",
+  "x": -350,
+  "y": -450,
+  "z": 10,
   "exits": [ "exit:1023" ]
 }

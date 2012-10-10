@@ -6,10 +6,40 @@
 #define super GameObject
 
 Room::Room(Realm *realm, uint id, Options options) :
-    super(realm, "room", id, options) {
+    super(realm, "room", id, options),
+    m_x(0),
+    m_y(0),
+    m_z(0) {
 }
 
 Room::~Room() {
+}
+
+void Room::setX(int x) {
+
+    if (m_x != x) {
+        m_x = x;
+
+        setModified();
+    }
+}
+
+void Room::setY(int y) {
+
+    if (m_y != y) {
+        m_y = y;
+
+        setModified();
+    }
+}
+
+void Room::setZ(int z) {
+
+    if (m_z != z) {
+        m_z = z;
+
+        setModified();
+    }
 }
 
 void Room::addExit(const GameObjectPtr &exit) {
@@ -93,6 +123,15 @@ void Room::setItems(const GameObjectPtrList &items) {
 
     if (m_items != items) {
         m_items = items;
+
+        setModified();
+    }
+}
+
+void Room::setVisibleRooms(const GameObjectPtrList &visibleRooms) {
+
+    if (m_visibleRooms != visibleRooms) {
+        m_visibleRooms = visibleRooms;
 
         setModified();
     }

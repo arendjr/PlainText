@@ -3,27 +3,30 @@
     loadScript("kinetic.js");
 
 
-    function Spot(x, y) {
-        this.x = x;
-        this.y = y;
-    }
-
-    Spot.prototype.take = function(area) {
-        area.spots[4 + this.x + 3 * this.y] = 1;
-    };
-
-    Spot.prototype.isAvailable = function(area) {
-        return area.spots[4 + this.x + 3 * this.y] === 0;
-    };
-
-    Spot.prototype.equals = function(spot) {
-        return spot.x === this.x && spot.y === this.y
-    }
-
     var self = controller;
 
+
     var mapEditor = element(".map-editor");
-    var selectedArea = mapEditor.querySelector(".selected-area");
+
+    var selectedRoom = mapEditor.querySelector(".selected-room");
+    selectedRoom.querySelector(".x").addEventListener("change", function(event) {
+        var value = event.target.value;
+        self.sendApiCall("property-set #" + selectedRoomId + " x " + value);
+        map.rooms[selectedRoomId].x = value;
+        drawMap();
+    });
+    selectedRoom.querySelector(".y").addEventListener("change", function(event) {
+        var value = event.target.value;
+        self.sendApiCall("property-set #" + selectedRoomId + " y " + value);
+        map.rooms[selectedRoomId].y = value;
+        drawMap();
+    });
+    selectedRoom.querySelector(".z").addEventListener("change", function(event) {
+        var value = event.target.value;
+        self.sendApiCall("property-set #" + selectedRoomId + " z " + value);
+        map.rooms[selectedRoomId].z = value;
+        drawMap();
+    });
 
     var exitEditor = element(".exit-editor");
     exitEditor.querySelector(".delete-button").addEventListener("click", function() {
@@ -37,51 +40,47 @@
     }, false);
 
 
-    var selectedAreaId = null;
-
-
     var map = {
-        areas: {},
+        rooms: {},
         exits: {}
     };
 
-    var areaShapes = [];
+    var selectedShape = null;
+    var selectedRoomId = null;
 
-    var directions = {
-        "north":     new Spot( 0, -1),
-        "northeast": new Spot( 1, -1),
-        "east":      new Spot( 1,  0),
-        "southeast": new Spot( 1,  1),
-        "south":     new Spot( 0,  1),
-        "southwest": new Spot(-1,  1),
-        "west":      new Spot(-1,  0),
-        "northwest": new Spot(-1, -1)
-    };
-    var orderedDirections = [ "north", "northeast", "east", "southeast",
-                              "south", "southwest", "west", "northwest" ];
-    var preferredDirections = [ "north", "east", "south", "west",
-                                "northeast", "southeast", "southwest", "northwest" ];
-    var verticals = {
-        "up":   new Spot( 1, -1),
-        "down": new Spot(-1,  1)
-    };
 
     function openMap() {
 
-        selectedArea.hide();
+        selectedRoom.hide();
 
         mapEditor.show();
         mapEditor.canvas = mapEditor.querySelector(".canvas");
 
-        if (mapEditor.stage) {
-            mapEditor.stage.removeChildren();
-        } else {
+        if (!mapEditor.stage) {
             mapEditor.stage = new Kinetic.Stage({
                 container: mapEditor.canvas,
                 width: mapEditor.canvas.clientWidth,
                 height: mapEditor.canvas.clientHeight,
                 draggable: true
             });
+
+            map.layer = new Kinetic.Layer();
+            map.layer.on("click", function(event) {
+                if (selectedShape) {
+                    selectedShape.setStroke("black");
+                }
+
+                if (event.shape.getId()) {
+                    selectedShape = event.shape;
+                    selectedShape.setStroke("orange");
+
+                    selectRoom(event.shape.getId());
+                }
+
+                map.layer.draw();
+            });
+
+            mapEditor.stage.add(map.layer);
         }
 
         loadMap();
@@ -92,20 +91,21 @@
         mapEditor.hide();
     }
 
-    function selectArea(areaId) {
+    function selectRoom(roomId) {
 
-        if (areaId) {
-            var area = map.areas[areaId];
-            selectedArea.querySelector(".id").textContent = area.id;
-            selectedArea.querySelector(".x").textContent = area.x;
-            selectedArea.querySelector(".y").textContent = area.y;
-            selectedArea.querySelector(".name").textContent = area.name;
-            selectedArea.querySelector(".description").textContent = area.description;
+        if (roomId) {
+            var room = map.rooms[roomId];
+            selectedRoom.querySelector(".id").textContent = room.id;
+            selectedRoom.querySelector(".x").value = room.x;
+            selectedRoom.querySelector(".y").value = room.y;
+            selectedRoom.querySelector(".z").value = room.z;
+            selectedRoom.querySelector(".name").textContent = room.name;
+            selectedRoom.querySelector(".description").textContent = room.description;
 
-            var exitsSpan = selectedArea.querySelector(".exits");
+            var exitsSpan = selectedRoom.querySelector(".exits");
             exitsSpan.innerHTML = "";
-            for (var i = 0, length = area.exits.length; i < length; i++) {
-                var exit = map.exits[objectId(area.exits[i])];
+            for (var i = 0, length = room.exits.length; i < length; i++) {
+                var exit = room.exits[i];
                 var exitSpan = document.createElement("a");
                 exitSpan.setAttribute("class", "exit");
                 exitSpan.setAttribute("data-exit-id", exit.id);
@@ -119,13 +119,13 @@
                 }
             }
 
-            selectedArea.show();
+            selectedRoom.show();
 
-            selectedAreaId = areaId;
+            selectedRoomId = roomId;
         } else {
-            selectedArea.hide();
+            selectedRoom.hide();
 
-            selectedAreaId = null;
+            selectedRoomId = null;
         }
     }
 
@@ -172,34 +172,51 @@
 
     function editProperty(propertyName, onSaved) {
 
-        if (selectedAreaId) {
-            self.propertyEditor.edit("#" + selectedAreaId + " " + propertyName, onSaved);
+        if (selectedRoomId) {
+            self.propertyEditor.edit("#" + selectedRoomId + " " + propertyName, onSaved);
         }
     }
 
 
-    function objectId(string) {
+    function resolvePointer(pointer) {
 
-        if (typeof string === "string") {
-            if (string.contains(":")) {
-                return parseInt(string.split(":")[1], 10);
-            } else {
-                return parseInt(string, 10);
-            }
+        if (pointer.startsWith("room:")) {
+            return map.rooms[parseInt(pointer.substr(5), 10)];
+        } else if (pointer.startsWith("exit:")) {
+            return map.exits[parseInt(pointer.substr(5), 10)];
         } else {
-            return string;
+            return null;
         }
+    }
+
+    function resolvePointers(object, propertyNames) {
+
+        propertyNames.forEach(function(propertyName) {
+            if (object.contains(propertyName)) {
+                var value = object[propertyName];
+                if (value instanceof Array) {
+                    for (var i = 0, length = value.length; i < length; i++) {
+                        value[i] = resolvePointer(value[i]);
+                    }
+                } else {
+                    object[propertyName] = resolvePointer(value);
+                }
+            }
+        });
     }
 
 
     function loadMap() {
 
-        self.sendApiCall("areas-list", function(data) {
-            console.log("Received areas");
+        self.sendApiCall("rooms-list", function(data) {
+            console.log("Received rooms");
 
             for (var i = 0; i < data.length; i++) {
-                var area = JSON.parse(data[i]);
-                map.areas[objectId(area.id)] = area;
+                var room = JSON.parse(data[i]);
+                room.x = room.x || 0;
+                room.y = room.y || 0;
+                room.z = room.z || 0;
+                map.rooms[room.id] = room;
             }
 
             self.sendApiCall("exits-list", function(data) {
@@ -207,350 +224,77 @@
 
                 for (var i = 0; i < data.length; i++) {
                     var exit = JSON.parse(data[i]);
-                    var destinationArea = map.areas[objectId(exit.destinationArea)];
-                    if (destinationArea) {
-                        exit.destinationArea = destinationArea;
-                        map.exits[objectId(exit.id)] = exit;
-                    } else {
-                        console.log("Exit " + exit.id + " has a non-existant destination area");
-                    }
+                    map.exits[exit.id] = exit;
                 }
 
-                layoutAreas();
+                for (var id in map.rooms) {
+                    resolvePointers(map.rooms[id], ["exits", "visibleRooms"]);
+                }
+                for (id in map.exits) {
+                    resolvePointers(map.exits[id], ["destination", "oppositeExit"]);
+                }
+
+                console.log(map.rooms);
+                console.log(map.exits);
+
                 drawMap();
             });
         });
     }
 
 
-    function layoutAreas() {
-
-        var area;
-        for (var key in map.areas) {
-            area = map.areas[key];
-            break;
-        }
-        if (!area) {
-            console.log("No areas to layout");
-            return;
-        }
-
-        var visitedAreas = [];
-        var positions = {};
-
-        function oppositeDirection(direction) {
-            if (directions.contains(direction)) {
-                var spot = directions[direction];
-                var oppositeSpot = new Spot(-spot.x, -spot.y);
-                for (var key in directions) {
-                    if (oppositeSpot.equals(directions[key])) {
-                        return key;
-                    }
-                }
-            } else if (verticals.contains(direction)) {
-                spot = verticals[direction];
-                oppositeSpot = new Spot(-spot.x, -spot.y);
-                for (key in verticals) {
-                    if (oppositeSpot.equals(verticals[key])) {
-                        return key;
-                    }
-                }
-            }
-            return undefined;
-        }
-
-        function visitArea(area, x, y) {
-            //console.log("Visting area \"" + area.name + "\"");
-
-            area.x = x;
-            area.y = y;
-            area.spots = [0, 0, 0,
-                          0, 0, 0,
-                          0, 0, 0];
-            positions[x + ":" + y] = area;
-
-            var visitIndex = visitedAreas.length;
-            visitedAreas.push(area);
-
-            function unwindVisitedAreas() {
-                for (var i = visitIndex, length = visitedAreas.length; i < length; i++) {
-                    var visitedArea = visitedAreas[i];
-                    delete positions[visitedArea.x + ":" + visitedArea.y];
-                }
-                visitedAreas.splice(visitIndex);
-            }
-
-            if (!area.exits) {
-                console.log("Area \"" + area.name + "\" has no exits");
-                return;
-            }
-
-            var directionalExits = [];
-            var verticalExits = [];
-            var otherExits = [];
-            for (var i = 0; i < area.exits.length; i++) {
-                var exit = map.exits[objectId(area.exits[i])];
-                if (directions.contains(exit.name)) {
-                    directionalExits.push(exit);
-                } else if (verticals.contains(exit.name)) {
-                    verticalExits.push(exit);
-                } else {
-                    otherExits.push(exit);
-                }
-            }
-
-            function findSpot(preferredSpot) {
-                if (preferredSpot.isAvailable(area)) {
-                    preferredSpot.take(area);
-                    return preferredSpot;
-                } else {
-                    var start = (preferredSpot.y === 1 ? 2 : 0);
-                    var length = preferredDirections.length;
-                    for (var i = start; i < start + length; i++) {
-                        var spot = directions[preferredDirections[i % length]];
-                        if (spot.isAvailable(area)) {
-                            spot.take(area);
-                            return spot;
-                        }
-                    }
-                    console.log("There are no more free spots in area \"" + area.name + "\"");
-                    return null;
-                }
-            }
-
-            function spotForDestination(destinationArea, originArea) {
-                var x = destinationArea.x - originArea.x;
-                var y = destinationArea.y - originArea.y;
-                if (x !== 0 && y !== 0 && Math.abs(x) !== Math.abs(y)) {
-                    return null;
-                }
-                if (x !== 0) {
-                    x /= Math.abs(x);
-                }
-                if (y !== 0) {
-                    y /= Math.abs(y);
-                }
-                return new Spot(x, y);
-            }
-
-            function attemptToVisitArea(area, spot) {
-                for (var i = 1; i <= 3; i++) {
-                    var destX = x + i * spot.x;
-                    var destY = y + i * spot.y;
-                    if (positions.contains(destX + ":" + destY)) {
-                        return false;
-                    }
-
-                    // skim the area and make sure this position isn't crossed by other exits
-                    for (var dx = -1; dx <= 1; dx++) {
-                        for (var dy = -1; dy <= 1; dy++) {
-                            if ((dx === 0 && dy === 0) ||
-                                (dx === -spot.x && dy === -spot.y)) {
-                                continue;
-                            }
-                            var position = (destX + dx) + ":" + (destY + dy);
-                            if (positions.contains(position)) {
-                                var adjacentArea = positions[position];
-                                if (!(new Spot(-dx, -dy)).isAvailable(adjacentArea)) {
-                                    return false;
-                                }
-                            }
-                        }
-                    }
-                    if (spot.x !== 0 && spot.y !== 0) {
-                        position = (x) + ":" + (y - spot.y);
-                        if (positions.contains(position)) {
-                            adjacentArea = positions[position];
-                            if (!(new Spot(spot.x, -spot.y)).isAvailable(adjacentArea)) {
-                                return false;
-                            }
-                        }
-                        position = (x - spot.x) + ":" + (y);
-                        if (positions.contains(position)) {
-                            adjacentArea = positions[position];
-                            if (!(new Spot(-spot.x, spot.y)).isAvailable(adjacentArea)) {
-                                return false;
-                            }
-                        }
-                    }
-
-                    if (visitArea(area, destX, destY)) {
-                        return true;
-                    }
-                }
-                return false;
-            }
-
-            var succeeded = true;
-
-            function followExit(exit) {
-                if (!succeeded) {
-                    return;
-                }
-
-                if (visitedAreas.contains(exit.destinationArea)) {
-                    var spot = spotForDestination(exit.destinationArea, area);
-                    if (spot === null) {
-                        succeeded = false;
-                        //console.log("  Exit \"" + exit.name + "\" is currently located at " +
-                        //              "a non-reachable position.");
-                        return;
-                    }
-                    //console.log("  Exit \"" + exit.name + "\" is currently located at " +
-                    //            spot.x + "," + spot.y);
-                    if (spot.isAvailable(area)) {
-                        spot.take(area);
-                    } else {
-                        succeeded = false;
-                        //console.log("    ... but that spot is already taken");
-                    }
-                } else {
-                    do {
-                        var direction = exit.name;
-                        if (directions.contains(exit.name) ||
-                            verticals.contains(exit.name)) {
-                            // yay!
-                        } else if (exit.data && exit.data.directionHint) {
-                            direction = exit.data.directionHint;
-                        } else if (exit.oppositeExit && exit.oppositeExit !== "0") {
-                            var oppositeExit = map.exits[objectId(exit.oppositeExit)];
-                            if (directions.contains(oppositeExit.name) ||
-                                verticals.contains(oppositeExit.name)) {
-                                direction = oppositeDirection(oppositeExit.name);
-                            } else if (oppositeExit.data && oppositeExit.data.directionHint) {
-                                var opposite = oppositeDirection(oppositeExit.data.directionHint);
-                                if (opposite) {
-                                    direction = opposite;
-                                }
-                            }
-                        }
-
-                        if (directions.contains(direction)) {
-                            if (directions[direction].isAvailable(area)) {
-                                spot = directions[direction];
-                                spot.take(area);
-                            } else {
-                                spot = null;
-                            }
-                        } else {
-                            spot = findSpot(verticals.contains(direction) ?
-                                            verticals[direction] : new Spot(-1, 0));
-                        }
-                        if (spot === null) {
-                            succeeded = false;
-                            break;
-                        }
-                        //console.log("  Exit \"" + exit.name + "\" is going to be at " +
-                        //            spot.x + "," + spot.y);
-                    } while (!attemptToVisitArea(exit.destinationArea, spot));
-                }
-            }
-
-            directionalExits.forEach(followExit);
-            verticalExits.forEach(followExit);
-            otherExits.forEach(followExit);
-            if (!succeeded) {
-                unwindVisitedAreas();
-                return false;
-            }
-
-            return true;
-        }
-
-        if (!visitArea(area, 0, 0)) {
-            console.log("No satisfying solution found");
-        }
-    }
-
-
     function drawMap() {
 
-        map.top = map.left = map.bottom = map.right = 0;
-
-        var area;
-        for (var key in map.areas) {
-            area = map.areas[key];
-
-            map.top = (area.y < map.top ? area.y : map.top);
-            map.left = (area.x < map.left ? area.x : map.left);
-            map.bottom = (area.y > map.bottom ? area.y : map.bottom);
-            map.right = (area.x > map.right ? area.x : map.right);
-        }
-        if (!area) {
-            console.log("No areas to draw");
+        if (Object.keys(map.rooms).isEmpty()) {
+            console.log("No rooms to draw");
             return;
         }
 
-        var visited = {};
+        var roomSize = 30;
 
-        var gridSize = 60;
-
-        var layer = new Kinetic.Layer();
-        var centerX = mapEditor.canvas.clientWidth / 2 - gridSize * (map.right + map.left) / 2;
-        var centerY = mapEditor.canvas.clientHeight / 2 - gridSize * (map.bottom + map.top) / 2;
-
-        function visitArea(area) {
-            visited[area.id] = true;
-
-            if (!area.exits) {
-                return;
-            }
-
-            for (var i = 0; i < area.exits.length; i++) {
-                var exit = map.exits[objectId(area.exits[i])];
-                if (visited.contains(exit.destinationArea.id)) {
-                    var line = new Kinetic.Line({
-                        points: [centerX + gridSize * area.x,
-                                 centerY + gridSize * area.y,
-                                 centerX + gridSize * exit.destinationArea.x,
-                                 centerY + gridSize * exit.destinationArea.y],
+        function drawRoom(room) {
+            for (var i = 0, length = room.exits.length; i < length; i++) {
+                var exit = room.exits[i];
+                var points = [room.x, room.y, exit.destination.x, exit.destination.y];
+                if (exit.shape) {
+                    exit.shape.setPoints(points);
+                } else {
+                    exit.shape = new Kinetic.Line({
+                        points: points,
                         stroke: "blue",
                         strokeWidth: 2,
                         listening: false
                     });
-                    layer.add(line);
-                } else {
-                    visitArea(exit.destinationArea);
+                    map.layer.add(exit.shape);
                 }
             }
 
-            var rect = new Kinetic.Rect({
-                id: objectId(area.id),
-                x: centerX + gridSize * area.x - 15,
-                y: centerY + gridSize * area.y - 15,
-                width: gridSize / 2,
-                height: gridSize / 2,
-                stroke: "black",
-                strokeWidth: 2,
-                fill: "grey"
-            });
-            layer.add(rect);
-            areaShapes.push(rect);
+            var x = room.x - roomSize / 2;
+            var y = room.y - roomSize / 2;
+            if (room.shape) {
+                room.shape.setX(x);
+                room.shape.setY(y);
+            } else {
+                room.shape = new Kinetic.Rect({
+                    id: room.id,
+                    x: x, y: y,
+                    width: roomSize, height: roomSize,
+                    stroke: "black",
+                    strokeWidth: 2,
+                    fill: "grey"
+                });
+                map.layer.add(room.shape);
+            }
         }
 
-        visitArea(area);
+        for (var id in map.rooms) {
+            drawRoom(map.rooms[id]);
+        }
+        for (id in map.rooms) {
+            map.rooms[id].shape.moveToTop();
+        }
 
-        areaShapes.forEach(function(shape) {
-            shape.moveToTop();
-        });
-
-        var selectedShape = null;
-        layer.on("click", function(event) {
-            if (selectedShape) {
-                selectedShape.setStroke("black");
-            }
-
-            if (event.shape.getId()) {
-                selectedShape = event.shape;
-                selectedShape.setStroke("orange");
-
-                selectArea(event.shape.getId());
-            }
-
-            layer.draw();
-        });
-
-        mapEditor.stage.add(layer);
+        map.layer.draw();
     }
 
 
@@ -566,21 +310,57 @@
                 }
             }
 
-            areaShapes.forEach(function(shape) {
-                var key = "area:" + shape.getId();
+            for (id in map.rooms) {
+                var shape = map.rooms[id].shape;
+                key = "room:" + shape.getId();
                 if (data.contains(key)) {
-                    var count = data[key];
+                    count = data[key];
                     var red = Math.floor(255 * count / maxCount);
                     var blue = 255 - red;
                     shape.setFill("rgb(" + red + ", 0, " + blue + ")");
                 } else {
                     shape.setFill("rgb(0, 0, 255)");
                 }
-            });
+            }
 
             mapEditor.stage.draw();
         });
     }
+
+    function plotAltitude(type) {
+        var lowest = 0;
+        var highest = 0;
+        for (var id in map.rooms) {
+            var room = map.rooms[id];
+            if (room.z > highest) {
+                highest = room.z;
+            } else if (room.z < lowest) {
+                lowest = room.z;
+            }
+        }
+
+        for (id in map.rooms) {
+            var shape = map.rooms[id].shape;
+            id = shape.getId();
+            room = map.rooms[id];
+
+            var red = 0, green = 0, blue = 0;
+            if (room.z > 0) {
+                red = Math.floor(255 * room.z / highest);
+                green = 255 - red;
+            } else if (room.z === 0) {
+                green = 255;
+            } else {
+                blue = Math.floor(255 * room.z / lowest);
+                green = 255 - blue;
+            }
+
+            shape.setFill("rgb(" + red + ", " + green + ", " + blue + ")");
+        }
+
+        mapEditor.stage.draw();
+    }
+
 
     var editMapLink = document.createElement("a");
     editMapLink.setAttribute("href", "javascript:void(0)");
@@ -591,24 +371,26 @@
     statusHeader.appendChild(document.createTextNode(" "));
     statusHeader.appendChild(editMapLink);
 
-    selectedArea.querySelector(".edit.name").addEventListener("click", function() {
+    selectedRoom.querySelector(".edit.name").addEventListener("click", function() {
         editProperty("name", function(newValue) {
-            map.areas[selectedAreaId].name = newValue;
-            selectedArea.querySelector(".name").textContent = newValue;
+            map.rooms[selectedRoomId].name = newValue;
+            selectedRoom.querySelector(".name").textContent = newValue;
         });
     }, false);
-    selectedArea.querySelector(".edit.description").addEventListener("click", function() {
+    selectedRoom.querySelector(".edit.description").addEventListener("click", function() {
         editProperty("description", function(newValue) {
-            map.areas[selectedAreaId].description = newValue;
-            selectedArea.querySelector(".description").textContent = newValue;
+            map.rooms[selectedRoomId].description = newValue;
+            selectedRoom.querySelector(".description").textContent = newValue;
         });
     }, false);
-    selectedArea.querySelector(".add.exit").addEventListener("click", addExit, false);
+    selectedRoom.querySelector(".add.exit").addEventListener("click", addExit, false);
 
-    mapEditor.querySelector(".plot.areavisit").addEventListener("click", function() {
-        plotStats("areavisit");
+    mapEditor.querySelector(".plot.altitude").addEventListener("click", function() {
+        plotAltitude();
     }, false);
-
+    mapEditor.querySelector(".plot.roomvisit").addEventListener("click", function() {
+        plotStats("roomvisit");
+    }, false);
     mapEditor.querySelector(".plot.playerdeath").addEventListener("click", function() {
         plotStats("playerdeath");
     }, false);

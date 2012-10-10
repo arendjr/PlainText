@@ -13,6 +13,18 @@ class Room : public GameObject {
         Room(Realm *realm, uint id, Options options = NoOptions);
         virtual ~Room();
 
+        int x() const { return m_x; }
+        void setX(int x);
+        Q_PROPERTY(int x READ x WRITE setX)
+
+        int y() const { return m_y; }
+        void setY(int y);
+        Q_PROPERTY(int y READ y WRITE setY)
+
+        int z() const { return m_z; }
+        void setZ(int z);
+        Q_PROPERTY(int z READ z WRITE setZ)
+
         const GameObjectPtrList &exits() const { return m_exits; }
         Q_INVOKABLE void addExit(const GameObjectPtr &exit);
         Q_INVOKABLE void removeExit(const GameObjectPtr &exit);
@@ -37,6 +49,10 @@ class Room : public GameObject {
         void setItems(const GameObjectPtrList &items);
         Q_PROPERTY(GameObjectPtrList items READ items WRITE setItems)
 
+        const GameObjectPtrList &visibleRooms() const { return m_visibleRooms; }
+        void setVisibleRooms(const GameObjectPtrList &visibleRooms);
+        Q_PROPERTY(GameObjectPtrList visibleRooms READ visibleRooms WRITE setVisibleRooms)
+
         Q_INVOKABLE void addGold(double amount);
 
         GameObjectPtrList characters() const { return m_players + m_npcs; }
@@ -46,10 +62,15 @@ class Room : public GameObject {
         Q_PROPERTY(GameObjectPtrList objects READ objects STORED false)
 
     private:
+        int m_x;
+        int m_y;
+        int m_z;
+
         GameObjectPtrList m_exits;
         GameObjectPtrList m_players;
         GameObjectPtrList m_npcs;
         GameObjectPtrList m_items;
+        GameObjectPtrList m_visibleRooms;
 };
 
 #endif // ROOM_H

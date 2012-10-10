@@ -69,6 +69,7 @@
 #include "commands/api/exitslistcommand.h"
 #include "commands/api/logretrievecommand.h"
 #include "commands/api/propertygetcommand.h"
+#include "commands/api/propertysetcommand.h"
 #include "commands/api/roomslistcommand.h"
 #include "commands/api/triggergetcommand.h"
 #include "commands/api/triggersetcommand.h"
@@ -148,6 +149,7 @@ CommandRegistry::CommandRegistry(QObject *parent) :
     m_apiCommands.insert("api-exits-list", new ExitsListCommand(this));
     m_apiCommands.insert("api-log-retrieve", new LogRetrieveCommand(this));
     m_apiCommands.insert("api-property-get", new PropertyGetCommand(this));
+    m_apiCommands.insert("api-property-set", new PropertySetCommand(this));
     m_apiCommands.insert("api-rooms-list", new RoomsListCommand(this));
     m_apiCommands.insert("api-trigger-get", new TriggerGetCommand(this));
     m_apiCommands.insert("api-trigger-set", new TriggerSetCommand(this));

@@ -1,5 +1,8 @@
 {
   "name": "Clothes Stall",
   "description": "The clothes stall seems to sell rather few clothes except for some not very well-made dresses. The rest are large pieces of textiles and fabrics, giving the buyer the opportunity to make their own clothes, the superior choice given the quality of the dresses.",
+  "x": -150,
+  "y": -150,
+  "z": 0,
   "exits": [ "exit:88" ]
 }

@@ -1,5 +1,8 @@
 {
   "name": "Coast Line",
   "description": "You are standing at the coast of the bay. Not too far to the west, you can see ships entering and leaving the harbor.",
+  "x": 0,
+  "y": 350,
+  "z": 0,
   "exits": [ "exit:35" ]
 }

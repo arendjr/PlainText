@@ -9,7 +9,7 @@
   "cost": 0,
   "stats": [0, 0, 0, 0, 0, 0],
   "height": 0,
-  "currentRoom": "room:81",
+  "currentRoom": "room:77",
   "race": "race:2",
   "characterClass": "class:147",
   "gender": "male",
@@ -19,7 +19,7 @@
   "maxHp": 1,
   "mp": 0,
   "maxMp": 0,
-  "gold": 4,
+  "gold": 19,
   "weapon": "0",
   "secondaryWeapon": "0",
   "shield": "0"

@@ -1,5 +1,8 @@
 {
   "name": "Stables",
   "description": "As you step inside the stables, the smell of horses almost overwhelms you. There are more horses here than would reasonably fit in the allocated space.",
+  "x": 200,
+  "y": -450,
+  "z": 0,
   "exits": [ "exit:1466" ]
 }
