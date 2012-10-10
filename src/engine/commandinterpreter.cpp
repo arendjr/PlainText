@@ -3,7 +3,6 @@
 #include <QRegExp>
 #include <QStringList>
 
-#include "room.h"
 #include "command.h"
 #include "commandregistry.h"
 #include "exit.h"
@@ -11,6 +10,7 @@
 #include "gameobjectptr.h"
 #include "logutil.h"
 #include "player.h"
+#include "room.h"
 #include "util.h"
 
 
@@ -44,7 +44,14 @@ void CommandInterpreter::execute(Player *player, const QString &command) {
             words[0] = Util::direction(commandName);
             commandName = words[0];
         }
-        if (Util::isDirection(commandName) || commandName == "out") {
+        Room *currentRoom = player->currentRoom().cast<Room *>();
+        bool matchedExit = false;
+        for (const GameObjectPtr &exitPtr : currentRoom->exits()) {
+            if (exitPtr->name() == commandName) {
+                matchedExit = true;
+            }
+        }
+        if (Util::isDirection(commandName) || matchedExit) {
             words.prepend("go");
             m_registry->command("go")->execute(player, words.join(" "));
             return;
