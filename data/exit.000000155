@@ -1,6 +1,6 @@
 {
   "name": "tent",
-  "destinationArea": "area:154",
+  "destination": "room:154",
   "oppositeExit": "0",
   "door": false,
   "hidden": false

@@ -2,7 +2,7 @@
   "name": "door",
   "description": "The heavy steel door seems to be in a pristine condition, though the building appears to be much older.",
   "triggers": { "onopen": "(function() {\n    this.setTimeout(function() {\n        this.open = false;\n    }, 30000);\n})" },
-  "destinationArea": "area:17",
+  "destination": "room:17",
   "oppositeExit": "0",
   "door": true,
   "hidden": false

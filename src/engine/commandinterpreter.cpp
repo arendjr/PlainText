@@ -3,7 +3,7 @@
 #include <QRegExp>
 #include <QStringList>
 
-#include "area.h"
+#include "room.h"
 #include "command.h"
 #include "commandregistry.h"
 #include "exit.h"

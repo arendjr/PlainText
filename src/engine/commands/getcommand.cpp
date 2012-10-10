@@ -26,7 +26,7 @@ void GetCommand::execute(Player *player, const QString &command) {
 
     takeWord("the");
 
-    GameObjectPtrList items = takeObjects(currentArea()->items());
+    GameObjectPtrList items = takeObjects(currentRoom()->items());
     if (!requireSome(items, "That's not here.")) {
         return;
     }

@@ -28,7 +28,7 @@ void AddShieldCommand::execute(Player *player, const QString &command) {
 
     Shield *shield = GameObject::createByObjectType<Shield *>(realm(), "shield");
     shield->setName(shieldName);
-    currentArea()->addItem(shield);
+    currentRoom()->addItem(shield);
 
     send(QString("Shield %1 added.").arg(shieldName));
 }

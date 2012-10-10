@@ -1,6 +1,6 @@
 {
   "name": "southwest",
-  "destinationArea": "area:68",
+  "destination": "room:68",
   "oppositeExit": "exit:117",
   "door": false,
   "hidden": false

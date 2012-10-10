@@ -1,5 +1,0 @@
-{
-  "name": "Main Street",
-  "description": "This is the end of the Main Street, right at the East Gate of the city. On the north side of the street are the barracks used by newly arriving soldiers.",
-  "exits": [ "exit:131", "exit:136", "exit:152" ]
-}

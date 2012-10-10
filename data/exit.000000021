@@ -1,7 +1,7 @@
 {
   "name": "stairs",
   "description": "",
-  "destinationArea": "area:20",
+  "destination": "room:20",
   "oppositeExit": "exit:22",
   "door": false,
   "hidden": false

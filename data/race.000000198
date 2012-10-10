@@ -6,6 +6,6 @@
   "height": 0,
   "weight": 0,
   "classes": [ ],
-  "startingArea": "area:1",
+  "startingArea": "room:1",
   "playerSelectable": false
 }

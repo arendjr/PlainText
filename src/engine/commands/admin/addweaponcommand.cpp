@@ -28,7 +28,7 @@ void AddWeaponCommand::execute(Player *player, const QString &command) {
 
     Weapon *weapon = GameObject::createByObjectType<Weapon *>(realm(), "weapon");
     weapon->setName(weaponName);
-    currentArea()->addItem(weapon);
+    currentRoom()->addItem(weapon);
 
     send(QString("Weapon %1 added.").arg(weaponName));
 }

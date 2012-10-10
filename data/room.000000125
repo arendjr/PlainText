@@ -1,0 +1,5 @@
+{
+  "name": "Main Street",
+  "description": "This is the end of the Main Street, right at the East Gate of the city. On the north side of the street are the barracks used by newly arriving soldiers. Right on the opposite side of the street are the stables used by most of the soldiers for tending their horses.",
+  "exits": [ "exit:131", "exit:136", "exit:152", "exit:1465" ]
+}

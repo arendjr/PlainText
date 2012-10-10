@@ -14,7 +14,7 @@
 
 #include "qjson/json_driver.hh"
 
-#include "area.h"
+#include "room.h"
 #include "character.h"
 #include "class.h"
 #include "conversionutil.h"
@@ -66,11 +66,6 @@ GameObject::~GameObject() {
     killAllTimers();
 }
 
-bool GameObject::isArea() const {
-
-    return strcmp(m_objectType, "area") == 0;
-}
-
 bool GameObject::isClass() const {
 
     return strcmp(m_objectType, "class") == 0;
@@ -109,6 +104,11 @@ bool GameObject::isRace() const {
 bool GameObject::isRealm() const {
 
     return strcmp(m_objectType, "realm") == 0;
+}
+
+bool GameObject::isRoom() const {
+
+    return strcmp(m_objectType, "room") == 0;
 }
 
 bool GameObject::isShield() const {
@@ -391,14 +391,13 @@ GameObject *GameObject::copy() {
 QString GameObject::toJSON(Options options) const {
 
     QStringList dumpedProperties;
-    if (options & IncludeId) {
+    if (~options & SkipId) {
         dumpedProperties << QString("  \"id\": %1").arg(m_id);
     }
     for (const QMetaProperty &metaProperty : storedMetaProperties()) {
         const char *name = metaProperty.name();
 
-        QString propertyString = ConversionUtil::toJSON(property(name),
-                                                        options & DontIncludeTypeInfo);
+        QString propertyString = ConversionUtil::toJSON(property(name), options & ~IncludeTypeInfo);
         if (!propertyString.isNull()) {
             dumpedProperties << QString("  \"%1\": %2").arg(name, propertyString);
         }
@@ -411,7 +410,7 @@ bool GameObject::save() {
     if (m_deleted) {
         return QFile::remove(DiskUtil::gameObjectPath(m_objectType, m_id));
     } else {
-        return DiskUtil::writeGameObject(m_objectType, m_id, toJSON());
+        return DiskUtil::writeGameObject(m_objectType, m_id, toJSON(SkipId | IncludeTypeInfo));
     }
 }
 
@@ -479,9 +478,7 @@ GameObject *GameObject::createByObjectType(Realm *realm, const QString &objectTy
         id = realm->uniqueObjectId();
     }
 
-    if (objectType == "area") {
-        return new Area(realm, id, options);
-    } else if (objectType == "character") {
+    if (objectType == "character") {
         return new Character(realm, id, options);
     } else if (objectType == "class") {
         return new Class(realm, id, options);
@@ -497,6 +494,8 @@ GameObject *GameObject::createByObjectType(Realm *realm, const QString &objectTy
         return new Race(realm, id, options);
     } else if (objectType == "realm") {
         return new Realm(options);
+    } else if (objectType == "room") {
+        return new Room(realm, id, options);
     } else if (objectType == "shield") {
         return new Shield(realm, id, options);
     } else if (objectType == "weapon") {

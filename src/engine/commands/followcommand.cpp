@@ -26,7 +26,7 @@ void FollowCommand::execute(Player *player, const QString &command) {
     }
 
     QPair <QString, uint> description = takeObjectsDescription();
-    GameObjectPtrList characters = objectsByDescription(description, currentArea()->characters());
+    GameObjectPtrList characters = objectsByDescription(description, currentRoom()->characters());
 
     if (characters.isEmpty()) {
         send(QString("\"%1\" is not here.").arg(Util::capitalize(description.first)));

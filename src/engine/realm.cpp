@@ -180,11 +180,11 @@ Player *Realm::getPlayer(const QString &name) const {
     return 0;
 }
 
-GameObjectPtrList Realm::allAreas() const {
+GameObjectPtrList Realm::allRooms() const {
 
     GameObjectPtrList areas;
     for (GameObject *object : m_objectMap) {
-        if (object->isArea()) {
+        if (object->isRoom()) {
             areas << object;
         }
     }

@@ -1,7 +1,7 @@
 {
   "name": "down",
   "description": "",
-  "destinationArea": "area:17",
+  "destination": "room:17",
   "oppositeExit": "exit:21",
   "door": false,
   "hidden": false

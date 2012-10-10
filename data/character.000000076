@@ -1,7 +1,7 @@
 {
   "name": "shopper",
   "description": "",
-  "triggers": { "onattack": "(function(attacker) {\n    this.enemies.pushIfNecessary(attacker);\n\n    this.setTimeout(function() {\n        this.shout(\"Help! Guards!\");\n        this.setTimeout(function() {\n            this.go(this.currentArea.exits.filter(function(exit) {\n                return exit.name.endsWith(\"stall\") || exit.destinationArea.name.contains(\"Market\");\n            }).randomElement());\n        }, 200);\n    }, 150);\n})", "oncharacterentered": "(function(activator) {\n    var area = this.currentArea;\n    var characters = area.characters;\n    if (activator.name.contains(\"city guard\") && characters.containsAny(this.enemies)) {\n        var enemy = this.enemies.findFirstAmong(characters);\n        this.setTimeout(function() {\n            if (!area.players.isEmpty() && !this.pointed) {\n                area.players.send(this.definiteName(area.npcs).capitalized() + \" points to \" + enemy.definiteName(characters) + \".\");\n                this.pointed = true;\n            }\n    \n            activator.enemies.pushIfNecessary(enemy);\n            this.setTimeout(function() {\n                activator.invokeTrigger(\"onactive\");\n                this.pointed = false;\n            }, randomInt(100, 400));\n        }, 10);\n    }\n})", "onspawn": "(function() {\n    var self = this;\n\n    function getGold() {\n        self.setTimeout(function() {\n            var items = this.currentArea.items;\n            for (var i = 0; i < items.length; i++) {\n                if (items[i].name.contains(\"gold\")) {\n                    this.take([ items[i] ]);\n                }\n            }\n        }, randomInt(1000, 10000));\n    }\n\n    this.setInterval(function() {\n        var exit = this.currentArea.exits.randomElement();\n        if ((exit.name.endsWith(\"stall\") || exit.destinationArea.name.contains(\"Market\")) &&\n            !exit.destinationArea.characters.containsAny(this.enemies)) {\n            this.go(exit);\n            getGold();\n        }\n    }, 17111);\n\n    this.gold = randomInt(3, 21);\n    this.enemies = [];\n})" },
+  "triggers": { "onattack": "(function(attacker) {\n    this.enemies.pushIfNecessary(attacker);\n\n    this.setTimeout(function() {\n        this.shout(\"Help! Guards!\");\n        this.setTimeout(function() {\n            this.go(this.currentRoom.exits.filter(function(exit) {\n                return exit.name.endsWith(\"stall\") || exit.destination.name.contains(\"Market\");\n            }).randomElement());\n        }, 200);\n    }, 150);\n})", "oncharacterentered": "(function(activator) {\n    var area = this.currentRoom;\n    var characters = area.characters;\n    if (activator.name.contains(\"city guard\") && characters.containsAny(this.enemies)) {\n        var enemy = this.enemies.findFirstAmong(characters);\n        this.setTimeout(function() {\n            if (!area.players.isEmpty() && !this.pointed) {\n                area.players.send(this.definiteName(area.npcs).capitalized() + \" points to \" + enemy.definiteName(characters) + \".\");\n                this.pointed = true;\n            }\n    \n            activator.enemies.pushIfNecessary(enemy);\n            this.setTimeout(function() {\n                activator.invokeTrigger(\"onactive\");\n                this.pointed = false;\n            }, randomInt(100, 400));\n        }, 10);\n    }\n})", "onspawn": "(function() {\n    var self = this;\n\n    function getGold() {\n        self.setTimeout(function() {\n            var items = this.currentRoom.items;\n            for (var i = 0; i < items.length; i++) {\n                if (items[i].name.contains(\"gold\")) {\n                    this.take([ items[i] ]);\n                }\n            }\n        }, randomInt(1000, 10000));\n    }\n\n    this.setInterval(function() {\n        var exit = this.currentRoom.exits.randomElement();\n        if ((exit.name.endsWith(\"stall\") || exit.destination.name.contains(\"Market\")) &&\n            !exit.destination.characters.containsAny(this.enemies)) {\n            this.go(exit);\n            getGold();\n        }\n    }, 17111);\n\n    this.gold = randomInt(3, 21);\n    this.enemies = [];\n})" },
   "plural": "shoppers",
   "indefiniteArticle": "a",
   "portable": false,
@@ -9,7 +9,7 @@
   "cost": 0,
   "stats": [0, 0, 0, 0, 0, 0],
   "height": 0,
-  "currentArea": "area:83",
+  "currentRoom": "room:81",
   "race": "race:2",
   "characterClass": "class:147",
   "gender": "male",
@@ -19,7 +19,7 @@
   "maxHp": 1,
   "mp": 0,
   "maxMp": 0,
-  "gold": 20,
+  "gold": 4,
   "weapon": "0",
   "secondaryWeapon": "0",
   "shield": "0"

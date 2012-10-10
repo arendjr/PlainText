@@ -10,7 +10,7 @@
 #include "scriptfunction.h"
 
 
-class Area;
+class Room;
 class Player;
 
 class ScriptEngine : public QObject {

@@ -1,6 +1,6 @@
 {
   "name": "bar",
-  "destinationArea": "area:176",
+  "destination": "room:176",
   "oppositeExit": "0",
   "door": false,
   "hidden": false

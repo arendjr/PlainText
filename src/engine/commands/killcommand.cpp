@@ -28,7 +28,7 @@ void KillCommand::execute(Player *player, const QString &command) {
 
     QPair <QString, uint> description = takeObjectsDescription();
     GameObjectPtrList characters = objectsByDescription(description,
-                                                        currentArea()->characters());
+                                                        currentRoom()->characters());
     if (!requireSome(characters, "That character is not here.")) {
         return;
     }

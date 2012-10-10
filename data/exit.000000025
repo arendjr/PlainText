@@ -1,6 +1,6 @@
 {
   "name": "up",
-  "destinationArea": "area:24",
+  "destination": "room:24",
   "size": 1.5,
   "door": false,
   "hidden": false

@@ -4,7 +4,7 @@
 #include <QDebug>
 #include <QMap>
 
-#include "area.h"
+#include "room.h"
 #include "characterstats.h"
 #include "class.h"
 #include "commandevent.h"
@@ -175,7 +175,7 @@ void Session::processSignIn(const QString &data) {
             m_player->setSession(this);
             connect(m_player, SIGNAL(write(QString)), this, SIGNAL(write(QString)));
 
-            m_player->enter(m_player->currentArea());
+            m_player->enter(m_player->currentRoom());
             break;
 
         case SignInAborted:
@@ -702,7 +702,7 @@ void Session::processSignupConfirmation(const QString &answer) {
         m_player->setStats(m_signUpData->stats);
         m_player->setHeight(m_signUpData->height);
         m_player->setWeight(m_signUpData->weight);
-        m_player->setCurrentArea(m_signUpData->race->startingArea());
+        m_player->setCurrentRoom(m_signUpData->race->startingArea());
 
         m_player->setHp(m_player->maxHp());
         m_player->setMp(m_player->maxMp());
@@ -712,6 +712,7 @@ void Session::processSignupConfirmation(const QString &answer) {
         m_signUpData = 0;
 
         LogUtil::logSessionEvent(m_source, "Character created for player " + m_player->name());
+        LogUtil::logCommand(m_player->name(), "(signed in)");
 
         write(QString("\nWelcome to " + m_realm->name() + ", %1.\n").arg(m_player->name()));
         setSignInStage(SignedIn);

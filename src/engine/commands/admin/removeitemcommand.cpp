@@ -21,7 +21,7 @@ void RemoveItemCommand::execute(Player *player, const QString &command) {
         return;
     }
 
-    GameObjectPtrList items = takeObjects(currentArea()->items());
+    GameObjectPtrList items = takeObjects(currentRoom()->items());
     if (!requireSome(items, "That's not here.")) {
         return;
     }

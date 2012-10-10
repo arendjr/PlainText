@@ -29,8 +29,8 @@ enum Option {
     DefiniteArticles = 0x02,
     Copy = 0x04,
     DontSave = 0x08,
-    IncludeId = 010,
-    DontIncludeTypeInfo = 0x20
+    SkipId = 010,
+    IncludeTypeInfo = 0x20
 };
 Q_DECLARE_FLAGS(Options, Option)
 Q_DECLARE_OPERATORS_FOR_FLAGS(Options)

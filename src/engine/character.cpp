@@ -2,13 +2,13 @@
 
 #include <QDateTime>
 
-#include "area.h"
 #include "exit.h"
 #include "group.h"
 #include "logutil.h"
 #include "player.h"
 #include "race.h"
 #include "realm.h"
+#include "room.h"
 #include "shield.h"
 #include "util.h"
 #include "weapon.h"
@@ -81,10 +81,10 @@ CharacterStats Character::totalStats() const {
     return totalStats;
 }
 
-void Character::setCurrentArea(const GameObjectPtr &currentArea) {
+void Character::setCurrentRoom(const GameObjectPtr &currentArea) {
 
-    if (m_currentArea != currentArea) {
-        m_currentArea = currentArea;
+    if (m_currentRoom != currentArea) {
+        m_currentRoom = currentArea;
 
         setModified();
     }
@@ -403,7 +403,7 @@ void Character::open(const GameObjectPtr &exitPtr) {
 
         send(QString("You open the %1.").arg(exit->name()));
 
-        GameObjectPtrList others = currentArea().cast<Area *>()->players();
+        GameObjectPtrList others = currentRoom().cast<Room *>()->players();
         others.removeOne(this);
         others.send(QString("%1 opens the %2.").arg(name(), exit->name()));
     }
@@ -429,7 +429,7 @@ void Character::close(const GameObjectPtr &exitPtr) {
         exit->setOpen(false);
         send(QString("You close the %1.").arg(exit->name()));
 
-        GameObjectPtrList others = currentArea().cast<Area *>()->players();
+        GameObjectPtrList others = currentRoom().cast<Room *>()->players();
         others.removeOne(this);
         others.send(QString("%1 closes the %2.").arg(name(), exit->name()));
     } else {
@@ -449,8 +449,8 @@ void Character::go(const GameObjectPtr &exitPtr) {
         return;
     }
 
-    Area *area = currentArea().cast<Area *>();
-    for (const GameObjectPtr &character : area->npcs()) {
+    Room *room = currentRoom().cast<Room *>();
+    for (const GameObjectPtr &character : room->npcs()) {
         if (!character->invokeTrigger("oncharacterexit", this, exit->name())) {
             return;
         }
@@ -465,13 +465,13 @@ void Character::go(const GameObjectPtr &exitPtr) {
         Group *group = m_group.cast<Group *>();
         if (group->leader() == this) {
             for (const GameObjectPtr &member : group->members()) {
-                if (member.cast<Character *>()->currentArea() != area) {
+                if (member.cast<Character *>()->currentRoom() != room) {
                     continue;
                 }
 
                 bool blocked = false;
 
-                for (const GameObjectPtr &character : area->npcs()) {
+                for (const GameObjectPtr &character : room->npcs()) {
                     if (!character->invokeTrigger("oncharacterexit", member, exit->name())) {
                         blocked = true;
                         break;
@@ -487,19 +487,19 @@ void Character::go(const GameObjectPtr &exitPtr) {
         }
     }
 
-    leave(currentArea(), exit->name(), followers);
-    enter(exit->destinationArea(), followers);
+    leave(currentRoom(), exit->name(), followers);
+    enter(exit->destination(), followers);
 }
 
-void Character::enter(const GameObjectPtr &areaPtr, const GameObjectPtrList &followers) {
+void Character::enter(const GameObjectPtr &roomPtr, const GameObjectPtrList &followers) {
 
-    setCurrentArea(areaPtr);
+    setCurrentRoom(roomPtr);
 
     for (const GameObjectPtr &follower : followers) {
-        follower.cast<Character *>()->setCurrentArea(areaPtr);
+        follower.cast<Character *>()->setCurrentRoom(roomPtr);
     }
 
-    Area *area = areaPtr.cast<Area *>();
+    Room *area = roomPtr.cast<Room *>();
     GameObjectPtrList npcs = area->npcs();
     GameObjectPtrList players = area->players();
 
@@ -510,7 +510,7 @@ void Character::enter(const GameObjectPtr &areaPtr, const GameObjectPtrList &fol
             area->addPlayer(follower);
         }
 
-        LogUtil::countAreaVisit(areaPtr.toString(), 1 + followers.length());
+        LogUtil::countAreaVisit(roomPtr.toString(), 1 + followers.length());
     } else {
         area->addNPC(this);
 
@@ -551,7 +551,7 @@ void Character::enter(const GameObjectPtr &areaPtr, const GameObjectPtrList &fol
 void Character::leave(const GameObjectPtr &areaPtr, const QString &exitName,
                       const GameObjectPtrList &followers) {
 
-    Area *area = areaPtr.cast<Area *>();
+    Room *area = areaPtr.cast<Room *>();
 
     if (isPlayer()) {
         area->removePlayer(this);
@@ -605,14 +605,14 @@ void Character::say(const QString &message) {
     QString text = (message.endsWith(".") || message.endsWith("?") || message.endsWith("!")) ?
                    "%1 says, \"%2\"" : "%1 says, \"%2.\"";
 
-    Area *area = currentArea().cast<Area *>();
+    Room *area = currentRoom().cast<Room *>();
     area->players().send(text.arg(definiteName(area->characters(), Capitalized),
                                   Util::capitalize(message)));
 }
 
 void Character::shout(const QString &msg) {
 
-    Area *area = currentArea().cast<Area *>();
+    Room *area = currentRoom().cast<Room *>();
 
     QString message = (msg.endsWith(".") || msg.endsWith("?") || msg.endsWith("!")) ?
                       Util::capitalize(msg) : Util::capitalize(msg + ".");
@@ -626,7 +626,7 @@ void Character::shout(const QString &msg) {
 
     for (const GameObjectPtr &exitPtr : area->exits()) {
         Exit *exit = exitPtr.cast<Exit *>();
-        Area *adjacentArea = exit->destinationArea().cast<Area *>();
+        Room *adjacentArea = exit->destination().cast<Room *>();
 
         adjacentArea->players().send(QString("You hear %1 shouting, \"%2\".").arg(indefiniteName(),
                                                                                   message));
@@ -666,7 +666,7 @@ void Character::tell(const GameObjectPtr &playerPtr, const QString &message) {
 
 void Character::take(const GameObjectPtrList &items) {
 
-    Area *area = currentArea().cast<Area *>();
+    Room *area = currentRoom().cast<Room *>();
 
     GameObjectPtrList takenItems;
     for (const GameObjectPtr &itemPtr : items) {
@@ -772,7 +772,7 @@ void Character::kill(const GameObjectPtr &characterPtr) {
         return;
     }
 
-    Area *area = currentArea().cast<Area *>();
+    Room *area = currentRoom().cast<Room *>();
     GameObjectPtrList others = area->players();
     others.removeOne(this);
     others.removeOne(characterPtr);
@@ -800,7 +800,7 @@ void Character::kill(const GameObjectPtr &characterPtr) {
 
     stun(4000 - (25 * myStats.dexterity));
 
-    others = currentArea().cast<Area *>()->characters();
+    others = currentRoom().cast<Room *>()->characters();
     others.removeOne(this);
     others.removeOne(characterPtr);
     for (const GameObjectPtr &other : others) {
@@ -820,7 +820,7 @@ void Character::die(const GameObjectPtr &attacker) {
 
     send("You died.", Red);
 
-    Area *area = currentArea().cast<Area *>();
+    Room *area = currentRoom().cast<Room *>();
 
     GameObjectPtrList others = area->characters();
     others.removeOne(this);
@@ -862,7 +862,7 @@ void Character::die(const GameObjectPtr &attacker) {
     killAllTimers();
 
     if (isPlayer()) {
-        LogUtil::countPlayerDeath(currentArea().toString());
+        LogUtil::countPlayerDeath(currentRoom().toString());
 
         area->removePlayer(this);
         enter(race().cast<Race *>()->startingArea());
@@ -898,7 +898,7 @@ void Character::follow(const GameObjectPtr &characterPtr) {
     }
     if (isPlayer()) {
         if (!characterPtr->isPlayer()) {
-            GameObjectPtrList characters = currentArea().cast<Area *>()->characters();
+            GameObjectPtrList characters = currentRoom().cast<Room *>()->characters();
             QString name = character->definiteName(characters, DefiniteArticles);
             send(QString("You cannot follow %1.").arg(name));
             return;
@@ -1042,13 +1042,13 @@ void Character::setLeaveOnActive(bool leaveOnActive) {
 
 void Character::init() {
 
-    // guarantee our current area lists us, otherwise we may end up in a real
+    // guarantee our current room lists us, otherwise we may end up in a real
     // limbo if we died and a server termination killed the respawn timers.
-    // in addition, this allows Area::npcs to become a non-stored property,
+    // in addition, this allows Room::npcs to become a non-stored property,
     // saving many disk writes when NPCs walk around
-    if (!isPlayer() && !currentArea().isNull()) {
-        Area *area = currentArea().cast<Area *>();
-        area->addNPC(this);
+    if (!isPlayer() && !currentRoom().isNull()) {
+        Room *room = currentRoom().cast<Room *>();
+        room->addNPC(this);
     }
 
     if (hasTrigger("oninit")) {
@@ -1087,7 +1087,7 @@ void Character::invokeTimer(int timerId) {
 
         setModified();
 
-        enter(currentArea());
+        enter(currentRoom());
 
         invokeTrigger("onspawn");
     } else if (timerId == m_effectsTimerId) {
@@ -1102,7 +1102,7 @@ void Character::invokeTimer(int timerId) {
             m_stunTimerId = 0;
 
             if (m_leaveOnActive) {
-                leave(currentArea());
+                leave(currentRoom());
                 m_leaveOnActive = false;
             } else {
                 invokeTrigger("onactive");

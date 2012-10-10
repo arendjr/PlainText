@@ -1,7 +1,7 @@
 {
   "name": "city guard",
   "description": "",
-  "triggers": { "onactive": "(function() {\n    for (var i = 0; i < this.enemies.length; i++) {\n        var enemy = this.enemies[i];\n        if (enemy.currentArea === this.currentArea) {\n            this.kill(enemy);\n            return;\n        }\n    }\n})", "onattack": "(function(attacker) {\n    if (this.enemies.indexOf(attacker) === -1) {\n        this.enemies.push(attacker);\n    }\n    this.setTimeout(function() {\n        this.invokeTrigger('onactive');\n    }, 200);\n})", "oncharacterattacked": "(function(attacker, defendant) { if (attacker.name === 'city guard') { return; } if (this.enemies.indexOf(attacker) === -1) { this.enemies.push(attacker); } var self = this; this.setTimeout(function() { self.invokeTrigger('onactive'); }, 600); })", "oncharacterdied": "(function(defendant, attacker) { var index = this.enemies.indexOf(defendant); if (index > -1) { this.enemies.splice(index, 1); } })", "oncharacterentered": "(function(attacker) { var self = this; this.setTimeout(function() { self.invokeTrigger('onactive'); }, 200); })", "onspawn": "(function() {\n    this.enemies = [];\n})", "ontalk": "(function(character) { character.send('The guard looks at you and shrugs.'); })" },
+  "triggers": { "onactive": "(function() {\n    for (var i = 0; i < this.enemies.length; i++) {\n        var enemy = this.enemies[i];\n        if (enemy.currentRoom === this.currentRoom) {\n            this.kill(enemy);\n            return;\n        }\n    }\n})", "onattack": "(function(attacker) {\n    if (this.enemies.indexOf(attacker) === -1) {\n        this.enemies.push(attacker);\n    }\n    this.setTimeout(function() {\n        this.invokeTrigger('onactive');\n    }, 200);\n})", "oncharacterattacked": "(function(attacker, defendant) { if (attacker.name === 'city guard') { return; } if (this.enemies.indexOf(attacker) === -1) { this.enemies.push(attacker); } var self = this; this.setTimeout(function() { self.invokeTrigger('onactive'); }, 600); })", "oncharacterdied": "(function(defendant, attacker) { var index = this.enemies.indexOf(defendant); if (index > -1) { this.enemies.splice(index, 1); } })", "oncharacterentered": "(function(attacker) { var self = this; this.setTimeout(function() { self.invokeTrigger('onactive'); }, 200); })", "onspawn": "(function() {\n    this.enemies = [];\n})", "ontalk": "(function(character) { character.send('The guard looks at you and shrugs.'); })" },
   "plural": "city guards",
   "indefiniteArticle": "a",
   "portable": false,
@@ -9,7 +9,7 @@
   "cost": 0,
   "stats": [30, 30, 30, 30, 20, 20],
   "height": 180,
-  "currentArea": "area:59",
+  "currentRoom": "room:59",
   "race": "race:2",
   "characterClass": "class:148",
   "gender": "male",

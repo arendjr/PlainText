@@ -1,6 +1,6 @@
 {
   "name": "road",
-  "destinationArea": "area:1",
+  "destination": "room:1",
   "size": 1.5,
   "door": false,
   "hidden": false

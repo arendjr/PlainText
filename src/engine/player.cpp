@@ -1,6 +1,6 @@
 #include "player.h"
 
-#include "area.h"
+#include "room.h"
 #include "commandinterpreter.h"
 #include "exit.h"
 #include "realm.h"
@@ -66,7 +66,7 @@ void Player::setSession(Session *session) {
         if (secondsStunned() > 0) {
             setLeaveOnActive(true);
         } else {
-            leave(currentArea());
+            leave(currentRoom());
         }
     }
 }
@@ -101,7 +101,7 @@ void Player::sendSellableItemsList(const GameObjectPtrList &items) {
 
 void Player::look() {
 
-    Area *area = currentArea().cast<Area *>();
+    Room *area = currentRoom().cast<Room *>();
     QString text;
 
     if (!area->name().isEmpty()) {

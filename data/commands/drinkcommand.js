@@ -1,6 +1,6 @@
 function DrinkCommand() {
 
-    this.setDescription("Drink an item in the current area or your inventory.\n" +
+    this.setDescription("Drink an item in the current room or your inventory.\n" +
                         "\n" +
                         "Example: drink potion");
 }
@@ -18,7 +18,7 @@ DrinkCommand.prototype.execute = function(player, command) {
 
     this.takeWord("the");
 
-    var allItems = player.inventory.concat(player.currentArea.items);
+    var allItems = player.inventory.concat(player.currentRoom.items);
     var item = this.takeObject(allItems);
     if (!this.requireSome(item, "You don't have that.")) {
         return;

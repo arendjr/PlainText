@@ -21,7 +21,7 @@ void SetRaceCommand::execute(Player *player, const QString &command) {
 
     super::prepareExecute(player, command);
 
-    GameObjectPtrList characters = takeObjects(currentArea()->characters());
+    GameObjectPtrList characters = takeObjects(currentRoom()->characters());
     if (!requireUnique(characters, "Character not found.", "Character is not unique.")) {
         return;
     }

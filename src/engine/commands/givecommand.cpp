@@ -58,13 +58,13 @@ void GiveCommand::execute(Player *player, const QString &command) {
     takeWord("to", IfNotLast);
     takeWord("the", IfNotLast);
 
-    GameObjectPtrList recipients = takeObjects(currentArea()->characters());
+    GameObjectPtrList recipients = takeObjects(currentRoom()->characters());
     if (!requireSome(recipients, "That recipient is not here.")) {
         return;
     }
 
     Character *recipient = recipients[0].cast<Character *>();
-    QString recipientName = recipient->definiteName(currentArea()->characters());
+    QString recipientName = recipient->definiteName(currentRoom()->characters());
 
     QString description;
 
@@ -102,7 +102,7 @@ void GiveCommand::execute(Player *player, const QString &command) {
     send(QString("You give %1 to %2.").arg(description, recipientName));
     recipient->send(QString("%1 gives you %2.").arg(player->name(), description));
 
-    GameObjectPtrList others = currentArea()->players();
+    GameObjectPtrList others = currentRoom()->players();
     others.removeOne(player);
     others.removeOne(recipient);
     others.send(QString("%1 gives %2 to %3.").arg(player->name(), description, recipientName));

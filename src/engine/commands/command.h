@@ -5,7 +5,7 @@
 #include <QPair>
 #include <QStringList>
 
-#include "area.h"
+#include "room.h"
 #include "gameobjectptr.h"
 #include "player.h"
 
@@ -36,7 +36,7 @@ class Command : public QObject {
         virtual void prepareExecute(Player *player, const QString &command);
 
         inline Player *player() const { return m_player; }
-        inline Area *currentArea() const { return m_player->currentArea().cast<Area *>(); }
+        inline Room *currentRoom() const { return m_player->currentRoom().cast<Room *>(); }
         inline Realm *realm() const { return m_player->realm(); }
         inline const QString &alias() const { return m_alias; }
 

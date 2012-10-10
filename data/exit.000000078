@@ -1,6 +1,6 @@
 {
   "name": "fruit stall",
-  "destinationArea": "area:77",
+  "destination": "room:77",
   "oppositeExit": "0",
   "door": false,
   "hidden": false

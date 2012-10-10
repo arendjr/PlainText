@@ -1,6 +1,6 @@
 {
   "name": "clothing stall",
-  "destinationArea": "area:79",
+  "destination": "room:79",
   "oppositeExit": "0",
   "door": false,
   "hidden": false

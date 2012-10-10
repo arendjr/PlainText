@@ -25,7 +25,7 @@ void LoseCommand::execute(Player *player, const QString &command) {
     if (hasWordsLeft()) {
         QPair <QString, uint> description = takeObjectsDescription();
         GameObjectPtrList characters = objectsByDescription(description,
-                                                            currentArea()->characters());
+                                                            currentRoom()->characters());
 
         if (characters.isEmpty()) {
             send(QString("\"%1\" is not here.").arg(Util::capitalize(description.first)));

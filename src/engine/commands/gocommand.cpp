@@ -27,7 +27,7 @@ void GoCommand::execute(Player *player, const QString &command) {
         return;
     }
 
-    GameObjectPtrList exits = takeObjects(currentArea()->exits());
+    GameObjectPtrList exits = takeObjects(currentRoom()->exits());
     if (!requireSome(exits, "You can't go that way.")) {
         return;
     }

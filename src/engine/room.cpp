@@ -1,18 +1,18 @@
-#include "area.h"
+#include "room.h"
 
 #include "character.h"
 
 
 #define super GameObject
 
-Area::Area(Realm *realm, uint id, Options options) :
-    super(realm, "area", id, options) {
+Room::Room(Realm *realm, uint id, Options options) :
+    super(realm, "room", id, options) {
 }
 
-Area::~Area() {
+Room::~Room() {
 }
 
-void Area::addExit(const GameObjectPtr &exit) {
+void Room::addExit(const GameObjectPtr &exit) {
 
     if (!m_exits.contains(exit)) {
         m_exits << exit;
@@ -21,14 +21,14 @@ void Area::addExit(const GameObjectPtr &exit) {
     }
 }
 
-void Area::removeExit(const GameObjectPtr &exit) {
+void Room::removeExit(const GameObjectPtr &exit) {
 
     if (m_exits.removeOne(exit)) {
         setModified();
     }
 }
 
-void Area::setExits(const GameObjectPtrList &exits) {
+void Room::setExits(const GameObjectPtrList &exits) {
 
     if (m_exits != exits) {
         m_exits = exits;
@@ -37,43 +37,43 @@ void Area::setExits(const GameObjectPtrList &exits) {
     }
 }
 
-void Area::addPlayer(const GameObjectPtr &player) {
+void Room::addPlayer(const GameObjectPtr &player) {
 
     if (!m_players.contains(player)) {
         m_players << player;
     }
 }
 
-void Area::removePlayer(const GameObjectPtr &player) {
+void Room::removePlayer(const GameObjectPtr &player) {
 
     m_players.removeOne(player);
 }
 
-void Area::setPlayers(const GameObjectPtrList &players) {
+void Room::setPlayers(const GameObjectPtrList &players) {
 
     m_players = players;
 }
 
-void Area::addNPC(const GameObjectPtr &npc) {
+void Room::addNPC(const GameObjectPtr &npc) {
 
     if (!m_npcs.contains(npc)) {
         m_npcs << npc;
     }
 }
 
-void Area::removeNPC(const GameObjectPtr &npc) {
+void Room::removeNPC(const GameObjectPtr &npc) {
 
     m_npcs.removeOne(npc);
 }
 
-void Area::setNPCs(const GameObjectPtrList &npcs) {
+void Room::setNPCs(const GameObjectPtrList &npcs) {
 
     if (m_npcs != npcs) {
         m_npcs = npcs;
     }
 }
 
-void Area::addItem(const GameObjectPtr &item) {
+void Room::addItem(const GameObjectPtr &item) {
 
     if (!m_items.contains(item)) {
         m_items << item;
@@ -82,14 +82,14 @@ void Area::addItem(const GameObjectPtr &item) {
     }
 }
 
-void Area::removeItem(const GameObjectPtr &item) {
+void Room::removeItem(const GameObjectPtr &item) {
 
     if (m_items.removeOne(item)) {
         setModified();
     }
 }
 
-void Area::setItems(const GameObjectPtrList &items) {
+void Room::setItems(const GameObjectPtrList &items) {
 
     if (m_items != items) {
         m_items = items;
@@ -98,7 +98,7 @@ void Area::setItems(const GameObjectPtrList &items) {
     }
 }
 
-void Area::addGold(double amount) {
+void Room::addGold(double amount) {
 
     GameObjectPtr goldPtr;
     for (const GameObjectPtr &itemPtr : m_items) {

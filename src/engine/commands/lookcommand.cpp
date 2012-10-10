@@ -36,7 +36,7 @@ void LookCommand::execute(Player *player, const QString &command) {
         return;
     }
 
-    GameObjectPtrList pool = player->inventory() + currentArea()->objects();
+    GameObjectPtrList pool = player->inventory() + currentRoom()->objects();
     GameObjectPtr object = takeObject(pool);
     if (!requireSome(object, "That's not here.")) {
         return;

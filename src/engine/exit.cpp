@@ -11,10 +11,10 @@ Exit::Exit(Realm *realm, uint id, Options options) :
 Exit::~Exit() {
 }
 
-void Exit::setDestinationArea(const GameObjectPtr &destinationArea) {
+void Exit::setDestination(const GameObjectPtr &destinationArea) {
 
-    if (m_destinationArea != destinationArea) {
-        m_destinationArea = destinationArea;
+    if (m_destination != destinationArea) {
+        m_destination = destinationArea;
 
         setModified();
     }

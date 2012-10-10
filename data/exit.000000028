@@ -1,6 +1,6 @@
 {
   "name": "path",
-  "destinationArea": "area:27",
+  "destination": "room:27",
   "size": 1.5,
   "door": false,
   "hidden": true

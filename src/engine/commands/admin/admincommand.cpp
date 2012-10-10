@@ -15,9 +15,9 @@ AdminCommand::~AdminCommand() {
 GameObjectPtrList AdminCommand::objectsByDescription(const QPair<QString, uint> &description,
                                                      const GameObjectPtrList &pool) {
 
-    if (description.first == "area") {
+    if (description.first == "room") {
         GameObjectPtrList objects;
-        objects << currentArea();
+        objects << currentRoom();
         return objects;
     }
 

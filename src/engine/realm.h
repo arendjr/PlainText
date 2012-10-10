@@ -44,7 +44,7 @@ class Realm : public GameObject {
         void unregisterPlayer(Player *player);
         Player *getPlayer(const QString &name) const;
 
-        GameObjectPtrList allAreas() const;
+        GameObjectPtrList allRooms() const;
         GameObjectPtrList allExits() const;
 
         void addReservedName(const QString &name);

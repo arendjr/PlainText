@@ -26,7 +26,7 @@ void UseCommand::execute(Player *player, const QString &command) {
 
     takeWord("the");
 
-    GameObjectPtrList allItems = player->inventory() + currentArea()->items();
+    GameObjectPtrList allItems = player->inventory() + currentRoom()->items();
     GameObjectPtr item = takeObject(allItems);
     if (!requireSome(item, "You don't have that.")) {
         return;

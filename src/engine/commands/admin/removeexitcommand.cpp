@@ -22,7 +22,7 @@ void RemoveExitCommand::execute(Player *player, const QString &command) {
         return;
     }
 
-    GameObjectPtrList exits = takeObjects(currentArea()->exits());
+    GameObjectPtrList exits = takeObjects(currentRoom()->exits());
     if (!requireUnique(exits, "There's no such exit.", "Exit is not unique.")) {
         return;
     }

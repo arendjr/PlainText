@@ -32,7 +32,7 @@ void SearchCommand::execute(Player *player, const QString &command) {
     int searchSkill = qMin(stats.intelligence + stats.faith, 100) + (isWanderer ? 30 : 0);
 
     Exit *foundExit = nullptr;
-    for (const GameObjectPtr &exitPtr : currentArea()->exits()) {
+    for (const GameObjectPtr &exitPtr : currentRoom()->exits()) {
         Exit *exit = exitPtr.cast<Exit *>();
         if (exit->isHidden()) {
             if (qrand() % 300 < searchSkill) {

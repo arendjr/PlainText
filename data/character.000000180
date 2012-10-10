@@ -8,7 +8,7 @@
   "cost": 0,
   "stats": [20, 20, 10, 30, 10, 10],
   "height": 0,
-  "currentArea": "area:176",
+  "currentRoom": "room:176",
   "race": "race:2",
   "characterClass": "class:147",
   "gender": "female",

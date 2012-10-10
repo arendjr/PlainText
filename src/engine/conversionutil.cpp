@@ -108,19 +108,19 @@ QString ConversionUtil::toJSON(const QVariant &variant, Options options) {
             QVariantMap map = variant.toMap();
             for (const QString &key : map.keys()) {
                 QVariant value = map[key];
-                if (options & DontIncludeTypeInfo) {
-                    stringList << QString("%1: %2").arg(jsString(key), toJSON(value, options));
-                } else {
+                if (options & IncludeTypeInfo) {
                     stringList << QString("%1: [ %2, %3, %4 ]")
                                   .arg(jsString(key), QString::number(value.type()),
                                        QString::number(value.userType()), toJSON(value, options));
+                } else {
+                    stringList << QString("%1: %2").arg(jsString(key), toJSON(value, options));
                 }
             }
             return stringList.isEmpty() ? QString() : "{ " + stringList.join(", ") + " }";
         }
         case QVariant::UserType:
             if (variant.userType() == QMetaType::type("GameObject *")) {
-                return variant.value<GameObject *>()->toJSON(IncludeId);
+                return variant.value<GameObject *>()->toJSON(IncludeTypeInfo);
             } else if (variant.userType() == QMetaType::type("GameObjectPtr")) {
                 return jsString(variant.value<GameObjectPtr>().toString());
             } else if (variant.userType() == QMetaType::type("GameObjectPtrList")) {

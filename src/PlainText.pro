@@ -32,7 +32,6 @@ TEMPLATE = app
 SOURCES += \
     main.cpp \
     engine/application.cpp \
-    engine/area.cpp \
     engine/character.cpp \
     engine/characterstats.cpp \
     engine/class.cpp \
@@ -56,6 +55,7 @@ SOURCES += \
     engine/player.cpp \
     engine/race.cpp \
     engine/realm.cpp \
+    engine/room.cpp \
     engine/scriptengine.cpp \
     engine/scriptfunction.cpp \
     engine/scriptfunctionmap.cpp \
@@ -120,13 +120,13 @@ SOURCES += \
     engine/commands/admin/stopservercommand.cpp \
     engine/commands/admin/unsettriggercommand.cpp \
     engine/commands/api/apicommand.cpp \
-    engine/commands/api/areaslistcommand.cpp \
     engine/commands/api/datagetcommand.cpp \
     engine/commands/api/datasetcommand.cpp \
     engine/commands/api/exitsetcommand.cpp \
     engine/commands/api/exitslistcommand.cpp \
     engine/commands/api/logretrievecommand.cpp \
     engine/commands/api/propertygetcommand.cpp \
+    engine/commands/api/roomslistcommand.cpp \
     engine/commands/api/triggergetcommand.cpp \
     engine/commands/api/triggersetcommand.cpp \
     engine/commands/api/triggerslistcommand.cpp \
@@ -155,7 +155,6 @@ SOURCES += \
 
 HEADERS += \
     engine/application.h \
-    engine/area.h \
     engine/character.h \
     engine/characterstats.h \
     engine/class.h \
@@ -180,6 +179,7 @@ HEADERS += \
     engine/player.h \
     engine/race.h \
     engine/realm.h \
+    engine/room.h \
     engine/scriptengine.h \
     engine/scriptfunction.h \
     engine/scriptfunctionmap.h \
@@ -244,13 +244,13 @@ HEADERS += \
     engine/commands/admin/stopservercommand.h \
     engine/commands/admin/unsettriggercommand.h \
     engine/commands/api/apicommand.h \
-    engine/commands/api/areaslistcommand.h \
     engine/commands/api/datagetcommand.h \
     engine/commands/api/datasetcommand.h \
     engine/commands/api/exitsetcommand.h \
     engine/commands/api/exitslistcommand.h \
     engine/commands/api/logretrievecommand.h \
     engine/commands/api/propertygetcommand.h \
+    engine/commands/api/roomslistcommand.h \
     engine/commands/api/triggergetcommand.h \
     engine/commands/api/triggersetcommand.h \
     engine/commands/api/triggerslistcommand.h \

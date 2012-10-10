@@ -29,8 +29,8 @@ void AddCharacterCommand::execute(Player *player, const QString &command) {
 
     Character *character = GameObject::createByObjectType<Character *>(realm(), "character");
     character->setName(characterName);
-    character->setCurrentArea(currentArea());
-    currentArea()->addNPC(character);
+    character->setCurrentRoom(currentRoom());
+    currentRoom()->addNPC(character);
 
     send(QString("Character %1 added.").arg(characterName));
 }

@@ -25,12 +25,12 @@ void CopyTriggersCommand::execute(Player *player, const QString &command) {
         return;
     }
 
-    GameObjectPtr sourceItem = takeObject(currentArea()->items() + currentArea()->npcs());
+    GameObjectPtr sourceItem = takeObject(currentRoom()->items() + currentRoom()->npcs());
     if (!requireSome(sourceItem, "Source item not found.")) {
         return;
     }
 
-    GameObjectPtr destinationItem = takeObject(currentArea()->items() + currentArea()->npcs());
+    GameObjectPtr destinationItem = takeObject(currentRoom()->items() + currentRoom()->npcs());
     if (!requireSome(destinationItem, "Destination item not found.")) {
         return;
     }

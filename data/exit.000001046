@@ -1,7 +1,7 @@
 {
   "name": "hatch",
-  "triggers": { "onopen": "(function() {\n    this.setTimeout(function() {\n        this.oppositeExit.destinationArea.players.send('The hatch closes shut.');\n        this.open = false;\n    }, 3000);\n})" },
-  "destinationArea": "area:1045",
+  "triggers": { "onopen": "(function() {\n    this.setTimeout(function() {\n        this.oppositeExit.destination.players.send('The hatch closes shut.');\n        this.open = false;\n    }, 3000);\n})" },
+  "destination": "room:1045",
   "oppositeExit": "exit:1047",
   "door": true,
   "hidden": true

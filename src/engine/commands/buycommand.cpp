@@ -23,7 +23,7 @@ void BuyCommand::execute(Player *player, const QString &command) {
     super::prepareExecute(player, command);
 
     GameObjectPtrList sellers;
-    for (const GameObjectPtr &npc : currentArea()->npcs()) {
+    for (const GameObjectPtr &npc : currentRoom()->npcs()) {
         if (npc->hasTrigger("onbuy")) {
             sellers << npc;
         }
@@ -55,7 +55,7 @@ void BuyCommand::execute(Player *player, const QString &command) {
             return;
         }
 
-        character = takeObject(currentArea()->npcs());
+        character = takeObject(currentRoom()->npcs());
     } else {
         prependWord(word);
 
@@ -71,10 +71,10 @@ void BuyCommand::execute(Player *player, const QString &command) {
                 return;
             }
 
-            character = takeObject(currentArea()->npcs());
+            character = takeObject(currentRoom()->npcs());
         } else if (!itemDescription.first.isEmpty()) {
             GameObjectPtrList characters = objectsByDescription(itemDescription,
-                                                                currentArea()->npcs());
+                                                                currentRoom()->npcs());
             if (characters.length() > 0) {
                 character = characters[0];
                 itemDescription = QPair<QString, uint>();
@@ -96,7 +96,7 @@ void BuyCommand::execute(Player *player, const QString &command) {
     }
 
     Character *seller = character.cast<Character *>();
-    QString sellerName = seller->definiteName(currentArea()->npcs(), Capitalized);
+    QString sellerName = seller->definiteName(currentRoom()->npcs(), Capitalized);
 
     if (seller->sellableItems().length() == 0) {
         send(QString("%1 has nothing for sale.").arg(sellerName));

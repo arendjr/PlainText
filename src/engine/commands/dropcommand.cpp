@@ -43,7 +43,7 @@ void DropCommand::execute(Player *player, const QString &command) {
             return;
         }
 
-        currentArea()->addGold(gold);
+        currentRoom()->addGold(gold);
         player->adjustGold(-gold);
 
         description = QString("$%1 worth of gold").arg(gold);
@@ -57,7 +57,7 @@ void DropCommand::execute(Player *player, const QString &command) {
         }
 
         for (const GameObjectPtr &item : items) {
-            currentArea()->addItem(item);
+            currentRoom()->addItem(item);
             player->removeInventoryItem(item);
         }
 
@@ -66,7 +66,7 @@ void DropCommand::execute(Player *player, const QString &command) {
 
     send(QString("You drop %2.").arg(description));
 
-    GameObjectPtrList others = currentArea()->players();
+    GameObjectPtrList others = currentRoom()->players();
     others.removeOne(player);
     others.send(QString("%1 drops %2.").arg(player->name(), description));
 }

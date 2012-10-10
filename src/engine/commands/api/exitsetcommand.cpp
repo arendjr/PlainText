@@ -1,6 +1,6 @@
 #include "exitsetcommand.h"
 
-#include "area.h"
+#include "room.h"
 #include "conversionutil.h"
 #include "exit.h"
 #include "realm.h"
@@ -12,8 +12,8 @@
 ExitSetCommand::ExitSetCommand(QObject *parent) :
     super(parent) {
 
-    setDescription("Syntax: api-exit-set <request-id> <exit-id-or-new> <area-from-id> \n"
-                   "                     <area-to-id> <name> [<opposite-name>]");
+    setDescription("Syntax: api-exit-set <request-id> <exit-id-or-new> <room-from-id> \n"
+                   "                     <room-to-id> <name> [<opposite-name>]");
 }
 
 ExitSetCommand::~ExitSetCommand() {
@@ -24,13 +24,13 @@ void ExitSetCommand::execute(Player *player, const QString &command) {
     super::prepareExecute(player, command);
 
     QString exitId = takeWord();
-    QString areaFromId = takeWord();
-    QString areaToId = takeWord();
+    QString roomFromId = takeWord();
+    QString roomToId = takeWord();
     QString name = takeWord();
     QString oppositeName = takeWord();
 
-    Area *sourceArea = qobject_cast<Area *>(realm()->getObject("area", areaFromId.toUInt()));
-    if (sourceArea == nullptr) {
+    Room *source = qobject_cast<Room *>(realm()->getObject("area", roomFromId.toUInt()));
+    if (source == nullptr) {
         sendError(404, "Area not found");
         return;
     }
@@ -39,7 +39,7 @@ void ExitSetCommand::execute(Player *player, const QString &command) {
     if (exitId == "new") {
         exit = GameObject::createByObjectType<Exit *>(realm(), "exit");
 
-        sourceArea->addExit(exit);
+        source->addExit(exit);
     } else {
         exit = qobject_cast<Exit *>(realm()->getObject("exit", exitId.toUInt()));
         if (exit == nullptr) {
@@ -48,17 +48,17 @@ void ExitSetCommand::execute(Player *player, const QString &command) {
         }
     }
 
-    Area *destinationArea = nullptr;
-    if (areaToId == "new") {
-        destinationArea = GameObject::createByObjectType<Area *>(realm(), "area");
+    Room *destination = nullptr;
+    if (roomToId == "new") {
+        destination = GameObject::createByObjectType<Room *>(realm(), "room");
     } else {
-        destinationArea = qobject_cast<Area *>(realm()->getObject("area", areaToId.toUInt()));
-        if (destinationArea == nullptr) {
-            sendError(404, "Area not found");
+        destination = qobject_cast<Room *>(realm()->getObject("room", roomToId.toUInt()));
+        if (destination == nullptr) {
+            sendError(404, "Room not found");
             return;
         }
     }
-    exit->setDestinationArea(destinationArea);
+    exit->setDestination(destination);
 
     exit->setName(name);
 
@@ -68,18 +68,18 @@ void ExitSetCommand::execute(Player *player, const QString &command) {
     }
     if (!oppositeName.isEmpty()) {
         if (exit->oppositeExit().isNull()) {
-            for (const GameObjectPtr &exitPtr : destinationArea->exits()) {
-                Exit *destinationAreaExit = exitPtr.cast<Exit *>();
-                if (destinationAreaExit->destinationArea() == sourceArea) {
-                    oppositeExit = destinationAreaExit;
+            for (const GameObjectPtr &exitPtr : destination->exits()) {
+                Exit *destinationExit = exitPtr.cast<Exit *>();
+                if (destinationExit->destination() == source) {
+                    oppositeExit = destinationExit;
                 }
             }
             if (oppositeExit == nullptr) {
                 oppositeExit = GameObject::createByObjectType<Exit *>(realm(), "exit");
-                oppositeExit->setDestinationArea(sourceArea);
+                oppositeExit->setDestination(source);
             }
             oppositeExit->setOppositeExit(exit);
-            destinationArea->addExit(oppositeExit);
+            destination->addExit(oppositeExit);
             exit->setOppositeExit(oppositeExit);
         } else {
             oppositeExit = exit->oppositeExit().cast<Exit *>();
@@ -89,12 +89,12 @@ void ExitSetCommand::execute(Player *player, const QString &command) {
 
     QVariantMap data;
     data["success"] = true;
-    data["exit"] = exit->toJSON(IncludeId | DontIncludeTypeInfo);
-    if (destinationArea != nullptr) {
-        data["destinationArea"] = destinationArea->toJSON(IncludeId | DontIncludeTypeInfo);;
+    data["exit"] = exit->toJSON();
+    if (destination != nullptr) {
+        data["destination"] = destination->toJSON();
     }
     if (oppositeExit != nullptr) {
-        data["oppositeExit"] = oppositeExit->toJSON(IncludeId | DontIncludeTypeInfo);;
+        data["oppositeExit"] = oppositeExit->toJSON();
     }
     sendReply(data);
 }

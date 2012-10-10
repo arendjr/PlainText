@@ -1,6 +1,6 @@
 {
   "name": "tea house",
-  "destinationArea": "area:169",
+  "destination": "room:169",
   "oppositeExit": "0",
   "door": false,
   "hidden": false

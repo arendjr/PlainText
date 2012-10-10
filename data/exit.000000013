@@ -1,6 +1,6 @@
 {
   "name": "south",
-  "destinationArea": "area:5",
+  "destination": "room:5",
   "size": 1.5,
   "door": false,
   "hidden": false

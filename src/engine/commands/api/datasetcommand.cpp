@@ -18,7 +18,7 @@ void DataSetCommand::execute(Player *player, const QString &command) {
 
     super::prepareExecute(player, command);
 
-    GameObjectPtr object = takeObject(currentArea()->objects());
+    GameObjectPtr object = takeObject(currentRoom()->objects());
     if (object.isNull()) {
         sendError(404, "Object not found");
         return;

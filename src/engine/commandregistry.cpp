@@ -4,7 +4,7 @@
 #include <QScriptValue>
 #include <QStringList>
 
-#include "area.h"
+#include "room.h"
 #include "exit.h"
 #include "gameexception.h"
 #include "gameobjectptr.h"
@@ -63,13 +63,13 @@
 #include "commands/admin/settriggercommand.h"
 #include "commands/admin/stopservercommand.h"
 #include "commands/admin/unsettriggercommand.h"
-#include "commands/api/areaslistcommand.h"
 #include "commands/api/datagetcommand.h"
 #include "commands/api/datasetcommand.h"
 #include "commands/api/exitsetcommand.h"
 #include "commands/api/exitslistcommand.h"
 #include "commands/api/logretrievecommand.h"
 #include "commands/api/propertygetcommand.h"
+#include "commands/api/roomslistcommand.h"
 #include "commands/api/triggergetcommand.h"
 #include "commands/api/triggersetcommand.h"
 #include "commands/api/triggerslistcommand.h"
@@ -142,13 +142,13 @@ CommandRegistry::CommandRegistry(QObject *parent) :
     m_adminCommands.insert("stop-server", new StopServerCommand(this));
     m_adminCommands.insert("unset-trigger", new UnsetTriggerCommand(this));
 
-    m_apiCommands.insert("api-areas-list", new AreasListCommand(this));
     m_apiCommands.insert("api-data-get", new DataGetCommand(this));
     m_apiCommands.insert("api-data-set", new DataSetCommand(this));
     m_apiCommands.insert("api-exit-set", new ExitSetCommand(this));
     m_apiCommands.insert("api-exits-list", new ExitsListCommand(this));
     m_apiCommands.insert("api-log-retrieve", new LogRetrieveCommand(this));
     m_apiCommands.insert("api-property-get", new PropertyGetCommand(this));
+    m_apiCommands.insert("api-rooms-list", new RoomsListCommand(this));
     m_apiCommands.insert("api-trigger-get", new TriggerGetCommand(this));
     m_apiCommands.insert("api-trigger-set", new TriggerSetCommand(this));
     m_apiCommands.insert("api-triggers-list", new TriggersListCommand(this));

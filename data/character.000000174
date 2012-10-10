@@ -9,7 +9,7 @@
   "cost": 0,
   "stats": [5, 10, 10, 10, 20, 30],
   "height": 0,
-  "currentArea": "area:169",
+  "currentRoom": "room:169",
   "sellableItems": [ "item:173" ],
   "race": "race:2",
   "characterClass": "class:147",

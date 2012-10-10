@@ -1,17 +1,17 @@
-#ifndef AREA_H
-#define AREA_H
+#ifndef ROOM_H
+#define ROOM_H
 
 #include "gameobject.h"
 #include "gameobjectptr.h"
 
 
-class Area : public GameObject {
+class Room : public GameObject {
 
     Q_OBJECT
 
     public:
-        Area(Realm *realm, uint id, Options options = NoOptions);
-        virtual ~Area();
+        Room(Realm *realm, uint id, Options options = NoOptions);
+        virtual ~Room();
 
         const GameObjectPtrList &exits() const { return m_exits; }
         Q_INVOKABLE void addExit(const GameObjectPtr &exit);
@@ -52,4 +52,4 @@ class Area : public GameObject {
         GameObjectPtrList m_items;
 };
 
-#endif // AREA_H
+#endif // ROOM_H

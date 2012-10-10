@@ -30,7 +30,7 @@ void TalkCommand::execute(Player *player, const QString &command) {
     QString name = takeWord("the");
 
     QPair <QString, uint> description = takeObjectsDescription();
-    GameObjectPtrList characters = objectsByDescription(description, currentArea()->characters());
+    GameObjectPtrList characters = objectsByDescription(description, currentRoom()->characters());
 
     if (characters.isEmpty()) {
         if (name.isEmpty()) {

@@ -13,9 +13,9 @@ class Exit : public GameObject {
         Exit(Realm *realm, uint id, Options options = NoOptions);
         virtual ~Exit();
 
-        const GameObjectPtr &destinationArea() const { return m_destinationArea; }
-        void setDestinationArea(const GameObjectPtr &destinationArea);
-        Q_PROPERTY(GameObjectPtr destinationArea READ destinationArea WRITE setDestinationArea)
+        const GameObjectPtr &destination() const { return m_destination; }
+        void setDestination(const GameObjectPtr &destination);
+        Q_PROPERTY(GameObjectPtr destination READ destination WRITE setDestination)
 
         const GameObjectPtr &oppositeExit() const { return m_oppositeExit; }
         void setOppositeExit(const GameObjectPtr &oppositeExit);
@@ -34,7 +34,7 @@ class Exit : public GameObject {
         Q_PROPERTY(bool hidden READ isHidden WRITE setHidden)
 
     private:
-        GameObjectPtr m_destinationArea;
+        GameObjectPtr m_destination;
         GameObjectPtr m_oppositeExit;
         bool m_door;
         bool m_open;

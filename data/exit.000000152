@@ -1,6 +1,6 @@
 {
   "name": "barracks",
-  "destinationArea": "area:151",
+  "destination": "room:151",
   "oppositeExit": "0",
   "door": false,
   "hidden": false

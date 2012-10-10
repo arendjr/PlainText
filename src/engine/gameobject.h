@@ -32,7 +32,6 @@ class GameObject : public QObject {
         Realm *realm() const { return m_realm; }
 
         const char *objectType() const { return m_objectType; }
-        Q_INVOKABLE bool isArea() const;
         Q_INVOKABLE bool isClass() const;
         Q_INVOKABLE bool isExit() const;
         Q_INVOKABLE bool isItem() const;
@@ -41,6 +40,7 @@ class GameObject : public QObject {
         Q_INVOKABLE bool isPlayer() const;
         Q_INVOKABLE bool isRace() const;
         Q_INVOKABLE bool isRealm() const;
+        Q_INVOKABLE bool isRoom() const;
         Q_INVOKABLE bool isShield() const;
         Q_INVOKABLE bool isWeapon() const;
         Q_INVOKABLE bool hasStats() const;

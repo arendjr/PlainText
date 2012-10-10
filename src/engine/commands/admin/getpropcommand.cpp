@@ -21,7 +21,7 @@ void GetPropCommand::execute(Player *player, const QString &command) {
 
     super::prepareExecute(player, command);
 
-    GameObjectPtr object = takeObject(currentArea()->objects());
+    GameObjectPtr object = takeObject(currentRoom()->objects());
     if (!requireSome(object, "Object not found.")) {
         return;
     }

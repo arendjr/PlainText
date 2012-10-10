@@ -28,7 +28,7 @@ void AddItemCommand::execute(Player *player, const QString &command) {
 
     Item *item = GameObject::createByObjectType<Item *>(realm(), "item");
     item->setName(itemName);
-    currentArea()->addItem(item);
+    currentRoom()->addItem(item);
 
     send(QString("Item %1 added.").arg(itemName));
 }

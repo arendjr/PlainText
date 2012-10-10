@@ -23,9 +23,9 @@ class Character : public StatsItem {
         void setHeight(int height);
         Q_PROPERTY(int height READ height WRITE setHeight)
 
-        const GameObjectPtr &currentArea() const { return m_currentArea; }
-        void setCurrentArea(const GameObjectPtr &currentArea);
-        Q_PROPERTY(GameObjectPtr currentArea READ currentArea WRITE setCurrentArea)
+        const GameObjectPtr &currentRoom() const { return m_currentRoom; }
+        void setCurrentRoom(const GameObjectPtr &currentRoom);
+        Q_PROPERTY(GameObjectPtr currentRoom READ currentRoom WRITE setCurrentRoom)
 
         const GameObjectPtrList &inventory() const { return m_inventory; }
         Q_INVOKABLE void addInventoryItem(const GameObjectPtr &item);
@@ -167,7 +167,7 @@ class Character : public StatsItem {
     private:
         int m_height;
 
-        GameObjectPtr m_currentArea;
+        GameObjectPtr m_currentRoom;
 
         GameObjectPtrList m_inventory;
         GameObjectPtrList m_sellableItems;

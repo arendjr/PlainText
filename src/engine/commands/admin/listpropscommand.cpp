@@ -21,7 +21,7 @@ void ListPropsCommand::execute(Player *player, const QString &command) {
 
     super::prepareExecute(player, command);
 
-    GameObjectPtrList objects = takeObjects(currentArea()->objects());
+    GameObjectPtrList objects = takeObjects(currentRoom()->objects());
     if (!requireUnique(objects, "Object not found.", "Object is not unique.")) {
         return;
     }

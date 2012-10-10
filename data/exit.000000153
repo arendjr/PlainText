@@ -1,6 +1,6 @@
 {
   "name": "road",
-  "destinationArea": "area:125",
+  "destination": "room:125",
   "oppositeExit": "0",
   "door": false,
   "hidden": false

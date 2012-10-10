@@ -8,7 +8,7 @@
 EatCommand::EatCommand(QObject *parent) :
     super(parent) {
 
-    setDescription("Eat an item in the current area or your inventory.\n"
+    setDescription("Eat an item in the current room or your inventory.\n"
                    "\n"
                    "Example: eat cake");
 }
@@ -26,7 +26,7 @@ void EatCommand::execute(Player *player, const QString &command) {
 
     takeWord("the");
 
-    GameObjectPtrList allItems = player->inventory() + currentArea()->items();
+    GameObjectPtrList allItems = player->inventory() + currentRoom()->items();
     GameObjectPtr item = takeObject(allItems);
     if (!requireSome(item, "You don't have that.")) {
         return;

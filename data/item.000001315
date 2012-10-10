@@ -1,0 +1,10 @@
+{
+  "name": "cup of herbal tea",
+  "description": "",
+  "triggers": { "ondrink": "(function(character) {\n    character.addEffect({\n        'delay': 45000,\n        'numOccurrences': 1,\n        'hpDelta': 2,\n        'mpDelta': 1,\n        'message': 'You feel the healing effect of the herbal tea.'\n    });\n    character.send('You drank the tea.');\n})" },
+  "plural": "cups of herbal tea",
+  "indefiniteArticle": "a",
+  "portable": true,
+  "weight": 0,
+  "cost": 0.5
+}

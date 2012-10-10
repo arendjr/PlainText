@@ -24,7 +24,7 @@ void CloseCommand::execute(Player *player, const QString &command) {
 
     takeWord("the");
 
-    GameObjectPtr exit = takeObject(currentArea()->exits());
+    GameObjectPtr exit = takeObject(currentRoom()->exits());
     if (!requireSome(exit, "That's not here.")) {
         return;
     }
