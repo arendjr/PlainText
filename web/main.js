@@ -112,7 +112,12 @@ function element(selector) {
 
 function elements(selector) {
 
-    return document.querySelectorAll(selector);
+    var nodeList = document.querySelectorAll(selector);
+    var array = [];
+    for (var i = 0; i < nodeList.length; i++) {
+        array.push(nodeList[i]);
+    }
+    return array;
 }
 
 

@@ -5,6 +5,8 @@ body {
     height: -webkit-calc(492px + 7em);
     height: -moz-calc(492px + 7em);
     height: calc(492px + 7em);
+
+    -webkit-user-select: none;
 }
 
 body,input {
@@ -39,6 +41,8 @@ body,input {
     outline: 0;
     border: 2px inset #777;
     background: #000;
+
+    -webkit-user-select: text;
 }
 
 .screen {
@@ -69,6 +73,8 @@ body,input {
     background-color: white;
 
     font-family: "Helvetica", "Arial", sans-serif;
+
+    -webkit-user-select: text;
 }
     .property-editor .button-list {
         padding: 5px 10px 5px;
@@ -94,6 +100,8 @@ body,input {
     background-color: white;
 
     font-family: "Helvetica", "Arial", sans-serif;
+
+    -webkit-user-select: text;
 }
     .exit-editor .label {
         display: inline-block;
@@ -138,19 +146,78 @@ body,input {
 
         background-color: white;
     }
-    .map-editor .sidebar {
+    .map-editor .toolbar {
         position: absolute;
         top: 0;
+        left: 0;
         right: 0;
-        width: -webkit-calc(20% - 4px);
-        width: -moz-calc(20% - 4px);
-        width: calc(20% - 4px);
-        min-width: 18em;
-        height: -webkit-calc(100% - 14px);
-        height: -moz-calc(100% - 14px);
-        height: calc(100% - 14px);
+        height: 22px;
+        z-index: 3;
 
-        border: 2px solid #000;
+        border-bottom: 2px solid black;
+        padding: 5px;
+        background-color: white;
+
+        font-family: "Helvetica", "Arial", sans-serif;
+    }
+        .label {
+            display: inline-block;
+
+            margin: 4px;
+
+            vertical-align: top;
+        }
+        .menu {
+            cursor: pointer;
+        }
+            .menu .menu-content {
+                display: none;
+                position: absolute;
+                z-index: 4;
+
+                border: 2px solid black;
+                background: white;
+            }
+            .menu:hover .menu-content {
+                display: block;
+            }
+                .menu .menu-item {
+                    padding: 5px;
+                }
+        .slider {
+            display: inline-block;
+            width: 400px;
+            height: 8px;
+
+            margin: 5px;
+            border: 1px solid gray;
+            border-radius: 2px;
+        }
+            .slider .handle {
+                position: relative;
+                top: -5px;
+                width: 16px;
+                height: 16px;
+
+                border: 1px solid black;
+                background-color: gray;
+
+                cursor: pointer;
+            }
+    .map-editor .sidebar {
+        position: absolute;
+        top: 34px;
+        right: 0;
+        width: -webkit-calc(20% - 2px);
+        width: -moz-calc(20% - 2px);
+        width: calc(20% - 2px);
+        min-width: 18em;
+        height: -webkit-calc(100% - 44px);
+        height: -moz-calc(100% - 44px);
+        height: calc(100% - 44px);
+        z-index: 3;
+
+        border-left: 2px solid #000;
         padding: 5px;
         background-color: white;
 

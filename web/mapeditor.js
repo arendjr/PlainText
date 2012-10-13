@@ -234,14 +234,13 @@
                     resolvePointers(map.exits[id], ["destination", "oppositeExit"]);
                 }
 
-                console.log(map.rooms);
-                console.log(map.exits);
-
                 drawMap();
             });
         });
     }
 
+
+    var perspective = 0;
 
     function drawMap() {
 
@@ -255,7 +254,10 @@
         function drawRoom(room) {
             for (var i = 0, length = room.exits.length; i < length; i++) {
                 var exit = room.exits[i];
-                var points = [room.x, room.y, exit.destination.x, exit.destination.y];
+                var points = [room.x + perspective * room.z,
+                              room.y - perspective * room.z,
+                              exit.destination.x + perspective * exit.destination.z,
+                              exit.destination.y - perspective * exit.destination.z];
                 if (exit.shape) {
                     exit.shape.setPoints(points);
                 } else {
@@ -269,8 +271,8 @@
                 }
             }
 
-            var x = room.x - roomSize / 2;
-            var y = room.y - roomSize / 2;
+            var x = room.x - roomSize / 2 + perspective * room.z;
+            var y = room.y - roomSize / 2 - perspective * room.z;
             if (room.shape) {
                 room.shape.setX(x);
                 room.shape.setY(y);
@@ -362,6 +364,48 @@
     }
 
 
+    var perspectiveSliderHandle = mapEditor.querySelector(".perspective.slider .handle");
+
+    function startPerspectiveSlider(event) {
+
+        var slider = mapEditor.querySelector(".perspective.slider");
+        var sliderRect = slider.getBoundingClientRect();
+        var handleRect = perspectiveSliderHandle.getBoundingClientRect();
+        perspectiveSliderHandle.leftX = sliderRect.left + 5;
+        perspectiveSliderHandle.rightX = sliderRect.right - 5;
+        perspectiveSliderHandle.currentX = Math.round((handleRect.left + handleRect.right) / 2);
+        perspectiveSliderHandle.offsetX = perspectiveSliderHandle.currentX - event.clientX;
+
+        window.addEventListener("mousemove", slidePerspective, false);
+        window.addEventListener("mouseup", stopPerspectiveSlider, false);
+    }
+
+    function stopPerspectiveSlider(event) {
+
+        window.removeEventListener("mousemove", slidePerspective, false);
+        window.removeEventListener("mouseup", stopPerspectiveSlider, false);
+        return false;
+    }
+
+    function slidePerspective(event) {
+
+        var newX = event.clientX + perspectiveSliderHandle.offsetX;
+        if (newX < perspectiveSliderHandle.leftX) {
+            newX = perspectiveSliderHandle.leftX;
+        } else if (newX > perspectiveSliderHandle.rightX) {
+            newX = perspectiveSliderHandle.rightX;
+        }
+
+        var left = (newX - perspectiveSliderHandle.leftX);
+        perspectiveSliderHandle.style.left = left + "px";
+
+        perspective = left / 200;
+        drawMap();
+
+        perspectiveSliderHandle.currentX = newX;
+    }
+
+
     var editMapLink = document.createElement("a");
     editMapLink.setAttribute("href", "javascript:void(0)");
     editMapLink.textContent = "Edit Map";
@@ -394,6 +438,8 @@
     mapEditor.querySelector(".plot.playerdeath").addEventListener("click", function() {
         plotStats("playerdeath");
     }, false);
+
+    perspectiveSliderHandle.addEventListener("mousedown", startPerspectiveSlider, false);
 
     mapEditor.querySelector(".close").addEventListener("click", closeMap, false);
 

@@ -2,6 +2,12 @@
 
     var self = controller;
 
+
+    elements("a[href='#']").forEach(function(element) {
+        element.setAttribute("href", "javascript:void(0)");
+    });
+
+
     var propertyEditor = element(".property-editor");
     self.propertyEditor = propertyEditor;
 
