@@ -28,6 +28,11 @@ void PropertyGetCommand::execute(Player *player, const QString &command) {
 
     const QMetaObject *metaObject = object->metaObject();
     int propertyIndex = metaObject->indexOfProperty(propertyName.toAscii().constData());
+    if (propertyIndex == -1) {
+        sendError(400, "Unknown property name");
+        return;
+    }
+
     QMetaProperty metaProperty = metaObject->property(propertyIndex);
 
     QVariantMap data;

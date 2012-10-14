@@ -23,6 +23,11 @@ var Options = {
     IfNotLast: 1
 };
 
+Array.prototype.append = function(value) {
+
+    return this.push(value);
+};
+
 Array.prototype.clear = function() {
 
     return this.splice(0, this.length);
@@ -69,11 +74,20 @@ Array.prototype.named = function(name) {
     return undefined;
 };
 
-Array.prototype.pushIfNecessary = function(element) {
+Array.prototype.insert = function(element) {
 
     if (!this.contains(element)) {
         this.push(element);
     }
+};
+
+Array.prototype.removeAll = function(value) {
+
+    var numRemovals = 0;
+    while (this.removeOne(value)) {
+        numRemovals++;
+    }
+    return numRemovals;
 };
 
 Array.prototype.removeFirst = function() {
@@ -84,6 +98,16 @@ Array.prototype.removeFirst = function() {
 Array.prototype.removeLast = function() {
 
     this.splice(this.length - 1, 1);
+};
+
+Array.prototype.removeOne = function(value) {
+
+    var index = this.indexOf(value);
+    if (index !== -1) {
+        this.splice(index, 1);
+        return true;
+    }
+    return false;
 };
 
 Array.prototype.send = function(message) {

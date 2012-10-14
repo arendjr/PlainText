@@ -14,39 +14,34 @@
 
     function attachListeners() {
 
-        window.onfocus = function() {
+        window.addEventListener("focus", function() {
             isActive = true;
-        };
-        window.onblur = function() {
+        }, false);
+
+        window.addEventListener("blur", function() {
             isActive = false;
-        };
+        }, false);
 
-        var onKeyPress = controller.commandInput.onkeypress;
-        controller.commandInput.onkeypress = function(event) {
-            onKeyPress.apply(controller.commandInput, [event]);
-
-            if (event.keyCode === keys.KEY_RETURN) {
-                notifications.requestPermission(function() {});
-                controller.commandInput.onkeypress = onKeyPress;
-            }
+        function requestPermission() {
+            notifications.requestPermission(function() {
+                controller.removeCommandListener(requestPermission);
+            });
         }
 
-        var writeToScreen = controller.writeToScreen;
-        controller.writeToScreen = function(message) {
-            writeToScreen.apply(controller, [message]);
+        controller.addCommandListener(requestPermission);
 
-            if (!isActive &&
-                notifications.checkPermission() === 0 &&
+        controller.addIncomingMessageListener(function(message) {
+            if (!isActive && notifications.checkPermission() === 0 &&
                 /^\w+ (says|tells|shouts)/.test(message)) {
 
                 var notification = notifications.createNotification(null, "MUD", message);
                 notification.show()
 
-                setTimeout(function(){
+                setTimeout(function() {
                     notification.cancel();
                 }, 10000);
             }
-        }
+        });
     }
 
     init();

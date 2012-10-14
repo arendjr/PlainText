@@ -6568,3 +6568,5 @@ Kinetic.Node.addGettersSetters(Kinetic.TextPath, ['fontFamily', 'fontSize', 'fon
  * @name getText
  * @methodOf Kinetic.TextPath.prototype
  */
+
+scriptLoaded("kinetic.js");

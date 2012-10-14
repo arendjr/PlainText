@@ -3235,3 +3235,5 @@ window.CodeMirror = (function() {
 
   return CodeMirror;
 })();
+
+scriptLoaded("codemirror.js");

@@ -27,6 +27,10 @@ void GetPropCommand::execute(Player *player, const QString &command) {
     }
 
     QString propertyName = Util::fullPropertyName(object.cast<GameObject *>(), takeWord());
+    if (propertyName.isEmpty()) {
+        send("Usage: get-prop <object-name> [#] <property-name>");
+        return;
+    }
 
     if (propertyName == "id") {
         send(QString::number(object->id()));

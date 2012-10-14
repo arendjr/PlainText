@@ -27,15 +27,58 @@ var keys = {
     KEY_INSERT:   45
 };
 
+var scriptCallbacks = {};
+
+
+Array.prototype.append = function(value) {
+
+    return this.push(value);
+};
 
 Array.prototype.contains = function(element) {
 
     return this.indexOf(element) > -1;
 };
 
+Array.prototype.insert = function(element) {
+
+    if (!this.contains(element)) {
+        this.push(element);
+    }
+};
+
 Array.prototype.isEmpty = function() {
 
     return this.length === 0;
+};
+
+Array.prototype.removeAll = function(value) {
+
+    var numRemovals = 0;
+    while (this.removeOne(value)) {
+        numRemovals++;
+    }
+    return numRemovals;
+};
+
+Array.prototype.removeFirst = function() {
+
+    this.splice(0, 1);
+};
+
+Array.prototype.removeLast = function() {
+
+    this.splice(this.length - 1, 1);
+};
+
+Array.prototype.removeOne = function(value) {
+
+    var index = this.indexOf(value);
+    if (index !== -1) {
+        this.splice(index, 1);
+        return true;
+    }
+    return false;
 };
 
 
@@ -74,35 +117,9 @@ String.prototype.trimmed = function() {
 };
 
 
-function loadScript(fileName) {
+function bound(min, value, max) {
 
-    var script = document.createElement("script");
-    script.setAttribute("type", "text/javascript");
-    script.setAttribute("src", fileName);
-    document.head.appendChild(script);
-}
-
-function loadStyle(fileName) {
-
-    var link = document.createElement("link");
-    link.setAttribute("rel", "stylesheet");
-    link.setAttribute("href", fileName);
-    document.head.appendChild(link);
-}
-
-function getQueryParam(name, defaultValue) {
-
-    var params = window.location.search.substr(1).split("&");
-    for (var i = 0; i < params.length; i++) {
-        var parts = params[i].split("=");
-        if (parts.length !== 2) {
-            continue;
-        }
-        if (parts[0] === name) {
-            return decodeURIComponent(parts[1]);
-        }
-    }
-    return defaultValue;
+    return (value < min) ? min : ((value > max) ? max : value);
 }
 
 function element(selector) {
@@ -120,10 +137,52 @@ function elements(selector) {
     return array;
 }
 
+function getQueryParam(name, defaultValue) {
 
-var isPhoneGap = (getQueryParam("phonegap") === "true");
-var isIPad = navigator.userAgent.toLowerCase().contains("ipad");
-var isIPhone = navigator.userAgent.toLowerCase().contains("iphone");
+    var params = window.location.search.substr(1).split("&");
+    for (var i = 0; i < params.length; i++) {
+        var parts = params[i].split("=");
+        if (parts.length !== 2) {
+            continue;
+        }
+        if (parts[0] === name) {
+            return decodeURIComponent(parts[1]);
+        }
+    }
+    return defaultValue;
+}
+
+function loadScript(fileName, callback) {
+
+    var script = document.createElement("script");
+    script.setAttribute("type", "text/javascript");
+    script.setAttribute("src", fileName);
+    document.head.appendChild(script);
+
+    if (callback) {
+        var index = fileName.lastIndexOf("/");
+        if (index === -1) {
+            scriptCallbacks[fileName] = callback;
+        } else {
+            scriptCallbacks[fileName.substr(index + 1)] = callback;
+        }
+    }
+}
+
+function loadStyle(fileName) {
+
+    var link = document.createElement("link");
+    link.setAttribute("rel", "stylesheet");
+    link.setAttribute("href", fileName);
+    document.head.appendChild(link);
+}
+
+function scriptLoaded(fileName) {
+
+    if (scriptCallbacks.contains(fileName)) {
+        scriptCallbacks[fileName]();
+    }
+}
 
 
 var controller;
@@ -140,6 +199,11 @@ function Controller() {
         "mp": element(".status-header .mp"),
     };
 
+    this.commandInput = element(".command-input");
+
+    this.commandListeners = [];
+    this.incomingMessageListeners = [];
+
     this.history = [];
     this.historyIndex = 0;
     this.currentCommand = "";
@@ -147,14 +211,20 @@ function Controller() {
     this.pendingRequests = {};
     this.requestId = 1;
 
+    this.socket = new WebSocket("ws://" + document.location.hostname + ":4802");
+
+    this.attachListeners();
+
+    this.setFocus();
+}
+
+Controller.prototype.attachListeners = function() {
+
     var self = this;
-    this.commandInput = element(".command-input");
-    this.commandInput.onkeypress = function(event) {
+
+    this.commandInput.addEventListener("keypress", function(event) {
         if (event.keyCode === keys.KEY_RETURN) {
             var command = self.commandInput.value;
-
-            self.socket.send(command);
-            self.commandInput.value = "";
 
             if (self.player.name) {
                 if (self.history[self.history.length - 1] !== command) {
@@ -162,9 +232,17 @@ function Controller() {
                 }
                 self.historyIndex = 0;
             }
+
+            command = self.notifyCommandListeners(command);
+            if (command !== false) {
+                self.socket.send(command);
+            }
+
+            self.commandInput.value = "";
         }
-    };
-    this.commandInput.onkeydown = function(event) {
+    }, false);
+
+    this.commandInput.addEventListener("keydown", function(event) {
         if (event.keyCode === keys.KEY_UP) {
             if (self.historyIndex === 0) {
                 self.currentCommand = self.commandInput.value;
@@ -187,13 +265,13 @@ function Controller() {
                 }
             }
         }
-    };
+    }, false);
 
-    this.socket = new WebSocket("ws://" + document.location.hostname + ":4802");
-    this.socket.onopen = function(message) {
+    this.socket.addEventListener("open", function(message) {
         self.writeToScreen("Connected.");
-    };
-    this.socket.onmessage = function(message) {
+    }, false);
+
+    this.socket.addEventListener("message", function(message) {
         if (message.data.substr(0, 1) === "{" && message.data.substr(-1) === "}") {
             var data = JSON.parse(message.data);
             if (!data) {
@@ -212,7 +290,7 @@ function Controller() {
                 delete self.pendingRequests[requestId];
             } else if (data.player) {
                 if (!self.player.isAdmin && data.player.isAdmin) {
-                    loadScript("admin.js");
+                    loadScript("admin/admin.js");
                 }
 
                 self.player = data.player;
@@ -234,42 +312,64 @@ function Controller() {
                 }
             }
         } else {
+            self.notifyIncomingMessageListeners(message);
+
             self.writeToScreen(message.data);
         }
-    };
-    this.socket.onclose = function(message) {
+    }, false);
+
+    this.socket.addEventListener("close", function() {
         self.writeToScreen("Connection closed.");
-    };
-    this.socket.onerror = function() {
+    }, false);
+
+    this.socket.addEventListener("error", function() {
         self.writeToScreen("Connection error.");
-    };
-
-    window.onorientationchange = function() {
-        self.updateLayout();
-    };
-    this.commandInput.onfocus = function() {
-        self.updateLayout();
-        self.screen.scrollTop = self.screen.scrollHeight;
-    };
-    this.commandInput.onblur = function() {
-        self.updateLayout();
-    };
-
-    if (isPhoneGap) {
-        element(".status-header").style.backgroundColor = "#c0c0c0";
-        this.updateLayout();
-    } else if (document.body.clientWidth > 660 && !isIPad) {
-        this.setFocus();
-    }
+    }, false);
 }
+
+Controller.prototype.addCommandListener = function(listener) {
+
+    this.commandListeners.insert(listener);
+};
+
+Controller.prototype.removeCommandListener = function(listener) {
+
+    this.commandListeners.removeAll(listener);
+};
+
+Controller.prototype.notifyCommandListeners = function(command) {
+
+    this.commandListeners.forEach(function(listener) {
+        var result = listener(command);
+        if (result !== undefined) {
+            command = result;
+        }
+    });
+    return command;
+};
+
+Controller.prototype.addIncomingMessageListener = function(listener) {
+
+    this.incomingMessageListeners.insert(listener);
+};
+
+Controller.prototype.removeIncomingMessageListener = function(listener) {
+
+    this.incomingMessageListeners.removeAll(listener);
+};
+
+Controller.prototype.notifyIncomingMessageListeners = function(message) {
+
+    this.incomingMessageListeners.forEach(function(listener) {
+        listener(message);
+    });
+};
 
 Controller.prototype.writeToScreen = function(message) {
 
     if (message.trimmed().length === 0) {
         return;
     }
-
-    var containsExits = message.contains("Obvious exits:");
 
     var div = document.createElement("div");
 
@@ -283,38 +383,9 @@ Controller.prototype.writeToScreen = function(message) {
         }
 
         var color = message.substring(index + 2, mIndex);
+
         var span = document.createElement("span");
-
-        if (containsExits) {
-            var regExp = /[:,] ([\w '-]+)/g;
-            var startIndex = mIndex + 1;
-            var array;
-
-            regExp.lastIndex = startIndex;
-            while ((array = regExp.exec(message)) !== null) {
-                if (array.index >= endIndex) {
-                    break;
-                }
-
-                span.appendChild(document.createTextNode(message.substring(startIndex,
-                                                                           array.index + 2)));
-
-                var anchor = document.createElement("a");
-                anchor.className = "go";
-                anchor.setAttribute("href", "javascript:void(0)");
-                anchor.textContent = array[1];
-                span.appendChild(anchor);
-
-                startIndex = regExp.lastIndex;
-            }
-
-            if (startIndex < endIndex) {
-                span.appendChild(document.createTextNode(message.substring(startIndex, endIndex)));
-            }
-        } else {
-            span.appendChild(document.createTextNode(message.substring(mIndex + 1, endIndex)));
-        }
-
+        span.appendChild(document.createTextNode(message.substring(mIndex + 1, endIndex)));
         span.style.color = colorMap[color];
         div.appendChild(span);
 
@@ -322,6 +393,10 @@ Controller.prototype.writeToScreen = function(message) {
     }
     if (message.length > 0) {
         div.appendChild(document.createTextNode(message));
+    }
+
+    if (this.screen.childNodes.length >= 500) {
+        this.screen.removeChild(this.screen.childNodes[0]);
     }
 
     this.screen.appendChild(div);
@@ -343,36 +418,6 @@ Controller.prototype.sendApiCall = function(command, callback) {
     this.requestId++;
 }
 
-Controller.prototype.updateLayout = function() {
-
-    var body = document.body;
-
-    var width = body.clientWidth;
-    var height = body.clientHeight;
-
-    if (width > 660) {
-        body.scrollTop = 0;
-        return;
-    }
-
-    var defaultScreenHeight = (isPhoneGap ? 424 : 320);
-
-    body.scrollTop = 2000;
-    var actualScrollTop = body.scrollTop;
-
-    var keyboardShown = (actualScrollTop > 0);
-    if (keyboardShown) {
-        if (isPhoneGap) {
-            actualScrollTop -= 44;
-        }
-
-        this.screen.style.height = (defaultScreenHeight - actualScrollTop) + "px";
-        body.scrollTop = 0;
-    } else {
-        this.screen.style.height = defaultScreenHeight + "px";
-    }
-}
-
 Controller.prototype.setFocus = function() {
 
     this.commandInput.focus();
@@ -388,30 +433,11 @@ function main() {
         loadScript("notifications.js");
     }
 
-    if (isIPad || isIPhone) {
-        loadScript("tappable.js");
-
-        function initTappable() {
-
-            if (!window.tappable) {
-                setTimeout(initTappable, 50);
-                return;
-            }
-
-            tappable(".go", function(event) {
-                var exitName = event.target.textContent;
-                controller.socket.send("go \"" + exitName + "\"");
-            });
+    controller.screen.addEventListener("click", function(event) {
+        var target = event.target;
+        if (target.className === "go") {
+            var exitName = target.textContent;
+            controller.socket.send("go \"" + exitName + "\"");
         }
-
-        setTimeout(initTappable, 50);
-    } else {
-        controller.screen.addEventListener("click", function(event) {
-            var target = event.target;
-            if (target.className === "go") {
-                var exitName = target.textContent;
-                controller.socket.send("go \"" + exitName + "\"");
-            }
-        }, false);
-    }
+    }, false);
 }

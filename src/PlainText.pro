@@ -283,13 +283,19 @@ OTHER_FILES += \
     engine/util.js \
     engine/commands/command.js \
     ../data/commands/drinkcommand.js \
-    ../web/admin.js \
     ../web/index.html \
+    ../web/kinetic.js \
     ../web/main.css \
     ../web/main.js \
-    ../web/mapeditor.js \
     ../web/notifications.js \
-    ../web/tappable.js \
+    ../web/admin/admin.css \
+    ../web/admin/admin.js \
+    ../web/admin/exiteditor.js \
+    ../web/admin/mapeditor.js \
+    ../web/admin/map.model.js \
+    ../web/admin/map.view.js \
+    ../web/admin/propertyeditor.js \
+    ../web/admin/slider.widget.js \
     ../DESIGN.txt \
     ../README.md \
     ../TODO.txt
