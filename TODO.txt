@@ -6,7 +6,6 @@ GAME MECHANICS
   -  Suggestions for commands to implement:
      -  cast
      -  commands
-     -  examine
      -  level
      -  list
      -  practice

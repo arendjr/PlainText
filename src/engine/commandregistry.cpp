@@ -94,6 +94,7 @@ CommandRegistry::CommandRegistry(QObject *parent) :
     m_commands.insert("eat", new EatCommand(this));
     m_commands.insert("enter", go);
     m_commands.insert("equipment", new EquipmentCommand(this));
+    m_commands.insert("examine", look);
     m_commands.insert("follow", new FollowCommand(this));
     m_commands.insert("get", get);
     m_commands.insert("give", new GiveCommand(this));

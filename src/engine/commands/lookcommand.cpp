@@ -14,7 +14,7 @@ LookCommand::LookCommand(QObject *parent) :
 
     setDescription("Look at something (any object, character, or the current area).\n"
                    "\n"
-                   "Examples: look, look door, look earl");
+                   "Examples: look, look door, look earl, examine sign");
 }
 
 LookCommand::~LookCommand() {
@@ -24,16 +24,24 @@ void LookCommand::execute(Player *player, const QString &command) {
 
     super::prepareExecute(player, command);
 
-    if (!hasWordsLeft()) {
-        player->look();
-        return;
-    }
+    if (alias() == "look") {
+        if (!hasWordsLeft()) {
+            player->look();
+            return;
+	}
 
-    takeWord("at", IfNotLast);
-    takeWord("the");
+	takeWord("at", IfNotLast);
+        takeWord("the", IfNotLast);
 
-    if (!assertWordsLeft("Look at what?")) {
-        return;
+        if (!assertWordsLeft("Look at what?")) {
+            return;
+        }
+    } else {
+        takeWord("the", IfNotLast);
+
+        if (!assertWordsLeft("Examine what?")) {
+            return;
+        }
     }
 
     GameObjectPtrList pool = player->inventory() + currentRoom()->objects();
