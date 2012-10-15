@@ -6,11 +6,16 @@ GAME MECHANICS
   -  Suggestions for commands to implement:
      -  cast
      -  commands
+     -  examine
+     -  level
      -  practice
+     -  prompt
+     -  read
      -  score
      -  skills
      -  spells
      -  unread
+     -  Allow "2.X" in addition to "second X" and "X 2".
 
 TECHNOLOGY
 
