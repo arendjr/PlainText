@@ -8,6 +8,7 @@ GAME MECHANICS
      -  commands
      -  examine
      -  level
+     -  list
      -  practice
      -  prompt
      -  read
