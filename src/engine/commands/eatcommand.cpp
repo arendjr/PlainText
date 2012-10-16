@@ -20,15 +20,8 @@ void EatCommand::execute(Player *player, const QString &command) {
 
     super::prepareExecute(player, command);
 
-    if (!assertWordsLeft("Eat what?")) {
-        return;
-    }
-
-    takeWord("the");
-
-    GameObjectPtrList allItems = player->inventory() + currentRoom()->items();
-    GameObjectPtr item = takeObject(allItems);
-    if (!requireSome(item, "You don't have that.")) {
+    GameObjectPtr item = takeObject(player->inventory() + currentRoom()->items());
+    if (!requireSome(item, "Eat what?")) {
         return;
     }
 

@@ -21,24 +21,10 @@ void TalkCommand::execute(Player *player, const QString &command) {
 
     super::prepareExecute(player, command);
 
-    if (!assertWordsLeft("Talk to who?")) {
-        return;
-    }
-
     takeWord("to");
 
-    QString name = takeWord("the");
-
-    QPair <QString, uint> description = takeObjectsDescription();
-    GameObjectPtrList characters = objectsByDescription(description, currentRoom()->characters());
-
-    if (characters.isEmpty()) {
-        if (name.isEmpty()) {
-            name = Util::capitalize(description.first);
-        } else {
-            name = "The " + description.first;
-        }
-        send(QString("\"%1\" is not here.").arg(name));
+    GameObjectPtr character = takeObject(currentRoom()->characters());
+    if (!requireSome(character, "Talk to who?")) {
         return;
     }
 
@@ -48,5 +34,5 @@ void TalkCommand::execute(Player *player, const QString &command) {
 
     QString message = takeRest();
 
-    player->talk(characters[0], message);
+    player->talk(character, message);
 }

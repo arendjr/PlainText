@@ -4,5 +4,6 @@
   "x": -200,
   "y": -200,
   "z": 0,
-  "exits": [ "exit:97", "exit:105", "exit:177" ]
+  "exits": [ "exit:97", "exit:105", "exit:177" ],
+  "items": [ "item:1315", "item:1199", "item:1257", "item:1332", "item:1306", "item:1216", "item:1259", "item:1473" ]
 }

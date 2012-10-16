@@ -37,6 +37,7 @@ SOURCES += \
     engine/class.cpp \
     engine/commandinterpreter.cpp \
     engine/commandregistry.cpp \
+    engine/container.cpp \
     engine/conversionutil.cpp \
     engine/diskutil.cpp \
     engine/effect.cpp \
@@ -85,6 +86,7 @@ SOURCES += \
     engine/commands/lookcommand.cpp \
     engine/commands/losecommand.cpp \
     engine/commands/opencommand.cpp \
+    engine/commands/putcommand.cpp \
     engine/commands/quitcommand.cpp \
     engine/commands/removecommand.cpp \
     engine/commands/saycommand.cpp \
@@ -99,6 +101,7 @@ SOURCES += \
     engine/commands/whocommand.cpp \
     engine/commands/wieldcommand.cpp \
     engine/commands/admin/addcharactercommand.cpp \
+    engine/commands/admin/addcontainercommand.cpp \
     engine/commands/admin/addexitcommand.cpp \
     engine/commands/admin/additemcommand.cpp \
     engine/commands/admin/addshieldcommand.cpp \
@@ -162,6 +165,7 @@ HEADERS += \
     engine/commandinterpreter.h \
     engine/commandregistry.h \
     engine/constants.h \
+    engine/container.h \
     engine/conversionutil.h \
     engine/diskutil.h \
     engine/effect.h \
@@ -210,6 +214,7 @@ HEADERS += \
     engine/commands/lookcommand.h \
     engine/commands/losecommand.h \
     engine/commands/opencommand.h \
+    engine/commands/putcommand.h \
     engine/commands/quitcommand.h \
     engine/commands/removecommand.h \
     engine/commands/saycommand.h \
@@ -224,6 +229,7 @@ HEADERS += \
     engine/commands/whocommand.h \
     engine/commands/wieldcommand.h \
     engine/commands/admin/addcharactercommand.h \
+    engine/commands/admin/addcontainercommand.h \
     engine/commands/admin/addexitcommand.h \
     engine/commands/admin/additemcommand.h \
     engine/commands/admin/addshieldcommand.h \

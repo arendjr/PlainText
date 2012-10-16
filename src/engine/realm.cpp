@@ -32,6 +32,12 @@ Realm::Realm(Options options) :
 
     m_commandInterpreter = new CommandInterpreter(this);
     m_commandInterpreter->setRegistry(m_commandRegistry);
+
+    m_reservedNames << "all" << "down" << "east" << "north" << "northeast" << "northwest" << "out"
+                    << "room" << "south" << "southeast" << "southwest" << "west";
+    for (const QString &commandName : m_commandRegistry->commandNames()) {
+        m_reservedNames << commandName;
+    }
 }
 
 Realm::~Realm() {

@@ -33,77 +33,33 @@ void BuyCommand::execute(Player *player, const QString &command) {
         return;
     }
 
-    if (!assertWordsLeft("Buy from who?")) {
-        return;
-    }
-
-    QString word = takeWord();
-
-    QPair<QString, uint> itemDescription;
-    GameObjectPtr character;
-
-    if (word == "the") {
-        if (!assertWordsLeft("Buy what?")) {
-            return;
-        }
-
-        itemDescription = takeObjectsDescription();
-    } else if (word == "from") {
-        takeWord("the");
-
-        if (!assertWordsLeft("Buy from who?")) {
-            return;
-        }
-
-        character = takeObject(currentRoom()->npcs());
-    } else {
-        prependWord(word);
-
+    ObjectDescription itemDescription;
+    if (peekWord() != "from") {
         itemDescription = takeObjectsDescription();
     }
 
-    if (character.isNull()) {
-        if (hasWordsLeft()) {
-            takeWord("from");
-            takeWord("the");
+    GameObjectPtr sellerPtr;
+    if (peekWord() == "from") {
+        takeWord();
 
-            if (!assertWordsLeft("Buy from who?")) {
-                return;
-            }
-
-            character = takeObject(currentRoom()->npcs());
-        } else if (!itemDescription.first.isEmpty()) {
-            GameObjectPtrList characters = objectsByDescription(itemDescription,
-                                                                currentRoom()->npcs());
-            if (characters.length() > 0) {
-                character = characters[0];
-                itemDescription = QPair<QString, uint>();
-            }
-        }
-
-        if (character.isNull()) {
-            if (sellers.length() == 1) {
-                character = sellers[0];
-            } else {
-                send("Buy from who?");
-                return;
-            }
-        }
+        sellerPtr = takeObject(currentRoom()->npcs());
+    } else if (sellers.length() == 1) {
+        sellerPtr = sellers[0];
     }
 
-    if (!requireSome(character, "That character is not here.")) {
+    if (!requireSome(sellerPtr, "Buy from who?")) {
         return;
     }
 
-    Character *seller = character.cast<Character *>();
+    Character *seller = sellerPtr.cast<Character *>();
     QString sellerName = seller->definiteName(currentRoom()->npcs(), Capitalized);
 
-    if (seller->sellableItems().length() == 0) {
-        send(QString("%1 has nothing for sale.").arg(sellerName));
+    if (seller->sellableItems().isEmpty()) {
+        send("%1 has nothing for sale.", sellerName);
         return;
     }
 
-    if (itemDescription.first.isEmpty()) {
+    if (itemDescription.name.isEmpty()) {
         seller->invokeTrigger("onbuy", player);
         return;
     }
@@ -113,18 +69,32 @@ void BuyCommand::execute(Player *player, const QString &command) {
         return;
     }
 
-    Item *item = items[0].cast<Item *>();
-    if (item->cost() > player->gold()) {
-        send("You don't have enough gold to buy that.");
-        return;
+    GameObjectPtrList boughtItems;
+    for (const GameObjectPtr &itemPtr : items) {
+        Item *item = itemPtr.cast<Item *>();
+        QString itemName = item->definiteName(seller->sellableItems());
+
+        if (item->cost() > player->gold()) {
+            send("You don't have enough gold to buy %1.", itemName);
+            continue;
+        }
+
+        if (player->inventoryWeight() + item->weight() > player->maxInventoryWeight()) {
+            send("%1 is too heavy to carry.", Util::capitalize(itemName));
+            continue;
+        }
+
+        if (!seller->invokeTrigger("onbuy", player, itemPtr)) {
+            continue;
+        }
+
+        player->adjustGold(-item->cost());
+        player->addInventoryItem(item->copy());
+
+        boughtItems.append(itemPtr);
     }
 
-    if (!seller->invokeTrigger("onbuy", player, items[0])) {
-        return;
+    if (!boughtItems.isEmpty()) {
+        send("You bought %1.", boughtItems.joinFancy());
     }
-
-    player->adjustGold(-item->cost());
-    player->addInventoryItem(item->copy());
-
-    send(QString("You bought %1.").arg(item->indefiniteName()));
 }

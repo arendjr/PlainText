@@ -13,7 +13,7 @@ class AdminCommand : public Command {
         virtual ~AdminCommand();
 
     protected:
-        virtual GameObjectPtrList objectsByDescription(const QPair<QString, uint> &description,
+        virtual GameObjectPtrList objectsByDescription(const ObjectDescription &description,
                                                        const GameObjectPtrList &pool);
 };
 

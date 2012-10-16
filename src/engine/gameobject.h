@@ -33,6 +33,7 @@ class GameObject : public QObject {
 
         const char *objectType() const { return m_objectType; }
         Q_INVOKABLE bool isClass() const;
+        Q_INVOKABLE bool isContainer() const;
         Q_INVOKABLE bool isExit() const;
         Q_INVOKABLE bool isItem() const;
         Q_INVOKABLE bool isCharacter() const;
@@ -46,12 +47,24 @@ class GameObject : public QObject {
         Q_INVOKABLE bool hasStats() const;
         Q_PROPERTY(const char *objectType READ objectType STORED false)
 
+        Q_INVOKABLE QString definiteName(const GameObjectPtrList &pool,
+                                         Options options = NoOptions);
+        Q_INVOKABLE QString indefiniteName(Options options = NoOptions);
+
         uint id() const { return m_id; }
         Q_PROPERTY(uint id READ id STORED false)
 
         const QString &name() const { return m_name; }
         void setName(const QString &name);
         Q_PROPERTY(QString name READ name WRITE setName)
+
+        const QString &plural() const { return m_plural; }
+        void setPlural(const QString &plural);
+        Q_PROPERTY(QString plural READ plural WRITE setPlural)
+
+        const QString &indefiniteArticle() const { return m_indefiniteArticle; }
+        void setIndefiniteArticle(const QString &indefiniteArticle);
+        Q_PROPERTY(QString indefiniteArticle READ indefiniteArticle WRITE setIndefiniteArticle)
 
         const QString &description() const { return m_description; }
         void setDescription(const QString &description);
@@ -182,6 +195,8 @@ class GameObject : public QObject {
         bool m_autoDelete;
 
         QString m_name;
+        QString m_plural;
+        QString m_indefiniteArticle;
         QString m_description;
         QVariantMap m_data;
         ScriptFunctionMap m_triggers;

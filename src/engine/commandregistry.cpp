@@ -30,6 +30,7 @@
 #include "commands/lookcommand.h"
 #include "commands/losecommand.h"
 #include "commands/opencommand.h"
+#include "commands/putcommand.h"
 #include "commands/quitcommand.h"
 #include "commands/removecommand.h"
 #include "commands/saycommand.h"
@@ -44,6 +45,7 @@
 #include "commands/wieldcommand.h"
 #include "commands/whocommand.h"
 #include "commands/admin/addcharactercommand.h"
+#include "commands/admin/addcontainercommand.h"
 #include "commands/admin/addexitcommand.h"
 #include "commands/admin/additemcommand.h"
 #include "commands/admin/addshieldcommand.h"
@@ -109,6 +111,7 @@ CommandRegistry::CommandRegistry(QObject *parent) :
     m_commands.insert("look", look);
     m_commands.insert("lose", new LoseCommand(this));
     m_commands.insert("open", new OpenCommand(this));
+    m_commands.insert("put", new PutCommand(this));
     m_commands.insert("quit", quit);
     m_commands.insert("remove", new RemoveCommand(this));
     m_commands.insert("say", new SayCommand(this));
@@ -124,6 +127,7 @@ CommandRegistry::CommandRegistry(QObject *parent) :
     m_commands.insert("/me", new SlashMeCommand(this));
 
     m_adminCommands.insert("add-character", new AddCharacterCommand(this));
+    m_adminCommands.insert("add-container", new AddContainerCommand(this));
     m_adminCommands.insert("add-exit", new AddExitCommand(this));
     m_adminCommands.insert("add-item", new AddItemCommand(this));
     m_adminCommands.insert("add-shield", new AddShieldCommand(this));

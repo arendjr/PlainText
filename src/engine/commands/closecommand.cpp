@@ -18,14 +18,8 @@ void CloseCommand::execute(Player *player, const QString &command) {
 
     super::prepareExecute(player, command);
 
-    if (!assertWordsLeft("Close what?")) {
-        return;
-    }
-
-    takeWord("the");
-
     GameObjectPtr exit = takeObject(currentRoom()->exits());
-    if (!requireSome(exit, "That's not here.")) {
+    if (!requireSome(exit, "Close what?")) {
         return;
     }
 

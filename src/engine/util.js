@@ -19,9 +19,10 @@ var Color = {
 };
 
 var Options = {
-    None: 0,
-    IfNotLast: 1
+    None: 0x0000,
+    IfNotLast: 0x0040
 };
+
 
 Array.prototype.append = function(value) {
 
@@ -175,6 +176,7 @@ Array.prototype.removeAt = function(index) {
     this.splice(index, 1);
 }
 
+
 String.prototype.capitalized = function() {
 
     return Util.capitalize(this);
@@ -200,6 +202,11 @@ String.prototype.isEmpty = function() {
     return this.length === 0;
 };
 
+String.prototype.left = function(n) {
+
+    return this.substr(0, n);
+};
+
 String.prototype.mid = function(begin, end) {
 
     return this.substr(begin, end);
@@ -212,6 +219,11 @@ String.prototype.replaceAll = function(before, after) {
         result = result.replace(before, after);
     }
     return result;
+};
+
+String.prototype.right = function(n) {
+
+    return this.substr(n);
 };
 
 String.prototype.startsWith = function(string) {
@@ -239,11 +251,13 @@ String.prototype.trimmed = function() {
     return this.replace(/^\s+|\s+$/g, "");
 };
 
+
 function $(identifier) {
 
     var split = identifier.split(":");
     return Realm.getObject(split[0], parseInt(split[1], 10));
 }
+
 
 function byChance(n, p) {
 

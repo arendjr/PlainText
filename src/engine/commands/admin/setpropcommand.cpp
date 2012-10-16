@@ -1,7 +1,6 @@
 #include "setpropcommand.h"
 
 #include "characterstats.h"
-#include "item.h"
 #include "util.h"
 
 
@@ -86,24 +85,21 @@ void SetPropCommand::execute(Player *player, const QString &command) {
                 break;
             }
         default:
-            send(QString("Setting property %1 is not supported.").arg(propertyName));
+            send("Setting property %1 is not supported.", propertyName);
             return;
     }
 
     if (variant.isValid()) {
         object->setProperty(propertyName.toAscii().constData(), variant);
 
-        send(QString("Property %1 modified.").arg(propertyName));
+        send("Property %1 modified.", propertyName);
 
-        if (object->isItem()) {
-            Item *item = object.cast<Item *>();
-            if (propertyName == "name" || propertyName == "plural" ||
-                propertyName == "indefiniteArticle") {
-                send(QString("New forms: %1 %2, one %3, two %4.").arg(item->indefiniteArticle(),
-                                                                      item->name(),
-                                                                      item->name(),
-                                                                      item->plural()));
-            }
+        if (propertyName == "name" || propertyName == "plural" ||
+            propertyName == "indefiniteArticle") {
+            send(QString("New forms: %1 %2, one %3, two %4.").arg(object->indefiniteArticle(),
+                                                                  object->name(),
+                                                                  object->name(),
+                                                                  object->plural()));
         }
     }
 }

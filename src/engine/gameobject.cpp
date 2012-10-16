@@ -14,9 +14,9 @@
 
 #include "qjson/json_driver.hh"
 
-#include "room.h"
 #include "character.h"
 #include "class.h"
+#include "container.h"
 #include "conversionutil.h"
 #include "deleteobjectevent.h"
 #include "diskutil.h"
@@ -28,6 +28,7 @@
 #include "player.h"
 #include "race.h"
 #include "realm.h"
+#include "room.h"
 #include "scriptengine.h"
 #include "shield.h"
 #include "util.h"
@@ -69,6 +70,11 @@ GameObject::~GameObject() {
 bool GameObject::isClass() const {
 
     return strcmp(m_objectType, "class") == 0;
+}
+
+bool GameObject::isContainer() const {
+
+    return strcmp(m_objectType, "container") == 0;
 }
 
 bool GameObject::isExit() const {
@@ -126,6 +132,39 @@ bool GameObject::hasStats() const {
     return isCharacter() || isShield() || isWeapon();
 }
 
+QString GameObject::definiteName(const GameObjectPtrList &pool, Options options) {
+
+    if (m_indefiniteArticle.isEmpty()) {
+        return name();
+    } else {
+        int position = 0;
+        int total = 0;
+        for (const GameObjectPtr &other : pool) {
+            if (other->name() == name()) {
+                total++;
+
+                if (other->id() == id()) {
+                    position = total;
+                }
+            }
+        }
+
+        return QString(options & Capitalized ? "The " : "the ") +
+               (total > 1 ? QString(Util::writtenPosition(position) + " ") : QLatin1String("")) +
+               name();
+    }
+}
+
+QString GameObject::indefiniteName(Options options) {
+
+    if (m_indefiniteArticle.isEmpty()) {
+        return name();
+    } else {
+        return (options & Capitalized ? Util::capitalize(m_indefiniteArticle) :
+                                        m_indefiniteArticle) + " " + name();
+    }
+}
+
 void GameObject::setName(const QString &name) {
 
     if (m_name != name) {
@@ -135,6 +174,24 @@ void GameObject::setName(const QString &name) {
         setModified();
 
         changeName(m_name);
+    }
+}
+
+void GameObject::setPlural(const QString &plural) {
+
+    if (m_plural != plural) {
+        m_plural = plural;
+
+        setModified();
+    }
+}
+
+void GameObject::setIndefiniteArticle(const QString &indefiniteArticle) {
+
+    if (m_indefiniteArticle != indefiniteArticle) {
+        m_indefiniteArticle = indefiniteArticle;
+
+        setModified();
     }
 }
 
@@ -482,6 +539,8 @@ GameObject *GameObject::createByObjectType(Realm *realm, const QString &objectTy
         return new Character(realm, id, options);
     } else if (objectType == "class") {
         return new Class(realm, id, options);
+    } else if (objectType == "container") {
+        return new Container(realm, id, options);
     } else if (objectType == "exit") {
         return new Exit(realm, id, options);
     } else if (objectType == "group") {
@@ -664,5 +723,27 @@ void GameObject::unregisterPointer(GameObjectPtr *pointer) {
 
 void GameObject::changeName(const QString &newName) {
 
-    Q_UNUSED(newName);
+    int length = newName.length();
+    if (length > 0 && !newName.startsWith('$')) {
+        if (newName.endsWith("y") && length > 1 && !Util::isVowel(newName[length - 2])) {
+            m_plural = newName.left(length - 1) + "ies";
+        } else if (newName.endsWith("f")) {
+            m_plural = newName.left(length - 1) + "ves";
+        } else if (newName.endsWith("fe")) {
+            m_plural = newName.left(length - 2) + "ves";
+        } else if (newName.endsWith("s") || newName.endsWith("x") ||
+                   newName.endsWith("sh") || newName.endsWith("ch")) {
+            m_plural = newName.left(length - 2) + "es";
+        } else if (newName.endsWith("ese")) {
+            m_plural = newName;
+        } else {
+            m_plural = newName + "s";
+        }
+
+        if (Util::isVowel(newName[0])) {
+            m_indefiniteArticle = "an";
+        } else {
+            m_indefiniteArticle = "a";
+        }
+    }
 }

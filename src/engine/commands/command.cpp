@@ -2,6 +2,7 @@
 
 #include <QRegExp>
 
+#include "container.h"
 #include "util.h"
 
 
@@ -47,6 +48,15 @@ bool Command::assertWordsLeft(const QString &noneLeftText) {
     }
 }
 
+QString Command::peekWord() const {
+
+    if (m_words.length() > 0) {
+        return m_words.first();
+    }
+
+    return QString();
+}
+
 QString Command::takeWord(Options options) {
 
     if (m_words.length() > 0) {
@@ -80,12 +90,9 @@ QString Command::takeWord(const QRegExp &pattern, Options options) {
 
 GameObjectPtr Command::takeObject(const GameObjectPtrList &pool) {
 
-    QPair<QString, uint> description = takeObjectsDescription();
-    if (!description.first.isEmpty()) {
-        GameObjectPtrList objects = objectsByDescription(description, pool);
-        if (objects.length() > 0) {
-            return objects[0];
-        }
+    ObjectDescription description = takeObjectsDescription();
+    if (!description.name.isEmpty()) {
+        return objectByDescription(description, pool);
     }
 
     return GameObjectPtr();
@@ -93,40 +100,45 @@ GameObjectPtr Command::takeObject(const GameObjectPtrList &pool) {
 
 GameObjectPtrList Command::takeObjects(const GameObjectPtrList &pool) {
 
-    QPair<QString, uint> description = takeObjectsDescription();
-    if (!description.first.isEmpty()) {
+    ObjectDescription description = takeObjectsDescription();
+    if (!description.name.isEmpty()) {
         return objectsByDescription(description, pool);
     }
 
     return GameObjectPtrList();
 }
 
-QPair<QString, uint> Command::takeObjectsDescription() {
+Command::ObjectDescription Command::takeObjectsDescription() {
 
-    QPair<QString, uint> description;
-    if (m_words.length() > 0) {
-        description.first = m_words.takeFirst().toLower();
-        if (m_words.length() > 0) {
-            if (description.first == "first") {
-                description.first = m_words.takeFirst().toLower();
-                description.second = 1;
-            } else if (description.first == "second") {
-                description.first = m_words.takeFirst().toLower();
-                description.second = 2;
-            } else if (description.first == "third") {
-                description.first = m_words.takeFirst().toLower();
-                description.second = 3;
-            } else if (description.first == "fourth") {
-                description.first = m_words.takeFirst().toLower();
-                description.second = 4;
-            } else {
-                description.second = m_words.first().toInt();
-                if (description.second > 0) {
-                    m_words.removeFirst();
-                }
+    takeWord("the", IfNotLast);
+
+    ObjectDescription description;
+    description.position = 0;
+
+    if (m_words.isEmpty()) {
+        return description;
+    }
+
+    description.name = m_words.takeFirst().toLower();
+
+    if (description.name.contains('.')) {
+        int index = description.name.indexOf('.');
+        description.position = description.name.left(index).toInt();
+        if (description.position > 0) {
+            description.name = description.name.mid(index + 1);
+        }
+    } else if (!m_words.isEmpty()) {
+        description.position = Util::numericPosition(description.name);
+        if (description.position > 0) {
+            description.name = m_words.takeFirst().toLower();
+        } else {
+            description.position = m_words.first().toInt();
+            if (description.position > 0) {
+                m_words.removeFirst();
             }
         }
     }
+
     return description;
 }
 
@@ -137,28 +149,39 @@ QString Command::takeRest() {
     return rest;
 }
 
-GameObjectPtrList Command::objectsByDescription(const QPair<QString, uint> &description,
+GameObjectPtr Command::objectByDescription(const ObjectDescription &description,
+                                           const GameObjectPtrList &pool) {
+
+    GameObjectPtrList objects = objectsByDescription(description, pool);
+    if (!objects.isEmpty()) {
+        return objects[0];
+    }
+
+    return GameObjectPtr();
+}
+
+GameObjectPtrList Command::objectsByDescription(const ObjectDescription &description,
                                                 const GameObjectPtrList &pool) {
 
     GameObjectPtrList objects;
-    if (description.first == "all") {
+    if (description.name == "all") {
         objects = pool;
     } else {
         for (const GameObjectPtr &object : pool) {
             QString loweredName = object->name().toLower();
             for (const QString &word : loweredName.split(' ')) {
-                if (word.startsWith(description.first)) {
-                    objects << object;
+                if (word.startsWith(description.name)) {
+                    objects.append(object);
                     break;
                 }
             }
         }
     }
-    if (description.second > 0) {
-        if (description.second <= (uint) objects.length()) {
-            GameObjectPtr selected = objects[description.second - 1];
+    if (description.position > 0) {
+        if (description.position <= (int) objects.length()) {
+            GameObjectPtr selected = objects[description.position - 1];
             objects.clear();
-            objects << selected;
+            objects.append(selected);
         } else {
             objects.clear();
         }
@@ -200,6 +223,16 @@ bool Command::requireUnique(const GameObjectPtrList &objects,
     } else {
         return true;
     }
+}
+
+void Command::send(const QString &message, const QString &arg1) {
+
+    send(QString(message).arg(arg1));
+}
+
+void Command::send(const QString &message, const QString &arg1, const QString &arg2) {
+
+    send(QString(message).arg(arg1, arg2));
 }
 
 void Command::setPlayer(Player *player) {

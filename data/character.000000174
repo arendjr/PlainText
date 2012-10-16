@@ -1,9 +1,9 @@
 {
   "name": "Lady Xu",
-  "description": "",
-  "triggers": { "onbuy": "(function(buyer, items) {\n    if (!items) {\n        buyer.send('Welcome ' + (buyer.gender == 'male' ? 'dear' : 'my lovely') + ', what can I make for you? Here\\'s my list:'); \n        buyer.sendSellableItemsList(this.sellableItems);\n        return;\n    }\n})" },
   "plural": "Lady Xus",
   "indefiniteArticle": "",
+  "description": "",
+  "triggers": { "onbuy": "(function(buyer, items) {\n    if (!items) {\n        buyer.send('Welcome ' + (buyer.gender == 'male' ? 'dear' : 'my lovely') + ', what can I make for you? Here\\'s my list:'); \n        buyer.sendSellableItemsList(this.sellableItems);\n        return;\n    }\n})" },
   "portable": false,
   "weight": 0,
   "cost": 0,

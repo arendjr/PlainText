@@ -22,6 +22,8 @@ class Util : public QObject {
 
         Q_INVOKABLE static QString writtenPosition(int position);
 
+        Q_INVOKABLE static int numericPosition(const QString &position);
+
         Q_INVOKABLE static QString capitalize(const QString &string);
 
         Q_INVOKABLE static QString center(const QString &string, int width);

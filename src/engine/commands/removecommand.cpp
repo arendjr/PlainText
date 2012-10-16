@@ -25,7 +25,7 @@ void RemoveCommand::execute(Player *player, const QString &command) {
         return;
     }
 
-    takeWord("(the|my)");
+    takeWord("my");
 
     GameObjectPtrList allItems;
     allItems << player->weapon()

@@ -1,5 +1,6 @@
 #include "lookcommand.h"
 
+#include "container.h"
 #include "exit.h"
 #include "item.h"
 #include "race.h"
@@ -24,21 +25,17 @@ void LookCommand::execute(Player *player, const QString &command) {
 
     super::prepareExecute(player, command);
 
-    if (alias() == "look") {
+    if (alias() == "l" || alias() == "look") {
         if (!hasWordsLeft()) {
             player->look();
             return;
-	}
+        }
 
-	takeWord("at", IfNotLast);
-        takeWord("the", IfNotLast);
-
+        takeWord("at", IfNotLast);
         if (!assertWordsLeft("Look at what?")) {
             return;
         }
     } else {
-        takeWord("the", IfNotLast);
-
         if (!assertWordsLeft("Examine what?")) {
             return;
         }
@@ -153,6 +150,16 @@ void LookCommand::execute(Player *player, const QString &command) {
         }
 
         send(m);
+    } else if (object->isContainer()) {
+        Container *container = object.cast<Container *>();
+
+        if (description.isEmpty()) {
+            send("%1 contains %2.", container->definiteName(pool, Capitalized),
+                 container->items().joinFancy());
+        } else {
+            send(description + "\n"
+                 "It contains %2.", container->items().joinFancy());
+        }
     } else if (description.isEmpty()) {
         QString name;
         if (object->isItem()) {

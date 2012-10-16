@@ -18,10 +18,6 @@ void DropCommand::execute(Player *player, const QString &command) {
 
     super::prepareExecute(player, command);
 
-    if (!assertWordsLeft("Drop what?")) {
-        return;
-    }
-
     QString description;
     GameObjectPtrList items;
     double gold = 0.0;
@@ -30,7 +26,7 @@ void DropCommand::execute(Player *player, const QString &command) {
     if (word.startsWith("$")) {
         QRegExp currencyRegExp("\\$\\d+(\\.5)?");
         if (!currencyRegExp.exactMatch(word)) {
-            send(QString("%1 is not a valid currency description.").arg(word));
+            send("%1 is not a valid currency description.", word);
             return;
         }
         gold = word.mid(1).toDouble();
@@ -49,10 +45,9 @@ void DropCommand::execute(Player *player, const QString &command) {
         description = QString("$%1 worth of gold").arg(gold);
     } else {
         prependWord(word);
-        takeWord("the");
 
         items = takeObjects(player->inventory());
-        if (!requireSome(items, "You don't have that.")) {
+        if (!requireSome(items, "Drop what?")) {
             return;
         }
 
@@ -64,7 +59,7 @@ void DropCommand::execute(Player *player, const QString &command) {
         description = items.joinFancy(DefiniteArticles);
     }
 
-    send(QString("You drop %2.").arg(description));
+    send("You drop %2.", description);
 
     GameObjectPtrList others = currentRoom()->players();
     others.removeOne(player);

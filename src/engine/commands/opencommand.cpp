@@ -19,14 +19,8 @@ void OpenCommand::execute(Player *player, const QString &command) {
 
     super::prepareExecute(player, command);
 
-    if (!assertWordsLeft("Open what?")) {
-        return;
-    }
-
-    takeWord("the");
-
     GameObjectPtr exit = takeObject(currentRoom()->exits());
-    if (!requireSome(exit, "That's not here.")) {
+    if (!requireSome(exit, "Open what?")) {
         return;
     }
 

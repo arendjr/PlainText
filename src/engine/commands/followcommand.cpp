@@ -21,16 +21,10 @@ void FollowCommand::execute(Player *player, const QString &command) {
 
     super::prepareExecute(player, command);
 
-    if (!assertWordsLeft("Follow who?")) {
+    GameObjectPtr character = takeObject(currentRoom()->characters());
+    if (!requireSome(character, "Follow who?")) {
         return;
     }
 
-    QPair <QString, uint> description = takeObjectsDescription();
-    GameObjectPtrList characters = objectsByDescription(description, currentRoom()->characters());
-
-    if (characters.isEmpty()) {
-        send(QString("\"%1\" is not here.").arg(Util::capitalize(description.first)));
-    } else {
-        player->follow(characters[0]);
-    }
+    player->follow(character);
 }

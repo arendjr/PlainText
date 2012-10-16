@@ -20,18 +20,10 @@ void KillCommand::execute(Player *player, const QString &command) {
 
     super::prepareExecute(player, command);
 
-    if (!assertWordsLeft("Kill who?")) {
+    GameObjectPtr character = takeObject(currentRoom()->characters());
+    if (!requireSome(character, "Kill who?")) {
         return;
     }
 
-    takeWord("the");
-
-    QPair <QString, uint> description = takeObjectsDescription();
-    GameObjectPtrList characters = objectsByDescription(description,
-                                                        currentRoom()->characters());
-    if (!requireSome(characters, "That character is not here.")) {
-        return;
-    }
-
-    player->kill(characters[0]);
+    player->kill(character);
 }

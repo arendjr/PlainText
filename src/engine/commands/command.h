@@ -5,6 +5,7 @@
 #include <QPair>
 #include <QStringList>
 
+#include "constants.h"
 #include "room.h"
 #include "gameobjectptr.h"
 #include "player.h"
@@ -19,10 +20,10 @@ class Command : public QObject {
     Q_OBJECT
 
     public:
-        enum Options {
-            None = 0x00,
-            IfNotLast = 0x01
-        };
+        typedef struct {
+            QString name;
+            int position;
+        } ObjectDescription;
 
         Command(QObject *parent = 0);
         virtual ~Command();
@@ -47,15 +48,18 @@ class Command : public QObject {
         inline bool hasWordsLeft() const { return m_words.length() > 0; }
         bool assertWordsLeft(const QString &noneLeftText);
 
-        QString takeWord(Options options = None);
-        QString takeWord(const char *pattern, Options options = None);
-        QString takeWord(const QRegExp &pattern, Options options = None);
+        QString peekWord() const;
+        QString takeWord(Options options = NoOptions);
+        QString takeWord(const char *pattern, Options options = NoOptions);
+        QString takeWord(const QRegExp &pattern, Options options = NoOptions);
         GameObjectPtr takeObject(const GameObjectPtrList &pool);
         GameObjectPtrList takeObjects(const GameObjectPtrList &pool);
-        QPair<QString, uint> takeObjectsDescription();
+        ObjectDescription takeObjectsDescription();
         QString takeRest();
 
-        virtual GameObjectPtrList objectsByDescription(const QPair<QString, uint> &description,
+        GameObjectPtr objectByDescription(const ObjectDescription &description,
+                                          const GameObjectPtrList &pool);
+        virtual GameObjectPtrList objectsByDescription(const ObjectDescription &description,
                                                        const GameObjectPtrList &pool);
 
         bool requireSome(const GameObjectPtr &object,
@@ -67,6 +71,8 @@ class Command : public QObject {
                            const QString &tooManyText);
 
         inline void send(const QString &message) { m_player->send(message); }
+        void send(const QString &message, const QString &arg1);
+        void send(const QString &message, const QString &arg1, const QString &arg2);
 
     private:
         void setPlayer(Player *player);

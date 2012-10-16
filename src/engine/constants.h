@@ -24,13 +24,14 @@ enum Color {
 };
 
 enum Option {
-    NoOptions = 0x00,
-    Capitalized = 0x01,
-    DefiniteArticles = 0x02,
-    Copy = 0x04,
-    DontSave = 0x08,
-    SkipId = 010,
-    IncludeTypeInfo = 0x20
+    NoOptions = 0x0000,
+    Capitalized = 0x0001,
+    DefiniteArticles = 0x0002,
+    Copy = 0x0004,
+    DontSave = 0x0008,
+    SkipId = 0x0010,
+    IncludeTypeInfo = 0x0020,
+    IfNotLast = 0x0040
 };
 Q_DECLARE_FLAGS(Options, Option)
 Q_DECLARE_OPERATORS_FOR_FLAGS(Options)

@@ -21,16 +21,11 @@ void GoCommand::execute(Player *player, const QString &command) {
     if (alias() == "go") {
         takeWord("to", IfNotLast);
     }
-    takeWord("the");
 
-    if (!assertWordsLeft("Go where?")) {
+    GameObjectPtr exit = takeObject(currentRoom()->exits());
+    if (!requireSome(exit, "Go where?")) {
         return;
     }
 
-    GameObjectPtrList exits = takeObjects(currentRoom()->exits());
-    if (!requireSome(exits, "You can't go that way.")) {
-        return;
-    }
-
-    player->go(exits[0]);
+    player->go(exit);
 }

@@ -20,15 +20,10 @@ void WieldCommand::execute(Player *player, const QString &command) {
 
     super::prepareExecute(player, command);
 
-    if (!assertWordsLeft("Wield what?")) {
-        return;
-    }
+    takeWord("my");
 
-    takeWord("(the|my)");
-
-    GameObjectPtrList allItems = player->inventory();
-    GameObjectPtr item = takeObject(allItems);
-    if (!requireSome(item, "You don't have that.")) {
+    GameObjectPtr item = takeObject(player->inventory());
+    if (!requireSome(item, "Wield what?")) {
         return;
     }
 

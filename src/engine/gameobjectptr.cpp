@@ -521,16 +521,16 @@ const GameObjectPtr &GameObjectPtrList::first() const {
     return m_items[0];
 }
 
-int GameObjectPtrList::indexOf(const GameObjectPtr &value, int from) const {
+int GameObjectPtrList::indexOf(const GameObjectPtr &value) const {
 
-    for (int i = from; i < m_size; i++) {
+    for (int i = 0; i < m_size; i++) {
         if (m_items[i] == value) {
             return i;
         }
     }
 
     if (m_nextList) {
-        return m_nextList->indexOf(value, from - NUM_ITEMS) + NUM_ITEMS;
+        return m_nextList->indexOf(value) + m_size;
     } else {
         return -1;
     }
@@ -603,7 +603,7 @@ void GameObjectPtrList::removeAt(int i) {
         }
     } else {
         Q_ASSERT(m_nextList);
-        m_nextList->removeAt(i - NUM_ITEMS);
+        m_nextList->removeAt(i - m_size);
     }
 
     if (m_nextList && m_nextList->m_size == 0) {
@@ -732,7 +732,7 @@ const GameObjectPtr &GameObjectPtrList::operator[](int i) const {
         return m_items[i];
     } else {
         Q_ASSERT(m_nextList);
-        return (*m_nextList)[i - NUM_ITEMS];
+        return (*m_nextList)[i - m_size];
     }
 }
 

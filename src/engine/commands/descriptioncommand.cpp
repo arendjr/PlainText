@@ -22,7 +22,7 @@ void DescriptionCommand::execute(Player *player, const QString &command) {
 
     super::prepareExecute(player, command);
 
-    if (!assertWordsLeft("Set your description to what?")) {
+    if (!assertWordsLeft("What should your description be?")) {
         return;
     }
 

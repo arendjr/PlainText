@@ -15,7 +15,6 @@ GAME MECHANICS
      -  skills
      -  spells
      -  unread
-     -  Allow "2.X" in addition to "second X" and "X 2".
 
 TECHNOLOGY
 

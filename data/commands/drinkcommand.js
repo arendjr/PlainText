@@ -12,15 +12,9 @@ DrinkCommand.prototype.execute = function(player, command) {
 
     this.prepareExecute(player, command);
 
-    if (!this.assertWordsLeft("Drink what?")) {
-        return;
-    }
-
-    this.takeWord("the");
-
     var allItems = player.inventory.concat(player.currentRoom.items);
     var item = this.takeObject(allItems);
-    if (!this.requireSome(item, "You don't have that.")) {
+    if (!this.requireSome(item, "Drink what?")) {
         return;
     }
 

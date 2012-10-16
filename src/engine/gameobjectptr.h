@@ -178,7 +178,7 @@ class GameObjectPtrList {
         GameObjectPtr &first();
         const GameObjectPtr &first() const;
 
-        int indexOf(const GameObjectPtr &value, int from = 0) const;
+        int indexOf(const GameObjectPtr &value) const;
 
         bool isEmpty() const;
 

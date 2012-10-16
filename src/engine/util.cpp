@@ -157,6 +157,22 @@ QString Util::writtenPosition(int position) {
     }
 }
 
+int Util::numericPosition(const QString &position) {
+
+    for (int i = 0; i < 20; i++) {
+        if (position == ::writtenPositions[i]) {
+            return i;
+        }
+    }
+
+    if (position.endsWith("1st") || position.endsWith("2nd") ||
+        position.endsWith("3rd") || position.endsWith("th")) {
+        return position.left(position.length() - 2).toInt();
+    } else {
+        return 0;
+    }
+}
+
 QString Util::capitalize(const QString &string) {
 
     return string.left(1).toUpper() + string.mid(1);

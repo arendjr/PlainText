@@ -1,9 +1,11 @@
 {
   "name": "Light Tower Keeper's House",
+  "plural": "Light Tower Keeper's Houses",
+  "indefiniteArticle": "a",
   "description": "The room looks like it is mainly used for storing various stuff. Of all the things you have seen, the light tower keeper certainly has some interesting stuff laying around.",
   "x": -150,
   "y": 150,
   "z": 0,
   "exits": [ "exit:42" ],
-  "items": [ "item:44" ]
+  "items": [ "container:1475" ]
 }

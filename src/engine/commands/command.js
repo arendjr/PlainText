@@ -112,7 +112,7 @@ Command.prototype.takeWord = function(pattern, options) {
 Command.prototype.takeObject = function(pool) {
 
     var description = this.takeObjectsDescription();
-    if (!description.first.isEmpty()) {
+    if (!description.name.isEmpty()) {
         var objects = this.objectsByDescription(description, pool);
         if (objects.length > 0) {
             return objects[0];
@@ -125,39 +125,44 @@ Command.prototype.takeObject = function(pool) {
 Command.prototype.takeObjects = function(pool) {
 
     var description = this.takeObjectsDescription();
-    if (!description.first.isEmpty()) {
+    if (!description.name.isEmpty()) {
         return this.objectsByDescription(description, pool);
     }
 
     return [];
 }
 
-Command.prototype.takeObjectsDescription = function() {
+Command.prototype.takeObjectsDescription = function(options) {
 
-    var description = { first: "", second: 0 };
-    if (this._words.length > 0) {
-        description.first = this._words.takeFirst().toLower();
-        if (this._words.length > 0) {
-            if (description.first === "first") {
-                description.first = this._words.takeFirst().toLower();
-                description.second = 1;
-            } else if (description.first === "second") {
-                description.first = this._words.takeFirst().toLower();
-                description.second = 2;
-            } else if (description.first === "third") {
-                description.first = this._words.takeFirst().toLower();
-                description.second = 3;
-            } else if (description.first === "fourth") {
-                description.first = this._words.takeFirst().toLower();
-                description.second = 4;
-            } else {
-                description.second = this._words.first().toInt();
-                if (description.second > 0) {
-                    this._words.removeFirst();
-                }
+    this.takeWord("the", Options.IfNotLast);
+
+    var description = { name: "", position: 0, containerName: "", containerPosition: 0 };
+
+    if (this._words.isEmpty()) {
+        return description;
+    }
+
+    description.name = this._words.takeFirst().toLower();
+    description.position = 0;
+
+    if (description.name.contains('.')) {
+        var index = description.name.indexOf('.');
+        description.position = description.name.left(index).toInt();
+        if (description.position > 0) {
+            description.name = description.name.mid(index + 1);
+        }
+    } else if (!this._words.isEmpty()) {
+        description.position = Util.numericPosition(description.name);
+        if (description.position > 0) {
+            description.name = this._words.takeFirst().toLower();
+        } else {
+            description.position = this._words.first().toInt();
+            if (description.position > 0) {
+                this._words.removeFirst();
             }
         }
     }
+
     return description;
 };
 
@@ -168,10 +173,20 @@ Command.prototype.takeRest = function() {
     return rest;
 };
 
+Command.prototype.objectByDescription = function(description, pool) {
+
+    var objects = objectsByDescription(description, pool);
+    if (!objects.isEmpty()) {
+        return objects[0];
+    }
+
+    return null;
+}
+
 Command.prototype.objectsByDescription = function(description, pool) {
 
     var objects = [];
-    if (description.first === "all") {
+    if (description.name === "all") {
         objects = pool;
     } else {
         for (var i = 0, length = pool.length; i < length; i++) {
@@ -179,16 +194,16 @@ Command.prototype.objectsByDescription = function(description, pool) {
             var words = object.name.toLower().split(" ");
             for (var j = 0; j < words.length; j++) {
                 var word = words[j];
-                if (word.startsWith(description.first)) {
+                if (word.startsWith(description.name)) {
                     objects.push(object);
                     break;
                 }
             }
         }
     }
-    if (description.second > 0) {
-        if (description.second <= objects.length) {
-            var selected = objects[description.second - 1];
+    if (description.position > 0) {
+        if (description.position <= objects.length) {
+            var selected = objects[description.position - 1];
             objects = [ selected ];
         } else {
             objects.clear();
