@@ -30,7 +30,6 @@
 #include "commands/lookcommand.h"
 #include "commands/losecommand.h"
 #include "commands/opencommand.h"
-#include "commands/putcommand.h"
 #include "commands/quitcommand.h"
 #include "commands/removecommand.h"
 #include "commands/saycommand.h"
@@ -111,7 +110,6 @@ CommandRegistry::CommandRegistry(QObject *parent) :
     m_commands.insert("look", look);
     m_commands.insert("lose", new LoseCommand(this));
     m_commands.insert("open", new OpenCommand(this));
-    m_commands.insert("put", new PutCommand(this));
     m_commands.insert("quit", quit);
     m_commands.insert("remove", new RemoveCommand(this));
     m_commands.insert("say", new SayCommand(this));

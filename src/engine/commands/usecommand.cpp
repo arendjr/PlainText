@@ -20,15 +20,8 @@ void UseCommand::execute(Player *player, const QString &command) {
 
     super::prepareExecute(player, command);
 
-    if (!assertWordsLeft("Use what?")) {
-        return;
-    }
-
-    takeWord("the");
-
-    GameObjectPtrList allItems = player->inventory() + currentRoom()->items();
-    GameObjectPtr item = takeObject(allItems);
-    if (!requireSome(item, "You don't have that.")) {
+    GameObjectPtr item = takeObject(player->inventory() + currentRoom()->items());
+    if (!requireSome(item, "Use what?")) {
         return;
     }
 

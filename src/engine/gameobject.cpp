@@ -132,7 +132,7 @@ bool GameObject::hasStats() const {
     return isCharacter() || isShield() || isWeapon();
 }
 
-QString GameObject::definiteName(const GameObjectPtrList &pool, Options options) {
+QString GameObject::definiteName(const GameObjectPtrList &pool, int options) const {
 
     if (m_indefiniteArticle.isEmpty()) {
         return name();
@@ -155,7 +155,7 @@ QString GameObject::definiteName(const GameObjectPtrList &pool, Options options)
     }
 }
 
-QString GameObject::indefiniteName(Options options) {
+QString GameObject::indefiniteName(int options) const {
 
     if (m_indefiniteArticle.isEmpty()) {
         return name();

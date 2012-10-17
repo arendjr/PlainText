@@ -86,7 +86,6 @@ SOURCES += \
     engine/commands/lookcommand.cpp \
     engine/commands/losecommand.cpp \
     engine/commands/opencommand.cpp \
-    engine/commands/putcommand.cpp \
     engine/commands/quitcommand.cpp \
     engine/commands/removecommand.cpp \
     engine/commands/saycommand.cpp \
@@ -214,7 +213,6 @@ HEADERS += \
     engine/commands/lookcommand.h \
     engine/commands/losecommand.h \
     engine/commands/opencommand.h \
-    engine/commands/putcommand.h \
     engine/commands/quitcommand.h \
     engine/commands/removecommand.h \
     engine/commands/saycommand.h \
@@ -289,6 +287,7 @@ OTHER_FILES += \
     engine/util.js \
     engine/commands/command.js \
     ../data/commands/drinkcommand.js \
+    ../data/commands/putcommand.js \
     ../web/index.html \
     ../web/kinetic.js \
     ../web/main.css \

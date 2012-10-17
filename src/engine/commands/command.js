@@ -235,7 +235,14 @@ Command.prototype.requireUnique = function(objects, tooFewText, tooManyText) {
     }
 };
 
-Command.prototype.send = function(message) {
+Command.prototype.send = function(message, arg1, arg2) {
+
+    if (message.contains("%1")) {
+        message = message.replace("%1", arg1);
+        if (message.contains("%2")) {
+            message = message.replace("%2", arg2);
+        }
+    }
 
     this._player.send(message);
 };

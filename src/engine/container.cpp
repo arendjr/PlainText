@@ -16,6 +16,8 @@ void Container::addItem(const GameObjectPtr &item) {
         m_items.append(item);
 
         adjustWeight(item.cast<Item *>()->weight());
+
+        setModified();
     }
 }
 
@@ -23,6 +25,8 @@ void Container::removeItem(const GameObjectPtr &item) {
 
     if (m_items.removeOne(item)) {
         adjustWeight(-item.cast<Item *>()->weight());
+
+        setModified();
     }
 }
 

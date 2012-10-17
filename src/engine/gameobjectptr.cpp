@@ -8,6 +8,7 @@
 #include <QDebug>
 #include <QMetaProperty>
 #include <QStringList>
+#include <QVector>
 
 #include "gameobject.h"
 #include "item.h"
@@ -783,55 +784,44 @@ void GameObjectPtrList::send(const QString &message, int color) const {
 
 QString GameObjectPtrList::joinFancy(Options options) const {
 
-    QList<GameObject *> objects;
-    QStringList objectNames;
-    QList<int> objectCounts;
-
     if (isEmpty()) {
         return (options & Capitalized ? "Nothing" : "nothing");
     }
 
-    for (const GameObjectPtr &pointer : *this) {
-        GameObject *object = pointer.cast<GameObject *>();
+    QVector<GameObject *> objects;
+    QStringList objectNames;
+    QList<int> objectCounts;
 
+    for (const GameObjectPtr &object : *this) {
         int index = objectNames.indexOf(object->name());
         if (index > -1) {
             objectCounts[index]++;
         } else {
-            objects << object;
+            objects << object.cast<GameObject *>();
             objectNames << object->name();
             objectCounts << 1;
         }
     }
 
     QStringList strings;
-    for (int i = 0; i < objects.length(); i++) {
-        GameObject *object = objects[i];
+    for (int i = 0; i < objects.size(); i++) {
+        const GameObject *object = objects[i];
 
-        Item *item = qobject_cast<Item *>(object);
-        if (item) {
-            if (objectCounts[i] > 1) {
-                if (i == 0 && options & Capitalized) {
-                    strings << Util::capitalize(Util::writtenNumber(objectCounts[i])) + " " +
-                               item->plural();
-                } else {
-                    strings << Util::writtenNumber(objectCounts[i]) + " " + item->plural();
-                }
+        if (objectCounts[i] > 1) {
+            if (i == 0 && options & Capitalized) {
+                strings << Util::capitalize(Util::writtenNumber(objectCounts[i])) + " " +
+                           object->plural();
             } else {
-                if (item->indefiniteArticle().isEmpty()) {
-                    strings << item->name();
-                } else {
-                    if (options & DefiniteArticles) {
-                        strings << (i == 0 && options & Capitalized ? "The " : "the ") +
-                                   item->name();
-                    } else {
-                        strings << item->indefiniteName(i == 0 && options & Capitalized ?
-                                                        Capitalized : NoOptions);
-                    }
-                }
+                strings << Util::writtenNumber(objectCounts[i]) + " " + object->plural();
             }
         } else {
-            strings << object->name();
+            if (object->indefiniteArticle().isEmpty()) {
+                strings << object->name();
+            } else if (options & DefiniteArticles) {
+                strings << (i == 0 && options & Capitalized ? "The " : "the ") + object->name();
+            } else {
+                strings << object->indefiniteName(i == 0 ? (options & Capitalized) : NoOptions);
+            }
         }
     }
 

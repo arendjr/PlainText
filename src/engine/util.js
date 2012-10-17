@@ -20,6 +20,8 @@ var Color = {
 
 var Options = {
     None: 0x0000,
+    Capitalized: 0x0001,
+    DefiniteArticles: 0x0002,
     IfNotLast: 0x0040
 };
 
@@ -52,6 +54,11 @@ Array.prototype.first = function() {
 Array.prototype.isEmpty = function() {
 
     return this.length === 0;
+};
+
+Array.prototype.joinFancy = function(options) {
+
+    return Util.joinPtrList(this, options);
 };
 
 Array.prototype.last = function() {

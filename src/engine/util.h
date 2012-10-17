@@ -5,6 +5,7 @@
 #include <QStringList>
 
 #include "constants.h"
+#include "gameobjectptr.h"
 
 
 class Util : public QObject {
@@ -15,6 +16,9 @@ class Util : public QObject {
         Q_INVOKABLE static QString joinFancy(const QStringList &list,
                                              const QString &separator = ", ",
                                              const QString &last = " and ");
+
+        Q_INVOKABLE static QString joinPtrList(const GameObjectPtrList &list,
+                                               int options = NoOptions);
 
         Q_INVOKABLE static QStringList sortExitNames(const QStringList &exitNames);
 

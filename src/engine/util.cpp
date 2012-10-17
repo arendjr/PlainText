@@ -23,6 +23,11 @@ QString Util::joinFancy(const QStringList &list, const QString &separator, const
     return string;
 }
 
+QString Util::joinPtrList(const GameObjectPtrList &list, int options) {
+
+    return list.joinFancy((Options) options);
+}
+
 struct Direction {
     QString name;
     QString opposite;

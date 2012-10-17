@@ -1,4 +1,5 @@
 function DrinkCommand() {
+    Command.call(this);
 
     this.setDescription("Drink an item in the current room or your inventory.\n" +
                         "\n" +

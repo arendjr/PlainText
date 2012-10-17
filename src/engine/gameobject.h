@@ -48,8 +48,8 @@ class GameObject : public QObject {
         Q_PROPERTY(const char *objectType READ objectType STORED false)
 
         Q_INVOKABLE QString definiteName(const GameObjectPtrList &pool,
-                                         Options options = NoOptions);
-        Q_INVOKABLE QString indefiniteName(Options options = NoOptions);
+                                         int options = NoOptions) const;
+        Q_INVOKABLE QString indefiniteName(int options = NoOptions) const;
 
         uint id() const { return m_id; }
         Q_PROPERTY(uint id READ id STORED false)
