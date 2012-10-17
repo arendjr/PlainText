@@ -2,6 +2,8 @@ function MapEditor(element) {
 
     this.element = element;
 
+    this.initialized = false;
+
     this.map = null;
     this.view = null;
 
@@ -63,11 +65,11 @@ MapEditor.prototype.attachListeners = function() {
     this.map.addChangeListener(function() {
         if (self.selectedRoomId !== 0) {
             var room = self.map.rooms[self.selectedRoomId];
-            self.selectedRoom.querySelector(".name").textContent = room.name;
-            self.selectedRoom.querySelector(".description").textContent = room.description;
-            self.selectedRoom.querySelector(".x").value = room.x;
-            self.selectedRoom.querySelector(".y").value = room.y;
-            self.selectedRoom.querySelector(".y").value = room.z;
+            self.selectedRoomElement.querySelector(".name").textContent = room.name;
+            self.selectedRoomElement.querySelector(".description").textContent = room.description;
+            self.selectedRoomElement.querySelector(".x").value = room.x;
+            self.selectedRoomElement.querySelector(".y").value = room.y;
+            self.selectedRoomElement.querySelector(".z").value = room.z;
         }
     });
 
@@ -91,7 +93,7 @@ MapEditor.prototype.attachListeners = function() {
         if (self.selectedRoomId) {
             controller.propertyEditor.edit("#" + self.selectedRoomId + " name", {
                 "onsave": function(value) {
-                    self.map.setRoomProperty(selectedRoomId, "name", value);
+                    self.map.setRoomProperty(self.selectedRoomId, "name", value);
                     controller.propertyEditor.close();
                 }
             });
@@ -100,10 +102,10 @@ MapEditor.prototype.attachListeners = function() {
 
     this.selectedRoomElement.querySelector(".edit.description").addEventListener("click",
         function() {
-        if (selectedRoomId) {
-            controller.propertyEditor.edit("#" + selectedRoomId + " description", {
+        if (self.selectedRoomId) {
+            controller.propertyEditor.edit("#" + self.selectedRoomId + " description", {
                 "onsave": function(value) {
-                    self.map.setRoomProperty(selectedRoomId, "description", value);
+                    self.map.setRoomProperty(self.selectedRoomId, "description", value);
                     controller.propertyEditor.close();
                 }
             });
@@ -115,23 +117,29 @@ MapEditor.prototype.attachListeners = function() {
     }, false);
 
     this.selectedRoomElement.querySelector(".x").addEventListener("change", function(event) {
-        self.map.setRoomProperty(selectedRoomId, "x", event.target.value);
+        self.map.setRoomProperty(self.selectedRoomId, "x", event.target.value);
     });
 
     this.selectedRoomElement.querySelector(".y").addEventListener("change", function(event) {
-        self.map.setRoomProperty(selectedRoomId, "y", event.target.value);
+        self.map.setRoomProperty(self.selectedRoomId, "y", event.target.value);
     });
 
     this.selectedRoomElement.querySelector(".z").addEventListener("change", function(event) {
-        self.map.setRoomProperty(selectedRoomId, "z", event.target.value);
+        self.map.setRoomProperty(self.selectedRoomId, "z", event.target.value);
     });
 
     this.slider.element.addEventListener("change", function(event) {
-        self.view.setPerspective(event.value);
+        self.view.setPerspective(event.detail.value);
     });
+
+    this.initialized = true;
 };
 
 MapEditor.prototype.open = function() {
+
+    if (!this.initialized) {
+        this.init();
+    }
 
     this.element.show();
 
@@ -192,6 +200,12 @@ MapEditor.prototype.plotStats = function(type) {
     var self = this;
 
     controller.sendApiCall("log-retrieve stats " + type + " 100", function(data) {
+        for (var key in data) {
+            var id = key.substr(5);
+            data[id] = data[key];
+            delete data[key];
+        }
+
         self.view.plotData(data);
     });
 };

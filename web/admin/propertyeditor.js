@@ -51,26 +51,27 @@ PropertyEditor.prototype.edit = function(value, options) {
 
     this.options = options || {};
 
-    if (value && value.trimmed().startsWith("(function")) {
+    if (this.options.mode === "javascript") {
         this.editor.setOption("mode", "javascript");
         this.editor.setOption("lineWrapping", false);
     } else {
         this.editor.setOption("mode", "null");
         this.editor.setOption("lineWrapping", true);
     }
-    this.editor.setValue(value !== undefined ? value.trimmed() : "");
 
     var submitButtonLabel = options.submitButtonLabel || "Save";
     this.element.querySelector(".submit-button").textContent = submitButtonLabel;
 
     this.element.show();
 
+    this.editor.setValue(value !== undefined ? value.trimmed() : "");
+
     this.editor.focus();
 };
 
 PropertyEditor.prototype.save = function() {
 
-    var value = self.editor.getValue();
+    var value = this.editor.getValue();
 
     if (this.options.onsave) {
         this.options.onsave(value);

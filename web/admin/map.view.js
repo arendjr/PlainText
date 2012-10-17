@@ -72,7 +72,7 @@ MapView.prototype.setModel = function(model) {
 
     this.model.addChangeListener(function() {
         if (self.selectedRoomId !== 0) {
-            if (!self.model.rooms.contains(selectedRoomId)) {
+            if (!self.model.rooms.contains(self.selectedRoomId)) {
                 self.selectedRoomId = 0;
                 self.notifySelectionListeners();
             }
@@ -113,10 +113,10 @@ MapView.prototype.draw = function() {
 
     function drawRoom(room) {
         room.exits.forEach(function(exit) {
-            var points = [room.x + perspective * room.z,
-                          room.y - perspective * room.z,
-                          exit.destination.x + perspective * exit.destination.z,
-                          exit.destination.y - perspective * exit.destination.z];
+            var points = [room.x + (perspective * room.z),
+                          room.y - (perspective * room.z),
+                          exit.destination.x + (perspective * exit.destination.z),
+                          exit.destination.y - (perspective * exit.destination.z)];
             if (exit.shape) {
                 exit.shape.setPoints(points);
             } else {
@@ -130,8 +130,8 @@ MapView.prototype.draw = function() {
             }
         });
 
-        var x = room.x - roomSize / 2 + perspective * room.z;
-        var y = room.y - roomSize / 2 - perspective * room.z;
+        var x = room.x - roomSize / 2 + (perspective * room.z);
+        var y = room.y - roomSize / 2 - (perspective * room.z);
         if (room.shape) {
             room.shape.setX(x);
             room.shape.setY(y);
@@ -160,7 +160,9 @@ MapView.prototype.draw = function() {
     this.stage.draw();
 }
 
-MapEditor.prototype.plotData = function(data) {
+MapView.prototype.plotData = function(data) {
+
+    console.log(data);
 
     var lowest = 0;
     var highest = 0;
@@ -181,8 +183,12 @@ MapEditor.prototype.plotData = function(data) {
 
         var red = 0, green = 0, blue = 0;
         if (lowest === 0) {
-            red = Math.floor(255 * value / highest);
-            blue = 255 - red;
+            if (highest === 0) {
+                blue = 255;
+            } else {
+                red = Math.floor(255 * value / highest);
+                blue = 255 - red;
+            }
         } else {
             if (value > 0) {
                 red = Math.floor(255 * value / highest);

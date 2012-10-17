@@ -60,6 +60,10 @@ MapModel.prototype.setRoomProperty = function(roomId, propertyName, value) {
 
     controller.sendApiCall("property-set #" + roomId + " " + propertyName +
                            " " + value, function() {
+        if (propertyName === "x" || propertyName === "y" || propertyName === "z") {
+            value = parseInt(value, 10);
+        }
+
         self.rooms[roomId][propertyName] = value;
         self.notifyChangeListeners();
     });

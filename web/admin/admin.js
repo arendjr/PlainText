@@ -61,7 +61,9 @@
                                                    " " + value.replace(/\n/g, "\\n"));
                             propertyEditor.close();
                         },
-                        "onclose": function() { controller.setFocus(); }
+                        "onclose": function() {
+                            controller.setFocus();
+                        }
                     });
                 });
 
@@ -93,13 +95,16 @@
                         }
 
                         propertyEditor.edit(triggerSource, {
+                            "mode": "javascript",
                             "onsave": function(value) {
-                                controller.sendApiCall("trigger-set #" + data.id +
-                                                       " " + value, function() {
+                                controller.sendApiCall("trigger-set #" + data.id + " " +
+                                                       triggerName + " " + value, function() {
                                     propertyEditor.close();
                                 });
                             },
-                            "onclose": function() { controller.setFocus(); }
+                            "onclose": function() {
+                                controller.setFocus();
+                            }
                         });
                     });
                 } else {
@@ -110,12 +115,15 @@
             }
 
             if (command === "exec-script") {
-                propertyEditor.edit(triggerSource, {
+                propertyEditor.edit("", {
+                    "mode": "javascript",
                     "onsave": function(value) {
                         controller.socket.send("exec-script " + value.replace(/\s+/g, " "));
                         propertyEditor.close();
                     },
-                    "onclose": function() { controller.setFocus(); },
+                    "onclose": function() {
+                        controller.setFocus();
+                    },
                     "submitButtonLabel": "Execute"
                 });
 
