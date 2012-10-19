@@ -714,7 +714,7 @@ void Session::processSignupConfirmation(const QString &answer) {
         LogUtil::logSessionEvent(m_source, "Character created for player " + m_player->name());
         LogUtil::logCommand(m_player->name(), "(signed in)");
 
-        write(QString("\nWelcome to " + m_realm->name() + ", %1.\n").arg(m_player->name()));
+        write(QString("\nWelcome to %1, %2.\n").arg(m_realm->name(), m_player->name()));
         setSignInStage(SignedIn);
     } else if (answer == "no" || answer == "n" ||
                answer == "back" || answer == "b") {

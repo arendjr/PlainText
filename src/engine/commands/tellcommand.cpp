@@ -29,7 +29,7 @@ void TellCommand::execute(Player *player, const QString &command) {
     QString userName = Util::capitalize(takeWord());
     Player *other = Realm::instance()->getPlayer(userName);
     if (!other || !other->session()) {
-        send(QString("%1 is not online.").arg(userName));
+        send("%1 is not online.", userName);
         return;
     }
 

@@ -158,7 +158,7 @@ void Player::quit() {
             send(QString("Please wait %1 seconds.").arg(secondsStunned()), Olive);
         } else {
             m_session->signOut();
-            m_session = nullptr;
+            setSession(nullptr);
         }
     }
 }

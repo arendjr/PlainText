@@ -24,6 +24,6 @@ void WhoCommand::execute(Player *player, const QString &command) {
     if (players.length() == 1) {
         send("Only you are online.");
     } else {
-        send(QString("%1 are online.").arg(players.joinFancy(Capitalized)));
+        send("%1 are online.", players.joinFancy(Capitalized));
     }
 }

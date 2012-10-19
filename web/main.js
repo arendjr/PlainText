@@ -312,7 +312,7 @@ Controller.prototype.attachListeners = function() {
                 }
             }
         } else {
-            self.notifyIncomingMessageListeners(message);
+            self.notifyIncomingMessageListeners(message.data);
 
             self.writeToScreen(message.data);
         }

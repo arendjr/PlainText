@@ -1,7 +1,6 @@
 (function(window) {
 
     var isActive = true;
-    var permissionRequested = false;
 
     function init() {
 
