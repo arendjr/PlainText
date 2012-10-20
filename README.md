@@ -6,7 +6,7 @@ As of this moment, this project is shrouded in mystery...
 Technology
 ----------
 
- * Build on the PlainText engine: http://github.com/arendjr/PlainText
+ * Built on the PlainText engine: http://github.com/arendjr/PlainText
 
 Playing the game
 ----------------
