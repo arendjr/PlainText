@@ -1,8 +1,0 @@
-{
-  "name": "Light Tower",
-  "description": "As you've climbed up the stairs, you find a mostly empty floor. It seems there's little else to do but continue up, or go back down.",
-  "x": 0,
-  "y": 200,
-  "z": 20,
-  "exits": [ "exit:22", "exit:25" ]
-}

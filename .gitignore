@@ -1,6 +1,6 @@
 # Qt Creator build
-PlainText-build-desktop*
-PlainText.pro.user
+FoggyText-build-desktop*
+FoggyText.pro.user
 moc_*.cpp
 
 # XCode project

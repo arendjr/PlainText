@@ -1,8 +1,0 @@
-{
-  "name": "Fruit Stall",
-  "description": "It's hard to tell whether this stall actually qualifies as a stall or more a collection of boxes. There are boxes with fine apples, spicy dragon apples, big red melons, overly ripe grapes, juicy blood oranges and the unfavorite, but nutricient beatle bananas.",
-  "x": -50,
-  "y": -200,
-  "z": 0,
-  "exits": [ "exit:87" ]
-}

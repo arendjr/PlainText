@@ -1,7 +1,0 @@
-{
-  "name": "tea house",
-  "destination": "room:169",
-  "oppositeExit": "0",
-  "door": false,
-  "hidden": false
-}

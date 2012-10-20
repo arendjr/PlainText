@@ -23,7 +23,7 @@ LIBS += -lz
 
 DEFINES *= QT_USE_QSTRINGBUILDER
 
-TARGET = PlainText
+TARGET = FoggyText
 CONFIG += console
 CONFIG -= app_bundle
 

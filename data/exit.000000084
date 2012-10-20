@@ -1,7 +1,0 @@
-{
-  "name": "butcher's stall",
-  "destination": "room:83",
-  "oppositeExit": "0",
-  "door": false,
-  "hidden": false
-}

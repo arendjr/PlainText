@@ -1,8 +1,0 @@
-{
-  "name": "Main Street",
-  "description": "Main Street is one of the more desirable places in Middle Port to live and it shows. The houses here are large and well kept. Some of the houses even have a little bit of decoration around the roofs, something highly unusual for this town.",
-  "x": 0,
-  "y": -500,
-  "z": 0,
-  "exits": [ "exit:115", "exit:133" ]
-}

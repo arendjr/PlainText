@@ -1,8 +1,0 @@
-{
-  "name": "Kitchen Tent",
-  "description": "This tent hosts the kitchen which is providing food for all the soldiers in the barracks. Many soldiers apparently eat their food outside, though there are also a few benches for those who like to eat inside.\n\nThis tent is a lot more pleasurable to be in, mainly because of the fresh smell of the food and the spices, rather than the muff and sweaty odor of the other tents.",
-  "x": 200,
-  "y": -600,
-  "z": 0,
-  "exits": [ "exit:166" ]
-}

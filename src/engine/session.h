@@ -20,10 +20,7 @@ class Session : public QObject {
             AskingPassword,
             AskingSignupPassword,
             AskingSignupPasswordConfirmation,
-            AskingRace,
-            AskingClass,
             AskingGender,
-            AskingExtraStats,
             AskingSignupConfirmation,
             SignedIn,
             SignInAborted
@@ -84,21 +81,9 @@ class Session : public QObject {
         void askForSignupPasswordConfirmation();
         void processSignupPasswordConfirmation(const QString &input);
 
-        void startAskingRace();
-        void askForRace();
-        void processRace(const QString &answer);
-
-        void startAskingClass();
-        void askForClass();
-        void processClass(const QString &answer);
-
         void startAskingGender();
         void askForGender();
         void processGender(const QString &answer);
-
-        void startAskingExtraStats();
-        void askForExtraStats();
-        void processExtraStats(const QString &answer);
 
         void startAskingSignupConfirmation();
         void askForSignupConfirmation();

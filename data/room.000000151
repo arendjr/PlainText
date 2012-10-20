@@ -1,8 +1,0 @@
-{
-  "name": "Military Barracks",
-  "description": "These barracks provide a place to stay for any new soldiers who are arriving from the haven, before they get send off to battle.",
-  "x": 200,
-  "y": -550,
-  "z": 0,
-  "exits": [ "exit:153", "exit:155", "exit:157", "exit:159", "exit:164" ]
-}

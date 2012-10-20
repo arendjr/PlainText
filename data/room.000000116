@@ -1,8 +1,0 @@
-{
-  "name": "Middle Port City Wall",
-  "description": "The high city wall stretches from the northeast to the southwest. Putting your back towards the wall, you see nothing but a wide-stretching open field.",
-  "x": 200,
-  "y": -200,
-  "z": 0,
-  "exits": [ "exit:118", "exit:120" ]
-}

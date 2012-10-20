@@ -1,8 +1,0 @@
-{
-  "name": "down",
-  "description": "",
-  "destination": "room:17",
-  "oppositeExit": "exit:21",
-  "door": false,
-  "hidden": false
-}

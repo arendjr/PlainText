@@ -1,8 +1,0 @@
-{
-  "name": "Hidden Path",
-  "description": "You're on a tight path that seems to move south from the light tower. The path itself is barely visible because of thick vegetation all over.",
-  "x": 0,
-  "y": 250,
-  "z": 0,
-  "exits": [ "exit:29", "exit:31" ]
-}

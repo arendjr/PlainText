@@ -1,8 +1,0 @@
-{
-  "name": "house",
-  "description": "The house looks old, but well-kept. Smoke coming from the chimney suggests the owner is at home right now.",
-  "destination": "room:36",
-  "size": 1.5,
-  "door": false,
-  "hidden": false
-}

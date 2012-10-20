@@ -1,8 +1,0 @@
-{
-  "name": "Middle Port City Wall",
-  "description": "As the big wall continues from the west, it slowly bends into a more northern direction whereas the forest starts retreating more towards the south, marking the beginning of an open field towards the east.",
-  "x": 100,
-  "y": -100,
-  "z": 0,
-  "exits": [ "exit:70", "exit:117" ]
-}

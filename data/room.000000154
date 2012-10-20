@@ -1,8 +1,0 @@
-{
-  "name": "Sleeping Tent",
-  "description": "The tent is efficiently filled with many rows of beds, each of the beds having two decks, providing sleeping spaces for as many soldiers as can fit in this tent.",
-  "x": 250,
-  "y": -550,
-  "z": 0,
-  "exits": [ "exit:160" ]
-}

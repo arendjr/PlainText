@@ -1,8 +1,0 @@
-{
-  "name": "Main Street",
-  "description": "The road is clearly dominated by the walls of Castle Black Water. Even so, you can still see the keep towering above the walls.",
-  "x": -400,
-  "y": -600,
-  "z": 20,
-  "exits": [ "exit:1167" ]
-}

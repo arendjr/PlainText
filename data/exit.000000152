@@ -1,7 +1,0 @@
-{
-  "name": "barracks",
-  "destination": "room:151",
-  "oppositeExit": "0",
-  "door": false,
-  "hidden": false
-}
