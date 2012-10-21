@@ -15,4 +15,4 @@ class CloseCommand : public Command {
         virtual void execute(Player *player, const QString &command);
 };
 
-#endif // GOCOMMAND_H
+#endif // CLOSECOMMAND_H
