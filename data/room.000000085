@@ -1,8 +1,8 @@
 {
   "name": "Bread Stall",
+  "plural": "Bread Stalls",
+  "indefiniteArticle": "a",
   "description": "The stall looks plain and simple, made from a little car that makes the whole thing flexible enough to move it away after market hours.\n\nThe baker's wife stands behind the stall, looking at you with a smile and inviting you to buy any of these nice smelling breads she has on display.",
-  "x": -50,
-  "y": -250,
-  "z": 0,
+  "position": [-50, -250, 0],
   "exits": [ "exit:91" ]
 }

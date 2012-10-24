@@ -1,8 +1,8 @@
 {
   "name": "Light Tower",
+  "plural": "Light Towers",
+  "indefiniteArticle": "a",
   "description": "As you step inside the tower, you notice how clean this place is. Someone must be taking great care of it.",
-  "x": 0,
-  "y": 200,
-  "z": 10,
+  "position": [0, 200, 10],
   "exits": [ "exit:19", "exit:21" ]
 }

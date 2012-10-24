@@ -1,8 +1,8 @@
 {
   "name": "Light Tower",
+  "plural": "Light Towers",
+  "indefiniteArticle": "a",
   "description": "You are now at the foot of the light tower. The door of the tower is heavy, and made of steel. The entire building looks odd and out of place in this environment. You cannot imagine who built it, or when, yet the steel on the tower looks unaffected by the ages.\n\nWhen you're quiet you can hear the slow moving of the sea in the distance.",
-  "x": 0,
-  "y": 200,
-  "z": 0,
+  "position": [0, 200, 0],
   "exits": [ "exit:16", "exit:18", "exit:28" ]
 }

@@ -1,8 +1,8 @@
 {
   "name": "",
+  "plural": "",
+  "indefiniteArticle": "",
   "description": "",
-  "x": -200,
-  "y": -400,
-  "z": 0,
+  "position": [-200, -400, 0],
   "exits": [ "exit:1047" ]
 }

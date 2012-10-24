@@ -1,8 +1,8 @@
 {
   "name": "Boatman's Street",
+  "plural": "Boatman's Streets",
+  "indefiniteArticle": "a",
   "description": "The street takes a bit of a turn here to move around the large shipyard that owns this street its name.",
-  "x": -300,
-  "y": -300,
-  "z": 0,
+  "position": [-300, -300, 0],
   "exits": [ "exit:106", "exit:108" ]
 }

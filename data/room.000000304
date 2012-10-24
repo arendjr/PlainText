@@ -1,8 +1,8 @@
 {
   "name": "Shipyard",
+  "plural": "Shipyards",
+  "indefiniteArticle": "a",
   "description": "This is the entrance to the shipyard. The shipyard belongs to Rupert Deschain, also known as \"The Boatman\".",
-  "x": -400,
-  "y": -200,
-  "z": -10,
+  "position": [-400, -200, -10],
   "exits": [ "exit:306" ]
 }

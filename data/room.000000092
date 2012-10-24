@@ -1,8 +1,8 @@
 {
   "name": "Market Street",
+  "plural": "Market Streets",
+  "indefiniteArticle": "a",
   "description": "Leading up to the market square, the street is filled with little shops that hope to get attention from those going to and from the market.",
-  "x": -100,
-  "y": -300,
-  "z": 0,
+  "position": [-100, -300, 0],
   "exits": [ "exit:94", "exit:99", "exit:170", "exit:226" ]
 }

@@ -1,9 +1,9 @@
 {
   "name": "Market Street",
+  "plural": "Market Streets",
+  "indefiniteArticle": "a",
   "description": "This is the beginning of the Market Street. The Market Square is at the far south end of the street.",
-  "x": -100,
-  "y": -400,
-  "z": 0,
+  "position": [-100, -400, 0],
   "exits": [ "exit:100", "exit:102", "exit:111" ],
   "items": [ "item:235", "item:1180" ]
 }

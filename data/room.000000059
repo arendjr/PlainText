@@ -1,8 +1,8 @@
 {
   "name": "Middle Port's South Gate",
+  "plural": "Middle Port's South Gates",
+  "indefiniteArticle": "a",
   "description": "As you stand just outside the South Gate, the walls of the city look higher and mightier than you imagined. The gate itself looks small in comparison. But then again, this is not the main entrance to the city.\n\nThe little road from the gate moves straight south towards where the Light Tower is supposed to be. A small path branches of to the east and disappears out of sight along the city wall.",
-  "x": -100,
-  "y": -100,
-  "z": 0,
+  "position": [-100, -100, 0],
   "exits": [ "exit:61", "exit:63", "exit:66" ]
 }

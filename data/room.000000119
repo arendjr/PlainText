@@ -1,8 +1,8 @@
 {
   "name": "Middle Port City Wall",
+  "plural": "Middle Port City Walls",
+  "indefiniteArticle": "a",
   "description": "At this point the path, although a little bit muddy, is a convenient route to get past the city. There's a wide open field towards the east, meaning that the path is well-lit during most hours of the day.",
-  "x": 300,
-  "y": -300,
-  "z": 0,
+  "position": [300, -300, 0],
   "exits": [ "exit:121", "exit:123" ]
 }
