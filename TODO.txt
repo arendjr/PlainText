@@ -1,0 +1,23 @@
+GAME MECHANICS
+
+  -  Finish combat mechanics.
+  -  Implement spell casting and learning.
+  -  Implement quests and leveling.
+  -  Suggestions for commands to implement:
+     -  cast
+     -  commands
+     -  level
+     -  list
+     -  practice
+     -  prompt
+     -  read
+     -  score
+     -  skills
+     -  spells
+     -  unread
+
+TECHNOLOGY
+
+  -  Migrate to Qt5 after release.
+     -  Use QCryptographicHash::Sha512 for password encryption.
+     -  Use QLatin1String / QStringLiteral where it makes sense.
