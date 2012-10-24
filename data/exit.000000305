@@ -1,0 +1,7 @@
+{
+  "name": "shipyard",
+  "destination": "room:304",
+  "oppositeExit": "exit:306",
+  "door": false,
+  "hidden": false
+}

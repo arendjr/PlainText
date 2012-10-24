@@ -1,0 +1,7 @@
+{
+  "name": "west",
+  "destination": "room:110",
+  "oppositeExit": "exit:114",
+  "door": false,
+  "hidden": false
+}

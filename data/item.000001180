@@ -1,0 +1,9 @@
+{
+  "name": "bucket full of water",
+  "description": "It's a bucket. It's filled with water.",
+  "plural": "buckets full of water",
+  "indefiniteArticle": "a",
+  "portable": true,
+  "weight": 10,
+  "cost": 0
+}

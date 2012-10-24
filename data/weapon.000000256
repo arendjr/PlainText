@@ -1,0 +1,10 @@
+{
+  "name": "sword",
+  "description": "It's a simple and plain sword.",
+  "plural": "swords",
+  "indefiniteArticle": "a",
+  "portable": true,
+  "weight": 2,
+  "cost": 65,
+  "stats": [15, 0, 0, 0, 0, 0]
+}

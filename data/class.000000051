@@ -1,0 +1,5 @@
+{
+  "name": "mage",
+  "description": "Mages are well-versed in the art of magic, especially offensive spells. They have weak fighting skills.",
+  "stats": [1, 4, 5, 3, 9, 8]
+}

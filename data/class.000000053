@@ -1,0 +1,5 @@
+{
+  "name": "thief",
+  "description": "Thieves have the ability to steal items from other characters, as well as the ability to pick locks that other classes would not be able to open without a key. They have reasonable fighting skills, and can be very deadly through their use of stealth and backstabbing.",
+  "stats": [1, 4, 5, 3, 9, 8]
+}

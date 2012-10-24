@@ -1,0 +1,11 @@
+{
+  "name": "animal",
+  "description": "",
+  "adjective": "",
+  "stats": [1, 1, 1, 1, 0, 10],
+  "height": 0,
+  "weight": 0,
+  "classes": [ ],
+  "startingArea": "room:1",
+  "playerSelectable": false
+}

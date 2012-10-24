@@ -1,0 +1,8 @@
+{
+  "name": "Middle Port Market Square",
+  "description": "The market square is buzzing with people. Various stalls are promoting their merchandise to those walking by.\n\nOn the south end of the market is the south gate of the city.",
+  "x": -100,
+  "y": -200,
+  "z": 0,
+  "exits": [ "exit:67", "exit:78", "exit:80", "exit:82", "exit:84", "exit:86", "exit:93", "exit:96" ]
+}

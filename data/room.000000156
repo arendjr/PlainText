@@ -1,0 +1,8 @@
+{
+  "name": "Sleeping Tent",
+  "description": "This tent is pretty much the same as the first one, simply filled with double-decked beds, row after row.",
+  "x": 250,
+  "y": -600,
+  "z": 0,
+  "exits": [ "exit:165" ]
+}

@@ -1,0 +1,8 @@
+{
+  "name": "gate",
+  "description": "",
+  "destination": "room:65",
+  "oppositeExit": "exit:67",
+  "door": false,
+  "hidden": false
+}

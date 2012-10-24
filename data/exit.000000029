@@ -1,0 +1,7 @@
+{
+  "name": "tower",
+  "destination": "room:14",
+  "size": 1.5,
+  "door": false,
+  "hidden": false
+}
