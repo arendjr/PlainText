@@ -3,6 +3,7 @@
 
 #include "gameobject.h"
 #include "gameobjectptr.h"
+#include "point.h"
 
 
 class Room : public GameObject {
@@ -13,17 +14,9 @@ class Room : public GameObject {
         Room(Realm *realm, uint id, Options options = NoOptions);
         virtual ~Room();
 
-        int x() const { return m_x; }
-        void setX(int x);
-        Q_PROPERTY(int x READ x WRITE setX)
-
-        int y() const { return m_y; }
-        void setY(int y);
-        Q_PROPERTY(int y READ y WRITE setY)
-
-        int z() const { return m_z; }
-        void setZ(int z);
-        Q_PROPERTY(int z READ z WRITE setZ)
+        const Point &position() const { return m_position; }
+        void setPosition(const Point &position);
+        Q_PROPERTY(Point position READ position WRITE setPosition)
 
         const GameObjectPtrList &exits() const { return m_exits; }
         Q_INVOKABLE void addExit(const GameObjectPtr &exit);
@@ -62,10 +55,7 @@ class Room : public GameObject {
         Q_PROPERTY(GameObjectPtrList objects READ objects STORED false)
 
     private:
-        int m_x;
-        int m_y;
-        int m_z;
-
+        Point m_position;
         GameObjectPtrList m_exits;
         GameObjectPtrList m_players;
         GameObjectPtrList m_npcs;

@@ -9,6 +9,7 @@
 #include "gameexception.h"
 #include "gameobject.h"
 #include "gameobjectptr.h"
+#include "point.h"
 #include "realm.h"
 #include "scriptengine.h"
 #include "util.h"
@@ -32,6 +33,7 @@ Engine::Engine() :
     qRegisterMetaType<GameObject *>();
     qRegisterMetaType<GameObjectPtr>();
     qRegisterMetaType<GameObjectPtrList>();
+    qRegisterMetaType<Point>();
 }
 
 bool Engine::start() {

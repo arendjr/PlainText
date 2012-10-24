@@ -19,7 +19,8 @@ class GameException : public std::exception {
             InvalidGameObjectCast,
             InvalidFunctionCode,
             InvalidCharacterStats,
-            InvalidCombatMessage
+            InvalidCombatMessage,
+            InvalidPoint
         };
 
         GameException(Cause cause);

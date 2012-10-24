@@ -1,6 +1,7 @@
 #include "setpropcommand.h"
 
 #include "characterstats.h"
+#include "point.h"
 #include "util.h"
 
 
@@ -49,7 +50,24 @@ void SetPropCommand::execute(Player *player, const QString &command) {
             variant = value.replace("\\n", "\n");
             break;
         case QVariant::UserType:
-            if (variant.userType() == QMetaType::type("GameObjectPtr")) {
+            if (variant.userType() == QMetaType::type("CharacterStats")) {
+                QStringList stringList = value.mid(1, value.length() - 2).split(',');
+                if (stringList.length() == 6) {
+                    CharacterStats stats;
+                    stats.strength = stringList[0].toInt();
+                    stats.dexterity = stringList[1].toInt();
+                    stats.vitality = stringList[2].toInt();
+                    stats.endurance = stringList[3].toInt();
+                    stats.intelligence = stringList[4].toInt();
+                    stats.faith = stringList[5].toInt();
+                    variant = QVariant::fromValue(stats);
+                } else {
+                    send("Property of type CharacterStats takes the form [ <str>, <dex>, <vit>, "
+                         "<end>, <int>, <fai> ].");
+                    return;
+                }
+                break;
+            } else if (variant.userType() == QMetaType::type("GameObjectPtr")) {
                 variant = QVariant::fromValue(GameObjectPtr::fromString(realm(), value));
                 break;
             } else if (variant.userType() == QMetaType::type("GameObjectPtrList")) {
@@ -66,20 +84,15 @@ void SetPropCommand::execute(Player *player, const QString &command) {
                     send(exception.what());
                 }
                 break;
-            } else if (variant.userType() == QMetaType::type("CharacterStats")) {
+            } else if (variant.userType() == QMetaType::type("Point")) {
                 QStringList stringList = value.mid(1, value.length() - 2).split(',');
-                if (stringList.length() == 6) {
-                    CharacterStats stats;
-                    stats.strength = stringList[0].toInt();
-                    stats.dexterity = stringList[1].toInt();
-                    stats.vitality = stringList[2].toInt();
-                    stats.endurance = stringList[3].toInt();
-                    stats.intelligence = stringList[4].toInt();
-                    stats.faith = stringList[5].toInt();
-                    variant = QVariant::fromValue(stats);
+                if (stringList.length() == 3) {
+                    Point point(stringList[0].toInt(),
+                                stringList[1].toInt(),
+                                stringList[2].toInt());
+                    variant = QVariant::fromValue(point);
                 } else {
-                    send("Property of type CharacterStats takes the form [ <str>, <dex>, <vit>, "
-                         "<end>, <int>, <fai> ].");
+                    send("Property of type Point takes the form [ <x>, <y>, <z> ].");
                     return;
                 }
                 break;

@@ -6,37 +6,16 @@
 #define super GameObject
 
 Room::Room(Realm *realm, uint id, Options options) :
-    super(realm, "room", id, options),
-    m_x(0),
-    m_y(0),
-    m_z(0) {
+    super(realm, "room", id, options) {
 }
 
 Room::~Room() {
 }
 
-void Room::setX(int x) {
+void Room::setPosition(const Point &position) {
 
-    if (m_x != x) {
-        m_x = x;
-
-        setModified();
-    }
-}
-
-void Room::setY(int y) {
-
-    if (m_y != y) {
-        m_y = y;
-
-        setModified();
-    }
-}
-
-void Room::setZ(int z) {
-
-    if (m_z != z) {
-        m_z = z;
+    if (m_position != position) {
+        m_position = position;
 
         setModified();
     }

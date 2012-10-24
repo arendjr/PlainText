@@ -42,6 +42,20 @@ void PropertySetCommand::execute(Player *player, const QString &command) {
         case QVariant::String:
             variant = value.replace("\\n", "\n");
             break;
+        case QVariant::UserType:
+            if (variant.userType() == QMetaType::type("Point")) {
+                QStringList stringList = value.mid(1, value.length() - 2).split(',');
+                if (stringList.length() == 3) {
+                    Point point(stringList[0].toInt(),
+                                stringList[1].toInt(),
+                                stringList[2].toInt());
+                    variant = QVariant::fromValue(point);
+                } else {
+                    sendError(400, "Invalid format for value of type Point.");
+                    return;
+                }
+                break;
+            }
         default:
             sendError(400, "Invalid type");
             return;

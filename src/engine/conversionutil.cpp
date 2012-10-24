@@ -6,6 +6,7 @@
 
 #include "characterstats.h"
 #include "gameobjectptr.h"
+#include "point.h"
 #include "realm.h"
 #include "scriptfunctionmap.h"
 
@@ -41,7 +42,9 @@ QVariant ConversionUtil::fromVariant(QVariant::Type type, int userType, const QV
             return variantMap;
         }
         case QVariant::UserType:
-            if (userType == QMetaType::type("GameObjectPtr")) {
+            if (userType == QMetaType::type("CharacterStats")) {
+                return QVariant::fromValue(CharacterStats::fromVariantList(variant.toList()));
+            } else if (userType == QMetaType::type("GameObjectPtr")) {
                 return QVariant::fromValue(GameObjectPtr::fromString(realm, variant.toString()));
             } else if (userType == QMetaType::type("GameObjectPtrList")) {
                 GameObjectPtrList pointerList;
@@ -49,6 +52,8 @@ QVariant ConversionUtil::fromVariant(QVariant::Type type, int userType, const QV
                     pointerList << GameObjectPtr::fromString(realm, item.toString());
                 }
                 return QVariant::fromValue(pointerList);
+            } else if (userType == QMetaType::type("Point")) {
+                return QVariant::fromValue(Point::fromVariantList(variant.toList()));
             } else if (userType == QMetaType::type("ScriptFunctionMap")) {
                 ScriptFunctionMap functionMap;
                 QVariantMap variantMap = variant.toMap();
@@ -56,8 +61,6 @@ QVariant ConversionUtil::fromVariant(QVariant::Type type, int userType, const QV
                     functionMap[key] = ScriptFunction::fromString(variantMap[key].toString());
                 }
                 return QVariant::fromValue(functionMap);
-            } else if (userType == QMetaType::type("CharacterStats")) {
-                return QVariant::fromValue(CharacterStats::fromVariantList(variant.toList()));
             }
             // fall-through
         default:
@@ -119,7 +122,9 @@ QString ConversionUtil::toJSON(const QVariant &variant, Options options) {
             return stringList.isEmpty() ? QString() : "{ " + stringList.join(", ") + " }";
         }
         case QVariant::UserType:
-            if (variant.userType() == QMetaType::type("GameObject *")) {
+            if (variant.userType() == QMetaType::type("CharacterStats")) {
+                return variant.value<CharacterStats>().toString();
+            } else if (variant.userType() == QMetaType::type("GameObject *")) {
                 return variant.value<GameObject *>()->toJSON(IncludeTypeInfo);
             } else if (variant.userType() == QMetaType::type("GameObjectPtr")) {
                 return jsString(variant.value<GameObjectPtr>().toString());
@@ -129,6 +134,8 @@ QString ConversionUtil::toJSON(const QVariant &variant, Options options) {
                     stringList << jsString(pointer.toString());
                 }
                 return stringList.isEmpty() ? QString() : "[ " + stringList.join(", ") + " ]";
+            } else if (variant.userType() == QMetaType::type("Point")) {
+                return variant.value<Point>().toString();
             } else if (variant.userType() == QMetaType::type("ScriptFunctionMap")) {
                 QStringList stringList;
                 ScriptFunctionMap functionMap = variant.value<ScriptFunctionMap>();
@@ -137,8 +144,6 @@ QString ConversionUtil::toJSON(const QVariant &variant, Options options) {
                                                         jsString(functionMap[key].toString()));
                 }
                 return stringList.isEmpty() ? QString() : "{ " + stringList.join(", ") + " }";
-            } else if (variant.userType() == QMetaType::type("CharacterStats")) {
-                return variant.value<CharacterStats>().toString();
             }
             // fall-through
         default:
@@ -177,7 +182,13 @@ QString ConversionUtil::toUserString(const QVariant &variant) {
             return stringList.isEmpty() ? "(empty)" : stringList.join("\n");
         }
         case QVariant::UserType:
-            if (variant.userType() == QMetaType::type("GameObjectPtr")) {
+            if (variant.userType() == QMetaType::type("CharacterStats")) {
+                CharacterStats stats = variant.value<CharacterStats>();
+                return QString("[ %1, %2, %3, %4, %5, %6 ]")
+                       .arg(stats.strength).arg(stats.dexterity)
+                       .arg(stats.vitality).arg(stats.endurance)
+                       .arg(stats.intelligence).arg(stats.faith);
+            } else if (variant.userType() == QMetaType::type("GameObjectPtr")) {
                 GameObjectPtr pointer = variant.value<GameObjectPtr>();
                 if (pointer.isNull()) {
                     return "(not set)";
@@ -190,12 +201,9 @@ QString ConversionUtil::toUserString(const QVariant &variant) {
                     stringList << pointer.toString();
                 }
                 return "[ " + stringList.join(", ") + " ]";
-            } else if (variant.userType() == QMetaType::type("CharacterStats")) {
-                CharacterStats stats = variant.value<CharacterStats>();
-                return QString("[ %1, %2, %3, %4, %5, %6 ]")
-                       .arg(stats.strength).arg(stats.dexterity)
-                       .arg(stats.vitality).arg(stats.endurance)
-                       .arg(stats.intelligence).arg(stats.faith);
+            } else if (variant.userType() == QMetaType::type("Point")) {
+                Point point = variant.value<Point>();
+                return QString("[ %1, %2, %3 ]").arg(point.x).arg(point.y).arg(point.z);
             }
             // fall-through
         default:

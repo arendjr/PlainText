@@ -30,9 +30,9 @@ MapModel.prototype.load = function() {
     controller.sendApiCall("rooms-list", function(data) {
         for (var i = 0; i < data.length; i++) {
             var room = JSON.parse(data[i]);
-            room.x = room.x || 0;
-            room.y = room.y || 0;
-            room.z = room.z || 0;
+            room.x = room.position ? room.position[0] : 0;
+            room.y = room.position ? room.position[1] : 0;
+            room.z = room.position ? room.position[2] : 0;
             self.rooms[room.id] = room;
         }
 
@@ -57,14 +57,30 @@ MapModel.prototype.load = function() {
 MapModel.prototype.setRoomProperty = function(roomId, propertyName, value) {
 
     var self = this;
+    var room = this.rooms[roomId];
+
+    if (!room.position) {
+        room.position = [ 0, 0, 0 ];
+    }
+
+    if (propertyName === "x" || propertyName === "y" || propertyName === "z") {
+        value = parseInt(value, 10);
+
+        if (propertyName === "x") {
+            room.x = value;
+        } else if (propertyName === "y") {
+            room.y = value;
+        } else {
+            room.z = value;
+        }
+
+        propertyName = "position";
+        value = "[" + room.x + "," + room.y + "," + room.z + "]";
+    }
 
     controller.sendApiCall("property-set #" + roomId + " " + propertyName +
                            " " + value, function() {
-        if (propertyName === "x" || propertyName === "y" || propertyName === "z") {
-            value = parseInt(value, 10);
-        }
-
-        self.rooms[roomId][propertyName] = value;
+        room[propertyName] = value;
         self.notifyChangeListeners();
     });
 }

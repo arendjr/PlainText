@@ -10,6 +10,7 @@
 #include "effect.h"
 #include "gameobject.h"
 #include "modifier.h"
+#include "point.h"
 #include "scriptfunctionmap.h"
 #include "scriptwindow.h"
 
@@ -29,6 +30,7 @@ ScriptEngine::ScriptEngine() :
     qScriptRegisterMetaType(&m_jsEngine, GameObjectPtr::toScriptValue,
                                          GameObjectPtr::fromScriptValue);
     qScriptRegisterMetaType(&m_jsEngine, Modifier::toScriptValue, Modifier::fromScriptValue);
+    qScriptRegisterMetaType(&m_jsEngine, Point::toScriptValue, Point::fromScriptValue);
     qScriptRegisterMetaType(&m_jsEngine, ScriptFunction::toScriptValue,
                                          ScriptFunction::fromScriptValue);
     qScriptRegisterMetaType(&m_jsEngine, ScriptFunctionMap::toScriptValue,

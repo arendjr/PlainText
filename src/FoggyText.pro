@@ -54,6 +54,7 @@ SOURCES += \
     engine/logutil.cpp \
     engine/modifier.cpp \
     engine/player.cpp \
+    engine/point.cpp \
     engine/race.cpp \
     engine/realm.cpp \
     engine/room.cpp \
@@ -181,6 +182,7 @@ HEADERS += \
     engine/logutil.h \
     engine/modifier.h \
     engine/player.h \
+    engine/point.h \
     engine/race.h \
     engine/realm.h \
     engine/room.h \
