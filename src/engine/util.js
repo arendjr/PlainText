@@ -46,9 +46,28 @@ Array.prototype.containsAny = function(array) {
     return this.findFirstAmong(array) !== null;
 };
 
+Array.prototype.findFirstAmong = function(array) {
+
+    for (var i = 0; i < this.length; i++) {
+        for (var j = 0; j < array.length; j++) {
+            if (this[i] === array[j]) {
+                return this[i];
+            }
+        }
+    }
+    return null;
+};
+
 Array.prototype.first = function() {
 
     return this[0];
+};
+
+Array.prototype.insert = function(element) {
+
+    if (!this.contains(element)) {
+        this.push(element);
+    }
 };
 
 Array.prototype.isEmpty = function() {
@@ -82,11 +101,9 @@ Array.prototype.named = function(name) {
     return undefined;
 };
 
-Array.prototype.insert = function(element) {
+Array.prototype.randomElement = function() {
 
-    if (!this.contains(element)) {
-        this.push(element);
-    }
+    return this[randomInt(0, this.length)];
 };
 
 Array.prototype.removeAll = function(value) {
@@ -96,6 +113,11 @@ Array.prototype.removeAll = function(value) {
         numRemovals++;
     }
     return numRemovals;
+};
+
+Array.prototype.removeAt = function(index) {
+
+    this.splice(index, 1);
 };
 
 Array.prototype.removeFirst = function() {
@@ -161,28 +183,33 @@ Array.prototype.withoutId = function(id) {
     return result;
 };
 
-Array.prototype.findFirstAmong = function(array) {
 
-    for (var i = 0; i < this.length; i++) {
-        for (var j = 0; j < array.length; j++) {
-            if (this[i] === array[j]) {
-                return this[i];
+String.prototype.arg = function() {
+
+    var result = this;
+
+    var argNum;
+    for (var i = 0; i < 10 && (argNum === undefined || argNum < arguments.length); i++) {
+        var substr = "%" + i;
+        var index = result.indexOf(substr);
+        if (index > -1) {
+            if (argNum === undefined) {
+                argNum = 0;
+            }
+
+            while (index > -1) {
+                result = result.replace(substr, arguments[argNum]);
+                index = result.indexOf(substr, index);
             }
         }
+
+        if (argNum !== undefined) {
+            argNum++;
+        }
     }
-    return null;
-};
 
-Array.prototype.randomElement = function() {
-
-    return this[randomInt(0, this.length)];
-};
-
-Array.prototype.removeAt = function(index) {
-
-    this.splice(index, 1);
+    return result;
 }
-
 
 String.prototype.capitalized = function() {
 
