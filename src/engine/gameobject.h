@@ -144,18 +144,8 @@ class GameObject : public QObject {
 
         Q_INVOKABLE void setDeleted();
 
-        static GameObject *createByObjectType(Realm *realm, const QString &objectType, uint id = 0,
+        static GameObject *createByObjectType(Realm *realm, const char *objectType, uint id = 0,
                                               Options options = NoOptions);
-
-        template <class T>
-        inline static T createByObjectType(Realm *realm, const char *objectType, uint id = 0,
-                                           Options options = NoOptions) {
-            T pointer = qobject_cast<T>(createByObjectType(realm, objectType, id, options));
-            if (!pointer) {
-                throw GameException(GameException::InvalidGameObjectCast, objectType, id);
-            }
-            return pointer;
-        }
 
         static GameObject *createFromFile(Realm *realm, const QString &path);
 

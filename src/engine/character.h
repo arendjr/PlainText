@@ -13,7 +13,7 @@ class Character : public StatsItem {
     Q_OBJECT
 
     public:
-        Character(Realm *realm, uint id, Options options = NoOptions);
+        Character(Realm *realm, uint id = 0, Options options = NoOptions);
         Character(Realm *realm, const char *objectType, uint id, Options options = NoOptions);
         virtual ~Character();
 

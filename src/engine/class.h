@@ -10,7 +10,7 @@ class Class : public GameObject {
     Q_OBJECT
 
     public:
-        Class(Realm *realm, int id, Options options = NoOptions);
+        Class(Realm *realm, int id = 0, Options options = NoOptions);
         virtual ~Class();
 
         const CharacterStats &stats() const { return m_stats; }

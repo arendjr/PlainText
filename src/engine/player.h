@@ -13,7 +13,7 @@ class Player : public Character {
     Q_OBJECT
 
     public:
-        Player(Realm *realm, uint id, Options options = NoOptions);
+        Player(Realm *realm, uint id = 0, Options options = NoOptions);
         virtual ~Player();
 
         const QString &passwordSalt() const { return m_passwordSalt; }

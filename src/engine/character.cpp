@@ -925,7 +925,7 @@ void Character::follow(const GameObjectPtr &characterPtr) {
 
     Group *group;
     if (character->m_group.isNull()) {
-        group = GameObject::createByObjectType<Group *>(realm(), "group");
+        group = new Group(realm());
         group->setLeader(characterPtr);
         character->m_group = group;
     } else {

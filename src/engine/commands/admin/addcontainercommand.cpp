@@ -8,7 +8,7 @@
 AddContainerCommand::AddContainerCommand(QObject *parent) :
     super(parent) {
 
-    setDescription("Add a container to the current area.\n"
+    setDescription("Add a container to the current room.\n"
                    "\n"
                    "Usage: add-container <container-name>");
 }
@@ -26,10 +26,10 @@ void AddContainerCommand::execute(Player *player, const QString &command) {
 
     QString containerName = takeWord();
 
-    Container *container = GameObject::createByObjectType<Container *>(realm(), "container");
+    Container *container = new Container(realm());
     container->setName(containerName);
     container->setPortable(true);
     currentRoom()->addItem(container);
 
-    send(QString("Container %1 added.").arg(containerName));
+    send("Container %1 added.", containerName);
 }

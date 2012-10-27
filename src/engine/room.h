@@ -11,7 +11,7 @@ class Room : public GameObject {
     Q_OBJECT
 
     public:
-        Room(Realm *realm, uint id, Options options = NoOptions);
+        Room(Realm *realm, uint id = 0, Options options = NoOptions);
         virtual ~Room();
 
         const Point &position() const { return m_position; }

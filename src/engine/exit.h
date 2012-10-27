@@ -10,7 +10,7 @@ class Exit : public GameObject {
     Q_OBJECT
 
     public:
-        Exit(Realm *realm, uint id, Options options = NoOptions);
+        Exit(Realm *realm, uint id = 0, Options options = NoOptions);
         virtual ~Exit();
 
         const GameObjectPtr &destination() const { return m_destination; }

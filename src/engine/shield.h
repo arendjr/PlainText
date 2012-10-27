@@ -9,7 +9,7 @@ class Shield : public StatsItem {
     Q_OBJECT
 
     public:
-        Shield(Realm *realm, uint id, Options options = NoOptions);
+        Shield(Realm *realm, uint id = 0, Options options = NoOptions);
         virtual ~Shield();
 
         const QString &category() const { return m_category; }

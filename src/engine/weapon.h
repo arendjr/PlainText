@@ -9,7 +9,7 @@ class Weapon : public StatsItem {
     Q_OBJECT
 
     public:
-        Weapon(Realm *realm, uint id, Options options = NoOptions);
+        Weapon(Realm *realm, uint id = 0, Options options = NoOptions);
         virtual ~Weapon();
 
         const QString &category() const { return m_category; }

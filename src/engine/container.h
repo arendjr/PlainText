@@ -10,7 +10,7 @@ class Container : public Item {
     Q_OBJECT
 
     public:
-        Container(Realm *realm, uint id, Options options = NoOptions);
+        Container(Realm *realm, uint id = 0, Options options = NoOptions);
         virtual ~Container();
 
         const GameObjectPtrList &items() const { return m_items; }

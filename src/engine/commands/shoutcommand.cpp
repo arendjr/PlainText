@@ -6,8 +6,8 @@
 ShoutCommand::ShoutCommand(QObject *parent) :
     super(parent) {
 
-    setDescription("Shout a message. Everyone in the same area and every "
-                   "adjacent area can hear it.\n"
+    setDescription("Shout something. Everyone in the same room and every "
+                   "adjacent room can hear it.\n"
                    "\n"
                    "Example: shout Anyone there?");
 }

@@ -11,7 +11,7 @@ class Race : public GameObject {
     Q_OBJECT
 
     public:
-        Race(Realm *realm, uint id, Options options = NoOptions);
+        Race(Realm *realm, uint id = 0, Options options = NoOptions);
         virtual ~Race();
 
         const QString &adjective() const { return m_adjective; }

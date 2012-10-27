@@ -9,7 +9,7 @@
 AddCharacterCommand::AddCharacterCommand(QObject *parent) :
     super(parent) {
 
-    setDescription("Add a character to the current area.\n"
+    setDescription("Add a character to the current room.\n"
                    "\n"
                    "Usage: add-character <character-name>");
 }
@@ -27,10 +27,10 @@ void AddCharacterCommand::execute(Player *player, const QString &command) {
 
     QString characterName = takeWord();
 
-    Character *character = GameObject::createByObjectType<Character *>(realm(), "character");
+    Character *character = new Character(realm());
     character->setName(characterName);
     character->setCurrentRoom(currentRoom());
     currentRoom()->addNPC(character);
 
-    send(QString("Character %1 added.").arg(characterName));
+    send("Character %1 added.", characterName);
 }

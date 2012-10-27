@@ -37,7 +37,7 @@ void ExitSetCommand::execute(Player *player, const QString &command) {
 
     Exit *exit;
     if (exitId == "new") {
-        exit = GameObject::createByObjectType<Exit *>(realm(), "exit");
+        exit = new Exit(realm());
 
         source->addExit(exit);
     } else {
@@ -48,9 +48,9 @@ void ExitSetCommand::execute(Player *player, const QString &command) {
         }
     }
 
-    Room *destination = nullptr;
+    Room *destination;
     if (roomToId == "new") {
-        destination = GameObject::createByObjectType<Room *>(realm(), "room");
+        destination = new Room(realm());
     } else {
         destination = qobject_cast<Room *>(realm()->getObject("room", roomToId.toUInt()));
         if (destination == nullptr) {
@@ -75,7 +75,7 @@ void ExitSetCommand::execute(Player *player, const QString &command) {
                 }
             }
             if (oppositeExit == nullptr) {
-                oppositeExit = GameObject::createByObjectType<Exit *>(realm(), "exit");
+                oppositeExit = new Exit(realm());
                 oppositeExit->setDestination(source);
             }
             oppositeExit->setOppositeExit(exit);

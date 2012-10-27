@@ -48,8 +48,13 @@ GameObject::GameObject(Realm *realm, const char *objectType, uint id, Options op
 
     Q_ASSERT(objectType);
 
-    if (m_id && ~m_options & Copy) {
-        m_realm->registerObject(this);
+    if (this != m_realm) {
+        if (m_id == 0) {
+            m_id = realm->uniqueObjectId();
+        }
+        if (~m_options & Copy) {
+            m_realm->registerObject(this);
+        }
     }
 }
 
@@ -528,40 +533,63 @@ void GameObject::setDeleted() {
     }
 }
 
-GameObject *GameObject::createByObjectType(Realm *realm, const QString &objectType, uint id,
+GameObject *GameObject::createByObjectType(Realm *realm, const char *objectType, uint id,
                                            Options options) {
 
-    if (id == 0) {
-        id = realm->uniqueObjectId();
+    switch (objectType[0]) {
+        case 'c':
+            if (strcmp(objectType + 1, "character" + 1) == 0) {
+                return new Character(realm, id, options);
+            } else if (strcmp(objectType + 1, "class" + 1) == 0) {
+                return new Class(realm, id, options);
+            } else if (strcmp(objectType + 1, "container" + 1) == 0) {
+                return new Container(realm, id, options);
+            }
+            break;
+        case 'e':
+            if (strcmp(objectType + 1, "exit" + 1) == 0) {
+                return new Exit(realm, id, options);
+            }
+            break;
+        case 'g':
+            if (strcmp(objectType + 1, "group" + 1) == 0) {
+                return new Group(realm, id, options);
+            }
+            break;
+        case 'i':
+            if (strcmp(objectType + 1, "item" + 1) == 0) {
+                return new Item(realm, id, options);
+            }
+            break;
+        case 'p':
+            if (strcmp(objectType + 1, "player" + 1) == 0) {
+                return new Player(realm, id, options);
+            }
+            break;
+        case 'r':
+            if (strcmp(objectType + 1, "race" + 1) == 0) {
+                return new Race(realm, id, options);
+            } else if (strcmp(objectType + 1, "realm" + 1) == 0) {
+                return new Realm(options);
+            } else if (strcmp(objectType + 1, "room" + 1) == 0) {
+                return new Room(realm, id, options);
+            }
+            break;
+        case 's':
+            if (strcmp(objectType + 1, "shield" + 1) == 0) {
+                return new Shield(realm, id, options);
+            }
+            break;
+        case 'w':
+            if (strcmp(objectType + 1, "weapon" + 1) == 0) {
+                return new Weapon(realm, id, options);
+            }
+            break;
+        default:
+            break;
     }
 
-    if (objectType == "character") {
-        return new Character(realm, id, options);
-    } else if (objectType == "class") {
-        return new Class(realm, id, options);
-    } else if (objectType == "container") {
-        return new Container(realm, id, options);
-    } else if (objectType == "exit") {
-        return new Exit(realm, id, options);
-    } else if (objectType == "group") {
-        return new Group(realm, id, options);
-    } else if (objectType == "item") {
-        return new Item(realm, id, options);
-    } else if (objectType == "player") {
-        return new Player(realm, id, options);
-    } else if (objectType == "race") {
-        return new Race(realm, id, options);
-    } else if (objectType == "realm") {
-        return new Realm(options);
-    } else if (objectType == "room") {
-        return new Room(realm, id, options);
-    } else if (objectType == "shield") {
-        return new Shield(realm, id, options);
-    } else if (objectType == "weapon") {
-        return new Weapon(realm, id, options);
-    } else {
-       throw GameException(GameException::UnknownGameObjectType);
-    }
+    throw GameException(GameException::UnknownGameObjectType);
 }
 
 GameObject *GameObject::createFromFile(Realm *realm, const QString &path) {
@@ -573,7 +601,8 @@ GameObject *GameObject::createFromFile(Realm *realm, const QString &path) {
         throw GameException(GameException::InvalidGameObjectFileName);
     }
 
-    GameObject *gameObject = createByObjectType(realm, components[0], components[1].toInt());
+    GameObject *gameObject = createByObjectType(realm, components[0].toAscii().constData(),
+                                                       components[1].toInt());
     gameObject->load(path);
     return gameObject;
 }

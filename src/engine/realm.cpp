@@ -142,7 +142,7 @@ GameObject *Realm::getObject(const QString &objectType, uint id) {
 
 GameObject *Realm::createObject(const QString &objectType) {
 
-    return GameObject::createByObjectType(this, objectType);
+    return GameObject::createByObjectType(this, objectType.toAscii().constData());
 }
 
 GameObjectPtrList Realm::players() const {

@@ -690,7 +690,7 @@ void Session::processSignupConfirmation(const QString &answer) {
         QByteArray data = QString(salt + m_signUpData->password).toUtf8();
         QString hash = QCryptographicHash::hash(data, QCryptographicHash::Sha1).toBase64();
 
-        m_player = GameObject::createByObjectType<Player *>(m_realm, "player");
+        m_player = new Player(m_realm);
 
         m_player->setAdmin(m_realm->players().isEmpty());
         m_player->setName(m_signUpData->userName);

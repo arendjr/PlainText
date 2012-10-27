@@ -10,7 +10,7 @@
 AddExitCommand::AddExitCommand(QObject *parent) :
     super(parent) {
 
-    setDescription("Add an exit to the current area.\n"
+    setDescription("Add an exit to the current room.\n"
                    "\n"
                    "Usage: add-exit <exit-name> <destination-id>\n"
                    "\n"
@@ -37,10 +37,9 @@ void AddExitCommand::execute(Player *player, const QString &command) {
 
     Room *destination;
     if (destinationId == "new") {
-        destination = GameObject::createByObjectType<Room *>(realm(), "room");
+        destination = new Room(realm());
     } else {
-        destination = qobject_cast<Room *>(realm()->getObject("room",
-                                                                  destinationId.toInt()));
+        destination = qobject_cast<Room *>(realm()->getObject("room", destinationId.toInt()));
         if (!destination) {
             send(QString("No room with ID %1.").arg(destinationId));
             return;
@@ -58,21 +57,21 @@ void AddExitCommand::execute(Player *player, const QString &command) {
         return;
     }
 
-    Exit *exit = GameObject::createByObjectType<Exit *>(realm(), "exit");
+    Exit *exit = new Exit(realm());
     exit->setName(exitName);
     exit->setDestination(destination);
     currentRoom()->addExit(exit);
 
-    send(QString("Exit %1 added.").arg(exitName));
+    send("Exit %1 added.", exitName);
 
     if (!oppositeExitName.isEmpty()) {
-        Exit *oppositeExit = GameObject::createByObjectType<Exit *>(realm(), "exit");
+        Exit *oppositeExit = new Exit(realm());
         oppositeExit->setName(oppositeExitName);
         oppositeExit->setDestination(currentRoom());
         oppositeExit->setOppositeExit(exit);
         destination->addExit(oppositeExit);
         exit->setOppositeExit(oppositeExit);
 
-        send(QString("Opposite exit %1 added.").arg(oppositeExit->name()));
+        send("Opposite exit %1 added.", oppositeExit->name());
     }
 }

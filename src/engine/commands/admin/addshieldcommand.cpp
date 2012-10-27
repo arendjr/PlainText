@@ -8,7 +8,7 @@
 AddShieldCommand::AddShieldCommand(QObject *parent) :
     super(parent) {
 
-    setDescription("Add a shield to the current area.\n"
+    setDescription("Add a shield to the current room.\n"
                    "\n"
                    "Usage: add-shield <shield-name>");
 }
@@ -26,9 +26,9 @@ void AddShieldCommand::execute(Player *player, const QString &command) {
 
     QString shieldName = takeWord();
 
-    Shield *shield = GameObject::createByObjectType<Shield *>(realm(), "shield");
+    Shield *shield = new Shield(realm());
     shield->setName(shieldName);
     currentRoom()->addItem(shield);
 
-    send(QString("Shield %1 added.").arg(shieldName));
+    send("Shield %1 added.", shieldName);
 }

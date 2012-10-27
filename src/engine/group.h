@@ -10,7 +10,7 @@ class Group : public GameObject {
     Q_OBJECT
 
     public:
-        Group(Realm *realm, uint id, Options options = NoOptions);
+        Group(Realm *realm, uint id = 0, Options options = NoOptions);
         virtual ~Group();
 
         const GameObjectPtr &leader() const { return m_leader; }

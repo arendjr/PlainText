@@ -51,7 +51,7 @@ void Item::setCost(double cost) {
 
 Item *Item::createGold(Realm *realm, double amount) {
 
-    Item *gold = super::createByObjectType<Item *>(realm, "item");
+    Item *gold = new Item(realm);
     gold->setName(QString("$%1 worth of gold").arg(amount));
     gold->setCost(amount);
     gold->setPortable(true);

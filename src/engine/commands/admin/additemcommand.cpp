@@ -8,7 +8,7 @@
 AddItemCommand::AddItemCommand(QObject *parent) :
     super(parent) {
 
-    setDescription("Add an item to the current area.\n"
+    setDescription("Add an item to the current room.\n"
                    "\n"
                    "Usage: add-item <item-name>");
 }
@@ -26,9 +26,9 @@ void AddItemCommand::execute(Player *player, const QString &command) {
 
     QString itemName = takeWord();
 
-    Item *item = GameObject::createByObjectType<Item *>(realm(), "item");
+    Item *item = new Item(realm());
     item->setName(itemName);
     currentRoom()->addItem(item);
 
-    send(QString("Item %1 added.").arg(itemName));
+    send("Item %1 added.", itemName);
 }

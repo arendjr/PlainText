@@ -8,7 +8,7 @@
 AddWeaponCommand::AddWeaponCommand(QObject *parent) :
     super(parent) {
 
-    setDescription("Add a weapon to the current area.\n"
+    setDescription("Add a weapon to the current room.\n"
                    "\n"
                    "Usage: add-weapon <weapon-name>");
 }
@@ -26,9 +26,9 @@ void AddWeaponCommand::execute(Player *player, const QString &command) {
 
     QString weaponName = takeWord();
 
-    Weapon *weapon = GameObject::createByObjectType<Weapon *>(realm(), "weapon");
+    Weapon *weapon = new Weapon(realm());
     weapon->setName(weaponName);
     currentRoom()->addItem(weapon);
 
-    send(QString("Weapon %1 added.").arg(weaponName));
+    send("Weapon %1 added.", weaponName);
 }
