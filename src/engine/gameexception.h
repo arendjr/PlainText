@@ -20,7 +20,8 @@ class GameException : public std::exception {
             InvalidFunctionCode,
             InvalidCharacterStats,
             InvalidCombatMessage,
-            InvalidPoint
+            InvalidPoint,
+            InvalidVector
         };
 
         GameException(Cause cause);

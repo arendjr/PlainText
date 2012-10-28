@@ -15,7 +15,8 @@ const char *GameException::s_messages[] = {
     "Invalid function code (Parse Error)",
     "Invalid character stats",
     "Invalid combat message",
-    "Invalid point"
+    "Invalid point",
+    "Invalid vector"
 };
 
 GameException::GameException(Cause cause) :

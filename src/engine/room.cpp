@@ -6,13 +6,14 @@
 #define super GameObject
 
 Room::Room(Realm *realm, uint id, Options options) :
-    super(realm, "room", id, options) {
+    super(realm, "room", id, options),
+    m_position(0, 0, 0) {
 }
 
 Room::~Room() {
 }
 
-void Room::setPosition(const Point &position) {
+void Room::setPosition(const Point3D &position) {
 
     if (m_position != position) {
         m_position = position;

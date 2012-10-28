@@ -54,7 +54,7 @@ SOURCES += \
     engine/logutil.cpp \
     engine/modifier.cpp \
     engine/player.cpp \
-    engine/point.cpp \
+    engine/point3d.cpp \
     engine/race.cpp \
     engine/realm.cpp \
     engine/room.cpp \
@@ -66,6 +66,7 @@ SOURCES += \
     engine/shield.cpp \
     engine/statsitem.cpp \
     engine/util.cpp \
+    engine/vector3d.cpp \
     engine/weapon.cpp \
     engine/commands/buycommand.cpp \
     engine/commands/closecommand.cpp \
@@ -182,7 +183,7 @@ HEADERS += \
     engine/logutil.h \
     engine/modifier.h \
     engine/player.h \
-    engine/point.h \
+    engine/point3d.h \
     engine/race.h \
     engine/realm.h \
     engine/room.h \
@@ -194,6 +195,7 @@ HEADERS += \
     engine/shield.h \
     engine/statsitem.h \
     engine/util.h \
+    engine/vector3d.h \
     engine/weapon.h \
     engine/commands/buycommand.h \
     engine/commands/closecommand.h \

@@ -10,9 +10,10 @@
 #include "effect.h"
 #include "gameobject.h"
 #include "modifier.h"
-#include "point.h"
+#include "point3d.h"
 #include "scriptfunctionmap.h"
 #include "scriptwindow.h"
+#include "vector3d.h"
 
 
 static ScriptEngine *s_instance = nullptr;
@@ -30,11 +31,12 @@ ScriptEngine::ScriptEngine() :
     qScriptRegisterMetaType(&m_jsEngine, GameObjectPtr::toScriptValue,
                                          GameObjectPtr::fromScriptValue);
     qScriptRegisterMetaType(&m_jsEngine, Modifier::toScriptValue, Modifier::fromScriptValue);
-    qScriptRegisterMetaType(&m_jsEngine, Point::toScriptValue, Point::fromScriptValue);
+    qScriptRegisterMetaType(&m_jsEngine, Point3D::toScriptValue, Point3D::fromScriptValue);
     qScriptRegisterMetaType(&m_jsEngine, ScriptFunction::toScriptValue,
                                          ScriptFunction::fromScriptValue);
     qScriptRegisterMetaType(&m_jsEngine, ScriptFunctionMap::toScriptValue,
                                          ScriptFunctionMap::fromScriptValue);
+    qScriptRegisterMetaType(&m_jsEngine, Vector3D::toScriptValue, Vector3D::fromScriptValue);
     qScriptRegisterSequenceMetaType<CharacterStatsList>(&m_jsEngine);
     qScriptRegisterSequenceMetaType<EffectList>(&m_jsEngine);
     qScriptRegisterSequenceMetaType<GameObjectPtrList>(&m_jsEngine);
@@ -183,27 +185,27 @@ const QMap<QString, QString> &ScriptEngine::triggers() {
                         "bought from it. When boughtItem is omitted, the buyer is requesting an "
                         "overview of the things for sale.");
         triggers.insert("oncharacterattacked(attacker : character, defendant : character) : void",
-                        "The oncharacterattacked trigger is invoked on any character in an area, "
+                        "The oncharacterattacked trigger is invoked on any character in a room, "
                         "except for the attacker and defendant themselves, when another "
-                        "character in that area emerges into combat.");
+                        "character in that room emerges into combat.");
         triggers.insert("oncharacterdied(defendant : character, attacker : optional character) : "
                         "bool",
-                        "The oncharacterdied trigger is invoked on any character in an area, "
-                        "when another character in that area dies. When attacker is omitted, the "
+                        "The oncharacterdied trigger is invoked on any character in a room, when "
+                        "another character in that room dies. When attacker is omitted, the "
                         "defendant died because of a non-combat cause (for example, poison).");
         triggers.insert("oncharacterentered(activator : character) : void",
-                        "The oncharacterentered trigger is invoked on any character in an area "
-                        "when another character enters that area.");
+                        "The oncharacterentered trigger is invoked on any character in a room when "
+                        "another character enters that room.");
         triggers.insert("onclose(activator : character) : bool",
                         "The onclose trigger is invoked on any item or exit when it's closed.");
         triggers.insert("oncombat(attacker : character, defendant : character, observers : list, "
                         "damage : integer) : bool",
                         "This trigger is defined on the realm, and may be defined on individual "
-                        "areas. Its primary responsibility is generating the messages that are "
+                        "rooms. Its primary responsibility is generating the messages that are "
                         "displayed during combat, but it may also provide special combat effects. "
-                        "If the area in which the combat takes place has this trigger defined, it "
+                        "If the room in which the combat takes place has this trigger defined, it "
                         "is used instead of the generic trigger from the realm. For this trigger, "
-                        "the return value cannot be used to cancel the combat, but if an area's "
+                        "the return value cannot be used to cancel the combat, but if a room's "
                         "trigger returns false it will fall back to the realm's trigger.");
         triggers.insert("ondie(attacker : optional character) : bool",
                         "The ondie trigger is invoked on any character when it dies. When "
@@ -217,10 +219,10 @@ const QMap<QString, QString> &ScriptEngine::triggers() {
                         "The onenter trigger is invoked on any exit when it's entered.");
         triggers.insert("onentered : void",
                         "The onentered trigger is invoked on any character when it entered a new "
-                        "area.");
+                        "room.");
         triggers.insert("oncharacterexit(activator : character, exitName : string) : bool",
-                        "The onexit trigger is invoked on any character in an area when another "
-                        "character leaves that area.");
+                        "The onexit trigger is invoked on any character in a room when another "
+                        "character leaves that room.");
         triggers.insert("oninit : void",
                         "The oninit trigger is invoked once on every object when the game server "
                         "is started. Note: For characters that do have an onspawn trigger, but "

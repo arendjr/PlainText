@@ -46,7 +46,7 @@ void PropertySetCommand::execute(Player *player, const QString &command) {
             if (variant.userType() == QMetaType::type("Point")) {
                 QStringList stringList = value.mid(1, value.length() - 2).split(',');
                 if (stringList.length() == 3) {
-                    Point point(stringList[0].toInt(),
+                    Point3D point(stringList[0].toInt(),
                                 stringList[1].toInt(),
                                 stringList[2].toInt());
                     variant = QVariant::fromValue(point);

@@ -1,8 +1,9 @@
 #include "setpropcommand.h"
 
 #include "characterstats.h"
-#include "point.h"
+#include "point3d.h"
 #include "util.h"
+#include "vector3d.h"
 
 
 #define super AdminCommand
@@ -84,15 +85,27 @@ void SetPropCommand::execute(Player *player, const QString &command) {
                     send(exception.what());
                 }
                 break;
-            } else if (variant.userType() == QMetaType::type("Point")) {
+            } else if (variant.userType() == QMetaType::type("Point3D")) {
                 QStringList stringList = value.mid(1, value.length() - 2).split(',');
                 if (stringList.length() == 3) {
-                    Point point(stringList[0].toInt(),
-                                stringList[1].toInt(),
-                                stringList[2].toInt());
+                    Point3D point(stringList[0].toInt(),
+                                  stringList[1].toInt(),
+                                  stringList[2].toInt());
                     variant = QVariant::fromValue(point);
                 } else {
-                    send("Property of type Point takes the form [ <x>, <y>, <z> ].");
+                    send("Property of type Point3D takes the form ( <x>, <y>, <z> ).");
+                    return;
+                }
+                break;
+            } else if (variant.userType() == QMetaType::type("Vector3D")) {
+                QStringList stringList = value.mid(1, value.length() - 2).split(',');
+                if (stringList.length() == 3) {
+                    Vector3D vector(stringList[0].toInt(),
+                                    stringList[1].toInt(),
+                                    stringList[2].toInt());
+                    variant = QVariant::fromValue(vector);
+                } else {
+                    send("Property of type Vector3D takes the form | <x>, <y>, <z> |.");
                     return;
                 }
                 break;

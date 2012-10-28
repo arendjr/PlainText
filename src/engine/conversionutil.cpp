@@ -6,9 +6,10 @@
 
 #include "characterstats.h"
 #include "gameobjectptr.h"
-#include "point.h"
+#include "point3d.h"
 #include "realm.h"
 #include "scriptfunctionmap.h"
+#include "vector3d.h"
 
 
 QVariant ConversionUtil::fromVariant(QVariant::Type type, int userType, const QVariant &variant) {
@@ -52,8 +53,8 @@ QVariant ConversionUtil::fromVariant(QVariant::Type type, int userType, const QV
                     pointerList << GameObjectPtr::fromString(realm, item.toString());
                 }
                 return QVariant::fromValue(pointerList);
-            } else if (userType == QMetaType::type("Point")) {
-                return QVariant::fromValue(Point::fromVariantList(variant.toList()));
+            } else if (userType == QMetaType::type("Point3D")) {
+                return QVariant::fromValue(Point3D::fromVariantList(variant.toList()));
             } else if (userType == QMetaType::type("ScriptFunctionMap")) {
                 ScriptFunctionMap functionMap;
                 QVariantMap variantMap = variant.toMap();
@@ -61,6 +62,8 @@ QVariant ConversionUtil::fromVariant(QVariant::Type type, int userType, const QV
                     functionMap[key] = ScriptFunction::fromString(variantMap[key].toString());
                 }
                 return QVariant::fromValue(functionMap);
+            } else if (userType == QMetaType::type("Vector3D")) {
+                return QVariant::fromValue(Vector3D::fromVariantList(variant.toList()));
             }
             // fall-through
         default:
@@ -134,8 +137,8 @@ QString ConversionUtil::toJSON(const QVariant &variant, Options options) {
                     stringList << jsString(pointer.toString());
                 }
                 return stringList.isEmpty() ? QString() : "[ " + stringList.join(", ") + " ]";
-            } else if (variant.userType() == QMetaType::type("Point")) {
-                return variant.value<Point>().toString();
+            } else if (variant.userType() == QMetaType::type("Point3D")) {
+                return variant.value<Point3D>().toString();
             } else if (variant.userType() == QMetaType::type("ScriptFunctionMap")) {
                 QStringList stringList;
                 ScriptFunctionMap functionMap = variant.value<ScriptFunctionMap>();
@@ -144,6 +147,8 @@ QString ConversionUtil::toJSON(const QVariant &variant, Options options) {
                                                         jsString(functionMap[key].toString()));
                 }
                 return stringList.isEmpty() ? QString() : "{ " + stringList.join(", ") + " }";
+            } else if (variant.userType() == QMetaType::type("Vector3D")) {
+                return variant.value<Vector3D>().toString();
             }
             // fall-through
         default:
@@ -201,9 +206,12 @@ QString ConversionUtil::toUserString(const QVariant &variant) {
                     stringList << pointer.toString();
                 }
                 return "[ " + stringList.join(", ") + " ]";
-            } else if (variant.userType() == QMetaType::type("Point")) {
-                Point point = variant.value<Point>();
-                return QString("[ %1, %2, %3 ]").arg(point.x).arg(point.y).arg(point.z);
+            } else if (variant.userType() == QMetaType::type("Point3D")) {
+                Point3D point = variant.value<Point3D>();
+                return QString("( %1, %2, %3 )").arg(point.x).arg(point.y).arg(point.z);
+            } else if (variant.userType() == QMetaType::type("Vector3D")) {
+                Vector3D vector = variant.value<Vector3D>();
+                return QString("| %1, %2, %3 |").arg(vector.x).arg(vector.y).arg(vector.z);
             }
             // fall-through
         default:

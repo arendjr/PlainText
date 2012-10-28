@@ -9,10 +9,11 @@
 #include "gameexception.h"
 #include "gameobject.h"
 #include "gameobjectptr.h"
-#include "point.h"
+#include "point3d.h"
 #include "realm.h"
 #include "scriptengine.h"
 #include "util.h"
+#include "vector3d.h"
 #include "interface/httpserver.h"
 #include "interface/telnetserver.h"
 #include "interface/websocketserver.h"
@@ -33,7 +34,8 @@ Engine::Engine() :
     qRegisterMetaType<GameObject *>();
     qRegisterMetaType<GameObjectPtr>();
     qRegisterMetaType<GameObjectPtrList>();
-    qRegisterMetaType<Point>();
+    qRegisterMetaType<Point3D>();
+    qRegisterMetaType<Vector3D>();
 }
 
 bool Engine::start() {
