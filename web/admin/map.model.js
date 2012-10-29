@@ -33,6 +33,7 @@ MapModel.prototype.load = function() {
             room.x = room.position ? room.position[0] : 0;
             room.y = room.position ? room.position[1] : 0;
             room.z = room.position ? room.position[2] : 0;
+            room.exits = room.exits || [];
             self.rooms[room.id] = room;
         }
 
