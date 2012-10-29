@@ -509,7 +509,11 @@ void GameObject::resolvePointers() {
             const char *name = metaProperty.name();
             if (metaProperty.userType() == QMetaType::type("GameObjectPtr")) {
                 GameObjectPtr pointer = property(name).value<GameObjectPtr>();
-                pointer.resolve(m_realm);
+                try {
+                    pointer.resolve(m_realm);
+                } catch (const GameException &exception) {
+                    pointer = GameObjectPtr();
+                }
                 setProperty(name, QVariant::fromValue(pointer));
             } else if (metaProperty.userType() == QMetaType::type("GameObjectPtrList")) {
                 GameObjectPtrList pointerList = property(name).value<GameObjectPtrList>();

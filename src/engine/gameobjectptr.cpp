@@ -740,7 +740,12 @@ const GameObjectPtr &GameObjectPtrList::operator[](int i) const {
 void GameObjectPtrList::resolvePointers(Realm *realm) {
 
     for (int i = 0; i < m_size; i++) {
-        m_items[i].resolve(realm);
+        try {
+            m_items[i].resolve(realm);
+        } catch (const GameException &exception) {
+            removeAt(i);
+            i--;
+        }
     }
     if (m_nextList) {
         m_nextList->resolvePointers(realm);
