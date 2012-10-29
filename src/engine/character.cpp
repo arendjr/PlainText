@@ -493,6 +493,8 @@ void Character::go(const GameObjectPtr &exitPtr) {
 
 void Character::enter(const GameObjectPtr &roomPtr, const GameObjectPtrList &followers) {
 
+    NOT_NULL(roomPtr)
+
     setCurrentRoom(roomPtr);
 
     for (const GameObjectPtr &follower : followers) {
@@ -550,6 +552,8 @@ void Character::enter(const GameObjectPtr &roomPtr, const GameObjectPtrList &fol
 
 void Character::leave(const GameObjectPtr &areaPtr, const QString &exitName,
                       const GameObjectPtrList &followers) {
+
+    NOT_NULL(areaPtr)
 
     Room *area = areaPtr.cast<Room *>();
 
