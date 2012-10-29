@@ -35,7 +35,7 @@ SliderWidget.prototype.attachListeners = function() {
 
         self.element.dispatchEvent(new CustomEvent("change", {
             "detail": {
-                "value": newX / self.options.width
+                "value": left / self.options.width
             }
         }));
     }
