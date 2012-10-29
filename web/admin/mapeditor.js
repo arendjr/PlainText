@@ -10,7 +10,8 @@ function MapEditor(element) {
     this.selectedRoomElement = null;
 
     this.exitEditor = null;
-    this.slider = null;
+    this.zoomSlider = null;
+    this.perspectiveSlider = null;
 
     this.selectedRoomId = 0;
 
@@ -45,7 +46,11 @@ function MapEditor(element) {
     });
 
     loadScript("admin/slider.widget.js", function() {
-        self.slider = new SliderWidget(element.querySelector(".perspective.slider"), {
+        self.zoomSlider = new SliderWidget(element.querySelector(".zoom.slider"), {
+            "width": 200,
+            "initialValue": 0.5
+        });
+        self.perspectiveSlider = new SliderWidget(element.querySelector(".perspective.slider"), {
             "width": 400
         });
     });
@@ -128,7 +133,11 @@ MapEditor.prototype.attachListeners = function() {
         self.map.setRoomProperty(self.selectedRoomId, "z", event.target.value);
     });
 
-    this.slider.element.addEventListener("change", function(event) {
+    this.zoomSlider.element.addEventListener("change", function(event) {
+        self.view.setZoom(2 * event.detail.value);
+    });
+
+    this.perspectiveSlider.element.addEventListener("change", function(event) {
         self.view.setPerspective(event.detail.value);
     });
 

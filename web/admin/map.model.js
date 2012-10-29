@@ -34,12 +34,22 @@ MapModel.prototype.load = function() {
             room.y = room.position ? room.position[1] : 0;
             room.z = room.position ? room.position[2] : 0;
             room.exits = room.exits || [];
+
+            if (self.rooms.hasOwnProperty(room.id)) {
+                room.shape = self.rooms[room.id].shape;
+            }
+
             self.rooms[room.id] = room;
         }
 
         controller.sendApiCall("exits-list", function(data) {
             for (var i = 0; i < data.length; i++) {
                 var exit = JSON.parse(data[i]);
+
+                if (self.exits.hasOwnProperty(exit.id)) {
+                    exit.shape = self.exits[exit.id].shape;
+                }
+
                 self.exits[exit.id] = exit;
             }
 

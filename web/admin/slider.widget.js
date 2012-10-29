@@ -2,14 +2,14 @@ function SliderWidget(element, options) {
 
     this.element = element;
     this.options = options || {};
+    this.options.width = this.options.width || 200;
 
     this.init();
 }
 
 SliderWidget.prototype.init = function() {
 
-    var width = this.options.width || 200;
-    this.element.style.width = width + "px";
+    this.element.style.width = this.options.width + "px";
 
     this.handleMargin = this.options.handleMargin || 5;
 
@@ -17,6 +17,11 @@ SliderWidget.prototype.init = function() {
     this.handle.setAttribute("class", "handle");
     this.handle.style.left = (-this.handleMargin) + "px";
     this.element.appendChild(this.handle);
+
+    if (this.options.initialValue) {
+        var left = this.options.initialValue * this.options.width;
+        this.handle.style.left = (left - this.handleMargin) + "px";
+    }
 
     this.attachListeners();
 };

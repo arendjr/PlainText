@@ -12,6 +12,7 @@ function MapView(element) {
 
     this.selectionListeners = [];
 
+    this.zoom = 1.0;
     this.perspective = 0.0;
 
     var self = this;
@@ -82,6 +83,16 @@ MapView.prototype.setModel = function(model) {
             self.draw();
         }
     });
+};
+
+MapView.prototype.setZoom = function(zoom) {
+
+    if (zoom !== this.zoom) {
+        this.zoom = zoom;
+
+        this.layer.setScale(zoom);
+        this.draw();
+    }
 };
 
 MapView.prototype.setPerspective = function(perspective) {
