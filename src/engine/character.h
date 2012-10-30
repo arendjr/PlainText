@@ -122,9 +122,9 @@ class Character : public StatsItem {
         Q_INVOKABLE void close(const GameObjectPtr &exit);
         Q_INVOKABLE void go(const GameObjectPtr &exit);
 
-        Q_INVOKABLE void enter(const GameObjectPtr &area,
+        Q_INVOKABLE void enter(const GameObjectPtr &roomPtr,
                                const GameObjectPtrList &followers = GameObjectPtrList());
-        Q_INVOKABLE void leave(const GameObjectPtr &area, const QString &exitName = QString(),
+        Q_INVOKABLE void leave(const GameObjectPtr &roomPtr, const QString &exitName = QString(),
                                const GameObjectPtrList &followers = GameObjectPtrList());
 
         Q_INVOKABLE void say(const QString &message);
@@ -162,7 +162,7 @@ class Character : public StatsItem {
         virtual void changeName(const QString &newName);
         virtual void changeStats(const CharacterStats &newStats);
 
-        virtual void enteredArea();
+        virtual void enteredRoom();
 
     private:
         int m_height;

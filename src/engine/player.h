@@ -49,7 +49,7 @@ class Player : public Character {
     protected:
         virtual void changeName(const QString &name);
 
-        virtual void enteredArea();
+        virtual void enteredRoom();
 
     private:
         QString m_passwordSalt;

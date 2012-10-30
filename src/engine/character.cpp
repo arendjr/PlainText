@@ -81,10 +81,10 @@ CharacterStats Character::totalStats() const {
     return totalStats;
 }
 
-void Character::setCurrentRoom(const GameObjectPtr &currentArea) {
+void Character::setCurrentRoom(const GameObjectPtr &currentRoom) {
 
-    if (m_currentRoom != currentArea) {
-        m_currentRoom = currentArea;
+    if (m_currentRoom != currentRoom) {
+        m_currentRoom = currentRoom;
 
         setModified();
     }
@@ -501,23 +501,23 @@ void Character::enter(const GameObjectPtr &roomPtr, const GameObjectPtrList &fol
         follower.cast<Character *>()->setCurrentRoom(roomPtr);
     }
 
-    Room *area = roomPtr.cast<Room *>();
-    GameObjectPtrList npcs = area->npcs();
-    GameObjectPtrList players = area->players();
+    Room *room = roomPtr.cast<Room *>();
+    GameObjectPtrList npcs = room->npcs();
+    GameObjectPtrList players = room->players();
 
     if (isPlayer()) {
-        area->addPlayer(this);
+        room->addPlayer(this);
 
         for (const GameObjectPtr &follower : followers) {
-            area->addPlayer(follower);
+            room->addPlayer(follower);
         }
 
         LogUtil::countRoomVisit(roomPtr.toString(), 1 + followers.length());
     } else {
-        area->addNPC(this);
+        room->addNPC(this);
 
         for (const GameObjectPtr &follower : followers) {
-            area->addNPC(follower);
+            room->addNPC(follower);
         }
     }
 
@@ -535,10 +535,10 @@ void Character::enter(const GameObjectPtr &roomPtr, const GameObjectPtrList &fol
         players.send(QString("%1 arrived.").arg(arrivalsName));
     }
 
-    enteredArea();
+    enteredRoom();
 
     for (const GameObjectPtr &follower : followers) {
-        follower.cast<Character *>()->enteredArea();
+        follower.cast<Character *>()->enteredRoom();
     }
 
     for (const GameObjectPtr &character : npcs) {
@@ -550,29 +550,29 @@ void Character::enter(const GameObjectPtr &roomPtr, const GameObjectPtrList &fol
     }
 }
 
-void Character::leave(const GameObjectPtr &areaPtr, const QString &exitName,
+void Character::leave(const GameObjectPtr &roomPtr, const QString &exitName,
                       const GameObjectPtrList &followers) {
 
-    NOT_NULL(areaPtr)
+    NOT_NULL(roomPtr)
 
-    Room *area = areaPtr.cast<Room *>();
+    Room *room = roomPtr.cast<Room *>();
 
     if (isPlayer()) {
-        area->removePlayer(this);
+        room->removePlayer(this);
 
         for (const GameObjectPtr &follower : followers) {
-            area->removePlayer(follower);
+            room->removePlayer(follower);
         }
     } else {
-        area->removeNPC(this);
+        room->removeNPC(this);
 
         for (const GameObjectPtr &follower : followers) {
-            area->removeNPC(follower);
+            room->removeNPC(follower);
         }
     }
 
-    GameObjectPtrList npcs = area->npcs();
-    GameObjectPtrList players = area->players();
+    GameObjectPtrList npcs = room->npcs();
+    GameObjectPtrList players = room->players();
 
     if (!players.isEmpty()) {
         QString departuresName;
@@ -609,32 +609,32 @@ void Character::say(const QString &message) {
     QString text = (message.endsWith(".") || message.endsWith("?") || message.endsWith("!")) ?
                    "%1 says, \"%2\"" : "%1 says, \"%2.\"";
 
-    Room *area = currentRoom().cast<Room *>();
-    area->players().send(text.arg(definiteName(area->characters(), Capitalized),
+    Room *room = currentRoom().cast<Room *>();
+    room->players().send(text.arg(definiteName(room->characters(), Capitalized),
                                   Util::capitalize(message)));
 }
 
 void Character::shout(const QString &msg) {
 
-    Room *area = currentRoom().cast<Room *>();
+    Room *room = currentRoom().cast<Room *>();
 
     QString message = (msg.endsWith(".") || msg.endsWith("?") || msg.endsWith("!")) ?
                       Util::capitalize(msg) : Util::capitalize(msg + ".");
 
-    GameObjectPtrList players = area->players();
-    players.send(QString("%1 shouts, \"%2\".").arg(definiteName(area->characters(), Capitalized),
+    GameObjectPtrList players = room->players();
+    players.send(QString("%1 shouts, \"%2\".").arg(definiteName(room->characters(), Capitalized),
                                                    message));
-    for (const GameObjectPtr &npc : area->npcs()) {
+    for (const GameObjectPtr &npc : room->npcs()) {
         npc->invokeTrigger("onshout", this, message);
     }
 
-    for (const GameObjectPtr &exitPtr : area->exits()) {
+    for (const GameObjectPtr &exitPtr : room->exits()) {
         Exit *exit = exitPtr.cast<Exit *>();
-        Room *adjacentArea = exit->destination().cast<Room *>();
+        Room *adjacentRoom = exit->destination().cast<Room *>();
 
-        adjacentArea->players().send(QString("You hear %1 shouting, \"%2\".").arg(indefiniteName(),
+        adjacentRoom->players().send(QString("You hear %1 shouting, \"%2\".").arg(indefiniteName(),
                                                                                   message));
-        for (const GameObjectPtr &npc : adjacentArea->npcs()) {
+        for (const GameObjectPtr &npc : adjacentRoom->npcs()) {
             npc->invokeTrigger("onshout", this, message);
         }
     }
@@ -670,26 +670,26 @@ void Character::tell(const GameObjectPtr &playerPtr, const QString &message) {
 
 void Character::take(const GameObjectPtrList &items) {
 
-    Room *area = currentRoom().cast<Room *>();
+    Room *room = currentRoom().cast<Room *>();
 
     GameObjectPtrList takenItems;
     for (const GameObjectPtr &itemPtr : items) {
         Item *item = itemPtr.cast<Item *>();
         if (item->name().endsWith("worth of gold")) {
             adjustGold(item->cost());
-            area->removeItem(itemPtr);
+            room->removeItem(itemPtr);
             takenItems << itemPtr;
         } else if (item->isPortable()) {
             if (inventoryWeight() + item->weight() <= maxInventoryWeight()) {
                 addInventoryItem(itemPtr);
-                area->removeItem(itemPtr);
+                room->removeItem(itemPtr);
                 takenItems << itemPtr;
             } else {
                 send(QString("You can't take %2, because it's too heavy.")
-                     .arg(item->definiteName(area->items())));
+                     .arg(item->definiteName(room->items())));
             }
         } else {
-            send(QString("You can't take %2.").arg(item->definiteName(area->items())));
+            send(QString("You can't take %2.").arg(item->definiteName(room->items())));
         }
     }
 
@@ -697,9 +697,9 @@ void Character::take(const GameObjectPtrList &items) {
         QString description = takenItems.joinFancy(DefiniteArticles);
         send(QString("You take %2.").arg(description));
 
-        GameObjectPtrList others = area->players();
+        GameObjectPtrList others = room->players();
         others.removeOne(this);
-        others.send(QString("%1 takes %3.").arg(definiteName(area->characters(), Capitalized),
+        others.send(QString("%1 takes %3.").arg(definiteName(room->characters(), Capitalized),
                                                 description));
     }
 }
@@ -776,8 +776,8 @@ void Character::kill(const GameObjectPtr &characterPtr) {
         return;
     }
 
-    Room *area = currentRoom().cast<Room *>();
-    GameObjectPtrList others = area->players();
+    Room *room = currentRoom().cast<Room *>();
+    GameObjectPtrList others = room->players();
     others.removeOne(this);
     others.removeOne(characterPtr);
 
@@ -795,8 +795,8 @@ void Character::kill(const GameObjectPtr &characterPtr) {
     }
 
     bool invoked = false;
-    if (area->hasTrigger("oncombat")) {
-        invoked = area->invokeTrigger("oncombat", this, characterPtr, others, damage);
+    if (room->hasTrigger("oncombat")) {
+        invoked = room->invokeTrigger("oncombat", this, characterPtr, others, damage);
     }
     if (!invoked) {
         realm()->invokeTrigger("oncombat", this, characterPtr, others, damage);
@@ -824,12 +824,12 @@ void Character::die(const GameObjectPtr &attacker) {
 
     send("You died.", Red);
 
-    Room *area = currentRoom().cast<Room *>();
+    Room *room = currentRoom().cast<Room *>();
 
-    GameObjectPtrList others = area->characters();
+    GameObjectPtrList others = room->characters();
     others.removeOne(this);
 
-    QString myName = definiteName(area->characters(), Capitalized);
+    QString myName = definiteName(room->characters(), Capitalized);
     others.send(QString("%1 died.").arg(myName), Teal);
 
     if (inventory().length() > 0 || m_gold > 0.0) {
@@ -837,7 +837,7 @@ void Character::die(const GameObjectPtr &attacker) {
 
         if (inventory().length() > 0) {
             for (const GameObjectPtr &item : inventory()) {
-                area->addItem(item);
+                room->addItem(item);
             }
 
             droppedItemsDescription = inventory().joinFancy();
@@ -846,7 +846,7 @@ void Character::die(const GameObjectPtr &attacker) {
         }
 
         if (m_gold > 0.0) {
-            area->addGold(m_gold);
+            room->addGold(m_gold);
 
             if (!droppedItemsDescription.isEmpty()) {
                 droppedItemsDescription += " and ";
@@ -868,13 +868,13 @@ void Character::die(const GameObjectPtr &attacker) {
     if (isPlayer()) {
         LogUtil::countPlayerDeath(currentRoom().toString());
 
-        area->removePlayer(this);
-        enter(race().cast<Race *>()->startingArea());
+        room->removePlayer(this);
+        enter(race().cast<Race *>()->startingRoom());
 
         setHp(1);
         stun(5000);
     } else {
-        area->removeNPC(this);
+        room->removeNPC(this);
 
         if (m_respawnTime) {
             setInventory(GameObjectPtrList());
@@ -1156,7 +1156,7 @@ void Character::changeStats(const CharacterStats &newStats) {
     setMaxMp(newStats.intelligence);
 }
 
-void Character::enteredArea() {
+void Character::enteredRoom() {
 
     invokeTrigger("onentered");
 }

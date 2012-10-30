@@ -34,9 +34,9 @@ class Race : public GameObject {
         void setClasses(const GameObjectPtrList &classes);
         Q_PROPERTY(GameObjectPtrList classes READ classes WRITE setClasses)
 
-        const GameObjectPtr &startingArea() const { return m_startingArea; }
-        void setStartingArea(const GameObjectPtr &startingArea);
-        Q_PROPERTY(GameObjectPtr startingArea READ startingArea WRITE setStartingArea)
+        const GameObjectPtr &startingRoom() const { return m_startingRoom; }
+        void setStartingRoom(const GameObjectPtr &startingRoom);
+        Q_PROPERTY(GameObjectPtr startingRoom READ startingRoom WRITE setStartingRoom)
 
         bool playerSelectable() const { return m_playerSelectable; }
         void setPlayerSelectable(bool playerSelectable);
@@ -50,7 +50,7 @@ class Race : public GameObject {
         int m_weight;
 
         GameObjectPtrList m_classes;
-        GameObjectPtr m_startingArea;
+        GameObjectPtr m_startingRoom;
 
         bool m_playerSelectable;
 };

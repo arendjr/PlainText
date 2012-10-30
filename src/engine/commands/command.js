@@ -3,7 +3,7 @@ function Command() {
 
     this._description = "";
     this._player = null;
-    this._currentArea = null;
+    this._currentRoom = null;
     this._words = [];
     this._alias = "";
 }
@@ -31,7 +31,7 @@ Command.prototype.prepareExecute = function(player, command) {
 Command.prototype.setPlayer = function(player) {
 
     this._player = player;
-    this._currentArea = player.currentArea;
+    this._currentRoom = player.currentRoom;
 };
 
 Command.prototype.setCommand = function(command) {

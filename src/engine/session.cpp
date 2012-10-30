@@ -702,7 +702,7 @@ void Session::processSignupConfirmation(const QString &answer) {
         m_player->setStats(m_signUpData->stats);
         m_player->setHeight(m_signUpData->height);
         m_player->setWeight(m_signUpData->weight);
-        m_player->setCurrentRoom(m_signUpData->race->startingArea());
+        m_player->setCurrentRoom(m_signUpData->race->startingRoom());
 
         m_player->setHp(m_player->maxHp());
         m_player->setMp(m_player->maxMp());

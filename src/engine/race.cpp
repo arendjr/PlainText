@@ -58,10 +58,10 @@ void Race::setClasses(const GameObjectPtrList &classes) {
     }
 }
 
-void Race::setStartingArea(const GameObjectPtr &startingArea) {
+void Race::setStartingRoom(const GameObjectPtr &startingRoom) {
 
-    if (m_startingArea != startingArea) {
-        m_startingArea = startingArea;
+    if (m_startingRoom != startingRoom) {
+        m_startingRoom = startingRoom;
 
         setModified();
     }

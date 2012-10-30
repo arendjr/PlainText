@@ -101,18 +101,18 @@ void Player::sendSellableItemsList(const GameObjectPtrList &items) {
 
 void Player::look() {
 
-    Room *area = currentRoom().cast<Room *>();
+    Room *room = currentRoom().cast<Room *>();
     QString text;
 
-    if (!area->name().isEmpty()) {
-        text += "\n" + Util::colorize(area->name(), Teal) + "\n\n";
+    if (!room->name().isEmpty()) {
+        text += "\n" + Util::colorize(room->name(), Teal) + "\n\n";
     }
 
-    text += area->description() + "\n";
+    text += room->description() + "\n";
 
-    if (area->exits().length() > 0) {
+    if (room->exits().length() > 0) {
         QStringList exitNames;
-        for (const GameObjectPtr &exitPtr : area->exits()) {
+        for (const GameObjectPtr &exitPtr : room->exits()) {
             Exit *exit = exitPtr.cast<Exit *>();
 
             if (exit->isHidden()) {
@@ -125,7 +125,7 @@ void Player::look() {
         text += Util::colorize("Obvious exits: " + exitNames.join(", ") + ".", Green) + "\n";
     }
 
-    GameObjectPtrList others = area->players();
+    GameObjectPtrList others = room->players();
     others.removeOne(this);
     if (others.length() > 0) {
         QStringList playerNames;
@@ -135,12 +135,12 @@ void Player::look() {
         text += QString("You see %1.\n").arg(Util::joinFancy(playerNames));
     }
 
-    if (area->npcs().length() > 0) {
-        text += QString("You see %1.\n").arg(area->npcs().joinFancy());
+    if (room->npcs().length() > 0) {
+        text += QString("You see %1.\n").arg(room->npcs().joinFancy());
     }
 
-    if (area->items().length() > 0) {
-        text += QString("You see %1.\n").arg(area->items().joinFancy());
+    if (room->items().length() > 0) {
+        text += QString("You see %1.\n").arg(room->items().joinFancy());
     }
 
     send(text);
@@ -182,7 +182,7 @@ void Player::changeName(const QString &newName) {
     }
 }
 
-void Player::enteredArea() {
+void Player::enteredRoom() {
 
     look();
 }
