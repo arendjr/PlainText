@@ -4,16 +4,11 @@
 #include <QDebug>
 #include <QMetaType>
 
-#include "characterstats.h"
 #include "commandregistry.h"
 #include "gameexception.h"
-#include "gameobject.h"
-#include "gameobjectptr.h"
-#include "point3d.h"
 #include "realm.h"
 #include "scriptengine.h"
 #include "util.h"
-#include "vector3d.h"
 #include "interface/httpserver.h"
 #include "interface/telnetserver.h"
 #include "interface/websocketserver.h"
@@ -29,13 +24,6 @@ Engine::Engine() :
     m_util(nullptr) {
 
     qsrand(QDateTime::currentMSecsSinceEpoch());
-
-    qRegisterMetaType<CharacterStats>();
-    qRegisterMetaType<GameObject *>();
-    qRegisterMetaType<GameObjectPtr>();
-    qRegisterMetaType<GameObjectPtrList>();
-    qRegisterMetaType<Point3D>();
-    qRegisterMetaType<Vector3D>();
 }
 
 bool Engine::start() {

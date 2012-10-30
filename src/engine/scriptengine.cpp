@@ -5,15 +5,10 @@
 #include <QFile>
 #include <QMetaType>
 
-#include "characterstats.h"
 #include "diskutil.h"
-#include "effect.h"
 #include "gameobject.h"
-#include "modifier.h"
-#include "point3d.h"
-#include "scriptfunctionmap.h"
+#include "metatyperegistry.h"
 #include "scriptwindow.h"
-#include "vector3d.h"
 
 
 static ScriptEngine *s_instance = nullptr;
@@ -24,23 +19,7 @@ ScriptEngine::ScriptEngine() :
 
     s_instance = this;
 
-    qScriptRegisterMetaType(&m_jsEngine, CharacterStats::toScriptValue,
-                                         CharacterStats::fromScriptValue);
-    qScriptRegisterMetaType(&m_jsEngine, Effect::toScriptValue, Effect::fromScriptValue);
-    qScriptRegisterMetaType(&m_jsEngine, GameObject::toScriptValue, GameObject::fromScriptValue);
-    qScriptRegisterMetaType(&m_jsEngine, GameObjectPtr::toScriptValue,
-                                         GameObjectPtr::fromScriptValue);
-    qScriptRegisterMetaType(&m_jsEngine, Modifier::toScriptValue, Modifier::fromScriptValue);
-    qScriptRegisterMetaType(&m_jsEngine, Point3D::toScriptValue, Point3D::fromScriptValue);
-    qScriptRegisterMetaType(&m_jsEngine, ScriptFunction::toScriptValue,
-                                         ScriptFunction::fromScriptValue);
-    qScriptRegisterMetaType(&m_jsEngine, ScriptFunctionMap::toScriptValue,
-                                         ScriptFunctionMap::fromScriptValue);
-    qScriptRegisterMetaType(&m_jsEngine, Vector3D::toScriptValue, Vector3D::fromScriptValue);
-    qScriptRegisterSequenceMetaType<CharacterStatsList>(&m_jsEngine);
-    qScriptRegisterSequenceMetaType<EffectList>(&m_jsEngine);
-    qScriptRegisterSequenceMetaType<GameObjectPtrList>(&m_jsEngine);
-    qScriptRegisterSequenceMetaType<ModifierList>(&m_jsEngine);
+    MetaTypeRegistry::registerMetaTypes(&m_jsEngine);
 
     ScriptWindow *window = new ScriptWindow(m_jsEngine.globalObject(), this);
     m_jsEngine.setGlobalObject(window->toScriptValue());

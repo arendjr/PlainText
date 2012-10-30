@@ -52,6 +52,7 @@ SOURCES += \
     engine/item.cpp \
     engine/logthread.cpp \
     engine/logutil.cpp \
+    engine/metatyperegistry.cpp \
     engine/modifier.cpp \
     engine/player.cpp \
     engine/point3d.cpp \
@@ -156,7 +157,7 @@ SOURCES += \
     ../3rdparty/qjson/json_scanner.cpp \
     ../3rdparty/qtiocompressor/qtiocompressor.cpp \
     ../3rdparty/qtwebsocket/QtWebSocket/QWsServer.cpp \
-    ../3rdparty/qtwebsocket/QtWebSocket/QWsSocket.cpp
+    ../3rdparty/qtwebsocket/QtWebSocket/QWsSocket.cpp \
 
 HEADERS += \
     engine/application.h \
@@ -181,6 +182,7 @@ HEADERS += \
     engine/item.h \
     engine/logthread.h \
     engine/logutil.h \
+    engine/metatyperegistry.h \
     engine/modifier.h \
     engine/player.h \
     engine/point3d.h \
@@ -285,7 +287,7 @@ HEADERS += \
     ../3rdparty/qjson/json_scanner.h \
     ../3rdparty/qtiocompressor/qtiocompressor.h \
     ../3rdparty/qtwebsocket/QtWebSocket/QWsServer.h \
-    ../3rdparty/qtwebsocket/QtWebSocket/QWsSocket.h
+    ../3rdparty/qtwebsocket/QtWebSocket/QWsSocket.h \
 
 OTHER_FILES += \
     engine/util.js \
