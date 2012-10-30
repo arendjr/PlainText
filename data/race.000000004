@@ -6,6 +6,6 @@
   "height": 160,
   "weight": 55,
   "classes": [ "class:50", "class:52", "class:53", "class:54", "class:56" ],
-  "startingArea": "room:11",
+  "startingRoom": "room:11",
   "playerSelectable": true
 }
