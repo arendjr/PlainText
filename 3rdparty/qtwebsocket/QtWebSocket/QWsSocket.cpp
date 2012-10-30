@@ -38,7 +38,7 @@ QWsSocket::QWsSocket( QObject * parent, QTcpSocket * socket, EWebsocketVersion w
 
 QWsSocket::~QWsSocket()
 {
-	QAbstractSocket::SocketState socketState = state();
+    //QAbstractSocket::SocketState socketState = state();
 	if ( state() == QAbstractSocket::ConnectedState )
 	{
 		qDebug() << "CloseAway, socket destroyed in server";
@@ -142,6 +142,8 @@ void QWsSocket::processDataV4()
 				closingHandshakeReceived = true;
 				close();
 				break;
+            default:
+                break;
 		}
 
 		currentFrame.clear();
@@ -290,6 +292,8 @@ void QWsSocket::processTcpStateChanged( QAbstractSocket::SocketState tcpSocketSt
 			}
 			break;
 		}
+        default:
+            break;
 	}
 }
 
