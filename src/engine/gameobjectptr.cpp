@@ -375,24 +375,41 @@ bool GameObjectPtrList::const_iterator::operator==(const GameObjectPtrList::cons
 
 GameObjectPtrList::GameObjectPtrList() :
     m_size(0),
+    m_capacity(0),
+    m_items(nullptr),
+    m_nextList(nullptr) {
+}
+
+GameObjectPtrList::GameObjectPtrList(int size) :
+    m_size(0),
+    m_capacity(size),
+    m_items(nullptr),
     m_nextList(nullptr) {
 
-    for (int i = 0; i < NUM_ITEMS; i++) {
-        m_items[i].setOwnerList(this);
+    if (m_capacity) {
+        m_items = new GameObjectPtr[m_capacity];
+
+        for (int i = 0; i < m_capacity; i++) {
+            m_items[i].setOwnerList(this);
+        }
     }
 }
 
 GameObjectPtrList::GameObjectPtrList(const GameObjectPtrList &other) :
-    GameObjectPtrList() {
+    m_size(other.length()),
+    m_capacity(other.length()),
+    m_items(nullptr),
+    m_nextList(nullptr) {
 
-    m_size = other.m_size;
+    if (m_capacity) {
+        m_items = new GameObjectPtr[m_capacity];
 
-    for (int i = 0; i < m_size; i++) {
-        m_items[i] = other.m_items[i];
-    }
-
-    if (other.m_nextList) {
-        m_nextList = new GameObjectPtrList(*other.m_nextList);
+        int index = 0;
+        for (const GameObjectPtr &pointer : other) {
+            m_items[index] = pointer;
+            m_items[index].setOwnerList(this);
+            index++;
+        }
     }
 }
 
@@ -405,6 +422,7 @@ GameObjectPtrList::GameObjectPtrList(GameObjectPtrList &&other) :
 GameObjectPtrList::~GameObjectPtrList() {
 
     delete m_nextList;
+    delete[] m_items;
 }
 
 void GameObjectPtrList::append(const GameObjectPtr &value) {
@@ -413,22 +431,59 @@ void GameObjectPtrList::append(const GameObjectPtr &value) {
         return;
     }
 
-    if (m_size < NUM_ITEMS) {
-        m_items[m_size] = value;
-        m_size++;
+    if (m_capacity) {
+        if (m_size < m_capacity) {
+            m_items[m_size] = value;
+            m_size++;
+        } else {
+            if (!m_nextList) {
+                m_nextList = new GameObjectPtrList(qMax(2 * m_capacity, 16));
+            }
+
+            m_nextList->append(value);
+        }
     } else {
-        if (!m_nextList) {
-            m_nextList = new GameObjectPtrList();
+        m_size = 1;
+        m_capacity = 16;
+
+        m_items = new GameObjectPtr[m_capacity];
+
+        for (int i = 0; i < m_capacity; i++) {
+            m_items[i].setOwnerList(this);
         }
 
-        m_nextList->append(value);
+        m_items[0] = value;
     }
 }
 
 void GameObjectPtrList::append(const GameObjectPtrList &value) {
 
+    int numRemaining = value.length();
+    if (numRemaining == 0) {
+        return;
+    }
+
+    if (!m_capacity) {
+        m_capacity = qMax(numRemaining, 16);
+
+        m_items = new GameObjectPtr[m_capacity];
+
+        for (int i = 0; i < m_capacity; i++) {
+            m_items[i].setOwnerList(this);
+        }
+    }
+
     for (const GameObjectPtr &item : value) {
-        append(item);
+        if (m_size == m_capacity) {
+            if (!m_nextList) {
+                m_nextList = new GameObjectPtrList(qMax(2 * m_capacity, numRemaining));
+            }
+
+            m_nextList->append(item);
+        } else {
+            append(item);
+            numRemaining--;
+        }
     }
 }
 
@@ -449,8 +504,11 @@ GameObjectPtrList::const_iterator GameObjectPtrList::begin() const {
 void GameObjectPtrList::clear() {
 
     delete m_nextList;
+    delete[] m_items;
 
     m_size = 0;
+    m_capacity = 0;
+    m_items = nullptr;
     m_nextList = nullptr;
 }
 
@@ -531,7 +589,11 @@ int GameObjectPtrList::indexOf(const GameObjectPtr &value) const {
     }
 
     if (m_nextList) {
-        return m_nextList->indexOf(value) + m_size;
+        int index = m_nextList->indexOf(value);
+        if (index != -1) {
+            index += m_size;
+        }
+        return index;
     } else {
         return -1;
     }
@@ -641,11 +703,8 @@ int GameObjectPtrList::size() const {
 void swap(GameObjectPtrList &first, GameObjectPtrList &second) {
 
     std::swap(first.m_size, second.m_size);
-
-    for (int i = 0, max = qMax(first.m_size, second.m_size); i < max; i++) {
-        swap(first.m_items[i], second.m_items[i]);
-    }
-
+    std::swap(first.m_capacity, second.m_capacity);
+    std::swap(first.m_items, second.m_items);
     std::swap(first.m_nextList, second.m_nextList);
 }
 
@@ -655,17 +714,13 @@ bool GameObjectPtrList::operator!=(const GameObjectPtrList &other) const {
         return true;
     }
 
-    for (int i = 0; i < m_size; i++) {
-        if (m_items[i] != other.m_items[i]) {
+    for (int i = 0; i < size(); i++) {
+        if (operator[](i) != other[i]) {
             return true;
         }
     }
 
-    if (m_nextList) {
-        return *m_nextList != *other.m_nextList;
-    } else {
-        return false;
-    }
+    return false;
 }
 
 GameObjectPtrList GameObjectPtrList::operator+(const GameObjectPtrList &other) const {
@@ -677,25 +732,8 @@ GameObjectPtrList GameObjectPtrList::operator+(const GameObjectPtrList &other) c
 
 GameObjectPtrList &GameObjectPtrList::operator=(const GameObjectPtrList &other) {
 
-    for (int i = other.m_size; i < m_size; i++) {
-        m_items[i] = GameObjectPtr();
-    }
-
-    m_size = other.m_size;
-
-    for (int i = 0; i < m_size; i++) {
-        m_items[i] = other.m_items[i];
-    }
-
-    if (m_nextList) {
-        delete m_nextList;
-    }
-    if (other.m_nextList) {
-        m_nextList = new GameObjectPtrList(*other.m_nextList);
-    } else {
-        m_nextList = nullptr;
-    }
-
+    clear();
+    append(other);
     return *this;
 }
 
@@ -714,17 +752,13 @@ bool GameObjectPtrList::operator==(const GameObjectPtrList &other) const {
         return false;
     }
 
-    for (int i = 0; i < m_size; i++) {
-        if (m_items[i] != other.m_items[i]) {
+    for (int i = 0; i < size(); i++) {
+        if (operator[](i) != other[i]) {
             return false;
         }
     }
 
-    if (m_nextList) {
-        return *m_nextList == *other.m_nextList;
-    } else {
-        return true;
-    }
+    return true;
 }
 
 const GameObjectPtr &GameObjectPtrList::operator[](int i) const {
@@ -764,15 +798,13 @@ void GameObjectPtrList::unresolvePointers() {
 
 GameObjectPtrList GameObjectPtrList::copyUnresolved() const {
 
-    GameObjectPtrList copy;
-    copy.m_size = m_size;
+    GameObjectPtrList copy(length());
+    copy.m_size = copy.m_capacity;
 
-    for (int i = 0; i < m_size; i++) {
-        copy.m_items[i] = m_items[i].copyUnresolved();
-    }
-
-    if (m_nextList) {
-        copy.m_nextList = new GameObjectPtrList(m_nextList->copyUnresolved());
+    int index = 0;
+    for (const GameObjectPtr &item : *this) {
+        copy.m_items[index] = item.copyUnresolved();
+        index++;
     }
     return copy;
 }

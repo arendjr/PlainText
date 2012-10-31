@@ -155,6 +155,7 @@ class GameObjectPtrList {
 
 
         GameObjectPtrList();
+        explicit GameObjectPtrList(int size);
         GameObjectPtrList(const GameObjectPtrList &other);
         GameObjectPtrList(GameObjectPtrList &&other);
         ~GameObjectPtrList();
@@ -229,10 +230,9 @@ class GameObjectPtrList {
         QString joinFancy(Options options = NoOptions) const;
 
     private:
-        static const int NUM_ITEMS = 16;
-
         int m_size;
-        GameObjectPtr m_items[NUM_ITEMS];
+        int m_capacity;
+        GameObjectPtr *m_items;
         GameObjectPtrList *m_nextList;
 };
 

@@ -48,8 +48,9 @@ QVariant ConversionUtil::fromVariant(QVariant::Type type, int userType, const QV
             } else if (userType == QMetaType::type("GameObjectPtr")) {
                 return QVariant::fromValue(GameObjectPtr::fromString(realm, variant.toString()));
             } else if (userType == QMetaType::type("GameObjectPtrList")) {
-                GameObjectPtrList pointerList;
-                for (const QVariant &item : variant.toList()) {
+                QList<QVariant> variantList = variant.toList();
+                GameObjectPtrList pointerList(variantList.length());
+                for (const QVariant &item : variantList) {
                     pointerList << GameObjectPtr::fromString(realm, item.toString());
                 }
                 return QVariant::fromValue(pointerList);
