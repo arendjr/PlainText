@@ -112,8 +112,8 @@ possible...
    button somewhere on the top right of this page). Keeping all forks in public
    repositories will help us all to merge code between our codebases.
 
-2. You can now clone your project to your own local machine and starting
-   working on it.
+2. You can now clone your project to your own local machine and start working
+   on it.
 
 2. You may want to clean up the data/ directory in your own checkout as you're
    probably going to be creating your own game world anyway.
@@ -185,7 +185,7 @@ list-properties <object>
 ```
 
 **Q. I see there are properties called respawnTime and respawnTimeVariation.
-How would those be used in determine when a character respawns?**
+How would those be used to determine when a character respawns?**
 
 The time it takes for a character to respawn (in milliseconds) is
 _respawnTime + (random number between 0.0 and 1.0) * respawnTimeVariation_.
