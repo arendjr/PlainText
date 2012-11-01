@@ -3,6 +3,22 @@ PlainText
 
 PlainText is a text-based MUD game engine.
 
+ * **[Features](#features)**
+ * **[Technology](#technology)**
+ * **[Running your own server](#running-your-own-server)**
+   * [Supported platforms](#supported-platforms)
+   * [Dependencies](#dependencies)
+   * [Compiling](#compiling)
+   * [Running](#running)
+ * **[Playing the game](#playing-the-game)**
+   * [Connect to your own server](#connect-to-your-own-server)
+   * [Connect to the demo server](#connect-to-the-demo-server)
+ * **[Creating your own game](#creating-your-own-game)**
+   * [Frequently Asked Questions](#frequently-asked-questions)
+ * **[License](#license)**
+ 
+
+<a id="features"></a>
 Features
 --------
 
@@ -27,6 +43,7 @@ Features
    * All game objects are in memory
    * Changes are synced to disk in separate thread
 
+<a id="technology"></a>
 Technology
 ----------
 
@@ -36,20 +53,24 @@ Technology
    MSDP and MSSP extension protocols), but also hosts a web interface over HTTP
    which connects to the game using WebSockets.
 
+<a id="running-your-own-server"></a>
 Running your own server
 -----------------------
 
+<a id="supported-platforms"></a>
 ### Supported platforms ###
 
  * Linux (tested on Gentoo Linux and openSUSE 12.2)
  * Mac OS X 10.7 and up (recently only tested on OS X 10.8)
 
+<a id="dependencies"></a>
 ### Dependencies ###
 
  * Clang 3.1 or higher, or GCC 4.7 or higher
  * Qt framework 4.7 or higher
  * Zlib development package
 
+<a id="compiling"></a>
 ### Compiling ###
 
 Run the following commands from the src/ directory:
@@ -57,6 +78,7 @@ Run the following commands from the src/ directory:
  * qmake PlainText.pro
  * make
 
+<a id="running"></a>
 ### Running ###
 
  * Set the PT_DATA_DIR environment variable to point to the data/ directory.
@@ -64,6 +86,7 @@ Run the following commands from the src/ directory:
    where you want your logs to be stored.
  * Run your compiled PlainText executable.
 
+<a id="playing-the-game"></a>
 Playing the game
 ----------------
 
@@ -74,6 +97,7 @@ modern standards compliant browser. These are the browsers that *should* work:
  * Internet Explorer 10
  * Safari
 
+<a id="connect-to-your-own-server"></a>
 ### Connect to your own server ###
 
 If you have just compiled your own server, you can connect to it through telnet
@@ -83,6 +107,7 @@ when you start your server.
 The first character you register on your own server will automatically become an
 admin.
 
+<a id="connect-to-the-demo-server"></a>
 ### Connect to the demo server ###
 
 If you do not have your own server, feel free to connect to the demo server:
@@ -90,6 +115,7 @@ If you do not have your own server, feel free to connect to the demo server:
  * Point your webbrowser to http://mud.yunocloud.com:8080/ *or*
  * Connect with telnet to mud.yunocloud.com on port 4801.
 
+<a id="creating-your-own-game"></a>
 Creating your own game
 ----------------------
 
@@ -127,6 +153,7 @@ possible...
    * FoggyText: https://github.com/arendjr/FoggyText
    * Conception: https://github.com/Lundex/Conception
 
+<a id="frequently-asked-questions"></a>
 ### Frequently Asked Questions ###
 
 **Q. I don't want to use character classes. How can I remove class support?**
@@ -197,6 +224,7 @@ and is dead forever rather than being respawned.
 
 A. Personally, I use Qt Creator: http://qt.digia.com/Product/Developer-Tools/
 
+<a id="license"></a>
 License
 -------
 
