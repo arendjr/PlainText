@@ -1,18 +1,16 @@
 #ifndef MODIFIER_H
 #define MODIFIER_H
 
-#include <QMetaType>
 #include <QScriptValue>
 #include <QString>
 
 #include "characterstats.h"
+#include "metatyperegistry.h"
 
 
 class Modifier {
 
     public:
-        Modifier();
-
         qint64 started;
         int duration;
 
@@ -26,7 +24,7 @@ class Modifier {
 
 typedef QList<Modifier> ModifierList;
 
-Q_DECLARE_METATYPE(Modifier)
-Q_DECLARE_METATYPE(ModifierList)
+PT_DECLARE_METATYPE(Modifier)
+PT_DECLARE_METATYPE(ModifierList)
 
 #endif // MODIFIER_H

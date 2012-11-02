@@ -8,19 +8,14 @@
 #include "gameexception.h"
 
 
-CharacterStats::CharacterStats() :
-    strength(0),
-    dexterity(0),
-    vitality(0),
-    endurance(0),
-    intelligence(0),
-    faith(0) {
-}
-
-CharacterStats &CharacterStats::operator=(const CharacterStats &other) {
-
-    memcpy(this, &other, sizeof(CharacterStats));
-    return *this;
+CharacterStats::CharacterStats(int strength, int dexterity, int vitality,
+                               int endurance, int intelligence, int faith) :
+    strength(strength),
+    dexterity(dexterity),
+    vitality(vitality),
+    endurance(endurance),
+    intelligence(intelligence),
+    faith(faith) {
 }
 
 bool CharacterStats::operator==(const CharacterStats &other) const {
@@ -64,51 +59,53 @@ bool CharacterStats::isNull() const {
 
 QString CharacterStats::toString() const {
 
-    QStringList components;
-    components << QString::number(strength);
-    components << QString::number(dexterity);
-    components << QString::number(vitality);
-    components << QString::number(endurance);
-    components << QString::number(intelligence);
-    components << QString::number(faith);
-    return "[" + components.join(", ") + "]";
+    QStringList stringList;
+    stringList << QString::number(strength);
+    stringList << QString::number(dexterity);
+    stringList << QString::number(vitality);
+    stringList << QString::number(endurance);
+    stringList << QString::number(intelligence);
+    stringList << QString::number(faith);
+    return "[" + stringList.join(", ") + "]";
 }
 
-CharacterStats CharacterStats::fromString(const QString &string) {
+QString CharacterStats::toUserString(const CharacterStats &stats) {
+
+    return stats.toString();
+}
+
+CharacterStats CharacterStats::fromUserString(const QString &string) {
 
     if (!string.startsWith("[") || !string.endsWith("]")) {
         throw GameException(GameException::InvalidCharacterStats);
     }
 
-    QStringList components = string.mid(1, -1).split(',');
-    if (components.length() != 6) {
+    QStringList stringList = string.mid(1, -1).split(',');
+    if (stringList.length() != 6) {
         throw GameException(GameException::InvalidCharacterStats);
     }
 
-    CharacterStats stats;
-    stats.strength = components[0].trimmed().toInt();
-    stats.dexterity = components[1].trimmed().toInt();
-    stats.vitality = components[2].trimmed().toInt();
-    stats.endurance = components[3].trimmed().toInt();
-    stats.intelligence = components[4].trimmed().toInt();
-    stats.faith = components[5].trimmed().toInt();
-    return stats;
+    return CharacterStats(stringList[0].trimmed().toInt(), stringList[1].trimmed().toInt(),
+                          stringList[2].trimmed().toInt(), stringList[3].trimmed().toInt(),
+                          stringList[4].trimmed().toInt(), stringList[5].trimmed().toInt());
 }
 
-CharacterStats CharacterStats::fromVariantList(const QVariantList &variantList) {
+QString CharacterStats::toJsonString(const CharacterStats &stats, Options options) {
 
+    Q_UNUSED(options);
+
+    return stats.toString();
+}
+
+CharacterStats CharacterStats::fromVariant(const QVariant &variant) {
+
+    QVariantList variantList = variant.toList();
     if (variantList.length() != 6) {
         throw GameException(GameException::InvalidCharacterStats);
     }
 
-    CharacterStats stats;
-    stats.strength = variantList[0].toInt();
-    stats.dexterity = variantList[1].toInt();
-    stats.vitality = variantList[2].toInt();
-    stats.endurance = variantList[3].toInt();
-    stats.intelligence = variantList[4].toInt();
-    stats.faith = variantList[5].toInt();
-    return stats;
+    return CharacterStats(variantList[0].toInt(), variantList[1].toInt(), variantList[2].toInt(),
+                          variantList[3].toInt(), variantList[4].toInt(), variantList[5].toInt());
 }
 
 QScriptValue CharacterStats::toScriptValue(QScriptEngine *engine, const CharacterStats &stats) {

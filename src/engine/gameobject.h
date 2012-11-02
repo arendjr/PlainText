@@ -135,7 +135,7 @@ class GameObject : public QObject {
 
         Q_INVOKABLE virtual GameObject *copy();
 
-        QString toJSON(Options options = NoOptions) const;
+        QString toJsonString(Options options = NoOptions) const;
 
         bool save();
         bool load(const QString &path);

@@ -20,7 +20,7 @@ void ExitsListCommand::execute(Player *player, const QString &command) {
 
     QVariantList data;
     for (const GameObjectPtr &exit : realm()->allExits()) {
-        data << exit->toJSON();
+        data << exit->toJsonString();
     }
     sendReply(data);
 }

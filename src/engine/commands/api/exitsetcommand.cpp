@@ -89,12 +89,12 @@ void ExitSetCommand::execute(Player *player, const QString &command) {
 
     QVariantMap data;
     data["success"] = true;
-    data["exit"] = exit->toJSON();
+    data["exit"] = exit->toJsonString();
     if (destination != nullptr) {
-        data["destination"] = destination->toJSON();
+        data["destination"] = destination->toJsonString();
     }
     if (oppositeExit != nullptr) {
-        data["oppositeExit"] = oppositeExit->toJSON();
+        data["oppositeExit"] = oppositeExit->toJsonString();
     }
     sendReply(data);
 }

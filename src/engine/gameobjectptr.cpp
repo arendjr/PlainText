@@ -10,6 +10,7 @@
 #include <QStringList>
 #include <QVector>
 
+#include "conversionutil.h"
 #include "gameobject.h"
 #include "item.h"
 #include "realm.h"
@@ -182,7 +183,16 @@ QString GameObjectPtr::toString() const {
     return QString("%1:%2").arg(m_objectType).arg(m_id);
 }
 
-GameObjectPtr GameObjectPtr::fromString(Realm *realm, const QString &string) {
+QString GameObjectPtr::toUserString(const GameObjectPtr &pointer) {
+
+    if (pointer.isNull()) {
+        return "(not set)";
+    } else {
+        return pointer.toString() + " (" + pointer->name() + ")";
+    }
+}
+
+GameObjectPtr GameObjectPtr::fromUserString(const QString &string) {
 
     if (string == "0") {
         return GameObjectPtr();
@@ -193,7 +203,51 @@ GameObjectPtr GameObjectPtr::fromString(Realm *realm, const QString &string) {
         throw GameException(GameException::InvalidGameObjectPointer);
     }
 
-    return GameObjectPtr(realm, components[0].toAscii().constData(), components[1].toInt());
+    return GameObjectPtr(Realm::instance(), components[0].toAscii().constData(),
+                                            components[1].toInt());
+}
+
+QString GameObjectPtr::toJsonString(const GameObjectPtr &pointer, Options options) {
+
+    Q_UNUSED(options)
+
+    return ConversionUtil::jsString(pointer.toString());
+}
+
+GameObjectPtr GameObjectPtr::fromVariant(const QVariant &variant) {
+
+    QString string = variant.toString();
+    if (string == "0") {
+        return GameObjectPtr();
+    }
+
+    QStringList components = string.split(':');
+    if (components.length() != 2) {
+        throw GameException(GameException::InvalidGameObjectPointer);
+    }
+
+    return GameObjectPtr(Realm::instance(), components[0].toAscii().constData(),
+                                            components[1].toInt());
+}
+
+QScriptValue GameObjectPtr::toScriptValue(QScriptEngine *engine, const GameObjectPtr &pointer) {
+
+    if (pointer.m_gameObject) {
+        return engine->newQObject(pointer.m_gameObject, QScriptEngine::QtOwnership,
+                                  QScriptEngine::ExcludeDeleteLater |
+                                  QScriptEngine::PreferExistingWrapperObject);
+    } else {
+        return engine->nullValue();
+    }
+}
+
+void GameObjectPtr::fromScriptValue(const QScriptValue &object, GameObjectPtr &pointer) {
+
+    if (object.isQObject()) {
+        pointer = GameObjectPtr(Realm::instance(), nullptr, object.property("id").toUInt32());
+    } else {
+        pointer = GameObjectPtr();
+    }
 }
 
 void swap(GameObjectPtr &first, GameObjectPtr &second) {
@@ -233,26 +287,6 @@ void swapWithinList(GameObjectPtr &first, GameObjectPtr &second) {
     std::swap(first.m_gameObject, second.m_gameObject);
     std::swap(first.m_objectType, second.m_objectType);
     std::swap(first.m_id, second.m_id);
-}
-
-QScriptValue GameObjectPtr::toScriptValue(QScriptEngine *engine, const GameObjectPtr &pointer) {
-
-    if (pointer.m_gameObject) {
-        return engine->newQObject(pointer.m_gameObject, QScriptEngine::QtOwnership,
-                                  QScriptEngine::ExcludeDeleteLater |
-                                  QScriptEngine::PreferExistingWrapperObject);
-    } else {
-        return engine->nullValue();
-    }
-}
-
-void GameObjectPtr::fromScriptValue(const QScriptValue &object, GameObjectPtr &pointer) {
-
-    if (object.isQObject()) {
-        pointer = GameObjectPtr(Realm::instance(), nullptr, object.property("id").toUInt32());
-    } else {
-        pointer = GameObjectPtr();
-    }
 }
 
 
@@ -863,4 +897,46 @@ QString GameObjectPtrList::joinFancy(Options options) const {
     }
 
     return Util::joinFancy(strings);
+}
+
+QString GameObjectPtrList::toUserString(const GameObjectPtrList &pointerList) {
+
+    QStringList stringList;
+    for (const GameObjectPtr &pointer : pointerList) {
+        stringList << pointer.toString();
+    }
+    return "[ " + stringList.join(", ") + " ]";
+}
+
+GameObjectPtrList GameObjectPtrList::fromUserString(const QString &string) {
+
+    GameObjectPtrList pointerList;
+    for (QString substring : string.mid(1, string.length() - 2).split(',')) {
+        substring = substring.trimmed();
+        if (!substring.isEmpty()) {
+            pointerList << GameObjectPtr::fromUserString(substring);
+        }
+    }
+    return pointerList;
+}
+
+QString GameObjectPtrList::toJsonString(const GameObjectPtrList &pointerList, Options options) {
+
+    Q_UNUSED(options);
+
+    QStringList stringList;
+    for (const GameObjectPtr &pointer : pointerList) {
+        stringList << GameObjectPtr::toJsonString(pointer);
+    }
+    return stringList.isEmpty() ? QString() : "[ " + stringList.join(", ") + " ]";
+}
+
+GameObjectPtrList GameObjectPtrList::fromVariant(const QVariant &variant) {
+
+    QList<QVariant> variantList = variant.toList();
+    GameObjectPtrList pointerList(variantList.length());
+    for (const QVariant &item : variantList) {
+        pointerList << GameObjectPtr::fromVariant(item);
+    }
+    return pointerList;
 }

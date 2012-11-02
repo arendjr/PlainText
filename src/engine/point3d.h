@@ -1,11 +1,12 @@
 #ifndef POINT3D_H
 #define POINT3D_H
 
-#include <QMetaType>
 #include <QScriptValue>
 #include <QString>
-#include <QVariantList>
+#include <QVariant>
 
+#include "constants.h"
+#include "metatyperegistry.h"
 #include "vector3d.h"
 
 
@@ -28,14 +29,17 @@ class Point3D {
         Vector3D operator-(const Point3D &other) const;
 
         QString toString() const;
-        static Point3D fromString(const QString &string);
 
-        static Point3D fromVariantList(const QVariantList &variantList);
+        static QString toUserString(const Point3D &point);
+        static Point3D fromUserString(const QString &string);
+
+        static QString toJsonString(const Point3D &point, Options options = NoOptions);
+        static Point3D fromVariant(const QVariant &variant);
 
         static QScriptValue toScriptValue(QScriptEngine *engine, const Point3D &stats);
         static void fromScriptValue(const QScriptValue &object, Point3D &stats);
 };
 
-Q_DECLARE_METATYPE(Point3D)
+PT_DECLARE_SERIALIZABLE_METATYPE(Point3D)
 
 #endif // POINT3D_H

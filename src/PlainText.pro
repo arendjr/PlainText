@@ -24,7 +24,7 @@ LIBS += -lz
 DEFINES *= QT_USE_QSTRINGBUILDER
 
 TARGET = PlainText
-CONFIG += console
+CONFIG += console debug
 CONFIG -= app_bundle
 
 TEMPLATE = app

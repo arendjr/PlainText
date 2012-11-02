@@ -1,9 +1,10 @@
 #ifndef EFFECT_H
 #define EFFECT_H
 
-#include <QMetaType>
 #include <QScriptValue>
 #include <QString>
+
+#include "metatyperegistry.h"
 
 
 class Effect {
@@ -26,7 +27,7 @@ class Effect {
 
 typedef QList<Effect> EffectList;
 
-Q_DECLARE_METATYPE(Effect)
-Q_DECLARE_METATYPE(EffectList)
+PT_DECLARE_METATYPE(Effect)
+PT_DECLARE_METATYPE(EffectList)
 
 #endif // EFFECT_H

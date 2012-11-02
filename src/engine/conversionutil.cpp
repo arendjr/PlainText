@@ -6,6 +6,7 @@
 
 #include "characterstats.h"
 #include "gameobjectptr.h"
+#include "metatyperegistry.h"
 #include "point3d.h"
 #include "realm.h"
 #include "scriptfunctionmap.h"
@@ -13,8 +14,6 @@
 
 
 QVariant ConversionUtil::fromVariant(QVariant::Type type, int userType, const QVariant &variant) {
-
-    Realm *realm = Realm::instance();
 
     switch (type) {
         case QVariant::Bool:
@@ -42,38 +41,28 @@ QVariant ConversionUtil::fromVariant(QVariant::Type type, int userType, const QV
             }
             return variantMap;
         }
-        case QVariant::UserType:
-            if (userType == QMetaType::type("CharacterStats")) {
-                return QVariant::fromValue(CharacterStats::fromVariantList(variant.toList()));
-            } else if (userType == QMetaType::type("GameObjectPtr")) {
-                return QVariant::fromValue(GameObjectPtr::fromString(realm, variant.toString()));
-            } else if (userType == QMetaType::type("GameObjectPtrList")) {
-                QList<QVariant> variantList = variant.toList();
-                GameObjectPtrList pointerList(variantList.length());
-                for (const QVariant &item : variantList) {
-                    pointerList << GameObjectPtr::fromString(realm, item.toString());
+        case QVariant::UserType: {
+            MetaTypeRegistry::JsonConverters converters =
+                    MetaTypeRegistry::jsonConverters(QMetaType::typeName(userType));
+            if (converters.jsonVariantToTypeConverter) {
+                return converters.jsonVariantToTypeConverter(variant);
+            } else {
+                const char *typeName = QMetaType::typeName(userType);
+                if (typeName) {
+                    qDebug() << "User type not serializable: " << typeName;
+                } else {
+                    qDebug() << "Unknown user type: " << userType;
                 }
-                return QVariant::fromValue(pointerList);
-            } else if (userType == QMetaType::type("Point3D")) {
-                return QVariant::fromValue(Point3D::fromVariantList(variant.toList()));
-            } else if (userType == QMetaType::type("ScriptFunctionMap")) {
-                ScriptFunctionMap functionMap;
-                QVariantMap variantMap = variant.toMap();
-                for (const QString &key : variantMap.keys()) {
-                    functionMap[key] = ScriptFunction::fromString(variantMap[key].toString());
-                }
-                return QVariant::fromValue(functionMap);
-            } else if (userType == QMetaType::type("Vector3D")) {
-                return QVariant::fromValue(Vector3D::fromVariantList(variant.toList()));
+                return QVariant();
             }
-            // fall-through
+        }
         default:
             qDebug() << "Unknown type: " << type;
             return QVariant();
     }
 }
 
-QString ConversionUtil::toJSON(const QVariant &variant, Options options) {
+QString ConversionUtil::toJsonString(const QVariant &variant, Options options) {
 
     switch (variant.type()) {
         case QVariant::Bool:
@@ -89,7 +78,7 @@ QString ConversionUtil::toJSON(const QVariant &variant, Options options) {
         case QVariant::List: {
             QStringList stringList;
             for (const QVariant &item : variant.toList()) {
-                stringList << ConversionUtil::toJSON(item);
+                stringList << ConversionUtil::toJsonString(item);
             }
             if (stringList.isEmpty()) {
                 return QString();
@@ -118,40 +107,28 @@ QString ConversionUtil::toJSON(const QVariant &variant, Options options) {
                 if (options & IncludeTypeInfo) {
                     stringList << QString("%1: [ %2, %3, %4 ]")
                                   .arg(jsString(key), QString::number(value.type()),
-                                       QString::number(value.userType()), toJSON(value, options));
+                                       QString::number(value.userType()), toJsonString(value, options));
                 } else {
-                    stringList << QString("%1: %2").arg(jsString(key), toJSON(value, options));
+                    stringList << QString("%1: %2").arg(jsString(key), toJsonString(value, options));
                 }
             }
             return stringList.isEmpty() ? QString() : "{ " + stringList.join(", ") + " }";
         }
-        case QVariant::UserType:
-            if (variant.userType() == QMetaType::type("CharacterStats")) {
-                return variant.value<CharacterStats>().toString();
-            } else if (variant.userType() == QMetaType::type("GameObject *")) {
-                return variant.value<GameObject *>()->toJSON(IncludeTypeInfo);
-            } else if (variant.userType() == QMetaType::type("GameObjectPtr")) {
-                return jsString(variant.value<GameObjectPtr>().toString());
-            } else if (variant.userType() == QMetaType::type("GameObjectPtrList")) {
-                QStringList stringList;
-                for (const GameObjectPtr &pointer : variant.value<GameObjectPtrList>()) {
-                    stringList << jsString(pointer.toString());
+        case QVariant::UserType: {
+            MetaTypeRegistry::JsonConverters converters =
+                    MetaTypeRegistry::jsonConverters(QMetaType::typeName(variant.userType()));
+            if (converters.typeToJsonStringConverter) {
+                return converters.typeToJsonStringConverter(variant);
+            } else {
+                const char *typeName = QMetaType::typeName(variant.userType());
+                if (typeName) {
+                    qDebug() << "User type not serializable: " << typeName;
+                } else {
+                    qDebug() << "Unknown user type: " << variant.userType();
                 }
-                return stringList.isEmpty() ? QString() : "[ " + stringList.join(", ") + " ]";
-            } else if (variant.userType() == QMetaType::type("Point3D")) {
-                return variant.value<Point3D>().toString();
-            } else if (variant.userType() == QMetaType::type("ScriptFunctionMap")) {
-                QStringList stringList;
-                ScriptFunctionMap functionMap = variant.value<ScriptFunctionMap>();
-                for (const QString &key : functionMap.keys()) {
-                    stringList << QString("%1: %2").arg(jsString(key),
-                                                        jsString(functionMap[key].toString()));
-                }
-                return stringList.isEmpty() ? QString() : "{ " + stringList.join(", ") + " }";
-            } else if (variant.userType() == QMetaType::type("Vector3D")) {
-                return variant.value<Vector3D>().toString();
+                return QString();
             }
-            // fall-through
+        }
         default:
             qDebug() << "Unknown type: " << variant.type();
             return QString();
@@ -187,34 +164,13 @@ QString ConversionUtil::toUserString(const QVariant &variant) {
             }
             return stringList.isEmpty() ? "(empty)" : stringList.join("\n");
         }
-        case QVariant::UserType:
-            if (variant.userType() == QMetaType::type("CharacterStats")) {
-                CharacterStats stats = variant.value<CharacterStats>();
-                return QString("[ %1, %2, %3, %4, %5, %6 ]")
-                       .arg(stats.strength).arg(stats.dexterity)
-                       .arg(stats.vitality).arg(stats.endurance)
-                       .arg(stats.intelligence).arg(stats.faith);
-            } else if (variant.userType() == QMetaType::type("GameObjectPtr")) {
-                GameObjectPtr pointer = variant.value<GameObjectPtr>();
-                if (pointer.isNull()) {
-                    return "(not set)";
-                } else {
-                    return pointer.toString() + " (" + pointer->name() + ")";
-                }
-            } else if (variant.userType() == QMetaType::type("GameObjectPtrList")) {
-                QStringList stringList;
-                for (GameObjectPtr pointer : variant.value<GameObjectPtrList>()) {
-                    stringList << pointer.toString();
-                }
-                return "[ " + stringList.join(", ") + " ]";
-            } else if (variant.userType() == QMetaType::type("Point3D")) {
-                Point3D point = variant.value<Point3D>();
-                return QString("( %1, %2, %3 )").arg(point.x).arg(point.y).arg(point.z);
-            } else if (variant.userType() == QMetaType::type("Vector3D")) {
-                Vector3D vector = variant.value<Vector3D>();
-                return QString("| %1, %2, %3 |").arg(vector.x).arg(vector.y).arg(vector.z);
+        case QVariant::UserType: {
+            MetaTypeRegistry::UserStringConverters converters =
+                    MetaTypeRegistry::userStringConverters(QMetaType::typeName(variant.userType()));
+            if (converters.typeToUserStringConverter) {
+                return converters.typeToUserStringConverter(variant);
             }
-            // fall-through
+        }   // fall-through
         default:
             return "(unknown type)";
     }

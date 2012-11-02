@@ -2,14 +2,15 @@
 #define GAMEOBJECTPTR_H
 
 #include <QList>
-#include <QMetaType>
 #include <QObject>
 #include <QScriptEngine>
 #include <QScriptValue>
 #include <QString>
+#include <QVariant>
 
 #include "constants.h"
 #include "gameexception.h"
+#include "metatyperegistry.h"
 
 
 class GameObject;
@@ -69,13 +70,18 @@ class GameObjectPtr {
         void setOwnerList(GameObjectPtrList *list);
 
         QString toString() const;
-        static GameObjectPtr fromString(Realm *realm, const QString &string);
 
-        friend void swap(GameObjectPtr &first, GameObjectPtr &second);
-        friend void swapWithinList(GameObjectPtr &first, GameObjectPtr &second);
+        static QString toUserString(const GameObjectPtr &pointer);
+        static GameObjectPtr fromUserString(const QString &string);
+
+        static QString toJsonString(const GameObjectPtr &pointer, Options options = NoOptions);
+        static GameObjectPtr fromVariant(const QVariant &variant);
 
         static QScriptValue toScriptValue(QScriptEngine *engine, const GameObjectPtr &pointer);
         static void fromScriptValue(const QScriptValue &object, GameObjectPtr &pointer);
+
+        friend void swap(GameObjectPtr &first, GameObjectPtr &second);
+        friend void swapWithinList(GameObjectPtr &first, GameObjectPtr &second);
 
     private:
         GameObject *m_gameObject;
@@ -86,7 +92,7 @@ class GameObjectPtr {
         GameObjectPtrList *m_list;
 };
 
-Q_DECLARE_METATYPE(GameObjectPtr)
+PT_DECLARE_SERIALIZABLE_METATYPE(GameObjectPtr)
 
 
 class GameObjectPtrList {
@@ -229,6 +235,13 @@ class GameObjectPtrList {
 
         QString joinFancy(Options options = NoOptions) const;
 
+        static QString toUserString(const GameObjectPtrList &pointerList);
+        static GameObjectPtrList fromUserString(const QString &string);
+
+        static QString toJsonString(const GameObjectPtrList &pointerList,
+                                    Options options = NoOptions);
+        static GameObjectPtrList fromVariant(const QVariant &variant);
+
     private:
         int m_size;
         int m_capacity;
@@ -236,6 +249,6 @@ class GameObjectPtrList {
         GameObjectPtrList *m_nextList;
 };
 
-Q_DECLARE_METATYPE(GameObjectPtrList)
+PT_DECLARE_SERIALIZABLE_METATYPE(GameObjectPtrList)
 
 #endif // GAMEOBJECTPTR_H

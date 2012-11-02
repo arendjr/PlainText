@@ -20,7 +20,7 @@ void RoomsListCommand::execute(Player *player, const QString &command) {
 
     QVariantList data;
     for (const GameObjectPtr &room : realm()->allRooms()) {
-        data << room->toJSON();
+        data << room->toJsonString();
     }
     sendReply(data);
 }

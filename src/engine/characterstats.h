@@ -1,17 +1,17 @@
 #ifndef CHARACTERSTATS_H
 #define CHARACTERSTATS_H
 
-#include <QMetaType>
 #include <QScriptValue>
 #include <QString>
-#include <QVariantList>
+#include <QVariant>
+
+#include "constants.h"
+#include "metatyperegistry.h"
 
 
 class CharacterStats {
 
     public:
-        CharacterStats();
-
         int strength;
         int dexterity;
         int vitality;
@@ -19,11 +19,14 @@ class CharacterStats {
         int intelligence;
         int faith;
 
+        CharacterStats() = default;
+        CharacterStats(int strength, int dexterity, int vitality,
+                       int endurance, int intelligence, int faith);
+
         inline int total() const {
             return strength + dexterity + vitality + endurance + intelligence + faith;
         }
 
-        CharacterStats &operator=(const CharacterStats &other);
         bool operator==(const CharacterStats &other) const;
         bool operator!=(const CharacterStats &other) const;
 
@@ -33,9 +36,12 @@ class CharacterStats {
         bool isNull() const;
 
         QString toString() const;
-        static CharacterStats fromString(const QString &string);
 
-        static CharacterStats fromVariantList(const QVariantList &variantList);
+        static QString toUserString(const CharacterStats &stats);
+        static CharacterStats fromUserString(const QString &string);
+
+        static QString toJsonString(const CharacterStats &stats, Options options = NoOptions);
+        static CharacterStats fromVariant(const QVariant &variant);
 
         static QScriptValue toScriptValue(QScriptEngine *engine, const CharacterStats &stats);
         static void fromScriptValue(const QScriptValue &object, CharacterStats &stats);
@@ -43,7 +49,6 @@ class CharacterStats {
 
 typedef QList<CharacterStats> CharacterStatsList;
 
-Q_DECLARE_METATYPE(CharacterStats)
-Q_DECLARE_METATYPE(CharacterStatsList)
+PT_DECLARE_SERIALIZABLE_METATYPE(CharacterStats)
 
 #endif // CHARACTERSTATS_H

@@ -21,7 +21,8 @@ class GameException : public std::exception {
             InvalidCharacterStats,
             InvalidCombatMessage,
             InvalidPoint,
-            InvalidVector
+            InvalidVector,
+            NotSupported
         };
 
         GameException(Cause cause);
@@ -29,10 +30,14 @@ class GameException : public std::exception {
         GameException(Cause cause, const char *message);
         virtual ~GameException() throw ();
 
+        Cause cause() const { return m_cause; }
+
         virtual const char *what() const throw ();
 
     private:
         static const char *s_messages[];
+
+        Cause m_cause;
 
         bool m_customMessage;
         char *m_message;

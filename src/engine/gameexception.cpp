@@ -16,17 +16,20 @@ const char *GameException::s_messages[] = {
     "Invalid character stats",
     "Invalid combat message",
     "Invalid point",
-    "Invalid vector"
+    "Invalid vector",
+    "Not supported"
 };
 
 GameException::GameException(Cause cause) :
     std::exception(),
+    m_cause(cause),
     m_customMessage(false),
     m_message(const_cast<char *>(s_messages[cause])) {
 }
 
 GameException::GameException(Cause cause, const char *objectType, uint id) :
     std::exception(),
+    m_cause(cause),
     m_customMessage(true) {
 
     m_message = new char[100];
@@ -39,6 +42,7 @@ GameException::GameException(Cause cause, const char *objectType, uint id) :
 
 GameException::GameException(GameException::Cause cause, const char *message) :
     std::exception(),
+    m_cause(cause),
     m_customMessage(true) {
 
     m_message = new char[100 + strlen(message)];

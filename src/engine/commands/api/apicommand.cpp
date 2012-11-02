@@ -27,7 +27,7 @@ void ApiCommand::sendReply(const QVariant &variant) {
                  "\"errorCode\": 0, "
                  "\"errorMessage\": \"\", "
                  "\"data\": %2 "
-                 "}").arg(m_requestId, ConversionUtil::toJSON(variant)));
+                 "}").arg(m_requestId, ConversionUtil::toJsonString(variant)));
 }
 
 void ApiCommand::sendError(int errorCode, const QString &errorMessage) {

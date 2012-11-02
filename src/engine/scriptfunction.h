@@ -1,10 +1,11 @@
 #ifndef SCRIPTFUNCTION_H
 #define SCRIPTFUNCTION_H
 
-#include <QMetaType>
 #include <QScriptValue>
 
+#include "constants.h"
 #include "gameexception.h"
+#include "metatyperegistry.h"
 
 
 class QScriptEngine;
@@ -24,12 +25,17 @@ class ScriptFunction {
 
         QString toString() const;
 
-        static ScriptFunction fromString(const QString &string);
+        static QString toUserString(const ScriptFunction &scriptFunction);
+        static ScriptFunction fromUserString(const QString &string);
+
+        static QString toJsonString(const ScriptFunction &scriptFunction,
+                                    Options options = NoOptions);
+        static ScriptFunction fromVariant(const QVariant &variant);
 
         static QScriptValue toScriptValue(QScriptEngine *engine, const ScriptFunction &function);
         static void fromScriptValue(const QScriptValue &value, ScriptFunction &function);
 };
 
-Q_DECLARE_METATYPE(ScriptFunction)
+PT_DECLARE_SERIALIZABLE_METATYPE(ScriptFunction)
 
 #endif // SCRIPTFUNCTION_H

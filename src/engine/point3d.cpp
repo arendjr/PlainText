@@ -39,42 +39,45 @@ Vector3D Point3D::operator-(const Point3D &other) const {
 
 QString Point3D::toString() const {
 
-    QStringList components;
-    components << QString::number(x);
-    components << QString::number(y);
-    components << QString::number(z);
-    return "[" + components.join(", ") + "]";
+    return QString("( %1, %2, %3 )").arg(x).arg(y).arg(z);
 }
 
-Point3D Point3D::fromString(const QString &string) {
+QString Point3D::toUserString(const Point3D &point) {
 
-    if (!string.startsWith("[") || !string.endsWith("]")) {
+    return point.toString();
+}
+
+Point3D Point3D::fromUserString(const QString &string) {
+
+    if (!string.startsWith("(") || !string.endsWith(")")) {
         throw GameException(GameException::InvalidPoint);
     }
 
-    QStringList components = string.mid(1, -1).split(',');
-    if (components.length() != 3) {
+    QStringList stringList = string.mid(1, string.length() - 2).split(',');
+    if (stringList.length() != 3) {
         throw GameException(GameException::InvalidPoint);
     }
 
-    Point3D point;
-    point.x = components[0].trimmed().toInt();
-    point.y = components[1].trimmed().toInt();
-    point.z = components[2].trimmed().toInt();
-    return point;
+    return Point3D(stringList[0].trimmed().toInt(),
+                   stringList[1].trimmed().toInt(),
+                   stringList[2].trimmed().toInt());
 }
 
-Point3D Point3D::fromVariantList(const QVariantList &variantList) {
+QString Point3D::toJsonString(const Point3D &point, Options options) {
 
+    Q_UNUSED(options)
+
+    return QString("[ %1, %2, %3 ]").arg(point.x).arg(point.y).arg(point.z);
+}
+
+Point3D Point3D::fromVariant(const QVariant &variant) {
+
+    QVariantList variantList = variant.toList();
     if (variantList.length() != 3) {
         throw GameException(GameException::InvalidPoint);
     }
 
-    Point3D point;
-    point.x = variantList[0].toInt();
-    point.y = variantList[1].toInt();
-    point.z = variantList[2].toInt();
-    return point;
+    return Point3D(variantList[0].toInt(), variantList[1].toInt(), variantList[2].toInt());
 }
 
 QScriptValue Point3D::toScriptValue(QScriptEngine *engine, const Point3D &point) {

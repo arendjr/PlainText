@@ -2,6 +2,7 @@
 
 #include <QDebug>
 
+#include "conversionutil.h"
 #include "scriptengine.h"
 
 
@@ -35,14 +36,41 @@ QString ScriptFunction::toString() const {
     return source;
 }
 
-ScriptFunction ScriptFunction::fromString(const QString &string) {
+QString ScriptFunction::toUserString(const ScriptFunction &scriptFunction) {
+
+    return scriptFunction.toString();
+}
+
+ScriptFunction ScriptFunction::fromUserString(const QString &string) {
 
     ScriptEngine *scriptEngine = ScriptEngine::instance();
     ScriptFunction function = scriptEngine->defineFunction(string);
     if (scriptEngine->hasUncaughtException()) {
         QScriptValue exception = scriptEngine->uncaughtException();
-        qWarning() << "Script Exception: " << exception.toString().toUtf8().constData() << endl
-                   << "While defining function: " << string.toUtf8().constData();
+        qWarning() << "Script Exception: " << exception.toString() << endl
+                   << "While defining function: " << string;
+        scriptEngine->evaluate("");
+        throw GameException(GameException::InvalidFunctionCode);
+    }
+    return function;
+}
+
+QString ScriptFunction::toJsonString(const ScriptFunction &scriptFunction, Options options) {
+
+    Q_UNUSED(options)
+
+    return ConversionUtil::jsString(scriptFunction.source);
+}
+
+ScriptFunction ScriptFunction::fromVariant(const QVariant &variant) {
+
+    QString string = variant.toString();
+    ScriptEngine *scriptEngine = ScriptEngine::instance();
+    ScriptFunction function = scriptEngine->defineFunction(string);
+    if (scriptEngine->hasUncaughtException()) {
+        QScriptValue exception = scriptEngine->uncaughtException();
+        qWarning() << "Script Exception: " << exception.toString() << endl
+                   << "While defining function: " << string;
         scriptEngine->evaluate("");
         throw GameException(GameException::InvalidFunctionCode);
     }

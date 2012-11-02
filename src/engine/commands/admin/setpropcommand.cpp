@@ -1,9 +1,8 @@
 #include "setpropcommand.h"
 
-#include "characterstats.h"
-#include "point3d.h"
+#include "gameexception.h"
+#include "metatyperegistry.h"
 #include "util.h"
-#include "vector3d.h"
 
 
 #define super AdminCommand
@@ -50,66 +49,32 @@ void SetPropCommand::execute(Player *player, const QString &command) {
         case QVariant::String:
             variant = value.replace("\\n", "\n");
             break;
-        case QVariant::UserType:
-            if (variant.userType() == QMetaType::type("CharacterStats")) {
-                QStringList stringList = value.mid(1, value.length() - 2).split(',');
-                if (stringList.length() == 6) {
-                    CharacterStats stats;
-                    stats.strength = stringList[0].toInt();
-                    stats.dexterity = stringList[1].toInt();
-                    stats.vitality = stringList[2].toInt();
-                    stats.endurance = stringList[3].toInt();
-                    stats.intelligence = stringList[4].toInt();
-                    stats.faith = stringList[5].toInt();
-                    variant = QVariant::fromValue(stats);
-                } else {
-                    send("Property of type CharacterStats takes the form [ <str>, <dex>, <vit>, "
-                         "<end>, <int>, <fai> ].");
-                    return;
-                }
-                break;
-            } else if (variant.userType() == QMetaType::type("GameObjectPtr")) {
-                variant = QVariant::fromValue(GameObjectPtr::fromString(realm(), value));
-                break;
-            } else if (variant.userType() == QMetaType::type("GameObjectPtrList")) {
+        case QVariant::UserType: {
+            MetaTypeRegistry::UserStringConverters converters =
+                    MetaTypeRegistry::userStringConverters(QMetaType::typeName(variant.userType()));
+            if (converters.userStringToTypeConverter) {
                 try {
-                    GameObjectPtrList pointerList;
-                    for (QString string : value.mid(1, value.length() - 2).split(',')) {
-                        string = string.trimmed();
-                        if (!string.isEmpty()) {
-                            pointerList << GameObjectPtr::fromString(realm(), string);
-                        }
-                    }
-                    variant = QVariant::fromValue(pointerList);
+                    variant = converters.userStringToTypeConverter(value);
                 } catch (const GameException &exception) {
-                    send(exception.what());
+                    switch (exception.cause()) {
+                        case GameException::InvalidCharacterStats:
+                            send("Property of type CharacterStats takes the form [ <str>, <dex>, "
+                                 "<vit>, <end>, <int>, <fai> ].");
+                            break;
+                        case GameException::InvalidPoint:
+                            send("Property of type Point3D takes the form ( <x>, <y>, <z> ).");
+                            break;
+                        case GameException::InvalidVector:
+                            send("Property of type Vector3D takes the form | <x>, <y>, <z> |.");
+                            break;
+                        default:
+                            send(exception.what());
+                            break;
+                    }
+                    break;
                 }
-                break;
-            } else if (variant.userType() == QMetaType::type("Point3D")) {
-                QStringList stringList = value.mid(1, value.length() - 2).split(',');
-                if (stringList.length() == 3) {
-                    Point3D point(stringList[0].toInt(),
-                                  stringList[1].toInt(),
-                                  stringList[2].toInt());
-                    variant = QVariant::fromValue(point);
-                } else {
-                    send("Property of type Point3D takes the form ( <x>, <y>, <z> ).");
-                    return;
-                }
-                break;
-            } else if (variant.userType() == QMetaType::type("Vector3D")) {
-                QStringList stringList = value.mid(1, value.length() - 2).split(',');
-                if (stringList.length() == 3) {
-                    Vector3D vector(stringList[0].toInt(),
-                                    stringList[1].toInt(),
-                                    stringList[2].toInt());
-                    variant = QVariant::fromValue(vector);
-                } else {
-                    send("Property of type Vector3D takes the form | <x>, <y>, <z> |.");
-                    return;
-                }
-                break;
             }
+        }   // fall-through
         default:
             send("Setting property %1 is not supported.", propertyName);
             return;

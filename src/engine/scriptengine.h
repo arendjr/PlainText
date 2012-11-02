@@ -10,6 +10,7 @@
 #include "scriptfunction.h"
 
 
+class MetaTypeRegistry;
 class Room;
 class Player;
 

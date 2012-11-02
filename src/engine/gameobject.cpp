@@ -450,7 +450,7 @@ GameObject *GameObject::copy() {
     return object;
 }
 
-QString GameObject::toJSON(Options options) const {
+QString GameObject::toJsonString(Options options) const {
 
     QStringList dumpedProperties;
     if (~options & SkipId) {
@@ -459,7 +459,7 @@ QString GameObject::toJSON(Options options) const {
     for (const QMetaProperty &metaProperty : storedMetaProperties()) {
         const char *name = metaProperty.name();
 
-        QString propertyString = ConversionUtil::toJSON(property(name), options & IncludeTypeInfo);
+        QString propertyString = ConversionUtil::toJsonString(property(name), options & IncludeTypeInfo);
         if (!propertyString.isNull()) {
             dumpedProperties << QString("  \"%1\": %2").arg(name, propertyString);
         }
@@ -472,7 +472,7 @@ bool GameObject::save() {
     if (m_deleted) {
         return QFile::remove(DiskUtil::gameObjectPath(m_objectType, m_id));
     } else {
-        return DiskUtil::writeGameObject(m_objectType, m_id, toJSON(SkipId | IncludeTypeInfo));
+        return DiskUtil::writeGameObject(m_objectType, m_id, toJsonString(SkipId | IncludeTypeInfo));
     }
 }
 
@@ -666,16 +666,23 @@ QList<QMetaProperty> GameObject::metaProperties() const {
 
 QList<QMetaProperty> GameObject::storedMetaProperties() const {
 
-    QList<QMetaProperty> properties;
-    int count = metaObject()->propertyCount(),
-        offset = GameObject::staticMetaObject.propertyOffset();
-    for (int i = offset; i < count; i++) {
-        QMetaProperty metaProperty = metaObject()->property(i);
-        if (metaProperty.isStored()) {
-            properties << metaProperty;
+    static QMap<QString, QList<QMetaProperty> > cachedMetaProperties;
+
+    QString key(objectType());
+    if (!cachedMetaProperties.contains(key)) {
+        QList<QMetaProperty> properties;
+        int count = metaObject()->propertyCount(),
+            offset = GameObject::staticMetaObject.propertyOffset();
+        for (int i = offset; i < count; i++) {
+            QMetaProperty metaProperty = metaObject()->property(i);
+            if (metaProperty.isStored()) {
+                properties << metaProperty;
+            }
         }
+        cachedMetaProperties[key] = properties;
     }
-    return properties;
+
+    return cachedMetaProperties[key];
 }
 
 void GameObject::invokeTimer(int timerId) {

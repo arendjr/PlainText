@@ -86,7 +86,7 @@ MapModel.prototype.setRoomProperty = function(roomId, propertyName, value) {
         }
 
         propertyName = "position";
-        value = "[" + room.x + "," + room.y + "," + room.z + "]";
+        value = "(" + room.x + "," + room.y + "," + room.z + ")";
     }
 
     controller.sendApiCall("property-set #" + roomId + " " + propertyName +

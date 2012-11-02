@@ -5,10 +5,6 @@
 #include "characterstats.h"
 
 
-Modifier::Modifier() :
-    duration(0) {
-}
-
 QScriptValue Modifier::toScriptValue(QScriptEngine *engine, const Modifier &modifier) {
 
     QScriptValue object = engine->newObject();
