@@ -35,11 +35,11 @@
 #define GET_MACRO(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, \
                   _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, \
                   _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, NAME, ...) NAME
-#define FOR_EACH(action,...) \
+#define FOR_EACH(action, ...) \
     GET_MACRO(__VA_ARGS__, PT_FE_30, PT_FE_29, PT_FE_28, PT_FE_27, PT_FE_26, \
                            PT_FE_25, PT_FE_24, PT_FE_23, PT_FE_22, PT_FE_21, \
                            PT_FE_20, PT_FE_19, PT_FE_18, PT_FE_17, PT_FE_16, \
-                           PT_FE_15, PT_FE_14, PT_FE_13, PT_FE_12, PT_FE_11 \
+                           PT_FE_15, PT_FE_14, PT_FE_13, PT_FE_12, PT_FE_11, \
                            PT_FE_10, PT_FE_9, PT_FE_8, PT_FE_7, PT_FE_6, \
                            PT_FE_5, PT_FE_4, PT_FE_3, PT_FE_2, PT_FE_1)(action, __VA_ARGS__)
 
