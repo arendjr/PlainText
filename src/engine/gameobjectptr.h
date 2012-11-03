@@ -10,6 +10,7 @@
 
 #include "constants.h"
 #include "gameexception.h"
+#include "gameobject.h"
 #include "metatyperegistry.h"
 
 
@@ -22,7 +23,7 @@ class GameObjectPtr {
     public:
         GameObjectPtr();
         GameObjectPtr(GameObject *gameObject);
-        GameObjectPtr(Realm *realm, const char *objectType, uint id);
+        GameObjectPtr(Realm *realm, GameObjectType objectType, uint id);
         GameObjectPtr(const GameObjectPtr &other);
         GameObjectPtr(GameObjectPtr &&other);
         ~GameObjectPtr();
@@ -86,7 +87,7 @@ class GameObjectPtr {
     private:
         GameObject *m_gameObject;
 
-        char m_objectType[10];
+        GameObjectType m_objectType;
         uint m_id;
 
         GameObjectPtrList *m_list;

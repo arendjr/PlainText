@@ -4,7 +4,6 @@
 #include <QScriptValue>
 
 #include "constants.h"
-#include "gameexception.h"
 #include "metatyperegistry.h"
 
 

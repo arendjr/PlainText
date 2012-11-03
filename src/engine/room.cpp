@@ -6,7 +6,7 @@
 #define super GameObject
 
 Room::Room(Realm *realm, uint id, Options options) :
-    super(realm, "room", id, options),
+    super(realm, GameObjectType::Room, id, options),
     m_position(0, 0, 0) {
 }
 

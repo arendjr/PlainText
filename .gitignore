@@ -1,6 +1,7 @@
 # Qt Creator build
+Makefile
 PlainText-build-desktop*
-PlainText.pro.user
+PlainText.pro.user*
 moc_*.cpp
 
 # XCode project

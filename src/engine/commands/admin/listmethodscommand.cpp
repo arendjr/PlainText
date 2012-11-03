@@ -34,7 +34,8 @@ void ListMethodsCommand::execute(Player *player, const QString &command) {
 
     ScriptEngine *scriptEngine = ScriptEngine::instance();
     QScriptValue value = scriptEngine->evaluate(QString("Object.keys($('%1:%2'))")
-                                                .arg(object->objectType()).arg(object->id()));
+                                                .arg(object->objectType().toString())
+                                                .arg(object->id()));
 
     QScriptValueIterator it(value);
     while (it.hasNext()) {

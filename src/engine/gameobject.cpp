@@ -1,7 +1,5 @@
 #include "gameobject.h"
 
-#include <cstring>
-
 #include <QDateTime>
 #include <QDebug>
 #include <QFile>
@@ -35,7 +33,7 @@
 #include "weapon.h"
 
 
-GameObject::GameObject(Realm *realm, const char *objectType, uint id, Options options) :
+GameObject::GameObject(Realm *realm, GameObjectType objectType, uint id, Options options) :
     QObject(),
     m_realm(realm),
     m_objectType(objectType),
@@ -46,7 +44,7 @@ GameObject::GameObject(Realm *realm, const char *objectType, uint id, Options op
     m_intervalHash(nullptr),
     m_timeoutHash(nullptr) {
 
-    Q_ASSERT(objectType);
+    Q_ASSERT(objectType != GameObjectType::Unknown);
 
     if (this != m_realm) {
         if (m_id == 0) {
@@ -74,67 +72,80 @@ GameObject::~GameObject() {
 
 bool GameObject::isClass() const {
 
-    return strcmp(m_objectType, "class") == 0;
-}
-
-bool GameObject::isContainer() const {
-
-    return strcmp(m_objectType, "container") == 0;
-}
-
-bool GameObject::isExit() const {
-
-    return strcmp(m_objectType, "exit") == 0;
-}
-
-bool GameObject::isItem() const {
-
-    return strcmp(m_objectType, "item") == 0 || isCharacter() || isShield() || isWeapon();
+    return m_objectType == GameObjectType::Class;
 }
 
 bool GameObject::isCharacter() const {
 
-    return strcmp(m_objectType, "character") == 0 || isPlayer();
+    return m_objectType == GameObjectType::Character || isPlayer();
+}
+
+bool GameObject::isContainer() const {
+
+    return m_objectType == GameObjectType::Container;
+}
+
+bool GameObject::isExit() const {
+
+    return m_objectType == GameObjectType::Exit;
+}
+
+bool GameObject::isItem() const {
+
+    return m_objectType == GameObjectType::Item ||
+           isCharacter() || isContainer() || isShield() || isWeapon();
 }
 
 bool GameObject::isGroup() const {
 
-    return strcmp(m_objectType, "group") == 0;
+    return m_objectType == GameObjectType::Group;
 }
 
 bool GameObject::isPlayer() const {
 
-    return strcmp(m_objectType, "player") == 0;
+    return m_objectType == GameObjectType::Player;
 }
 
 bool GameObject::isRace() const {
 
-    return strcmp(m_objectType, "race") == 0;
+    return m_objectType == GameObjectType::Race;
 }
 
 bool GameObject::isRealm() const {
 
-    return strcmp(m_objectType, "realm") == 0;
+    return m_objectType == GameObjectType::Realm;
 }
 
 bool GameObject::isRoom() const {
 
-    return strcmp(m_objectType, "room") == 0;
+    return m_objectType == GameObjectType::Room;
 }
 
 bool GameObject::isShield() const {
 
-    return strcmp(m_objectType, "shield") == 0;
+    return m_objectType == GameObjectType::Shield;
 }
 
 bool GameObject::isWeapon() const {
 
-    return strcmp(m_objectType, "weapon") == 0;
+    return m_objectType == GameObjectType::Weapon;
 }
 
 bool GameObject::hasStats() const {
 
     return isCharacter() || isShield() || isWeapon();
+}
+
+void GameObject::setName(const QString &name) {
+
+    if (m_name != name) {
+        m_name = name;
+
+        setObjectName(name);
+        setModified();
+
+        changeName(m_name);
+    }
 }
 
 QString GameObject::definiteName(const GameObjectPtrList &pool, int options) const {
@@ -167,18 +178,6 @@ QString GameObject::indefiniteName(int options) const {
     } else {
         return (options & Capitalized ? Util::capitalize(m_indefiniteArticle) :
                                         m_indefiniteArticle) + " " + name();
-    }
-}
-
-void GameObject::setName(const QString &name) {
-
-    if (m_name != name) {
-        m_name = name;
-
-        setObjectName(name);
-        setModified();
-
-        changeName(m_name);
     }
 }
 
@@ -470,9 +469,10 @@ QString GameObject::toJsonString(Options options) const {
 bool GameObject::save() {
 
     if (m_deleted) {
-        return QFile::remove(DiskUtil::gameObjectPath(m_objectType, m_id));
+        return QFile::remove(DiskUtil::gameObjectPath(m_objectType.toString(), m_id));
     } else {
-        return DiskUtil::writeGameObject(m_objectType, m_id, toJsonString(SkipId | IncludeTypeInfo));
+        return DiskUtil::writeGameObject(m_objectType.toString(), m_id,
+                                         toJsonString(SkipId | IncludeTypeInfo));
     }
 }
 
@@ -537,57 +537,35 @@ void GameObject::setDeleted() {
     }
 }
 
-GameObject *GameObject::createByObjectType(Realm *realm, const char *objectType, uint id,
+GameObject *GameObject::createByObjectType(Realm *realm, GameObjectType objectType, uint id,
                                            Options options) {
 
-    switch (objectType[0]) {
-        case 'c':
-            if (strcmp(objectType + 1, "character" + 1) == 0) {
-                return new Character(realm, id, options);
-            } else if (strcmp(objectType + 1, "class" + 1) == 0) {
-                return new Class(realm, id, options);
-            } else if (strcmp(objectType + 1, "container" + 1) == 0) {
-                return new Container(realm, id, options);
-            }
-            break;
-        case 'e':
-            if (strcmp(objectType + 1, "exit" + 1) == 0) {
-                return new Exit(realm, id, options);
-            }
-            break;
-        case 'g':
-            if (strcmp(objectType + 1, "group" + 1) == 0) {
-                return new Group(realm, id, options);
-            }
-            break;
-        case 'i':
-            if (strcmp(objectType + 1, "item" + 1) == 0) {
-                return new Item(realm, id, options);
-            }
-            break;
-        case 'p':
-            if (strcmp(objectType + 1, "player" + 1) == 0) {
-                return new Player(realm, id, options);
-            }
-            break;
-        case 'r':
-            if (strcmp(objectType + 1, "race" + 1) == 0) {
-                return new Race(realm, id, options);
-            } else if (strcmp(objectType + 1, "realm" + 1) == 0) {
-                return new Realm(options);
-            } else if (strcmp(objectType + 1, "room" + 1) == 0) {
-                return new Room(realm, id, options);
-            }
-            break;
-        case 's':
-            if (strcmp(objectType + 1, "shield" + 1) == 0) {
-                return new Shield(realm, id, options);
-            }
-            break;
-        case 'w':
-            if (strcmp(objectType + 1, "weapon" + 1) == 0) {
-                return new Weapon(realm, id, options);
-            }
+    switch (objectType.value) {
+        case GameObjectType::Character:
+            return new Character(realm, id, options);
+        case GameObjectType::Class:
+            return new Class(realm, id, options);
+        case GameObjectType::Container:
+            return new Container(realm, id, options);
+        case GameObjectType::Exit:
+            return new Exit(realm, id, options);
+        case GameObjectType::Group:
+            return new Group(realm, id, options);
+        case GameObjectType::Item:
+            return new Item(realm, id, options);
+        case GameObjectType::Player:
+            return new Player(realm, id, options);
+        case GameObjectType::Race:
+            return new Race(realm, id, options);
+        case GameObjectType::Realm:
+            return new Realm(options);
+        case GameObjectType::Room:
+            return new Room(realm, id, options);
+        case GameObjectType::Shield:
+            return new Shield(realm, id, options);
+        case GameObjectType::Weapon:
+            return new Weapon(realm, id, options);
+        case GameObjectType::Unknown:
             break;
         default:
             break;
@@ -605,7 +583,8 @@ GameObject *GameObject::createFromFile(Realm *realm, const QString &path) {
         throw GameException(GameException::InvalidGameObjectFileName);
     }
 
-    GameObject *gameObject = createByObjectType(realm, components[0].toAscii().constData(),
+    QString objectType = Util::capitalize(components[0]);
+    GameObject *gameObject = createByObjectType(realm, GameObjectType::fromString(objectType),
                                                        components[1].toInt());
     gameObject->load(path);
     return gameObject;
@@ -666,10 +645,8 @@ QList<QMetaProperty> GameObject::metaProperties() const {
 
 QList<QMetaProperty> GameObject::storedMetaProperties() const {
 
-    static QMap<QString, QList<QMetaProperty> > cachedMetaProperties;
-
-    QString key(objectType());
-    if (!cachedMetaProperties.contains(key)) {
+    static QHash<int, QList<QMetaProperty> > storedProperties;
+    if (!storedProperties.contains(m_objectType.intValue())) {
         QList<QMetaProperty> properties;
         int count = metaObject()->propertyCount(),
             offset = GameObject::staticMetaObject.propertyOffset();
@@ -679,10 +656,9 @@ QList<QMetaProperty> GameObject::storedMetaProperties() const {
                 properties << metaProperty;
             }
         }
-        cachedMetaProperties[key] = properties;
+        storedProperties[m_objectType.intValue()] = properties;
     }
-
-    return cachedMetaProperties[key];
+    return storedProperties[m_objectType.intValue()];
 }
 
 void GameObject::invokeTimer(int timerId) {
@@ -753,8 +729,9 @@ void GameObject::registerPointer(GameObjectPtr *pointer) {
 
 void GameObject::unregisterPointer(GameObjectPtr *pointer) {
 
-    Q_ASSERT(m_pointers.contains(pointer));
-    m_pointers.removeOne(pointer);
+    int index = m_pointers.indexOf(pointer);
+    Q_ASSERT(index > -1);
+    m_pointers.remove(index);
 
     if (m_autoDelete && m_pointers.isEmpty()) {
         setDeleted();

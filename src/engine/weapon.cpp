@@ -4,7 +4,7 @@
 #define super StatsItem
 
 Weapon::Weapon(Realm *realm, uint id, Options options) :
-    super(realm, "weapon", id, options) {
+    super(realm, GameObjectType::Weapon, id, options) {
 
     setPortable(true);
 }

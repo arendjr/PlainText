@@ -11,7 +11,7 @@ class StatsItem : public Item {
     Q_OBJECT
 
     public:
-        StatsItem(Realm *realm, const char *objectType, uint id, Options options = NoOptions);
+        StatsItem(Realm *realm, GameObjectType objectType, uint id, Options options = NoOptions);
         virtual ~StatsItem();
 
         const CharacterStats &stats() const { return m_stats; }

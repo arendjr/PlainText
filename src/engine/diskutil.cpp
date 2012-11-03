@@ -28,7 +28,7 @@ bool DiskUtil::writeFile(const QString &path, const QString &content) {
     return true;
 }
 
-bool DiskUtil::writeGameObject(const char *objectType, uint id, const QString &content) {
+bool DiskUtil::writeGameObject(const QString &objectType, uint id, const QString &content) {
 
     return writeFile(gameObjectPath(objectType, id), content);
 }
@@ -51,7 +51,7 @@ QStringList DiskUtil::dataDirFileList(const QString &subdirectory) {
     return dir.entryList(QDir::Files);
 }
 
-QString DiskUtil::gameObjectPath(const char *objectType, uint id) {
+QString DiskUtil::gameObjectPath(const QString &objectType, uint id) {
 
     return dataDir() + QString("/%1.%2").arg(objectType).arg(id, 9, 10, QChar('0'));
 }

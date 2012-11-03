@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <climits>
-#include <cstring>
 #include <utility>
 
 #include <QDebug>
@@ -11,7 +10,6 @@
 #include <QVector>
 
 #include "conversionutil.h"
-#include "gameobject.h"
 #include "item.h"
 #include "realm.h"
 #include "util.h"
@@ -19,10 +17,9 @@
 
 GameObjectPtr::GameObjectPtr() :
     m_gameObject(nullptr),
+    m_objectType(GameObjectType::Unknown),
     m_id(0),
     m_list(nullptr) {
-
-    m_objectType[0] = '\0';
 }
 
 GameObjectPtr::GameObjectPtr(GameObject *gameObject) :
@@ -30,20 +27,17 @@ GameObjectPtr::GameObjectPtr(GameObject *gameObject) :
 
     if (gameObject) {
         m_gameObject = gameObject;
-        strcpy(m_objectType, gameObject->objectType());
+        m_objectType = gameObject->objectType();
         m_id = gameObject->id() ? gameObject->id() : UINT_MAX;
         m_gameObject->registerPointer(this);
     }
 }
 
-GameObjectPtr::GameObjectPtr(Realm *realm, const char *objectType, uint id) :
-    GameObjectPtr() {
-
-    m_id = id;
-
-    if (objectType) {
-        strcpy(m_objectType, objectType);
-    }
+GameObjectPtr::GameObjectPtr(Realm *realm, GameObjectType objectType, uint id) :
+    m_gameObject(nullptr),
+    m_objectType(objectType),
+    m_id(id),
+    m_list(nullptr) {
 
     if (realm->isInitialized()) {
         resolve(realm);
@@ -52,10 +46,9 @@ GameObjectPtr::GameObjectPtr(Realm *realm, const char *objectType, uint id) :
 
 GameObjectPtr::GameObjectPtr(const GameObjectPtr &other) :
     m_gameObject(other.m_gameObject),
+    m_objectType(other.m_objectType),
     m_id(other.m_id),
     m_list(nullptr) {
-
-    strcpy(m_objectType, other.m_objectType);
 
     if (m_gameObject) {
         m_gameObject->registerPointer(this);
@@ -88,7 +81,7 @@ GameObjectPtr &GameObjectPtr::operator=(const GameObjectPtr &other) {
         }
 
         m_gameObject = other.m_gameObject;
-        strcpy(m_objectType, other.m_objectType);
+        m_objectType = other.m_objectType;
         m_id = other.m_id;
 
         if (m_gameObject) {
@@ -140,12 +133,12 @@ void GameObjectPtr::resolve(Realm *realm) {
         return;
     }
 
-    m_gameObject = realm->getObject(m_objectType[0] == '\0' ? nullptr : m_objectType, m_id);
+    m_gameObject = realm->getObject(m_objectType, m_id);
     if (!m_gameObject) {
         throw GameException(GameException::InvalidGameObjectPointer, m_objectType, m_id);
     }
-    if (m_objectType[0] == '\0') {
-        strcpy(m_objectType, m_gameObject->objectType());
+    if (m_objectType == GameObjectType::Unknown) {
+        m_objectType = m_gameObject->objectType();
     }
 
     m_gameObject->registerPointer(this);
@@ -165,7 +158,7 @@ GameObjectPtr GameObjectPtr::copyUnresolved() const {
 
     GameObjectPtr copy;
     copy.m_id = m_id;
-    strcpy(copy.m_objectType, m_objectType);
+    copy.m_objectType = m_objectType;
     return copy;
 }
 
@@ -180,7 +173,7 @@ QString GameObjectPtr::toString() const {
         return "0";
     }
 
-    return QString("%1:%2").arg(m_objectType).arg(m_id);
+    return QString("%1:%2").arg(m_objectType.toString(), m_id);
 }
 
 QString GameObjectPtr::toUserString(const GameObjectPtr &pointer) {
@@ -203,7 +196,7 @@ GameObjectPtr GameObjectPtr::fromUserString(const QString &string) {
         throw GameException(GameException::InvalidGameObjectPointer);
     }
 
-    return GameObjectPtr(Realm::instance(), components[0].toAscii().constData(),
+    return GameObjectPtr(Realm::instance(), GameObjectType::fromString(components[0]),
                                             components[1].toInt());
 }
 
@@ -226,8 +219,8 @@ GameObjectPtr GameObjectPtr::fromVariant(const QVariant &variant) {
         throw GameException(GameException::InvalidGameObjectPointer);
     }
 
-    return GameObjectPtr(Realm::instance(), components[0].toAscii().constData(),
-                                            components[1].toInt());
+    return GameObjectPtr(Realm::instance(), GameObjectType::fromString(components[0]),
+                         components[1].toInt());
 }
 
 QScriptValue GameObjectPtr::toScriptValue(QScriptEngine *engine, const GameObjectPtr &pointer) {
@@ -244,7 +237,8 @@ QScriptValue GameObjectPtr::toScriptValue(QScriptEngine *engine, const GameObjec
 void GameObjectPtr::fromScriptValue(const QScriptValue &object, GameObjectPtr &pointer) {
 
     if (object.isQObject()) {
-        pointer = GameObjectPtr(Realm::instance(), nullptr, object.property("id").toUInt32());
+        pointer = GameObjectPtr(Realm::instance(), GameObjectType::Unknown,
+                                object.property("id").toUInt32());
     } else {
         pointer = GameObjectPtr();
     }

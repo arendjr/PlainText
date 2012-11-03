@@ -18,5 +18,6 @@ void DeleteObjectEvent::process() {
 
 QString DeleteObjectEvent::toString() const {
 
-    return QString("Delete object %2:%3").arg(m_object->objectType()).arg(m_object->id());
+    return QString("Delete object %2:%3").arg(m_object->objectType().toString())
+                                         .arg(m_object->id());
 }

@@ -15,7 +15,7 @@ static Realm *s_instance = nullptr;
 #define super GameObject
 
 Realm::Realm(Options options) :
-    super(this, "realm", 0, options),
+    super(this, GameObjectType::Realm, 0, options),
     m_initialized(false),
     m_nextId(1),
     m_timeIntervalId(0),
@@ -64,7 +64,7 @@ Realm *Realm::instance() {
 
 void Realm::init() {
 
-    load(DiskUtil::gameObjectPath(objectType(), id()));
+    load(DiskUtil::gameObjectPath(objectType().toString(), id()));
 
     for (const QString &fileName : DiskUtil::dataDirFileList()) {
         if (!fileName.startsWith("realm.")) {
@@ -116,10 +116,10 @@ void Realm::unregisterObject(GameObject *gameObject) {
     m_objectMap.remove(gameObject->id());
 }
 
-GameObject *Realm::getObject(const char *objectType, uint id) {
+GameObject *Realm::getObject(GameObjectType objectType, uint id) {
 
     if (id == 0) {
-        if (!objectType || strcmp(this->objectType(), objectType) == 0) {
+        if (objectType == GameObjectType::Unknown || this->objectType() == objectType) {
             return this;
         }
     }
@@ -127,7 +127,7 @@ GameObject *Realm::getObject(const char *objectType, uint id) {
     if (m_objectMap.contains(id)) {
         GameObject *object = m_objectMap[id];
         Q_ASSERT(object);
-        if (!objectType || strcmp(object->objectType(), objectType) == 0) {
+        if (objectType == GameObjectType::Unknown || this->objectType() == objectType) {
             return object;
         }
     }
@@ -137,12 +137,12 @@ GameObject *Realm::getObject(const char *objectType, uint id) {
 
 GameObject *Realm::getObject(const QString &objectType, uint id) {
 
-    return getObject(objectType.toAscii().constData(), id);
+    return getObject(GameObjectType::fromString(objectType), id);
 }
 
 GameObject *Realm::createObject(const QString &objectType) {
 
-    return GameObject::createByObjectType(this, objectType.toAscii().constData());
+    return GameObject::createByObjectType(this, GameObjectType::fromString(objectType));
 }
 
 GameObjectPtrList Realm::players() const {

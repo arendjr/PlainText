@@ -29,7 +29,8 @@ void ExitSetCommand::execute(Player *player, const QString &command) {
     QString name = takeWord();
     QString oppositeName = takeWord();
 
-    Room *source = qobject_cast<Room *>(realm()->getObject("area", roomFromId.toUInt()));
+    Room *source = qobject_cast<Room *>(realm()->getObject(GameObjectType::Room,
+                                                           roomFromId.toUInt()));
     if (source == nullptr) {
         sendError(404, "Area not found");
         return;
@@ -41,7 +42,7 @@ void ExitSetCommand::execute(Player *player, const QString &command) {
 
         source->addExit(exit);
     } else {
-        exit = qobject_cast<Exit *>(realm()->getObject("exit", exitId.toUInt()));
+        exit = qobject_cast<Exit *>(realm()->getObject(GameObjectType::Exit, exitId.toUInt()));
         if (exit == nullptr) {
             sendError(404, "Exit not found");
             return;
@@ -52,7 +53,8 @@ void ExitSetCommand::execute(Player *player, const QString &command) {
     if (roomToId == "new") {
         destination = new Room(realm());
     } else {
-        destination = qobject_cast<Room *>(realm()->getObject("room", roomToId.toUInt()));
+        destination = qobject_cast<Room *>(realm()->getObject(GameObjectType::Room,
+                                                              roomToId.toUInt()));
         if (destination == nullptr) {
             sendError(404, "Room not found");
             return;

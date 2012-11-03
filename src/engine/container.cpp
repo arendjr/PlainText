@@ -4,7 +4,7 @@
 #define super Item
 
 Container::Container(Realm *realm, uint id, Options options) :
-    super(realm, "container", id, options) {
+    super(realm, GameObjectType::Container, id, options) {
 }
 
 Container::~Container() {

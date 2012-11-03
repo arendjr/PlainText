@@ -20,5 +20,5 @@ void TimerEvent::process() {
 QString TimerEvent::toString() const {
 
     return QString("Timer #%1 on object %2:%3")
-           .arg(m_timerId).arg(m_object->objectType()).arg(m_object->id());
+           .arg(m_timerId).arg(m_object->objectType().toString()).arg(m_object->id());
 }

@@ -7,7 +7,7 @@
 
 #define super Item
 
-StatsItem::StatsItem(Realm *realm, const char *objectType, uint id, Options options) :
+StatsItem::StatsItem(Realm *realm, GameObjectType objectType, uint id, Options options) :
     super(realm, objectType, id, options),
     m_stats(0, 0, 0, 0, 0, 0),
     m_modifiersTimerId(0) {

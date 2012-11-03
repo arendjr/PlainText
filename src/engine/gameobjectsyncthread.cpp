@@ -61,12 +61,12 @@ void GameObjectSyncThread::syncObject(GameObject *object) {
         object->save();
     } catch (const GameException &exception) {
         qWarning() << "Game Exception: " << exception.what() << endl
-                   << QString("While syncing object: %1:%2").arg(object->objectType(),
-                                                                 object->id()).toUtf8().constData();
+                   << QString("While syncing object: %1:%2")
+                      .arg(object->objectType().toString(), object->id());
     } catch (...) {
         qWarning() << "Unknown exception." << endl
-                   << QString("While syncing object: %1:%2").arg(object->objectType(),
-                                                                 object->id()).toUtf8().constData();
+                   << QString("While syncing object: %1:%2")
+                      .arg(object->objectType().toString(), object->id());
     }
 
     delete object;

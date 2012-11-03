@@ -34,7 +34,7 @@ class Realm : public GameObject {
 
         void registerObject(GameObject *gameObject);
         void unregisterObject(GameObject *gameObject);
-        GameObject *getObject(const char *objectType, uint id);
+        GameObject *getObject(GameObjectType objectType, uint id);
         Q_INVOKABLE GameObject *getObject(const QString &objectType, uint id);
         Q_INVOKABLE GameObject *createObject(const QString &objectType);
 

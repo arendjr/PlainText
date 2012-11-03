@@ -11,7 +11,7 @@
 #define super Character
 
 Player::Player(Realm *realm, uint id, Options options) :
-    super(realm, "player", id, options),
+    super(realm, GameObjectType::Player, id, options),
     m_regenerationIntervalId(0),
     m_admin(false),
     m_session(0) {

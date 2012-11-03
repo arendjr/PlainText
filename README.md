@@ -208,7 +208,7 @@ list-methods <object>
 And this command gives an overview of all the properties:
 
 ```
-list-properties <object>
+list-props <object>
 ```
 
 **Q. I see there are properties called respawnTime and respawnTimeVariation.

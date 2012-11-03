@@ -34,7 +34,7 @@ void ListPropsCommand::execute(Player *player, const QString &command) {
 
     for (const QMetaProperty &metaProperty : object->metaProperties()) {
         const char *name = metaProperty.name();
-        if (strcmp(name, "objectType") == 0 || strcmp(name, "id") == 0) {
+        if (strcmp(name, "id") == 0) {
             continue;
         }
 

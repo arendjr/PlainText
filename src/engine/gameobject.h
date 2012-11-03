@@ -2,20 +2,39 @@
 #define GAMEOBJECT_H
 
 #include <QHash>
-#include <QList>
 #include <QMetaProperty>
 #include <QObject>
 #include <QScriptEngine>
 #include <QScriptValue>
 #include <QVariantMap>
+#include <QVector>
 
 #include "constants.h"
+#include "metatyperegistry.h"
 #include "scriptfunctionmap.h"
 
 
 class GameObjectPtr;
 class GameObjectPtrList;
 class Realm;
+
+
+PT_DEFINE_ENUM(GameObjectType,
+    Unknown,
+    Exit,
+    Room,
+    Item,
+    Character,
+    Player,
+    Class,
+    Race,
+    Container,
+    Group,
+    Weapon,
+    Shield,
+    Realm
+)
+
 
 class GameObject : public QObject {
 
@@ -26,12 +45,14 @@ class GameObject : public QObject {
     friend void swapWithinList(GameObjectPtr &first, GameObjectPtr &second);
 
     public:
-        GameObject(Realm *realm, const char *objectType, uint id, Options options = NoOptions);
+        GameObject(Realm *realm, GameObjectType objectType, uint id, Options options = NoOptions);
         virtual ~GameObject();
 
         Realm *realm() const { return m_realm; }
 
-        const char *objectType() const { return m_objectType; }
+        GameObjectType objectType() const { return m_objectType; }
+        Q_PROPERTY(GameObjectType objectType READ objectType STORED false)
+
         Q_INVOKABLE bool isClass() const;
         Q_INVOKABLE bool isContainer() const;
         Q_INVOKABLE bool isExit() const;
@@ -45,11 +66,6 @@ class GameObject : public QObject {
         Q_INVOKABLE bool isShield() const;
         Q_INVOKABLE bool isWeapon() const;
         Q_INVOKABLE bool hasStats() const;
-        Q_PROPERTY(const char *objectType READ objectType STORED false)
-
-        Q_INVOKABLE QString definiteName(const GameObjectPtrList &pool,
-                                         int options = NoOptions) const;
-        Q_INVOKABLE QString indefiniteName(int options = NoOptions) const;
 
         uint id() const { return m_id; }
         Q_PROPERTY(uint id READ id STORED false)
@@ -57,6 +73,10 @@ class GameObject : public QObject {
         const QString &name() const { return m_name; }
         void setName(const QString &name);
         Q_PROPERTY(QString name READ name WRITE setName)
+
+        Q_INVOKABLE QString definiteName(const GameObjectPtrList &pool,
+                                         int options = NoOptions) const;
+        Q_INVOKABLE QString indefiniteName(int options = NoOptions) const;
 
         const QString &plural() const { return m_plural; }
         void setPlural(const QString &plural);
@@ -144,7 +164,7 @@ class GameObject : public QObject {
 
         Q_INVOKABLE void setDeleted();
 
-        static GameObject *createByObjectType(Realm *realm, const char *objectType, uint id = 0,
+        static GameObject *createByObjectType(Realm *realm, GameObjectType objectType, uint id = 0,
                                               Options options = NoOptions);
 
         static GameObject *createFromFile(Realm *realm, const QString &path);
@@ -177,12 +197,14 @@ class GameObject : public QObject {
     private:
         Realm *m_realm;
 
-        const char *m_objectType;
+        GameObjectType m_objectType;
         uint m_id;
         Options m_options;
 
-        QList<GameObjectPtr *> m_pointers;
         bool m_autoDelete;
+        bool m_deleted;
+
+        QVector<GameObjectPtr *> m_pointers;
 
         QString m_name;
         QString m_plural;
@@ -191,10 +213,13 @@ class GameObject : public QObject {
         QVariantMap m_data;
         ScriptFunctionMap m_triggers;
 
-        bool m_deleted;
-
         QHash<int, QScriptValue> *m_intervalHash;
         QHash<int, QScriptValue> *m_timeoutHash;
+
+        static QHash<QString, GameObjectType> s_stringToTypeHash;
+        static QHash<GameObjectType, QString> s_typeToStringHash;
+
+        static void initObjectTypeHashes();
 };
 
 Q_DECLARE_METATYPE(GameObject *)

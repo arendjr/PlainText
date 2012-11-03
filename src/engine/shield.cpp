@@ -4,7 +4,7 @@
 #define super StatsItem
 
 Shield::Shield(Realm *realm, uint id, Options options) :
-    super(realm, "shield", id, options) {
+    super(realm, GameObjectType::Shield, id, options) {
 
     setPortable(true);
 }

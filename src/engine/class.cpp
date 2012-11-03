@@ -4,7 +4,7 @@
 #define super GameObject
 
 Class::Class(Realm *realm, int id, Options options) :
-    super(realm, "class", id, options) {
+    super(realm, GameObjectType::Class, id, options) {
 
     setAutoDelete(false);
 }

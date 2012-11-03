@@ -5,6 +5,8 @@
 
 #include <Qt>
 
+#include "gameobject.h"
+
 
 class GameException : public std::exception {
 
@@ -26,7 +28,7 @@ class GameException : public std::exception {
         };
 
         GameException(Cause cause);
-        GameException(Cause cause, const char *objectType, uint id);
+        GameException(Cause cause, GameObjectType objectType, uint id);
         GameException(Cause cause, const char *message);
         virtual ~GameException() throw ();
 

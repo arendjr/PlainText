@@ -11,7 +11,7 @@ class Item : public GameObject {
 
     public:
         Item(Realm *realm, uint id = 0, Options options = NoOptions);
-        Item(Realm *realm, const char *objectType, uint id, Options options = NoOptions);
+        Item(Realm *realm, GameObjectType objectType, uint id, Options options = NoOptions);
         virtual ~Item();
 
         bool isPortable() const { return m_portable; }

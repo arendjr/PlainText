@@ -26,7 +26,7 @@ GameObjectPtrList AdminCommand::objectsByDescription(const ObjectDescription &de
         if (objectId > 0 || description.name == "#0") {
             GameObjectPtrList objects;
             if (description.position < 2) {
-                objects << realm()->getObject(0, objectId);
+                objects << realm()->getObject(GameObjectType::Unknown, objectId);
             }
             return objects;
         }

@@ -14,7 +14,7 @@ class Character : public StatsItem {
 
     public:
         Character(Realm *realm, uint id = 0, Options options = NoOptions);
-        Character(Realm *realm, const char *objectType, uint id, Options options = NoOptions);
+        Character(Realm *realm, GameObjectType objectType, uint id, Options options = NoOptions);
         virtual ~Character();
 
         Q_INVOKABLE virtual CharacterStats totalStats() const;

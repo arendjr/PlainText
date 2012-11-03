@@ -39,7 +39,8 @@ void AddExitCommand::execute(Player *player, const QString &command) {
     if (destinationId == "new") {
         destination = new Room(realm());
     } else {
-        destination = qobject_cast<Room *>(realm()->getObject("room", destinationId.toInt()));
+        destination = qobject_cast<Room *>(realm()->getObject(GameObjectType::Room,
+                                                              destinationId.toInt()));
         if (!destination) {
             send(QString("No room with ID %1.").arg(destinationId));
             return;

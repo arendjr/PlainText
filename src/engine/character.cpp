@@ -29,14 +29,14 @@
 #define super StatsItem
 
 Character::Character(Realm *realm, uint id, Options options) :
-    Character(realm, "character", id, options) {
+    Character(realm, GameObjectType::Character, id, options) {
 
     if (~options & Copy) {
         m_regenerationIntervalId = realm->startInterval(this, 45000);
     }
 }
 
-Character::Character(Realm *realm, const char *objectType, uint id, Options options) :
+Character::Character(Realm *realm, GameObjectType objectType, uint id, Options options) :
     super(realm, objectType, id, options),
     m_gender("male"),
     m_respawnTime(0),

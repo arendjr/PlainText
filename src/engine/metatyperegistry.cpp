@@ -64,6 +64,7 @@ void MetaTypeRegistry::registerMetaTypes(QScriptEngine *engine) {
     REGISTER_META_LIST_TYPE(EffectList)
 
     REGISTER_META_TYPE_POINTER(GameObject)
+    REGISTER_SERIALIZABLE_META_TYPE(GameObjectType)
     REGISTER_SERIALIZABLE_META_TYPE(GameObjectPtr)
     REGISTER_SERIALIZABLE_META_LIST_TYPE(GameObjectPtrList)
 

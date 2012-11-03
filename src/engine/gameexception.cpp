@@ -3,6 +3,8 @@
 #include <cstdio>
 #include <cstring>
 
+#include "gameobject.h"
+
 
 const char *GameException::s_messages[] = {
     "Unknown game object type",
@@ -27,14 +29,15 @@ GameException::GameException(Cause cause) :
     m_message(const_cast<char *>(s_messages[cause])) {
 }
 
-GameException::GameException(Cause cause, const char *objectType, uint id) :
+GameException::GameException(Cause cause, GameObjectType objectType, uint id) :
     std::exception(),
     m_cause(cause),
     m_customMessage(true) {
 
     m_message = new char[100];
-    if (objectType) {
-        sprintf(m_message, "%s (Object: %s:%d)", s_messages[cause], objectType, id);
+    if (objectType != GameObjectType::Unknown) {
+        sprintf(m_message, "%s (Object: %s:%d)", s_messages[cause],
+                objectType.toString(), id);
     } else {
         sprintf(m_message, "%s (Object: undefined:%d)", s_messages[cause], id);
     }

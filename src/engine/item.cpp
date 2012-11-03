@@ -4,10 +4,10 @@
 #define super GameObject
 
 Item::Item(Realm *realm, uint id, Options options) :
-    Item(realm, "item", id, options) {
+    Item(realm, GameObjectType::Item, id, options) {
 }
 
-Item::Item(Realm *realm, const char *objectType, uint id, Options options) :
+Item::Item(Realm *realm, GameObjectType objectType, uint id, Options options) :
     super(realm, objectType, id, options),
     m_portable(false),
     m_weight(0),

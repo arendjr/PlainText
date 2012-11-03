@@ -1,7 +1,7 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#include <qglobal.h>
+#include <QFlags>
 
 
 enum Color {

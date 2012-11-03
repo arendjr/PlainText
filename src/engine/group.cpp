@@ -4,7 +4,7 @@
 #define super GameObject
 
 Group::Group(Realm *realm, uint id, Options options) :
-    super(realm, "group", id, (Options) (options | DontSave)) {
+    super(realm, GameObjectType::Group, id, options | DontSave) {
 }
 
 Group::~Group() {
