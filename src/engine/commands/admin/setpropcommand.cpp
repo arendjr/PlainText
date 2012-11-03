@@ -55,6 +55,7 @@ void SetPropCommand::execute(Player *player, const QString &command) {
             if (converters.userStringToTypeConverter) {
                 try {
                     variant = converters.userStringToTypeConverter(value);
+                    break;
                 } catch (const GameException &exception) {
                     switch (exception.cause()) {
                         case GameException::InvalidCharacterStats:
@@ -71,7 +72,7 @@ void SetPropCommand::execute(Player *player, const QString &command) {
                             send(exception.what());
                             break;
                     }
-                    break;
+                    return;
                 }
             }
         }   // fall-through

@@ -48,9 +48,10 @@ void PropertySetCommand::execute(Player *player, const QString &command) {
             if (converters.userStringToTypeConverter) {
                 try {
                     variant = converters.userStringToTypeConverter(value);
+                    break;
                 } catch (const GameException &exception) {
                     sendError(400, exception.what());
-                    break;
+                    return;
                 }
             }
         }   // fall-through
