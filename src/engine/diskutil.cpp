@@ -53,7 +53,7 @@ QStringList DiskUtil::dataDirFileList(const QString &subdirectory) {
 
 QString DiskUtil::gameObjectPath(const QString &objectType, uint id) {
 
-    return dataDir() + QString("/%1.%2").arg(objectType).arg(id, 9, 10, QChar('0'));
+    return dataDir() + QString("/%1.%2").arg(objectType.toLower()).arg(id, 9, 10, QChar('0'));
 }
 
 void DiskUtil::appendToLogFile(const QString &fileName, const QString &line) {
