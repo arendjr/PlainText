@@ -173,7 +173,7 @@ QString GameObjectPtr::toString() const {
         return "0";
     }
 
-    return QString("%1:%2").arg(m_objectType.toString(), m_id);
+    return QString("%1:%2").arg(m_objectType.toString()).arg(m_id).toLower();
 }
 
 QString GameObjectPtr::toUserString(const GameObjectPtr &pointer) {
