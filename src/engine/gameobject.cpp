@@ -653,6 +653,13 @@ QList<QMetaProperty> GameObject::storedMetaProperties() const {
         for (int i = offset; i < count; i++) {
             QMetaProperty metaProperty = metaObject()->property(i);
             if (metaProperty.isStored()) {
+                if (isRoom() || isExit() || isPlayer()) {
+                    // specific optimization to avoid useless inflation of some objects
+                    if (strcmp(metaProperty.name(), "plural") == 0 ||
+                        strcmp(metaProperty.name(), "indefiniteArticle") == 0) {
+                        continue;
+                    }
+                }
                 properties << metaProperty;
             }
         }
