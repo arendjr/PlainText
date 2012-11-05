@@ -34,7 +34,7 @@ Vector3D Vector3D::operator-(const Vector3D &other) const {
 
 QString Vector3D::toString() const {
 
-    return QString("| %1, %2, %3 |").arg(x).arg(y).arg(z);
+    return QString("[ %1, %2, %3 ]").arg(x).arg(y).arg(z);
 }
 
 QString Vector3D::toUserString(const Vector3D &vector) {
@@ -44,7 +44,7 @@ QString Vector3D::toUserString(const Vector3D &vector) {
 
 Vector3D Vector3D::fromUserString(const QString &string) {
 
-    if (!string.startsWith("|") || !string.endsWith("|")) {
+    if (!string.startsWith("[") || !string.endsWith("]")) {
         throw GameException(GameException::InvalidVector);
     }
 
