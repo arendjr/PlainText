@@ -117,6 +117,43 @@ String.prototype.trimmed = function() {
 };
 
 
+var Util = {};
+
+Util.directions = [
+    { "name": "north", "opposite": "south" },
+    { "name": "northeast", "opposite": "southwest" },
+    { "name": "east", "opposite": "west" },
+    { "name": "southeast", "opposite": "northwest" },
+    { "name": "south", "opposite": "north" },
+    { "name": "southwest", "opposite": "northeast" },
+    { "name": "west", "opposite": "east" },
+    { "name": "northwest", "opposite": "southeast" },
+    { "name": "up", "opposite": "down" },
+    { "name": "down", "opposite": "up" }
+];
+
+Util.indexOfDirection = function(direction) {
+
+    for (var i = 0; i < 10; i++) {
+        if (this.directions[i].name === direction) {
+            return i;
+        }
+    }
+
+    return -1;
+};
+
+Util.isDirection = function(string) {
+
+    return this.indexOfDirection(string) > -1;
+};
+
+Util.opposingDirection = function(direction) {
+
+    return this.directions[this.indexOfDirection(direction)].opposite;
+};
+
+
 function bound(min, value, max) {
 
     return (value < min) ? min : ((value > max) ? max : value);

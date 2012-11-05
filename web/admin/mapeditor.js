@@ -10,6 +10,7 @@ function MapEditor(element) {
     this.selectedRoomElement = null;
 
     this.exitEditor = null;
+    this.exitDeleteDialog = null;
     this.zoomSlider = null;
     this.perspectiveSlider = null;
 
@@ -43,6 +44,10 @@ function MapEditor(element) {
 
     loadScript("admin/exiteditor.js", function() {
         self.exitEditor = new ExitEditor();
+    });
+
+    loadScript("admin/exitdeletedialog.js", function() {
+        self.exitDeleteDialog = new ExitDeleteDialog();
     });
 
     loadScript("admin/slider.widget.js", function() {
@@ -118,7 +123,12 @@ MapEditor.prototype.attachListeners = function() {
     }, false);
 
     this.selectedRoomElement.querySelector(".add.exit").addEventListener("click", function() {
-
+        self.exitEditor.add({
+            "onsave": function(exit) {
+                self.map.setExit(exit);
+                self.exitEditor.close();
+            }
+        });
     }, false);
 
     this.selectedRoomElement.querySelector(".x").addEventListener("change", function(event) {
@@ -192,9 +202,26 @@ MapEditor.prototype.onRoomSelectionChanged = function() {
         exitsSpan.appendChild(exitSpan);
 
         exitSpan.addEventListener("click", function() {
-            self.exitEditor.edit(exit, {
+            self.exitEditor.edit(room.id, exit, {
                 "onsave": function(exit) {
                     self.map.setExit(exit);
+                    self.exitEditor.close();
+                },
+                "ondelete": function(exitId) {
+                    if (exit.oppositeExit) {
+                        self.exitDeleteDialog.show({
+                            "ondeleteone": function() {
+                                self.map.deleteExit(exitId);
+                            },
+                            "ondeleteboth": function() {
+                                self.map.deleteExit(exitId);
+                                self.map.deleteExit(exit.oppositeExit.id);
+                            }
+                        });
+                    } else {
+                        self.map.deleteExit(exitId);
+                    }
+
                     self.exitEditor.close();
                 }
             });

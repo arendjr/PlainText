@@ -61,6 +61,36 @@
             font-weight: bold;
         }
 
+.exit-delete-dialog {
+    position: absolute;
+    top: 200px;
+    left: -webkit-calc(50% - 200px);
+    left: -moz-calc(50% - 200px);
+    left: calc(50% - 200px);
+    right: -webkit-calc(50% - 200px);
+    right: -moz-calc(50% - 200px);
+    right: calc(50% - 200px);
+    z-index: 4;
+
+    border: 1px solid #000;
+    background-color: white;
+
+    font-family: "Helvetica", "Arial", sans-serif;
+
+    -webkit-user-select: text;
+}
+    .exit-delete-dialog {
+        margin: 1em
+    }
+    .exit-delete-dialog .button-list {
+        position: relative;
+
+        padding: 5px 10px 5px;
+        background-color: #ccc;
+
+        text-align: right;
+    }
+
 .map-editor {
     position: absolute;
     top: 0;

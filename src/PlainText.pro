@@ -127,6 +127,7 @@ SOURCES += \
     engine/commands/api/apicommand.cpp \
     engine/commands/api/datagetcommand.cpp \
     engine/commands/api/datasetcommand.cpp \
+    engine/commands/api/exitdeletecommand.cpp \
     engine/commands/api/exitsetcommand.cpp \
     engine/commands/api/exitslistcommand.cpp \
     engine/commands/api/logretrievecommand.cpp \
@@ -258,6 +259,7 @@ HEADERS += \
     engine/commands/api/apicommand.h \
     engine/commands/api/datagetcommand.h \
     engine/commands/api/datasetcommand.h \
+    engine/commands/api/exitdeletecommand.h \
     engine/commands/api/exitsetcommand.h \
     engine/commands/api/exitslistcommand.h \
     engine/commands/api/logretrievecommand.h \
@@ -302,6 +304,7 @@ OTHER_FILES += \
     ../web/notifications.js \
     ../web/admin/admin.css \
     ../web/admin/admin.js \
+    ../web/admin/exitdeletedialog.js \
     ../web/admin/exiteditor.js \
     ../web/admin/mapeditor.js \
     ../web/admin/map.model.js \

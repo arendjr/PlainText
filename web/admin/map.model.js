@@ -98,8 +98,44 @@ MapModel.prototype.setRoomProperty = function(roomId, propertyName, value) {
 
 MapModel.prototype.setExit = function(exit) {
 
+    var self = this;
+
+    controller.sendApiCall("exit-set " + exit.id + " " + exit.source + " " + exit.destination +
+                           " " + exit.name + " " + exit.oppositeExit, function(data) {
+        var exit = JSON.parse(data["exit"]);
+        self.exits[exit.id] = exit;
+
+        if (data.contains("oppositeExit")) {
+            var oppositeExit = JSON.parse(data["oppositeExit"]);
+            self.exits[oppositeExit.id] = oppositeExit;
+
+            self.resolvePointers(oppositeExit, ["destination", "oppositeExit"]);
+        }
+
+        if (data.contains("destination")) {
+            var destination = JSON.parse(data["destination"]);
+            self.rooms[destination.id] = destination;
+
+            self.resolvePointers(destination, ["exits", "visibleRooms"]);
+        }
+
+        self.resolvePointers(exit, ["destination", "oppositeExit"]);
+
+        self.notifyChangeListeners();
+    });
+
     this.exits[exit.id] = exit;
     this.notifyChangeListeners();
+}
+
+MapModel.prototype.deleteExit = function(exitId) {
+
+    var self = this;
+
+    controller.sendApiCall("exit-delete " + exitId, function() {
+        delete self.rooms[exitId];
+        self.notifyChangeListeners();
+    });
 }
 
 MapModel.prototype.resolvePointer = function(pointer) {

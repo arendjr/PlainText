@@ -66,6 +66,7 @@
 #include "commands/admin/unsettriggercommand.h"
 #include "commands/api/datagetcommand.h"
 #include "commands/api/datasetcommand.h"
+#include "commands/api/exitdeletecommand.h"
 #include "commands/api/exitsetcommand.h"
 #include "commands/api/exitslistcommand.h"
 #include "commands/api/logretrievecommand.h"
@@ -148,6 +149,7 @@ CommandRegistry::CommandRegistry(QObject *parent) :
 
     m_apiCommands.insert("api-data-get", new DataGetCommand(this));
     m_apiCommands.insert("api-data-set", new DataSetCommand(this));
+    m_apiCommands.insert("api-exit-delete", new ExitDeleteCommand(this));
     m_apiCommands.insert("api-exit-set", new ExitSetCommand(this));
     m_apiCommands.insert("api-exits-list", new ExitsListCommand(this));
     m_apiCommands.insert("api-log-retrieve", new LogRetrieveCommand(this));
