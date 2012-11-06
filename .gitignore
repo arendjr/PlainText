@@ -1,5 +1,6 @@
 # Qt Creator build
 Makefile
+PlainText
 PlainText-build-desktop*
 PlainText.pro.user*
 moc_*.cpp
