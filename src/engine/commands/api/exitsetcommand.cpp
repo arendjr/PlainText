@@ -57,6 +57,21 @@ void ExitSetCommand::execute(Player *player, const QString &command) {
         }
     }
 
+    Point3D point(0, 0, 0);
+    if (!position.isEmpty()) {
+        point = Point3D::fromUserString(position);
+    }
+
+    if (!exit) {
+        exit = new Exit(realm());
+        source->addExit(exit);
+    }
+
+    if (!destination) {
+        destination = new Room(realm());
+        destination->setPosition(point);
+    }
+
     Exit *oppositeExit = nullptr;
     if (oppositeName.isEmpty() && Util::isDirection(name)) {
         oppositeName = Util::opposingDirection(name);
@@ -73,22 +88,6 @@ void ExitSetCommand::execute(Player *player, const QString &command) {
             oppositeExit = exit->oppositeExit().cast<Exit *>();
         }
     }
-
-    Point3D point(0, 0, 0);
-    if (!position.isEmpty()) {
-        point = Point3D::fromUserString(position);
-    }
-
-    if (!exit) {
-        exit = new Exit(realm());
-        source->addExit(exit);
-    }
-
-    if (!destination) {
-        destination = new Room(realm());
-        destination->setPosition(point);
-    }
-
     if (!oppositeExit) {
         oppositeExit = new Exit(realm());
         oppositeExit->setDestination(source);
@@ -106,6 +105,7 @@ void ExitSetCommand::execute(Player *player, const QString &command) {
     QVariantMap data;
     data["success"] = true;
     data["exit"] = exit->toJsonString();
+    data["source"] = source->toJsonString();
     if (destination != nullptr) {
         data["destination"] = destination->toJsonString();
     }

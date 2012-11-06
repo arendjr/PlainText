@@ -28,13 +28,17 @@ ExitEditor.prototype.attachListeners = function() {
         var direction = self.element.querySelector(".direction").value;
         var name = self.element.querySelector(".name").value;
         var oppositeExit = self.element.querySelector(".opposite").value;
-        if (Util.isDirection(name)) {
+        if (name === "" || Util.isDirection(name)) {
             self.element.querySelector(".name").value = direction;
         }
-        if (Util.isDirection(oppositeExit)) {
+        if (oppositeExit === "" || Util.isDirection(oppositeExit)) {
             self.element.querySelector(".opposite").value = Util.opposingDirection(direction);
         }
     });
+
+    this.element.querySelector(".destination-id").addEventListener("focus", function() {
+        self.element.querySelector(".destination.id").checked = true;
+    }, false);
 
     this.element.querySelector(".delete-button").addEventListener("click", function() {
         self.deleteExit();
@@ -49,9 +53,9 @@ ExitEditor.prototype.attachListeners = function() {
     }, false);
 };
 
-ExitEditor.prototype.add = function(options) {
+ExitEditor.prototype.add = function(sourceId, options) {
 
-    this.edit({ "name": "" }, options);
+    this.edit(sourceId, { "name": "" }, options);
 };
 
 ExitEditor.prototype.edit = function(sourceId, exit, options) {
@@ -82,10 +86,15 @@ ExitEditor.prototype.edit = function(sourceId, exit, options) {
     if (exit.destination) {
         this.element.querySelector(".destination.id").checked = true;
         this.element.querySelector(".destination-id").value = exit.destination.id;
+    } else {
+        this.element.querySelector(".new.destination").checked = true;
+        this.element.querySelector(".destination-id").value = "";
     }
 
     if (exit.oppositeExit) {
         this.element.querySelector(".opposite").value = exit.oppositeExit.name;
+    } else {
+        this.element.querySelector(".opposite").value = "";
     }
 
     this.element.show();

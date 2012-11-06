@@ -105,6 +105,17 @@ MapModel.prototype.setExit = function(exit) {
         var exit = JSON.parse(data["exit"]);
         self.exits[exit.id] = exit;
 
+        if (data.contains("source")) {
+            var source = JSON.parse(data["source"]);
+            source.x = source.position ? source.position[0] : 0;
+            source.y = source.position ? source.position[1] : 0;
+            source.z = source.position ? source.position[2] : 0;
+            source.exits = source.exits || [];
+            self.rooms[source.id] = source;
+
+            self.resolvePointers(source, ["exits", "visibleRooms"]);
+        }
+
         if (data.contains("oppositeExit")) {
             var oppositeExit = JSON.parse(data["oppositeExit"]);
             self.exits[oppositeExit.id] = oppositeExit;
@@ -114,6 +125,10 @@ MapModel.prototype.setExit = function(exit) {
 
         if (data.contains("destination")) {
             var destination = JSON.parse(data["destination"]);
+            destination.x = destination.position ? destination.position[0] : 0;
+            destination.y = destination.position ? destination.position[1] : 0;
+            destination.z = destination.position ? destination.position[2] : 0;
+            destination.exits = destination.exits || [];
             self.rooms[destination.id] = destination;
 
             self.resolvePointers(destination, ["exits", "visibleRooms"]);
@@ -133,7 +148,12 @@ MapModel.prototype.deleteExit = function(exitId) {
     var self = this;
 
     controller.sendApiCall("exit-delete " + exitId, function() {
-        delete self.rooms[exitId];
+        var exit = self.exits[exitId];
+        for (var roomId in self.rooms) {
+            var room = self.rooms[roomId];
+            room.exits.removeOne(exit);
+        }
+        delete self.exits[exitId];
         self.notifyChangeListeners();
     });
 }

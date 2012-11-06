@@ -79,8 +79,8 @@
 
     -webkit-user-select: text;
 }
-    .exit-delete-dialog {
-        margin: 1em
+    .exit-delete-dialog p {
+        margin: 1em;
     }
     .exit-delete-dialog .button-list {
         position: relative;

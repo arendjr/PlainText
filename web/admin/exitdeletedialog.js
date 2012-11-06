@@ -24,7 +24,7 @@ ExitDeleteDialog.prototype.attachListeners = function() {
     }, false);
 
     this.element.querySelector(".cancel-button").addEventListener("click", function() {
-        self.hide();
+        self.close();
     }, false);
 };
 
@@ -49,7 +49,7 @@ ExitDeleteDialog.prototype.deleteBoth = function() {
     }
 };
 
-ExitDeleteDialog.prototype.hide = function() {
+ExitDeleteDialog.prototype.close = function() {
 
     this.element.hide();
 };

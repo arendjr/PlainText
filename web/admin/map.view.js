@@ -6,6 +6,7 @@ function MapView(element) {
 
     this.stage = null;
     this.layer = null;
+    this.shapes = [];
 
     this.selectedShape = null;
     this.selectedRoomId = 0;
@@ -118,16 +119,24 @@ MapView.prototype.draw = function() {
     }
 
     var roomSize = 30;
+    var halfRoomSize = 15;
 
     var self = this;
-    var perspective = this.perspective;
+    var perspective = 2 * this.perspective;
 
-    function drawRoom(room) {
-        room.exits.forEach(function(exit) {
-            var points = [room.x + (perspective * room.z),
-                          room.y - (perspective * room.z),
-                          exit.destination.x + (perspective * exit.destination.z),
-                          exit.destination.y - (perspective * exit.destination.z)];
+    var processedShapes = [];
+    var shapesToProcess = this.shapes;
+
+    roomIds.forEach(function(id) {
+        var room = rooms[id];
+        var z = perspective * room.z;
+        for (var i = 0, length = room.exits.length; i < length; i++) {
+            var exit = room.exits[i];
+            var destination = exit.destination;
+            var points = [room.x + z,
+                          room.y - z,
+                          destination.x + perspective * destination.z,
+                          destination.y - perspective * destination.z];
             if (exit.shape) {
                 exit.shape.setPoints(points);
             } else {
@@ -139,10 +148,13 @@ MapView.prototype.draw = function() {
                 });
                 self.layer.add(exit.shape);
             }
-        });
 
-        var x = room.x - roomSize / 2 + (perspective * room.z);
-        var y = room.y - roomSize / 2 - (perspective * room.z);
+            shapesToProcess.removeOne(exit.shape);
+            processedShapes.append(exit.shape);
+        }
+
+        var x = room.x - halfRoomSize + z;
+        var y = room.y - halfRoomSize - z;
         if (room.shape) {
             room.shape.setX(x);
             room.shape.setY(y);
@@ -159,13 +171,17 @@ MapView.prototype.draw = function() {
             });
             self.layer.add(room.shape);
         }
-    }
 
-    roomIds.forEach(function(id) {
-        drawRoom(rooms[id]);
+        shapesToProcess.removeOne(room.shape);
+        processedShapes.append(room.shape);
     });
     roomIds.forEach(function(id) {
         rooms[id].shape.moveToTop();
+    });
+
+    this.shapes = processedShapes;
+    shapesToProcess.forEach(function(shape) {
+        self.layer.remove(shape);
     });
 
     this.stage.draw();
