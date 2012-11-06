@@ -127,7 +127,7 @@ GameObject *Realm::getObject(GameObjectType objectType, uint id) {
     if (m_objectMap.contains(id)) {
         GameObject *object = m_objectMap[id];
         Q_ASSERT(object);
-        if (objectType == GameObjectType::Unknown || this->objectType() == objectType) {
+        if (objectType == GameObjectType::Unknown || object->objectType() == objectType) {
             return object;
         }
     }
