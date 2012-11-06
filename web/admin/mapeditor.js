@@ -99,6 +99,12 @@ MapEditor.prototype.attachListeners = function() {
         self.close();
     }, false);
 
+    this.selectedRoomElement.querySelector(".enter-room-button").addEventListener("click", function() {
+        if (self.selectedRoomId) {
+            controller.sendCommand("enter-room #" + self.selectedRoomId); 
+        }
+    });
+
     this.selectedRoomElement.querySelector(".edit.name").addEventListener("click", function() {
         if (self.selectedRoomId) {
             controller.propertyEditor.edit("#" + self.selectedRoomId + " name", {

@@ -272,7 +272,7 @@ Controller.prototype.attachListeners = function() {
 
             command = self.notifyCommandListeners(command);
             if (command !== false) {
-                self.socket.send(command);
+                self.sendCommand(command);
             }
 
             self.commandInput.value = "";
@@ -441,6 +441,11 @@ Controller.prototype.writeToScreen = function(message) {
     this.screen.scrollTop = this.screen.scrollHeight;
 }
 
+Controller.prototype.sendCommand = function(command) {
+
+    this.socket.send(command);
+}
+
 Controller.prototype.sendApiCall = function(command, callback) {
 
     var requestId = "request" + this.requestId;
@@ -474,7 +479,7 @@ function main() {
         var target = event.target;
         if (target.className === "go") {
             var exitName = target.textContent;
-            controller.socket.send("go \"" + exitName + "\"");
+            controller.sendCommand("go \"" + exitName + "\"");
         }
     }, false);
 }
