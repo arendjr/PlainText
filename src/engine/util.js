@@ -87,6 +87,7 @@ Array.prototype.last = function() {
 
 Array.prototype.mid = function(begin, end) {
 
+    end = (end === undefined ? this.length : end);
     return this.slice(begin, end - begin);
 };
 

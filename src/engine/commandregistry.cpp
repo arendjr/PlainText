@@ -179,6 +179,21 @@ void CommandRegistry::registerCommand(const QString &commandName, const QScriptV
     registerCommand(commandName, command);
 }
 
+void CommandRegistry::registerAdminCommand(const QString &commandName, Command *command) {
+
+    if (m_adminCommands.contains(commandName)) {
+        delete m_adminCommands[commandName];
+    }
+
+    m_adminCommands[commandName] = command;
+}
+
+void CommandRegistry::registerAdminCommand(const QString &commandName, const QScriptValue &object) {
+
+    Command *command = new ScriptCommand(object, this);
+    registerAdminCommand(commandName, command);
+}
+
 bool CommandRegistry::contains(const QString &commandName) const {
 
     return m_commands.contains(commandName);

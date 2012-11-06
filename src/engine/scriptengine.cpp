@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QMetaType>
 
 #include "diskutil.h"
@@ -35,43 +36,33 @@ ScriptEngine *ScriptEngine::instance() {
 
 void ScriptEngine::loadScripts() {
 
-    QFile utilJs(":/script/util.js");
-    if (utilJs.open(QIODevice::ReadOnly)) {
-        m_jsEngine.evaluate(utilJs.readAll(), "util.js");
-        utilJs.close();
+    loadScript(":/script/util.js");
+    loadScript(":/script/commands/command.js");
+    loadScript(":/script/commands/admin/admincommand.js");
+    
+    QDir commandsDir(DiskUtil::dataDir() + "/commands");
+    for (const QString &entry : commandsDir.entryList(QDir::Files)) {
+        loadScript(commandsDir.path() + "/" + entry);
+    }
+    QDir adminCommandsDir(DiskUtil::dataDir() + "/commands/admin");
+    for (const QString &entry : adminCommandsDir.entryList(QDir::Files)) {
+        loadScript(adminCommandsDir.path() + "/" + entry);
+    }
+}
+
+void ScriptEngine::loadScript(const QString &path) {
+
+    QFile file(path);
+    QFileInfo info(path);
+    if (file.open(QIODevice::ReadOnly)) {
+        m_jsEngine.evaluate(file.readAll(), "commands/command.js");
+        file.close();
         if (m_jsEngine.hasUncaughtException()) {
-            qWarning() << "Exception while evaluating util.js: "
+            qWarning() << "Exception while evaluating " << info.fileName() << ": "
                        << m_jsEngine.uncaughtException().toString();
         }
     } else {
-        qWarning() << "Could not open util.js";
-    }
-
-    QFile commandJs(":/script/commands/command.js");
-    if (commandJs.open(QIODevice::ReadOnly)) {
-        m_jsEngine.evaluate(commandJs.readAll(), "commands/command.js");
-        commandJs.close();
-        if (m_jsEngine.hasUncaughtException()) {
-            qWarning() << "Exception while evaluating command.js: "
-                       << m_jsEngine.uncaughtException().toString();
-        }
-    } else {
-        qWarning() << "Could not open command.js";
-    }
-
-    QDir dir(DiskUtil::dataDir() + "/commands");
-    for (const QString &entry : dir.entryList(QDir::Files)) {
-        QFile userCommandJs(dir.path() + "/" + entry);
-        if (userCommandJs.open(QIODevice::ReadOnly)) {
-            m_jsEngine.evaluate(userCommandJs.readAll(), "commands/" + entry);
-            userCommandJs.close();
-            if (m_jsEngine.hasUncaughtException()) {
-                qWarning() << "Exception while evaluating " << entry << ": "
-                           << m_jsEngine.uncaughtException().toString();
-            }
-        } else {
-            qWarning() << "Could not open " << entry;
-        }
+        qWarning() << "Could not open " << info.fileName();
     }
 }
 

@@ -25,6 +25,7 @@ class ScriptEngine : public QObject {
         static ScriptEngine *instance();
 
         void loadScripts();
+        void loadScript(const QString &path);
 
         QScriptValue evaluate(const QString &program,
                               const QString &fileName = QString(), int lineNumber = 1);

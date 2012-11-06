@@ -21,6 +21,9 @@ class CommandRegistry : public QObject {
         void registerCommand(const QString &commandName, Command *command);
         Q_INVOKABLE void registerCommand(const QString &commandName, const QScriptValue &object);
 
+        void registerAdminCommand(const QString &commandName, Command *command);
+        Q_INVOKABLE void registerAdminCommand(const QString &commandName, const QScriptValue &object);
+
         QStringList commandNames() const { return m_commands.keys(); }
         bool contains(const QString &commandName) const;
         Command *command(const QString &commandName) const;
