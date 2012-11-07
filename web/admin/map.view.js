@@ -16,11 +16,7 @@ function MapView(element) {
     this.zoom = 1.0;
     this.perspective = 0.0;
 
-    var self = this;
-
-    loadScript("kinetic.js", function() {
-        self.init();
-    });
+    this.init();
 }
 
 MapView.prototype.init = function() {
@@ -35,10 +31,6 @@ MapView.prototype.init = function() {
     this.stage.add(this.layer);
 
     this.attachListeners();
-
-    if (this.model !== null) {
-        this.draw();
-    }
 };
 
 MapView.prototype.attachListeners = function() {
@@ -80,9 +72,7 @@ MapView.prototype.setModel = function(model) {
             }
         }
 
-        if (self.stage !== null) {
-            self.draw();
-        }
+        self.draw();
     });
 };
 

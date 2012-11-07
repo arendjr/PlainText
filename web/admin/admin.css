@@ -43,6 +43,9 @@
         font-weight: bold;
         text-align: right;
     }
+    .exit-editor .x,.exit-editor .y,.exit-editor .z {
+        width: 5em;
+    }
     .exit-editor .button-list {
         position: relative;
 

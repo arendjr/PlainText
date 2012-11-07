@@ -32,9 +32,20 @@ ExitEditor.prototype.attachListeners = function() {
             self.element.querySelector(".name").value = direction;
         }
         if (oppositeExit === "" || Util.isDirection(oppositeExit)) {
-            self.element.querySelector(".opposite").value = Util.opposingDirection(direction);
+            if (Util.isDirection(direction)) {
+                self.element.querySelector(".opposite").value = "";
+            }
         }
+        self.updatePositionAndDistanceVisibility();
     });
+
+    this.element.querySelector(".new.destination").addEventListener("change", function() {
+        self.updatePositionAndDistanceVisibility();
+    }, false);
+
+    this.element.querySelector(".destination.id").addEventListener("change", function() {
+        self.updatePositionAndDistanceVisibility();
+    }, false);
 
     this.element.querySelector(".destination-id").addEventListener("focus", function() {
         self.element.querySelector(".destination.id").checked = true;
@@ -51,6 +62,23 @@ ExitEditor.prototype.attachListeners = function() {
     this.element.querySelector(".submit-button").addEventListener("click", function() {
         self.save();
     }, false);
+};
+
+ExitEditor.prototype.updatePositionAndDistanceVisibility = function() {
+
+    if (this.element.querySelector(".new.destination").checked) {
+        var direction = this.element.querySelector(".direction").value;
+        if (Util.isDirection(direction)) {
+            this.element.querySelector(".distance-paragraph").show();
+            this.element.querySelector(".position-paragraph").hide();
+        } else {
+            this.element.querySelector(".distance-paragraph").hide();
+            this.element.querySelector(".position-paragraph").show();
+        }
+    } else {
+        this.element.querySelector(".distance-paragraph").hide();
+        this.element.querySelector(".position-paragraph").hide();
+    }
 };
 
 ExitEditor.prototype.add = function(sourceId, options) {
@@ -96,6 +124,8 @@ ExitEditor.prototype.edit = function(sourceId, exit, options) {
     } else {
         this.element.querySelector(".opposite").value = "";
     }
+
+    this.updatePositionAndDistanceVisibility();
 
     this.element.show();
 };

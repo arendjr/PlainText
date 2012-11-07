@@ -36,6 +36,12 @@
                     New room
                     <input type="radio" name="destination" class="destination id" value="id">
                     Room #<input type="text" size="8" class="destination-id"></p>
+                <p class="distance-paragraph"><span class="label">Distance:</span>
+                    <input type="text" class="distance"></p>
+                <p class="position-paragraph"><span class="label">Position:</span>
+                    <input type="number" class="x" step="50">,
+                    <input type="number" class="y" step="50">,
+                    <input type="number" class="z" step="50"></p>
                 <p><span class="label">Opposite:</span>
                     <input type="text" class="opposite"></p>
             </div>
@@ -83,9 +89,9 @@
                     <p><strong>Room #<span class="id"></span></strong>
                         <button class="enter-room-button"
                                 title="Enter this room with your in-game character, regardless of where you currently are.">Enter</button></p>
-                    <p><input type="number" class="x" step="100">,
-                        <input type="number" class="y" step="100">,
-                        <input type="number" class="z" step="100"></p>
+                    <p><input type="number" class="x" step="50">,
+                        <input type="number" class="y" step="50">,
+                        <input type="number" class="z" step="50"></p>
                     <p><strong>Name:</strong>
                         <span class="name"></span>
                         <a href="#" class="edit name">(edit)</a></p>

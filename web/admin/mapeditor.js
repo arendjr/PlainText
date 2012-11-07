@@ -18,46 +18,21 @@ function MapEditor(element) {
 
     this.perspective = 0;
 
-    var self = this;
+    this.map = new MapModel();
 
-    loadScript("admin/map.model.js", function() {
-        self.map = new MapModel();
+    this.view = new MapView(element.querySelector(".canvas"));
+    this.view.setModel(this.map);
 
-        if (self.view !== null) {
-            self.view.setModel(self.map);
-        }
+    this.exitEditor = new ExitEditor();
+
+    this.exitDeleteDialog = new ExitDeleteDialog();
+
+    this.zoomSlider = new SliderWidget(element.querySelector(".zoom.slider"), {
+        "width": 200,
+        "initialValue": 0.5
     });
-
-    loadScript("admin/map.view.js", function() {
-        self.view = new MapView(element.querySelector(".canvas"));
-
-        self.view.addSelectionListener(function(selectedRoomId) {
-            self.selectedRoomId = selectedRoomId;
-
-            self.onRoomSelectionChanged();
-        });
-
-        if (self.map !== null) {
-            self.view.setModel(self.map);
-        }
-    });
-
-    loadScript("admin/exiteditor.js", function() {
-        self.exitEditor = new ExitEditor();
-    });
-
-    loadScript("admin/exitdeletedialog.js", function() {
-        self.exitDeleteDialog = new ExitDeleteDialog();
-    });
-
-    loadScript("admin/slider.widget.js", function() {
-        self.zoomSlider = new SliderWidget(element.querySelector(".zoom.slider"), {
-            "width": 200,
-            "initialValue": 0.5
-        });
-        self.perspectiveSlider = new SliderWidget(element.querySelector(".perspective.slider"), {
-            "width": 400
-        });
+    this.perspectiveSlider = new SliderWidget(element.querySelector(".perspective.slider"), {
+        "width": 400
     });
 }
 
@@ -76,6 +51,11 @@ MapEditor.prototype.attachListeners = function() {
         if (self.selectedRoomId) {
             self.onRoomSelectionChanged();
         }
+    });
+
+    this.view.addSelectionListener(function(selectedRoomId) {
+        self.selectedRoomId = selectedRoomId;
+        self.onRoomSelectionChanged();
     });
 
     this.element.querySelector(".plot.altitude").addEventListener("click", function() {
@@ -170,6 +150,8 @@ MapEditor.prototype.open = function() {
 MapEditor.prototype.close = function() {
 
     this.element.hide();
+
+    controller.setFocus();
 };
 
 MapEditor.prototype.onRoomSelectionChanged = function() {

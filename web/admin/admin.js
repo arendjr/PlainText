@@ -8,7 +8,7 @@
 
     function init() {
 
-        loadScript("admin/mapeditor.js", function() {
+        loadScript("admin/__all__.js", function() {
             mapEditor = new MapEditor(element(".map-editor"));
 
             var editMapLink = document.createElement("a");
@@ -21,9 +21,7 @@
             var statusHeader = element(".status-header");
             statusHeader.appendChild(document.createTextNode(" "));
             statusHeader.appendChild(editMapLink);
-        });
 
-        loadScript("admin/propertyeditor.js", function() {
             propertyEditor = new PropertyEditor();
             controller.propertyEditor = propertyEditor;
         });

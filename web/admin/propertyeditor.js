@@ -12,24 +12,16 @@ function PropertyEditor() {
 
 PropertyEditor.prototype.init = function() {
 
-    var self = this;
-
-    loadScript("codemirror/codemirror.js", function() {
-        loadScript("codemirror/javascript.js");
-        loadScript("codemirror/util/simple-hint.js");
-        loadScript("codemirror/util/javascript-hint.js");
-
-        self.editor = CodeMirror.fromTextArea(self.element.querySelector("textarea"), {
-            "lineNumbers": true,
-            "matchBrackets": true,
-            "tabSize": 4,
-            "indentUnit": 4,
-            "indentWithTabs": false
-        });
+    this.editor = CodeMirror.fromTextArea(this.element.querySelector("textarea"), {
+        "lineNumbers": true,
+        "matchBrackets": true,
+        "tabSize": 4,
+        "indentUnit": 4,
+        "indentWithTabs": false
     });
 
-    loadStyle("codemirror/codemirror.css");
-    loadStyle("codemirror/util/simple-hint.css");
+    loadStyle("admin/codemirror/codemirror.css");
+    loadStyle("admin/codemirror/util/simple-hint.css");
 
     this.attachListeners();
 }

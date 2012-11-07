@@ -2,6 +2,7 @@
 
 #include <QDebug>
 #include <QFile>
+#include <QFileInfo>
 #include <QRegExp>
 #include <QStringList>
 #include <QTcpSocket>
@@ -74,17 +75,35 @@ void HttpServer::onReadyRead() {
                 return;
             }
 
+            QString content = file.readAll();
+
+            QFileInfo info(path);
+            if (info.baseName() == "__all__") {
+                path = info.path();
+                QString concatenated;
+                for (const QString &fileName : content.split('\n', QString::SkipEmptyParts)) {
+                    QFile file(path + "/" + fileName);
+                    if (!file.open(QIODevice::ReadOnly)) {
+                        concatenated = QString("Could not open %1").arg(file.fileName());
+                        break;
+                    }
+                    concatenated.append(file.readAll() + "\n");
+                }
+                concatenated.append(QString("scriptLoaded(\"%1\");\n").arg(info.fileName()));
+                content = concatenated;
+            }
+
             QString mimeType = "text/html";
-            if (path.endsWith(".js")) {
+            if (info.suffix() == "js") {
                 mimeType = "text/javascript";
-            } else if (path.endsWith(".css")) {
+            } else if (info.suffix() == "css") {
                 mimeType = "text/css";
             }
 
             os << "HTTP/1.0 200 Ok\r\n"
                   "Content-Type: " << mimeType << "; charset=\"utf-8\"\r\n"
                   "\r\n"
-               << file.readAll();
+               << content;
 
             socket->close();
 
