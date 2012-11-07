@@ -19,6 +19,12 @@
         return; \
     }
 
+#define IS_TYPE(pointer, Type) \
+    NOT_NULL(pointer) \
+    if (!pointer->is##Type()) { \
+        return; \
+    }
+
 #define NO_STUN \
     if (m_secondsStunned > 0) { \
         send(QString("Please wait %1 seconds.").arg(m_secondsStunned), Olive); \
@@ -382,7 +388,7 @@ void Character::clearNegativeEffects() {
 
 void Character::open(const GameObjectPtr &exitPtr) {
 
-    NOT_NULL(exitPtr)
+    IS_TYPE(exitPtr, Exit)
     NO_STUN
 
     Exit *exit = exitPtr.cast<Exit *>();
@@ -411,7 +417,7 @@ void Character::open(const GameObjectPtr &exitPtr) {
 
 void Character::close(const GameObjectPtr &exitPtr) {
 
-    NOT_NULL(exitPtr)
+    IS_TYPE(exitPtr, Exit)
     NO_STUN
 
     Exit *exit = exitPtr.cast<Exit *>();
@@ -439,7 +445,7 @@ void Character::close(const GameObjectPtr &exitPtr) {
 
 void Character::go(const GameObjectPtr &exitPtr) {
 
-    NOT_NULL(exitPtr)
+    IS_TYPE(exitPtr, Exit)
     NO_STUN
 
     Exit *exit = exitPtr.cast<Exit *>();
@@ -493,7 +499,7 @@ void Character::go(const GameObjectPtr &exitPtr) {
 
 void Character::enter(const GameObjectPtr &roomPtr, const GameObjectPtrList &followers) {
 
-    NOT_NULL(roomPtr)
+    IS_TYPE(roomPtr, Room)
 
     setCurrentRoom(roomPtr);
 
@@ -553,7 +559,7 @@ void Character::enter(const GameObjectPtr &roomPtr, const GameObjectPtrList &fol
 void Character::leave(const GameObjectPtr &roomPtr, const QString &exitName,
                       const GameObjectPtrList &followers) {
 
-    NOT_NULL(roomPtr)
+    IS_TYPE(roomPtr, Room)
 
     Room *room = roomPtr.cast<Room *>();
 
@@ -642,7 +648,7 @@ void Character::shout(const QString &msg) {
 
 void Character::talk(const GameObjectPtr &characterPtr, const QString &message) {
 
-    NOT_NULL(characterPtr)
+    IS_TYPE(characterPtr, Character)
 
     Character *character = characterPtr.cast<Character *>();
     if (character->isPlayer()) {
@@ -655,7 +661,7 @@ void Character::talk(const GameObjectPtr &characterPtr, const QString &message) 
 
 void Character::tell(const GameObjectPtr &playerPtr, const QString &message) {
 
-    NOT_NULL(playerPtr)
+    IS_TYPE(playerPtr, Player)
 
     Player *player = playerPtr.cast<Player *>();
 
@@ -767,7 +773,7 @@ void Character::remove(const GameObjectPtr &item) {
 
 void Character::kill(const GameObjectPtr &characterPtr) {
 
-    NOT_NULL(characterPtr)
+    IS_TYPE(characterPtr, Character)
     NO_STUN
 
     Character *character = characterPtr.cast<Character *>();
@@ -892,7 +898,7 @@ void Character::die(const GameObjectPtr &attacker) {
 
 void Character::follow(const GameObjectPtr &characterPtr) {
 
-    NOT_NULL(characterPtr);
+    IS_TYPE(characterPtr, Character);
 
     Character *character = characterPtr.cast<Character *>();
 

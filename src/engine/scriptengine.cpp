@@ -100,7 +100,7 @@ QScriptValue ScriptEngine::executeFunction(ScriptFunction &function,
                                            const GameObjectPtr &thisObject,
                                            const QScriptValueList &arguments) {
 
-    QScriptValue result =  function.value.call(m_jsEngine.toScriptValue(thisObject), arguments);
+    QScriptValue result = function.value.call(m_jsEngine.toScriptValue(thisObject), arguments);
     if (m_jsEngine.hasUncaughtException()) {
         QScriptValue exception = m_jsEngine.uncaughtException();
         qWarning() << "Script Exception: " << exception.toString().toUtf8().constData() << endl

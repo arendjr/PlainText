@@ -137,12 +137,13 @@ GameObject *Realm::getObject(GameObjectType objectType, uint id) {
 
 GameObject *Realm::getObject(const QString &objectType, uint id) {
 
-    return getObject(GameObjectType::fromString(objectType), id);
+    return getObject(GameObjectType::fromString(Util::capitalize(objectType)), id);
 }
 
 GameObject *Realm::createObject(const QString &objectType) {
 
-    return GameObject::createByObjectType(this, GameObjectType::fromString(objectType));
+    return GameObject::createByObjectType(this,
+                                          GameObjectType::fromString(Util::capitalize(objectType)));
 }
 
 GameObjectPtrList Realm::players() const {

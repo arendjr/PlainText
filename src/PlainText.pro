@@ -297,15 +297,17 @@ OTHER_FILES += \
     engine/commands/command.js \
     ../data/commands/drinkcommand.js \
     ../data/commands/putcommand.js \
+    ../data/commands/admin/enterroomcommand.js \
     ../web/index.html \
-    ../web/kinetic.js \
     ../web/main.css \
     ../web/main.js \
     ../web/notifications.js \
+    ../web/admin/__all__.js \
     ../web/admin/admin.css \
     ../web/admin/admin.js \
     ../web/admin/exitdeletedialog.js \
     ../web/admin/exiteditor.js \
+    ../web/admin/kinetic.js \
     ../web/admin/mapeditor.js \
     ../web/admin/map.model.js \
     ../web/admin/map.view.js \
@@ -313,7 +315,8 @@ OTHER_FILES += \
     ../web/admin/slider.widget.js \
     ../DESIGN.txt \
     ../README.md \
-    ../TODO.txt
+    ../TODO.txt \
+    ../web/admin/__all__.js
 
 INCLUDEPATH += \
     engine \
