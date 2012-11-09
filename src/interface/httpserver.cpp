@@ -78,21 +78,6 @@ void HttpServer::onReadyRead() {
             QString content = file.readAll();
 
             QFileInfo info(path);
-            if (info.baseName() == "__all__") {
-                path = info.path();
-                QString concatenated;
-                for (const QString &fileName : content.split('\n', QString::SkipEmptyParts)) {
-                    QFile file(path + "/" + fileName);
-                    if (!file.open(QIODevice::ReadOnly)) {
-                        concatenated = QString("Could not open %1").arg(file.fileName());
-                        break;
-                    }
-                    concatenated.append(file.readAll() + "\n");
-                }
-                concatenated.append(QString("scriptLoaded(\"%1\");\n").arg(info.fileName()));
-                content = concatenated;
-            }
-
             QString mimeType = "text/html";
             if (info.suffix() == "js") {
                 mimeType = "text/javascript";

@@ -171,7 +171,7 @@
         .sidebar .x,.sidebar .y,.sidebar .z {
             width: 5em;
         }
-        .sidebar .add,.sidebar .edit {
+        .sidebar .add,.sidebar .edit.description {
             font-size: 75%;
         }
         .sidebar .description {

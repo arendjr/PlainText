@@ -95,3 +95,7 @@
     closeOnTokenChange: false
   };
 })();
+
+if (typeof define === "function" && define.amd) {
+  define("codemirror/util/simple-hint");
+}

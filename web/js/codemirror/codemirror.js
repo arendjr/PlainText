@@ -3236,4 +3236,6 @@ window.CodeMirror = (function() {
   return CodeMirror;
 })();
 
-scriptLoaded("codemirror.js");
+if (typeof define === "function" && define.amd) {
+  define( "codemirror/codemirror", [], function () { return CodeMirror; } );
+}

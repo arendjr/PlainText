@@ -1,11 +1,18 @@
-(function(window) {
+/*global define:false, require:false*/
+define(["controller"], function(Controller) {
+
+    "use strict";
 
     var isActive = true;
+
+    var notifications;
 
     function init() {
 
         if (window.webkitNotifications) {
-            window.notifications = window.webkitNotifications;
+            notifications = window.webkitNotifications;
+        } else {
+            notifications = window.notifications;
         }
 
         attachListeners();
@@ -23,18 +30,18 @@
 
         function requestPermission() {
             notifications.requestPermission(function() {
-                controller.removeCommandListener(requestPermission);
+                Controller.removeCommandListener(requestPermission);
             });
         }
 
-        controller.addCommandListener(requestPermission);
+        Controller.addCommandListener(requestPermission);
 
-        controller.addIncomingMessageListener(function(message) {
+        Controller.addIncomingMessageListener(function(message) {
             if (!isActive && notifications.checkPermission() === 0 &&
-                /^\w+ (says|tells|shouts)/.test(message)) {
+                /^\w+ (asks|says|tells|shouts)/.test(message)) {
 
                 var notification = notifications.createNotification(null, "MUD", message);
-                notification.show()
+                notification.show();
 
                 setTimeout(function() {
                     notification.cancel();
@@ -45,4 +52,4 @@
 
     init();
 
-})(window);
+});

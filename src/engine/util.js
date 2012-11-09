@@ -210,7 +210,7 @@ String.prototype.arg = function() {
     }
 
     return result;
-}
+};
 
 String.prototype.capitalized = function() {
 

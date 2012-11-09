@@ -299,24 +299,32 @@ OTHER_FILES += \
     ../data/commands/putcommand.js \
     ../data/commands/admin/enterroomcommand.js \
     ../web/index.html \
-    ../web/main.css \
-    ../web/main.js \
-    ../web/notifications.js \
-    ../web/admin/__all__.js \
-    ../web/admin/admin.css \
-    ../web/admin/admin.js \
-    ../web/admin/exitdeletedialog.js \
-    ../web/admin/exiteditor.js \
-    ../web/admin/kinetic.js \
-    ../web/admin/mapeditor.js \
-    ../web/admin/map.model.js \
-    ../web/admin/map.view.js \
-    ../web/admin/propertyeditor.js \
-    ../web/admin/slider.widget.js \
+    ../web/css/admin.css \
+    ../web/css/main.css \
+    ../web/js/kinetic.js \
+    ../web/js/main.js \
+    ../web/js/notifications.js \
+    ../web/js/require.js \
+    ../web/js/zepto.js \
+    ../web/js/admin/admin.js \
+    ../web/js/admin/exitdeletedialog.js \
+    ../web/js/admin/exiteditor.js \
+    ../web/js/admin/kinetic.js \
+    ../web/js/admin/mapeditor.js \
+    ../web/js/admin/map.model.js \
+    ../web/js/admin/map.view.js \
+    ../web/js/admin/propertyeditor.js \
+    ../web/js/admin/slider.widget.js \
+    ../web/js/codemirror/codemirror.css \
+    ../web/js/codemirror/codemirror.js \
+    ../web/js/codemirror/javascript.js \
+    ../web/js/codemirror/util/javascript-hint.js \
+    ../web/js/codemirror/util/simple-hint.js \
     ../DESIGN.txt \
     ../README.md \
     ../TODO.txt \
-    ../web/admin/__all__.js
+    ../web/js/util.js \
+    ../web/js/controller.js
 
 INCLUDEPATH += \
     engine \

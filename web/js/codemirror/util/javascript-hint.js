@@ -132,3 +132,7 @@
     return found;
   }
 })();
+
+if (typeof define === "function" && define.amd) {
+  define("codemirror/util/javascript-hint");
+}

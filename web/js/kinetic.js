@@ -6569,4 +6569,6 @@ Kinetic.Node.addGettersSetters(Kinetic.TextPath, ['fontFamily', 'fontSize', 'fon
  * @methodOf Kinetic.TextPath.prototype
  */
 
-scriptLoaded("kinetic.js");
+if (typeof define === "function" && define.amd) {
+    define("kinetic", [], function () { return Kinetic; });
+}
