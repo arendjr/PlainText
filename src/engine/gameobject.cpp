@@ -150,24 +150,28 @@ void GameObject::setName(const QString &name) {
 
 QString GameObject::definiteName(const GameObjectPtrList &pool, int options) const {
 
-    if (m_indefiniteArticle.isEmpty()) {
-        return name();
-    } else {
-        int position = 0;
-        int total = 0;
-        for (const GameObjectPtr &other : pool) {
-            if (other->name() == name()) {
-                total++;
+    try {
+        if (m_indefiniteArticle.isEmpty()) {
+            return name();
+        } else {
+            int position = 0;
+            int total = 0;
+            for (const GameObjectPtr &other : pool) {
+                if (other->name() == name()) {
+                    total++;
 
-                if (other->id() == id()) {
-                    position = total;
+                    if (other->id() == id()) {
+                        position = total;
+                    }
                 }
             }
-        }
 
-        return QString(options & Capitalized ? "The " : "the ") +
-               (total > 1 ? QString(Util::writtenPosition(position) + " ") : QLatin1String("")) +
-               name();
+            return QString(options & Capitalized ? "The " : "the ") +
+                   (total > 1 ? QString(Util::writtenPosition(position) + " ") : QLatin1String("")) +
+                   name();
+        }
+    } catch (GameException &exception) {
+        qDebug() << "Exception in GameObject::definiteName(): " << exception.what();
     }
 }
 

@@ -1,5 +1,7 @@
 #include "player.h"
 
+#include <QDebug>
+
 #include "room.h"
 #include "commandinterpreter.h"
 #include "exit.h"
@@ -90,60 +92,68 @@ void Player::send(const QString &_message, int color) const {
 
 void Player::sendSellableItemsList(const GameObjectPtrList &items) {
 
-    QString message;
-    for (const GameObjectPtr &item : items) {
-        message += QString("  %1$%3\n")
-                   .arg(item->name().leftJustified(30))
-                   .arg(item.cast<Item *>()->cost());
+    try {
+        QString message;
+        for (const GameObjectPtr &item : items) {
+            message += QString("  %1$%3\n")
+                       .arg(item->name().leftJustified(30))
+                       .arg(item.cast<Item *>()->cost());
+        }
+        write(message);
+    } catch (GameException &exception) {
+        qDebug() << "Exception in Player::sendSellableItemsList(): " << exception.what();
     }
-    write(message);
 }
 
 void Player::look() {
 
-    Room *room = currentRoom().cast<Room *>();
-    QString text;
+    try {
+        Room *room = currentRoom().cast<Room *>();
+        QString text;
 
-    if (!room->name().isEmpty()) {
-        text += "\n" + Util::colorize(room->name(), Teal) + "\n\n";
-    }
+        if (!room->name().isEmpty()) {
+            text += "\n" + Util::colorize(room->name(), Teal) + "\n\n";
+        }
 
-    text += room->description() + "\n";
+        text += room->description() + "\n";
 
-    if (room->exits().length() > 0) {
-        QStringList exitNames;
-        for (const GameObjectPtr &exitPtr : room->exits()) {
-            Exit *exit = exitPtr.cast<Exit *>();
+        if (room->exits().length() > 0) {
+            QStringList exitNames;
+            for (const GameObjectPtr &exitPtr : room->exits()) {
+                Exit *exit = exitPtr.cast<Exit *>();
 
-            if (exit->isHidden()) {
-                continue;
+                if (exit->isHidden()) {
+                    continue;
+                }
+
+                exitNames << exit->name();
             }
-
-            exitNames << exit->name();
+            exitNames = Util::sortExitNames(exitNames);
+            text += Util::colorize("Obvious exits: " + exitNames.join(", ") + ".", Green) + "\n";
         }
-        exitNames = Util::sortExitNames(exitNames);
-        text += Util::colorize("Obvious exits: " + exitNames.join(", ") + ".", Green) + "\n";
-    }
 
-    GameObjectPtrList others = room->players();
-    others.removeOne(this);
-    if (others.length() > 0) {
-        QStringList playerNames;
-        for (const GameObjectPtr &other : others) {
-            playerNames << other->name();
+        GameObjectPtrList others = room->players();
+        others.removeOne(this);
+        if (others.length() > 0) {
+            QStringList playerNames;
+            for (const GameObjectPtr &other : others) {
+                playerNames << other->name();
+            }
+            text += QString("You see %1.\n").arg(Util::joinFancy(playerNames));
         }
-        text += QString("You see %1.\n").arg(Util::joinFancy(playerNames));
-    }
 
-    if (room->npcs().length() > 0) {
-        text += QString("You see %1.\n").arg(room->npcs().joinFancy());
-    }
+        if (room->npcs().length() > 0) {
+            text += QString("You see %1.\n").arg(room->npcs().joinFancy());
+        }
 
-    if (room->items().length() > 0) {
-        text += QString("You see %1.\n").arg(room->items().joinFancy());
-    }
+        if (room->items().length() > 0) {
+            text += QString("You see %1.\n").arg(room->items().joinFancy());
+        }
 
-    send(text);
+        send(text);
+    } catch (GameException &exception) {
+        qDebug() << "Exception in Player::look(): " << exception.what();
+    }
 }
 
 void Player::execute(const QString &command) {
