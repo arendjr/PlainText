@@ -4,6 +4,7 @@ PlainText
 PlainText-build-desktop*
 PlainText.pro.user*
 moc_*.cpp
+qrc_*.cpp
 
 # XCode project
 *.xcodeproj
