@@ -6,6 +6,7 @@
 
 #include "constants.h"
 #include "gameobjectptr.h"
+#include "vector3d.h"
 
 
 class Util : public QObject {
@@ -55,6 +56,8 @@ class Util : public QObject {
         static bool isDirectionAbbreviation(const QString &string);
 
         static QString direction(const QString &abbreviation);
+
+        Q_INVOKABLE static QString directionForVector(const Vector3D &vector);
 
         static QString toCamelCase(QString string);
         static QString fromCamelCase(const QString &string);

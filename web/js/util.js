@@ -42,9 +42,44 @@ define(function() {
         return directions[indexOfDirection(direction)].vector;
     }
 
+    function directionForVector(vector) {
+
+        if (vector instanceof Array) {
+            vector = { "x": vector[0], "y": vector[1], "z": vector[2] };
+        }
+
+        if (Math.abs(vector.z) > Math.sqrt(Math.pow(vector.x, 2) + Math.pow(vector.y, 2))) {
+            if (vector.z > 0) {
+                return "down";
+            } else {
+                return "up";
+            }
+        } else {
+            var degrees = Math.atan2(vector.y, vector.x) * 180.0 / Math.PI + 180.0;
+            if (degrees < 22.5 || degrees > 337.5) {
+                return "east";
+            } else if (degrees >= 22.5 && degrees < 67.5) {
+                return "southeast";
+            } else if (degrees >= 67.5 && degrees < 112.5) {
+                return "south";
+            } else if (degrees >= 112.5 && degrees < 157.5) {
+                return "southwest";
+            } else if (degrees >= 157.5 && degrees < 202.5) {
+                return "west";
+            } else if (degrees >= 202.5 && degrees < 247.5) {
+                return "northwest";
+            } else if (degrees >= 247.5 && degrees < 292.5) {
+                return "north";
+            } else {
+                return "northeast";
+            }
+        }
+    }
+
     return {
         "isDirection": isDirection,
         "opposingDirection": opposingDirection,
-        "directionVector": directionVector
+        "directionVector": directionVector,
+        "directionForVector": directionForVector
     };
 });

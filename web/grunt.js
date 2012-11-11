@@ -30,10 +30,18 @@ module.exports = function(grunt) {
         browser: true
       },
       globals: {}
+    },
+    requirejs: {
+      compile: {
+        options: {
+          baseUrl: "js",
+          mainConfigFile: "path/to/config.js",
+          out: "js/all.js"
+        }
+      }
     }
   });
 
-  // Default task.
   grunt.registerTask('default', 'lint');
-
+  grunt.loadNpmTasks('grunt-contrib-requirejs');
 };

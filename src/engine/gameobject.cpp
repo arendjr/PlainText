@@ -172,6 +172,7 @@ QString GameObject::definiteName(const GameObjectPtrList &pool, int options) con
         }
     } catch (GameException &exception) {
         qDebug() << "Exception in GameObject::definiteName(): " << exception.what();
+        return m_name;
     }
 }
 

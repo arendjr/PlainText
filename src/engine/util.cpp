@@ -1,11 +1,16 @@
 #include "util.h"
 
+#include <cmath>
+
+#include <QTextStream>
+#include <QtAlgorithms>
+
 #include "gameobjectptr.h"
 #include "player.h"
 #include "scriptengine.h"
 
-#include <QTextStream>
-#include <QtAlgorithms>
+
+#define TAU 6.2831853071
 
 
 QString Util::joinFancy(const QStringList &list, const QString &separator, const QString &last) {
@@ -345,6 +350,36 @@ QString Util::direction(const QString &abbreviation) {
 
     Q_ASSERT(isDirectionAbbreviation(abbreviation));
     return directions[indexOfDirectionAbbreviation(abbreviation)].name;
+}
+
+QString Util::directionForVector(const Vector3D &vector) {
+
+    if (abs(vector.z) > sqrt(pow(vector.x, 2) + pow(vector.y, 2))) {
+        if (vector.z > 0) {
+            return "down";
+        } else {
+            return "up";
+        }
+    } else {
+        double degrees = atan2(vector.y, vector.x) * 360.0 / TAU + 180.0;
+        if (degrees < 22.5 || degrees > 337.5) {
+            return "east";
+        } else if (degrees >= 22.5 && degrees < 67.5) {
+            return "southeast";
+        } else if (degrees >= 67.5 && degrees < 112.5) {
+            return "south";
+        } else if (degrees >= 112.5 && degrees < 157.5) {
+            return "southwest";
+        } else if (degrees >= 157.5 && degrees < 202.5) {
+            return "west";
+        } else if (degrees >= 202.5 && degrees < 247.5) {
+            return "northwest";
+        } else if (degrees >= 247.5 && degrees < 292.5) {
+            return "north";
+        } else {
+            return "northeast";
+        }
+    }
 }
 
 QString Util::toCamelCase(QString string) {

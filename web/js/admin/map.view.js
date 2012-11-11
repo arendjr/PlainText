@@ -126,6 +126,10 @@ define(["kinetic"], function(Kinetic) {
             var z = perspective * room.z;
             for (var i = 0, length = room.exits.length; i < length; i++) {
                 var exit = room.exits[i];
+                if (exit.oppositeExit && exit.oppositeExit.shape) {
+                    continue;
+                }
+
                 var destination = exit.destination;
                 var points = [room.x + z,
                               room.y - z,
@@ -136,7 +140,7 @@ define(["kinetic"], function(Kinetic) {
                 } else {
                     exit.shape = new Kinetic.Line({
                         "points": points,
-                        "stroke": "blue",
+                        "stroke": (exit.oppositeExit ? "blue" : "lightblue"),
                         "strokeWidth": 2,
                         "listening": false
                     });

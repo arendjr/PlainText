@@ -122,6 +122,10 @@ define(["util", "zepto"], function(Util, $) {
         } else {
             $(".new.destination", this.element).prop("checked", true);
             $(".destination-id", this.element).val("");
+
+            $(".x", this.element).val(sourceRoom.position[0]);
+            $(".y", this.element).val(sourceRoom.position[1]);
+            $(".z", this.element).val(sourceRoom.position[2]);
         }
 
         if (exit.oppositeExit) {
