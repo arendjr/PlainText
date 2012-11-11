@@ -236,9 +236,24 @@ define(["kinetic"], function(Kinetic) {
         this.selectionListeners.insert(listener);
     };
 
+    MapView.prototype.getSelectionListeners = function() {
+
+        return this.selectionListeners.slice(0);
+    };
+
     MapView.prototype.removeSelectionListener = function(listener) {
 
         this.selectionListeners.removeAll(listener);
+    };
+
+    MapView.prototype.removeSelectionListeners = function() {
+
+        this.selectionListeners.clear();
+    };
+
+    MapView.prototype.setSelectionListeners = function(listeners) {
+
+        this.selectionListeners = listeners;
     };
 
     MapView.prototype.notifySelectionListeners = function() {

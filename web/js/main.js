@@ -5,6 +5,11 @@ Array.prototype.append = function(value) {
     return this.push(value);
 };
 
+Array.prototype.clear = function() {
+
+    return this.splice(0, this.length);
+};
+
 Array.prototype.contains = function(element) {
 
     return this.indexOf(element) > -1;

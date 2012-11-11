@@ -11,6 +11,10 @@ define(["util", "zepto"], function(Util, $) {
                                   "south", "southwest", "west", "northwest",
                                   "up", "down"];
 
+        this.mapModel = null;
+        this.mapView = null;
+        this.originalSelectionListeners = [];
+
         this.sourceRoom = null;
         this.exit = null;
 
@@ -29,18 +33,7 @@ define(["util", "zepto"], function(Util, $) {
         var self = this;
 
         $(".direction", this.element).on("change", function() {
-            var direction = $(".direction", self.element).val();
-            var name = $(".name", self.element).val();
-            var oppositeExit = $(".opposite", self.element).val();
-            if (name === "" || Util.isDirection(name)) {
-                $(".name").val(direction);
-            }
-            if (oppositeExit === "" || Util.isDirection(oppositeExit)) {
-                if (Util.isDirection(direction)) {
-                    $(".opposite", self.element).val(Util.opposingDirection(direction));
-                }
-            }
-            self.updatePositionAndDistanceVisibility();
+            self.setDirection($(".direction", self.element).val());
         });
 
         $(".new.destination", this.element).on("change", function() {
@@ -69,21 +62,14 @@ define(["util", "zepto"], function(Util, $) {
         });
     };
 
-    ExitEditor.prototype.updatePositionAndDistanceVisibility = function() {
+    ExitEditor.prototype.setMapModel = function(mapModel) {
 
-        if ($(".new.destination", this.element).prop("checked")) {
-            var direction = $(".direction", this.element).val();
-            if (Util.isDirection(direction)) {
-                $(".distance-paragraph", this.element).show();
-                $(".position-paragraph", this.element).hide();
-            } else {
-                $(".distance-paragraph", this.element).hide();
-                $(".position-paragraph", this.element).show();
-            }
-        } else {
-            $(".distance-paragraph", this.element).hide();
-            $(".position-paragraph", this.element).hide();
-        }
+        this.mapModel = mapModel;
+    };
+
+    ExitEditor.prototype.setMapView = function(mapView) {
+
+        this.mapView = mapView;
     };
 
     ExitEditor.prototype.add = function(sourceRoom, options) {
@@ -110,11 +96,7 @@ define(["util", "zepto"], function(Util, $) {
 
         $(".name", this.element).val(exit.name);
 
-        if (exit.id) {
-            $(".delete-button", this.element).show();
-        } else {
-            $(".delete-button", this.element).hide();
-        }
+        $(".delete-button", this.element).css("display", exit.id ? "" : "none");
 
         if (exit.destination) {
             $(".destination.id", this.element).prop("checked", true);
@@ -136,7 +118,64 @@ define(["util", "zepto"], function(Util, $) {
 
         this.updatePositionAndDistanceVisibility();
 
+        if (this.mapView) {
+            this.originalSelectionListeners = this.mapView.getSelectionListeners();
+            this.mapView.removeSelectionListeners();
+
+            var self = this;
+            this.mapView.addSelectionListener(function(selectedRoomId) {
+                $(".destination.id", self.element).prop("checked", true);
+                $(".destination-id", self.element).val(selectedRoomId);
+                self.updatePositionAndDistanceVisibility();
+
+                if (self.mapModel) {
+                    var destinationRoom = self.mapModel.rooms[selectedRoomId];
+                    self.setDirection(Util.directionForVector({
+                        "x": destinationRoom.position[0] - sourceRoom.position[0],
+                        "y": destinationRoom.position[1] - sourceRoom.position[1],
+                        "z": destinationRoom.position[2] - sourceRoom.position[2]
+                    }));
+                }
+            });
+        }
+
         this.element.show();
+    };
+
+    ExitEditor.prototype.setDirection = function(direction) {
+
+        $(".direction", this.element).val(Util.isDirection(direction) ? direction : "");
+
+        var name = $(".name", this.element).val();
+        if (name === "" || Util.isDirection(name)) {
+            $(".name").val(direction);
+        }
+
+        var oppositeExit = $(".opposite", this.element).val();
+        if (oppositeExit === "" || Util.isDirection(oppositeExit)) {
+            if (Util.isDirection(direction)) {
+                $(".opposite", this.element).val(Util.opposingDirection(direction));
+            }
+        }
+
+        this.updatePositionAndDistanceVisibility();
+    };
+
+    ExitEditor.prototype.updatePositionAndDistanceVisibility = function() {
+
+        if ($(".new.destination", this.element).prop("checked")) {
+            var direction = $(".direction", this.element).val();
+            if (Util.isDirection(direction)) {
+                $(".distance-paragraph", this.element).show();
+                $(".position-paragraph", this.element).hide();
+            } else {
+                $(".distance-paragraph", this.element).hide();
+                $(".position-paragraph", this.element).show();
+            }
+        } else {
+            $(".distance-paragraph", this.element).hide();
+            $(".position-paragraph", this.element).hide();
+        }
     };
 
     ExitEditor.prototype.save = function() {
@@ -192,6 +231,10 @@ define(["util", "zepto"], function(Util, $) {
 
         if (this.options.onclose) {
             this.options.onclose();
+        }
+
+        if (this.mapView) {
+            this.mapView.setSelectionListeners(this.originalSelectionListeners);
         }
 
         this.element.hide();

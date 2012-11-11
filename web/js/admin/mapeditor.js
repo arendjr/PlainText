@@ -10,7 +10,7 @@ define(["controller", "admin/map.model", "admin/map.view", "admin/exiteditor",
 
         this.element = $(".map-editor");
 
-        this.map = null;
+        this.model = null;
         this.view = null;
 
         this.exitEditor = null;
@@ -27,12 +27,14 @@ define(["controller", "admin/map.model", "admin/map.view", "admin/exiteditor",
 
     MapEditor.prototype.init = function() {
 
-        this.map = new MapModel();
+        this.model = new MapModel();
 
         this.view = new MapView($(".canvas", this.element)[0]);
-        this.view.setModel(this.map);
+        this.view.setModel(this.model);
 
         this.exitEditor = new ExitEditor();
+        this.exitEditor.setMapModel(this.model);
+        this.exitEditor.setMapView(this.view);
 
         this.exitDeleteDialog = new ExitDeleteDialog();
 
@@ -55,7 +57,7 @@ define(["controller", "admin/map.model", "admin/map.view", "admin/exiteditor",
 
         var self = this;
 
-        this.map.addChangeListener(function() {
+        this.model.addChangeListener(function() {
             if (self.selectedRoomId) {
                 self.onRoomSelectionChanged();
             }
@@ -91,10 +93,10 @@ define(["controller", "admin/map.model", "admin/map.view", "admin/exiteditor",
 
         $(".edit.name", this.selectedRoomDiv).on("click", function() {
             if (self.selectedRoomId) {
-                var room = self.map.rooms[self.selectedRoomId];
+                var room = self.model.rooms[self.selectedRoomId];
                 self.propertyEditor.edit(room.name, {
                     "onsave": function(value) {
-                        self.map.setRoomProperty(self.selectedRoomId, "name", value);
+                        self.model.setRoomProperty(self.selectedRoomId, "name", value);
                         self.propertyEditor.close();
                     }
                 });
@@ -103,10 +105,10 @@ define(["controller", "admin/map.model", "admin/map.view", "admin/exiteditor",
 
         $(".edit.description", this.selectedRoomDiv).on("click", function() {
             if (self.selectedRoomId) {
-                var room = self.map.rooms[self.selectedRoomId];
+                var room = self.model.rooms[self.selectedRoomId];
                 self.propertyEditor.edit(room.description, {
                     "onsave": function(value) {
-                        self.map.setRoomProperty(self.selectedRoomId, "description", value);
+                        self.model.setRoomProperty(self.selectedRoomId, "description", value);
                         self.propertyEditor.close();
                     }
                 });
@@ -114,28 +116,28 @@ define(["controller", "admin/map.model", "admin/map.view", "admin/exiteditor",
         }, false);
 
         this.selectedRoomDiv.on("click", ".edit.exit", function() {
-            var sourceRoom = self.map.rooms[self.selectedRoomId];
-            var exit = self.map.exits[event.target.getAttribute("data-exit-id")];
+            var sourceRoom = self.model.rooms[self.selectedRoomId];
+            var exit = self.model.exits[event.target.getAttribute("data-exit-id")];
             self.exitEditor.edit(sourceRoom, exit, {
                 "onsave": function(exit) {
-                    self.map.setExit(exit);
+                    self.model.setExit(exit);
                     self.exitEditor.close();
                 },
                 "ondelete": function(exitId) {
                     if (exit.oppositeExit) {
                         self.exitDeleteDialog.show({
                             "ondeleteone": function() {
-                                self.map.deleteExit(exit.id);
+                                self.model.deleteExit(exit.id);
                                 self.exitDeleteDialog.close();
                             },
                             "ondeleteboth": function() {
-                                self.map.deleteExit(exit.id);
-                                self.map.deleteExit(exit.oppositeExit.id);
+                                self.model.deleteExit(exit.id);
+                                self.model.deleteExit(exit.oppositeExit.id);
                                 self.exitDeleteDialog.close();
                             }
                         });
                     } else {
-                        self.map.deleteExit(exitId);
+                        self.model.deleteExit(exitId);
                     }
 
                     self.exitEditor.close();
@@ -144,25 +146,25 @@ define(["controller", "admin/map.model", "admin/map.view", "admin/exiteditor",
         });
 
         $(".add.exit", this.selectedRoomDiv).on("click", function() {
-            var sourceRoom = self.map.rooms[self.selectedRoomId];
+            var sourceRoom = self.model.rooms[self.selectedRoomId];
             self.exitEditor.add(sourceRoom, {
                 "onsave": function(exit) {
-                    self.map.setExit(exit);
+                    self.model.setExit(exit);
                     self.exitEditor.close();
                 }
             });
         }, false);
 
         $(".x", this.selectedRoomDiv).on("change", function(event) {
-            self.map.setRoomProperty(self.selectedRoomId, "x", event.target.value);
+            self.model.setRoomProperty(self.selectedRoomId, "x", event.target.value);
         });
 
         $(".y", this.selectedRoomDiv).on("change", function(event) {
-            self.map.setRoomProperty(self.selectedRoomId, "y", event.target.value);
+            self.model.setRoomProperty(self.selectedRoomId, "y", event.target.value);
         });
 
         $(".z", this.selectedRoomDiv).on("change", function(event) {
-            self.map.setRoomProperty(self.selectedRoomId, "z", event.target.value);
+            self.model.setRoomProperty(self.selectedRoomId, "z", event.target.value);
         });
 
         this.zoomSlider.element.addEventListener("change", function(event) {
@@ -179,7 +181,7 @@ define(["controller", "admin/map.model", "admin/map.view", "admin/exiteditor",
 
         this.element.show();
 
-        this.map.load();
+        this.model.load();
     };
 
     MapEditor.prototype.close = function() {
@@ -196,7 +198,7 @@ define(["controller", "admin/map.model", "admin/map.view", "admin/exiteditor",
             return;
         }
 
-        var room = this.map.rooms[this.selectedRoomId];
+        var room = this.model.rooms[this.selectedRoomId];
 
         $(".id", this.selectedRoomDiv).text(room.id);
         $(".x", this.selectedRoomDiv).val(room.x);
@@ -241,7 +243,7 @@ define(["controller", "admin/map.model", "admin/map.view", "admin/exiteditor",
 
     MapEditor.prototype.plotAltitude = function(type) {
 
-        var rooms = this.map.rooms;
+        var rooms = this.model.rooms;
         var data = {};
         for (var id in rooms) {
             data[id] = rooms[id].z;

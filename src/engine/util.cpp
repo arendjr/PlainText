@@ -361,23 +361,23 @@ QString Util::directionForVector(const Vector3D &vector) {
             return "up";
         }
     } else {
-        double degrees = atan2(vector.y, vector.x) * 360.0 / TAU + 180.0;
-        if (degrees < 22.5 || degrees > 337.5) {
+        double degrees = atan2(vector.y, vector.x) * 360.0 / TAU;
+        if (degrees < -157.5 || degrees > 157.5) {
+            return "west";
+        } else if (degrees >= -157.5 && degrees < -112.5) {
+            return "northwest";
+        } else if (degrees >= -112.5 && degrees < -67.5) {
+            return "north";
+        } else if (degrees >= -67.5 && degrees < -22.5) {
+            return "northeast";
+        } else if (degrees >= -22.5 && degrees < 22.5) {
             return "east";
         } else if (degrees >= 22.5 && degrees < 67.5) {
             return "southeast";
         } else if (degrees >= 67.5 && degrees < 112.5) {
             return "south";
-        } else if (degrees >= 112.5 && degrees < 157.5) {
-            return "southwest";
-        } else if (degrees >= 157.5 && degrees < 202.5) {
-            return "west";
-        } else if (degrees >= 202.5 && degrees < 247.5) {
-            return "northwest";
-        } else if (degrees >= 247.5 && degrees < 292.5) {
-            return "north";
         } else {
-            return "northeast";
+            return "southwest";
         }
     }
 }
