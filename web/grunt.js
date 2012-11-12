@@ -34,9 +34,29 @@ module.exports = function(grunt) {
     requirejs: {
       compile: {
         options: {
-          baseUrl: "js",
-          mainConfigFile: "path/to/config.js",
-          out: "js/all.js"
+          appDir: "js/",
+          baseUrl: "./",
+          dir: "min",
+
+          modules: [
+            {
+              name: "main"
+            },
+            {
+              name: "admin/admin",
+              include: [
+                "kinetic",
+                "admin/mapeditor",
+                "codemirror/codemirror",
+                "codemirror/javascript",
+                "codemirror/util/simple-hint",
+                "codemirror/util/javascript-hint"
+              ],
+              exclude: [
+                "controller"
+              ]
+            }
+          ]
         }
       }
     }

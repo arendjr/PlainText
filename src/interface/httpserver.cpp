@@ -65,6 +65,13 @@ void HttpServer::onReadyRead() {
             }
             path = "../web" + path;
 
+            if (path.contains("/js/")) {
+                QString minifiedPath = path.replace("/js/", "/min/");
+                if (QFile::exists(minifiedPath)) {
+                    path = minifiedPath;
+                }
+            }
+
             QFile file(path);
             if (!file.open(QIODevice::ReadOnly)) {
                 os << "HTTP/1.0 404 Not Found"
