@@ -129,11 +129,10 @@ SOURCES += \
     engine/commands/api/datasetcommand.cpp \
     engine/commands/api/exitdeletecommand.cpp \
     engine/commands/api/exitsetcommand.cpp \
-    engine/commands/api/exitslistcommand.cpp \
     engine/commands/api/logretrievecommand.cpp \
+    engine/commands/api/objectslistcommand.cpp \
     engine/commands/api/propertygetcommand.cpp \
     engine/commands/api/propertysetcommand.cpp \
-    engine/commands/api/roomslistcommand.cpp \
     engine/commands/api/triggergetcommand.cpp \
     engine/commands/api/triggersetcommand.cpp \
     engine/commands/api/triggerslistcommand.cpp \
@@ -261,11 +260,10 @@ HEADERS += \
     engine/commands/api/datasetcommand.h \
     engine/commands/api/exitdeletecommand.h \
     engine/commands/api/exitsetcommand.h \
-    engine/commands/api/exitslistcommand.h \
     engine/commands/api/logretrievecommand.h \
+    engine/commands/api/objectslistcommand.h \
     engine/commands/api/propertygetcommand.h \
     engine/commands/api/propertysetcommand.h \
-    engine/commands/api/roomslistcommand.h \
     engine/commands/api/triggergetcommand.h \
     engine/commands/api/triggersetcommand.h \
     engine/commands/api/triggerslistcommand.h \

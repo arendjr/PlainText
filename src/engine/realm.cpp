@@ -146,6 +146,17 @@ GameObject *Realm::createObject(const QString &objectType) {
                                           GameObjectType::fromString(Util::capitalize(objectType)));
 }
 
+GameObjectPtrList Realm::allObjects(GameObjectType objectType) const {
+
+    GameObjectPtrList objects;
+    for (GameObject *object : m_objectMap) {
+        if (object->objectType() == objectType) {
+            objects << object;
+        }
+    }
+    return objects;
+}
+
 GameObjectPtrList Realm::players() const {
 
     GameObjectPtrList players;
@@ -185,28 +196,6 @@ Player *Realm::getPlayer(const QString &name) const {
     }
 
     return 0;
-}
-
-GameObjectPtrList Realm::allRooms() const {
-
-    GameObjectPtrList areas;
-    for (GameObject *object : m_objectMap) {
-        if (object->isRoom()) {
-            areas << object;
-        }
-    }
-    return areas;
-}
-
-GameObjectPtrList Realm::allExits() const {
-
-    GameObjectPtrList exits;
-    for (GameObject *object : m_objectMap) {
-        if (object->isExit()) {
-            exits << object;
-        }
-    }
-    return exits;
 }
 
 void Realm::addReservedName(const QString &name) {

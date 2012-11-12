@@ -37,15 +37,13 @@ class Realm : public GameObject {
         GameObject *getObject(GameObjectType objectType, uint id);
         Q_INVOKABLE GameObject *getObject(const QString &objectType, uint id);
         Q_INVOKABLE GameObject *createObject(const QString &objectType);
+        GameObjectPtrList allObjects(GameObjectType objectType) const;
 
         Q_INVOKABLE GameObjectPtrList players() const;
         Q_INVOKABLE GameObjectPtrList onlinePlayers() const;
         void registerPlayer(Player *player);
         void unregisterPlayer(Player *player);
         Player *getPlayer(const QString &name) const;
-
-        GameObjectPtrList allRooms() const;
-        GameObjectPtrList allExits() const;
 
         void addReservedName(const QString &name);
         const QStringList &reservedNames() const { return m_reservedNames; }

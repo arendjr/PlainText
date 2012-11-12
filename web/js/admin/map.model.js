@@ -32,7 +32,7 @@ define(["controller"], function(Controller) {
 
         var self = this;
 
-        Controller.sendApiCall("rooms-list", function(data) {
+        Controller.sendApiCall("objects-list room", function(data) {
             for (var i = 0; i < data.length; i++) {
                 var room = JSON.parse(data[i]);
                 room.x = room.position ? room.position[0] : 0;
@@ -47,7 +47,7 @@ define(["controller"], function(Controller) {
                 self.rooms[room.id] = room;
             }
 
-            Controller.sendApiCall("exits-list", function(data) {
+            Controller.sendApiCall("objects-list exit", function(data) {
                 for (var i = 0; i < data.length; i++) {
                     var exit = JSON.parse(data[i]);
 
