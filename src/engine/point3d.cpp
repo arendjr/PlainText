@@ -82,16 +82,16 @@ Point3D Point3D::fromVariant(const QVariant &variant) {
 
 QScriptValue Point3D::toScriptValue(QScriptEngine *engine, const Point3D &point) {
 
-    QScriptValue object = engine->newObject();
-    object.setProperty("x", point.x);
-    object.setProperty("y", point.y);
-    object.setProperty("z", point.z);
+    QScriptValue object = engine->newArray(3);
+    object.setProperty(0, point.x);
+    object.setProperty(1, point.y);
+    object.setProperty(2, point.z);
     return object;
 }
 
 void Point3D::fromScriptValue(const QScriptValue &object, Point3D &point) {
 
-    point.x = object.property("x").toInt32();
-    point.y = object.property("y").toInt32();
-    point.z = object.property("z").toInt32();
+    point.x = object.property(0).toInt32();
+    point.y = object.property(1).toInt32();
+    point.z = object.property(2).toInt32();
 }

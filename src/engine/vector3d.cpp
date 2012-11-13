@@ -77,18 +77,18 @@ Vector3D Vector3D::fromVariant(const QVariant &variant) {
 
 QScriptValue Vector3D::toScriptValue(QScriptEngine *engine, const Vector3D &vector) {
 
-    QScriptValue object = engine->newObject();
-    object.setProperty("x", vector.x);
-    object.setProperty("y", vector.y);
-    object.setProperty("z", vector.z);
+    QScriptValue object = engine->newArray(3);
+    object.setProperty(0, vector.x);
+    object.setProperty(1, vector.y);
+    object.setProperty(2, vector.z);
     return object;
 }
 
 void Vector3D::fromScriptValue(const QScriptValue &object, Vector3D &vector) {
 
-    vector.x = object.property("x").toInt32();
-    vector.y = object.property("y").toInt32();
-    vector.z = object.property("z").toInt32();
+    vector.x = object.property(0).toInt32();
+    vector.y = object.property(1).toInt32();
+    vector.z = object.property(2).toInt32();
 }
 
 Vector3D operator*(int scalar, const Vector3D &vector) {
