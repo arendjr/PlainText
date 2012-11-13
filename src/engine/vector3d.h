@@ -37,6 +37,8 @@ class Vector3D {
         static void fromScriptValue(const QScriptValue &object, Vector3D &stats);
 };
 
+Vector3D operator*(int scalar, const Vector3D &vector);
+
 PT_DECLARE_SERIALIZABLE_METATYPE(Vector3D)
 
 #endif // VECTOR3D_H

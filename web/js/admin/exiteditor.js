@@ -194,7 +194,7 @@ define(["util", "zepto"], function(Util, $) {
             if (Util.isDirection(direction)) {
                 var distance = parseInt($(".distance", this.element).val(), 10);
                 var sourcePosition = this.sourceRoom.position;
-                var vector = Util.directionVector(direction);
+                var vector = Util.vectorForDirection(direction);
                 exit.position = [
                     sourcePosition[0] + distance * vector[0],
                     sourcePosition[1] + distance * vector[1],

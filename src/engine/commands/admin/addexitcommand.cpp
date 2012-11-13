@@ -81,18 +81,7 @@ void AddExitCommand::execute(Player *player, const QString &command) {
                 send("Giving a distance is only supported when the exit name is a direction.");
                 return;
             }
-            QMap<QString, Vector3D> vectors;
-            vectors["north"] = Vector3D(0, -distance, 0);
-            vectors["northeast"] = Vector3D(distance, -distance, 0);
-            vectors["east"] = Vector3D(distance, 0, 0);
-            vectors["southeast"] = Vector3D(distance, distance, 0);
-            vectors["south"] = Vector3D(0, distance, 0);
-            vectors["southwest"] = Vector3D(-distance, distance, 0);
-            vectors["west"] = Vector3D(-distance, 0, 0);
-            vectors["northwest"] = Vector3D(-distance, -distance, 0);
-            vectors["up"] = Vector3D(0, 0, distance);
-            vectors["down"] = Vector3D(0, 0, -distance);
-            position = currentRoom()->position() + vectors[exitName];
+            position = currentRoom()->position() + distance * Util::vectorForDirection(exitName);
         }
     }
 

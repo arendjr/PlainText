@@ -37,19 +37,20 @@ struct Direction {
     QString name;
     QString opposite;
     QString abbreviation;
+    Vector3D vector;
 };
 
 static Direction directions[10] = {
-    { QString("north"), QString("south"), QString("n") },
-    { QString("northeast"), QString("southwest"), QString("ne") },
-    { QString("east"), QString("west"), QString("e") },
-    { QString("southeast"), QString("northwest"), QString("se") },
-    { QString("south"), QString("north"), QString("s") },
-    { QString("southwest"), QString("northeast"), QString("sw") },
-    { QString("west"), QString("east"), QString("w") },
-    { QString("northwest"), QString("southeast"), QString("nw") },
-    { QString("up"), QString("down"), QString("u") },
-    { QString("down"), QString("up"), QString("d") }
+    { QString("north"), QString("south"), QString("n"), Vector3D(0, -1, 0) },
+    { QString("northeast"), QString("southwest"), QString("ne"), Vector3D(1, -1, 0) },
+    { QString("east"), QString("west"), QString("e"), Vector3D(1, 0, 0) },
+    { QString("southeast"), QString("northwest"), QString("se"), Vector3D(1, 1, 0) },
+    { QString("south"), QString("north"), QString("s"), Vector3D(0, 1, 0) },
+    { QString("southwest"), QString("northeast"), QString("sw"), Vector3D(-1, 1, 0) },
+    { QString("west"), QString("east"), QString("w"), Vector3D(-1, 0, 0) },
+    { QString("northwest"), QString("southeast"), QString("nw"), Vector3D(-1, -1, 0) },
+    { QString("up"), QString("down"), QString("u"), Vector3D(0, 0, 1) },
+    { QString("down"), QString("up"), QString("d"), Vector3D(0, 0, -1) }
 };
 
 static int indexOfDirection(const QString &direction) {
@@ -337,8 +338,12 @@ bool Util::isDirection(const QString &string) {
 
 QString Util::opposingDirection(const QString &direction) {
 
-    Q_ASSERT(isDirection(direction));
-    return directions[indexOfDirection(direction)].opposite;
+    int index = indexOfDirection(direction);
+    if (index > -1) {
+        return directions[index].opposite;
+    } else {
+        return QString();
+    }
 }
 
 bool Util::isDirectionAbbreviation(const QString &string) {
@@ -348,8 +353,22 @@ bool Util::isDirectionAbbreviation(const QString &string) {
 
 QString Util::direction(const QString &abbreviation) {
 
-    Q_ASSERT(isDirectionAbbreviation(abbreviation));
-    return directions[indexOfDirectionAbbreviation(abbreviation)].name;
+    int index = indexOfDirectionAbbreviation(abbreviation);
+    if (index > -1) {
+        return directions[index].name;
+    } else {
+        return QString();
+    }
+}
+
+Vector3D Util::vectorForDirection(const QString &direction) {
+
+    int index = indexOfDirection(direction);
+    if (index > -1) {
+        return directions[index].vector;
+    } else {
+        return Vector3D(0, 0, 0);
+    }
 }
 
 QString Util::directionForVector(const Vector3D &vector) {

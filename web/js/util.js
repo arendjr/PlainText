@@ -9,7 +9,7 @@ define(function() {
         { "name": "east", "opposite": "west", "vector": [1, 0, 0] },
         { "name": "southeast", "opposite": "northwest", "vector": [1, 1, 0] },
         { "name": "south", "opposite": "north", "vector": [0, 1, 0] },
-        { "name": "southwest", "opposite": "northeast", "vector": [-1, -1, 0] },
+        { "name": "southwest", "opposite": "northeast", "vector": [-1, 1, 0] },
         { "name": "west", "opposite": "east", "vector": [-1, 0, 0] },
         { "name": "northwest", "opposite": "southeast", "vector": [-1, -1, 0] },
         { "name": "up", "opposite": "down", "vector": [0, 0, 1] },
@@ -37,7 +37,7 @@ define(function() {
         return directions[indexOfDirection(direction)].opposite;
     }
 
-    function directionVector(direction) {
+    function vectorForDirection(direction) {
 
         return directions[indexOfDirection(direction)].vector;
     }
@@ -79,7 +79,7 @@ define(function() {
     return {
         "isDirection": isDirection,
         "opposingDirection": opposingDirection,
-        "directionVector": directionVector,
+        "vectorForDirection": vectorForDirection,
         "directionForVector": directionForVector
     };
 });

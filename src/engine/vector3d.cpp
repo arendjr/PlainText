@@ -90,3 +90,8 @@ void Vector3D::fromScriptValue(const QScriptValue &object, Vector3D &vector) {
     vector.y = object.property("y").toInt32();
     vector.z = object.property("z").toInt32();
 }
+
+Vector3D operator*(int scalar, const Vector3D &vector) {
+
+    return Vector3D(scalar * vector.x, scalar * vector.y, scalar * vector.z);
+}

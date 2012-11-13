@@ -57,6 +57,8 @@ class Util : public QObject {
 
         static QString direction(const QString &abbreviation);
 
+        Q_INVOKABLE static Vector3D vectorForDirection(const QString &direction);
+
         Q_INVOKABLE static QString directionForVector(const Vector3D &vector);
 
         static QString toCamelCase(QString string);
