@@ -15,6 +15,7 @@ PlainText is a text-based MUD game engine.
    * [Connect to the demo server](#connect-to-the-demo-server)
  * **[Creating your own game](#creating-your-own-game)**
    * [Frequently Asked Questions](#frequently-asked-questions)
+ * **[Community](#community)**
  * **[License](#license)**
  
 
@@ -223,6 +224,20 @@ and is dead forever rather than being respawned.
 **Q. What IDE do you recommended?**
 
 A. Personally, I use Qt Creator: http://qt.digia.com/Product/Developer-Tools/
+
+<a id="community"></a>
+Community
+---------
+
+If you have questions, or just want to discuss anything related to the PlainText
+engine, please join us at one of the following forums:
+
+ * The [PlainText core](https://groups.google.com/forum/?fromgroups#!forum/plaintext-core)
+forum is meant for technical discussions regarding use of the PlainText engine.
+ * The [PlainText gameplay](https://groups.google.com/forum/?fromgroups#!forum/plaintext-gameplay)
+forum is used to discuss gameplay mechanics (including code snippets).
+ * The [PlainText tooling](https://groups.google.com/forum/?fromgroups#!forum/plaintext-tooling)
+forum is for discussion regarding tooling (IDEs, room building, compilers, etc.).
 
 <a id="license"></a>
 License
