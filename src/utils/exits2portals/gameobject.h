@@ -22,6 +22,7 @@ class Realm;
 PT_DEFINE_ENUM(GameObjectType,
     Unknown,
     Exit,
+    Portal,
     Room,
     Item,
     Character,
@@ -53,19 +54,10 @@ class GameObject : public QObject {
         GameObjectType objectType() const { return m_objectType; }
         Q_PROPERTY(GameObjectType objectType READ objectType STORED false)
 
-        Q_INVOKABLE bool isClass() const;
-        Q_INVOKABLE bool isContainer() const;
         Q_INVOKABLE bool isExit() const;
-        Q_INVOKABLE bool isItem() const;
-        Q_INVOKABLE bool isCharacter() const;
-        Q_INVOKABLE bool isGroup() const;
-        Q_INVOKABLE bool isPlayer() const;
-        Q_INVOKABLE bool isRace() const;
         Q_INVOKABLE bool isRealm() const;
         Q_INVOKABLE bool isRoom() const;
-        Q_INVOKABLE bool isShield() const;
-        Q_INVOKABLE bool isWeapon() const;
-        Q_INVOKABLE bool hasStats() const;
+        Q_INVOKABLE bool isPortal() const;
 
         uint id() const { return m_id; }
         Q_PROPERTY(uint id READ id STORED false)
@@ -73,10 +65,6 @@ class GameObject : public QObject {
         const QString &name() const { return m_name; }
         void setName(const QString &name);
         Q_PROPERTY(QString name READ name WRITE setName)
-
-        Q_INVOKABLE QString definiteName(const GameObjectPtrList &pool,
-                                         int options = NoOptions) const;
-        Q_INVOKABLE QString indefiniteName(int options = NoOptions) const;
 
         const QString &plural() const { return m_plural; }
         void setPlural(const QString &plural);
@@ -107,54 +95,6 @@ class GameObject : public QObject {
         void setTriggers(const ScriptFunctionMap &triggers);
         Q_PROPERTY(ScriptFunctionMap triggers READ triggers WRITE setTriggers)
 
-        Q_INVOKABLE bool invokeTrigger(const QString &triggerName,
-                                       const QScriptValue &arg1 = QScriptValue(),
-                                       const QScriptValue &arg2 = QScriptValue(),
-                                       const QScriptValue &arg3 = QScriptValue(),
-                                       const QScriptValue &arg4 = QScriptValue());
-        bool invokeTrigger(const QString &triggerName,
-                           GameObject *arg1,
-                           const GameObjectPtr &arg2,
-                           const QScriptValue &arg3 = QScriptValue(),
-                           const QScriptValue &arg4 = QScriptValue());
-        bool invokeTrigger(const QString &triggerName,
-                           GameObject *arg1,
-                           const GameObjectPtrList &arg2,
-                           const QScriptValue &arg3 = QScriptValue(),
-                           const QScriptValue &arg4 = QScriptValue());
-        bool invokeTrigger(const QString &triggerName,
-                           GameObject *arg1,
-                           const GameObjectPtr &arg2,
-                           const GameObjectPtrList &arg3,
-                           const QScriptValue &arg4 = QScriptValue());
-        bool invokeTrigger(const QString &triggerName,
-                           GameObject *arg1,
-                           const QScriptValue &arg2 = QScriptValue(),
-                           const QScriptValue &arg3 = QScriptValue(),
-                           const QScriptValue &arg4 = QScriptValue());
-        bool invokeTrigger(const QString &triggerName,
-                           const GameObjectPtr &arg1,
-                           const GameObjectPtr &arg2,
-                           const QScriptValue &arg3 = QScriptValue(),
-                           const QScriptValue &arg4 = QScriptValue());
-        bool invokeTrigger(const QString &triggerName,
-                           const GameObjectPtr &arg1,
-                           const QScriptValue &arg2 = QScriptValue(),
-                           const QScriptValue &arg3 = QScriptValue(),
-                           const QScriptValue &arg4 = QScriptValue());
-
-        Q_INVOKABLE virtual void send(const QString &message, int color = Silver) const;
-
-        Q_INVOKABLE int setInterval(const QScriptValue &function, int delay);
-        Q_INVOKABLE void clearInterval(int intervalId);
-
-        Q_INVOKABLE int setTimeout(const QScriptValue &function, int delay);
-        Q_INVOKABLE void clearTimeout(int timerId);
-
-        Q_INVOKABLE virtual void init();
-
-        Q_INVOKABLE virtual GameObject *copy();
-
         QString toJsonString(Options options = NoOptions) const;
 
         bool save();
@@ -169,17 +109,11 @@ class GameObject : public QObject {
 
         static GameObject *createFromFile(Realm *realm, const QString &path);
 
-        static GameObject *createCopy(const GameObject *other);
-
         static QScriptValue toScriptValue(QScriptEngine *engine, GameObject *const &gameObject);
         static void fromScriptValue(const QScriptValue &object, GameObject *&gameObject);
 
         QList<QMetaProperty> metaProperties() const;
         QList<QMetaProperty> storedMetaProperties() const;
-
-        virtual void invokeTimer(int timerId);
-
-        virtual void killAllTimers();
 
     protected:
         bool mayReferenceOtherProperties() const;
@@ -191,8 +125,6 @@ class GameObject : public QObject {
 
         void registerPointer(GameObjectPtr *pointer);
         void unregisterPointer(GameObjectPtr *pointer);
-
-        virtual void changeName(const QString &newName);
 
     private:
         Realm *m_realm;

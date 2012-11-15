@@ -1,31 +1,8 @@
-QT += core network script
-QT -= gui
+include(environment.pri)
 
-macx {
-    DEPLOYMENT_TARGET = 10.7
-    MAC_SDK  = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX$${DEPLOYMENT_TARGET}.sdk
-    if (!exists($$MAC_SDK)) {
-        error("The selected Mac OS X SDK does not exist at $$MAC_SDK!")
-    }
-    QMAKE_MACOSX_DEPLOYMENT_TARGET = $$DEPLOYMENT_TARGET
-    QMAKE_MAC_SDK = $$MAC_SDK
-    QMAKE_CXXFLAGS = -stdlib=libc++
-    LIBS += -L$$MAC_SDK/usr/lib/ -lc++
-} else {
-    system(which clang++ 2> /dev/null) {
-        LIBS += -lc++
-        QMAKE_CXX = clang++
-        QMAKE_CXXFLAGS = -stdlib=libc++
-    }
-}
-QMAKE_CXXFLAGS += -std=c++11
 LIBS += -lz
 
-DEFINES *= QT_USE_QSTRINGBUILDER
-
 TARGET = PlainText
-CONFIG += console debug
-CONFIG -= app_bundle
 
 TEMPLATE = app
 
@@ -56,6 +33,7 @@ SOURCES += \
     engine/modifier.cpp \
     engine/player.cpp \
     engine/point3d.cpp \
+    engine/portal.cpp \
     engine/race.cpp \
     engine/realm.cpp \
     engine/room.cpp \
@@ -187,6 +165,7 @@ HEADERS += \
     engine/modifier.h \
     engine/player.h \
     engine/point3d.h \
+    engine/portal.h \
     engine/race.h \
     engine/realm.h \
     engine/room.h \

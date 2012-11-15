@@ -1,7 +1,5 @@
 #include "realm.h"
 
-#include <cstring>
-
 #include "commandinterpreter.h"
 #include "commandregistry.h"
 #include "diskutil.h"

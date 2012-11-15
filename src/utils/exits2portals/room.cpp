@@ -1,7 +1,5 @@
 #include "room.h"
 
-#include "item.h"
-
 
 #define super GameObject
 
@@ -42,6 +40,31 @@ void Room::setExits(const GameObjectPtrList &exits) {
 
     if (m_exits != exits) {
         m_exits = exits;
+
+        setModified();
+    }
+}
+
+void Room::addPortal(const GameObjectPtr &portal) {
+
+    if (!m_portals.contains(portal)) {
+        m_portals << portal;
+
+        setModified();
+    }
+}
+
+void Room::removePortal(const GameObjectPtr &portal) {
+
+    if (m_portals.removeOne(portal)) {
+        setModified();
+    }
+}
+
+void Room::setPortals(const GameObjectPtrList &portals) {
+
+    if (m_portals != portals) {
+        m_portals = portals;
 
         setModified();
     }
@@ -105,25 +128,5 @@ void Room::setItems(const GameObjectPtrList &items) {
         m_items = items;
 
         setModified();
-    }
-}
-
-void Room::addGold(double amount) {
-
-    GameObjectPtr goldPtr;
-    for (const GameObjectPtr &itemPtr : m_items) {
-        if (itemPtr->name().endsWith("worth of gold")) {
-            goldPtr = itemPtr;
-            break;
-        }
-    }
-
-    if (goldPtr.isNull()) {
-        Item *gold = Item::createGold(realm(), amount);
-        addItem(gold);
-    } else {
-        Item *gold = goldPtr.cast<Item *>();
-        gold->setCost(gold->cost() + amount);
-        gold->setName(QString("$%1 worth of gold").arg(gold->cost()));
     }
 }

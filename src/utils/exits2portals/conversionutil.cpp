@@ -4,7 +4,6 @@
 #include <QDebug>
 #include <QStringList>
 
-#include "characterstats.h"
 #include "gameobjectptr.h"
 #include "metatyperegistry.h"
 #include "realm.h"

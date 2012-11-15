@@ -24,6 +24,12 @@ class Room : public GameObject {
         void setExits(const GameObjectPtrList &exits);
         Q_PROPERTY(GameObjectPtrList exits READ exits WRITE setExits)
 
+        const GameObjectPtrList &portals() const { return m_portals; }
+        Q_INVOKABLE void addPortal(const GameObjectPtr &portal);
+        Q_INVOKABLE void removePortal(const GameObjectPtr &portal);
+        void setPortals(const GameObjectPtrList &portals);
+        Q_PROPERTY(GameObjectPtrList portals READ portals WRITE setPortals)
+
         const GameObjectPtrList &players() const { return m_players; }
         Q_INVOKABLE void addPlayer(const GameObjectPtr &player);
         Q_INVOKABLE void removePlayer(const GameObjectPtr &player);
@@ -42,8 +48,6 @@ class Room : public GameObject {
         void setItems(const GameObjectPtrList &items);
         Q_PROPERTY(GameObjectPtrList items READ items WRITE setItems)
 
-        Q_INVOKABLE void addGold(double amount);
-
         GameObjectPtrList characters() const { return m_players + m_npcs; }
         Q_PROPERTY(GameObjectPtrList characters READ characters STORED false)
 
@@ -53,6 +57,7 @@ class Room : public GameObject {
     private:
         Point3D m_position;
         GameObjectPtrList m_exits;
+        GameObjectPtrList m_portals;
         GameObjectPtrList m_players;
         GameObjectPtrList m_npcs;
         GameObjectPtrList m_items;

@@ -11,7 +11,6 @@
 
 #include "conversionutil.h"
 #include "realm.h"
-#include "util.h"
 
 
 GameObjectPtr::GameObjectPtr() :
@@ -834,62 +833,6 @@ GameObjectPtrList GameObjectPtrList::copyUnresolved() const {
         index++;
     }
     return copy;
-}
-
-void GameObjectPtrList::send(const QString &message, int color) const {
-
-    for (int i = 0; i < m_size; i++) {
-        m_items[i]->send(message, color);
-    }
-    if (m_nextList) {
-        m_nextList->send(message, color);
-    }
-}
-
-QString GameObjectPtrList::joinFancy(Options options) const {
-
-    if (isEmpty()) {
-        return (options & Capitalized ? "Nothing" : "nothing");
-    }
-
-    QVector<GameObject *> objects;
-    QStringList objectNames;
-    QList<int> objectCounts;
-
-    for (const GameObjectPtr &object : *this) {
-        int index = objectNames.indexOf(object->name());
-        if (index > -1) {
-            objectCounts[index]++;
-        } else {
-            objects << object.cast<GameObject *>();
-            objectNames << object->name();
-            objectCounts << 1;
-        }
-    }
-
-    QStringList strings;
-    for (int i = 0; i < objects.size(); i++) {
-        const GameObject *object = objects[i];
-
-        if (objectCounts[i] > 1) {
-            if (i == 0 && options & Capitalized) {
-                strings << Util::capitalize(Util::writtenNumber(objectCounts[i])) + " " +
-                           object->plural();
-            } else {
-                strings << Util::writtenNumber(objectCounts[i]) + " " + object->plural();
-            }
-        } else {
-            if (object->indefiniteArticle().isEmpty()) {
-                strings << object->name();
-            } else if (options & DefiniteArticles) {
-                strings << (i == 0 && options & Capitalized ? "The " : "the ") + object->name();
-            } else {
-                strings << object->indefiniteName(i == 0 ? (options & Capitalized) : NoOptions);
-            }
-        }
-    }
-
-    return Util::joinFancy(strings);
 }
 
 QString GameObjectPtrList::toUserString(const GameObjectPtrList &pointerList) {
