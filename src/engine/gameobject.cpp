@@ -24,6 +24,7 @@
 #include "group.h"
 #include "item.h"
 #include "player.h"
+#include "portal.h"
 #include "race.h"
 #include "realm.h"
 #include "room.h"
@@ -104,6 +105,11 @@ bool GameObject::isGroup() const {
 bool GameObject::isPlayer() const {
 
     return m_objectType == GameObjectType::Player;
+}
+
+bool GameObject::isPortal() const {
+
+    return m_objectType == GameObjectType::Portal;
 }
 
 bool GameObject::isRace() const {
@@ -560,6 +566,8 @@ GameObject *GameObject::createByObjectType(Realm *realm, GameObjectType objectTy
             return new Item(realm, id, options);
         case GameObjectType::Player:
             return new Player(realm, id, options);
+        case GameObjectType::Portal:
+            return new Portal(realm, id, options);
         case GameObjectType::Race:
             return new Race(realm, id, options);
         case GameObjectType::Realm:

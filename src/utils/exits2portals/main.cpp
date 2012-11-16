@@ -1,14 +1,19 @@
+#include <QCoreApplication>
+#include <QScriptEngine>
 #include <QString>
 
 #include "exit.h"
+#include "metatyperegistry.h"
 #include "portal.h"
 #include "realm.h"
 #include "room.h"
 
+
 int main(int argc, char *argv[]) {
 
-    Q_UNUSED(argc)
-    Q_UNUSED(argv)
+    QCoreApplication application(argc, argv);
+    QScriptEngine jsEngine;
+    MetaTypeRegistry::registerMetaTypes(&jsEngine);
 
     Realm realm;
     realm.init();
@@ -42,6 +47,16 @@ int main(int argc, char *argv[]) {
             portal->setName(exit->name());
             portal->setDescription(exit->description());
 
+            PortalFlags flags = PortalFlags::CanPassThrough;
+            if (exit->isHidden()) {
+                flags |= PortalFlags::IsHiddenFromSide1;
+            }
+            if (exit->isDoor()) {
+                flags ^= PortalFlags::CanPassThrough;
+                flags |= PortalFlags::CanPassThroughIfOpen;
+                flags |= PortalFlags::CanOpenFromSide1;
+            }
+
             room->removeExit(exitPtr);
             room->addPortal(portal);
 
@@ -53,11 +68,24 @@ int main(int argc, char *argv[]) {
                 portal->setName2(oppositeExit->name());
                 portal->setDescription2(oppositeExit->description());
 
+                if (oppositeExit->isHidden()) {
+                    flags |= PortalFlags::IsHiddenFromSide2;
+                }
+                if (oppositeExit->isDoor()) {
+                    if (!exit->isDoor()) {
+                        flags ^= PortalFlags::CanPassThrough;
+                        flags |= PortalFlags::CanPassThroughIfOpen;
+                    }
+                    flags |= PortalFlags::CanOpenFromSide2;
+                }
+
                 destination->removeExit(oppositeExit);
                 destination->addPortal(portal);
 
                 oppositeExit->setDeleted();
             }
+
+            portal->setFlags(flags);
 
             exit->setDeleted();
         }
@@ -73,4 +101,6 @@ int main(int argc, char *argv[]) {
     for (const GameObjectPtr &roomPtr : realm.allObjects(GameObjectType::Room)) {
         roomPtr->save();
     }
+
+    return 0;
 }

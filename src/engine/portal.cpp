@@ -2,7 +2,8 @@
 
 
 Portal::Portal(Realm *realm, uint id, Options options) :
-    GameObject(realm, GameObjectType::Exit, id, options) {
+    GameObject(realm, GameObjectType::Portal, id, options),
+    m_flags(PortalFlags::NoFlags) {
 }
 
 Portal::~Portal() {
@@ -44,6 +45,15 @@ void Portal::setRoom2(const GameObjectPtr &room2) {
     }
 }
 
+void Portal::setFlags(PortalFlags flags) {
+
+    if (m_flags != flags) {
+        m_flags = flags;
+
+        setModified();
+    }
+}
+
 QString Portal::nameFromRoom(const GameObjectPtr &room) {
 
     if (room == m_room2 && !m_name2.isEmpty()) {
@@ -54,8 +64,24 @@ QString Portal::nameFromRoom(const GameObjectPtr &room) {
 
 QString Portal::descriptionFromRoom(const GameObjectPtr &room) {
 
-    if (room == m_room2 && !m_description2.isEmpty()) {
+    if (room == m_room2 && (!m_name2.isEmpty() || !m_description2.isEmpty())) {
         return m_description2;
     }
     return description();
+}
+
+bool Portal::isHiddenFromRoom(const GameObjectPtr &room) {
+
+    if (room == m_room2) {
+        return m_flags & PortalFlags::IsHiddenFromSide2;
+    }
+    return m_flags & PortalFlags::IsHiddenFromSide1;
+}
+
+bool Portal::canOpenFromRoom(const GameObjectPtr &room) {
+
+    if (room == m_room2) {
+        return m_flags & PortalFlags::CanOpenFromSide2;
+    }
+    return m_flags & PortalFlags::CanOpenFromSide1;
 }

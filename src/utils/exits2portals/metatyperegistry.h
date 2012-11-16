@@ -160,13 +160,14 @@ class MetaTypeRegistry {
             }                                                                                     \
             static Type fromString(const QString &string) {                                       \
                 static const char *strings[] = { FOR_EACH(PT_ENUM_STRING, __VA_ARGS__) "" };      \
-                const char *data = string.toAscii().constData();                                  \
-                for (int i = 0; strings[i][0] != '\0'; i++) {                                     \
-                    if (strcmp(data, strings[i]) == 0) {                                          \
-                        return (Flags) i;                                                         \
+                QStringList stringList = string.split('|');                                       \
+                uint flags = 0;                                                                   \
+                for (int i = 0; i < (int) NumFlags; i++) {                                        \
+                    if (stringList.contains(strings[i])) {                                        \
+                        flags |= 1 << i;                                                          \
                     }                                                                             \
                 }                                                                                 \
-                return NoFlags;                                                                   \
+                return (Flags) flags;                                                             \
             }                                                                                     \
             int intValue() const {                                                                \
                 return value;                                                                     \
@@ -177,6 +178,42 @@ class MetaTypeRegistry {
             }                                                                                     \
             Type &operator=(const QString &string) {                                              \
                 *this = fromString(string);                                                       \
+                return *this;                                                                     \
+            }                                                                                     \
+            Flags operator|(Type other) {                                                         \
+                return (Flags) ((uint) value | (uint) other.value);                               \
+            }                                                                                     \
+            Flags operator|(Flags other) {                                                        \
+                return (Flags) ((uint) value | (uint) other);                                     \
+            }                                                                                     \
+            Type &operator|=(Type other) {                                                        \
+                value = (Flags) ((uint) value | (uint) other.value);                              \
+                return *this;                                                                     \
+            }                                                                                     \
+            Type &operator|=(Flags other) {                                                       \
+                value = (Flags) ((uint) value | (uint) other);                                    \
+                return *this;                                                                     \
+            }                                                                                     \
+            Flags operator&(Type other) {                                                         \
+                return (Flags) ((uint) value & (uint) other.value);                               \
+            }                                                                                     \
+            Flags operator&(Flags other) {                                                        \
+                return (Flags) ((uint) value & (uint) other);                                     \
+            }                                                                                     \
+            Type &operator&=(Type other) {                                                        \
+                value = (Flags) ((uint) value & (uint) other.value);                              \
+                return *this;                                                                     \
+            }                                                                                     \
+            Type &operator&=(Flags other) {                                                       \
+                value = (Flags) ((uint) value & (uint) other);                                    \
+                return *this;                                                                     \
+            }                                                                                     \
+            Type &operator^=(Type other) {                                                        \
+                value = (Flags) ((uint) value ^ (uint) other.value);                              \
+                return *this;                                                                     \
+            }                                                                                     \
+            Type &operator^=(Flags other) {                                                       \
+                value = (Flags) ((uint) value ^ (uint) other);                                    \
                 return *this;                                                                     \
             }                                                                                     \
             bool operator==(Type other) const {                                                   \

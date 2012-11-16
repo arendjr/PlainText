@@ -1,6 +1,6 @@
 include(../../environment.pri)
 
-TARGET = PlainText
+TARGET = exits2portals
 
 TEMPLATE = app
 

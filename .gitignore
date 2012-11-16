@@ -1,8 +1,9 @@
-# Qt Creator build
+# Qt build
 Makefile
 PlainText
-PlainText-build-desktop*
-PlainText.pro.user*
+exits2portals
+*-build-desktop*
+*.pro.user*
 moc_*.cpp
 qrc_*.cpp
 

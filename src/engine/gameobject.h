@@ -21,6 +21,7 @@ class Realm;
 
 PT_DEFINE_ENUM(GameObjectType,
     Unknown,
+    Portal,
     Exit,
     Room,
     Item,
@@ -60,6 +61,7 @@ class GameObject : public QObject {
         Q_INVOKABLE bool isCharacter() const;
         Q_INVOKABLE bool isGroup() const;
         Q_INVOKABLE bool isPlayer() const;
+        Q_INVOKABLE bool isPortal() const;
         Q_INVOKABLE bool isRace() const;
         Q_INVOKABLE bool isRealm() const;
         Q_INVOKABLE bool isRoom() const;

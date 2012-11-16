@@ -21,8 +21,8 @@ class Realm;
 
 PT_DEFINE_ENUM(GameObjectType,
     Unknown,
-    Exit,
     Portal,
+    Exit,
     Room,
     Item,
     Character,

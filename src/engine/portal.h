@@ -3,6 +3,24 @@
 
 #include "gameobject.h"
 #include "gameobjectptr.h"
+#include "metatyperegistry.h"
+
+
+PT_DEFINE_FLAGS(PortalFlags,
+    IsHiddenFromSide1,
+    IsHiddenFromSide2,
+    CanOpenFromSide1,
+    CanOpenFromSide2,
+    CanSeeThrough,
+    CanHearThrough,
+    CanShootThrough,
+    CanPassThrough,
+    CanSeeThroughIfOpen,
+    CanHearThroughIfOpen,
+    CanShootThroughIfOpen,
+    CanPassThroughIfOpen,
+    IsOpen
+)
 
 
 class Portal : public GameObject {
@@ -29,14 +47,21 @@ class Portal : public GameObject {
         void setRoom2(const GameObjectPtr &room2);
         Q_PROPERTY(GameObjectPtr room2 READ room2 WRITE setRoom2)
 
+        PortalFlags flags() const { return m_flags; }
+        void setFlags(PortalFlags flags);
+        Q_PROPERTY(PortalFlags flags READ flags WRITE setFlags)
+
         Q_INVOKABLE QString nameFromRoom(const GameObjectPtr &room);
         Q_INVOKABLE QString descriptionFromRoom(const GameObjectPtr &room);
+        Q_INVOKABLE bool isHiddenFromRoom(const GameObjectPtr &room);
+        Q_INVOKABLE bool canOpenFromRoom(const GameObjectPtr &room);
 
     private:
         QString m_name2;
         QString m_description2;
         GameObjectPtr m_room;
         GameObjectPtr m_room2;
+        PortalFlags m_flags;
 };
 
 #endif // PORTAL_H
