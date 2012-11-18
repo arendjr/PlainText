@@ -1,8 +1,6 @@
 {
   "name": "Middle Port's East Gate",
-  "plural": "Middle Port's East Gates",
-  "indefiniteArticle": "a",
   "description": "You're standing right outside the East Gate. From here, the road leads straight towards the haven that is roughly southeast of the city, as well as to the land of the goblins in the far east.\n\nThere's a small path to the south that provides a shortcut around the city.",
-  "position": [300, -500, 0],
-  "exits": [ "exit:124", "exit:126", "exit:128" ]
+  "position": [ 300, -500, 0 ],
+  "portals": [ "portal:1506", "portal:1507", "portal:1508" ]
 }

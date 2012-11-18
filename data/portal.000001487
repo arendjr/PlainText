@@ -1,0 +1,7 @@
+{
+  "name": "fruit stall",
+  "name2": "square",
+  "room": "room:65",
+  "room2": "room:77",
+  "flags": "CanPassThrough"
+}

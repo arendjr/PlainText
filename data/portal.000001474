@@ -1,0 +1,7 @@
+{
+  "name": "path",
+  "name2": "tower",
+  "room": "room:14",
+  "room2": "room:27",
+  "flags": "IsHiddenFromSide1|CanPassThrough"
+}

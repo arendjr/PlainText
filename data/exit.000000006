@@ -1,8 +1,0 @@
-{
-  "name": "north",
-  "description": "",
-  "destination": "room:5",
-  "size": 1.5,
-  "door": false,
-  "hidden": false
-}

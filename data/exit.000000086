@@ -1,7 +1,0 @@
-{
-  "name": "bread stall",
-  "destination": "room:85",
-  "oppositeExit": "0",
-  "door": false,
-  "hidden": false
-}

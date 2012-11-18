@@ -1,7 +1,0 @@
-{
-  "name": "fruit stall",
-  "destination": "room:77",
-  "oppositeExit": "0",
-  "door": false,
-  "hidden": false
-}

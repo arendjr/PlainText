@@ -1,8 +1,6 @@
 {
   "name": "Main Street",
-  "plural": "Main Streets",
-  "indefiniteArticle": "a",
   "description": "This is the end of the Main Street, right at the East Gate of the city. On the north side of the street are the barracks used by newly arriving soldiers. Right on the opposite side of the street are the stables used by most of the soldiers for tending their horses.",
-  "position": [200, -500, 0],
-  "exits": [ "exit:131", "exit:136", "exit:152", "exit:1465" ]
+  "position": [ 200, -500, 0 ],
+  "portals": [ "portal:1507", "portal:1509", "portal:1510", "portal:1511" ]
 }

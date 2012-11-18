@@ -1,0 +1,8 @@
+{
+  "name": "west",
+  "description": "There's an alley to the west. It appears a dead end.",
+  "name2": "east",
+  "room": "room:98",
+  "room2": "room:101",
+  "flags": "CanPassThrough"
+}

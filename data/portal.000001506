@@ -1,0 +1,7 @@
+{
+  "name": "north",
+  "name2": "south",
+  "room": "room:119",
+  "room2": "room:122",
+  "flags": "CanPassThrough"
+}

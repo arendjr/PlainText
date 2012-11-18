@@ -1,8 +1,6 @@
 {
   "name": "Main Street",
-  "plural": "Main Streets",
-  "indefiniteArticle": "a",
   "description": "The southside of the street is populated with beautiful houses, one more impressive than the next. One of these houses belongs to Markus Kagir, by far the wealthiest man of the city.\n\nOn the northside there's a canal, separating the street from the walls of Castle Blackwater. Blablabla.",
-  "position": [-200, -500, 0],
-  "exits": [ "exit:278", "exit:1005" ]
+  "position": [ -200, -500, 0 ],
+  "portals": [ "portal:1477", "portal:1478" ]
 }

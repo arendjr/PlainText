@@ -1,0 +1,7 @@
+{
+  "name": "shoe store",
+  "name2": "out",
+  "room": "room:92",
+  "room2": "room:225",
+  "flags": "CanPassThrough"
+}

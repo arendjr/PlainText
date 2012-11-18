@@ -1,8 +1,6 @@
 {
   "name": "Sleeping Tent",
-  "plural": "Sleeping Tents",
-  "indefiniteArticle": "a",
   "description": "The tent is efficiently filled with many rows of beds, each of the beds having two decks, providing sleeping spaces for as many soldiers as can fit in this tent.",
-  "position": [250, -550, 0],
-  "exits": [ "exit:160" ]
+  "position": [ 250, -550, 0 ],
+  "portals": [ "portal:1513" ]
 }

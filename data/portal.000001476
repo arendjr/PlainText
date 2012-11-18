@@ -1,0 +1,8 @@
+{
+  "name": "alley",
+  "triggers": { "onopen": "(function() {\n    this.setTimeout(function() {\n        this.oppositeExit.destination.players.send('The hatch closes shut.');\n        this.open = false;\n    }, 3000);\n})" },
+  "name2": "hatch",
+  "room": "room:1045",
+  "room2": "room:101",
+  "flags": "IsHiddenFromSide2|CanOpenFromSide2|CanPassThroughIfOpen"
+}

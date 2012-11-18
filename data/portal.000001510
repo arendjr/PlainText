@@ -1,0 +1,7 @@
+{
+  "name": "barracks",
+  "name2": "road",
+  "room": "room:125",
+  "room2": "room:151",
+  "flags": "CanPassThrough"
+}

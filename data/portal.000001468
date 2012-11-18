@@ -1,0 +1,8 @@
+{
+  "name": "tower",
+  "description": "The tower ahead looks impressive, indeed.",
+  "name2": "road",
+  "room": "room:1",
+  "room2": "room:14",
+  "flags": "CanPassThrough"
+}

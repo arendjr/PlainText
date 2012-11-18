@@ -1,8 +1,6 @@
 {
   "name": "Military Barracks",
-  "plural": "Military Barraces",
-  "indefiniteArticle": "a",
   "description": "These barracks provide a place to stay for any new soldiers who are arriving from the haven, before they get send off to battle.",
-  "position": [200, -550, 0],
-  "exits": [ "exit:153", "exit:155", "exit:157", "exit:159", "exit:164" ]
+  "position": [ 200, -550, 0 ],
+  "portals": [ "portal:1510", "portal:1513", "portal:1514", "portal:1515", "portal:1516" ]
 }

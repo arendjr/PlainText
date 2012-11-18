@@ -1,8 +1,6 @@
 {
   "name": "Light Tower",
-  "plural": "Light Towers",
-  "indefiniteArticle": "a",
   "description": "As you've climbed up the stairs, you find a mostly empty floor. It seems there's little else to do but continue up, or go back down.",
-  "position": [0, 200, 20],
-  "exits": [ "exit:22", "exit:25" ]
+  "position": [ 0, 200, 20 ],
+  "portals": [ "portal:1475", "portal:1479" ]
 }

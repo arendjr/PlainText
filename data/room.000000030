@@ -1,8 +1,6 @@
 {
   "name": "Hidden Path",
-  "plural": "Hidden Paths",
-  "indefiniteArticle": "a",
   "description": "The path extends further to the south. As you keep moving, the sound of the sea seems to be getting closer and closer.",
-  "position": [0, 300, 0],
-  "exits": [ "exit:32", "exit:34" ]
+  "position": [ 0, 300, 0 ],
+  "portals": [ "portal:1480", "portal:1481" ]
 }

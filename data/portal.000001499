@@ -1,0 +1,7 @@
+{
+  "name": "bar",
+  "name2": "out",
+  "room": "room:95",
+  "room2": "room:176",
+  "flags": "CanPassThrough"
+}

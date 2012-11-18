@@ -1,8 +1,6 @@
 {
   "name": "Butcher's Stall",
-  "plural": "Butcher's Stalls",
-  "indefiniteArticle": "a",
   "description": "This stall has a little pitched roof to protect the hanging meat from direct sunlight. There are large chomps of pork and swine, cuts of lamb meat and hogget, and legs, breasts and wings of chickens, ducks and goose.",
-  "position": [-50, -150, 0],
-  "exits": [ "exit:90" ]
+  "position": [ -50, -150, 0 ],
+  "portals": [ "portal:1490" ]
 }

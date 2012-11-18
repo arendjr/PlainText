@@ -1,8 +1,6 @@
 {
   "name": "Weapons Stall",
-  "plural": "Weapons Stalls",
-  "indefiniteArticle": "a",
   "description": "The stall is nothing more than a table and a wooden side used for presenting the various goods. The weapons here are nothing special, but they appear to be of general good quality.",
-  "position": [-150, -250, 0],
-  "exits": [ "exit:89" ]
+  "position": [ -150, -250, 0 ],
+  "portals": [ "portal:1489" ]
 }

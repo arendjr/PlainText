@@ -1,8 +1,6 @@
 {
   "name": "Stables",
-  "plural": "Stables",
-  "indefiniteArticle": "a",
   "description": "As you step inside the stables, the smell of horses almost overwhelms you. There are more horses here than would reasonably fit in the allocated space.",
-  "position": [200, -450, 0],
-  "exits": [ "exit:1466" ]
+  "position": [ 200, -450, 0 ],
+  "portals": [ "portal:1511" ]
 }

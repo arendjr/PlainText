@@ -1,8 +1,6 @@
 {
   "name": "Middle Port City Wall",
-  "plural": "Middle Port City Walls",
-  "indefiniteArticle": "a",
   "description": "This path, providing a shortcut to the east side of the city, seems like it is not supposed to be used by men or women from any self-respecting class. The high walls on your north look fearsome and intimidating, while the thick vegetation of the forest on the other side would make a perfect hiding spot for some wild animal that is ready to attack you.",
-  "position": [0, -100, 0],
-  "exits": [ "exit:64", "exit:69" ]
+  "position": [ 0, -100, 0 ],
+  "portals": [ "portal:1484", "portal:1486" ]
 }

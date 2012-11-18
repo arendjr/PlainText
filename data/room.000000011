@@ -1,8 +1,6 @@
 {
   "name": "Light Tower Road",
-  "plural": "Light Tower Roads",
-  "indefiniteArticle": "a",
   "description": "This is the road that leads to the light tower in the south. Looking back towards the north, you can still see the town's gate from afar.\n\nThe road itself is surrounded by high trees on both sides. You cannot look deep into the forest however, as tight vegetation is blocking most of your sight. Fortunately, there are small ditches on either side of the road, keeping most of the flora, and who knows what else, at a comfortable distance from those travelling here.",
-  "position": [-100, 0, 0],
-  "exits": [ "exit:13", "exit:60" ]
+  "position": [ -100, 0, 0 ],
+  "portals": [ "portal:1471", "portal:1472" ]
 }

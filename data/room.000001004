@@ -1,8 +1,6 @@
 {
   "name": "Main Street",
-  "plural": "Main Streets",
-  "indefiniteArticle": "a",
   "description": "From here you have a good look on Castle Blackwater's Keep, towering above the castle's walls across the canal that runs north of the street.\n\nOn the southside there are large and beautiful houses, as well as the city's brothel.",
-  "position": [-300, -500, 10],
-  "exits": [ "exit:1006", "exit:1010", "exit:1166" ]
+  "position": [ -300, -500, 10 ],
+  "portals": [ "portal:1478", "portal:1512", "portal:1517" ]
 }

@@ -1,8 +1,6 @@
 {
   "name": "Boatman's Street",
-  "plural": "Boatman's Streets",
-  "indefiniteArticle": "a",
   "description": "You are the end of the Boatman's Street. You can see the entrance to the large shipyard that stretches out across most of the southside of the street.",
-  "position": [-400, -300, 0],
-  "exits": [ "exit:109", "exit:305" ]
+  "position": [ -400, -300, 0 ],
+  "portals": [ "portal:1483", "portal:1502" ]
 }

@@ -1,8 +1,6 @@
 {
   "name": "Main Street",
-  "plural": "Main Streets",
-  "indefiniteArticle": "a",
   "description": "The road is clearly dominated by the walls of Castle Black Water. Even so, you can still see the keep towering above the walls.",
-  "position": [-400, -600, 20],
-  "exits": [ "exit:1167" ]
+  "position": [ -400, -600, 20 ],
+  "portals": [ "portal:1512" ]
 }

@@ -1,7 +1,0 @@
-{
-  "name": "tent",
-  "destination": "room:156",
-  "oppositeExit": "0",
-  "door": false,
-  "hidden": false
-}

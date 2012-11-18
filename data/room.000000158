@@ -1,8 +1,6 @@
 {
   "name": "Kitchen Tent",
-  "plural": "Kitchen Tents",
-  "indefiniteArticle": "a",
   "description": "This tent hosts the kitchen which is providing food for all the soldiers in the barracks. Many soldiers apparently eat their food outside, though there are also a few benches for those who like to eat inside.\n\nThis tent is a lot more pleasurable to be in, mainly because of the fresh smell of the food and the spices, rather than the muff and sweaty odor of the other tents.",
-  "position": [200, -600, 0],
-  "exits": [ "exit:166" ]
+  "position": [ 200, -600, 0 ],
+  "portals": [ "portal:1515" ]
 }

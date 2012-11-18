@@ -1,0 +1,8 @@
+{
+  "name": "house",
+  "description": "The house looks old, but well-kept. Smoke coming from the chimney suggests the owner is at home right now.",
+  "name2": "out",
+  "room": "room:1",
+  "room2": "room:36",
+  "flags": "CanPassThrough"
+}

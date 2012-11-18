@@ -1,0 +1,7 @@
+{
+  "name": "street",
+  "name2": "shipyard",
+  "room": "room:304",
+  "room2": "room:107",
+  "flags": "CanPassThrough"
+}

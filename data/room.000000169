@@ -1,8 +1,6 @@
 {
   "name": "Tea House",
-  "plural": "Tea Houses",
-  "indefiniteArticle": "a",
   "description": "The tea house is a serene old place, where people gather for comfort and relaxation. A subtle chatter and occassional laughter help to provide a warm atmosphere that's enjoyed by many people from around town.",
-  "position": [-50, -300, 0],
-  "exits": [ "exit:172" ]
+  "position": [ -50, -300, 0 ],
+  "portals": [ "portal:1496" ]
 }

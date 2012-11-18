@@ -1,8 +1,6 @@
 {
   "name": "Light Tower Keeper's House",
-  "plural": "Light Tower Keeper's Houses",
-  "indefiniteArticle": "a",
   "description": "The house looks pretty well-kept on the inside. You're currently standing in a big room, with a big fireplace at the left wall. In the right corner stands a one-person bed, suggesting that the keeper is living here by himself.",
-  "position": [-150, 200, 0],
-  "exits": [ "exit:38", "exit:41" ]
+  "position": [ -150, 200, 0 ],
+  "portals": [ "portal:1469", "portal:1482" ]
 }

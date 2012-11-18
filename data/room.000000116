@@ -1,8 +1,6 @@
 {
   "name": "Middle Port City Wall",
-  "plural": "Middle Port City Walls",
-  "indefiniteArticle": "a",
   "description": "The high city wall stretches from the northeast to the southwest. Putting your back towards the wall, you see nothing but a wide-stretching open field.",
-  "position": [200, -200, 0],
-  "exits": [ "exit:118", "exit:120" ]
+  "position": [ 200, -200, 0 ],
+  "portals": [ "portal:1494", "portal:1505" ]
 }

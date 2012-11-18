@@ -1,8 +1,6 @@
 {
   "name": "West Haven Road",
-  "plural": "West Haven Roads",
-  "indefiniteArticle": "a",
   "description": "Just outside the west gate of Middle Port, the road leads through wide open fields on both sides. On the south side there's little to see but endless fields of grass and some flat hills. To the north you can see some fields of corn and wheat that are worked on by the farmers from the city.",
-  "position": [400, -500, 0],
-  "exits": [ "exit:129" ]
+  "position": [ 400, -500, 0 ],
+  "portals": [ "portal:1508" ]
 }
