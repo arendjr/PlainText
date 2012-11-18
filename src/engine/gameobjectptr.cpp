@@ -184,10 +184,10 @@ QString GameObjectPtr::toUserString(const GameObjectPtr &pointer) {
     }
 }
 
-GameObjectPtr GameObjectPtr::fromUserString(const QString &string) {
+void GameObjectPtr::fromUserString(const QString &string, GameObjectPtr &pointer) {
 
     if (string == "0") {
-        return GameObjectPtr();
+        return;
     }
 
     QStringList components = string.split(':');
@@ -195,8 +195,8 @@ GameObjectPtr GameObjectPtr::fromUserString(const QString &string) {
         throw GameException(GameException::InvalidGameObjectPointer);
     }
 
-    return GameObjectPtr(Realm::instance(), GameObjectType::fromString(components[0]),
-                                            components[1].toInt());
+    pointer = GameObjectPtr(Realm::instance(), GameObjectType::fromString(components[0]),
+                            components[1].toInt());
 }
 
 QString GameObjectPtr::toJsonString(const GameObjectPtr &pointer, Options options) {
@@ -206,11 +206,11 @@ QString GameObjectPtr::toJsonString(const GameObjectPtr &pointer, Options option
     return ConversionUtil::jsString(pointer.toString());
 }
 
-GameObjectPtr GameObjectPtr::fromVariant(const QVariant &variant) {
+void GameObjectPtr::fromVariant(const QVariant &variant, GameObjectPtr &pointer) {
 
     QString string = variant.toString();
     if (string == "0") {
-        return GameObjectPtr();
+        return;
     }
 
     QStringList components = string.split(':');
@@ -218,8 +218,8 @@ GameObjectPtr GameObjectPtr::fromVariant(const QVariant &variant) {
         throw GameException(GameException::InvalidGameObjectPointer);
     }
 
-    return GameObjectPtr(Realm::instance(), GameObjectType::fromString(components[0]),
-                         components[1].toInt());
+    pointer = GameObjectPtr(Realm::instance(), GameObjectType::fromString(components[0]),
+                            components[1].toInt());
 }
 
 QScriptValue GameObjectPtr::toScriptValue(QScriptEngine *engine, const GameObjectPtr &pointer) {
@@ -626,6 +626,21 @@ int GameObjectPtrList::indexOf(const GameObjectPtr &value) const {
     }
 }
 
+void GameObjectPtrList::insert(const GameObjectPtr &value) {
+
+    for (int i = 0; i < m_size; i++) {
+        if (m_items[i] == value) {
+            return;
+        }
+    }
+
+    if (m_nextList) {
+        m_nextList->insert(value);
+    } else {
+        append(value);
+    }
+}
+
 bool GameObjectPtrList::isEmpty() const {
 
     return m_size == 0;
@@ -715,6 +730,18 @@ bool GameObjectPtrList::removeOne(const GameObjectPtr &value) {
         return m_nextList->removeOne(value);
     } else {
         return false;
+    }
+}
+
+void GameObjectPtrList::reserve(int size) {
+
+    if (size && !m_capacity) {
+        m_capacity = size;
+        m_items = new GameObjectPtr[m_capacity];
+
+        for (int i = 0; i < m_capacity; i++) {
+            m_items[i].setOwnerList(this);
+        }
     }
 }
 
@@ -901,16 +928,18 @@ QString GameObjectPtrList::toUserString(const GameObjectPtrList &pointerList) {
     return "[ " + stringList.join(", ") + " ]";
 }
 
-GameObjectPtrList GameObjectPtrList::fromUserString(const QString &string) {
+void GameObjectPtrList::fromUserString(const QString &string, GameObjectPtrList &pointerList) {
 
-    GameObjectPtrList pointerList;
-    for (QString substring : string.mid(1, string.length() - 2).split(',')) {
+    QStringList stringList = string.mid(1, string.length() - 2).split(',');
+    pointerList.reserve(stringList.size());
+    for (QString substring : stringList) {
         substring = substring.trimmed();
         if (!substring.isEmpty()) {
-            pointerList << GameObjectPtr::fromUserString(substring);
+            GameObjectPtr pointer;
+            GameObjectPtr::fromUserString(substring, pointer);
+            pointerList << pointer;
         }
     }
-    return pointerList;
 }
 
 QString GameObjectPtrList::toJsonString(const GameObjectPtrList &pointerList, Options options) {
@@ -924,12 +953,13 @@ QString GameObjectPtrList::toJsonString(const GameObjectPtrList &pointerList, Op
     return stringList.isEmpty() ? QString() : "[ " + stringList.join(", ") + " ]";
 }
 
-GameObjectPtrList GameObjectPtrList::fromVariant(const QVariant &variant) {
+void GameObjectPtrList::fromVariant(const QVariant &variant, GameObjectPtrList &pointerList) {
 
     QList<QVariant> variantList = variant.toList();
-    GameObjectPtrList pointerList(variantList.length());
+    pointerList.reserve(variantList.size());
     for (const QVariant &item : variantList) {
-        pointerList << GameObjectPtr::fromVariant(item);
+        GameObjectPtr pointer;
+        GameObjectPtr::fromVariant(item, pointer);
+        pointerList << pointer;
     }
-    return pointerList;
 }

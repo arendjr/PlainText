@@ -18,7 +18,7 @@ class Room : public GameObject {
         void setPosition(const Point3D &position);
         Q_PROPERTY(Point3D position READ position WRITE setPosition)
 
-        const GameObjectPtrList &exits() const { return m_exits; }
+        GameObjectPtrList exits() const { return m_exits; }
         Q_INVOKABLE void addExit(const GameObjectPtr &exit);
         Q_INVOKABLE void removeExit(const GameObjectPtr &exit);
         void setExits(const GameObjectPtrList &exits);

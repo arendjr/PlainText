@@ -2,7 +2,7 @@
 
 
 Exit::Exit(Realm *realm, uint id, Options options) :
-    GameObject(realm, GameObjectType::Exit, id, options),
+    GameObject(realm, GameObjectType::Exit, id, options | DontSave),
     m_door(false),
     m_open(false),
     m_hidden(false) {
@@ -13,43 +13,20 @@ Exit::~Exit() {
 
 void Exit::setDestination(const GameObjectPtr &destination) {
 
-    if (m_destination != destination) {
-        m_destination = destination;
-
-        setModified();
-    }
-}
-
-void Exit::setOppositeExit(const GameObjectPtr &oppositeExit) {
-
-    if (m_oppositeExit != oppositeExit) {
-        m_oppositeExit = oppositeExit;
-
-        setModified();
-    }
+    m_destination = destination;
 }
 
 void Exit::setDoor(bool door) {
 
-    if (m_door != door) {
-        m_door = door;
-
-        setModified();
-    }
+    m_door = door;
 }
 
 void Exit::setOpen(bool open) {
 
-    if (m_open != open) {
-        m_open = open;
-    }
+    m_open = open;
 }
 
 void Exit::setHidden(bool hidden) {
 
-    if (m_hidden != hidden) {
-        m_hidden = hidden;
-
-        setModified();
-    }
+    m_hidden = hidden;
 }

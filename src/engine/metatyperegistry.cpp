@@ -5,6 +5,8 @@
 
 #include "characterstats.h"
 #include "effect.h"
+#include "gameevent.h"
+#include "gameeventmultipliermap.h"
 #include "gameobject.h"
 #include "gameobjectptr.h"
 #include "modifier.h"
@@ -63,6 +65,9 @@ void MetaTypeRegistry::registerMetaTypes(QScriptEngine *engine) {
 
     REGISTER_META_TYPE(Effect)
     REGISTER_META_LIST_TYPE(EffectList)
+
+    REGISTER_META_TYPE_POINTER(GameEvent)
+    REGISTER_SERIALIZABLE_META_TYPE(GameEventMultiplierMap)
 
     REGISTER_META_TYPE_POINTER(GameObject)
     REGISTER_SERIALIZABLE_META_TYPE(GameObjectType)

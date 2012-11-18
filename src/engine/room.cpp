@@ -1,6 +1,8 @@
 #include "room.h"
 
+#include "exit.h"
 #include "item.h"
+#include "portal.h"
 
 
 #define super GameObject
@@ -8,6 +10,8 @@
 Room::Room(Realm *realm, uint id, Options options) :
     super(realm, GameObjectType::Room, id, options),
     m_position(0, 0, 0) {
+
+    setAutoDelete(false);
 }
 
 Room::~Room() {
@@ -22,29 +26,50 @@ void Room::setPosition(const Point3D &position) {
     }
 }
 
-void Room::addExit(const GameObjectPtr &exit) {
+void Room::addPortal(const GameObjectPtr &portal) {
 
-    if (!m_exits.contains(exit)) {
-        m_exits << exit;
+    if (!m_portals.contains(portal)) {
+        m_portals << portal;
 
         setModified();
     }
 }
 
-void Room::removeExit(const GameObjectPtr &exit) {
+void Room::removePortal(const GameObjectPtr &portal) {
 
-    if (m_exits.removeOne(exit)) {
+    if (m_portals.removeOne(portal)) {
         setModified();
     }
 }
 
-void Room::setExits(const GameObjectPtrList &exits) {
+void Room::setPortals(const GameObjectPtrList &portals) {
 
-    if (m_exits != exits) {
-        m_exits = exits;
+    if (m_portals != portals) {
+        m_portals = portals;
 
         setModified();
     }
+}
+
+GameObjectPtrList Room::exits() {
+
+    GameObjectPtrList exits;
+    for (const GameObjectPtr &portalPtr : m_portals) {
+        Portal *portal = portalPtr.cast<Portal *>();
+        if (portal->flags() & PortalFlags::CanPassThrough ||
+            (portal->flags() & PortalFlags::CanPassThroughIfOpen &&
+             portal->canOpenFromRoom(this))) {
+            Exit *exit = new Exit(realm());
+            exit->setName(portal->nameFromRoom(this));
+            exit->setDescription(portal->descriptionFromRoom(this));
+            exit->setDestination(portal->oppositeOf(this));
+            exit->setDoor(portal->canOpenFromRoom(this));
+            exit->setOpen(portal->isOpen());
+            exit->setHidden(portal->isHiddenFromRoom(this));
+            exits.append(exit);
+        }
+    }
+    return exits;
 }
 
 void Room::addPlayer(const GameObjectPtr &player) {
@@ -103,6 +128,15 @@ void Room::setItems(const GameObjectPtrList &items) {
 
     if (m_items != items) {
         m_items = items;
+
+        setModified();
+    }
+}
+
+void Room::setEventMultipliers(const GameEventMultiplierMap &multipliers) {
+
+    if (m_eventMultipliers != multipliers) {
+        m_eventMultipliers = multipliers;
 
         setModified();
     }

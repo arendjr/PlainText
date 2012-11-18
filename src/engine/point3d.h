@@ -31,13 +31,13 @@ class Point3D {
         QString toString() const;
 
         static QString toUserString(const Point3D &point);
-        static Point3D fromUserString(const QString &string);
+        static void fromUserString(const QString &string, Point3D &point);
 
         static QString toJsonString(const Point3D &point, Options options = NoOptions);
-        static Point3D fromVariant(const QVariant &variant);
+        static void fromVariant(const QVariant &variant, Point3D &point);
 
-        static QScriptValue toScriptValue(QScriptEngine *engine, const Point3D &stats);
-        static void fromScriptValue(const QScriptValue &object, Point3D &stats);
+        static QScriptValue toScriptValue(QScriptEngine *engine, const Point3D &point);
+        static void fromScriptValue(const QScriptValue &object, Point3D &point);
 };
 
 PT_DECLARE_SERIALIZABLE_METATYPE(Point3D)

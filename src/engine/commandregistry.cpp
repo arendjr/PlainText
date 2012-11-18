@@ -45,8 +45,8 @@
 #include "commands/whocommand.h"
 #include "commands/admin/addcharactercommand.h"
 #include "commands/admin/addcontainercommand.h"
-#include "commands/admin/addexitcommand.h"
 #include "commands/admin/additemcommand.h"
+#include "commands/admin/addportalcommand.h"
 #include "commands/admin/addshieldcommand.h"
 #include "commands/admin/addweaponcommand.h"
 #include "commands/admin/copyitemcommand.h"
@@ -66,10 +66,10 @@
 #include "commands/admin/unsettriggercommand.h"
 #include "commands/api/datagetcommand.h"
 #include "commands/api/datasetcommand.h"
-#include "commands/api/exitdeletecommand.h"
-#include "commands/api/exitsetcommand.h"
 #include "commands/api/logretrievecommand.h"
+#include "commands/api/objectdeletecommand.h"
 #include "commands/api/objectslistcommand.h"
+#include "commands/api/portalsetcommand.h"
 #include "commands/api/propertygetcommand.h"
 #include "commands/api/propertysetcommand.h"
 #include "commands/api/triggergetcommand.h"
@@ -126,7 +126,7 @@ CommandRegistry::CommandRegistry(QObject *parent) :
 
     m_adminCommands.insert("add-character", new AddCharacterCommand(this));
     m_adminCommands.insert("add-container", new AddContainerCommand(this));
-    m_adminCommands.insert("add-exit", new AddExitCommand(this));
+    m_adminCommands.insert("add-portal", new AddPortalCommand(this));
     m_adminCommands.insert("add-item", new AddItemCommand(this));
     m_adminCommands.insert("add-shield", new AddShieldCommand(this));
     m_adminCommands.insert("add-weapon", new AddWeaponCommand(this));
@@ -148,10 +148,10 @@ CommandRegistry::CommandRegistry(QObject *parent) :
 
     m_apiCommands.insert("api-data-get", new DataGetCommand(this));
     m_apiCommands.insert("api-data-set", new DataSetCommand(this));
-    m_apiCommands.insert("api-exit-delete", new ExitDeleteCommand(this));
-    m_apiCommands.insert("api-exit-set", new ExitSetCommand(this));
     m_apiCommands.insert("api-log-retrieve", new LogRetrieveCommand(this));
+    m_apiCommands.insert("api-object-delete", new ObjectDeleteCommand(this));
     m_apiCommands.insert("api-objects-list", new ObjectsListCommand(this));
+    m_apiCommands.insert("api-portal-set", new PortalSetCommand(this));
     m_apiCommands.insert("api-property-get", new PropertyGetCommand(this));
     m_apiCommands.insert("api-property-set", new PropertySetCommand(this));
     m_apiCommands.insert("api-trigger-get", new TriggerGetCommand(this));

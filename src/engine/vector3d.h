@@ -28,13 +28,13 @@ class Vector3D {
         QString toString() const;
 
         static QString toUserString(const Vector3D &vector);
-        static Vector3D fromUserString(const QString &string);
+        static void fromUserString(const QString &string, Vector3D &vector);
 
         static QString toJsonString(const Vector3D &vector, Options options = NoOptions);
-        static Vector3D fromVariant(const QVariant &variant);
+        static void fromVariant(const QVariant &variant, Vector3D &vector);
 
-        static QScriptValue toScriptValue(QScriptEngine *engine, const Vector3D &stats);
-        static void fromScriptValue(const QScriptValue &object, Vector3D &stats);
+        static QScriptValue toScriptValue(QScriptEngine *engine, const Vector3D &vector);
+        static void fromScriptValue(const QScriptValue &object, Vector3D &vector);
 };
 
 Vector3D operator*(int scalar, const Vector3D &vector);

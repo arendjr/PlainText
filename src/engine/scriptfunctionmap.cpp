@@ -28,9 +28,10 @@ QString ScriptFunctionMap::toUserString(const ScriptFunctionMap &functionMap) {
     return "(function map)";
 }
 
-ScriptFunctionMap ScriptFunctionMap::fromUserString(const QString &string) {
+void ScriptFunctionMap::fromUserString(const QString &string, ScriptFunctionMap &functionMap) {
 
     Q_UNUSED(string)
+    Q_UNUSED(functionMap)
 
     throw GameException(GameException::NotSupported,
                         "Converting user strings to script function map not (yet) supported");
@@ -48,14 +49,12 @@ QString ScriptFunctionMap::toJsonString(const ScriptFunctionMap &functionMap, Op
     return stringList.isEmpty() ? QString() : "{ " + stringList.join(", ") + " }";
 }
 
-ScriptFunctionMap ScriptFunctionMap::fromVariant(const QVariant &variant) {
+void ScriptFunctionMap::fromVariant(const QVariant &variant, ScriptFunctionMap &functionMap) {
 
-    ScriptFunctionMap functionMap;
     QVariantMap variantMap = variant.toMap();
     for (const QString &key : variantMap.keys()) {
-        functionMap[key] = ScriptFunction::fromVariant(variantMap[key]);
+        ScriptFunction::fromVariant(variantMap[key], functionMap[key]);
     }
-    return functionMap;
 }
 
 QScriptValue ScriptFunctionMap::toScriptValue(QScriptEngine *engine, const ScriptFunctionMap &map) {

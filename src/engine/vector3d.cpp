@@ -42,7 +42,7 @@ QString Vector3D::toUserString(const Vector3D &vector) {
     return vector.toString();
 }
 
-Vector3D Vector3D::fromUserString(const QString &string) {
+void Vector3D::fromUserString(const QString &string, Vector3D &vector) {
 
     if (!string.startsWith("[") || !string.endsWith("]")) {
         throw GameException(GameException::InvalidVector);
@@ -53,26 +53,28 @@ Vector3D Vector3D::fromUserString(const QString &string) {
         throw GameException(GameException::InvalidVector);
     }
 
-    return Vector3D(stringList[0].trimmed().toInt(),
-                    stringList[1].trimmed().toInt(),
-                    stringList[2].trimmed().toInt());
+    vector.x = stringList[0].trimmed().toInt();
+    vector.y = stringList[1].trimmed().toInt();
+    vector.z = stringList[2].trimmed().toInt();
 }
 
 QString Vector3D::toJsonString(const Vector3D &vector, Options options) {
 
     Q_UNUSED(options)
 
-    return QString("[ %1, %2, %3 ]").arg(vector.x).arg(vector.y).arg(vector.z);
+    return vector.toString();
 }
 
-Vector3D Vector3D::fromVariant(const QVariant &variant) {
+void Vector3D::fromVariant(const QVariant &variant, Vector3D &vector) {
 
     QVariantList variantList = variant.toList();
     if (variantList.length() != 3) {
         throw GameException(GameException::InvalidVector);
     }
 
-    return Vector3D(variantList[0].toInt(), variantList[1].toInt(), variantList[2].toInt());
+    vector.x = variantList[0].toInt();
+    vector.y = variantList[1].toInt();
+    vector.z = variantList[2].toInt();
 }
 
 QScriptValue Vector3D::toScriptValue(QScriptEngine *engine, const Vector3D &vector) {

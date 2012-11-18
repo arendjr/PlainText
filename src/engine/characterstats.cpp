@@ -74,7 +74,7 @@ QString CharacterStats::toUserString(const CharacterStats &stats) {
     return stats.toString();
 }
 
-CharacterStats CharacterStats::fromUserString(const QString &string) {
+void CharacterStats::fromUserString(const QString &string, CharacterStats &stats) {
 
     if (!string.startsWith("[") || !string.endsWith("]")) {
         throw GameException(GameException::InvalidCharacterStats);
@@ -85,9 +85,12 @@ CharacterStats CharacterStats::fromUserString(const QString &string) {
         throw GameException(GameException::InvalidCharacterStats);
     }
 
-    return CharacterStats(stringList[0].trimmed().toInt(), stringList[1].trimmed().toInt(),
-                          stringList[2].trimmed().toInt(), stringList[3].trimmed().toInt(),
-                          stringList[4].trimmed().toInt(), stringList[5].trimmed().toInt());
+    stats.strength = stringList[0].trimmed().toInt();
+    stats.dexterity = stringList[1].trimmed().toInt();
+    stats.vitality = stringList[2].trimmed().toInt();
+    stats.endurance = stringList[3].trimmed().toInt();
+    stats.intelligence = stringList[4].trimmed().toInt();
+    stats.faith = stringList[5].trimmed().toInt();
 }
 
 QString CharacterStats::toJsonString(const CharacterStats &stats, Options options) {
@@ -97,15 +100,19 @@ QString CharacterStats::toJsonString(const CharacterStats &stats, Options option
     return stats.toString();
 }
 
-CharacterStats CharacterStats::fromVariant(const QVariant &variant) {
+void CharacterStats::fromVariant(const QVariant &variant, CharacterStats &stats) {
 
     QVariantList variantList = variant.toList();
     if (variantList.length() != 6) {
         throw GameException(GameException::InvalidCharacterStats);
     }
 
-    return CharacterStats(variantList[0].toInt(), variantList[1].toInt(), variantList[2].toInt(),
-                          variantList[3].toInt(), variantList[4].toInt(), variantList[5].toInt());
+    stats.strength = variantList[0].toInt();
+    stats.dexterity = variantList[1].toInt();
+    stats.vitality = variantList[2].toInt();
+    stats.endurance = variantList[3].toInt();
+    stats.intelligence = variantList[4].toInt();
+    stats.faith = variantList[5].toInt();
 }
 
 QScriptValue CharacterStats::toScriptValue(QScriptEngine *engine, const CharacterStats &stats) {

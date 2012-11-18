@@ -19,6 +19,7 @@
 #include "deleteobjectevent.h"
 #include "diskutil.h"
 #include "exit.h"
+#include "gameeventobject.h"
 #include "gameexception.h"
 #include "gameobjectptr.h"
 #include "group.h"
@@ -49,7 +50,7 @@ GameObject::GameObject(Realm *realm, GameObjectType objectType, uint id, Options
 
     if (this != m_realm) {
         if (m_id == 0) {
-            m_id = realm->uniqueObjectId();
+            m_id = m_realm->uniqueObjectId();
         }
         if (~m_options & Copy) {
             m_realm->registerObject(this);
@@ -84,6 +85,11 @@ bool GameObject::isCharacter() const {
 bool GameObject::isContainer() const {
 
     return m_objectType == GameObjectType::Container;
+}
+
+bool GameObject::isEvent() const {
+
+    return m_objectType == GameObjectType::Event;
 }
 
 bool GameObject::isExit() const {
@@ -558,6 +564,8 @@ GameObject *GameObject::createByObjectType(Realm *realm, GameObjectType objectTy
             return new Class(realm, id, options);
         case GameObjectType::Container:
             return new Container(realm, id, options);
+        case GameObjectType::Event:
+            return new GameEventObject(realm, id, options);
         case GameObjectType::Exit:
             return new Exit(realm, id, options);
         case GameObjectType::Group:
@@ -645,9 +653,9 @@ void GameObject::fromScriptValue(const QScriptValue &object, GameObject *&gameOb
     Q_ASSERT(gameObject);
 }
 
-QList<QMetaProperty> GameObject::metaProperties() const {
+QVector<QMetaProperty> GameObject::metaProperties() const {
 
-    QList<QMetaProperty> properties;
+    QVector<QMetaProperty> properties;
     int count = metaObject()->propertyCount(),
         offset = GameObject::staticMetaObject.propertyOffset();
     for (int i = offset; i < count; i++) {
@@ -656,11 +664,11 @@ QList<QMetaProperty> GameObject::metaProperties() const {
     return properties;
 }
 
-QList<QMetaProperty> GameObject::storedMetaProperties() const {
+QVector<QMetaProperty> GameObject::storedMetaProperties() const {
 
-    static QHash<int, QList<QMetaProperty> > storedProperties;
+    static QHash<int, QVector<QMetaProperty> > storedProperties;
     if (!storedProperties.contains(m_objectType.intValue())) {
-        QList<QMetaProperty> properties;
+        QVector<QMetaProperty> properties;
         int count = metaObject()->propertyCount(),
             offset = GameObject::staticMetaObject.propertyOffset();
         for (int i = offset; i < count; i++) {
@@ -770,7 +778,7 @@ void GameObject::changeName(const QString &newName) {
             m_plural = newName.left(length - 2) + "ves";
         } else if (newName.endsWith("s") || newName.endsWith("x") ||
                    newName.endsWith("sh") || newName.endsWith("ch")) {
-            m_plural = newName.left(length - 2) + "es";
+            m_plural = newName + "es";
         } else if (newName.endsWith("ese")) {
             m_plural = newName;
         } else {

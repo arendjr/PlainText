@@ -20,6 +20,9 @@ SOURCES += \
     engine/effect.cpp \
     engine/engine.cpp \
     engine/exit.cpp \
+    engine/gameevent.cpp \
+    engine/gameeventmultipliermap.cpp \
+    engine/gameeventobject.cpp \
     engine/gameexception.cpp \
     engine/gameobject.cpp \
     engine/gameobjectptr.cpp \
@@ -43,9 +46,11 @@ SOURCES += \
     engine/scriptwindow.cpp \
     engine/session.cpp \
     engine/shield.cpp \
+    engine/soundevent.cpp \
     engine/statsitem.cpp \
     engine/util.cpp \
     engine/vector3d.cpp \
+    engine/visualevent.cpp \
     engine/weapon.cpp \
     engine/commands/buycommand.cpp \
     engine/commands/closecommand.cpp \
@@ -82,8 +87,8 @@ SOURCES += \
     engine/commands/wieldcommand.cpp \
     engine/commands/admin/addcharactercommand.cpp \
     engine/commands/admin/addcontainercommand.cpp \
-    engine/commands/admin/addexitcommand.cpp \
     engine/commands/admin/additemcommand.cpp \
+    engine/commands/admin/addportalcommand.cpp \
     engine/commands/admin/addshieldcommand.cpp \
     engine/commands/admin/addweaponcommand.cpp \
     engine/commands/admin/admincommand.cpp \
@@ -105,10 +110,10 @@ SOURCES += \
     engine/commands/api/apicommand.cpp \
     engine/commands/api/datagetcommand.cpp \
     engine/commands/api/datasetcommand.cpp \
-    engine/commands/api/exitdeletecommand.cpp \
-    engine/commands/api/exitsetcommand.cpp \
     engine/commands/api/logretrievecommand.cpp \
+    engine/commands/api/objectdeletecommand.cpp \
     engine/commands/api/objectslistcommand.cpp \
+    engine/commands/api/portalsetcommand.cpp \
     engine/commands/api/propertygetcommand.cpp \
     engine/commands/api/propertysetcommand.cpp \
     engine/commands/api/triggergetcommand.cpp \
@@ -152,6 +157,9 @@ HEADERS += \
     engine/engine.h \
     engine/exit.h \
     engine/foreach.h \
+    engine/gameevent.h \
+    engine/gameeventmultipliermap.h \
+    engine/gameeventobject.h \
     engine/gameexception.h \
     engine/gameobject.h \
     engine/gameobjectptr.h \
@@ -175,9 +183,11 @@ HEADERS += \
     engine/scriptwindow.h \
     engine/session.h \
     engine/shield.h \
+    engine/soundevent.h \
     engine/statsitem.h \
     engine/util.h \
     engine/vector3d.h \
+    engine/visualevent.h \
     engine/weapon.h \
     engine/commands/buycommand.h \
     engine/commands/closecommand.h \
@@ -214,8 +224,8 @@ HEADERS += \
     engine/commands/wieldcommand.h \
     engine/commands/admin/addcharactercommand.h \
     engine/commands/admin/addcontainercommand.h \
-    engine/commands/admin/addexitcommand.h \
     engine/commands/admin/additemcommand.h \
+    engine/commands/admin/addportalcommand.h \
     engine/commands/admin/addshieldcommand.h \
     engine/commands/admin/addweaponcommand.h \
     engine/commands/admin/admincommand.h \
@@ -237,10 +247,10 @@ HEADERS += \
     engine/commands/api/apicommand.h \
     engine/commands/api/datagetcommand.h \
     engine/commands/api/datasetcommand.h \
-    engine/commands/api/exitdeletecommand.h \
-    engine/commands/api/exitsetcommand.h \
     engine/commands/api/logretrievecommand.h \
+    engine/commands/api/objectdeletecommand.h \
     engine/commands/api/objectslistcommand.h \
+    engine/commands/api/portalsetcommand.h \
     engine/commands/api/propertygetcommand.h \
     engine/commands/api/propertysetcommand.h \
     engine/commands/api/triggergetcommand.h \

@@ -54,7 +54,24 @@ void Portal::setFlags(PortalFlags flags) {
     }
 }
 
-QString Portal::nameFromRoom(const GameObjectPtr &room) {
+void Portal::setEventMultipliers(const GameEventMultiplierMap &multipliers) {
+
+    if (m_eventMultipliers != multipliers) {
+        m_eventMultipliers = multipliers;
+
+        setModified();
+    }
+}
+
+const GameObjectPtr &Portal::oppositeOf(const GameObjectPtr &room) const {
+
+    if (room == m_room2) {
+        return m_room;
+    }
+    return m_room2;
+}
+
+const QString &Portal::nameFromRoom(const GameObjectPtr &room) const {
 
     if (room == m_room2 && !m_name2.isEmpty()) {
         return m_name2;
@@ -62,7 +79,7 @@ QString Portal::nameFromRoom(const GameObjectPtr &room) {
     return name();
 }
 
-QString Portal::descriptionFromRoom(const GameObjectPtr &room) {
+const QString &Portal::descriptionFromRoom(const GameObjectPtr &room) const {
 
     if (room == m_room2 && (!m_name2.isEmpty() || !m_description2.isEmpty())) {
         return m_description2;
@@ -70,7 +87,7 @@ QString Portal::descriptionFromRoom(const GameObjectPtr &room) {
     return description();
 }
 
-bool Portal::isHiddenFromRoom(const GameObjectPtr &room) {
+bool Portal::isHiddenFromRoom(const GameObjectPtr &room) const {
 
     if (room == m_room2) {
         return m_flags & PortalFlags::IsHiddenFromSide2;
@@ -78,10 +95,55 @@ bool Portal::isHiddenFromRoom(const GameObjectPtr &room) {
     return m_flags & PortalFlags::IsHiddenFromSide1;
 }
 
-bool Portal::canOpenFromRoom(const GameObjectPtr &room) {
+bool Portal::canOpenFromRoom(const GameObjectPtr &room) const {
 
     if (room == m_room2) {
         return m_flags & PortalFlags::CanOpenFromSide2;
     }
     return m_flags & PortalFlags::CanOpenFromSide1;
+}
+
+bool Portal::canSeeThrough() const {
+
+    return m_flags & PortalFlags::CanSeeThrough;
+}
+
+bool Portal::canHearThrough() const {
+
+    return m_flags & PortalFlags::CanHearThrough;
+}
+
+bool Portal::canShootThrough() const {
+
+    return m_flags & PortalFlags::CanShootThrough;
+}
+
+bool Portal::canPassThrough() const {
+
+    return m_flags & PortalFlags::CanPassThrough;
+}
+
+bool Portal::canSeeThroughIfOpen() const {
+
+    return m_flags & PortalFlags::CanSeeThroughIfOpen;
+}
+
+bool Portal::canHearThroughIfOpen() const {
+
+    return m_flags & PortalFlags::CanHearThroughIfOpen;
+}
+
+bool Portal::canShootThroughIfOpen() const {
+
+    return m_flags & PortalFlags::CanShootThroughIfOpen;
+}
+
+bool Portal::canPassThroughIfOpen() const {
+
+    return m_flags & PortalFlags::CanPassThroughIfOpen;
+}
+
+bool Portal::isOpen() const {
+
+    return m_flags & PortalFlags::IsOpen;
 }

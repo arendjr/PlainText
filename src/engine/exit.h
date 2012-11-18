@@ -17,10 +17,6 @@ class Exit : public GameObject {
         void setDestination(const GameObjectPtr &destination);
         Q_PROPERTY(GameObjectPtr destination READ destination WRITE setDestination)
 
-        const GameObjectPtr &oppositeExit() const { return m_oppositeExit; }
-        void setOppositeExit(const GameObjectPtr &oppositeExit);
-        Q_PROPERTY(GameObjectPtr oppositeExit READ oppositeExit WRITE setOppositeExit)
-
         bool isDoor() const { return m_door; }
         void setDoor(bool door);
         Q_PROPERTY(bool door READ isDoor WRITE setDoor)

@@ -46,6 +46,7 @@ int main(int argc, char *argv[]) {
             portal->setRoom(roomPtr);
             portal->setName(exit->name());
             portal->setDescription(exit->description());
+            portal->setTriggers(exit->triggers());
 
             PortalFlags flags = PortalFlags::CanPassThrough;
             if (exit->isHidden()) {
@@ -67,6 +68,9 @@ int main(int argc, char *argv[]) {
                 portal->setRoom2(destination);
                 portal->setName2(oppositeExit->name());
                 portal->setDescription2(oppositeExit->description());
+                for (const QString &triggerName : oppositeExit->triggers().keys()) {
+                    portal->setTrigger(triggerName, oppositeExit->trigger(triggerName));
+                }
 
                 if (oppositeExit->isHidden()) {
                     flags |= PortalFlags::IsHiddenFromSide2;

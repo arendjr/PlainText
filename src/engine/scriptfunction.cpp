@@ -41,10 +41,10 @@ QString ScriptFunction::toUserString(const ScriptFunction &scriptFunction) {
     return scriptFunction.toString();
 }
 
-ScriptFunction ScriptFunction::fromUserString(const QString &string) {
+void ScriptFunction::fromUserString(const QString &string, ScriptFunction &function) {
 
     ScriptEngine *scriptEngine = ScriptEngine::instance();
-    ScriptFunction function = scriptEngine->defineFunction(string);
+    function = scriptEngine->defineFunction(string);
     if (scriptEngine->hasUncaughtException()) {
         QScriptValue exception = scriptEngine->uncaughtException();
         qWarning() << "Script Exception: " << exception.toString() << endl
@@ -52,7 +52,6 @@ ScriptFunction ScriptFunction::fromUserString(const QString &string) {
         scriptEngine->evaluate("");
         throw GameException(GameException::InvalidFunctionCode);
     }
-    return function;
 }
 
 QString ScriptFunction::toJsonString(const ScriptFunction &scriptFunction, Options options) {
@@ -62,11 +61,11 @@ QString ScriptFunction::toJsonString(const ScriptFunction &scriptFunction, Optio
     return ConversionUtil::jsString(scriptFunction.source);
 }
 
-ScriptFunction ScriptFunction::fromVariant(const QVariant &variant) {
+void ScriptFunction::fromVariant(const QVariant &variant, ScriptFunction &function) {
 
     QString string = variant.toString();
     ScriptEngine *scriptEngine = ScriptEngine::instance();
-    ScriptFunction function = scriptEngine->defineFunction(string);
+    function = scriptEngine->defineFunction(string);
     if (scriptEngine->hasUncaughtException()) {
         QScriptValue exception = scriptEngine->uncaughtException();
         qWarning() << "Script Exception: " << exception.toString() << endl
@@ -74,7 +73,6 @@ ScriptFunction ScriptFunction::fromVariant(const QVariant &variant) {
         scriptEngine->evaluate("");
         throw GameException(GameException::InvalidFunctionCode);
     }
-    return function;
 }
 
 QScriptValue ScriptFunction::toScriptValue(QScriptEngine *engine, const ScriptFunction &function) {

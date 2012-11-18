@@ -24,6 +24,7 @@ class GameException : public std::exception {
             InvalidCombatMessage,
             InvalidPoint,
             InvalidVector,
+            UnknownGameEventType,
             NotSupported
         };
 

@@ -38,10 +38,10 @@ class CharacterStats {
         QString toString() const;
 
         static QString toUserString(const CharacterStats &stats);
-        static CharacterStats fromUserString(const QString &string);
+        static void fromUserString(const QString &string, CharacterStats &stats);
 
         static QString toJsonString(const CharacterStats &stats, Options options = NoOptions);
-        static CharacterStats fromVariant(const QVariant &variant);
+        static void fromVariant(const QVariant &variant, CharacterStats &stats);
 
         static QScriptValue toScriptValue(QScriptEngine *engine, const CharacterStats &stats);
         static void fromScriptValue(const QScriptValue &object, CharacterStats &stats);

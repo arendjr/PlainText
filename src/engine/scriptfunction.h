@@ -25,11 +25,11 @@ class ScriptFunction {
         QString toString() const;
 
         static QString toUserString(const ScriptFunction &scriptFunction);
-        static ScriptFunction fromUserString(const QString &string);
+        static void fromUserString(const QString &string, ScriptFunction &function);
 
         static QString toJsonString(const ScriptFunction &scriptFunction,
                                     Options options = NoOptions);
-        static ScriptFunction fromVariant(const QVariant &variant);
+        static void fromVariant(const QVariant &variant, ScriptFunction &function);
 
         static QScriptValue toScriptValue(QScriptEngine *engine, const ScriptFunction &function);
         static void fromScriptValue(const QScriptValue &value, ScriptFunction &function);

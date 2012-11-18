@@ -25,6 +25,7 @@ PT_DEFINE_ENUM(GameObjectType,
     Exit,
     Room,
     Item,
+    Event,
     Character,
     Player,
     Class,
@@ -56,6 +57,7 @@ class GameObject : public QObject {
 
         Q_INVOKABLE bool isClass() const;
         Q_INVOKABLE bool isContainer() const;
+        Q_INVOKABLE bool isEvent() const;
         Q_INVOKABLE bool isExit() const;
         Q_INVOKABLE bool isItem() const;
         Q_INVOKABLE bool isCharacter() const;
@@ -176,8 +178,8 @@ class GameObject : public QObject {
         static QScriptValue toScriptValue(QScriptEngine *engine, GameObject *const &gameObject);
         static void fromScriptValue(const QScriptValue &object, GameObject *&gameObject);
 
-        QList<QMetaProperty> metaProperties() const;
-        QList<QMetaProperty> storedMetaProperties() const;
+        QVector<QMetaProperty> metaProperties() const;
+        QVector<QMetaProperty> storedMetaProperties() const;
 
         virtual void invokeTimer(int timerId);
 

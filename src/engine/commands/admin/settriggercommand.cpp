@@ -44,7 +44,8 @@ void SetTriggerCommand::execute(Player *player, const QString &command) {
         source = "(" + source + ")";
     }
 
-    ScriptFunction trigger = ScriptFunction::fromUserString(source);
+    ScriptFunction trigger;
+    ScriptFunction::fromUserString(source, trigger);
     object->setTrigger(triggerName, trigger);
     send(QString("Trigger %1 set.").arg(triggerName));
 

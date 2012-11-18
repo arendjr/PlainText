@@ -73,10 +73,10 @@ class GameObjectPtr {
         QString toString() const;
 
         static QString toUserString(const GameObjectPtr &pointer);
-        static GameObjectPtr fromUserString(const QString &string);
+        static void fromUserString(const QString &string, GameObjectPtr &pointer);
 
         static QString toJsonString(const GameObjectPtr &pointer, Options options = NoOptions);
-        static GameObjectPtr fromVariant(const QVariant &variant);
+        static void fromVariant(const QVariant &variant, GameObjectPtr &pointer);
 
         static QScriptValue toScriptValue(QScriptEngine *engine, const GameObjectPtr &pointer);
         static void fromScriptValue(const QScriptValue &object, GameObjectPtr &pointer);
@@ -188,6 +188,8 @@ class GameObjectPtrList {
 
         int indexOf(const GameObjectPtr &value) const;
 
+        void insert(const GameObjectPtr &value);
+
         bool isEmpty() const;
 
         GameObjectPtr &last();
@@ -202,6 +204,8 @@ class GameObjectPtrList {
         int removeAll(const GameObjectPtr &value);
         void removeAt(int i);
         bool removeOne(const GameObjectPtr &value);
+
+        void reserve(int size);
 
         int size() const;
 
@@ -237,11 +241,11 @@ class GameObjectPtrList {
         QString joinFancy(Options options = NoOptions) const;
 
         static QString toUserString(const GameObjectPtrList &pointerList);
-        static GameObjectPtrList fromUserString(const QString &string);
+        static void fromUserString(const QString &string, GameObjectPtrList &pointerList);
 
         static QString toJsonString(const GameObjectPtrList &pointerList,
                                     Options options = NoOptions);
-        static GameObjectPtrList fromVariant(const QVariant &variant);
+        static void fromVariant(const QVariant &variant, GameObjectPtrList &pointerList);
 
     private:
         int m_size;

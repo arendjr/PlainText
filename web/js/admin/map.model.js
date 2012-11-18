@@ -6,7 +6,7 @@ define(["controller"], function(Controller) {
     function MapModel() {
 
         this.rooms = {};
-        this.exits = {};
+        this.portals = {};
 
         this.changeListeners = [];
     }
@@ -38,7 +38,7 @@ define(["controller"], function(Controller) {
                 room.x = room.position ? room.position[0] : 0;
                 room.y = room.position ? room.position[1] : 0;
                 room.z = room.position ? room.position[2] : 0;
-                room.exits = room.exits || [];
+                room.portals = room.portals || [];
 
                 if (self.rooms.hasOwnProperty(room.id)) {
                     room.shape = self.rooms[room.id].shape;
@@ -47,22 +47,22 @@ define(["controller"], function(Controller) {
                 self.rooms[room.id] = room;
             }
 
-            Controller.sendApiCall("objects-list exit", function(data) {
+            Controller.sendApiCall("objects-list portal", function(data) {
                 for (var i = 0; i < data.length; i++) {
-                    var exit = JSON.parse(data[i]);
+                    var portal = JSON.parse(data[i]);
 
-                    if (self.exits.hasOwnProperty(exit.id)) {
-                        exit.shape = self.exits[exit.id].shape;
+                    if (self.portals.hasOwnProperty(portal.id)) {
+                        portal.shape = self.portals[portal.id].shape;
                     }
 
-                    self.exits[exit.id] = exit;
+                    self.portals[portal.id] = portal;
                 }
 
                 for (var id in self.rooms) {
-                    self.resolvePointers(self.rooms[id], ["exits", "visibleRooms"]);
+                    self.resolvePointers(self.rooms[id], ["portals"]);
                 }
-                for (id in self.exits) {
-                    self.resolvePointers(self.exits[id], ["destination", "oppositeExit"]);
+                for (id in self.portals) {
+                    self.resolvePointers(self.portals[id], ["room", "room2"]);
                 }
 
                 self.notifyChangeListeners();
@@ -101,34 +101,27 @@ define(["controller"], function(Controller) {
         });
     };
 
-    MapModel.prototype.setExit = function(exit) {
+    MapModel.prototype.setPortal = function(portal) {
 
         var self = this;
 
-        var call = "exit-set " + exit.id + " " + exit.source + " " + exit.destination +
-                   " " + exit.name + " " + exit.oppositeExit +
-                   (exit.position ? " (" + exit.position.join(",") + ")" : "");
+        var call = "portal-set " + portal.id + " " + portal.source + " " + portal.destination +
+                   " " + portal.name + " " + portal.oppositePortal +
+                   (portal.position ? " (" + portal.position.join(",") + ")" : "");
 
         Controller.sendApiCall(call, function(data) {
-            var exit = JSON.parse(data["exit"]);
-            self.exits[exit.id] = exit;
+            var portal = JSON.parse(data["portal"]);
+            self.portals[portal.id] = portal;
 
             if (data.contains("source")) {
                 var source = JSON.parse(data["source"]);
                 source.x = source.position ? source.position[0] : 0;
                 source.y = source.position ? source.position[1] : 0;
                 source.z = source.position ? source.position[2] : 0;
-                source.exits = source.exits || [];
+                source.portals = source.portals || [];
                 self.rooms[source.id] = source;
 
-                self.resolvePointers(source, ["exits", "visibleRooms"]);
-            }
-
-            if (data.contains("oppositeExit")) {
-                var oppositeExit = JSON.parse(data["oppositeExit"]);
-                self.exits[oppositeExit.id] = oppositeExit;
-
-                self.resolvePointers(oppositeExit, ["destination", "oppositeExit"]);
+                self.resolvePointers(source, ["portals"]);
             }
 
             if (data.contains("destination")) {
@@ -136,32 +129,32 @@ define(["controller"], function(Controller) {
                 destination.x = destination.position ? destination.position[0] : 0;
                 destination.y = destination.position ? destination.position[1] : 0;
                 destination.z = destination.position ? destination.position[2] : 0;
-                destination.exits = destination.exits || [];
+                destination.portals = destination.portals || [];
                 self.rooms[destination.id] = destination;
 
-                self.resolvePointers(destination, ["exits", "visibleRooms"]);
+                self.resolvePointers(destination, ["portals"]);
             }
 
-            self.resolvePointers(exit, ["destination", "oppositeExit"]);
+            self.resolvePointers(portal, ["room", "room2"]);
 
             self.notifyChangeListeners();
         });
 
-        this.exits[exit.id] = exit;
+        this.portals[portal.id] = portal;
         this.notifyChangeListeners();
     };
 
-    MapModel.prototype.deleteExit = function(exitId) {
+    MapModel.prototype.deletePortal = function(portalId) {
 
         var self = this;
 
-        Controller.sendApiCall("exit-delete " + exitId, function() {
-            var exit = self.exits[exitId];
+        Controller.sendApiCall("portal-delete " + portalId, function() {
+            var portal = self.portals[portalId];
             for (var roomId in self.rooms) {
                 var room = self.rooms[roomId];
-                room.exits.removeOne(exit);
+                room.portals.removeOne(portal);
             }
-            delete self.exits[exitId];
+            delete self.portals[portalId];
             self.notifyChangeListeners();
         });
     };
@@ -170,8 +163,8 @@ define(["controller"], function(Controller) {
 
         if (pointer.startsWith("room:")) {
             return this.rooms[parseInt(pointer.substr(5), 10)];
-        } else if (pointer.startsWith("exit:")) {
-            return this.exits[parseInt(pointer.substr(5), 10)];
+        } else if (pointer.startsWith("portal:")) {
+            return this.portals[parseInt(pointer.substr(5), 10)];
         } else {
             return null;
         }

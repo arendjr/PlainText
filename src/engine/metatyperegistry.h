@@ -52,13 +52,17 @@ class MetaTypeRegistry {
         return Type::toUserString(variant.value<Type>());                                         \
     }                                                                                             \
     inline QVariant convertUserStringTo##Type(const QString &string) {                            \
-        return QVariant::fromValue(Type::fromUserString(string));                                 \
+        Type value;                                                                               \
+        Type::fromUserString(string, value);                                                      \
+        return QVariant::fromValue(value);                                                        \
     }                                                                                             \
     inline QString convert##Type##ToJsonString(const QVariant &variant) {                         \
         return Type::toJsonString(variant.value<Type>());                                         \
     }                                                                                             \
     inline QVariant convertJsonVariantTo##Type(const QVariant &variant) {                         \
-        return QVariant::fromValue(Type::fromVariant(variant));                                   \
+        Type value;                                                                               \
+        Type::fromVariant(variant, value);                                                        \
+        return QVariant::fromValue(value);                                                        \
     }
 
 #define PT_ENUM_VALUE(Item) Item,
@@ -68,7 +72,7 @@ class MetaTypeRegistry {
 #define PT_DEFINE_ENUM(Type, ...)                                                                 \
     class Type {                                                                                  \
         public:                                                                                   \
-            enum Values : uint {                                                                  \
+            enum Values : unsigned int {                                                          \
                 FOR_EACH(PT_ENUM_VALUE, __VA_ARGS__)                                              \
                 NumValues                                                                         \
             } value;                                                                              \
@@ -141,7 +145,7 @@ class MetaTypeRegistry {
 #define PT_DEFINE_FLAGS(Type, ...)                                                                \
     class Type {                                                                                  \
         public:                                                                                   \
-            enum Flags : uint {                                                                   \
+            enum Flags : unsigned int {                                                           \
                 NoFlags = 0,                                                                      \
                 FOR_EACH_COUNTED(PT_FLAG_VALUE, __VA_ARGS__)                                      \
                 NumFlags = COUNT(__VA_ARGS__)                                                     \
@@ -161,7 +165,7 @@ class MetaTypeRegistry {
             static Type fromString(const QString &string) {                                       \
                 static const char *strings[] = { FOR_EACH(PT_ENUM_STRING, __VA_ARGS__) "" };      \
                 QStringList stringList = string.split('|');                                       \
-                uint flags = 0;                                                                   \
+                unsigned int flags = 0;                                                           \
                 for (int i = 0; i < (int) NumFlags; i++) {                                        \
                     if (stringList.contains(strings[i])) {                                        \
                         flags |= 1 << i;                                                          \
@@ -180,40 +184,40 @@ class MetaTypeRegistry {
                 *this = fromString(string);                                                       \
                 return *this;                                                                     \
             }                                                                                     \
-            Flags operator|(Type other) {                                                         \
-                return (Flags) ((uint) value | (uint) other.value);                               \
+            Flags operator|(Type other) const {                                                   \
+                return (Flags) ((unsigned int) value | (unsigned int) other.value);               \
             }                                                                                     \
-            Flags operator|(Flags other) {                                                        \
-                return (Flags) ((uint) value | (uint) other);                                     \
+            Flags operator|(Flags other) const {                                                  \
+                return (Flags) ((unsigned int) value | (unsigned int) other);                     \
             }                                                                                     \
             Type &operator|=(Type other) {                                                        \
-                value = (Flags) ((uint) value | (uint) other.value);                              \
+                value = (Flags) ((unsigned int) value | (unsigned int) other.value);              \
                 return *this;                                                                     \
             }                                                                                     \
             Type &operator|=(Flags other) {                                                       \
-                value = (Flags) ((uint) value | (uint) other);                                    \
+                value = (Flags) ((unsigned int) value | (unsigned int) other);                    \
                 return *this;                                                                     \
             }                                                                                     \
-            Flags operator&(Type other) {                                                         \
-                return (Flags) ((uint) value & (uint) other.value);                               \
+            Flags operator&(Type other) const {                                                   \
+                return (Flags) ((unsigned int) value & (unsigned int) other.value);               \
             }                                                                                     \
-            Flags operator&(Flags other) {                                                        \
-                return (Flags) ((uint) value & (uint) other);                                     \
+            Flags operator&(Flags other) const {                                                  \
+                return (Flags) ((unsigned int) value & (unsigned int) other);                     \
             }                                                                                     \
             Type &operator&=(Type other) {                                                        \
-                value = (Flags) ((uint) value & (uint) other.value);                              \
+                value = (Flags) ((unsigned int) value & (unsigned int) other.value);              \
                 return *this;                                                                     \
             }                                                                                     \
             Type &operator&=(Flags other) {                                                       \
-                value = (Flags) ((uint) value & (uint) other);                                    \
+                value = (Flags) ((unsigned int) value & (unsigned int) other);                    \
                 return *this;                                                                     \
             }                                                                                     \
             Type &operator^=(Type other) {                                                        \
-                value = (Flags) ((uint) value ^ (uint) other.value);                              \
+                value = (Flags) ((unsigned int) value ^ (unsigned int) other.value);              \
                 return *this;                                                                     \
             }                                                                                     \
             Type &operator^=(Flags other) {                                                       \
-                value = (Flags) ((uint) value ^ (uint) other);                                    \
+                value = (Flags) ((unsigned int) value ^ (unsigned int) other);                    \
                 return *this;                                                                     \
             }                                                                                     \
             bool operator==(Type other) const {                                                   \

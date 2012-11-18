@@ -19,6 +19,7 @@ const char *GameException::s_messages[] = {
     "Invalid combat message",
     "Invalid point",
     "Invalid vector",
+    "Unknown game event type",
     "Not supported"
 };
 

@@ -1,6 +1,7 @@
 #ifndef PORTAL_H
 #define PORTAL_H
 
+#include "gameeventmultipliermap.h"
 #include "gameobject.h"
 #include "gameobjectptr.h"
 #include "metatyperegistry.h"
@@ -51,10 +52,25 @@ class Portal : public GameObject {
         void setFlags(PortalFlags flags);
         Q_PROPERTY(PortalFlags flags READ flags WRITE setFlags)
 
-        Q_INVOKABLE QString nameFromRoom(const GameObjectPtr &room);
-        Q_INVOKABLE QString descriptionFromRoom(const GameObjectPtr &room);
-        Q_INVOKABLE bool isHiddenFromRoom(const GameObjectPtr &room);
-        Q_INVOKABLE bool canOpenFromRoom(const GameObjectPtr &room);
+        const GameEventMultiplierMap &eventMultipliers() const { return m_eventMultipliers; }
+        void setEventMultipliers(const GameEventMultiplierMap &multipliers);
+        Q_PROPERTY(GameEventMultiplierMap eventMultipliers READ eventMultipliers
+                                                           WRITE setEventMultipliers)
+
+        Q_INVOKABLE const GameObjectPtr &oppositeOf(const GameObjectPtr &room) const;
+        Q_INVOKABLE const QString &nameFromRoom(const GameObjectPtr &room) const;
+        Q_INVOKABLE const QString &descriptionFromRoom(const GameObjectPtr &room) const;
+        Q_INVOKABLE bool isHiddenFromRoom(const GameObjectPtr &room) const;
+        Q_INVOKABLE bool canOpenFromRoom(const GameObjectPtr &room) const;
+        Q_INVOKABLE bool canSeeThrough() const;
+        Q_INVOKABLE bool canHearThrough() const;
+        Q_INVOKABLE bool canShootThrough() const;
+        Q_INVOKABLE bool canPassThrough() const;
+        Q_INVOKABLE bool canSeeThroughIfOpen() const;
+        Q_INVOKABLE bool canHearThroughIfOpen() const;
+        Q_INVOKABLE bool canShootThroughIfOpen() const;
+        Q_INVOKABLE bool canPassThroughIfOpen() const;
+        Q_INVOKABLE bool isOpen() const;
 
     private:
         QString m_name2;
@@ -62,6 +78,7 @@ class Portal : public GameObject {
         GameObjectPtr m_room;
         GameObjectPtr m_room2;
         PortalFlags m_flags;
+        GameEventMultiplierMap m_eventMultipliers;
 };
 
 #endif // PORTAL_H

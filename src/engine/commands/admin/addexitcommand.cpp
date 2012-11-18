@@ -69,7 +69,8 @@ void AddExitCommand::execute(Player *player, const QString &command) {
     if (destinationId == "new") {
         QString distanceOrVector = takeRest();
         if (distanceOrVector.startsWith("[") && distanceOrVector.endsWith("]")) {
-            Vector3D vector = Vector3D::fromUserString(distanceOrVector);
+            Vector3D vector;
+            Vector3D::fromUserString(distanceOrVector, vector);
             position = currentRoom()->position() + vector;
         } else if (!distanceOrVector.isEmpty()) {
             int distance = distanceOrVector.toInt();

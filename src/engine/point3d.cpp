@@ -47,7 +47,7 @@ QString Point3D::toUserString(const Point3D &point) {
     return point.toString();
 }
 
-Point3D Point3D::fromUserString(const QString &string) {
+void Point3D::fromUserString(const QString &string, Point3D &point) {
 
     if (!string.startsWith("(") || !string.endsWith(")")) {
         throw GameException(GameException::InvalidPoint);
@@ -58,9 +58,9 @@ Point3D Point3D::fromUserString(const QString &string) {
         throw GameException(GameException::InvalidPoint);
     }
 
-    return Point3D(stringList[0].trimmed().toInt(),
-                   stringList[1].trimmed().toInt(),
-                   stringList[2].trimmed().toInt());
+    point.x = stringList[0].trimmed().toInt(),
+    point.y = stringList[1].trimmed().toInt(),
+    point.z = stringList[2].trimmed().toInt();
 }
 
 QString Point3D::toJsonString(const Point3D &point, Options options) {
@@ -70,14 +70,16 @@ QString Point3D::toJsonString(const Point3D &point, Options options) {
     return QString("[ %1, %2, %3 ]").arg(point.x).arg(point.y).arg(point.z);
 }
 
-Point3D Point3D::fromVariant(const QVariant &variant) {
+void Point3D::fromVariant(const QVariant &variant, Point3D &point) {
 
     QVariantList variantList = variant.toList();
     if (variantList.length() != 3) {
         throw GameException(GameException::InvalidPoint);
     }
 
-    return Point3D(variantList[0].toInt(), variantList[1].toInt(), variantList[2].toInt());
+    point.x = variantList[0].toInt();
+    point.y = variantList[1].toInt();
+    point.z = variantList[2].toInt();
 }
 
 QScriptValue Point3D::toScriptValue(QScriptEngine *engine, const Point3D &point) {
