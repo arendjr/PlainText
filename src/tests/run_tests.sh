@@ -1,5 +1,5 @@
 #!/bin/bash
 
-qmake ../PlainText.pro CONFIG+=tests && \
+qmake ../tests.pro && \
 make -j2 && \
 ./tests

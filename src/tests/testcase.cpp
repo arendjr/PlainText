@@ -1,5 +1,6 @@
 #include "testcase.h"
 
+#include <QDir>
 #include <QTest>
 
 #include "engine.h"
@@ -11,7 +12,9 @@
 
 void TestCase::initTestCase() {
 
-    qputenv("PT_DATA_DIR", "data");
+    if (qgetenv("PT_DATA_DIR").isEmpty()) {
+        qputenv("PT_DATA_DIR", "data");
+    }
 
     m_engine = new Engine();
     bool started = m_engine->start();
