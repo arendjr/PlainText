@@ -5,11 +5,6 @@ Makefile
 moc_*.cpp
 qrc_*.cpp
 
-# executables
-PlainText
-exits2portals
-tests
-
 # XCode project
 *.xcodeproj
 
