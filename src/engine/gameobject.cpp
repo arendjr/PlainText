@@ -487,6 +487,8 @@ bool GameObject::save() {
 
     if (m_deleted) {
         return QFile::remove(DiskUtil::gameObjectPath(m_objectType.toString(), m_id));
+
+        m_realm->enqueueEvent(new DeleteObjectEvent(this));
     } else {
         return DiskUtil::writeGameObject(m_objectType.toString(), m_id,
                                          toJsonString(SkipId | IncludeTypeInfo));
@@ -546,11 +548,11 @@ void GameObject::setDeleted() {
     if (~m_options & Copy) {
         m_deleted = true;
 
-        if (~m_options & DontSave) {
+        if (m_options & DontSave) {
+            m_realm->enqueueEvent(new DeleteObjectEvent(this));
+        } else {
             m_realm->addModifiedObject(this);
         }
-
-        m_realm->enqueueEvent(new DeleteObjectEvent(this));
     }
 }
 
