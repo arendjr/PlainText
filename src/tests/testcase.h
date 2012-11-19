@@ -1,3 +1,6 @@
+#ifndef TESTCASE_H
+#define TESTCASE_H
+
 #include <QObject>
 
 
@@ -10,10 +13,6 @@ class TestCase : public QObject {
     private slots:
         virtual void initTestCase();
 
-        virtual void init();
-
-        virtual void cleanup();
-
         virtual void cleanupTestCase();
 
     private:
@@ -22,3 +21,5 @@ class TestCase : public QObject {
 
         Engine *m_engine;
 };
+
+#endif // TESTCASE_H

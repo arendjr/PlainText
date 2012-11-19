@@ -25,7 +25,7 @@ class Room : public GameObject {
         void setPortals(const GameObjectPtrList &portals);
         Q_PROPERTY(GameObjectPtrList portals READ portals WRITE setPortals)
 
-        GameObjectPtrList exits();
+        GameObjectPtrList exits() const;
         Q_PROPERTY(GameObjectPtrList exits READ portals STORED false)
 
         const GameObjectPtrList &players() const { return m_players; }
@@ -56,7 +56,7 @@ class Room : public GameObject {
         GameObjectPtrList characters() const { return m_players + m_npcs; }
         Q_PROPERTY(GameObjectPtrList characters READ characters STORED false)
 
-        GameObjectPtrList objects() { return exits() + characters() + m_items; }
+        GameObjectPtrList objects() const { return exits() + characters() + m_items; }
         Q_PROPERTY(GameObjectPtrList objects READ objects STORED false)
 
     private:

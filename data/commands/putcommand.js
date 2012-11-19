@@ -30,6 +30,12 @@ PutCommand.prototype.execute = function(player, command) {
         return;
     }
 
+    items.removeOne(container);
+    if (items.isEmpty()) {
+        this.send("Put what?");
+        return;
+    }
+
     items.forEach(function(item) {
         container.addItem(item);
         player.removeInventoryItem(item);

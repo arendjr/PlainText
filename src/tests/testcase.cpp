@@ -31,12 +31,6 @@ void TestCase::initTestCase() {
     createTestWorld();
 }
 
-void TestCase::init() {
-}
-
-void TestCase::cleanup() {
-}
-
 void TestCase::cleanupTestCase() {
 
     destroyTestWorld();

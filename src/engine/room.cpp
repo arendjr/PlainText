@@ -51,21 +51,28 @@ void Room::setPortals(const GameObjectPtrList &portals) {
     }
 }
 
-GameObjectPtrList Room::exits() {
+GameObjectPtrList Room::exits() const {
 
     GameObjectPtrList exits;
     for (const GameObjectPtr &portalPtr : m_portals) {
         Portal *portal = portalPtr.cast<Portal *>();
         if (portal->flags() & PortalFlags::CanPassThrough ||
             (portal->flags() & PortalFlags::CanPassThroughIfOpen &&
-             portal->canOpenFromRoom(this))) {
+             portal->canOpenFromRoom(const_cast<Room *>(this)))) {
             Exit *exit = new Exit(realm());
-            exit->setName(portal->nameFromRoom(this));
-            exit->setDescription(portal->descriptionFromRoom(this));
-            exit->setDestination(portal->oppositeOf(this));
-            exit->setDoor(portal->canOpenFromRoom(this));
-            exit->setOpen(portal->isOpen());
-            exit->setHidden(portal->isHiddenFromRoom(this));
+            if (this == portal->room().cast<Room *>()) {
+                exit->setName(portal->name());
+                exit->setDescription(portal->description());
+                exit->setDestination(portal->room2());
+                exit->setDoor(portal->flags() & PortalFlags::CanOpenFromSide1);
+                exit->setHidden(portal->flags() & PortalFlags::IsHiddenFromSide1);
+            } else {
+                exit->setName(portal->name2());
+                exit->setDescription(portal->description2());
+                exit->setDestination(portal->room());
+                exit->setDoor(portal->flags() & PortalFlags::CanOpenFromSide2);
+                exit->setHidden(portal->flags() & PortalFlags::IsHiddenFromSide2);
+            }
             exits.append(exit);
         }
     }

@@ -1,3 +1,6 @@
+#ifndef TEST_SERIALIZATION_H
+#define TEST_SERIALIZATION_H
+
 #include "testcase.h"
 
 #include <QFile>
@@ -12,7 +15,7 @@ class SerializationTest: public TestCase {
     Q_OBJECT
 
     private slots:
-        void objectsSyncedToDisk() {
+        void testObjectsSyncedToDisk() {
 
             QTest::qWait(20);
             Realm::instance()->enqueueModifiedObjects();
@@ -89,3 +92,5 @@ class SerializationTest: public TestCase {
             }
         }
 };
+
+#endif // TEST_SERIALIZATION_H

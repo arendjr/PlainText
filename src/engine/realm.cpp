@@ -13,7 +13,7 @@ static Realm *s_instance = nullptr;
 #define super GameObject
 
 Realm::Realm(Options options) :
-    super(this, GameObjectType::Realm, 0, options),
+    super(this, GameObjectType::Realm, 0, options | DontRegister),
     m_initialized(false),
     m_nextId(1),
     m_timeIntervalId(0),

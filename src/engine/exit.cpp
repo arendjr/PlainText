@@ -2,7 +2,7 @@
 
 
 Exit::Exit(Realm *realm, uint id, Options options) :
-    GameObject(realm, GameObjectType::Exit, id, options | DontSave),
+    GameObject(realm, GameObjectType::Exit, id, options | Temporary),
     m_door(false),
     m_open(false),
     m_hidden(false) {

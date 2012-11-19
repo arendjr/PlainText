@@ -48,7 +48,7 @@ GameObject::GameObject(Realm *realm, GameObjectType objectType, uint id, Options
 
     Q_ASSERT(objectType != GameObjectType::Unknown);
 
-    if (this != m_realm) {
+    if (~options & DontRegister) {
         if (m_id == 0) {
             m_id = m_realm->uniqueObjectId();
         }
@@ -545,7 +545,7 @@ void GameObject::resolvePointers() {
 
 void GameObject::setDeleted() {
 
-    if (~m_options & Copy) {
+    if (~m_options & Copy && !m_deleted) {
         m_deleted = true;
 
         if (m_options & DontSave) {
