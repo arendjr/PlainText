@@ -148,7 +148,7 @@ GameObjectPtrList Realm::allObjects(GameObjectType objectType) const {
 
     GameObjectPtrList objects;
     for (GameObject *object : m_objectMap) {
-        if (object->objectType() == objectType) {
+        if (objectType == GameObjectType::Unknown || object->objectType() == objectType) {
             objects << object;
         }
     }

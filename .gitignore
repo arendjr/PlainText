@@ -1,11 +1,14 @@
 # Qt build
 Makefile
-PlainText
-exits2portals
 *-build-desktop*
 *.pro.user*
 moc_*.cpp
 qrc_*.cpp
+
+# executables
+PlainText
+exits2portals
+tests
 
 # XCode project
 *.xcodeproj
