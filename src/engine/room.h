@@ -25,8 +25,8 @@ class Room : public GameObject {
         void setPortals(const GameObjectPtrList &portals);
         Q_PROPERTY(GameObjectPtrList portals READ portals WRITE setPortals)
 
-        GameObjectPtrList exits() const;
-        Q_PROPERTY(GameObjectPtrList exits READ portals STORED false)
+        const GameObjectPtrList &exits();
+        Q_PROPERTY(GameObjectPtrList exits READ exits STORED false)
 
         const GameObjectPtrList &players() const { return m_players; }
         Q_INVOKABLE void addPlayer(const GameObjectPtr &player);
@@ -56,12 +56,13 @@ class Room : public GameObject {
         GameObjectPtrList characters() const { return m_players + m_npcs; }
         Q_PROPERTY(GameObjectPtrList characters READ characters STORED false)
 
-        GameObjectPtrList objects() const { return exits() + characters() + m_items; }
+        GameObjectPtrList objects() { return exits() + characters() + m_items; }
         Q_PROPERTY(GameObjectPtrList objects READ objects STORED false)
 
     private:
         Point3D m_position;
         GameObjectPtrList m_portals;
+        GameObjectPtrList m_exits;
         GameObjectPtrList m_players;
         GameObjectPtrList m_npcs;
         GameObjectPtrList m_items;

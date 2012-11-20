@@ -1,8 +1,10 @@
 #include "exit.h"
 
 
+#define super GameObject
+
 Exit::Exit(Realm *realm, uint id, Options options) :
-    GameObject(realm, GameObjectType::Exit, id, options | Temporary),
+    super(realm, GameObjectType::Exit, id, options | DontSave),
     m_door(false),
     m_open(false),
     m_hidden(false) {

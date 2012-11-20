@@ -53,7 +53,6 @@ SOURCES += \
     engine/visualevent.cpp \
     engine/weapon.cpp \
     engine/commands/buycommand.cpp \
-    engine/commands/closecommand.cpp \
     engine/commands/command.cpp \
     engine/commands/descriptioncommand.cpp \
     engine/commands/disbandcommand.cpp \
@@ -71,7 +70,6 @@ SOURCES += \
     engine/commands/killcommand.cpp \
     engine/commands/lookcommand.cpp \
     engine/commands/losecommand.cpp \
-    engine/commands/opencommand.cpp \
     engine/commands/quitcommand.cpp \
     engine/commands/removecommand.cpp \
     engine/commands/saycommand.cpp \
@@ -190,7 +188,6 @@ HEADERS += \
     engine/visualevent.h \
     engine/weapon.h \
     engine/commands/buycommand.h \
-    engine/commands/closecommand.h \
     engine/commands/command.h \
     engine/commands/descriptioncommand.h \
     engine/commands/disbandcommand.h \
@@ -208,7 +205,6 @@ HEADERS += \
     engine/commands/killcommand.h \
     engine/commands/lookcommand.h \
     engine/commands/losecommand.h \
-    engine/commands/opencommand.h \
     engine/commands/quitcommand.h \
     engine/commands/removecommand.h \
     engine/commands/saycommand.h \
@@ -282,7 +278,9 @@ HEADERS += \
 OTHER_FILES += \
     engine/util.js \
     engine/commands/command.js \
+    ../data/commands/closecommand.js \
     ../data/commands/drinkcommand.js \
+    ../data/commands/opencommand.js \
     ../data/commands/putcommand.js \
     ../data/commands/admin/enterroomcommand.js \
     ../web/index.html \
@@ -294,12 +292,12 @@ OTHER_FILES += \
     ../web/js/require.js \
     ../web/js/zepto.js \
     ../web/js/admin/admin.js \
-    ../web/js/admin/exitdeletedialog.js \
-    ../web/js/admin/exiteditor.js \
     ../web/js/admin/kinetic.js \
     ../web/js/admin/mapeditor.js \
     ../web/js/admin/map.model.js \
     ../web/js/admin/map.view.js \
+    ../web/js/admin/portaldeletedialog.js \
+    ../web/js/admin/portaleditor.js \
     ../web/js/admin/propertyeditor.js \
     ../web/js/admin/slider.widget.js \
     ../web/js/codemirror/codemirror.css \

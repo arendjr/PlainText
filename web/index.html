@@ -25,25 +25,29 @@
                 <button class="submit-button">Submit</button>
             </div>
         </div>
-        <div class="exit-editor" style="display: none">
-            <div>
+        <div class="portal-editor" style="display: none">
+            <div class="column">
+                <p><span class="label">Name:</span>
+                    <input type="text" class="name" size="30"></p>
+                <p><span class="label">Room:</span>
+                    #<input type="text" size="8" class="room-id"></p>
                 <p><span class="label">Direction:</span>
                     <select class="direction"></select></p>
+            </div>
+            <div class="column">
                 <p><span class="label">Name:</span>
-                    <input type="text" class="name"></p>
-                <p><span class="label">Destination:</span>
+                    <input type="text" class="name2" size="30"></p>
+                <p><span class="label">Room:</span>
                     <input type="radio" name="destination" class="destination new" value="new">
                     New room
                     <input type="radio" name="destination" class="destination id" value="id">
-                    Room #<input type="text" size="8" class="destination-id"></p>
+                    #<input type="text" size="8" class="room2-id"></p>
                 <p class="distance-paragraph"><span class="label">Distance:</span>
                     <input type="text" class="distance"></p>
                 <p class="position-paragraph"><span class="label">Position:</span>
                     <input type="number" class="x" step="50">,
                     <input type="number" class="y" step="50">,
                     <input type="number" class="z" step="50"></p>
-                <p><span class="label">Opposite:</span>
-                    <input type="text" class="opposite"></p>
             </div>
             <div class="button-list">
                 <button class="delete-button">Delete</button>
@@ -51,13 +55,14 @@
                 <button class="submit-button">Save</button>
             </div>
         </div>
-        <div class="exit-delete-dialog" style="display: none">
+        <div class="portal-delete-dialog" style="display: none">
             <div>
-                <p>Do you want to delete the exit in only this direction, or in both directions?</p>
+                <p>Do you want to delete access to the portal from the current room, or delete the
+                    entire portal from both directions?</p>
             </div>
             <div class="button-list">
-                <button class="delete-one-button">Delete One Direction</button>
-                <button class="delete-both-button">Delete Both Directions</button>
+                <button class="delete-one-button">Delete Access</button>
+                <button class="delete-both-button">Delete Entire Portal</button>
                 <button class="cancel-button">Cancel</button>
             </div>
         </div>
@@ -98,9 +103,9 @@
                     <p><strong>Description:</strong><br>
                         <span class="description"></span>
                         <a href="#" class="edit description">(edit)</a></p>
-                    <p><strong>Exits:</strong><br>
-                        <span class="exits"></span>
-                        <a href="#" class="add exit">(add)</a></p>
+                    <p><strong>Portals:</strong><br>
+                        <span class="portals"></span>
+                        <a href="#" class="add portal">(add)</a></p>
                 </div>
             </div>
         </div>

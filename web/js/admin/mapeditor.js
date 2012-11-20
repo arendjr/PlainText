@@ -1,8 +1,8 @@
 /*global define:false, require:false*/
-define(["controller", "admin/map.model", "admin/map.view", "admin/exiteditor",
-        "admin/exitdeletedialog", "admin/propertyeditor", "admin/slider.widget", "zepto"],
-       function(Controller, MapModel, MapView, ExitEditor,
-                ExitDeleteDialog, PropertyEditor, SliderWidget, $) {
+define(["controller", "admin/map.model", "admin/map.view", "admin/portaleditor",
+        "admin/portaldeletedialog", "admin/propertyeditor", "admin/slider.widget", "zepto"],
+       function(Controller, MapModel, MapView, PortalEditor,
+                PortalDeleteDialog, PropertyEditor, SliderWidget, $) {
 
     "use strict";
 
@@ -13,8 +13,8 @@ define(["controller", "admin/map.model", "admin/map.view", "admin/exiteditor",
         this.model = null;
         this.view = null;
 
-        this.exitEditor = null;
-        this.exitDeleteDialog = null;
+        this.portalEditor = null;
+        this.portalDeleteDialog = null;
         this.propertyEditor = null;
         this.zoomSlider = null;
         this.perspectiveSlider = null;
@@ -32,11 +32,11 @@ define(["controller", "admin/map.model", "admin/map.view", "admin/exiteditor",
         this.view = new MapView($(".canvas", this.element)[0]);
         this.view.setModel(this.model);
 
-        this.exitEditor = new ExitEditor();
-        this.exitEditor.setMapModel(this.model);
-        this.exitEditor.setMapView(this.view);
+        this.portalEditor = new PortalEditor();
+        this.portalEditor.setMapModel(this.model);
+        this.portalEditor.setMapView(this.view);
 
-        this.exitDeleteDialog = new ExitDeleteDialog();
+        this.portalDeleteDialog = new PortalDeleteDialog();
 
         this.propertyEditor = new PropertyEditor();
 
@@ -115,42 +115,44 @@ define(["controller", "admin/map.model", "admin/map.view", "admin/exiteditor",
             }
         }, false);
 
-        this.selectedRoomDiv.on("click", ".edit.exit", function() {
-            var sourceRoom = self.model.rooms[self.selectedRoomId];
-            var exit = self.model.exits[event.target.getAttribute("data-exit-id")];
-            self.exitEditor.edit(sourceRoom, exit, {
-                "onsave": function(exit) {
-                    self.model.setExit(exit);
-                    self.exitEditor.close();
+        this.selectedRoomDiv.on("click", ".edit.portal", function() {
+            var portal = self.model.portals[event.target.getAttribute("data-portal-id")];
+            self.portalEditor.edit(portal, {
+                "onsave": function(portal) {
+                    self.model.setPortal(portal);
+                    self.portalEditor.close();
                 },
-                "ondelete": function(exitId) {
-                    if (exit.oppositeExit) {
-                        self.exitDeleteDialog.show({
+                "ondelete": function(portalId) {
+                    if (portal.room.portals.contains(portal) &&
+                        portal.room2.portals.contains(portal)) {
+                        self.portalDeleteDialog.show({
                             "ondeleteone": function() {
-                                self.model.deleteExit(exit.id);
-                                self.exitDeleteDialog.close();
+                                var sourceRoom = self.model.rooms[self.selectedRoomId];
+                                var portals = sourceRoom.portals.slice(0);
+                                portals.removeOne(portal);
+                                self.model.setRoomProperty(sourceRoom.id, "portals", portals);
+                                self.portalDeleteDialog.close();
                             },
                             "ondeleteboth": function() {
-                                self.model.deleteExit(exit.id);
-                                self.model.deleteExit(exit.oppositeExit.id);
-                                self.exitDeleteDialog.close();
+                                self.model.deletePortal(portalId);
+                                self.portalDeleteDialog.close();
                             }
                         });
                     } else {
-                        self.model.deleteExit(exitId);
+                        self.model.deletePortal(portalId);
                     }
 
-                    self.exitEditor.close();
+                    self.portalEditor.close();
                 }
             });
         });
 
-        $(".add.exit", this.selectedRoomDiv).on("click", function() {
+        $(".add.portal", this.selectedRoomDiv).on("click", function() {
             var sourceRoom = self.model.rooms[self.selectedRoomId];
-            self.exitEditor.add(sourceRoom, {
-                "onsave": function(exit) {
-                    self.model.setExit(exit);
-                    self.exitEditor.close();
+            self.portalEditor.add(sourceRoom, {
+                "onsave": function(portal) {
+                    self.model.setPortal(portal);
+                    self.portalEditor.close();
                 }
             });
         }, false);
@@ -207,20 +209,20 @@ define(["controller", "admin/map.model", "admin/map.view", "admin/exiteditor",
         $(".name", this.selectedRoomDiv).not(".edit").text(room.name);
         $(".description", this.selectedRoomDiv).not(".edit").text(room.description);
 
-        var exitsSpan = $(".exits", this.selectedRoomDiv);
-        exitsSpan.empty();
-        room.exits.forEach(function(exit) {
-            if (exitsSpan.children().length) {
-                exitsSpan.append(", ");
+        var portalsSpan = $(".portals", this.selectedRoomDiv);
+        portalsSpan.empty();
+        room.portals.forEach(function(portal) {
+            if (portalsSpan.children().length) {
+                portalsSpan.append(", ");
             }
 
-            var exitSpan = $("<a />", {
-                "text": exit.name,
-                "class": "edit exit",
-                "data-exit-id": exit.id,
+            var portalSpan = $("<a />", {
+                "text": portal.name,
+                "class": "edit portal",
+                "data-portal-id": portal.id,
                 "href": ["java", "script:void(0)"].join("")
             });
-            exitsSpan.append(exitSpan);
+            portalsSpan.append(portalSpan);
         });
 
         this.selectedRoomDiv.show();

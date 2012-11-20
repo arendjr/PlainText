@@ -3,19 +3,19 @@ define(["zepto"], function($) {
 
     "use strict";
 
-    function ExitDeleteDialog() {
+    function PortalDeleteDialog() {
 
-        this.element = $(".exit-delete-dialog");
+        this.element = $(".portal-delete-dialog");
 
         this.init();
     }
 
-    ExitDeleteDialog.prototype.init = function() {
+    PortalDeleteDialog.prototype.init = function() {
 
         this.attachListeners();
     };
 
-    ExitDeleteDialog.prototype.attachListeners = function() {
+    PortalDeleteDialog.prototype.attachListeners = function() {
 
         var self = this;
 
@@ -32,32 +32,32 @@ define(["zepto"], function($) {
         });
     };
 
-    ExitDeleteDialog.prototype.show = function(options) {
+    PortalDeleteDialog.prototype.show = function(options) {
 
         this.options = options || {};
 
         this.element.show();
     };
 
-    ExitDeleteDialog.prototype.deleteOne = function() {
+    PortalDeleteDialog.prototype.deleteOne = function() {
 
         if (this.options.ondeleteone) {
             this.options.ondeleteone();
         }
     };
 
-    ExitDeleteDialog.prototype.deleteBoth = function() {
+    PortalDeleteDialog.prototype.deleteBoth = function() {
 
         if (this.options.ondeleteboth) {
             this.options.ondeleteboth();
         }
     };
 
-    ExitDeleteDialog.prototype.close = function() {
+    PortalDeleteDialog.prototype.close = function() {
 
         this.element.hide();
     };
 
-    return ExitDeleteDialog;
+    return PortalDeleteDialog;
 
 });

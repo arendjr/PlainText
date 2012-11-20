@@ -105,9 +105,14 @@ define(["kinetic"], function(Kinetic) {
         this.stage.setWidth(this.element.clientWidth);
         this.stage.setHeight(this.element.clientHeight);
 
+        var portals = this.model.portals;
+        var portalIds = Object.keys(portals);
+        if (portalIds.isEmpty()) {
+            return;
+        }
+
         var rooms = this.model.rooms;
         var roomIds = Object.keys(rooms);
-
         if (roomIds.isEmpty()) {
             return;
         }
@@ -121,41 +126,37 @@ define(["kinetic"], function(Kinetic) {
         var processedShapes = [];
         var shapesToProcess = this.shapes;
 
+        portalIds.forEach(function(id) {
+            var portal = portals[id];
+            var room = portal.room;
+            var room2 = portal.room2;
+            var points = [room.x + perspective * room.z, room.y - perspective * room.z,
+                          room2.x + perspective * room2.z, room2.y - perspective * room2.z];
+            if (portal.shape) {
+                portal.shape.setPoints(points);
+            } else {
+                portal.shape = new Kinetic.Line({
+                    "points": points,
+                    "stroke": "blue",
+                    "strokeWidth": 2,
+                    "listening": false
+                });
+                self.layer.add(portal.shape);
+            }
+
+            shapesToProcess.removeOne(portal.shape);
+            processedShapes.append(portal.shape);
+        });
+
         roomIds.forEach(function(id) {
             var room = rooms[id];
             var z = perspective * room.z;
-            for (var i = 0, length = room.exits.length; i < length; i++) {
-                var exit = room.exits[i];
-                if (exit.oppositeExit && exit.oppositeExit.shape) {
-                    continue;
-                }
-
-                var destination = exit.destination;
-                var points = [room.x + z,
-                              room.y - z,
-                              destination.x + perspective * destination.z,
-                              destination.y - perspective * destination.z];
-                if (exit.shape) {
-                    exit.shape.setPoints(points);
-                } else {
-                    exit.shape = new Kinetic.Line({
-                        "points": points,
-                        "stroke": (exit.oppositeExit ? "blue" : "lightblue"),
-                        "strokeWidth": 2,
-                        "listening": false
-                    });
-                    self.layer.add(exit.shape);
-                }
-
-                shapesToProcess.removeOne(exit.shape);
-                processedShapes.append(exit.shape);
-            }
-
             var x = room.x - halfRoomSize + z;
             var y = room.y - halfRoomSize - z;
             if (room.shape) {
                 room.shape.setX(x);
                 room.shape.setY(y);
+                room.shape.moveToTop();
             } else {
                 room.shape = new Kinetic.Rect({
                     "id": room.id,
@@ -172,9 +173,6 @@ define(["kinetic"], function(Kinetic) {
 
             shapesToProcess.removeOne(room.shape);
             processedShapes.append(room.shape);
-        });
-        roomIds.forEach(function(id) {
-            rooms[id].shape.moveToTop();
         });
 
         this.shapes = processedShapes;

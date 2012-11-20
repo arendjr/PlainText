@@ -19,15 +19,15 @@
         text-align: right;
     }
 
-.exit-editor {
+.portal-editor {
     position: absolute;
     top: 180px;
-    left: -webkit-calc(50% - 200px);
-    left: -moz-calc(50% - 200px);
-    left: calc(50% - 200px);
-    right: -webkit-calc(50% - 200px);
-    right: -moz-calc(50% - 200px);
-    right: calc(50% - 200px);
+    left: -webkit-calc(50% - 330px);
+    left: -moz-calc(50% - 330px);
+    left: calc(50% - 330px);
+    right: -webkit-calc(50% - 330px);
+    right: -moz-calc(50% - 330px);
+    right: calc(50% - 330px);
     z-index: 3;
 
     border: 1px solid #000;
@@ -37,16 +37,25 @@
 
     -webkit-user-select: text;
 }
-    .exit-editor .label {
+    .portal-editor .column {
+        display: inline-block;
+        width: 50%;
+    }
+    .portal-editor .column:nth-child(2) {
+        position: absolute;
+        top: 0;
+        left: 50%;
+    }
+    .portal-editor .label {
         display: inline-block;
         width: 80px;
         font-weight: bold;
         text-align: right;
     }
-    .exit-editor .x,.exit-editor .y,.exit-editor .z {
+    .portal-editor .x,.portal-editor .y,.portal-editor .z {
         width: 5em;
     }
-    .exit-editor .button-list {
+    .portal-editor .button-list {
         position: relative;
 
         padding: 5px 10px 5px;
@@ -54,7 +63,7 @@
 
         text-align: right;
     }
-        .exit-editor .delete-button {
+        .portal-editor .delete-button {
             position: absolute;
             top: 3px;
             left: 3px;
@@ -64,7 +73,7 @@
             font-weight: bold;
         }
 
-.exit-delete-dialog {
+.portal-delete-dialog {
     position: absolute;
     top: 200px;
     left: -webkit-calc(50% - 200px);
@@ -82,10 +91,10 @@
 
     -webkit-user-select: text;
 }
-    .exit-delete-dialog p {
+    .portal-delete-dialog p {
         margin: 1em;
     }
-    .exit-delete-dialog .button-list {
+    .portal-delete-dialog .button-list {
         position: relative;
 
         padding: 5px 10px 5px;

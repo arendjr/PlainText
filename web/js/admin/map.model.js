@@ -94,9 +94,18 @@ define(["controller"], function(Controller) {
             value = "(" + room.x + "," + room.y + "," + room.z + ")";
         }
 
+        var resolvedValue = value;
+        var pointerList = [];
+        if (propertyName === "portals") {
+            value.forEach(function(pointer) {
+                pointerList.append("portal:" + pointer.id);
+            });
+            value = "[" + pointerList.join(", ") + "]";
+        }
+
         Controller.sendApiCall("property-set #" + roomId + " " + propertyName +
                                " " + value, function() {
-            room[propertyName] = value;
+            room[propertyName] = resolvedValue;
             self.notifyChangeListeners();
         });
     };
@@ -164,7 +173,7 @@ define(["controller"], function(Controller) {
         if (pointer.startsWith("room:")) {
             return this.rooms[parseInt(pointer.substr(5), 10)];
         } else if (pointer.startsWith("portal:")) {
-            return this.portals[parseInt(pointer.substr(5), 10)];
+            return this.portals[parseInt(pointer.substr(7), 10)];
         } else {
             return null;
         }

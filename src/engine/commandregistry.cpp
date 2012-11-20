@@ -12,7 +12,6 @@
 #include "player.h"
 #include "util.h"
 #include "commands/buycommand.h"
-#include "commands/closecommand.h"
 #include "commands/descriptioncommand.h"
 #include "commands/disbandcommand.h"
 #include "commands/dropcommand.h"
@@ -29,7 +28,6 @@
 #include "commands/killcommand.h"
 #include "commands/lookcommand.h"
 #include "commands/losecommand.h"
-#include "commands/opencommand.h"
 #include "commands/quitcommand.h"
 #include "commands/removecommand.h"
 #include "commands/saycommand.h"
@@ -88,7 +86,6 @@ CommandRegistry::CommandRegistry(QObject *parent) :
 
     m_commands.insert("attack", kill);
     m_commands.insert("buy", new BuyCommand(this));
-    m_commands.insert("close", new CloseCommand(this));
     m_commands.insert("description", new DescriptionCommand(this));
     m_commands.insert("disband", new DisbandCommand(this));
     m_commands.insert("drop", new DropCommand(this));
@@ -109,7 +106,6 @@ CommandRegistry::CommandRegistry(QObject *parent) :
     m_commands.insert("l", look);
     m_commands.insert("look", look);
     m_commands.insert("lose", new LoseCommand(this));
-    m_commands.insert("open", new OpenCommand(this));
     m_commands.insert("quit", quit);
     m_commands.insert("remove", new RemoveCommand(this));
     m_commands.insert("say", new SayCommand(this));

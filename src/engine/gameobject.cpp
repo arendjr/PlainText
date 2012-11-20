@@ -569,7 +569,7 @@ GameObject *GameObject::createByObjectType(Realm *realm, GameObjectType objectTy
         case GameObjectType::Event:
             return new GameEventObject(realm, id, options);
         case GameObjectType::Exit:
-            return new Exit(realm, id, options);
+            return new Exit(realm, options);
         case GameObjectType::Group:
             return new Group(realm, id, options);
         case GameObjectType::Item:
