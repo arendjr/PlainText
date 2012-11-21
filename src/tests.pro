@@ -14,6 +14,7 @@ SOURCES += \
 HEADERS += \
     tests/testcase.h \
     tests/test_container.h \
+    tests/test_crashes.h \
     tests/test_serialization.h \
 
 INCLUDEPATH += \

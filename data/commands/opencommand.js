@@ -7,10 +7,10 @@ function OpenCommand() {
                         "Example: open door");
 }
 
-PutCommand.prototype = new Command();
-PutCommand.prototype.constructor = PutCommand;
+OpenCommand.prototype = new Command();
+OpenCommand.prototype.constructor = OpenCommand;
 
-PutCommand.prototype.execute = function(player, command) {
+OpenCommand.prototype.execute = function(player, command) {
 
     this.prepareExecute(player, command);
 

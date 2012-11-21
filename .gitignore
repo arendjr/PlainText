@@ -1,6 +1,6 @@
 # Qt build
 Makefile
-*-build-desktop*
+*-build-*
 *.pro.user*
 moc_*.cpp
 qrc_*.cpp

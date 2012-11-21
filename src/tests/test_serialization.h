@@ -10,7 +10,7 @@
 #include "realm.h"
 
 
-class SerializationTest: public TestCase {
+class SerializationTest : public TestCase {
 
     Q_OBJECT
 
