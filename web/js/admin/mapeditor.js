@@ -96,7 +96,7 @@ define(["controller", "admin/map.model", "admin/map.view", "admin/portaleditor",
                 var room = self.model.rooms[self.selectedRoomId];
                 self.propertyEditor.edit(room.name, {
                     "onsave": function(value) {
-                        self.model.setRoomProperty(self.selectedRoomId, "name", value);
+                        room.setProperty("name", value);
                         self.propertyEditor.close();
                     }
                 });
@@ -108,7 +108,7 @@ define(["controller", "admin/map.model", "admin/map.view", "admin/portaleditor",
                 var room = self.model.rooms[self.selectedRoomId];
                 self.propertyEditor.edit(room.description, {
                     "onsave": function(value) {
-                        self.model.setRoomProperty(self.selectedRoomId, "description", value);
+                        room.setProperty("description", value);
                         self.propertyEditor.close();
                     }
                 });
@@ -130,7 +130,7 @@ define(["controller", "admin/map.model", "admin/map.view", "admin/portaleditor",
                                 var sourceRoom = self.model.rooms[self.selectedRoomId];
                                 var portals = sourceRoom.portals.slice(0);
                                 portals.removeOne(portal);
-                                self.model.setRoomProperty(sourceRoom.id, "portals", portals);
+                                sourceRoom.setProperty("portals", portals);
                                 self.portalDeleteDialog.close();
                             },
                             "ondeleteboth": function() {
@@ -157,16 +157,9 @@ define(["controller", "admin/map.model", "admin/map.view", "admin/portaleditor",
             });
         }, false);
 
-        $(".x", this.selectedRoomDiv).on("change", function(event) {
-            self.model.setRoomProperty(self.selectedRoomId, "x", event.target.value);
-        });
-
-        $(".y", this.selectedRoomDiv).on("change", function(event) {
-            self.model.setRoomProperty(self.selectedRoomId, "y", event.target.value);
-        });
-
-        $(".z", this.selectedRoomDiv).on("change", function(event) {
-            self.model.setRoomProperty(self.selectedRoomId, "z", event.target.value);
+        $(".x,.y,.z", this.selectedRoomDiv).on("change", function(event) {
+            var room = self.model.rooms[self.selectedRoomId];
+            room.setProperty(event.target.className, event.target.value);
         });
 
         this.zoomSlider.element.addEventListener("change", function(event) {
@@ -217,7 +210,7 @@ define(["controller", "admin/map.model", "admin/map.view", "admin/portaleditor",
             }
 
             var portalSpan = $("<a />", {
-                "text": portal.name,
+                "text": portal.room === room ? portal.name : portal.name2,
                 "class": "edit portal",
                 "data-portal-id": portal.id,
                 "href": ["java", "script:void(0)"].join("")
