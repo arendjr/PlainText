@@ -24,7 +24,7 @@ void CopyItemCommand::execute(Player *player, const QString &command) {
         return;
     }
 
-    GameObjectPtr item = takeObject(currentRoom()->items() + currentRoom()->npcs());
+    GameObjectPtr item = takeObject(currentRoom()->items() + currentRoom()->characters());
     if (!requireSome(item, "Item not found.")) {
         return;
     }
@@ -32,7 +32,7 @@ void CopyItemCommand::execute(Player *player, const QString &command) {
     GameObject *copy = item->copy();
 
     if (copy->isCharacter()) {
-        currentRoom()->addNPC(copy);
+        currentRoom()->addCharacter(copy);
 
         send(QString("Character %1 copied.").arg(item->name()));
     } else {

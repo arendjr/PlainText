@@ -85,39 +85,22 @@ const GameObjectPtrList &Room::exits() {
     return m_exits;
 }
 
-void Room::addPlayer(const GameObjectPtr &player) {
+void Room::addCharacter(const GameObjectPtr &character) {
 
-    if (!m_players.contains(player)) {
-        m_players << player;
+    if (!m_characters.contains(character)) {
+        m_characters << character;
     }
 }
 
-void Room::removePlayer(const GameObjectPtr &player) {
+void Room::removeCharacter(const GameObjectPtr &character) {
 
-    m_players.removeOne(player);
+    m_characters.removeOne(character);
 }
 
-void Room::setPlayers(const GameObjectPtrList &players) {
+void Room::setCharacters(const GameObjectPtrList &characters) {
 
-    m_players = players;
-}
-
-void Room::addNPC(const GameObjectPtr &npc) {
-
-    if (!m_npcs.contains(npc)) {
-        m_npcs << npc;
-    }
-}
-
-void Room::removeNPC(const GameObjectPtr &npc) {
-
-    m_npcs.removeOne(npc);
-}
-
-void Room::setNPCs(const GameObjectPtrList &npcs) {
-
-    if (m_npcs != npcs) {
-        m_npcs = npcs;
+    if (m_characters != characters) {
+        m_characters = characters;
     }
 }
 

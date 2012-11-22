@@ -61,7 +61,7 @@ void DropCommand::execute(Player *player, const QString &command) {
 
     send("You drop %2.", description);
 
-    GameObjectPtrList others = currentRoom()->players();
+    GameObjectPtrList others = currentRoom()->characters();
     others.removeOne(player);
     others.send(QString("%1 drops %2.").arg(player->name(), description));
 }

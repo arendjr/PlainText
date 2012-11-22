@@ -1,5 +1,7 @@
 #include "vector3d.h"
 
+#include <cmath>
+
 #include <QScriptEngine>
 #include <QStringList>
 
@@ -30,6 +32,11 @@ Vector3D Vector3D::operator+(const Vector3D &other) const {
 Vector3D Vector3D::operator-(const Vector3D &other) const {
 
     return Vector3D(x - other.x, y - other.y, z - other.z);
+}
+
+int Vector3D::length() const {
+
+    return sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
 }
 
 QString Vector3D::toString() const {

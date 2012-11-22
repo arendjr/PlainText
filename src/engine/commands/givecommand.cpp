@@ -100,7 +100,7 @@ void GiveCommand::execute(Player *player, const QString &command) {
     send("You give %1 to %2.", description, recipientName);
     recipient->send(QString("%1 gives you %2.").arg(player->name(), description));
 
-    GameObjectPtrList others = currentRoom()->players();
+    GameObjectPtrList others = currentRoom()->characters();
     others.removeOne(player);
     others.removeOne(recipient);
     others.send(QString("%1 gives %2 to %3.").arg(player->name(), description, recipientName));

@@ -404,7 +404,7 @@ void Character::open(const GameObjectPtr &exitPtr) {
 
             send(QString("You open the %1.").arg(exit->name()));
 
-            GameObjectPtrList others = currentRoom().cast<Room *>()->players();
+            GameObjectPtrList others = currentRoom().cast<Room *>()->characters();
             others.removeOne(this);
             others.send(QString("%1 opens the %2.").arg(name(), exit->name()));
         }
@@ -433,7 +433,7 @@ void Character::close(const GameObjectPtr &exitPtr) {
             exit->setOpen(false);
             send(QString("You close the %1.").arg(exit->name()));
 
-            GameObjectPtrList others = currentRoom().cast<Room *>()->players();
+            GameObjectPtrList others = currentRoom().cast<Room *>()->characters();
             others.removeOne(this);
             others.send(QString("%1 closes the %2.").arg(name(), exit->name()));
         } else {
@@ -457,7 +457,7 @@ void Character::go(const GameObjectPtr &exitPtr) {
         }
 
         Room *room = currentRoom().cast<Room *>();
-        for (const GameObjectPtr &character : room->npcs()) {
+        for (const GameObjectPtr &character : room->characters()) {
             if (!character->invokeTrigger("oncharacterexit", this, exit->name())) {
                 return;
             }
@@ -478,7 +478,7 @@ void Character::go(const GameObjectPtr &exitPtr) {
 
                     bool blocked = false;
 
-                    for (const GameObjectPtr &character : room->npcs()) {
+                    for (const GameObjectPtr &character : room->characters()) {
                         if (!character->invokeTrigger("oncharacterexit", member, exit->name())) {
                             blocked = true;
                             break;
@@ -511,26 +511,19 @@ void Character::enter(const GameObjectPtr &roomPtr, const GameObjectPtrList &fol
         }
 
         Room *room = roomPtr.cast<Room *>();
-        GameObjectPtrList npcs = room->npcs();
-        GameObjectPtrList players = room->players();
+        GameObjectPtrList characters = room->characters();
 
-        if (isPlayer()) {
-            room->addPlayer(this);
+        room->addCharacter(this);
 
-            for (const GameObjectPtr &follower : followers) {
-                room->addPlayer(follower);
-            }
-
-            LogUtil::countRoomVisit(roomPtr.toString(), 1 + followers.length());
-        } else {
-            room->addNPC(this);
-
-            for (const GameObjectPtr &follower : followers) {
-                room->addNPC(follower);
-            }
+        for (const GameObjectPtr &follower : followers) {
+            room->addCharacter(follower);
         }
 
-        if (!players.isEmpty()) {
+        if (isPlayer()) {
+            LogUtil::countRoomVisit(roomPtr.toString(), 1 + followers.length());
+        }
+
+        if (!characters.isEmpty()) {
             QString arrivalsName;
             if (followers.isEmpty()) {
                 arrivalsName = indefiniteName(Capitalized);
@@ -541,7 +534,7 @@ void Character::enter(const GameObjectPtr &roomPtr, const GameObjectPtrList &fol
                 arrivalsName = arrivals.joinFancy(Capitalized);
             }
 
-            players.send(QString("%1 arrived.").arg(arrivalsName));
+            characters.send(QString("%1 arrived.").arg(arrivalsName));
         }
 
         enteredRoom();
@@ -550,7 +543,7 @@ void Character::enter(const GameObjectPtr &roomPtr, const GameObjectPtrList &fol
             follower.cast<Character *>()->enteredRoom();
         }
 
-        for (const GameObjectPtr &character : npcs) {
+        for (const GameObjectPtr &character : characters) {
             character->invokeTrigger("oncharacterentered", this);
 
             for (const GameObjectPtr &follower : followers) {
@@ -568,35 +561,25 @@ void Character::leave(const GameObjectPtr &roomPtr, const QString &exitName,
     try {
         Room *room = roomPtr.cast<Room *>();
 
-        if (isPlayer()) {
-            room->removePlayer(this);
+        room->removeCharacter(this);
 
-            for (const GameObjectPtr &follower : followers) {
-                room->removePlayer(follower);
-            }
-        } else {
-            room->removeNPC(this);
-
-            for (const GameObjectPtr &follower : followers) {
-                room->removeNPC(follower);
-            }
+        for (const GameObjectPtr &follower : followers) {
+            room->removeCharacter(follower);
         }
 
-        GameObjectPtrList npcs = room->npcs();
-        GameObjectPtrList players = room->players();
-
-        if (!players.isEmpty()) {
+        GameObjectPtrList characters = room->characters();
+        if (!characters.isEmpty()) {
             QString departuresName;
             if (followers.isEmpty()) {
                 bool unique = true;
-                for (const GameObjectPtr &other : npcs) {
+                for (const GameObjectPtr &other : characters) {
                     if (other->name() == name()) {
                         unique = false;
                         break;
                     }
                 }
                 if (unique) {
-                    departuresName = definiteName(npcs, Capitalized);
+                    departuresName = definiteName(characters, Capitalized);
                 } else {
                     departuresName = indefiniteName(Capitalized);
                 }
@@ -607,11 +590,12 @@ void Character::leave(const GameObjectPtr &roomPtr, const QString &exitName,
                 departuresName = departures.joinFancy(Capitalized);
             }
 
-            players.send(exitName.isEmpty() ?
-                         QString("%1 left.").arg(departuresName) :
-                         QString("%1 left %2%3.").arg(departuresName,
-                                                      Util::isDirection(exitName) ? "" : "to the ",
-                                                      exitName));
+            characters.send(exitName.isEmpty() ?
+                            QString("%1 left.").arg(departuresName) :
+                            QString("%1 left %2%3.").arg(departuresName,
+                                                         Util::isDirection(exitName) ? "" :
+                                                                                       "to the ",
+                                                         exitName));
         }
     } catch (GameException &exception) {
         qDebug() << "Exception in Character::leave(): " << exception.what();
@@ -625,8 +609,8 @@ void Character::say(const QString &message) {
                        "%1 says, \"%2\"" : "%1 says, \"%2.\"";
 
         Room *room = currentRoom().cast<Room *>();
-        room->players().send(text.arg(definiteName(room->characters(), Capitalized),
-                                      Util::capitalize(message)));
+        room->characters().send(text.arg(definiteName(room->characters(), Capitalized),
+                                         Util::capitalize(message)));
     } catch (GameException &exception) {
         qDebug() << "Exception in Character::say(): " << exception.what();
     }
@@ -640,21 +624,21 @@ void Character::shout(const QString &msg) {
         QString message = (msg.endsWith(".") || msg.endsWith("?") || msg.endsWith("!")) ?
                           Util::capitalize(msg) : Util::capitalize(msg + ".");
 
-        GameObjectPtrList players = room->players();
-        players.send(QString("%1 shouts, \"%2\".").arg(definiteName(room->characters(),
-                                                                    Capitalized), message));
-        for (const GameObjectPtr &npc : room->npcs()) {
-            npc->invokeTrigger("onshout", this, message);
+        GameObjectPtrList characters = room->characters();
+        characters.send(QString("%1 shouts, \"%2\".").arg(definiteName(room->characters(),
+                                                                       Capitalized), message));
+        for (const GameObjectPtr &character : room->characters()) {
+            character->invokeTrigger("onshout", this, message);
         }
 
         for (const GameObjectPtr &exitPtr : room->exits()) {
             Exit *exit = exitPtr.cast<Exit *>();
             Room *adjacentRoom = exit->destination().cast<Room *>();
 
-            adjacentRoom->players().send(QString("You hear %1 shouting, \"%2\".")
-                                         .arg(indefiniteName(), message));
-            for (const GameObjectPtr &npc : adjacentRoom->npcs()) {
-                npc->invokeTrigger("onshout", this, message);
+            adjacentRoom->characters().send(QString("You hear %1 shouting, \"%2\".")
+                                            .arg(indefiniteName(), message));
+            for (const GameObjectPtr &character : adjacentRoom->characters()) {
+                character->invokeTrigger("onshout", this, message);
             }
         }
     } catch (GameException &exception) {
@@ -724,7 +708,7 @@ void Character::take(const GameObjectPtrList &items) {
             QString description = takenItems.joinFancy(DefiniteArticles);
             send(QString("You take %2.").arg(description));
 
-            GameObjectPtrList others = room->players();
+            GameObjectPtrList others = room->characters();
             others.removeOne(this);
             others.send(QString("%1 takes %3.").arg(definiteName(room->characters(), Capitalized),
                                                     description));
@@ -811,7 +795,7 @@ void Character::kill(const GameObjectPtr &characterPtr) {
         }
 
         Room *room = currentRoom().cast<Room *>();
-        GameObjectPtrList others = room->players();
+        GameObjectPtrList others = room->characters();
         others.removeOne(this);
         others.removeOne(characterPtr);
 
@@ -903,17 +887,16 @@ void Character::die(const GameObjectPtr &attacker) {
 
         killAllTimers();
 
+        room->removeCharacter(this);
+
         if (isPlayer()) {
             LogUtil::countPlayerDeath(currentRoom().toString());
 
-            room->removePlayer(this);
             enter(race().cast<Race *>()->startingRoom());
 
             setHp(1);
             stun(5000);
         } else {
-            room->removeNPC(this);
-
             if (m_respawnTime) {
                 setInventory(GameObjectPtrList());
 
@@ -1098,13 +1081,14 @@ void Character::setLeaveOnActive(bool leaveOnActive) {
 void Character::init() {
 
     try {
-        // guarantee our current room lists us, otherwise we may end up in a real
-        // limbo if we died and a server termination killed the respawn timers.
-        // in addition, this allows Room::npcs to become a non-stored property,
-        // saving many disk writes when NPCs walk around
+        // guarantee our current room lists us, otherwise we may end up in a
+        // real limbo if we died and a server termination killed the respawn
+        // timers. in addition, this allows Room::characters to become a
+        // non-stored property, saving many disk writes when characters walk
+        // around
         if (!isPlayer() && !currentRoom().isNull()) {
             Room *room = currentRoom().cast<Room *>();
-            room->addNPC(this);
+            room->addCharacter(this);
         }
 
         if (hasTrigger("oninit")) {

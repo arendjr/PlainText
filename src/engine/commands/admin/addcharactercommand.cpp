@@ -30,7 +30,7 @@ void AddCharacterCommand::execute(Player *player, const QString &command) {
     Character *character = new Character(realm());
     character->setName(characterName);
     character->setCurrentRoom(currentRoom());
-    currentRoom()->addNPC(character);
+    currentRoom()->addCharacter(character);
 
     send("Character %1 added.", characterName);
 }

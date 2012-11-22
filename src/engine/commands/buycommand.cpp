@@ -23,9 +23,9 @@ void BuyCommand::execute(Player *player, const QString &command) {
     super::prepareExecute(player, command);
 
     GameObjectPtrList sellers;
-    for (const GameObjectPtr &npc : currentRoom()->npcs()) {
-        if (npc->hasTrigger("onbuy")) {
-            sellers << npc;
+    for (const GameObjectPtr &character : currentRoom()->characters()) {
+        if (character->hasTrigger("onbuy")) {
+            sellers << character;
         }
     }
 
@@ -42,7 +42,7 @@ void BuyCommand::execute(Player *player, const QString &command) {
     if (peekWord() == "from") {
         takeWord();
 
-        sellerPtr = takeObject(currentRoom()->npcs());
+        sellerPtr = takeObject(currentRoom()->characters());
     } else if (sellers.length() == 1) {
         sellerPtr = sellers[0];
     }
@@ -52,7 +52,7 @@ void BuyCommand::execute(Player *player, const QString &command) {
     }
 
     Character *seller = sellerPtr.cast<Character *>();
-    QString sellerName = seller->definiteName(currentRoom()->npcs(), Capitalized);
+    QString sellerName = seller->definiteName(currentRoom()->characters(), Capitalized);
 
     if (seller->sellableItems().isEmpty()) {
         send("%1 has nothing for sale.", sellerName);

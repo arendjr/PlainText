@@ -38,6 +38,11 @@ void GameEvent::setDescription(const QString &description) {
     m_description = description;
 }
 
+void GameEvent::setExcludedCharacters(const GameObjectPtrList &excludedCharacters) {
+
+    m_excludedCharacters = excludedCharacters;
+}
+
 void GameEvent::setDistantDescription(const QString &distantDescription) {
 
     m_distantDescription = distantDescription;
@@ -48,7 +53,7 @@ void GameEvent::setVeryDistantDescription(const QString &veryDistantDescription)
     m_veryDistantDescription = veryDistantDescription;
 }
 
-void GameEvent::activate() {
+void GameEvent::fire() {
 
     while (m_nextVisitIndex < m_visits.size()) {
         Visit visit = m_visits[m_nextVisitIndex];
@@ -92,6 +97,15 @@ QVector<QMetaProperty> GameEvent::storedMetaProperties() const {
 }
 
 void GameEvent::addVisit(Room *room, double strength) {
+
+    for (int i = 0; i < m_visits.size(); i++) {
+        if (m_visits[i].room == room) {
+            if (m_visits[i].strength < strength) {
+                m_visits[i].strength = strength;
+            }
+            return;
+        }
+    }
 
     m_visits.append(Visit(room, strength));
 }

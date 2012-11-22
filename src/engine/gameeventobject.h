@@ -33,7 +33,8 @@ class GameEventObject : public GameObject {
         Q_PROPERTY(QString veryDistantDescription READ veryDistantDescription
                                                   WRITE setVeryDistantDescription)
 
-        GameEvent *createInRoom(Room *origin, double strength);
+        GameEvent *createInRoom(Room *origin, double strength,
+                                const GameObjectPtrList &excludedCharacters = GameObjectPtrList());
 
     private:
         GameEventType m_eventType;

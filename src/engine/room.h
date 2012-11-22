@@ -28,17 +28,11 @@ class Room : public GameObject {
         const GameObjectPtrList &exits();
         Q_PROPERTY(GameObjectPtrList exits READ exits STORED false)
 
-        const GameObjectPtrList &players() const { return m_players; }
-        Q_INVOKABLE void addPlayer(const GameObjectPtr &player);
-        Q_INVOKABLE void removePlayer(const GameObjectPtr &player);
-        void setPlayers(const GameObjectPtrList &players);
-        Q_PROPERTY(GameObjectPtrList players READ players WRITE setPlayers STORED false)
-
-        const GameObjectPtrList &npcs() const { return m_npcs; }
-        Q_INVOKABLE void addNPC(const GameObjectPtr &npc);
-        Q_INVOKABLE void removeNPC(const GameObjectPtr &npc);
-        void setNPCs(const GameObjectPtrList &npcs);
-        Q_PROPERTY(GameObjectPtrList npcs READ npcs WRITE setNPCs STORED false)
+        const GameObjectPtrList &characters() const { return m_characters; }
+        Q_INVOKABLE void addCharacter(const GameObjectPtr &character);
+        Q_INVOKABLE void removeCharacter(const GameObjectPtr &character);
+        void setCharacters(const GameObjectPtrList &characters);
+        Q_PROPERTY(GameObjectPtrList characters READ characters WRITE setCharacters STORED false)
 
         const GameObjectPtrList &items() const { return m_items; }
         Q_INVOKABLE void addItem(const GameObjectPtr &item);
@@ -53,9 +47,6 @@ class Room : public GameObject {
 
         Q_INVOKABLE void addGold(double amount);
 
-        GameObjectPtrList characters() const { return m_players + m_npcs; }
-        Q_PROPERTY(GameObjectPtrList characters READ characters STORED false)
-
         GameObjectPtrList objects() { return exits() + characters() + m_items; }
         Q_PROPERTY(GameObjectPtrList objects READ objects STORED false)
 
@@ -63,8 +54,7 @@ class Room : public GameObject {
         Point3D m_position;
         GameObjectPtrList m_portals;
         GameObjectPtrList m_exits;
-        GameObjectPtrList m_players;
-        GameObjectPtrList m_npcs;
+        GameObjectPtrList m_characters;
         GameObjectPtrList m_items;
         GameEventMultiplierMap m_eventMultipliers;
 };

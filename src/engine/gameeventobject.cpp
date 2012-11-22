@@ -50,7 +50,8 @@ void GameEventObject::setVeryDistantDescription(const QString &veryDistantDescri
     }
 }
 
-GameEvent *GameEventObject::createInRoom(Room *origin, double strength) {
+GameEvent *GameEventObject::createInRoom(Room *origin, double strength,
+                                         const GameObjectPtrList &excludedCharacters) {
 
     GameEvent *event;
     switch (m_eventType.value) {
@@ -68,6 +69,8 @@ GameEvent *GameEventObject::createInRoom(Room *origin, double strength) {
         const char *name = metaProperty.name();
         event->setProperty(name, property(name));
     }
+
+    event->setExcludedCharacters(excludedCharacters);
 
     return event;
 }

@@ -41,6 +41,11 @@ class GameEvent : public QObject {
         void setDescription(const QString &description);
         Q_PROPERTY(QString description READ description WRITE setDescription)
 
+        const GameObjectPtrList &excludedCharacters() const { return m_excludedCharacters; }
+        void setExcludedCharacters(const GameObjectPtrList &excludedCharacters);
+        Q_PROPERTY(GameObjectPtrList excludedCharacters READ excludedCharacters
+                                                        WRITE setExcludedCharacters)
+
         const QString &distantDescription() const { return m_distantDescription; }
         void setDistantDescription(const QString &distantDescription);
         Q_PROPERTY(QString distantDescription READ distantDescription WRITE setDistantDescription)
@@ -50,7 +55,7 @@ class GameEvent : public QObject {
         Q_PROPERTY(QString veryDistantDescription READ veryDistantDescription
                                                   WRITE setVeryDistantDescription)
 
-        void activate();
+        void fire();
 
         static QScriptValue toScriptValue(QScriptEngine *engine, GameEvent *const &event);
         static void fromScriptValue(const QScriptValue &object, GameEvent *&event);
@@ -85,6 +90,8 @@ class GameEvent : public QObject {
         QString m_description;
         QString m_distantDescription;
         QString m_veryDistantDescription;
+
+        GameObjectPtrList m_excludedCharacters;
 };
 
 PT_DECLARE_METATYPE(GameEvent *)

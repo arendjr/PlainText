@@ -132,18 +132,10 @@ void Player::look() {
             text += Util::colorize("Obvious exits: " + exitNames.join(", ") + ".", Green) + "\n";
         }
 
-        GameObjectPtrList others = room->players();
+        GameObjectPtrList others = room->characters();
         others.removeOne(this);
         if (others.length() > 0) {
-            QStringList playerNames;
-            for (const GameObjectPtr &other : others) {
-                playerNames << other->name();
-            }
-            text += QString("You see %1.\n").arg(Util::joinFancy(playerNames));
-        }
-
-        if (room->npcs().length() > 0) {
-            text += QString("You see %1.\n").arg(room->npcs().joinFancy());
+            text += QString("You see %1.\n").arg(others.joinFancy());
         }
 
         if (room->items().length() > 0) {

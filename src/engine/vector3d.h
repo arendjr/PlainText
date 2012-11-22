@@ -25,6 +25,8 @@ class Vector3D {
         Vector3D operator+(const Vector3D &other) const;
         Vector3D operator-(const Vector3D &other) const;
 
+        int length() const;
+
         QString toString() const;
 
         static QString toUserString(const Vector3D &vector);
