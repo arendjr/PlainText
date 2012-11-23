@@ -11,6 +11,7 @@
 #include "realm.h"
 #include "room.h"
 #include "shield.h"
+#include "soundevent.h"
 #include "util.h"
 #include "weapon.h"
 
@@ -605,12 +606,39 @@ void Character::leave(const GameObjectPtr &roomPtr, const QString &exitName,
 void Character::say(const QString &message) {
 
     try {
-        QString text = (message.endsWith(".") || message.endsWith("?") || message.endsWith("!")) ?
-                       "%1 says, \"%2\"" : "%1 says, \"%2.\"";
-
         Room *room = currentRoom().cast<Room *>();
-        room->characters().send(text.arg(definiteName(room->characters(), Capitalized),
-                                         Util::capitalize(message)));
+
+        QString description;
+        if (message.endsWith("?")) {
+            description = "%1 asks, \"%2\"";
+        } else {
+            description = (message.endsWith(".") || message.endsWith("!")) ?
+                          "%1 says, \"%2\"" : "%1 says, \"%2.\"";
+        }
+        description = description.arg(definiteName(room->characters(), Capitalized),
+                                      Util::capitalize(message));
+
+        QString garbledMessage;
+        for (const QChar &character : message) {
+            if (character.isLetterOrNumber() || character == ' ') {
+                if (qrand() % 3 == 0 && character != ' ') {
+                    garbledMessage.append(".");
+                } else {
+                    garbledMessage.append(character);
+                }
+            }
+        }
+        QString distantDescription = QString("You hear a %1 asking, \"%2\"")
+                                     .arg(gender() == "male" ? "men" : "women",
+                                          garbledMessage);
+
+        QString veryDistantDescription = "You hear a distant mutter.";
+
+        SoundEvent *event = new SoundEvent(room, 1.0);
+        event->setDescription(description);
+        event->setDistantDescription(distantDescription);
+        event->setDistantDescription(veryDistantDescription);
+        event->fire();
     } catch (GameException &exception) {
         qDebug() << "Exception in Character::say(): " << exception.what();
     }

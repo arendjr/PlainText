@@ -30,7 +30,6 @@
 #include "commands/losecommand.h"
 #include "commands/quitcommand.h"
 #include "commands/removecommand.h"
-#include "commands/saycommand.h"
 #include "commands/scriptcommand.h"
 #include "commands/searchcommand.h"
 #include "commands/shoutcommand.h"
@@ -108,7 +107,6 @@ CommandRegistry::CommandRegistry(QObject *parent) :
     m_commands.insert("lose", new LoseCommand(this));
     m_commands.insert("quit", quit);
     m_commands.insert("remove", new RemoveCommand(this));
-    m_commands.insert("say", new SayCommand(this));
     m_commands.insert("search", new SearchCommand(this));
     m_commands.insert("shout", new ShoutCommand(this));
     m_commands.insert("stats", new StatsCommand(this));

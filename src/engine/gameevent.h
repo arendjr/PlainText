@@ -42,9 +42,16 @@ class GameEvent : public QObject {
         Q_PROPERTY(QString description READ description WRITE setDescription)
 
         const GameObjectPtrList &excludedCharacters() const { return m_excludedCharacters; }
+        void addExcludedCharacter(const GameObjectPtr &excludedCharacter);
         void setExcludedCharacters(const GameObjectPtrList &excludedCharacters);
         Q_PROPERTY(GameObjectPtrList excludedCharacters READ excludedCharacters
                                                         WRITE setExcludedCharacters)
+
+        const GameObjectPtrList &affectedCharacters() const { return m_affectedCharacters; }
+        void addAffectedCharacter(const GameObjectPtr &affectedCharacter);
+        void setAffectedCharacters(const GameObjectPtrList &affectedCharacters);
+        Q_PROPERTY(GameObjectPtrList affectedCharacters READ affectedCharacters
+                                                        WRITE setAffectedCharacters)
 
         const QString &distantDescription() const { return m_distantDescription; }
         void setDistantDescription(const QString &distantDescription);
@@ -66,6 +73,7 @@ class GameEvent : public QObject {
         virtual void visitRoom(Room *room, double strength) = 0;
 
         void addVisit(Room *room, double strength);
+        bool hasBeenVisited(Room *room) const;
 
     private:
         class Visit {
@@ -92,6 +100,7 @@ class GameEvent : public QObject {
         QString m_veryDistantDescription;
 
         GameObjectPtrList m_excludedCharacters;
+        GameObjectPtrList m_affectedCharacters;
 };
 
 PT_DECLARE_METATYPE(GameEvent *)

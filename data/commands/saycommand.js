@@ -1,0 +1,25 @@
+function SayCommand() {
+    Command.call(this);
+
+    this.setDescription("Say something. Everyone in the same room can hear it.\n" +
+                        "\n" +
+                        "Example: say How are you?");
+}
+
+SayCommand.prototype = new Command();
+SayCommand.prototype.constructor = SayCommand;
+
+SayCommand.prototype.execute = function(player, command) {
+
+    this.prepareExecute(player, command);
+
+    if (!this.assertWordsLeft("Say what?")) {
+        return;
+    }
+
+    var message = takeRest();
+
+    player.say(message);
+}
+
+CommandRegistry.registerCommand("say", new SayCommand());

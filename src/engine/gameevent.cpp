@@ -38,9 +38,24 @@ void GameEvent::setDescription(const QString &description) {
     m_description = description;
 }
 
+void GameEvent::addExcludedCharacter(const GameObjectPtr &excludedCharacter) {
+
+    m_excludedCharacters.append(excludedCharacter);
+}
+
 void GameEvent::setExcludedCharacters(const GameObjectPtrList &excludedCharacters) {
 
     m_excludedCharacters = excludedCharacters;
+}
+
+void GameEvent::addAffectedCharacter(const GameObjectPtr &affectedCharacter) {
+
+    m_affectedCharacters.append(affectedCharacter);
+}
+
+void GameEvent::setAffectedCharacters(const GameObjectPtrList &affectedCharacters) {
+
+    m_affectedCharacters = affectedCharacters;
 }
 
 void GameEvent::setDistantDescription(const QString &distantDescription) {
@@ -108,4 +123,14 @@ void GameEvent::addVisit(Room *room, double strength) {
     }
 
     m_visits.append(Visit(room, strength));
+}
+
+bool GameEvent::hasBeenVisited(Room *room) const {
+
+    for (int i = 0; i < m_nextVisitIndex; i++) {
+        if (m_visits[i].room == room) {
+            return true;
+        }
+    }
+    return false;
 }

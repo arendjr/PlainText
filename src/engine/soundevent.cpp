@@ -38,28 +38,38 @@ void SoundEvent::visitRoom(Room *room, double strength) {
             } else {
                 character->invokeTrigger("onsound", message);
             }
+            addAffectedCharacter(character);
         }
 
         for (const GameObjectPtr &portalPtr : room->portals()) {
             Portal *portal = portalPtr.cast<Portal *>();
+            Room *room1 = portal->room().cast<Room *>();
+            Room *room2 = portal->room2().cast<Room *>();
+            Room *oppositeRoom = (room == room1 ? room2 : room1);
+            if (hasBeenVisited(oppositeRoom)) {
+                continue;
+            }
 
             double multiplier;
             if (portal->isOpen()) {
-                if (!portal->canHearThrough()) {
+                if (!portal->canHearThroughIfOpen()) {
                     continue;
                 }
                 multiplier = 1.0;
             } else {
-                if (!portal->canHearThroughIfOpen()) {
+                if (!portal->canHearThrough()) {
                     continue;
                 }
                 multiplier = portal->eventMultipliers()[GameEventType::SoundEvent];
             }
 
-            Room *room = portal->room().cast<Room *>();
-            Room *room2 = portal->room2().cast<Room *>();
-            Vector3D vector = room2->position() - room->position();
-            multiplier *= 1.0 - vector.length() / 50.0;
+            Vector3D vector = room2->position() - room1->position();
+            multiplier *= (1.0 - vector.length() / 50.0);
+
+            double propagatedStrength = strength * multiplier;
+            if (propagatedStrength >= 0.1) {
+                addVisit(oppositeRoom, propagatedStrength);
+            }
         }
     }
 }
