@@ -5,5 +5,5 @@
   "name2": "out",
   "room": "room:36",
   "room2": "room:40",
-  "flags": "CanOpenFromSide1|CanPassThroughIfOpen"
+  "flags": "CanOpenFromSide1|CanSeeThroughIfOpen|CanHearThroughIfOpen|CanShootThroughIfOpen|CanPassThroughIfOpen"
 }

@@ -4,5 +4,5 @@
   "name2": "hatch",
   "room": "room:1045",
   "room2": "room:101",
-  "flags": "IsHiddenFromSide2|CanOpenFromSide2|CanPassThroughIfOpen"
+  "flags": "IsHiddenFromSide2|CanOpenFromSide2|CanSeeThroughIfOpen|CanHearThroughIfOpen|CanShootThroughIfOpen|CanPassThroughIfOpen"
 }

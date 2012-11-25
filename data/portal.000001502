@@ -3,5 +3,5 @@
   "name2": "east",
   "room": "room:104",
   "room2": "room:107",
-  "flags": "CanPassThrough"
+  "flags": "CanSeeThrough|CanHearThrough|CanShootThrough|CanPassThrough"
 }
