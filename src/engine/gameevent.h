@@ -36,10 +36,22 @@ class GameEvent : public QObject {
 
         GameObjectPtr origin() const;
         Q_PROPERTY(GameObjectPtr origin READ origin STORED false)
+        Room *originRoom() const { return m_origin; }
 
         const QString &description() const { return m_description; }
         void setDescription(const QString &description);
         Q_PROPERTY(QString description READ description WRITE setDescription)
+
+        const QString &distantDescription() const { return m_distantDescription; }
+        void setDistantDescription(const QString &distantDescription);
+        Q_PROPERTY(QString distantDescription READ distantDescription WRITE setDistantDescription)
+
+        const QString &veryDistantDescription() const { return m_veryDistantDescription; }
+        void setVeryDistantDescription(const QString &veryDistantDescription);
+        Q_PROPERTY(QString veryDistantDescription READ veryDistantDescription
+                                                  WRITE setVeryDistantDescription)
+
+        Q_INVOKABLE virtual QString descriptionForStrengthInRoom(double strength, Room *room) const;
 
         const GameObjectPtrList &excludedCharacters() const { return m_excludedCharacters; }
         void addExcludedCharacter(const GameObjectPtr &excludedCharacter);
@@ -52,15 +64,6 @@ class GameEvent : public QObject {
         void setAffectedCharacters(const GameObjectPtrList &affectedCharacters);
         Q_PROPERTY(GameObjectPtrList affectedCharacters READ affectedCharacters
                                                         WRITE setAffectedCharacters)
-
-        const QString &distantDescription() const { return m_distantDescription; }
-        void setDistantDescription(const QString &distantDescription);
-        Q_PROPERTY(QString distantDescription READ distantDescription WRITE setDistantDescription)
-
-        const QString &veryDistantDescription() const { return m_veryDistantDescription; }
-        void setVeryDistantDescription(const QString &veryDistantDescription);
-        Q_PROPERTY(QString veryDistantDescription READ veryDistantDescription
-                                                  WRITE setVeryDistantDescription)
 
         void fire();
 

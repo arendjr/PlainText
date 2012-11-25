@@ -218,7 +218,8 @@ void GameObjectPtr::fromVariant(const QVariant &variant, GameObjectPtr &pointer)
         throw GameException(GameException::InvalidGameObjectPointer);
     }
 
-    pointer = GameObjectPtr(Realm::instance(), GameObjectType::fromString(components[0]),
+    QString objectType = Util::capitalize(components[0]);
+    pointer = GameObjectPtr(Realm::instance(), GameObjectType::fromString(objectType),
                             components[1].toInt());
 }
 

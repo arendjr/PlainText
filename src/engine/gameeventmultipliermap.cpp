@@ -98,8 +98,11 @@ QString GameEventMultiplierMap::toJsonString(const GameEventMultiplierMap &multi
 
     QStringList stringList;
     for (const GameEventType &eventType : multipliers.keys()) {
-        stringList << QString("%1: %2").arg(ConversionUtil::jsString(eventType.toString()))
-                                       .arg(multipliers[eventType]);
+        double value = multipliers[eventType];
+        if (value != 1.0) {
+            stringList << QString("%1: %2").arg(ConversionUtil::jsString(eventType.toString()))
+                                           .arg(value);
+        }
     }
     return stringList.isEmpty() ? QString() : "{ " + stringList.join(", ") + " }";
 }

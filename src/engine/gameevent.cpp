@@ -38,6 +38,29 @@ void GameEvent::setDescription(const QString &description) {
     m_description = description;
 }
 
+void GameEvent::setDistantDescription(const QString &distantDescription) {
+
+    m_distantDescription = distantDescription;
+}
+
+void GameEvent::setVeryDistantDescription(const QString &veryDistantDescription) {
+
+    m_veryDistantDescription = veryDistantDescription;
+}
+
+QString GameEvent::descriptionForStrengthInRoom(double strength, Room *room) const {
+
+    Q_UNUSED(room)
+
+    if (strength >= 0.7 || m_distantDescription.isEmpty()) {
+        return m_description;
+    } else if (strength >= 0.4 || m_veryDistantDescription.isEmpty()) {
+        return m_distantDescription;
+    } else {
+        return m_veryDistantDescription;
+    }
+}
+
 void GameEvent::addExcludedCharacter(const GameObjectPtr &excludedCharacter) {
 
     m_excludedCharacters.append(excludedCharacter);
@@ -56,16 +79,6 @@ void GameEvent::addAffectedCharacter(const GameObjectPtr &affectedCharacter) {
 void GameEvent::setAffectedCharacters(const GameObjectPtrList &affectedCharacters) {
 
     m_affectedCharacters = affectedCharacters;
-}
-
-void GameEvent::setDistantDescription(const QString &distantDescription) {
-
-    m_distantDescription = distantDescription;
-}
-
-void GameEvent::setVeryDistantDescription(const QString &veryDistantDescription) {
-
-    m_veryDistantDescription = veryDistantDescription;
 }
 
 void GameEvent::fire() {

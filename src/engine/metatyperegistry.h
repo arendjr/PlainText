@@ -152,6 +152,7 @@ class MetaTypeRegistry {
             } value;                                                                              \
             Type() = default;                                                                     \
             Type(Flags value) : value(value) {}                                                   \
+            Type(unsigned int value) : value((Flags) value) {}                                    \
             QString toString() const {                                                            \
                 static const char *strings[] = { FOR_EACH(PT_ENUM_STRING, __VA_ARGS__) "" };      \
                 QStringList stringList;                                                           \
@@ -190,6 +191,9 @@ class MetaTypeRegistry {
             Flags operator|(Flags other) const {                                                  \
                 return (Flags) ((unsigned int) value | (unsigned int) other);                     \
             }                                                                                     \
+            Flags operator|(unsigned int other) const {                                           \
+                return (Flags) ((unsigned int) value | other);                                    \
+            }                                                                                     \
             Type &operator|=(Type other) {                                                        \
                 value = (Flags) ((unsigned int) value | (unsigned int) other.value);              \
                 return *this;                                                                     \
@@ -198,11 +202,18 @@ class MetaTypeRegistry {
                 value = (Flags) ((unsigned int) value | (unsigned int) other);                    \
                 return *this;                                                                     \
             }                                                                                     \
+            Type &operator|=(unsigned int other) {                                                \
+                value = (Flags) ((unsigned int) value | other);                                   \
+                return *this;                                                                     \
+            }                                                                                     \
             Flags operator&(Type other) const {                                                   \
                 return (Flags) ((unsigned int) value & (unsigned int) other.value);               \
             }                                                                                     \
             Flags operator&(Flags other) const {                                                  \
                 return (Flags) ((unsigned int) value & (unsigned int) other);                     \
+            }                                                                                     \
+            Flags operator&(unsigned int other) const {                                           \
+                return (Flags) ((unsigned int) value & other);                                    \
             }                                                                                     \
             Type &operator&=(Type other) {                                                        \
                 value = (Flags) ((unsigned int) value & (unsigned int) other.value);              \
@@ -210,6 +221,10 @@ class MetaTypeRegistry {
             }                                                                                     \
             Type &operator&=(Flags other) {                                                       \
                 value = (Flags) ((unsigned int) value & (unsigned int) other);                    \
+                return *this;                                                                     \
+            }                                                                                     \
+            Type &operator&=(unsigned int other) {                                                \
+                value = (Flags) ((unsigned int) value & other);                                   \
                 return *this;                                                                     \
             }                                                                                     \
             Type &operator^=(Type other) {                                                        \
@@ -220,17 +235,27 @@ class MetaTypeRegistry {
                 value = (Flags) ((unsigned int) value ^ (unsigned int) other);                    \
                 return *this;                                                                     \
             }                                                                                     \
+            Type &operator^=(unsigned int other) {                                                \
+                value = (Flags) ((unsigned int) value ^ other);                                   \
+                return *this;                                                                     \
+            }                                                                                     \
             bool operator==(Type other) const {                                                   \
                 return value == other.value;                                                      \
             }                                                                                     \
             bool operator==(Flags other) const {                                                  \
                 return value == other;                                                            \
             }                                                                                     \
+            bool operator==(unsigned int other) const {                                           \
+                return (unsigned int) value == other;                                             \
+            }                                                                                     \
             bool operator!=(Type other) const {                                                   \
                 return value != other.value;                                                      \
             }                                                                                     \
             bool operator!=(Flags other) const {                                                  \
                 return value != other;                                                            \
+            }                                                                                     \
+            bool operator!=(unsigned int other) const {                                           \
+                return (unsigned int) value != other;                                             \
             }                                                                                     \
             static QScriptValue toScriptValue(QScriptEngine *engine, const Type &type) {          \
                 Q_UNUSED(engine)                                                                  \

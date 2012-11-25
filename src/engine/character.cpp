@@ -11,7 +11,7 @@
 #include "realm.h"
 #include "room.h"
 #include "shield.h"
-#include "soundevent.h"
+#include "speechevent.h"
 #include "util.h"
 #include "weapon.h"
 
@@ -607,67 +607,22 @@ void Character::say(const QString &message) {
 
     try {
         Room *room = currentRoom().cast<Room *>();
-
-        QString description;
-        if (message.endsWith("?")) {
-            description = "%1 asks, \"%2\"";
-        } else {
-            description = (message.endsWith(".") || message.endsWith("!")) ?
-                          "%1 says, \"%2\"" : "%1 says, \"%2.\"";
-        }
-        description = description.arg(definiteName(room->characters(), Capitalized),
-                                      Util::capitalize(message));
-
-        QString garbledMessage;
-        for (const QChar &character : message) {
-            if (character.isLetterOrNumber() || character == ' ') {
-                if (qrand() % 3 == 0 && character != ' ') {
-                    garbledMessage.append(".");
-                } else {
-                    garbledMessage.append(character);
-                }
-            }
-        }
-        QString distantDescription = QString("You hear a %1 asking, \"%2\"")
-                                     .arg(gender() == "male" ? "men" : "women",
-                                          garbledMessage);
-
-        QString veryDistantDescription = "You hear a distant mutter.";
-
-        SoundEvent *event = new SoundEvent(room, 1.0);
-        event->setDescription(description);
-        event->setDistantDescription(distantDescription);
-        event->setDistantDescription(veryDistantDescription);
+        SpeechEvent *event = new SpeechEvent(this, message, room, 1.0);
         event->fire();
     } catch (GameException &exception) {
         qDebug() << "Exception in Character::say(): " << exception.what();
     }
 }
 
-void Character::shout(const QString &msg) {
+void Character::shout(const QString &message) {
 
     try {
         Room *room = currentRoom().cast<Room *>();
+        SpeechEvent *event = new SpeechEvent(this, message, room, 5.0);
+        event->fire();
 
-        QString message = (msg.endsWith(".") || msg.endsWith("?") || msg.endsWith("!")) ?
-                          Util::capitalize(msg) : Util::capitalize(msg + ".");
-
-        GameObjectPtrList characters = room->characters();
-        characters.send(QString("%1 shouts, \"%2\".").arg(definiteName(room->characters(),
-                                                                       Capitalized), message));
-        for (const GameObjectPtr &character : room->characters()) {
+        for (const GameObjectPtr &character : event->affectedCharacters()) {
             character->invokeTrigger("onshout", this, message);
-        }
-
-        for (const GameObjectPtr &exitPtr : room->exits()) {
-            Exit *exit = exitPtr.cast<Exit *>();
-            Room *adjacentRoom = exit->destination().cast<Room *>();
-
-            adjacentRoom->characters().send(QString("You hear %1 shouting, \"%2\".")
-                                            .arg(indefiniteName(), message));
-            for (const GameObjectPtr &character : adjacentRoom->characters()) {
-                character->invokeTrigger("onshout", this, message);
-            }
         }
     } catch (GameException &exception) {
         qDebug() << "Exception in Character::shout(): " << exception.what();

@@ -47,6 +47,7 @@ SOURCES += \
     engine/session.cpp \
     engine/shield.cpp \
     engine/soundevent.cpp \
+    engine/speechevent.cpp \
     engine/statsitem.cpp \
     engine/util.cpp \
     engine/vector3d.cpp \
@@ -181,6 +182,7 @@ HEADERS += \
     engine/session.h \
     engine/shield.h \
     engine/soundevent.h \
+    engine/speechevent.h \
     engine/statsitem.h \
     engine/util.h \
     engine/vector3d.h \

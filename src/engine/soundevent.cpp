@@ -18,15 +18,7 @@ void SoundEvent::visitRoom(Room *room, double strength) {
     strength *= room->eventMultipliers()[GameEventType::SoundEvent];
 
     if (strength >= 0.1) {
-        QString message;
-
-        if (strength >= 0.7 || distantDescription().isEmpty()) {
-            message = description();
-        } else if (strength >= 0.4 || veryDistantDescription().isEmpty()) {
-            message = distantDescription();
-        } else {
-            message = veryDistantDescription();
-        }
+        QString message = descriptionForStrengthInRoom(strength, room);
 
         for (const GameObjectPtr &character : room->characters()) {
             if (excludedCharacters().contains(character)) {
@@ -64,7 +56,7 @@ void SoundEvent::visitRoom(Room *room, double strength) {
             }
 
             Vector3D vector = room2->position() - room1->position();
-            multiplier *= (1.0 - vector.length() / 50.0);
+            multiplier *= qMax(1.0 - 0.005 * vector.length(), 0.0);
 
             double propagatedStrength = strength * multiplier;
             if (propagatedStrength >= 0.1) {
