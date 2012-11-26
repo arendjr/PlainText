@@ -6,6 +6,7 @@
 #include <QStringList>
 
 #include "gameexception.h"
+#include "util.h"
 
 
 CharacterStats::CharacterStats(int strength, int dexterity, int vitality,
@@ -80,17 +81,17 @@ void CharacterStats::fromUserString(const QString &string, CharacterStats &stats
         throw GameException(GameException::InvalidCharacterStats);
     }
 
-    QStringList stringList = string.mid(1, -1).split(',');
+    QStringList stringList = Util::splitComponents(string);
     if (stringList.length() != 6) {
         throw GameException(GameException::InvalidCharacterStats);
     }
 
-    stats.strength = stringList[0].trimmed().toInt();
-    stats.dexterity = stringList[1].trimmed().toInt();
-    stats.vitality = stringList[2].trimmed().toInt();
-    stats.endurance = stringList[3].trimmed().toInt();
-    stats.intelligence = stringList[4].trimmed().toInt();
-    stats.faith = stringList[5].trimmed().toInt();
+    stats.strength = stringList[0].toInt();
+    stats.dexterity = stringList[1].toInt();
+    stats.vitality = stringList[2].toInt();
+    stats.endurance = stringList[3].toInt();
+    stats.intelligence = stringList[4].toInt();
+    stats.faith = stringList[5].toInt();
 }
 
 QString CharacterStats::toJsonString(const CharacterStats &stats, Options options) {

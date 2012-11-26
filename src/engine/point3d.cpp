@@ -4,6 +4,7 @@
 #include <QStringList>
 
 #include "gameexception.h"
+#include "util.h"
 
 
 Point3D::Point3D(int x, int y, int z) :
@@ -53,14 +54,14 @@ void Point3D::fromUserString(const QString &string, Point3D &point) {
         throw GameException(GameException::InvalidPoint);
     }
 
-    QStringList stringList = string.mid(1, string.length() - 2).split(',');
+    QStringList stringList = Util::splitComponents(string);
     if (stringList.length() != 3) {
         throw GameException(GameException::InvalidPoint);
     }
 
-    point.x = stringList[0].trimmed().toInt(),
-    point.y = stringList[1].trimmed().toInt(),
-    point.z = stringList[2].trimmed().toInt();
+    point.x = stringList[0].toInt(),
+    point.y = stringList[1].toInt(),
+    point.z = stringList[2].toInt();
 }
 
 QString Point3D::toJsonString(const Point3D &point, Options options) {

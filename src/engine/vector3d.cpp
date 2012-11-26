@@ -6,6 +6,7 @@
 #include <QStringList>
 
 #include "gameexception.h"
+#include "util.h"
 
 
 Vector3D::Vector3D(int x, int y, int z) :
@@ -55,14 +56,14 @@ void Vector3D::fromUserString(const QString &string, Vector3D &vector) {
         throw GameException(GameException::InvalidVector);
     }
 
-    QStringList stringList = string.mid(1, string.length() - 2).split(',');
+    QStringList stringList = Util::splitComponents(string);
     if (stringList.length() != 3) {
         throw GameException(GameException::InvalidVector);
     }
 
-    vector.x = stringList[0].trimmed().toInt();
-    vector.y = stringList[1].trimmed().toInt();
-    vector.z = stringList[2].trimmed().toInt();
+    vector.x = stringList[0].toInt();
+    vector.y = stringList[1].toInt();
+    vector.z = stringList[2].toInt();
 }
 
 QString Vector3D::toJsonString(const Vector3D &vector, Options options) {

@@ -39,6 +39,8 @@ class Util : public QObject {
 
         static QStringList splitLines(const QString &string, int maxLineLength = 80);
 
+        static QStringList splitComponents(const QString &string);
+
         static QString colorize(const QString &string, Color color);
 
         Q_INVOKABLE static QString highlight(const QString &string);
