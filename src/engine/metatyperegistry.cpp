@@ -12,6 +12,7 @@
 #include "modifier.h"
 #include "point3d.h"
 #include "portal.h"
+#include "room.h"
 #include "scriptfunctionmap.h"
 #include "vector3d.h"
 
@@ -80,6 +81,8 @@ void MetaTypeRegistry::registerMetaTypes(QScriptEngine *engine) {
     REGISTER_SERIALIZABLE_META_TYPE(Point3D)
 
     REGISTER_SERIALIZABLE_META_TYPE(PortalFlags)
+
+    REGISTER_SERIALIZABLE_META_TYPE(RoomFlags)
 
     REGISTER_SERIALIZABLE_META_TYPE(ScriptFunction)
     REGISTER_SERIALIZABLE_META_TYPE(ScriptFunctionMap)

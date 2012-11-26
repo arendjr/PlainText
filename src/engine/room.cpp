@@ -11,7 +11,8 @@
 
 Room::Room(Realm *realm, uint id, Options options) :
     super(realm, GameObjectType::Room, id, options),
-    m_position(0, 0, 0) {
+    m_position(0, 0, 0),
+    m_flags(RoomFlags::NoFlags) {
 
     setAutoDelete(false);
 }
@@ -124,6 +125,15 @@ void Room::setItems(const GameObjectPtrList &items) {
 
     if (m_items != items) {
         m_items = items;
+
+        setModified();
+    }
+}
+
+void Room::setFlags(RoomFlags flags) {
+
+    if (m_flags != flags) {
+        m_flags = flags;
 
         setModified();
     }

@@ -58,14 +58,17 @@ void TestCase::createTestWorld() {
     roomA->addPortal(portal);
     roomB->addPortal(portal);
 
-    Player *player = new Player(realm);
+    Player *player = new Player(realm, 1999);
     player->setName("Arie");
     player->setCurrentRoom(roomA);
+    player->setPasswordSalt("W6YS83vT");
+    player->setPasswordHash("CNPnlGobv2Q8VUH2kOovwPvZqk0=");
+    player->setAdmin(true);
 
     QCOMPARE(roomA->id(), (unsigned) 1);
     QCOMPARE(roomB->id(), (unsigned) 2);
     QCOMPARE(portal->id(), (unsigned) 3);
-    QCOMPARE(player->id(), (unsigned) 4);
+    QCOMPARE(player->id(), (unsigned) 1999);
 }
 
 void TestCase::destroyTestWorld() {

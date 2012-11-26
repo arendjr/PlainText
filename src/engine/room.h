@@ -4,7 +4,15 @@
 #include "gameeventmultipliermap.h"
 #include "gameobject.h"
 #include "gameobjectptr.h"
+#include "metatyperegistry.h"
 #include "point3d.h"
+
+
+PT_DEFINE_FLAGS(RoomFlags,
+    NoCeiling,
+    NoFloor,
+    Outside
+)
 
 
 class Room : public GameObject {
@@ -40,6 +48,10 @@ class Room : public GameObject {
         void setItems(const GameObjectPtrList &items);
         Q_PROPERTY(GameObjectPtrList items READ items WRITE setItems)
 
+        RoomFlags flags() const { return m_flags; }
+        void setFlags(RoomFlags flags);
+        Q_PROPERTY(RoomFlags flags READ flags WRITE setFlags)
+
         const GameEventMultiplierMap &eventMultipliers() const { return m_eventMultipliers; }
         void setEventMultipliers(const GameEventMultiplierMap &multipliers);
         Q_PROPERTY(GameEventMultiplierMap eventMultipliers READ eventMultipliers
@@ -56,6 +68,7 @@ class Room : public GameObject {
         GameObjectPtrList m_exits;
         GameObjectPtrList m_characters;
         GameObjectPtrList m_items;
+        RoomFlags m_flags;
         GameEventMultiplierMap m_eventMultipliers;
 };
 

@@ -26,6 +26,7 @@ class Vector3D {
         Vector3D operator-(const Vector3D &other) const;
 
         int length() const;
+        Vector3D normalized() const;
 
         QString toString() const;
 

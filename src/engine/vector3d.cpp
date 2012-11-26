@@ -40,6 +40,22 @@ int Vector3D::length() const {
     return sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
 }
 
+Vector3D Vector3D::normalized() const {
+
+    int l = length();
+    Vector3D result;
+    if (l > 0) {
+        result.x = 100 * x / l;
+        result.y = 100 * y / l;
+        result.z = 100 * z / l;
+    } else {
+        result.x = 0;
+        result.y = 0;
+        result.z = 0;
+    }
+    return result;
+}
+
 QString Vector3D::toString() const {
 
     return QString("[ %1, %2, %3 ]").arg(x).arg(y).arg(z);

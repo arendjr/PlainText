@@ -41,15 +41,6 @@ class ContainerTest : public TestCase {
             player->addInventoryItem(item3);
         }
 
-        virtual void cleanup() {
-
-            /*for (const GameObjectPtr &item : m_items) {
-                item->setDeleted();
-            }
-
-            m_container->setDeleted();*/
-        }
-
         void testPutAllInContainer() {
 
             Realm *realm = Realm::instance();
