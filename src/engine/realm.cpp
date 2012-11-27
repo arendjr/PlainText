@@ -1,5 +1,7 @@
 #include "realm.h"
 
+#include <QDebug>
+
 #include "commandinterpreter.h"
 #include "commandregistry.h"
 #include "diskutil.h"
@@ -34,7 +36,7 @@ Realm::Realm(Options options) :
     m_reservedNames << "all" << "down" << "east" << "north" << "northeast" << "northwest" << "out"
                     << "room" << "south" << "southeast" << "southwest" << "west";
     for (const QString &commandName : m_commandRegistry->commandNames()) {
-        m_reservedNames << commandName;
+        m_reservedNames.append(commandName);
     }
 }
 
@@ -149,7 +151,7 @@ GameObjectPtrList Realm::allObjects(GameObjectType objectType) const {
     GameObjectPtrList objects;
     for (GameObject *object : m_objectMap) {
         if (objectType == GameObjectType::Unknown || object->objectType() == objectType) {
-            objects << object;
+            objects.append(object);
         }
     }
     return objects;
@@ -159,7 +161,7 @@ GameObjectPtrList Realm::players() const {
 
     GameObjectPtrList players;
     for (Player *player : m_playerMap) {
-        players << player;
+        players.append(player);
     }
     return players;
 }
@@ -169,7 +171,7 @@ GameObjectPtrList Realm::onlinePlayers() const {
     GameObjectPtrList players;
     for (Player *player : m_playerMap) {
         if (player->session()) {
-            players << player;
+            players.append(player);
         }
     }
     return players;
@@ -200,7 +202,7 @@ void Realm::addReservedName(const QString &name) {
 
     QString userName = Util::validateUserName(name);
     if (!m_reservedNames.contains(userName)) {
-        m_reservedNames << userName;
+        m_reservedNames.append(userName);
     }
 }
 
@@ -230,7 +232,7 @@ void Realm::addModifiedObject(GameObject *object) {
     }
 
     if (!m_modifiedObjects.contains(object)) {
-        m_modifiedObjects << object;
+        m_modifiedObjects.append(object);
     }
 }
 

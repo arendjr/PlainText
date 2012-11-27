@@ -6,6 +6,7 @@
 #include <QFile>
 #include <QTest>
 
+#include "characterstats.h"
 #include "diskutil.h"
 #include "realm.h"
 
@@ -15,6 +16,15 @@ class SerializationTest : public TestCase {
     Q_OBJECT
 
     private slots:
+        void testUserStrings() {
+
+            QString userString = "[1, 1, 1, 1, 1, 1]";
+            CharacterStats expected(1, 1, 1, 1, 1, 1);
+            CharacterStats actual;
+            CharacterStats::fromUserString(userString, actual);
+            QCOMPARE(actual, expected);
+        }
+
         void testObjectsSyncedToDisk() {
 
             QTest::qWait(20);
@@ -35,7 +45,7 @@ class SerializationTest : public TestCase {
                     "  \"name\": \"Room A\",\n"
                     "  \"position\": [ 0, 0, 0 ],\n"
                     "  \"portals\": [ \"portal:3\" ],\n"
-                    "  \"eventMultipliers\": { \"SoundEvent\": 1, \"VisualEvent\": 1 }\n"
+                    "  \"flags\": \"\"\n"
                 "}"));
             }
 
@@ -46,7 +56,7 @@ class SerializationTest : public TestCase {
                     "  \"name\": \"Room B\",\n"
                     "  \"position\": [ 0, 0, 0 ],\n"
                     "  \"portals\": [ \"portal:3\" ],\n"
-                    "  \"eventMultipliers\": { \"SoundEvent\": 1, \"VisualEvent\": 1 }\n"
+                    "  \"flags\": \"\"\n"
                 "}"));
             }
 
@@ -58,8 +68,7 @@ class SerializationTest : public TestCase {
                     "  \"name2\": \"b-to-a\",\n"
                     "  \"room\": \"room:1\",\n"
                     "  \"room2\": \"room:2\",\n"
-                    "  \"flags\": \"CanPassThrough\",\n"
-                    "  \"eventMultipliers\": { \"SoundEvent\": 1, \"VisualEvent\": 1 }\n"
+                    "  \"flags\": \"CanPassThrough\"\n"
                 "}"));
             }
 
@@ -87,7 +96,7 @@ class SerializationTest : public TestCase {
                     "  \"weapon\": \"0\",\n"
                     "  \"secondaryWeapon\": \"0\",\n"
                     "  \"shield\": \"0\",\n"
-                    "  \"admin\": false\n"
+                    "  \"admin\": true\n"
                 "}"));
             }
         }

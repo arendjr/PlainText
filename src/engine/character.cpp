@@ -35,6 +35,7 @@ Character::Character(Realm *realm, uint id, Options options) :
 
 Character::Character(Realm *realm, GameObjectType objectType, uint id, Options options) :
     super(realm, objectType, id, options),
+    m_height(0),
     m_gender("male"),
     m_respawnTime(0),
     m_respawnTimeVariation(0),

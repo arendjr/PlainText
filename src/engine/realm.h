@@ -4,6 +4,7 @@
 #include <QDateTime>
 #include <QHash>
 #include <QStringList>
+#include <QVector>
 
 #include "gameobject.h"
 #include "gameobjectptr.h"
@@ -110,7 +111,7 @@ class Realm : public GameObject {
         GameThread m_gameThread;
 
         GameObjectSyncThread m_syncThread;
-        QList<GameObject *> m_modifiedObjects;
+        QVector<GameObject *> m_modifiedObjects;
 
         LogThread m_logThread;
 

@@ -225,7 +225,7 @@ QStringList Util::splitLines(const QString &string, int maxLineLength) {
             QString left = word.left(index);
             if (!left.isEmpty()) {
                 if (currentLine.length() + left.length() + 1 > maxLineLength) {
-                    lines << currentLine;
+                    lines.append(currentLine);
                     currentLine = left;
                     currentLineLength = left.length();
                 } else {
@@ -236,7 +236,7 @@ QStringList Util::splitLines(const QString &string, int maxLineLength) {
                     currentLineLength += left.length();
                 }
             }
-            lines << currentLine;
+            lines.append(currentLine);
             currentLine = "";
             currentLineLength = 0;
             word = word.mid(index + 1);
@@ -247,7 +247,7 @@ QStringList Util::splitLines(const QString &string, int maxLineLength) {
 
         int wordLength = word.length() - 4 * word.count("\x1B[");
         if (currentLineLength + wordLength + 1 > maxLineLength) {
-            lines << currentLine;
+            lines.append(currentLine);
             currentLine = word;
             currentLineLength = wordLength;
         } else {
@@ -259,7 +259,7 @@ QStringList Util::splitLines(const QString &string, int maxLineLength) {
         }
     }
     if (!currentLine.isEmpty()) {
-        lines << currentLine;
+        lines.append(currentLine);
     }
 
     return lines;

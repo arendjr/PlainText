@@ -5,6 +5,8 @@
 
 #include <cmath>
 
+#include <QDateTime>
+#include <QDebug>
 #include <QTest>
 
 #include "character.h"
@@ -30,6 +32,7 @@ class VisualEventsTest : public TestCase {
             portal->setRoom2(roomB);
             portal->setName(Util::directionForVector(roomB->position() - roomA->position()));
             portal->setName2(Util::directionForVector(roomA->position() - roomB->position()));
+            portal->setFlags(PortalFlags::CanSeeThrough);
 
             roomA->addPortal(portal);
             roomB->addPortal(portal);
@@ -40,6 +43,8 @@ class VisualEventsTest : public TestCase {
 
             Realm *realm = Realm::instance();
 
+            qint64 start = QDateTime::currentMSecsSinceEpoch();
+
             const int numRows = 120;
             const int numColumns = 120;
             for (int i = 0; i < numRows; i++) {
@@ -49,6 +54,7 @@ class VisualEventsTest : public TestCase {
                     int z = 0 - 50 * sin(i * TAU / 240) - 50 * sin(j * TAU / 240);
 
                     Room *room = new Room(realm);
+                    room->setFlags(RoomFlags::NoCeiling);
                     room->setPosition(Point3D(x, y, z));
 
                     if (i > 0) {
@@ -70,29 +76,50 @@ class VisualEventsTest : public TestCase {
                 }
             }
 
+            qint64 end = QDateTime::currentMSecsSinceEpoch();
+            qDebug() << "Generating rooms took " << (end - start) << "ms";
+
             {
                 Character *character = new Character(realm);
                 character->setName("Character A");
+                Room *room = m_rooms[0].cast<Room *>();
+                room->addCharacter(character);
+                character->setCurrentRoom(room);
                 m_characters.append(character);
             }
 
             {
                 Character *character = new Character(realm);
                 character->setName("Character B");
+                Room *room = m_rooms[numColumns - 1].cast<Room *>();
+                room->addCharacter(character);
+                character->setCurrentRoom(room);
                 m_characters.append(character);
             }
 
             {
                 Character *character = new Character(realm);
                 character->setName("Character C");
+                Room *room = m_rooms[(numRows - 1) * numColumns].cast<Room *>();
+                room->addCharacter(character);
+                character->setCurrentRoom(room);
                 m_characters.append(character);
             }
 
             {
                 Character *character = new Character(realm);
                 character->setName("Character D");
+                Room *room = m_rooms[numRows * numColumns - 1].cast<Room *>();
+                room->addCharacter(character);
+                character->setCurrentRoom(room);
                 m_characters.append(character);
             }
+        }
+
+        virtual void cleanup() {
+
+            m_rooms.clear();
+            m_characters.clear();
         }
 
         void testVisualEvent() {
@@ -104,9 +131,12 @@ class VisualEventsTest : public TestCase {
             VisualEvent *event = new VisualEvent(room, 100.0);
             event->setDescription("You see a bright white flash.");
 
-            QBENCHMARK {
-                event->fire();
-            }
+            qint64 start = QDateTime::currentMSecsSinceEpoch();
+
+            event->fire();
+
+            qint64 end = QDateTime::currentMSecsSinceEpoch();
+            qDebug() << "Event fire took " << (end - start) << "ms";
 
             QVERIFY(event->affectedCharacters().contains(m_characters[0]));
             QVERIFY(event->affectedCharacters().contains(m_characters[1]));

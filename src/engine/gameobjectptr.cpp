@@ -889,9 +889,9 @@ QString GameObjectPtrList::joinFancy(Options options) const {
         if (index > -1) {
             objectCounts[index]++;
         } else {
-            objects << object.cast<GameObject *>();
-            objectNames << object->name();
-            objectCounts << 1;
+            objects.append(object.cast<GameObject *>());
+            objectNames.append(object->name());
+            objectCounts.append(1);
         }
     }
 
@@ -901,18 +901,22 @@ QString GameObjectPtrList::joinFancy(Options options) const {
 
         if (objectCounts[i] > 1) {
             if (i == 0 && options & Capitalized) {
-                strings << Util::capitalize(Util::writtenNumber(objectCounts[i])) + " " +
-                           object->plural();
+                strings.append(Util::capitalize(Util::writtenNumber(objectCounts[i])) +
+                               " " + object->plural());
             } else {
-                strings << Util::writtenNumber(objectCounts[i]) + " " + object->plural();
+                strings.append(Util::writtenNumber(objectCounts[i]) + " " +
+                               object->plural());
             }
         } else {
             if (object->indefiniteArticle().isEmpty()) {
-                strings << object->name();
+                strings.append(object->name());
             } else if (options & DefiniteArticles) {
-                strings << (i == 0 && options & Capitalized ? "The " : "the ") + object->name();
+                strings.append((i == 0 && options & Capitalized ?
+                                "The " : "the ") + object->name());
             } else {
-                strings << object->indefiniteName(i == 0 ? (options & Capitalized) : NoOptions);
+                strings.append(object->indefiniteName(i == 0 ?
+                                                      (options & Capitalized) :
+                                                      NoOptions));
             }
         }
     }
@@ -924,7 +928,7 @@ QString GameObjectPtrList::toUserString(const GameObjectPtrList &pointerList) {
 
     QStringList stringList;
     for (const GameObjectPtr &pointer : pointerList) {
-        stringList << pointer.toString();
+        stringList.append(pointer.toString());
     }
     return "[ " + stringList.join(", ") + " ]";
 }
@@ -938,7 +942,7 @@ void GameObjectPtrList::fromUserString(const QString &string, GameObjectPtrList 
         if (!substring.isEmpty()) {
             GameObjectPtr pointer;
             GameObjectPtr::fromUserString(substring, pointer);
-            pointerList << pointer;
+            pointerList.append(pointer);
         }
     }
 }
@@ -949,7 +953,7 @@ QString GameObjectPtrList::toJsonString(const GameObjectPtrList &pointerList, Op
 
     QStringList stringList;
     for (const GameObjectPtr &pointer : pointerList) {
-        stringList << GameObjectPtr::toJsonString(pointer);
+        stringList.append(GameObjectPtr::toJsonString(pointer));
     }
     return stringList.isEmpty() ? QString() : "[ " + stringList.join(", ") + " ]";
 }
@@ -961,6 +965,6 @@ void GameObjectPtrList::fromVariant(const QVariant &variant, GameObjectPtrList &
     for (const QVariant &item : variantList) {
         GameObjectPtr pointer;
         GameObjectPtr::fromVariant(item, pointer);
-        pointerList << pointer;
+        pointerList.append(pointer);
     }
 }

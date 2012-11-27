@@ -2,4 +2,4 @@
 
 qmake ../tests.pro && \
 make -j2 && \
-./tests
+./tests -callgrind
