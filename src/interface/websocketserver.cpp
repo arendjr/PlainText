@@ -6,9 +6,9 @@
 #include <QWsServer.h>
 #include <QWsSocket.h>
 
-#include "engine/conversionutil.h"
-#include "engine/player.h"
-#include "engine/session.h"
+#include "conversionutil.h"
+#include "player.h"
+#include "session.h"
 
 
 WebSocketServer::WebSocketServer(Realm *realm, quint16 port, QObject *parent) :

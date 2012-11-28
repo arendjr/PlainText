@@ -34,24 +34,41 @@ QString SpeechEvent::descriptionForStrengthInRoom(double strength, Room *room) c
         return description.arg(m_speaker->definiteName(originRoom()->characters(), Capitalized),
                                Util::capitalize(m_message));
     } else if (strength >= 0.5) {
-        QString garbledMessage;
+        QStringList garbledWords;
+        QString word;
+        int numHeardWords = 0;
         for (const QChar &character : m_message) {
-            if (character.isLetterOrNumber() || character == ' ') {
-                if (qrand() % 100 < 150.0 * (strength - 0.2) || character == ' ') {
-                    garbledMessage.append(character);
+            if (character == ' ') {
+                if (qrand() % 100 < 150.0 * (strength - 0.2)) {
+                    garbledWords.append(word);
+                    numHeardWords++;
                 } else {
-                    garbledMessage.append(".");
+                    garbledWords.append(QString(word.length(), '.'));
                 }
+                word.clear();
+            } else if (character.isLetterOrNumber()) {
+                word.append(character);
             }
         }
+        if (qrand() % 100 < 150.0 * (strength - 0.2)) {
+            garbledWords.append(word);
+            numHeardWords++;
+        } else {
+            garbledWords.append(QString(word.length(), '.'));
+        }
+        QString garbledMessage;
+        if (numHeardWords == 0) {
+            garbledMessage = " something, but you cannot make out a word of it.";
+        } else {
+            garbledMessage = QString(", \"%1\"").arg(garbledWords.join(" "));
+        }
+
         QString direction = Util::directionForVector(originRoom()->position() - room->position());
-        return QString("You hear a %1 %2 %3, \"%4\"")
-               .arg(m_speaker->gender() == "male" ? "man" : "woman",
-                    direction == "up" ? "above" :
-                    (direction == "down" ? "below" :
-                     QString("in the " + direction)),
-                    m_isShout ? "shouting" : "saying",
-                    garbledMessage);
+        return QString("You hear a " + QString(m_speaker->gender() == "male" ? "man " : "woman ") +
+                       (direction == "up" ? "from above " : (direction == "down" ? "from below " :
+                                                            QString("to the " + direction + " "))) +
+                       (m_isShout ? "shouting" : "saying") +
+                       garbledMessage);
     } else if (strength >= (m_speaker->gender() == "male" ? 0.4 : 0.3)) {
         QString direction = Util::directionForVector(originRoom()->position() - room->position());
         if (direction == "up") {

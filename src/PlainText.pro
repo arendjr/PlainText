@@ -9,50 +9,30 @@ TEMPLATE = app
 SOURCES += \
     main.cpp \
     engine/application.cpp \
-    engine/character.cpp \
     engine/characterstats.cpp \
-    engine/class.cpp \
     engine/commandinterpreter.cpp \
     engine/commandregistry.cpp \
-    engine/container.cpp \
     engine/conversionutil.cpp \
     engine/diskutil.cpp \
     engine/effect.cpp \
     engine/engine.cpp \
-    engine/exit.cpp \
-    engine/gameevent.cpp \
     engine/gameeventmultipliermap.cpp \
-    engine/gameeventobject.cpp \
     engine/gameexception.cpp \
-    engine/gameobject.cpp \
     engine/gameobjectptr.cpp \
     engine/gameobjectsyncthread.cpp \
     engine/gamethread.cpp \
-    engine/group.cpp \
-    engine/item.cpp \
     engine/logthread.cpp \
     engine/logutil.cpp \
     engine/metatyperegistry.cpp \
     engine/modifier.cpp \
-    engine/player.cpp \
     engine/point3d.cpp \
-    engine/portal.cpp \
-    engine/race.cpp \
-    engine/realm.cpp \
-    engine/room.cpp \
     engine/scriptengine.cpp \
     engine/scriptfunction.cpp \
     engine/scriptfunctionmap.cpp \
     engine/scriptwindow.cpp \
     engine/session.cpp \
-    engine/shield.cpp \
-    engine/soundevent.cpp \
-    engine/speechevent.cpp \
-    engine/statsitem.cpp \
     engine/util.cpp \
     engine/vector3d.cpp \
-    engine/visualevent.cpp \
-    engine/weapon.cpp \
     engine/commands/buycommand.cpp \
     engine/commands/command.cpp \
     engine/commands/descriptioncommand.cpp \
@@ -75,7 +55,6 @@ SOURCES += \
     engine/commands/removecommand.cpp \
     engine/commands/scriptcommand.cpp \
     engine/commands/searchcommand.cpp \
-    engine/commands/shoutcommand.cpp \
     engine/commands/slashmecommand.cpp \
     engine/commands/statscommand.cpp \
     engine/commands/talkcommand.cpp \
@@ -123,6 +102,26 @@ SOURCES += \
     engine/events/event.cpp \
     engine/events/signinevent.cpp \
     engine/events/timerevent.cpp \
+    engine/gameevents/gameevent.cpp \
+    engine/gameevents/soundevent.cpp \
+    engine/gameevents/speechevent.cpp \
+    engine/gameevents/visualevent.cpp \
+    engine/gameobjects/character.cpp \
+    engine/gameobjects/class.cpp \
+    engine/gameobjects/container.cpp \
+    engine/gameobjects/exit.cpp \
+    engine/gameobjects/gameeventobject.cpp \
+    engine/gameobjects/gameobject.cpp \
+    engine/gameobjects/group.cpp \
+    engine/gameobjects/item.cpp \
+    engine/gameobjects/player.cpp \
+    engine/gameobjects/portal.cpp \
+    engine/gameobjects/race.cpp \
+    engine/gameobjects/realm.cpp \
+    engine/gameobjects/room.cpp \
+    engine/gameobjects/shield.cpp \
+    engine/gameobjects/statsitem.cpp \
+    engine/gameobjects/weapon.cpp \
     engine/logmessages/commandlogmessage.cpp \
     engine/logmessages/logmessage.cpp \
     engine/logmessages/npctalklogmessage.cpp \
@@ -144,50 +143,32 @@ HEADERS += \
     engine/application.h \
     engine/character.h \
     engine/characterstats.h \
-    engine/class.h \
     engine/commandinterpreter.h \
     engine/commandregistry.h \
     engine/constants.h \
-    engine/container.h \
     engine/conversionutil.h \
     engine/diskutil.h \
     engine/effect.h \
     engine/engine.h \
-    engine/exit.h \
     engine/foreach.h \
-    engine/gameevent.h \
     engine/gameeventmultipliermap.h \
     engine/gameeventobject.h \
     engine/gameexception.h \
-    engine/gameobject.h \
     engine/gameobjectptr.h \
     engine/gameobjectsyncthread.h \
     engine/gamethread.h \
-    engine/group.h \
-    engine/item.h \
     engine/logthread.h \
     engine/logutil.h \
     engine/metatyperegistry.h \
     engine/modifier.h \
-    engine/player.h \
     engine/point3d.h \
-    engine/portal.h \
-    engine/race.h \
-    engine/realm.h \
-    engine/room.h \
     engine/scriptengine.h \
     engine/scriptfunction.h \
     engine/scriptfunctionmap.h \
     engine/scriptwindow.h \
     engine/session.h \
-    engine/shield.h \
-    engine/soundevent.h \
-    engine/speechevent.h \
-    engine/statsitem.h \
     engine/util.h \
     engine/vector3d.h \
-    engine/visualevent.h \
-    engine/weapon.h \
     engine/commands/buycommand.h \
     engine/commands/command.h \
     engine/commands/descriptioncommand.h \
@@ -210,7 +191,6 @@ HEADERS += \
     engine/commands/removecommand.h \
     engine/commands/scriptcommand.h \
     engine/commands/searchcommand.h \
-    engine/commands/shoutcommand.h \
     engine/commands/slashmecommand.h \
     engine/commands/statscommand.h \
     engine/commands/talkcommand.h \
@@ -258,6 +238,26 @@ HEADERS += \
     engine/events/event.h \
     engine/events/signinevent.h \
     engine/events/timerevent.h \
+    engine/gameevents/gameevent.h \
+    engine/gameevents/soundevent.h \
+    engine/gameevents/speechevent.h \
+    engine/gameevents/visualevent.h \
+    engine/gameobjects/character.h \
+    engine/gameobjects/class.h \
+    engine/gameobjects/container.h \
+    engine/gameobjects/exit.h \
+    engine/gameobjects/gameeventobject.h \
+    engine/gameobjects/gameobject.h \
+    engine/gameobjects/group.h \
+    engine/gameobjects/item.h \
+    engine/gameobjects/player.h \
+    engine/gameobjects/portal.h \
+    engine/gameobjects/race.h \
+    engine/gameobjects/realm.h \
+    engine/gameobjects/room.h \
+    engine/gameobjects/shield.h \
+    engine/gameobjects/statsitem.h \
+    engine/gameobjects/weapon.h \
     engine/logmessages/commandlogmessage.h \
     engine/logmessages/logmessage.h \
     engine/logmessages/npctalklogmessage.h \
@@ -283,6 +283,7 @@ OTHER_FILES += \
     ../data/commands/opencommand.js \
     ../data/commands/putcommand.js \
     ../data/commands/saycommand.js \
+    ../data/commands/shoutcommand.js \
     ../data/commands/admin/enterroomcommand.js \
     ../web/index.html \
     ../web/css/admin.css \
@@ -318,6 +319,8 @@ INCLUDEPATH += \
     engine/commands/admin \
     engine/commands/api \
     engine/events \
+    engine/gameevents \
+    engine/gameobjects \
     engine/logmessages \
     $$PWD/../3rdparty \
     $$PWD/../3rdparty/qtiocompressor \

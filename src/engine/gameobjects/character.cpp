@@ -526,22 +526,16 @@ void Character::enter(const GameObjectPtr &roomPtr, const GameObjectPtrList &fol
         }
 
         if (!characters.isEmpty()) {
-            QString arrivalsName;
-            if (followers.isEmpty()) {
-                arrivalsName = indefiniteName(Capitalized);
-            } else {
-                GameObjectPtrList arrivals;
-                arrivals << this;
-                arrivals << followers;
-                arrivalsName = arrivals.joinFancy(Capitalized);
-            }
-
-            characters.send(QString("%1 arrived.").arg(arrivalsName));
+            GameObjectPtrList arrivals;
+            arrivals.append(this);
+            arrivals.append(followers);
+            characters.send(QString("%1 arrived.").arg(arrivals.joinFancy(Capitalized)));
         }
 
         enteredRoom();
 
         for (const GameObjectPtr &follower : followers) {
+            follower->send(QString("You follow %1.").arg(name()));
             follower.cast<Character *>()->enteredRoom();
         }
 
