@@ -1,7 +1,7 @@
 function SayCommand() {
     Command.call(this);
 
-    this.setDescription("Say something. Everyone in the same room can hear it.\n" +
+    this.setDescription("Say something. Everyone close to you can hear it.\n" +
                         "\n" +
                         "Example: say How are you?");
 }
