@@ -138,6 +138,7 @@ class VisualEventsTest : public TestCase {
             qint64 end = QDateTime::currentMSecsSinceEpoch();
             qDebug() << "Event fire took " << (end - start) << "ms";
 
+            QCOMPARE(event->numVisitedRooms(), 14400);
             QVERIFY(event->affectedCharacters().contains(m_characters[0]));
             QVERIFY(event->affectedCharacters().contains(m_characters[1]));
             QVERIFY(event->affectedCharacters().contains(m_characters[2]));

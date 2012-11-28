@@ -67,6 +67,8 @@ class GameEvent : public QObject {
 
         void fire();
 
+        int numVisitedRooms() const;
+
         static QScriptValue toScriptValue(QScriptEngine *engine, GameEvent *const &event);
         static void fromScriptValue(const QScriptValue &object, GameEvent *&event);
 
@@ -96,6 +98,7 @@ class GameEvent : public QObject {
         Room *m_origin;
 
         QVector<Visit> m_visits;
+        QHash<Room *, int> m_visitIndex;
         int m_nextVisitIndex;
 
         QString m_description;

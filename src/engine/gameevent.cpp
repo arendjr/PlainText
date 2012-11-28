@@ -93,6 +93,11 @@ void GameEvent::fire() {
     deleteLater();
 }
 
+int GameEvent::numVisitedRooms() const {
+
+    return m_nextVisitIndex;
+}
+
 QScriptValue GameEvent::toScriptValue(QScriptEngine *engine, GameEvent *const &event) {
 
     return engine->newQObject(event, QScriptEngine::QtOwnership,
@@ -126,24 +131,20 @@ QVector<QMetaProperty> GameEvent::storedMetaProperties() const {
 
 void GameEvent::addVisit(Room *room, double strength) {
 
-    for (int i = 0; i < m_visits.size(); i++) {
-        if (m_visits[i].room == room) {
-            if (m_visits[i].strength < strength) {
-                m_visits[i].strength = strength;
-            }
-            return;
+    int index = m_visitIndex[room];
+    if (index == 0) {
+        m_visits.append(Visit(room, strength));
+        m_visitIndex[room] = m_visits.size();
+    } else {
+        index--;
+        if (m_visits[index].strength < strength) {
+            m_visits[index].strength = strength;
         }
     }
-
-    m_visits.append(Visit(room, strength));
 }
 
 bool GameEvent::hasBeenVisited(Room *room) const {
 
-    for (int i = 0; i < m_nextVisitIndex; i++) {
-        if (m_visits[i].room == room) {
-            return true;
-        }
-    }
-    return false;
+    int index = m_visitIndex[room];
+    return index > 0;
 }
