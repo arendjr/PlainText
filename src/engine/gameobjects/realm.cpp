@@ -189,7 +189,7 @@ void Realm::unregisterPlayer(Player *player) {
     m_playerMap.remove(player->name());
 }
 
-Player *Realm::getPlayer(const QString &name) const {
+GameObject *Realm::getPlayer(const QString &name) const {
 
     if (m_playerMap.contains(name)) {
         return m_playerMap[name];

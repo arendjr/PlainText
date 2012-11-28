@@ -44,7 +44,7 @@ class Realm : public GameObject {
         Q_INVOKABLE GameObjectPtrList onlinePlayers() const;
         void registerPlayer(Player *player);
         void unregisterPlayer(Player *player);
-        Player *getPlayer(const QString &name) const;
+        Q_INVOKABLE GameObject *getPlayer(const QString &name) const;
 
         void addReservedName(const QString &name);
         const QStringList &reservedNames() const { return m_reservedNames; }

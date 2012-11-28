@@ -28,12 +28,23 @@ var Options = {
 
 Array.prototype.append = function(value) {
 
-    return this.push(value);
+    if (value instanceof Array) {
+        for (var i = 0, l = value.length; i < l; i++) {
+            this.push(value[i]);
+        }
+    } else {
+        return this.push(value);
+    }
 };
 
 Array.prototype.clear = function() {
 
     return this.splice(0, this.length);
+};
+
+Array.prototype.clone = function() {
+
+    return this.slice(0);
 };
 
 Array.prototype.contains = function(element) {

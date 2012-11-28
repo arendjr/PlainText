@@ -624,13 +624,14 @@ void Character::shout(const QString &message) {
     }
 }
 
-void Character::talk(const GameObjectPtr &characterPtr, const QString &message) {
+void Character::talk(const GameObjectPtr &character, const QString &message) {
 
     try {
-        Character *character = characterPtr.cast<Character *>();
-        if (character->isPlayer()) {
-            tell(character, message);
-        } else {
+        Room *room = currentRoom().cast<Room *>();
+        SpeechEvent *event = new SpeechEvent(this, message, room, 1.0, character);
+        event->fire();
+
+        if (!character->isPlayer()) {
             LogUtil::logNpcTalk(character->name(), message);
             character->invokeTrigger("ontalk", this, message);
         }

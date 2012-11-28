@@ -15,7 +15,6 @@
 #include "commands/descriptioncommand.h"
 #include "commands/disbandcommand.h"
 #include "commands/dropcommand.h"
-#include "commands/eatcommand.h"
 #include "commands/equipmentcommand.h"
 #include "commands/followcommand.h"
 #include "commands/getcommand.h"
@@ -28,17 +27,12 @@
 #include "commands/killcommand.h"
 #include "commands/lookcommand.h"
 #include "commands/losecommand.h"
-#include "commands/quitcommand.h"
 #include "commands/removecommand.h"
 #include "commands/scriptcommand.h"
 #include "commands/searchcommand.h"
 #include "commands/slashmecommand.h"
 #include "commands/statscommand.h"
-#include "commands/talkcommand.h"
-#include "commands/tellcommand.h"
-#include "commands/usecommand.h"
 #include "commands/wieldcommand.h"
-#include "commands/whocommand.h"
 #include "commands/admin/addcharactercommand.h"
 #include "commands/admin/addcontainercommand.h"
 #include "commands/admin/additemcommand.h"
@@ -80,14 +74,12 @@ CommandRegistry::CommandRegistry(QObject *parent) :
     Command *go = new GoCommand(this);
     Command *kill = new KillCommand(this);
     Command *look = new LookCommand(this);
-    Command *quit = new QuitCommand(this);
 
     m_commands.insert("attack", kill);
     m_commands.insert("buy", new BuyCommand(this));
     m_commands.insert("description", new DescriptionCommand(this));
     m_commands.insert("disband", new DisbandCommand(this));
     m_commands.insert("drop", new DropCommand(this));
-    m_commands.insert("eat", new EatCommand(this));
     m_commands.insert("enter", go);
     m_commands.insert("equipment", new EquipmentCommand(this));
     m_commands.insert("examine", look);
@@ -95,7 +87,6 @@ CommandRegistry::CommandRegistry(QObject *parent) :
     m_commands.insert("get", get);
     m_commands.insert("give", new GiveCommand(this));
     m_commands.insert("go", go);
-    m_commands.insert("goodbye", quit);
     m_commands.insert("group", new GroupCommand(this));
     m_commands.insert("gtalk", new GtalkCommand(this));
     m_commands.insert("help", new HelpCommand(this));
@@ -104,16 +95,11 @@ CommandRegistry::CommandRegistry(QObject *parent) :
     m_commands.insert("l", look);
     m_commands.insert("look", look);
     m_commands.insert("lose", new LoseCommand(this));
-    m_commands.insert("quit", quit);
     m_commands.insert("remove", new RemoveCommand(this));
     m_commands.insert("search", new SearchCommand(this));
     m_commands.insert("stats", new StatsCommand(this));
     m_commands.insert("take", get);
-    m_commands.insert("talk", new TalkCommand(this));
-    m_commands.insert("tell", new TellCommand(this));
-    m_commands.insert("use", new UseCommand(this));
     m_commands.insert("wield", new WieldCommand(this));
-    m_commands.insert("who", new WhoCommand(this));
     m_commands.insert("/me", new SlashMeCommand(this));
 
     m_adminCommands.insert("add-character", new AddCharacterCommand(this));

@@ -13,8 +13,8 @@ DrinkCommand.prototype.execute = function(player, command) {
 
     this.prepareExecute(player, command);
 
-    var allItems = player.inventory.concat(player.currentRoom.items);
-    var item = this.takeObject(allItems);
+    var pool = player.inventory.concat(player.currentRoom.items);
+    var item = this.takeObject(pool);
     if (!this.requireSome(item, "Drink what?")) {
         return;
     }

@@ -288,7 +288,7 @@ void Session::processUserName(const QString &answer) {
         return;
     }
 
-    m_player = m_realm->getPlayer(userName);
+    m_player = qobject_cast<Player *>(m_realm->getPlayer(userName));
     if (m_player) {
         setSignInStage(AskingPassword);
     } else if (m_realm->reservedNames().contains(userName)) {
@@ -335,7 +335,7 @@ void Session::processPassword(const QString &input) {
         LogUtil::logSessionEvent(m_source, "Authentication success for player " + m_player->name());
         LogUtil::logCommand(m_player->name(), "(signed in)");
 
-        if (m_player->session()) {
+        if (m_player->isOnline()) {
             write("Cannot sign you in because you're already signed in from another location.\n");
             setSignInStage(SessionClosed);
             emit terminate();

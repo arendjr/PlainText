@@ -8,11 +8,12 @@
 #define super SoundEvent
 
 SpeechEvent::SpeechEvent(Character *speaker, const QString &message,
-                         Room *origin, double strength) :
+                         Room *origin, double strength, const GameObjectPtr &target) :
     super(origin, strength),
     m_speaker(speaker),
     m_message(message),
-    m_isShout(strength > 1.0) {
+    m_isShout(strength > 1.0),
+    m_target(target) {
 }
 
 SpeechEvent::~SpeechEvent() {
@@ -26,10 +27,22 @@ QString SpeechEvent::descriptionForStrengthInRoom(double strength, Room *room) c
             description = QString(".!?").contains(m_message.right(1)) ?
                           "%1 shouts, \"%2\"" : "%1 shouts, \"%2!\"";
         } else if (m_message.endsWith("?")) {
-            description = "%1 asks, \"%2\"";
+            if (m_target.isNull()) {
+                description = "%1 asks, \"%2\"";
+            } else {
+                GameObjectPtrList pool = originRoom()->characters();
+                description = QString("%2 asks %1, \"%3\"").arg(m_target->definiteName(pool));
+            }
         } else {
-            description = (m_message.endsWith(".") || m_message.endsWith("!")) ?
-                          "%1 says, \"%2\"" : "%1 says, \"%2.\"";
+            if (m_target.isNull()) {
+                description = (m_message.endsWith(".") || m_message.endsWith("!")) ?
+                              "%1 says, \"%2\"" : "%1 says, \"%2.\"";
+            } else {
+                GameObjectPtrList pool = originRoom()->characters();
+                description = QString((m_message.endsWith(".") || m_message.endsWith("!")) ?
+                                      "%2 says to %1, \"%3\"" : "%2 says to %1, \"%3.\"")
+                              .arg(m_target->definiteName(pool));
+            }
         }
         return description.arg(m_speaker->definiteName(originRoom()->characters(), Capitalized),
                                Util::capitalize(m_message));

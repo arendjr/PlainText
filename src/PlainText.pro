@@ -38,7 +38,6 @@ SOURCES += \
     engine/commands/descriptioncommand.cpp \
     engine/commands/disbandcommand.cpp \
     engine/commands/dropcommand.cpp \
-    engine/commands/eatcommand.cpp \
     engine/commands/equipmentcommand.cpp \
     engine/commands/followcommand.cpp \
     engine/commands/getcommand.cpp \
@@ -51,16 +50,11 @@ SOURCES += \
     engine/commands/killcommand.cpp \
     engine/commands/lookcommand.cpp \
     engine/commands/losecommand.cpp \
-    engine/commands/quitcommand.cpp \
     engine/commands/removecommand.cpp \
     engine/commands/scriptcommand.cpp \
     engine/commands/searchcommand.cpp \
     engine/commands/slashmecommand.cpp \
     engine/commands/statscommand.cpp \
-    engine/commands/talkcommand.cpp \
-    engine/commands/tellcommand.cpp \
-    engine/commands/usecommand.cpp \
-    engine/commands/whocommand.cpp \
     engine/commands/wieldcommand.cpp \
     engine/commands/admin/addcharactercommand.cpp \
     engine/commands/admin/addcontainercommand.cpp \
@@ -174,7 +168,6 @@ HEADERS += \
     engine/commands/descriptioncommand.h \
     engine/commands/disbandcommand.h \
     engine/commands/dropcommand.h \
-    engine/commands/eatcommand.h \
     engine/commands/equipmentcommand.h \
     engine/commands/followcommand.h \
     engine/commands/getcommand.h \
@@ -187,16 +180,11 @@ HEADERS += \
     engine/commands/killcommand.h \
     engine/commands/lookcommand.h \
     engine/commands/losecommand.h \
-    engine/commands/quitcommand.h \
     engine/commands/removecommand.h \
     engine/commands/scriptcommand.h \
     engine/commands/searchcommand.h \
     engine/commands/slashmecommand.h \
     engine/commands/statscommand.h \
-    engine/commands/talkcommand.h \
-    engine/commands/tellcommand.h \
-    engine/commands/usecommand.h \
-    engine/commands/whocommand.h \
     engine/commands/wieldcommand.h \
     engine/commands/admin/addcharactercommand.h \
     engine/commands/admin/addcontainercommand.h \
@@ -280,10 +268,16 @@ OTHER_FILES += \
     engine/commands/command.js \
     ../data/commands/closecommand.js \
     ../data/commands/drinkcommand.js \
+    ../data/commands/eatcommand.js \
     ../data/commands/opencommand.js \
     ../data/commands/putcommand.js \
+    ../data/commands/quitcommand.js \
     ../data/commands/saycommand.js \
     ../data/commands/shoutcommand.js \
+    ../data/commands/talkcommand.js \
+    ../data/commands/tellcommand.js \
+    ../data/commands/usecommand.js \
+    ../data/commands/whocommand.js \
     ../data/commands/admin/enterroomcommand.js \
     ../web/index.html \
     ../web/css/admin.css \

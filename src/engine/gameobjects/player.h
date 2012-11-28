@@ -30,6 +30,7 @@ class Player : public Character {
 
         Session *session() const { return m_session; }
         void setSession(Session *session);
+        Q_INVOKABLE bool isOnline() const;
 
         virtual void send(const QString &message, int color = Silver) const;
 

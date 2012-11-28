@@ -11,7 +11,6 @@ GAME MECHANICS
      -  practice
      -  prompt
      -  read
-     -  reply
      -  score
      -  skills
      -  spells

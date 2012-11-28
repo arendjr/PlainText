@@ -73,6 +73,11 @@ void Player::setSession(Session *session) {
     }
 }
 
+bool Player::isOnline() const {
+
+    return m_session != nullptr;
+}
+
 void Player::send(const QString &_message, int color) const {
 
     QString message;
