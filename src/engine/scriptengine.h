@@ -45,8 +45,6 @@ class ScriptEngine : public QObject {
         void setGlobalObject(const char *name, QObject *object);
         void unsetGlobalObject(const char *name);
 
-        static const QMap<QString, QString> &triggers();
-
     private:
         QScriptEngine m_jsEngine;
 };

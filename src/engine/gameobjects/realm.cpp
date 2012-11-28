@@ -6,6 +6,7 @@
 #include "commandregistry.h"
 #include "diskutil.h"
 #include "player.h"
+#include "triggerregistry.h"
 #include "util.h"
 
 
@@ -32,6 +33,8 @@ Realm::Realm(Options options) :
 
     m_commandInterpreter = new CommandInterpreter(this);
     m_commandInterpreter->setRegistry(m_commandRegistry);
+
+    m_triggerRegistry = new TriggerRegistry(this);
 
     m_reservedNames << "all" << "down" << "east" << "north" << "northeast" << "northwest" << "out"
                     << "room" << "south" << "southeast" << "southwest" << "west";

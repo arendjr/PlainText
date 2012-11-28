@@ -8,6 +8,7 @@
 #include "gameexception.h"
 #include "realm.h"
 #include "scriptengine.h"
+#include "triggerregistry.h"
 #include "util.h"
 #include "interface/httpserver.h"
 #include "interface/telnetserver.h"
@@ -36,6 +37,7 @@ bool Engine::start() {
         m_realm->setScriptEngine(m_scriptEngine);
         m_scriptEngine->setGlobalObject("CommandRegistry", m_realm->commandRegistry());
         m_scriptEngine->setGlobalObject("Realm", m_realm);
+        m_scriptEngine->setGlobalObject("TriggerRegistry", m_realm->triggerRegistry());
         m_scriptEngine->setGlobalObject("Util", m_util);
 
         m_scriptEngine->loadScripts();

@@ -31,6 +31,7 @@ SOURCES += \
     engine/scriptfunctionmap.cpp \
     engine/scriptwindow.cpp \
     engine/session.cpp \
+    engine/triggerregistry.cpp \
     engine/util.cpp \
     engine/vector3d.cpp \
     engine/commands/buycommand.cpp \
@@ -161,6 +162,7 @@ HEADERS += \
     engine/scriptfunctionmap.h \
     engine/scriptwindow.h \
     engine/session.h \
+    engine/triggerregistry.h \
     engine/util.h \
     engine/vector3d.h \
     engine/commands/buycommand.h \

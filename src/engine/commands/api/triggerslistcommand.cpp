@@ -1,6 +1,8 @@
 #include "triggerslistcommand.h"
 
+#include "realm.h"
 #include "scriptengine.h"
+#include "triggerregistry.h"
 
 
 #define super ApiCommand
@@ -18,5 +20,5 @@ void TriggersListCommand::execute(Player *player, const QString &command) {
 
     super::prepareExecute(player, command);
 
-    sendReply(QStringList(ScriptEngine::triggers().keys()));
+    sendReply(realm()->triggerRegistry()->signatures());
 }

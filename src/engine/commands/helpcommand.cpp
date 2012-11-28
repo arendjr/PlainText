@@ -3,6 +3,7 @@
 #include "commandregistry.h"
 #include "realm.h"
 #include "scriptengine.h"
+#include "triggerregistry.h"
 #include "util.h"
 
 
@@ -175,17 +176,18 @@ QString HelpCommand::showAdminHelp(const QString &commandName) {
             "\n"
             "Here is a list of all the triggers which are available:\n"
             "\n";
-        for (const QString &triggerName : ScriptEngine::triggers().keys()) {
+        for (const QString &triggerName : realm()->triggerRegistry()->signatures()) {
             m += "  " + Util::highlight(triggerName) + "\n";
         }
         m += "\n"
              "Type *help <trigger>* to see help about a particular trigger.\n";
     } else {
-        for (const QString &triggerName : ScriptEngine::triggers().keys()) {
+        for (const QString &triggerName : realm()->triggerRegistry()->signatures()) {
             if (triggerName.startsWith(commandName)) {
                 m = "\n" +
                     Util::highlight(triggerName) + "\n  " +
-                    Util::splitLines(ScriptEngine::triggers()[triggerName], 78).join("\n  ") +
+                    Util::splitLines(realm()->triggerRegistry()->description(triggerName), 78)
+                    .join("\n  ") +
                     "\n\n";
                 break;
             }

@@ -19,6 +19,7 @@ class Event;
 class LogMessage;
 class Player;
 class ScriptEngine;
+class TriggerRegistry;
 
 class Realm : public GameObject {
 
@@ -89,6 +90,8 @@ class Realm : public GameObject {
         CommandRegistry *commandRegistry() const { return m_commandRegistry; }
         CommandInterpreter *commandInterpreter() const { return m_commandInterpreter; }
 
+        TriggerRegistry *triggerRegistry() const { return m_triggerRegistry; }
+
     signals:
         void hourPassed(const QDateTime &dateTime);
         void dayPassed(const QDateTime &dateTime);
@@ -119,6 +122,8 @@ class Realm : public GameObject {
 
         CommandRegistry *m_commandRegistry;
         CommandInterpreter *m_commandInterpreter;
+
+        TriggerRegistry *m_triggerRegistry;
 };
 
 #endif // REALM_H

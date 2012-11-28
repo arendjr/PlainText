@@ -21,7 +21,6 @@ EXTENSIBILITY
   -  Move hitChance from Character::kill() to oncombat trigger.
   -  Refactor Session class to allow customizing of sign-up process.
   -  Make look command more flexible.
-  -  Introduce TriggerRegistry.
 
 TECHNOLOGY
 
