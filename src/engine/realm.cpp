@@ -231,9 +231,7 @@ void Realm::addModifiedObject(GameObject *object) {
         return;
     }
 
-    if (!m_modifiedObjects.contains(object)) {
-        m_modifiedObjects.append(object);
-    }
+    m_modifiedObjects.insert(object);
 }
 
 void Realm::enqueueModifiedObjects() {

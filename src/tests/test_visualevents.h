@@ -45,13 +45,13 @@ class VisualEventsTest : public TestCase {
 
             qint64 start = QDateTime::currentMSecsSinceEpoch();
 
-            const int numRows = 120;
-            const int numColumns = 120;
+            const int numRows = 100;
+            const int numColumns = 100;
             for (int i = 0; i < numRows; i++) {
                 int y = 20 * i;
                 for (int j = 0; j < numColumns; j++) {
                     int x = 20 * j;
-                    int z = 0 - 50 * sin(i * TAU / 240) - 50 * sin(j * TAU / 240);
+                    int z = 0 - 40 * sin(i * TAU / 200) - 40 * sin(j * TAU / 200);
 
                     Room *room = new Room(realm);
                     room->setFlags(RoomFlags::NoCeiling);
@@ -125,7 +125,7 @@ class VisualEventsTest : public TestCase {
         void testVisualEvent() {
 
             int numRooms = m_rooms.length();
-            QCOMPARE(numRooms, 14400);
+            QCOMPARE(numRooms, 10000);
 
             Room *room = m_rooms[numRooms / 2].cast<Room *>();
             VisualEvent *event = new VisualEvent(room, 100.0);
@@ -138,7 +138,7 @@ class VisualEventsTest : public TestCase {
             qint64 end = QDateTime::currentMSecsSinceEpoch();
             qDebug() << "Event fire took " << (end - start) << "ms";
 
-            QCOMPARE(event->numVisitedRooms(), 14400);
+            QCOMPARE(event->numVisitedRooms(), 10000);
             QVERIFY(event->affectedCharacters().contains(m_characters[0]));
             QVERIFY(event->affectedCharacters().contains(m_characters[1]));
             QVERIFY(event->affectedCharacters().contains(m_characters[2]));

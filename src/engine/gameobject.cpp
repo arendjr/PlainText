@@ -676,13 +676,6 @@ QVector<QMetaProperty> GameObject::storedMetaProperties() const {
         for (int i = offset; i < count; i++) {
             QMetaProperty metaProperty = metaObject()->property(i);
             if (metaProperty.isStored()) {
-                if (isRoom() || isExit() || isPlayer() || isPortal()) {
-                    // specific optimization to avoid useless inflation of some objects
-                    if (strcmp(metaProperty.name(), "plural") == 0 ||
-                        strcmp(metaProperty.name(), "indefiniteArticle") == 0) {
-                        continue;
-                    }
-                }
                 properties << metaProperty;
             }
         }
@@ -770,9 +763,14 @@ void GameObject::unregisterPointer(GameObjectPtr *pointer) {
 
 void GameObject::changeName(const QString &newName) {
 
+    if (isRoom() || isExit() || isPlayer() || isPortal()) {
+        // specific optimization to avoid useless inflation of some objects
+        return;
+    }
+
     int length = newName.length();
-    if (length > 0 && !newName.startsWith('$')) {
-        if (newName.endsWith("y") && length > 1 && !Util::isVowel(newName[length - 2])) {
+    if (length > 1 && !newName.startsWith('$')) {
+        if (newName.endsWith("y") && !Util::isVowel(newName[length - 2])) {
             m_plural = newName.left(length - 1) + "ies";
         } else if (newName.endsWith("f")) {
             m_plural = newName.left(length - 1) + "ves";

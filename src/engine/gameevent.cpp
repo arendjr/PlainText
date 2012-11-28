@@ -84,7 +84,7 @@ void GameEvent::setAffectedCharacters(const GameObjectPtrList &affectedCharacter
 void GameEvent::fire() {
 
     while (m_nextVisitIndex < m_visits.size()) {
-        Visit visit = m_visits[m_nextVisitIndex];
+        Visit visit = m_visits.value(m_nextVisitIndex);
         visitRoom(visit.room, visit.strength);
 
         m_nextVisitIndex++;
@@ -131,7 +131,7 @@ QVector<QMetaProperty> GameEvent::storedMetaProperties() const {
 
 void GameEvent::addVisit(Room *room, double strength) {
 
-    int index = m_visitIndex[room];
+    int index = m_visitIndex.value(room);
     if (index == 0) {
         m_visits.append(Visit(room, strength));
         m_visitIndex[room] = m_visits.size();
@@ -145,6 +145,6 @@ void GameEvent::addVisit(Room *room, double strength) {
 
 bool GameEvent::hasBeenVisited(Room *room) const {
 
-    int index = m_visitIndex[room];
+    int index = m_visitIndex.value(room);
     return index > 0;
 }

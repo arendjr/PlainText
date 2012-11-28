@@ -35,9 +35,9 @@ void VisualEvent::visitRoom(Room *room, double strength) {
         }
 
         for (const GameObjectPtr &portalPtr : room->portals()) {
-            Portal *portal = portalPtr.cast<Portal *>();
-            Room *room1 = portal->room().cast<Room *>();
-            Room *room2 = portal->room2().cast<Room *>();
+            Portal *portal = portalPtr.unsafeCast<Portal *>();
+            Room *room1 = portal->room().unsafeCast<Room *>();
+            Room *room2 = portal->room2().unsafeCast<Room *>();
             Room *oppositeRoom = (room == room1 ? room2 : room1);
             if (hasBeenVisited(oppositeRoom)) {
                 continue;

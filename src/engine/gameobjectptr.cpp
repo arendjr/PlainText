@@ -284,16 +284,6 @@ void swapWithinList(GameObjectPtr &first, GameObjectPtr &second) {
 }
 
 
-GameObjectPtrList::iterator::iterator() :
-    m_list(nullptr),
-    m_index(0) {
-}
-
-GameObjectPtrList::iterator::iterator(const GameObjectPtrList::iterator &other) :
-    m_list(other.m_list),
-    m_index(other.m_index) {
-}
-
 bool GameObjectPtrList::iterator::operator!=(const GameObjectPtrList::iterator &other) const {
 
     return m_list != other.m_list || m_index != other.m_index;
@@ -312,9 +302,8 @@ GameObjectPtr &GameObjectPtrList::iterator::operator*() const {
 
 GameObjectPtrList::iterator &GameObjectPtrList::iterator::operator++() {
 
-    if (m_index < m_list->m_size - 1 || !m_list->m_nextList) {
-        m_index++;
-    } else {
+    m_index++;
+    if (m_index == m_list->m_size && m_list->m_nextList) {
         m_list = m_list->m_nextList;
         m_index = 0;
     }
@@ -324,9 +313,8 @@ GameObjectPtrList::iterator &GameObjectPtrList::iterator::operator++() {
 GameObjectPtrList::iterator GameObjectPtrList::iterator::operator++(int) {
 
     GameObjectPtrList::iterator it(*this);
-    if (m_index < m_list->m_size - 1 || !m_list->m_nextList) {
-        m_index++;
-    } else {
+    m_index++;
+    if (m_index == m_list->m_size && m_list->m_nextList) {
         m_list = m_list->m_nextList;
         m_index = 0;
     }
@@ -343,16 +331,6 @@ bool GameObjectPtrList::iterator::operator==(const GameObjectPtrList::const_iter
     return m_list == other.m_list && m_index == other.m_index;
 }
 
-
-GameObjectPtrList::const_iterator::const_iterator() :
-    m_list(nullptr),
-    m_index(0) {
-}
-
-GameObjectPtrList::const_iterator::const_iterator(const GameObjectPtrList::const_iterator &other) :
-    m_list(other.m_list),
-    m_index(other.m_index) {
-}
 
 GameObjectPtrList::const_iterator::const_iterator(const GameObjectPtrList::iterator &other) :
     m_list(other.m_list),
@@ -373,9 +351,8 @@ const GameObjectPtr &GameObjectPtrList::const_iterator::operator*() const {
 
 GameObjectPtrList::const_iterator &GameObjectPtrList::const_iterator::operator++() {
 
-    if (m_index < m_list->m_size - 1 || !m_list->m_nextList) {
-        m_index++;
-    } else {
+    m_index++;
+    if (m_index == m_list->m_size && m_list->m_nextList) {
         m_list = m_list->m_nextList;
         m_index = 0;
     }
@@ -385,9 +362,8 @@ GameObjectPtrList::const_iterator &GameObjectPtrList::const_iterator::operator++
 GameObjectPtrList::const_iterator GameObjectPtrList::const_iterator::operator++(int) {
 
     GameObjectPtrList::const_iterator it(*this);
-    if (m_index < m_list->m_size - 1 || !m_list->m_nextList) {
-        m_index++;
-    } else {
+    m_index++;
+    if (m_index == m_list->m_size && m_list->m_nextList) {
         m_list = m_list->m_nextList;
         m_index = 0;
     }
@@ -519,6 +495,7 @@ GameObjectPtrList::iterator GameObjectPtrList::begin() {
 
     GameObjectPtrList::iterator it;
     it.m_list = this;
+    it.m_index = 0;
     return it;
 }
 
@@ -526,6 +503,7 @@ GameObjectPtrList::const_iterator GameObjectPtrList::begin() const {
 
     GameObjectPtrList::const_iterator it;
     it.m_list = const_cast<GameObjectPtrList *>(this);
+    it.m_index = 0;
     return it;
 }
 
@@ -544,6 +522,7 @@ GameObjectPtrList::const_iterator GameObjectPtrList::constBegin() const {
 
     GameObjectPtrList::const_iterator it;
     it.m_list = const_cast<GameObjectPtrList *>(this);
+    it.m_index = 0;
     return it;
 }
 

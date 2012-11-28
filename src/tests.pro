@@ -2,7 +2,7 @@ include(PlainText.pro)
 
 TARGET = tests
 
-CONFIG  += qtestlib
+CONFIG += qtestlib
 
 SOURCES -= \
     main.cpp \

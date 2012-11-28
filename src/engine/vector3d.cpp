@@ -37,7 +37,7 @@ Vector3D Vector3D::operator-(const Vector3D &other) const {
 
 int Vector3D::length() const {
 
-    return sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
+    return sqrt(x * x + y * y + z * z);
 }
 
 Vector3D Vector3D::normalized() const {

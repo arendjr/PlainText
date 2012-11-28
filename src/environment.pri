@@ -22,5 +22,5 @@ QMAKE_CXXFLAGS += -std=c++11
 
 DEFINES *= QT_USE_QSTRINGBUILDER
 
-CONFIG += console debug
+CONFIG += console
 CONFIG -= app_bundle

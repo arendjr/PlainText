@@ -63,6 +63,10 @@ class GameObjectPtr {
             return pointer;
         }
 
+        template <class T> inline T unsafeCast() const {
+            return static_cast<T>(m_gameObject);
+        }
+
         void resolve(Realm *realm);
         void unresolve(bool unregister = true);
 
@@ -106,9 +110,6 @@ class GameObjectPtrList {
             public:
                 friend class GameObjectPtrList;
 
-                iterator();
-                iterator(const iterator &other);
-
                 bool operator!=(const iterator &other) const;
                 bool operator!=(const const_iterator &other) const;
 
@@ -133,8 +134,7 @@ class GameObjectPtrList {
             public:
                 friend class GameObjectPtrList;
 
-                const_iterator();
-                const_iterator(const const_iterator &other);
+                const_iterator() = default;
                 const_iterator(const iterator &other);
 
                 bool operator!=(const const_iterator &other) const;
