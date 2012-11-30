@@ -1,5 +1,7 @@
 #include "gocommand.h"
 
+#include "portal.h"
+
 
 #define super Command
 
@@ -22,10 +24,31 @@ void GoCommand::execute(Player *player, const QString &command) {
         takeWord("to", IfNotLast);
     }
 
-    GameObjectPtr exit = takeObject(currentRoom()->exits());
-    if (!requireSome(exit, "Go where?")) {
+    ObjectDescription description = takeObjectsDescription();
+    GameObjectPtrList portals;
+    for (const GameObjectPtr &portalPtr : currentRoom()->portals()) {
+        Portal *portal = portalPtr.cast<Portal *>();
+        QString loweredName = portal->nameFromRoom(player->currentRoom()).toLower();
+        for (const QString &word : loweredName.split(' ')) {
+            if (word.startsWith(description.name)) {
+                portals.append(portal);
+                break;
+            }
+        }
+    }
+    if (description.position > 0) {
+        if (description.position <= (int) portals.length()) {
+            GameObjectPtr selected = portals[description.position - 1];
+            portals.clear();
+            portals.append(selected);
+        } else {
+            portals.clear();
+        }
+    }
+
+    if (!requireSome(portals, "Go where?")) {
         return;
     }
 
-    player->go(exit);
+    player->go(portals[0]);
 }

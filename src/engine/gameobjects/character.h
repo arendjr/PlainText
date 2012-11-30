@@ -6,6 +6,7 @@
 #include "effect.h"
 #include "gameobjectptr.h"
 #include "statsitem.h"
+#include "vector3d.h"
 
 
 class Character : public StatsItem {
@@ -26,6 +27,10 @@ class Character : public StatsItem {
         const GameObjectPtr &currentRoom() const { return m_currentRoom; }
         void setCurrentRoom(const GameObjectPtr &currentRoom);
         Q_PROPERTY(GameObjectPtr currentRoom READ currentRoom WRITE setCurrentRoom)
+
+        const Vector3D &direction() const { return m_direction; }
+        void setDirection(const Vector3D &direction);
+        Q_PROPERTY(Vector3D direction READ direction WRITE setDirection)
 
         const GameObjectPtrList &inventory() const { return m_inventory; }
         Q_INVOKABLE void addInventoryItem(const GameObjectPtr &item);
@@ -120,7 +125,7 @@ class Character : public StatsItem {
 
         Q_INVOKABLE void open(const GameObjectPtr &exit);
         Q_INVOKABLE void close(const GameObjectPtr &exit);
-        Q_INVOKABLE void go(const GameObjectPtr &exit);
+        Q_INVOKABLE void go(const GameObjectPtr &pointer);
 
         Q_INVOKABLE void enter(const GameObjectPtr &roomPtr,
                                const GameObjectPtrList &followers = GameObjectPtrList());
@@ -168,6 +173,7 @@ class Character : public StatsItem {
         int m_height;
 
         GameObjectPtr m_currentRoom;
+        Vector3D m_direction;
 
         GameObjectPtrList m_inventory;
         GameObjectPtrList m_sellableItems;

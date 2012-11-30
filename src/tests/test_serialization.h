@@ -83,6 +83,7 @@ class SerializationTest : public TestCase {
                     "  \"stats\": [0, 0, 0, 0, 0, 0],\n"
                     "  \"height\": 0,\n"
                     "  \"currentRoom\": \"room:1\",\n"
+                    "  \"direction\": [ 0, 0, 0 ],\n"
                     "  \"race\": \"0\",\n"
                     "  \"characterClass\": \"0\",\n"
                     "  \"gender\": \"male\",\n"

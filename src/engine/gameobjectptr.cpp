@@ -111,8 +111,11 @@ bool GameObjectPtr::operator==(const GameObjectPtr &other) const {
 
 bool GameObjectPtr::operator==(const GameObject *other) const {
 
-    Q_ASSERT(other);
-    return m_gameObject == other;
+    if (other) {
+        return m_gameObject == other;
+    } else {
+        throw new GameException(GameException::NullPointerReference);
+    }
 }
 
 bool GameObjectPtr::operator!=(const GameObjectPtr &other) const {
@@ -122,8 +125,11 @@ bool GameObjectPtr::operator!=(const GameObjectPtr &other) const {
 
 bool GameObjectPtr::operator!=(const GameObject *other) const {
 
-    Q_ASSERT(other);
-    return m_gameObject != other;
+    if (other) {
+        return m_gameObject != other;
+    } else {
+        throw new GameException(GameException::NullPointerReference);
+    }
 }
 
 void GameObjectPtr::resolve(Realm *realm) {
@@ -296,7 +302,9 @@ bool GameObjectPtrList::iterator::operator!=(const GameObjectPtrList::const_iter
 
 GameObjectPtr &GameObjectPtrList::iterator::operator*() const {
 
-    Q_ASSERT(m_list);
+    if (!m_list) {
+        throw GameException(GameException::NullIteratorReference);
+    }
     return m_list->m_items[m_index];
 }
 
@@ -345,7 +353,9 @@ bool GameObjectPtrList::const_iterator::operator!=(const GameObjectPtrList::cons
 
 const GameObjectPtr &GameObjectPtrList::const_iterator::operator*() const {
 
-    Q_ASSERT(m_list);
+    if (!m_list) {
+        throw GameException(GameException::NullIteratorReference);
+    }
     return m_list->m_items[m_index];
 }
 
@@ -687,8 +697,12 @@ void GameObjectPtrList::removeAt(int i) {
             m_size--;
         }
     } else {
-        Q_ASSERT(m_nextList);
-        m_nextList->removeAt(i - m_size);
+        if (m_nextList) {
+            m_nextList->removeAt(i - m_size);
+        } else {
+            throw GameException(GameException::IndexOutOfBounds,
+                                QString("Index %1 should be within [0,%2)").arg(i).arg(m_size));
+        }
     }
 
     if (m_nextList && m_nextList->m_size == 0) {
@@ -800,8 +814,12 @@ const GameObjectPtr &GameObjectPtrList::operator[](int i) const {
     if (i < m_size) {
         return m_items[i];
     } else {
-        Q_ASSERT(m_nextList);
-        return (*m_nextList)[i - m_size];
+        if (m_nextList) {
+            return (*m_nextList)[i - m_size];
+        } else {
+            throw GameException(GameException::IndexOutOfBounds,
+                                QString("Index %1 should be within [0,%2)").arg(i).arg(m_size));
+        }
     }
 }
 

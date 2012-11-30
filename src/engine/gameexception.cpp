@@ -1,6 +1,5 @@
 #include "gameexception.h"
 
-#include <cstdio>
 #include <cstring>
 
 #include "gameobject.h"
@@ -20,47 +19,39 @@ const char *GameException::s_messages[] = {
     "Invalid point",
     "Invalid vector",
     "Unknown game event type",
-    "Not supported"
+    "Not supported",
+    "Index out of bounds",
+    "Null iterator referenced"
 };
 
 GameException::GameException(Cause cause) :
     std::exception(),
     m_cause(cause),
-    m_customMessage(false),
-    m_message(const_cast<char *>(s_messages[cause])) {
+    m_what(strdup(s_messages[cause])) {
 }
 
 GameException::GameException(Cause cause, GameObjectType objectType, uint id) :
     std::exception(),
-    m_cause(cause),
-    m_customMessage(true) {
+    m_cause(cause) {
 
-    m_message = new char[100];
-    if (objectType != GameObjectType::Unknown) {
-        sprintf(m_message, "%s (Object: %s:%d)", s_messages[cause],
-                objectType.toCString(), id);
-    } else {
-        sprintf(m_message, "%s (Object: undefined:%d)", s_messages[cause], id);
-    }
+    m_what = strdup(QString("%1 (%2:%3)").arg(QString(s_messages[cause]), objectType.toString(),
+                                              QString::number(id)).toUtf8().constData());
 }
 
-GameException::GameException(GameException::Cause cause, const char *message) :
+GameException::GameException(GameException::Cause cause, const QString &message) :
     std::exception(),
-    m_cause(cause),
-    m_customMessage(true) {
+    m_cause(cause) {
 
-    m_message = new char[100 + strlen(message)];
-    sprintf(m_message, "%s: %s", s_messages[cause], message);
+    m_what = strdup(QString("%1: %2").arg(QString(s_messages[cause]), message)
+                    .toUtf8().constData());
 }
 
 GameException::~GameException() throw () {
 
-    if (m_customMessage) {
-        delete[] m_message;
-    }
+    delete[] m_what;
 }
 
 const char *GameException::what() const throw () {
 
-    return m_message;
+    return m_what;
 }

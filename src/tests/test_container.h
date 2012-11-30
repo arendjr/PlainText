@@ -19,7 +19,7 @@ class ContainerTest : public TestCase {
         virtual void init() {
 
             Realm *realm = Realm::instance();
-            Player *player = realm->getPlayer("Arie");
+            Player *player = (Player *) realm->getPlayer("Arie");
 
             m_container = new Container(realm);
             m_container->setName("container");
@@ -44,7 +44,7 @@ class ContainerTest : public TestCase {
         void testPutAllInContainer() {
 
             Realm *realm = Realm::instance();
-            Player *player = realm->getPlayer("Arie");
+            Player *player = (Player *) realm->getPlayer("Arie");
 
             QSignalSpy spy(player, SIGNAL(write(QString)));
 

@@ -191,7 +191,13 @@ Command.prototype.objectsByDescription = function(description, pool) {
     } else {
         for (var i = 0, length = pool.length; i < length; i++) {
             var object = pool[i];
-            var words = object.name.toLower().split(" ");
+            var name;
+            if (object.nameFromRoom) {
+                name = object.nameFromRoom(this._currentRoom);
+            } else {
+                name = object.name;
+            }
+            var words = name.toLower().split(" ");
             for (var j = 0; j < words.length; j++) {
                 var word = words[j];
                 if (word.startsWith(description.name)) {

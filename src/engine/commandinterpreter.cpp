@@ -5,11 +5,11 @@
 
 #include "command.h"
 #include "commandregistry.h"
-#include "exit.h"
 #include "gameexception.h"
 #include "gameobjectptr.h"
 #include "logutil.h"
 #include "player.h"
+#include "portal.h"
 #include "room.h"
 #include "util.h"
 
@@ -44,17 +44,31 @@ void CommandInterpreter::execute(Player *player, const QString &command) {
             words[0] = Util::direction(commandName);
             commandName = words[0];
         }
-        Room *currentRoom = player->currentRoom().cast<Room *>();
-        bool matchedExit = false;
-        for (const GameObjectPtr &exitPtr : currentRoom->exits()) {
-            if (exitPtr->name() == commandName) {
-                matchedExit = true;
-            }
-        }
-        if (Util::isDirection(commandName) || matchedExit) {
+        if (Util::isDirection(commandName)) {
             words.prepend("go");
             m_registry->command("go")->execute(player, words.join(" "));
             return;
+        } else {
+            Room *currentRoom = player->currentRoom().cast<Room *>();
+            bool matchedPortal = false;
+            for (const GameObjectPtr &portalPtr : currentRoom->portals()) {
+                Portal *portal = portalPtr.cast<Portal *>();
+                QString portalName = portal->nameFromRoom(player->currentRoom());
+                if (portalName == commandName) {
+                    matchedPortal = true;
+                } else {
+                    for (const QString &portalNamePart : portalName.split(' ')) {
+                        if (portalNamePart == commandName) {
+                            matchedPortal = true;
+                        }
+                    }
+                }
+            }
+            if (matchedPortal) {
+                words.prepend("go");
+                m_registry->command("go")->execute(player, words.join(" "));
+                return;
+            }
         }
 
         QStringList commands;

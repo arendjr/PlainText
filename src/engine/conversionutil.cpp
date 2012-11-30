@@ -4,11 +4,7 @@
 #include <QDebug>
 #include <QStringList>
 
-#include "characterstats.h"
-#include "gameobjectptr.h"
 #include "metatyperegistry.h"
-#include "realm.h"
-#include "scriptfunctionmap.h"
 
 
 QVariant ConversionUtil::fromVariant(QVariant::Type type, int userType, const QVariant &variant) {

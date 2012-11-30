@@ -3,7 +3,7 @@
 
 #include <exception>
 
-#include <Qt>
+#include <QString>
 
 #include "gameobject.h"
 
@@ -25,12 +25,14 @@ class GameException : public std::exception {
             InvalidPoint,
             InvalidVector,
             UnknownGameEventType,
-            NotSupported
+            NotSupported,
+            IndexOutOfBounds,
+            NullIteratorReference
         };
 
         GameException(Cause cause);
         GameException(Cause cause, GameObjectType objectType, uint id);
-        GameException(Cause cause, const char *message);
+        GameException(Cause cause, const QString &message);
         virtual ~GameException() throw ();
 
         Cause cause() const { return m_cause; }
@@ -42,8 +44,7 @@ class GameException : public std::exception {
 
         Cause m_cause;
 
-        bool m_customMessage;
-        char *m_message;
+        char *m_what;
 };
 
 #endif // GAMEEXCEPTION_H

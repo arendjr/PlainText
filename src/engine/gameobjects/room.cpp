@@ -72,12 +72,14 @@ const GameObjectPtrList &Room::exits() {
                     exit->setDestination(portal->room2());
                     exit->setDoor(portal->flags() & PortalFlags::CanOpenFromSide1);
                     exit->setHidden(portal->flags() & PortalFlags::IsHiddenFromSide1);
+                    exit->setTriggers(portal->triggers());
                 } else {
                     exit->setName(portal->name2());
                     exit->setDescription(portal->description2());
                     exit->setDestination(portal->room());
                     exit->setDoor(portal->flags() & PortalFlags::CanOpenFromSide2);
                     exit->setHidden(portal->flags() & PortalFlags::IsHiddenFromSide2);
+                    exit->setTriggers(portal->triggers());
                 }
                 m_exits.append(exit);
             }

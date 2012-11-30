@@ -7,6 +7,7 @@
 #include "group.h"
 #include "logutil.h"
 #include "player.h"
+#include "portal.h"
 #include "race.h"
 #include "realm.h"
 #include "room.h"
@@ -36,6 +37,7 @@ Character::Character(Realm *realm, uint id, Options options) :
 Character::Character(Realm *realm, GameObjectType objectType, uint id, Options options) :
     super(realm, objectType, id, options),
     m_height(0),
+    m_direction(0, 0, 0),
     m_gender("male"),
     m_respawnTime(0),
     m_respawnTimeVariation(0),
@@ -88,6 +90,15 @@ void Character::setCurrentRoom(const GameObjectPtr &currentRoom) {
 
     if (m_currentRoom != currentRoom) {
         m_currentRoom = currentRoom;
+
+        setModified();
+    }
+}
+
+void Character::setDirection(const Vector3D &direction) {
+
+    if (m_direction != direction) {
+        m_direction = direction;
 
         setModified();
     }
@@ -446,26 +457,63 @@ void Character::close(const GameObjectPtr &exitPtr) {
     }
 }
 
-void Character::go(const GameObjectPtr &exitPtr) {
+void Character::go(const GameObjectPtr &pointer) {
 
     NO_STUN
 
     try {
-        Exit *exit = exitPtr.cast<Exit *>();
+        Room *room = currentRoom().cast<Room *>();
+        QString exitName;
+        GameObjectPtr destination;
+        GameObjectPtr portalOrExit;
 
-        if (exit->isDoor() && !exit->isOpen()) {
-            send(QString("The %1 is closed.").arg(exit->name()));
+        if (pointer->isExit()) {
+            Exit *exit = pointer.unsafeCast<Exit *>();
+
+            exitName = exit->name();
+            if (exit->isDoor() && !exit->isOpen()) {
+                send(QString("The %1 is closed.").arg(exitName));
+                return;
+            }
+
+            destination = exit->destination();
+            portalOrExit = pointer;
+        } else if (pointer->isPortal()) {
+            Portal *portal = pointer.unsafeCast<Portal *>();
+
+            exitName = portal->nameFromRoom(currentRoom());
+            if (portal->canOpenFromRoom(currentRoom()) && !portal->isOpen()) {
+                send(QString("The %1 is closed.").arg(exitName));
+                return;
+            }
+
+            destination = portal->oppositeOf(currentRoom());
+            portalOrExit = pointer;
+        } else if (pointer->isRoom()) {
+            for (const GameObjectPtr &portalPtr : room->portals()) {
+                Portal *portal = portalPtr.cast<Portal *>();
+                if (portal->oppositeOf(currentRoom()) == pointer) {
+                    exitName = portal->nameFromRoom(currentRoom());
+                    if (portal->canOpenFromRoom(currentRoom()) && !portal->isOpen()) {
+                        send(QString("The %1 is closed.").arg(exitName));
+                        return;
+                    }
+                }
+            }
+
+            destination = pointer;
+        } else {
+            qDebug() << "Character::go(): Expected a pointer to an exit, portal or room";
             return;
         }
 
-        Room *room = currentRoom().cast<Room *>();
         for (const GameObjectPtr &character : room->characters()) {
-            if (!character->invokeTrigger("oncharacterexit", this, exit->name())) {
+            if (!character->invokeTrigger("oncharacterexit", this, exitName)) {
                 return;
             }
         }
 
-        if (!exit->invokeTrigger("onenter", this)) {
+        if (!portalOrExit.isNull() && !portalOrExit->invokeTrigger("onenter", this)) {
             return;
         }
 
@@ -479,25 +527,27 @@ void Character::go(const GameObjectPtr &exitPtr) {
                     }
 
                     bool blocked = false;
-
                     for (const GameObjectPtr &character : room->characters()) {
-                        if (!character->invokeTrigger("oncharacterexit", member, exit->name())) {
+                        if (!character->invokeTrigger("oncharacterexit", member, exitName)) {
                             blocked = true;
                             break;
                         }
                     }
-
-                    if (blocked || !exit->invokeTrigger("onenter", member)) {
+                    if (blocked) {
                         continue;
                     }
 
-                    followers << member;
+                    if (!portalOrExit.isNull() && !portalOrExit->invokeTrigger("onenter", member)) {
+                        continue;
+                    }
+
+                    followers.append(member);
                 }
             }
         }
 
-        leave(currentRoom(), exit->name(), followers);
-        enter(exit->destination(), followers);
+        leave(currentRoom(), exitName, followers);
+        enter(destination, followers);
     } catch (GameException &exception) {
         qDebug() << "Exception in Character::go(): " << exception.what();
     }
