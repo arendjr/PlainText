@@ -28,7 +28,7 @@ enum Option {
     NoOptions = 0x0000,
     Capitalized = 0x0001,
     DefiniteArticles = 0x0002,
-    Copy = 0x0004,
+    Copy = 0x0004 | 0x0008,
     DontSave = 0x0008,
     SkipId = 0x0010,
     IncludeTypeInfo = 0x0020,
