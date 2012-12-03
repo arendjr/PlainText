@@ -43,30 +43,7 @@ void VisualEvent::visitRoom(Room *room, double strength) {
                 continue;
             }
 
-            Vector3D vector = oppositeRoom->position() - room->position();
-
-            bool inSight = true;
-
-            if (room != originRoom()) {
-                Vector3D sourceVector = (room->position() - originRoom()->position()).normalized();
-                Vector3D targetVector = vector.normalized();
-                if (sourceVector != targetVector) {
-                    inSight = false;
-
-                    if (room->flags() & RoomFlags::NoCeiling) {
-                        if (targetVector.z >= sourceVector.z) {
-                            inSight = true;
-                        }
-                    }
-                    if (room->flags() & RoomFlags::NoFloor) {
-                        if (targetVector.z <= sourceVector.z) {
-                            inSight = true;
-                        }
-                    }
-                }
-            }
-
-            if (!inSight) {
+            if (!isWithinSight(oppositeRoom, oppositeRoom)) {
                 continue;
             }
 
@@ -83,6 +60,7 @@ void VisualEvent::visitRoom(Room *room, double strength) {
                 multiplier = portal->eventMultipliers()[GameEventType::VisualEvent];
             }
 
+            Vector3D vector = oppositeRoom->position() - room->position();
             multiplier *= qMax(1.0 - 0.0005 * vector.length(), 0.0);
 
             double propagatedStrength = strength * multiplier;
@@ -91,4 +69,32 @@ void VisualEvent::visitRoom(Room *room, double strength) {
             }
         }
     }
+}
+
+bool VisualEvent::isWithinSight(Room *targetRoom, Room *sourceRoom) {
+
+    if (sourceRoom == originRoom()) {
+        return true;
+    }
+
+    Vector3D vector = targetRoom->position() - sourceRoom->position();
+
+    Vector3D sourceVector = (targetRoom->position() - originRoom()->position()).normalized();
+    Vector3D targetVector = vector.normalized();
+    if (sourceVector == targetVector) {
+        return true;
+    }
+
+    if (targetRoom->flags() & RoomFlags::NoCeiling) {
+        if (targetVector.z >= sourceVector.z) {
+            return true;
+        }
+    }
+    if (targetRoom->flags() & RoomFlags::NoFloor) {
+        if (targetVector.z <= sourceVector.z) {
+            return true;
+        }
+    }
+
+    return false;
 }

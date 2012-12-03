@@ -14,6 +14,8 @@ class VisualEvent : public GameEvent {
 
     protected:
         virtual void visitRoom(Room *room, double strength);
+
+        virtual bool isWithinSight(Room *targetRoom, Room *sourceRoom);
 };
 
 #endif // VISUALEVENT_H

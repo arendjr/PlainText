@@ -98,6 +98,7 @@ SOURCES += \
     engine/events/signinevent.cpp \
     engine/events/timerevent.cpp \
     engine/gameevents/gameevent.cpp \
+    engine/gameevents/movementevent.cpp \
     engine/gameevents/soundevent.cpp \
     engine/gameevents/speechevent.cpp \
     engine/gameevents/visualevent.cpp \
@@ -229,6 +230,7 @@ HEADERS += \
     engine/events/signinevent.h \
     engine/events/timerevent.h \
     engine/gameevents/gameevent.h \
+    engine/gameevents/movementevent.h \
     engine/gameevents/soundevent.h \
     engine/gameevents/speechevent.h \
     engine/gameevents/visualevent.h \
