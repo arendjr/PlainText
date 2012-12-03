@@ -1,8 +1,6 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#include <QFlags>
-
 
 enum Color {
     White = 0,
@@ -24,7 +22,7 @@ enum Color {
 };
 
 
-enum Option {
+enum Options {
     NoOptions = 0x0000,
     Capitalized = 0x0001,
     DefiniteArticles = 0x0002,
@@ -34,9 +32,9 @@ enum Option {
     IncludeTypeInfo = 0x0020,
     IfNotLast = 0x0040,
     DontRegister = 0x0080,
-    DontServe = 0x0100
+    DontServe = 0x0100,
+    AutoDelete = 0x0200,
+    NeverDelete = 0x0400
 };
-Q_DECLARE_FLAGS(Options, Option)
-Q_DECLARE_OPERATORS_FOR_FLAGS(Options)
 
 #endif // CONSTANTS_H

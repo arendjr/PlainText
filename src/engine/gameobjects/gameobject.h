@@ -205,7 +205,6 @@ class GameObject : public QObject {
         uint m_id;
         Options m_options;
 
-        bool m_autoDelete;
         bool m_deleted;
 
         QVector<GameObjectPtr *> m_pointers;

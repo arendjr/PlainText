@@ -4,7 +4,7 @@
 #define super GameObject
 
 Exit::Exit(Realm *realm, uint id, Options options) :
-    super(realm, GameObjectType::Exit, id, options | DontSave),
+    super(realm, GameObjectType::Exit, id, (Options) (options | DontSave)),
     m_door(false),
     m_open(false),
     m_hidden(false) {

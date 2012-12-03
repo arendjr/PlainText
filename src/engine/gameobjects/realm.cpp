@@ -16,7 +16,7 @@ static Realm *s_instance = nullptr;
 #define super GameObject
 
 Realm::Realm(Options options) :
-    super(this, GameObjectType::Realm, 0, options | DontRegister),
+    super(this, GameObjectType::Realm, 0, (Options) (options | DontRegister | NeverDelete)),
     m_initialized(false),
     m_nextId(1),
     m_timeIntervalId(0),
@@ -26,8 +26,6 @@ Realm::Realm(Options options) :
     if (~options & Copy) {
         s_instance = this;
     }
-
-    setAutoDelete(false);
 
     m_commandRegistry = new CommandRegistry(this);
 

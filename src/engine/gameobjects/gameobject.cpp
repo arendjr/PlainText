@@ -40,8 +40,7 @@ GameObject::GameObject(Realm *realm, GameObjectType objectType, uint id, Options
     m_realm(realm),
     m_objectType(objectType),
     m_id(id),
-    m_options(options),
-    m_autoDelete(true),
+    m_options((Options) (options | AutoDelete)),
     m_deleted(false),
     m_intervalHash(nullptr),
     m_timeoutHash(nullptr) {
@@ -475,7 +474,8 @@ QString GameObject::toJsonString(Options options) const {
     for (const QMetaProperty &metaProperty : storedMetaProperties()) {
         const char *name = metaProperty.name();
 
-        QString propertyString = ConversionUtil::toJsonString(property(name), options & IncludeTypeInfo);
+        QString propertyString = ConversionUtil::toJsonString(property(name),
+                                                              (Options) (options & IncludeTypeInfo));
         if (!propertyString.isNull()) {
             dumpedProperties << QString("  \"%1\": %2").arg(name, propertyString);
         }
@@ -491,7 +491,7 @@ bool GameObject::save() {
         m_realm->enqueueEvent(new DeleteObjectEvent(this));
     } else {
         return DiskUtil::writeGameObject(m_objectType.toString(), m_id,
-                                         toJsonString(SkipId | IncludeTypeInfo));
+                                         toJsonString((Options) (SkipId | IncludeTypeInfo)));
     }
 }
 
@@ -741,10 +741,18 @@ void GameObject::setModified() {
 
 void GameObject::setAutoDelete(bool autoDelete) {
 
-    m_autoDelete = autoDelete;
+    if (autoDelete) {
+        m_options = (Options) (m_options | AutoDelete);
+    } else {
+        m_options = (Options) (m_options & ~AutoDelete);
+    }
 }
 
 void GameObject::registerPointer(GameObjectPtr *pointer) {
+
+    if (m_options & NeverDelete) {
+        return;
+    } 
 
     Q_ASSERT(!m_pointers.contains(pointer));
     m_pointers.append(pointer);
@@ -752,11 +760,15 @@ void GameObject::registerPointer(GameObjectPtr *pointer) {
 
 void GameObject::unregisterPointer(GameObjectPtr *pointer) {
 
+    if (m_options & NeverDelete) {
+        return;
+    } 
+
     int index = m_pointers.indexOf(pointer);
     Q_ASSERT(index > -1);
     m_pointers.remove(index);
 
-    if (m_autoDelete && m_pointers.isEmpty()) {
+    if (m_options & AutoDelete && m_pointers.isEmpty()) {
         setDeleted();
     }
 }

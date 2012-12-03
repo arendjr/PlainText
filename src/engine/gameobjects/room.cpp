@@ -10,11 +10,10 @@
 #define super GameObject
 
 Room::Room(Realm *realm, uint id, Options options) :
-    super(realm, GameObjectType::Room, id, options),
+    super(realm, GameObjectType::Room, id, (Options) (options | NeverDelete)),
     m_position(0, 0, 0),
+    m_portals(8),
     m_flags(RoomFlags::NoFlags) {
-
-    setAutoDelete(false);
 }
 
 Room::~Room() {
@@ -32,7 +31,7 @@ void Room::setPosition(const Point3D &position) {
 void Room::addPortal(const GameObjectPtr &portal) {
 
     if (!m_portals.contains(portal)) {
-        m_portals << portal;
+        m_portals.append(portal);
 
         m_exits.clear();
         setModified();
@@ -91,7 +90,7 @@ const GameObjectPtrList &Room::exits() {
 void Room::addCharacter(const GameObjectPtr &character) {
 
     if (!m_characters.contains(character)) {
-        m_characters << character;
+        m_characters.append(character);
     }
 }
 
@@ -110,7 +109,7 @@ void Room::setCharacters(const GameObjectPtrList &characters) {
 void Room::addItem(const GameObjectPtr &item) {
 
     if (!m_items.contains(item)) {
-        m_items << item;
+        m_items.append(item);
 
         setModified();
     }

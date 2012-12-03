@@ -390,30 +390,30 @@ Vector3D Util::vectorForDirection(const QString &direction) {
 
 QString Util::directionForVector(const Vector3D &vector) {
 
-    if (abs(vector.z) > sqrt(pow(vector.x, 2) + pow(vector.y, 2))) {
+    if (abs(vector.z) > sqrt(vector.x * vector.x + vector.y * vector.y)) {
         if (vector.z > 0) {
-            return "down";
+            return directions[9].name;
         } else {
-            return "up";
+            return directions[8].name;
         }
     } else {
         double degrees = atan2(vector.y, vector.x) * 360.0 / TAU;
         if (degrees < -157.5 || degrees > 157.5) {
-            return "west";
+            return directions[6].name;
         } else if (degrees >= -157.5 && degrees < -112.5) {
-            return "northwest";
+            return directions[7].name;
         } else if (degrees >= -112.5 && degrees < -67.5) {
-            return "north";
+            return directions[0].name;
         } else if (degrees >= -67.5 && degrees < -22.5) {
-            return "northeast";
+            return directions[1].name;
         } else if (degrees >= -22.5 && degrees < 22.5) {
-            return "east";
+            return directions[2].name;
         } else if (degrees >= 22.5 && degrees < 67.5) {
-            return "southeast";
+            return directions[3].name;
         } else if (degrees >= 67.5 && degrees < 112.5) {
-            return "south";
+            return directions[4].name;
         } else {
-            return "southwest";
+            return directions[5].name;
         }
     }
 }
