@@ -27,11 +27,15 @@ class MovementTest : public TestCase {
             {
                 player->go(portal);
                 QCOMPARE(player->currentRoom()->name(), QString("Room B"));
+
+                QCOMPARE(player->direction(), Vector3D(0, 100, 0));
             }
 
             {
                 player->go(portal);
                 QCOMPARE(player->currentRoom()->name(), QString("Room A"));
+
+                QCOMPARE(player->direction(), Vector3D(0, -100, 0));
             }
 
             {

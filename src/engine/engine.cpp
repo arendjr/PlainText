@@ -27,7 +27,7 @@ Engine::Engine() :
     qsrand(QDateTime::currentMSecsSinceEpoch());
 }
 
-bool Engine::start() {
+bool Engine::start(Options options) {
 
     try {
         m_scriptEngine = new ScriptEngine();
@@ -43,9 +43,11 @@ bool Engine::start() {
         m_scriptEngine->loadScripts();
         m_realm->init();
 
-        m_telnetServer = new TelnetServer(m_realm, 4801);
-        m_webSocketServer = new WebSocketServer(m_realm, 4802);
-        m_httpServer = new HttpServer(8080);
+        if (~options & DontServe) {
+            m_telnetServer = new TelnetServer(m_realm, 4801);
+            m_webSocketServer = new WebSocketServer(m_realm, 4802);
+            m_httpServer = new HttpServer(8080);
+        }
 
         return true;
     } catch (const GameException &exception) {

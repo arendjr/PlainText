@@ -33,7 +33,8 @@ enum Option {
     SkipId = 0x0010,
     IncludeTypeInfo = 0x0020,
     IfNotLast = 0x0040,
-    DontRegister = 0x0080
+    DontRegister = 0x0080,
+    DontServe = 0x0100
 };
 Q_DECLARE_FLAGS(Options, Option)
 Q_DECLARE_OPERATORS_FOR_FLAGS(Options)

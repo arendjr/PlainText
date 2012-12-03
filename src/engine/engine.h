@@ -3,6 +3,8 @@
 
 #include <QObject>
 
+#include "constants.h"
+
 
 class HttpServer;
 class Realm;
@@ -19,7 +21,7 @@ class Engine : public QObject {
         Engine();
         virtual ~Engine();
 
-        bool start();
+        bool start(Options options = NoOptions);
 
     private:
         HttpServer *m_httpServer;

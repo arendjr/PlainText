@@ -54,7 +54,7 @@ class SerializationTest : public TestCase {
                 QVERIFY(file.open(QIODevice::ReadOnly));
                 QCOMPARE(QString(file.readAll()), QString("{\n"
                     "  \"name\": \"Room B\",\n"
-                    "  \"position\": [ 0, 0, 0 ],\n"
+                    "  \"position\": [ 0, 50, 0 ],\n"
                     "  \"portals\": [ \"portal:3\" ],\n"
                     "  \"flags\": \"\"\n"
                 "}"));

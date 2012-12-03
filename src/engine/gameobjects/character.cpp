@@ -546,8 +546,13 @@ void Character::go(const GameObjectPtr &pointer) {
             }
         }
 
+        Room *sourceRoom = currentRoom().cast<Room *>();
+        Room *destinationRoom = destination.cast<Room *>();
+
         leave(currentRoom(), exitName, followers);
         enter(destination, followers);
+
+        setDirection((destinationRoom->position() - sourceRoom->position()).normalized());
     } catch (GameException &exception) {
         qDebug() << "Exception in Character::go(): " << exception.what();
     }

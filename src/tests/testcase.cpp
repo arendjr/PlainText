@@ -24,7 +24,7 @@ void TestCase::initTestCase() {
     }
 
     m_engine = new Engine();
-    bool started = m_engine->start();
+    bool started = m_engine->start(DontServe);
 
     QVERIFY2(started, "Engine should be started");
 
@@ -44,9 +44,11 @@ void TestCase::createTestWorld() {
 
     Room *roomA = new Room(realm);
     roomA->setName("Room A");
+    roomA->setPosition(Point3D(0, 0, 0));
 
     Room *roomB = new Room(realm);
     roomB->setName("Room B");
+    roomB->setPosition(Point3D(0, 50, 0));
 
     Portal *portal = new Portal(realm);
     portal->setRoom(roomA);
