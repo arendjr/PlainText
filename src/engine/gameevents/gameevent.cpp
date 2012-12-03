@@ -148,3 +148,13 @@ bool GameEvent::hasBeenVisited(Room *room) const {
     int index = m_visitIndex.value(room);
     return index > 0;
 }
+
+double GameEvent::strengthForRoom(Room *room) const {
+
+    int index = m_visitIndex.value(room);
+    if (index > 0) {
+        return m_visits[index - 1].strength;
+    } else {
+        return 0.0;
+    }
+}

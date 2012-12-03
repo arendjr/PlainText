@@ -43,7 +43,7 @@ void VisualEvent::visitRoom(Room *room, double strength) {
                 continue;
             }
 
-            if (!isWithinSight(oppositeRoom, oppositeRoom)) {
+            if (!isWithinSight(oppositeRoom, room)) {
                 continue;
             }
 
@@ -77,20 +77,18 @@ bool VisualEvent::isWithinSight(Room *targetRoom, Room *sourceRoom) {
         return true;
     }
 
-    Vector3D vector = targetRoom->position() - sourceRoom->position();
-
-    Vector3D sourceVector = (targetRoom->position() - originRoom()->position()).normalized();
-    Vector3D targetVector = vector.normalized();
+    Vector3D sourceVector = (sourceRoom->position() - originRoom()->position()).normalized();
+    Vector3D targetVector = (targetRoom->position() - sourceRoom->position()).normalized();
     if (sourceVector == targetVector) {
         return true;
     }
 
-    if (targetRoom->flags() & RoomFlags::NoCeiling) {
+    if (sourceRoom->flags() & RoomFlags::NoCeiling) {
         if (targetVector.z >= sourceVector.z) {
             return true;
         }
     }
-    if (targetRoom->flags() & RoomFlags::NoFloor) {
+    if (sourceRoom->flags() & RoomFlags::NoFloor) {
         if (targetVector.z <= sourceVector.z) {
             return true;
         }

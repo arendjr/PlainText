@@ -79,6 +79,7 @@ class GameEvent : public QObject {
 
         void addVisit(Room *room, double strength);
         bool hasBeenVisited(Room *room) const;
+        double strengthForRoom(Room *room) const;
 
     private:
         class Visit {

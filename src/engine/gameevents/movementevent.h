@@ -12,10 +12,13 @@ class MovementEvent : public VisualEvent {
         MovementEvent(Room *origin, double strength);
         virtual ~MovementEvent();
 
-        void setDestination();
+        void setDestination(Room *destination);
 
     protected:
         virtual void visitRoom(Room *room, double strength);
+
+    private:
+        Room *m_destination;
 };
 
 #endif // MOVEMENTEVENT_H
