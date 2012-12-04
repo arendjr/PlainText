@@ -6,6 +6,7 @@
 #include "exit.h"
 #include "group.h"
 #include "logutil.h"
+#include "movementevent.h"
 #include "player.h"
 #include "portal.h"
 #include "race.h"
@@ -547,12 +548,51 @@ void Character::go(const GameObjectPtr &pointer) {
         }
 
         Room *sourceRoom = currentRoom().cast<Room *>();
+        sourceRoom->removeCharacter(this);
+        for (const GameObjectPtr &follower : followers) {
+            sourceRoom->removeCharacter(follower);
+        }
+
         Room *destinationRoom = destination.cast<Room *>();
+        destinationRoom->addCharacter(this);
+        for (const GameObjectPtr &follower : followers) {
+            destinationRoom->addCharacter(follower);
+        }
 
-        leave(currentRoom(), exitName, followers);
-        enter(destination, followers);
+        Vector3D movement = destinationRoom->position() - sourceRoom->position();
+        Vector3D direction = movement.normalized();
 
-        setDirection((destinationRoom->position() - sourceRoom->position()).normalized());
+        setCurrentRoom(destination);
+        setDirection(direction);
+        enteredRoom();
+
+        for (const GameObjectPtr &followerPtr : followers) {
+            Character *follower = followerPtr.cast<Character *>();
+            follower->setCurrentRoom(destination);
+            follower->setDirection(direction);
+            follower->send(QString("You follow %1.").arg(name()));
+            follower->enteredRoom();
+        }
+
+        MovementEvent *event = new MovementEvent(this, sourceRoom, 1.0);
+        event->setDestination(destinationRoom);
+        event->setExcludedCharacters(followers);
+        event->addExcludedCharacter(this);
+        event->setMovement(movement);
+        event->setDirection(direction);
+        event->fire();
+
+        for (const GameObjectPtr &character : destinationRoom->characters()) {
+            character->invokeTrigger("oncharacterentered", this);
+
+            for (const GameObjectPtr &follower : followers) {
+                character->invokeTrigger("oncharacterentered", follower);
+            }
+        }
+
+        if (isPlayer()) {
+            LogUtil::countRoomVisit(destination.toString(), 1 + followers.length());
+        }
     } catch (GameException &exception) {
         qDebug() << "Exception in Character::go(): " << exception.what();
     }
