@@ -1,8 +1,12 @@
 #include "visualevent.h"
 
+#include "character.h"
 #include "portal.h"
 #include "room.h"
 #include "vector3d.h"
+
+
+#define TAU 6.2831853071
 
 
 #define super GameEvent
@@ -21,8 +25,15 @@ void VisualEvent::visitRoom(Room *room, double strength) {
     if (strength >= 0.1) {
         QString message = descriptionForStrengthInRoom(strength, room);
 
-        for (const GameObjectPtr &character : room->characters()) {
-            if (excludedCharacters().contains(character)) {
+        for (const GameObjectPtr &characterPtr : room->characters()) {
+            if (excludedCharacters().contains(characterPtr)) {
+                continue;
+            }
+
+            Character *character = characterPtr.cast<Character *>();
+            double angle = character->direction().angle(room->position() - originRoom()->position());
+
+            if (angle > TAU / 8) {
                 continue;
             }
 

@@ -42,7 +42,8 @@ QString MovementEvent::descriptionForStrengthInRoom(double strength, Room *room)
     QString direction = Util::directionForVector(m_direction);
 
     if (strength > 0.9) {
-        return QString("You see %1 walking to the %2.").arg(m_character->name(), direction);
+        return QString("You see %1 walking to the %2.").arg(m_character->indefiniteName(),
+                                                            direction);
     } else if (strength > 0.8) {
         QString sex = m_character->gender() == "male" ? "a man" : "a woman";
         return QString("You see %1 walking to the %2.").arg(sex, direction);

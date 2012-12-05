@@ -15,6 +15,11 @@ Vector3D::Vector3D(int x, int y, int z) :
     z(z) {
 }
 
+bool Vector3D::isNull() const {
+
+    return x == 0 && y == 0 && z == 0;
+}
+
 bool Vector3D::operator==(const Vector3D &other) const {
 
     return other.x == x && other.y == y && other.z == z;
@@ -54,6 +59,20 @@ Vector3D Vector3D::normalized() const {
         result.z = 0;
     }
     return result;
+}
+
+int Vector3D::operator*(const Vector3D &other) const {
+
+    return x * other.x +
+           y * other.y +
+           z * other.z;
+}
+
+double Vector3D::angle(const Vector3D &other) const {
+
+    return acos((x * other.x + y * other.y + z * other.z) /
+                (sqrt(x * x + y * y + z * z) *
+                 sqrt(other.x * other.x + other.y * other.y + other.z * other.z)));
 }
 
 QString Vector3D::toString() const {

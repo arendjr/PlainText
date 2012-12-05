@@ -19,6 +19,8 @@ class Vector3D {
         Vector3D() = default;
         Vector3D(int x, int y, int z);
 
+        bool isNull() const;
+
         bool operator==(const Vector3D &other) const;
         bool operator!=(const Vector3D &other) const;
 
@@ -27,6 +29,10 @@ class Vector3D {
 
         int length() const;
         Vector3D normalized() const;
+
+        int operator*(const Vector3D &other) const;
+
+        double angle(const Vector3D &other) const;
 
         QString toString() const;
 
