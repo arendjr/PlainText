@@ -16,6 +16,8 @@ class ScriptFunction {
         QString source;
 
         ScriptFunction();
+        ScriptFunction(const char *string);
+        ScriptFunction(const QString &string);
         ScriptFunction(const ScriptFunction &other);
 
         ScriptFunction &operator=(const ScriptFunction &other);

@@ -39,18 +39,30 @@ QString MovementEvent::descriptionForStrengthInRoom(double strength, Room *room)
 
     Q_UNUSED(room)
 
-    QString direction = Util::directionForVector(m_direction);
+    if (room == originRoom()) {
+        return QString("%1 walked to the %2.").arg(m_character->indefiniteName(Capitalized),
+                                                   Util::directionForVector(m_direction));
+    } else if (room == m_destination) {
+        return QString("%1 walked to you.").arg(m_character->indefiniteName(Capitalized));
+    }
+
+    QString direction;
+    double angle = m_direction.angle(room->position() - originRoom()->position());
+    if (angle < TAU / 8) {
+        direction = "toward you";
+    } else {
+        direction = "to the " + Util::directionForVector(m_direction);
+    }
 
     if (strength > 0.9) {
-        return QString("You see %1 walking to the %2.").arg(m_character->indefiniteName(),
-                                                            direction);
+        return QString("You see %1 walking %2.").arg(m_character->indefiniteName(), direction);
     } else if (strength > 0.8) {
         QString sex = m_character->gender() == "male" ? "a man" : "a woman";
-        return QString("You see %1 walking to the %2.").arg(sex, direction);
+        return QString("You see %1 walking %2.").arg(sex, direction);
     } else if (strength > 0.6) {
-        return QString("You see someone walking to the %1.").arg(direction);
+        return QString("You see someone walking %1.").arg(direction);
     } else {
-        return QString("You see a shape moving to the %1.").arg(direction);
+        return QString("You see a shape moving %1.").arg(direction);
     }
 }
 

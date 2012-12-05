@@ -562,33 +562,27 @@ void Character::go(const GameObjectPtr &pointer) {
         Vector3D movement = destinationRoom->position() - sourceRoom->position();
         Vector3D direction = movement.normalized();
 
-        setCurrentRoom(destination);
+        leave(currentRoom());
         setDirection(direction);
-        enteredRoom();
+        enter(destination);
 
         for (const GameObjectPtr &followerPtr : followers) {
             Character *follower = followerPtr.cast<Character *>();
-            follower->setCurrentRoom(destination);
-            follower->setDirection(direction);
-            follower->send(QString("You follow %1.").arg(name()));
-            follower->enteredRoom();
+            if (follower->currentRoom() == currentRoom()) {
+                follower->leave(currentRoom());
+                follower->setDirection(direction);
+                follower->enter(destination);
+                follower->send(QString("You follow %1.").arg(name()));
+            }
         }
 
         MovementEvent *event = new MovementEvent(this, sourceRoom, 1.0);
         event->setDestination(destinationRoom);
-        event->setExcludedCharacters(followers);
-        event->addExcludedCharacter(this);
         event->setMovement(movement);
         event->setDirection(direction);
+        event->setExcludedCharacters(followers);
+        event->addExcludedCharacter(this);
         event->fire();
-
-        for (const GameObjectPtr &character : destinationRoom->characters()) {
-            character->invokeTrigger("oncharacterentered", this);
-
-            for (const GameObjectPtr &follower : followers) {
-                character->invokeTrigger("oncharacterentered", follower);
-            }
-        }
 
         if (isPlayer()) {
             LogUtil::countRoomVisit(destination.toString(), 1 + followers.length());
@@ -598,96 +592,29 @@ void Character::go(const GameObjectPtr &pointer) {
     }
 }
 
-void Character::enter(const GameObjectPtr &roomPtr, const GameObjectPtrList &followers) {
+void Character::enter(const GameObjectPtr &roomPtr) {
 
     try {
         setCurrentRoom(roomPtr);
 
-        for (const GameObjectPtr &follower : followers) {
-            follower.cast<Character *>()->setCurrentRoom(roomPtr);
-        }
-
         Room *room = roomPtr.cast<Room *>();
-        GameObjectPtrList characters = room->characters();
-
         room->addCharacter(this);
-
-        for (const GameObjectPtr &follower : followers) {
-            room->addCharacter(follower);
-        }
-
-        if (isPlayer()) {
-            LogUtil::countRoomVisit(roomPtr.toString(), 1 + followers.length());
-        }
-
-        if (!characters.isEmpty()) {
-            GameObjectPtrList arrivals;
-            arrivals.append(this);
-            arrivals.append(followers);
-            characters.send(QString("%1 arrived.").arg(arrivals.joinFancy(Capitalized)));
-        }
 
         enteredRoom();
 
-        for (const GameObjectPtr &follower : followers) {
-            follower->send(QString("You follow %1.").arg(name()));
-            follower.cast<Character *>()->enteredRoom();
-        }
-
-        for (const GameObjectPtr &character : characters) {
+        for (const GameObjectPtr &character : room->characters()) {
             character->invokeTrigger("oncharacterentered", this);
-
-            for (const GameObjectPtr &follower : followers) {
-                character->invokeTrigger("oncharacterentered", follower);
-            }
         }
     } catch (GameException &exception) {
         qDebug() << "Exception in Character::enter(): " << exception.what();
     }
 }
 
-void Character::leave(const GameObjectPtr &roomPtr, const QString &exitName,
-                      const GameObjectPtrList &followers) {
+void Character::leave(const GameObjectPtr &roomPtr) {
 
     try {
         Room *room = roomPtr.cast<Room *>();
-
         room->removeCharacter(this);
-
-        for (const GameObjectPtr &follower : followers) {
-            room->removeCharacter(follower);
-        }
-
-        GameObjectPtrList characters = room->characters();
-        if (!characters.isEmpty()) {
-            QString departuresName;
-            if (followers.isEmpty()) {
-                bool unique = true;
-                for (const GameObjectPtr &other : characters) {
-                    if (other->name() == name()) {
-                        unique = false;
-                        break;
-                    }
-                }
-                if (unique) {
-                    departuresName = definiteName(characters, Capitalized);
-                } else {
-                    departuresName = indefiniteName(Capitalized);
-                }
-            } else {
-                GameObjectPtrList departures;
-                departures << this;
-                departures << followers;
-                departuresName = departures.joinFancy(Capitalized);
-            }
-
-            characters.send(exitName.isEmpty() ?
-                            QString("%1 left.").arg(departuresName) :
-                            QString("%1 left %2%3.").arg(departuresName,
-                                                         Util::isDirection(exitName) ? "" :
-                                                                                       "to the ",
-                                                         exitName));
-        }
     } catch (GameException &exception) {
         qDebug() << "Exception in Character::leave(): " << exception.what();
     }

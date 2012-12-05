@@ -2,6 +2,7 @@
 #define TESTCASE_H
 
 #include <QObject>
+#include <QScriptValue>
 
 
 class Engine;
@@ -9,6 +10,9 @@ class Engine;
 class TestCase : public QObject {
 
     Q_OBJECT
+
+    protected:
+        QScriptValue evaluate(const QString &statement);
 
     private slots:
         virtual void initTestCase();

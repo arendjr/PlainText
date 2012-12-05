@@ -9,7 +9,13 @@
 #include "portal.h"
 #include "realm.h"
 #include "room.h"
+#include "scriptengine.h"
 
+
+QScriptValue TestCase::evaluate(const QString &statement) {
+
+    return ScriptEngine::instance()->evaluate(statement);
+}
 
 void TestCase::initTestCase() {
 
@@ -55,20 +61,35 @@ void TestCase::createTestWorld() {
     portal->setRoom2(roomB);
     portal->setName("a-to-b");
     portal->setName2("b-to-a");
-    portal->setFlags(PortalFlags::CanPassThrough);
+    portal->setFlags(PortalFlags::CanPassThrough | PortalFlags::CanSeeThrough);
 
     roomA->addPortal(portal);
     roomB->addPortal(portal);
 
-    Player *player = new Player(realm, 4);
+    Player *player = new Player(realm);
     player->setName("Arie");
     player->setCurrentRoom(roomA);
     player->setAdmin(true);
 
+    Room *roomC = new Room(realm);
+    roomC->setName("Room C");
+    roomC->setPosition(Point3D(0, 100, 0));
+
+    portal = new Portal(realm);
+    portal->setRoom(roomB);
+    portal->setRoom2(roomC);
+    portal->setName("b-to-c");
+    portal->setName2("c-to-b");
+    portal->setFlags(PortalFlags::CanPassThrough | PortalFlags::CanSeeThrough);
+
+    roomB->addPortal(portal);
+    roomC->addPortal(portal);
+
     QCOMPARE(roomA->id(), (unsigned) 1);
     QCOMPARE(roomB->id(), (unsigned) 2);
-    QCOMPARE(portal->id(), (unsigned) 3);
     QCOMPARE(player->id(), (unsigned) 4);
+    QCOMPARE(roomC->id(), (unsigned) 5);
+    QCOMPARE(portal->id(), (unsigned) 6);
 }
 
 void TestCase::destroyTestWorld() {

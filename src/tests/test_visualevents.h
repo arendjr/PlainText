@@ -17,9 +17,6 @@
 #include "visualevent.h"
 
 
-#define TAU 6.2831853071
-
-
 class VisualEventsTest : public TestCase {
 
     Q_OBJECT

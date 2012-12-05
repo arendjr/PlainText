@@ -10,9 +10,6 @@
 #include "scriptengine.h"
 
 
-#define TAU 6.2831853071
-
-
 QString Util::joinFancy(const QStringList &list, const QString &separator, const QString &last) {
 
     QString string;

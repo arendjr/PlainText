@@ -9,6 +9,9 @@
 #include "vector3d.h"
 
 
+#define TAU 6.2831853071
+
+
 class Util : public QObject {
 
     Q_OBJECT

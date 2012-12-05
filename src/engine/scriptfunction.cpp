@@ -9,6 +9,16 @@
 ScriptFunction::ScriptFunction() {
 }
 
+ScriptFunction::ScriptFunction(const char *string) {
+
+    fromUserString(QString::fromUtf8(string), *this);
+}
+
+ScriptFunction::ScriptFunction(const QString &string) {
+
+    fromUserString(string, *this);
+}
+
 ScriptFunction::ScriptFunction(const ScriptFunction &other) :
     value(other.value),
     source(other.source) {

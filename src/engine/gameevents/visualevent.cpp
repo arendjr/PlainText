@@ -3,10 +3,8 @@
 #include "character.h"
 #include "portal.h"
 #include "room.h"
+#include "util.h"
 #include "vector3d.h"
-
-
-#define TAU 6.2831853071
 
 
 #define super GameEvent
@@ -31,10 +29,12 @@ void VisualEvent::visitRoom(Room *room, double strength) {
             }
 
             Character *character = characterPtr.cast<Character *>();
-            double angle = character->direction().angle(room->position() - originRoom()->position());
-
-            if (angle > TAU / 8) {
-                continue;
+            Vector3D eventDirection = originRoom()->position() - room->position();
+            if (!eventDirection.isNull()) {
+                double angle = character->direction().angle(eventDirection);
+                if (angle > TAU / 8) {
+                    continue;
+                }
             }
 
             if (character->isPlayer()) {

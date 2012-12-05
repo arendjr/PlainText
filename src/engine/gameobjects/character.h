@@ -127,10 +127,8 @@ class Character : public StatsItem {
         Q_INVOKABLE void close(const GameObjectPtr &exit);
         Q_INVOKABLE void go(const GameObjectPtr &pointer);
 
-        Q_INVOKABLE void enter(const GameObjectPtr &roomPtr,
-                               const GameObjectPtrList &followers = GameObjectPtrList());
-        Q_INVOKABLE void leave(const GameObjectPtr &roomPtr, const QString &exitName = QString(),
-                               const GameObjectPtrList &followers = GameObjectPtrList());
+        Q_INVOKABLE void enter(const GameObjectPtr &roomPtr);
+        Q_INVOKABLE void leave(const GameObjectPtr &roomPtr);
 
         Q_INVOKABLE void say(const QString &message);
         Q_INVOKABLE void shout(const QString &message);

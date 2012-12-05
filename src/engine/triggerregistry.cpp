@@ -68,12 +68,16 @@ TriggerRegistry::TriggerRegistry(QObject *parent) :
     m_triggers.insert("onshout(activator : character, message : string) : void",
                       "The onshout trigger is invoked on any character when it hears someone "
                       "shout.");
+    m_triggers.insert("onsound(message : string) : void",
+                      "The onsound trigger is invoked when a sound event is perceived.");
     m_triggers.insert("onspawn : void",
                       "The onspawn trigger is invoked on any character when it respawns.");
     m_triggers.insert("ontalk(speaker : character, message : string) : void",
                       "The ontalk trigger is invoked on any character when talked to.");
     m_triggers.insert("onuse(activator : character) : void",
                       "The onuse trigger is invoked on any item when it's used.");
+    m_triggers.insert("onvisual(message : string) : void",
+                      "The onvisual trigger is invoked when a visual event is perceived.");
 }
 
 TriggerRegistry::~TriggerRegistry() {
