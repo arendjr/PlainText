@@ -20,8 +20,6 @@
 #include "commands/getcommand.h"
 #include "commands/givecommand.h"
 #include "commands/gocommand.h"
-#include "commands/groupcommand.h"
-#include "commands/gtalkcommand.h"
 #include "commands/helpcommand.h"
 #include "commands/inventorycommand.h"
 #include "commands/killcommand.h"
@@ -87,8 +85,6 @@ CommandRegistry::CommandRegistry(QObject *parent) :
     m_commands.insert("get", get);
     m_commands.insert("give", new GiveCommand(this));
     m_commands.insert("go", go);
-    m_commands.insert("group", new GroupCommand(this));
-    m_commands.insert("gtalk", new GtalkCommand(this));
     m_commands.insert("help", new HelpCommand(this));
     m_commands.insert("inventory", new InventoryCommand(this));
     m_commands.insert("kill", kill);

@@ -267,6 +267,16 @@ String.prototype.left = function(n) {
     return this.substr(0, n);
 };
 
+String.prototype.leftJustified = function(n, fill) {
+
+    fill = fill || " ";
+    var padding = "";
+    for (var i = n - this.length; i > 0; i--) {
+        padding += fill;
+    }
+    return this + padding;
+};
+
 String.prototype.mid = function(begin, end) {
 
     return this.substr(begin, end);
@@ -284,6 +294,16 @@ String.prototype.replaceAll = function(before, after) {
 String.prototype.right = function(n) {
 
     return this.substr(n);
+};
+
+String.prototype.rightJustified = function(n, fill) {
+
+    fill = fill || " ";
+    var padding = "";
+    for (var i = n - this.length; i > 0; i--) {
+        padding += fill;
+    }
+    return padding + this;
 };
 
 String.prototype.startsWith = function(string) {

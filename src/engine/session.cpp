@@ -76,6 +76,8 @@ void Session::setSessionState(int sessionState) {
                                     "Player object should have been set");
             }
 
+            LogUtil::logCommand(m_player->name(), "(signed in)");
+
             m_player->setSession(this);
             break;
         }

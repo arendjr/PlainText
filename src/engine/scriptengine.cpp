@@ -128,7 +128,6 @@ void ScriptEngine::setGlobalObject(const char *name, QObject *object) {
     m_jsEngine.globalObject()
               .setProperty(name, m_jsEngine.newQObject(object,
                                                        QScriptEngine::QtOwnership,
-                                                       QScriptEngine::ExcludeSuperClassContents |
                                                        QScriptEngine::ExcludeDeleteLater));
 }
 

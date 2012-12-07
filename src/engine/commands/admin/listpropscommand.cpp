@@ -21,24 +21,24 @@ void ListPropsCommand::execute(Player *player, const QString &command) {
 
     super::prepareExecute(player, command);
 
-    GameObjectPtrList objects = takeObjects(currentRoom()->objects());
-    if (!requireUnique(objects, "Object not found.", "Object is not unique.")) {
+    GameObjectPtr object = takeObject(currentRoom()->objects());
+    if (!requireSome(object, "Object not found.")) {
         return;
     }
 
-    GameObjectPtr object = objects[0];
-    send(QString("These are all known properties of %1:\n"
-                 "\n").arg(Util::highlight(QString("object #%1").arg(object->id()))));
+    send("These are all known properties of %1:\n\n",
+         Util::highlight(QString("object #%1").arg(object->id())));
 
     const int lineLength = 45;
 
     for (const QMetaProperty &metaProperty : object->metaProperties()) {
-        const char *name = metaProperty.name();
-        if (strcmp(name, "id") == 0) {
+        const char *propertyName = metaProperty.name();
+        QString name(propertyName);
+        if (name == "id" || name.contains("password")) {
             continue;
         }
 
-        QString value = ConversionUtil::toUserString(object->property(name));
+        QString value = ConversionUtil::toUserString(object->property(propertyName));
 
         if (!metaProperty.isWritable()) {
             value += " (read-only)";
@@ -55,7 +55,7 @@ void ListPropsCommand::execute(Player *player, const QString &command) {
             }
         }
 
-        send("  " + Util::highlight(QString(name).leftJustified(30)) + "  " + valueLines[0]);
+        send("  " + Util::highlight(name.leftJustified(30)) + "  " + valueLines[0]);
         for (int i = 1; i < valueLines.size(); i++) {
             send("                                  " + valueLines[i]);
         }
