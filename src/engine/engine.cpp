@@ -6,6 +6,7 @@
 
 #include "commandregistry.h"
 #include "gameexception.h"
+#include "logutil.h"
 #include "realm.h"
 #include "scriptengine.h"
 #include "triggerregistry.h"
@@ -22,7 +23,8 @@ Engine::Engine() :
     m_webSocketServer(nullptr),
     m_scriptEngine(nullptr),
     m_realm(nullptr),
-    m_util(nullptr) {
+    m_util(nullptr),
+    m_logUtil(nullptr) {
 
     qsrand(QDateTime::currentMSecsSinceEpoch());
 }
@@ -33,9 +35,11 @@ bool Engine::start(Options options) {
         m_scriptEngine = new ScriptEngine();
         m_realm = new Realm();
         m_util = new Util();
+        m_logUtil = new LogUtil();
 
         m_realm->setScriptEngine(m_scriptEngine);
         m_scriptEngine->setGlobalObject("CommandRegistry", m_realm->commandRegistry());
+        m_scriptEngine->setGlobalObject("LogUtil", m_logUtil);
         m_scriptEngine->setGlobalObject("Realm", m_realm);
         m_scriptEngine->setGlobalObject("TriggerRegistry", m_realm->triggerRegistry());
         m_scriptEngine->setGlobalObject("Util", m_util);
@@ -62,9 +66,13 @@ Engine::~Engine() {
     delete m_webSocketServer;
     delete m_telnetServer;
 
+    m_scriptEngine->unsetGlobalObject("CommandRegistry");
+    m_scriptEngine->unsetGlobalObject("LogUtil");
     m_scriptEngine->unsetGlobalObject("Realm");
+    m_scriptEngine->unsetGlobalObject("TriggerRegistry");
     m_scriptEngine->unsetGlobalObject("Util");
 
+    delete m_logUtil;
     delete m_util;
     delete m_realm;
     delete m_scriptEngine;

@@ -22,7 +22,8 @@ var Options = {
     None: 0x0000,
     Capitalized: 0x0001,
     DefiniteArticles: 0x0002,
-    IfNotLast: 0x0040
+    IfNotLast: 0x0040,
+    Highlighted: 0x0800
 };
 
 
@@ -196,6 +197,19 @@ Array.prototype.withoutId = function(id) {
 };
 
 
+Object.defineProperty(Object.prototype, "contains", {
+    "value": Object.prototype.hasOwnProperty,
+    "configurable": true,
+    "writable": true
+});
+
+Object.defineProperty(Object.prototype, "keys", {
+    "value": function() { return Object.keys(this) },
+    "configurable": true,
+    "writable": true
+});
+
+
 String.prototype.arg = function() {
 
     var result = this;
@@ -301,11 +315,22 @@ String.prototype.trimmed = function() {
 function $(identifier) {
 
     var split = identifier.split(":");
-    return Realm.getObject(split[0], parseInt(split[1], 10));
+    return Realm.getObject(Util.capitalize(split[0]), parseInt(split[1], 10));
 }
 
 
 function byChance(n, p) {
 
     return randomInt(0, p) < n;
+}
+
+
+function min(a, b) {
+
+    return a < b ? a : b;
+}
+
+function max(a, b) {
+
+    return a > b ? a : b;
 }

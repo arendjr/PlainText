@@ -3,8 +3,10 @@
 
 #include <QMetaType>
 #include <QObject>
+#include <QScriptEngine>
 
 
+class GameObject;
 class Player;
 class Realm;
 
@@ -13,35 +15,35 @@ class Session : public QObject {
     Q_OBJECT
 
     public:
-        enum SignInStage {
+        enum SessionState {
             SessionClosed = 0,
-            AskingUserName,
-            AskingUserNameConfirmation,
-            AskingPassword,
-            AskingSignupPassword,
-            AskingSignupPasswordConfirmation,
-            AskingRace,
-            AskingClass,
-            AskingGender,
-            AskingExtraStats,
-            AskingSignupConfirmation,
-            SignedIn,
-            SignInAborted
+            SigningIn,
+            SignedIn
         };
 
-        Session(Realm *realm, const QString &source, QObject *parent);
+        Session(Realm *realm, const QString &description, const QString &source, QObject *parent);
         virtual ~Session();
 
         void open();
 
-        SignInStage signInStage() const { return m_signInStage; }
-        bool authenticated() const { return m_signInStage == SignedIn; }
+        const QString &source() const { return m_source; }
+        Q_PROPERTY(QString source READ source)
 
-        Player *player() const { return m_player; }
+        SessionState sessionState() const { return m_sessionState; }
+        bool authenticated() const { return m_sessionState == SignedIn; }
+        Q_INVOKABLE void setSessionState(int sessionState);
 
         void processSignIn(const QString &data);
 
         void signOut();
+
+        Player *player() const { return m_player; }
+        Q_INVOKABLE void setPlayer(GameObject *player);
+
+        Q_INVOKABLE void send(const QString &message);
+
+        static QScriptValue toScriptValue(QScriptEngine *engine, Session *const&session);
+        static void fromScriptValue(const QScriptValue &object, Session *&session);
 
     public slots:
         void onUserInput(QString data);
@@ -54,57 +56,12 @@ class Session : public QObject {
     private:
         QString m_source;
 
-        SignInStage m_signInStage;
-
-        struct SignUpData;
-        SignUpData *m_signUpData;
+        SessionState m_sessionState;
 
         Realm *m_realm;
         Player *m_player;
 
-        void setSignInStage(SignInStage signInStage);
-
-        void startAskingUserName();
-        void askForUserName();
-        void processUserName(const QString &answer);
-
-        void startAskingUserNameConfirmation();
-        void askForUserNameConfirmation();
-        void processUserNameConfirmation(const QString &answer);
-
-        void startAskingPassword();
-        void askForPassword();
-        void processPassword(const QString &input);
-
-        void startAskingSignupPassword();
-        void askForSignupPassword();
-        void processSignupPassword(const QString &input);
-
-        void startAskingSignupPasswordConfirmation();
-        void askForSignupPasswordConfirmation();
-        void processSignupPasswordConfirmation(const QString &input);
-
-        void startAskingRace();
-        void askForRace();
-        void processRace(const QString &answer);
-
-        void startAskingClass();
-        void askForClass();
-        void processClass(const QString &answer);
-
-        void startAskingGender();
-        void askForGender();
-        void processGender(const QString &answer);
-
-        void startAskingExtraStats();
-        void askForExtraStats();
-        void processExtraStats(const QString &answer);
-
-        void startAskingSignupConfirmation();
-        void askForSignupConfirmation();
-        void processSignupConfirmation(const QString &answer);
-
-        void showColumns(const QStringList &items);
+        QScriptValue m_scriptObject;
 };
 
 Q_DECLARE_METATYPE(Session *)

@@ -209,6 +209,29 @@ QString Util::formatWeight(int weight) {
     return QString::number(weight) + "kg";
 }
 
+QString Util::formatColumns(const QStringList &items, int options) {
+
+    QString string;
+    int length = items.length();
+    int halfLength = length / 2 + length % 2;
+    for (int i = 0; i < halfLength; i++) {
+        QString first = items[i];
+        QString second = i < length - halfLength ? items[i + halfLength] : QString("");
+
+        if (options & Capitalized) {
+            first = capitalize(first);
+            second = capitalize(second);
+        }
+        if (options & Highlighted) {
+            first = highlight(first);
+            second = highlight(second);
+        }
+
+        string += "  " + first.leftJustified(30) + "  " + second + "\n";
+    }
+    return string;
+}
+
 QStringList Util::splitLines(const QString &string, int maxLineLength) {
 
     QStringList words = string.split(' ');
@@ -290,7 +313,7 @@ static const char *colorMap[] = {
     "35;1", "35"
 };
 
-QString Util::colorize(const QString &string, Color color) {
+QString Util::colorize(const QString &string, int color) {
 
     return "\x1B[" + QString(colorMap[color]) + "m" + string + "\x1B[0m";
 }

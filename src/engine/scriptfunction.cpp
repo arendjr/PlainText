@@ -59,7 +59,6 @@ void ScriptFunction::fromUserString(const QString &string, ScriptFunction &funct
         QScriptValue exception = scriptEngine->uncaughtException();
         qWarning() << "Script Exception: " << exception.toString() << endl
                    << "While defining function: " << string;
-        scriptEngine->evaluate("");
         throw GameException(GameException::InvalidFunctionCode);
     }
 }
@@ -80,7 +79,6 @@ void ScriptFunction::fromVariant(const QVariant &variant, ScriptFunction &functi
         QScriptValue exception = scriptEngine->uncaughtException();
         qWarning() << "Script Exception: " << exception.toString() << endl
                    << "While defining function: " << string;
-        scriptEngine->evaluate("");
         throw GameException(GameException::InvalidFunctionCode);
     }
 }

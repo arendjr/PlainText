@@ -705,7 +705,6 @@ void GameObject::invokeTimer(int timerId) {
         QScriptValue exception = scriptEngine->uncaughtException();
         qWarning() << "Script Exception: " << exception.toString().toUtf8().constData() << endl
                    << "While executing function: " << function.toString().toUtf8().constData();
-        scriptEngine->evaluate("");
     }
 }
 
@@ -775,7 +774,7 @@ void GameObject::unregisterPointer(GameObjectPtr *pointer) {
 
 void GameObject::changeName(const QString &newName) {
 
-    if (isRoom() || isExit() || isPlayer() || isPortal()) {
+    if (isRoom() || isExit() || isPlayer() || isPortal() || isRealm()) {
         // specific optimization to avoid useless inflation of some objects
         return;
     }

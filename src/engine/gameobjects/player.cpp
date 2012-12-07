@@ -1,5 +1,6 @@
 #include "player.h"
 
+#include <QCryptographicHash>
 #include <QDebug>
 
 #include "room.h"
@@ -46,6 +47,22 @@ void Player::setPasswordHash(const QString &passwordHash) {
     }
 }
 
+void Player::setPassword(const QString &password) {
+
+    m_passwordSalt = Util::randomString(8);
+    QByteArray data = QString(m_passwordSalt + password).toUtf8();
+    m_passwordHash = QCryptographicHash::hash(data, QCryptographicHash::Sha1).toBase64();
+
+    setModified();
+}
+
+bool Player::matchesPassword(const QString &password) const {
+
+    QByteArray data = QString(m_passwordSalt + password).toUtf8();
+    QString passwordHash = QCryptographicHash::hash(data, QCryptographicHash::Sha1).toBase64();
+    return m_passwordHash == passwordHash;
+}
+
 void Player::setAdmin(bool admin) {
 
     if (m_admin != admin) {
@@ -61,6 +78,8 @@ void Player::setSession(Session *session) {
 
     if (m_session) {
         m_regenerationIntervalId = realm()->startInterval(this, 30000);
+
+        enter(currentRoom());
     } else {
         realm()->stopInterval(m_regenerationIntervalId);
         m_regenerationIntervalId = 0;
@@ -80,6 +99,10 @@ bool Player::isOnline() const {
 
 void Player::send(const QString &_message, int color) const {
 
+    if (!m_session) {
+        return;
+    }
+
     QString message;
     if (_message.endsWith("\n") ||
         (_message.startsWith("{") && _message.endsWith("}"))) {
@@ -92,10 +115,14 @@ void Player::send(const QString &_message, int color) const {
         message = Util::colorize(message, (Color) color);
     }
 
-    write(message);
+    m_session->send(message);
 }
 
 void Player::sendSellableItemsList(const GameObjectPtrList &items) {
+
+    if (!m_session) {
+        return;
+    }
 
     try {
         QString message;
@@ -104,7 +131,7 @@ void Player::sendSellableItemsList(const GameObjectPtrList &items) {
                        .arg(item->name().leftJustified(30))
                        .arg(item.cast<Item *>()->cost());
         }
-        write(message);
+        m_session->send(message);
     } catch (GameException &exception) {
         qDebug() << "Exception in Player::sendSellableItemsList(): " << exception.what();
     }

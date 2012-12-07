@@ -34,7 +34,8 @@ enum Options {
     DontRegister = 0x0080,
     DontServe = 0x0100,
     AutoDelete = 0x0200,
-    NeverDelete = 0x0400
+    NeverDelete = 0x0400,
+    Highlighted = 0x0800
 };
 
 #endif // CONSTANTS_H

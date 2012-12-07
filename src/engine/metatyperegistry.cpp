@@ -14,6 +14,7 @@
 #include "portal.h"
 #include "room.h"
 #include "scriptfunctionmap.h"
+#include "session.h"
 #include "vector3d.h"
 
 
@@ -86,6 +87,8 @@ void MetaTypeRegistry::registerMetaTypes(QScriptEngine *engine) {
 
     REGISTER_SERIALIZABLE_META_TYPE(ScriptFunction)
     REGISTER_SERIALIZABLE_META_TYPE(ScriptFunctionMap)
+
+    REGISTER_META_TYPE_POINTER(Session)
 
     REGISTER_SERIALIZABLE_META_TYPE(Vector3D)
 }

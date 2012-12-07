@@ -5,7 +5,6 @@
 #include <QMetaProperty>
 #include <QObject>
 #include <QScriptEngine>
-#include <QScriptValue>
 #include <QVariantMap>
 #include <QVector>
 

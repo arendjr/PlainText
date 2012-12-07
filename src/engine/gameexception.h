@@ -27,7 +27,8 @@ class GameException : public std::exception {
             UnknownGameEventType,
             NotSupported,
             IndexOutOfBounds,
-            NullIteratorReference
+            NullIteratorReference,
+            InvalidSignIn
         };
 
         GameException(Cause cause);

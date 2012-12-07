@@ -7,6 +7,7 @@
 
 
 class HttpServer;
+class LogUtil;
 class Realm;
 class ScriptEngine;
 class TelnetServer;
@@ -31,6 +32,7 @@ class Engine : public QObject {
         ScriptEngine *m_scriptEngine;
         Realm *m_realm;
         Util *m_util;
+        LogUtil *m_logUtil;
 };
 
 #endif // ENGINE_H

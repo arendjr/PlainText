@@ -185,7 +185,7 @@ in the realm, makes it easy to query for players, etc.. The Realm class is
 also used if you need to create a new object from JavaScript:
 
 ```javascript
-var newItem = Realm.createObject('item');
+var newItem = Realm.createObject('Item');
 ```
 
 **Q. How do triggers work?**

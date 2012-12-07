@@ -24,6 +24,9 @@ class Player : public Character {
         void setPasswordHash(const QString &passwordHash);
         Q_PROPERTY(QString passwordHash READ passwordHash WRITE setPasswordHash)
 
+        Q_INVOKABLE void setPassword(const QString &password);
+        Q_INVOKABLE bool matchesPassword(const QString &password) const;
+
         bool isAdmin() const { return m_admin; }
         void setAdmin(bool admin);
         Q_PROPERTY(bool admin READ isAdmin WRITE setAdmin)
@@ -43,9 +46,6 @@ class Player : public Character {
         Q_INVOKABLE void quit();
 
         virtual void invokeTimer(int timerId);
-
-    signals:
-        void write(const QString &data) const;
 
     protected:
         virtual void changeName(const QString &name);

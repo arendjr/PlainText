@@ -21,7 +21,8 @@ const char *GameException::s_messages[] = {
     "Unknown game event type",
     "Not supported",
     "Index out of bounds",
-    "Null iterator referenced"
+    "Null iterator referenced",
+    "Invalid sign-in"
 };
 
 GameException::GameException(Cause cause) :

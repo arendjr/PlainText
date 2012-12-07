@@ -36,6 +36,5 @@ void ScriptCommand::execute(Player *player, const QString &command) {
     if (engine->hasUncaughtException()) {
         qWarning() << "Exception while executing command " << command << ": "
                    << engine->uncaughtException().toString();
-        engine->evaluate("");
     }
 }

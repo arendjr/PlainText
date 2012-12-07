@@ -13,6 +13,7 @@
 class MetaTypeRegistry;
 class Room;
 class Player;
+class Session;
 
 class ScriptEngine : public QObject {
 
@@ -33,14 +34,16 @@ class ScriptEngine : public QObject {
                                       const QString &fileName = QString(), int lineNumber = 1);
 
         bool hasUncaughtException() const;
-        QScriptValue uncaughtException() const;
+        QScriptValue uncaughtException();
 
         QScriptValue executeFunction(ScriptFunction &function, const GameObjectPtr &thisObject,
                                      const QScriptValueList &arguments);
 
         QScriptValue toScriptValue(GameObject *object);
         QScriptValue toScriptValue(const GameObjectPtr &object);
-        QScriptValue toScriptValue(const GameObjectPtrList &list);
+        template <class T> QScriptValue toScriptValue(T object) {
+            return m_jsEngine.toScriptValue(object);
+        }
 
         void setGlobalObject(const char *name, QObject *object);
         void unsetGlobalObject(const char *name);

@@ -48,6 +48,8 @@ void ScriptEngine::loadScripts() {
     for (const QString &entry : adminCommandsDir.entryList(QDir::Files)) {
         loadScript(adminCommandsDir.path() + "/" + entry);
     }
+
+    loadScript(DiskUtil::dataDir() + "/scripts/sessionhandler.js");
 }
 
 void ScriptEngine::loadScript(const QString &path) {
@@ -55,11 +57,11 @@ void ScriptEngine::loadScript(const QString &path) {
     QFile file(path);
     QFileInfo info(path);
     if (file.open(QIODevice::ReadOnly)) {
-        m_jsEngine.evaluate(file.readAll(), "commands/command.js");
+        evaluate(file.readAll(), "commands/command.js");
         file.close();
-        if (m_jsEngine.hasUncaughtException()) {
+        if (hasUncaughtException()) {
             qWarning() << "Exception while evaluating " << info.fileName() << ": "
-                       << m_jsEngine.uncaughtException().toString();
+                       << uncaughtException().toString();
         }
     } else {
         qWarning() << "Could not open " << info.fileName();
@@ -91,9 +93,11 @@ bool ScriptEngine::hasUncaughtException() const {
     return m_jsEngine.hasUncaughtException();
 }
 
-QScriptValue ScriptEngine::uncaughtException() const {
+QScriptValue ScriptEngine::uncaughtException() {
 
-    return m_jsEngine.uncaughtException();
+    QScriptValue exception = m_jsEngine.uncaughtException();
+    m_jsEngine.evaluate("");
+    return exception;
 }
 
 QScriptValue ScriptEngine::executeFunction(ScriptFunction &function,
@@ -101,11 +105,10 @@ QScriptValue ScriptEngine::executeFunction(ScriptFunction &function,
                                            const QScriptValueList &arguments) {
 
     QScriptValue result = function.value.call(m_jsEngine.toScriptValue(thisObject), arguments);
-    if (m_jsEngine.hasUncaughtException()) {
-        QScriptValue exception = m_jsEngine.uncaughtException();
+    if (hasUncaughtException()) {
+        QScriptValue exception = uncaughtException();
         qWarning() << "Script Exception: " << exception.toString().toUtf8().constData() << endl
                    << "While executing function: " << function.source.toUtf8().constData();
-        m_jsEngine.evaluate("");
     }
     return result;
 }
@@ -118,11 +121,6 @@ QScriptValue ScriptEngine::toScriptValue(GameObject *object) {
 QScriptValue ScriptEngine::toScriptValue(const GameObjectPtr &object) {
 
     return m_jsEngine.toScriptValue(object);
-}
-
-QScriptValue ScriptEngine::toScriptValue(const GameObjectPtrList &list) {
-
-    return m_jsEngine.toScriptValue(list);
 }
 
 void ScriptEngine::setGlobalObject(const char *name, QObject *object) {

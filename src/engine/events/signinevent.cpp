@@ -17,7 +17,7 @@ SignInEvent::~SignInEvent() {
 void SignInEvent::process() {
 
     if (!m_session || m_input.isEmpty()) {
-        qWarning() << "Processing uninitialized sign in event. Skipped.";
+        qWarning() << "Processing uninitialized sign-in event. Skipped.";
         return;
     }
 
@@ -26,5 +26,5 @@ void SignInEvent::process() {
 
 QString SignInEvent::toString() const {
 
-    return QString("Sign in input during stage %1: %2").arg(m_session->signInStage()).arg(m_input);
+    return QString("Sign-in input in state %1: %2").arg(m_session->sessionState()).arg(m_input);
 }

@@ -33,7 +33,7 @@ void WebSocketServer::onClientConnected() {
     QWsSocket *socket = m_server->nextPendingConnection();
     connect(socket, SIGNAL(disconnected()), SLOT(onClientDisconnected()));
 
-    Session *session = new Session(m_realm, socket->peerAddress().toString(), socket);
+    Session *session = new Session(m_realm, "WebSocket", socket->peerAddress().toString(), socket);
     connect(session, SIGNAL(write(QString)), SLOT(onSessionOutput(QString)));
 
     connect(socket, SIGNAL(frameReceived(QString)), session, SLOT(onUserInput(QString)));

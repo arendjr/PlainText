@@ -39,6 +39,8 @@ Realm::Realm(Options options) :
     for (const QString &commandName : m_commandRegistry->commandNames()) {
         m_reservedNames.append(commandName);
     }
+
+    load(DiskUtil::gameObjectPath("Realm", id()));
 }
 
 Realm::~Realm() {
@@ -64,8 +66,6 @@ Realm *Realm::instance() {
 }
 
 void Realm::init() {
-
-    load(DiskUtil::gameObjectPath(objectType().toString(), id()));
 
     for (const QString &fileName : DiskUtil::dataDirFileList()) {
         if (!fileName.startsWith("realm.")) {
@@ -138,13 +138,12 @@ GameObject *Realm::getObject(GameObjectType objectType, uint id) {
 
 GameObject *Realm::getObject(const QString &objectType, uint id) {
 
-    return getObject(GameObjectType::fromString(Util::capitalize(objectType)), id);
+    return getObject(GameObjectType::fromString(objectType), id);
 }
 
 GameObject *Realm::createObject(const QString &objectType) {
 
-    return GameObject::createByObjectType(this,
-                                          GameObjectType::fromString(Util::capitalize(objectType)));
+    return GameObject::createByObjectType(this, GameObjectType::fromString(objectType));
 }
 
 GameObjectPtrList Realm::allObjects(GameObjectType objectType) const {

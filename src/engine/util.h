@@ -40,34 +40,36 @@ class Util : public QObject {
 
         Q_INVOKABLE static QString formatWeight(int weight);
 
-        static QStringList splitLines(const QString &string, int maxLineLength = 80);
+        Q_INVOKABLE static QString formatColumns(const QStringList &items, int options = NoOptions);
 
-        static QStringList splitComponents(const QString &string);
+        Q_INVOKABLE static QStringList splitLines(const QString &string, int maxLineLength = 80);
 
-        static QString colorize(const QString &string, Color color);
+        Q_INVOKABLE static QStringList splitComponents(const QString &string);
+
+        Q_INVOKABLE static QString colorize(const QString &string, int color);
 
         Q_INVOKABLE static QString highlight(const QString &string);
 
         Q_INVOKABLE static QString processHighlights(const QString &string);
 
-        static QString validateUserName(const QString &string);
+        Q_INVOKABLE static QString validateUserName(const QString &string);
 
-        static bool isVowel(const QChar &character);
+        Q_INVOKABLE static bool isVowel(const QChar &character);
 
         Q_INVOKABLE static bool isDirection(const QString &string);
 
         Q_INVOKABLE static QString opposingDirection(const QString &direction);
 
-        static bool isDirectionAbbreviation(const QString &string);
+        Q_INVOKABLE static bool isDirectionAbbreviation(const QString &string);
 
-        static QString direction(const QString &abbreviation);
+        Q_INVOKABLE static QString direction(const QString &abbreviation);
 
         Q_INVOKABLE static Vector3D vectorForDirection(const QString &direction);
 
         Q_INVOKABLE static QString directionForVector(const Vector3D &vector);
 
-        static QString toCamelCase(QString string);
-        static QString fromCamelCase(const QString &string);
+        Q_INVOKABLE static QString toCamelCase(QString string);
+        Q_INVOKABLE static QString fromCamelCase(const QString &string);
 
         static QString fullPropertyName(QObject *object, const QString &propertyName);
 

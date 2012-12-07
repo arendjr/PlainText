@@ -283,6 +283,7 @@ OTHER_FILES += \
     ../data/commands/usecommand.js \
     ../data/commands/whocommand.js \
     ../data/commands/admin/enterroomcommand.js \
+    ../data/scripts/sessionhandler.js \
     ../web/index.html \
     ../web/css/admin.css \
     ../web/css/main.css \
@@ -309,7 +310,7 @@ OTHER_FILES += \
     ../README.md \
     ../TODO.txt \
     ../web/js/util.js \
-    ../web/js/controller.js
+    ../web/js/controller.js \
 
 INCLUDEPATH += \
     engine \

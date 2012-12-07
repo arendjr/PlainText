@@ -47,8 +47,8 @@ class Realm : public GameObject {
         void unregisterPlayer(Player *player);
         Q_INVOKABLE GameObject *getPlayer(const QString &name) const;
 
-        void addReservedName(const QString &name);
-        const QStringList &reservedNames() const { return m_reservedNames; }
+        Q_INVOKABLE void addReservedName(const QString &name);
+        Q_INVOKABLE QStringList reservedNames() const { return m_reservedNames; }
 
         const QDateTime &dateTime() const { return m_dateTime; }
         virtual void setDateTime(const QDateTime &dateTime);
