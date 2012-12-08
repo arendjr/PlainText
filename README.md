@@ -175,7 +175,7 @@ possible...
 
 A. Just remove all classes from the data/ directory, except one. You can
 hardwire all players to use that one class in the sign-up process in
-data/scripts/session.js. See the FoggyText project for an example:
+data/scripts/sessionhandler.js. See the FoggyText project for an example:
 https://github.com/arendjr/FoggyText
 
 **Q. What does the Realm class do?**
