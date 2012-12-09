@@ -13,7 +13,7 @@ CloseCommand.prototype.execute = function(player, command) {
 
     this.prepareExecute(player, command);
 
-    var portal = takeObject(this._currentRoom.portals);
+    var portal = takeObject(this.currentRoom.portals);
     if (!this.requireSome(portal, "Close what?")) {
         return;
     }

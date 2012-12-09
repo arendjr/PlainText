@@ -9,7 +9,6 @@
 #include "diskutil.h"
 #include "gameobject.h"
 #include "metatyperegistry.h"
-#include "scriptwindow.h"
 
 
 static ScriptEngine *s_instance = nullptr;
@@ -21,9 +20,6 @@ ScriptEngine::ScriptEngine() :
     s_instance = this;
 
     MetaTypeRegistry::registerMetaTypes(&m_jsEngine);
-
-    ScriptWindow *window = new ScriptWindow(m_jsEngine.globalObject(), this);
-    m_jsEngine.setGlobalObject(window->toScriptValue());
 }
 
 ScriptEngine::~ScriptEngine() {
@@ -40,16 +36,19 @@ void ScriptEngine::loadScripts() {
     loadScript(":/script/commands/command.js");
     loadScript(":/script/commands/admin/admincommand.js");
     
-    QDir commandsDir(DiskUtil::dataDir() + "/commands");
-    for (const QString &entry : commandsDir.entryList(QDir::Files)) {
-        loadScript(commandsDir.path() + "/" + entry);
-    }
-    QDir adminCommandsDir(DiskUtil::dataDir() + "/commands/admin");
-    for (const QString &entry : adminCommandsDir.entryList(QDir::Files)) {
-        loadScript(adminCommandsDir.path() + "/" + entry);
-    }
+    loadScripts(DiskUtil::dataDir() + "/commands");
+    loadScripts(DiskUtil::dataDir() + "/scripts");
+}
 
-    loadScript(DiskUtil::dataDir() + "/scripts/sessionhandler.js");
+void ScriptEngine::loadScripts(const QString &dirPath) {
+
+    QDir dir(dirPath);
+    for (const QString &entry : dir.entryList(QDir::Files)) {
+        loadScript(dirPath + "/" + entry);
+    }
+    for (const QString &entry : dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
+        loadScripts(dirPath + "/" + entry);
+    }
 }
 
 void ScriptEngine::loadScript(const QString &path) {

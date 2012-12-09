@@ -18,8 +18,6 @@ class StatsItem : public Item {
         void setStats(const CharacterStats &stats);
         Q_PROPERTY(CharacterStats stats READ stats WRITE setStats)
 
-        Q_INVOKABLE virtual CharacterStats totalStats() const;
-
         ModifierList modifiers() const { return m_modifiers; }
         Q_INVOKABLE void addModifier(const Modifier &modifier);
         Q_INVOKABLE void clearModifiers();

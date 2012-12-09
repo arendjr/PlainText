@@ -6,6 +6,8 @@
 #include <QFileInfo>
 #include <QMetaProperty>
 #include <QMetaType>
+#include <QScriptValueIterator>
+#include <QStack>
 #include <QStringList>
 #include <QVariantList>
 #include <QVariantMap>
@@ -397,6 +399,41 @@ bool GameObject::invokeTrigger(const QString &triggerName,
     return invokeTrigger(triggerName, engine->toScriptValue(arg1), arg2, arg3, arg4);
 }
 
+QScriptValue GameObject::invokeScriptMethod(const QString &methodName,
+                                            const QScriptValue &arg1, const QScriptValue &arg2,
+                                            const QScriptValue &arg3, const QScriptValue &arg4) {
+
+    ScriptEngine *engine = m_realm->scriptEngine();
+    QScriptValue scriptObject = engine->toScriptValue(this);
+
+    QScriptValue method = scriptObject.property(methodName);
+
+    QScriptValueList arguments;
+    if (arg1.isValid()) {
+        arguments << arg1;
+
+        if (arg2.isValid()) {
+            arguments << arg2;
+
+            if (arg3.isValid()) {
+                arguments << arg3;
+
+                if (arg4.isValid()) {
+                    arguments << arg4;
+                }
+            }
+        }
+    }
+
+    QScriptValue result = method.call(scriptObject, arguments);
+    if (engine->hasUncaughtException()) {
+        QScriptValue exception = engine->uncaughtException();
+        qWarning() << "Script Exception: " << exception.toString().toUtf8().constData() << endl
+                   << "While executing game object method: " << methodName.toUtf8().constData();
+    }
+    return result;
+}
+
 void GameObject::send(const QString &message, int color) const {
 
     Q_UNUSED(message)
@@ -644,9 +681,62 @@ GameObject *GameObject::createCopy(const GameObject *other) {
 
 QScriptValue GameObject::toScriptValue(QScriptEngine *engine, GameObject *const &gameObject) {
 
-    return engine->newQObject(gameObject, QScriptEngine::QtOwnership,
-                              QScriptEngine::ExcludeDeleteLater |
-                              QScriptEngine::PreferExistingWrapperObject);
+    static QMap<QString, QScriptValue> prototypeMap;
+
+    QScriptValue object = engine->newQObject(gameObject, QScriptEngine::QtOwnership,
+                                             QScriptEngine::ExcludeDeleteLater |
+                                             QScriptEngine::PreferExistingWrapperObject);
+
+    if (!gameObject) {
+        return object;
+    }
+
+    const QMetaObject *metaObject = gameObject->metaObject();
+    QString className(metaObject->className());
+
+    if (!prototypeMap.contains(className)) {
+        QScriptValue prototype = engine->evaluate(className);
+        if (!prototype.isFunction()) {
+            prototype = engine->evaluate(QString("function %1() {}; %1").arg(className));
+        }
+
+        QStack<QScriptValue> prototypeChain;
+        prototypeChain.push(prototype);
+        QString name(className);
+        while (name != "GameObject") {
+            metaObject = metaObject->superClass();
+            name = metaObject->className();
+
+            QScriptValue superPrototype = engine->evaluate(name);
+            if (!superPrototype.isFunction()) {
+                superPrototype = engine->evaluate(QString("function %1() {}; %1").arg(name));
+            }
+            prototypeChain.push(superPrototype);
+        }
+
+        QScriptValue superPrototype = prototypeChain.pop();
+        while (!prototypeChain.isEmpty()) {
+            QScriptValue prototype = prototypeChain.pop();
+            QScriptValue superInstance = superPrototype.construct();
+            superInstance.setProperty("constructor", prototype);
+
+            QScriptValueIterator it(prototype.property("prototype"));
+            while (it.hasNext()) {
+                it.next();
+                superInstance.setProperty(it.name(), it.value());
+            }
+
+            prototype.setProperty("prototype", superInstance);
+
+            superPrototype = prototype;
+        }
+
+        prototypeMap[className] = prototype;
+    }
+
+    object.setPrototype(prototypeMap[className].construct());
+
+    return object;
 }
 
 void GameObject::fromScriptValue(const QScriptValue &object, GameObject *&gameObject) {

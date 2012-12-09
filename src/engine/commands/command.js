@@ -1,21 +1,21 @@
 
 function Command() {
 
-    this._description = "";
-    this._player = null;
-    this._currentRoom = null;
-    this._words = [];
-    this._alias = "";
+    this.description = "";
+    this.player = null;
+    this.currentRoom = null;
+    this.words = [];
+    this.alias = "";
 }
 
 Command.prototype.description = function() {
 
-    return this._description;
+    return this.description;
 };
 
 Command.prototype.setDescription = function(description) {
 
-    this._description = Util.processHighlights(description);
+    this.description = Util.processHighlights(description);
 };
 
 Command.prototype.execute = null;
@@ -25,13 +25,13 @@ Command.prototype.prepareExecute = function(player, command) {
     this.setPlayer(player);
     this.setCommand(command);
 
-    this._alias = this.takeWord();
+    this.alias = this.takeWord();
 };
 
 Command.prototype.setPlayer = function(player) {
 
-    this._player = player;
-    this._currentRoom = player.currentRoom;
+    this.player = player;
+    this.currentRoom = player.currentRoom;
 };
 
 Command.prototype.setCommand = function(command) {
@@ -53,56 +53,61 @@ Command.prototype.setCommand = function(command) {
         }
     }
 
-    this._words = words;
+    this.words = words;
 };
 
 Command.prototype.prependWord = function(word) {
 
-    this._words.splice(0, 0, word);
+    this.words.splice(0, 0, word);
 };
 
 Command.prototype.appendWord = function(word) {
 
-    this._words.push(word);
+    this.words.push(word);
 };
 
 Command.prototype.numWordsLeft = function() {
 
-    return this._words.length;
+    return this.words.length;
 };
 
 Command.prototype.hasWordsLeft = function() {
 
-    return this._words.length > 0;
+    return this.words.length > 0;
 };
 
 Command.prototype.assertWordsLeft = function(noneLeftText) {
 
     if (!this.hasWordsLeft()) {
-        this._player.send(noneLeftText);
+        this.player.send(noneLeftText);
         return false;
     } else {
         return true;
     }
 }
 
+Command.prototype.peekWord = function() {
+
+    return this.words[0];
+}
+
 Command.prototype.takeWord = function(pattern, options) {
 
-    if (this._words.length > 0) {
+    if (this.words.length > 0) {
         if (typeof pattern === "string") {
             pattern = new RegExp("^" + pattern + "$");
-            if (options & Options.IfNotLast && this._words.length === 1) {
+            if (options & Options.IfNotLast && this.words.length === 1) {
                 return "";
             }
-            if (pattern.test(this._words[0])) {
-                return this._words.takeFirst();
+            if (pattern.test(this.words[0])) {
+                return this.words.takeFirst();
             }
         } else {
             options = pattern;
-            if (options & Options.IfNotLast && this._words.length === 1) {
+            if (options & Options.IfNotLast && this.words.length === 1) {
                 return "";
             }
-            return this._words.takeFirst();
+            return this.words.takeFirst();
         }
     }
 
@@ -138,11 +143,11 @@ Command.prototype.takeObjectsDescription = function(options) {
 
     var description = { name: "", position: 0, containerName: "", containerPosition: 0 };
 
-    if (this._words.isEmpty()) {
+    if (this.words.isEmpty()) {
         return description;
     }
 
-    description.name = this._words.takeFirst().toLower();
+    description.name = this.words.takeFirst().toLower();
     description.position = 0;
 
     if (description.name.contains('.')) {
@@ -151,14 +156,14 @@ Command.prototype.takeObjectsDescription = function(options) {
         if (description.position > 0) {
             description.name = description.name.mid(index + 1);
         }
-    } else if (!this._words.isEmpty()) {
+    } else if (!this.words.isEmpty()) {
         description.position = Util.numericPosition(description.name);
         if (description.position > 0) {
-            description.name = this._words.takeFirst().toLower();
+            description.name = this.words.takeFirst().toLower();
         } else {
-            description.position = this._words.first().toInt();
+            description.position = this.words.first().toInt();
             if (description.position > 0) {
-                this._words.removeFirst();
+                this.words.removeFirst();
             }
         }
     }
@@ -168,8 +173,8 @@ Command.prototype.takeObjectsDescription = function(options) {
 
 Command.prototype.takeRest = function() {
 
-    var rest = this._words.join(" ");
-    this._words.clear();
+    var rest = this.words.join(" ");
+    this.words.clear();
     return rest;
 };
 
@@ -193,7 +198,7 @@ Command.prototype.objectsByDescription = function(description, pool) {
             var object = pool[i];
             var name;
             if (object.nameFromRoom) {
-                name = object.nameFromRoom(this._currentRoom);
+                name = object.nameFromRoom(this.currentRoom);
             } else {
                 name = object.name;
             }
@@ -250,5 +255,5 @@ Command.prototype.send = function(message, arg1, arg2) {
         }
     }
 
-    this._player.send(message);
+    this.player.send(message);
 };

@@ -11,14 +11,12 @@
 #include "logutil.h"
 #include "player.h"
 #include "util.h"
-#include "commands/buycommand.h"
 #include "commands/descriptioncommand.h"
 #include "commands/disbandcommand.h"
 #include "commands/dropcommand.h"
 #include "commands/equipmentcommand.h"
 #include "commands/followcommand.h"
 #include "commands/getcommand.h"
-#include "commands/givecommand.h"
 #include "commands/gocommand.h"
 #include "commands/helpcommand.h"
 #include "commands/inventorycommand.h"
@@ -27,9 +25,7 @@
 #include "commands/losecommand.h"
 #include "commands/removecommand.h"
 #include "commands/scriptcommand.h"
-#include "commands/searchcommand.h"
 #include "commands/slashmecommand.h"
-#include "commands/statscommand.h"
 #include "commands/wieldcommand.h"
 #include "commands/admin/addcharactercommand.h"
 #include "commands/admin/addcontainercommand.h"
@@ -74,7 +70,6 @@ CommandRegistry::CommandRegistry(QObject *parent) :
     Command *look = new LookCommand(this);
 
     m_commands.insert("attack", kill);
-    m_commands.insert("buy", new BuyCommand(this));
     m_commands.insert("description", new DescriptionCommand(this));
     m_commands.insert("disband", new DisbandCommand(this));
     m_commands.insert("drop", new DropCommand(this));
@@ -83,7 +78,6 @@ CommandRegistry::CommandRegistry(QObject *parent) :
     m_commands.insert("examine", look);
     m_commands.insert("follow", new FollowCommand(this));
     m_commands.insert("get", get);
-    m_commands.insert("give", new GiveCommand(this));
     m_commands.insert("go", go);
     m_commands.insert("help", new HelpCommand(this));
     m_commands.insert("inventory", new InventoryCommand(this));
@@ -92,8 +86,6 @@ CommandRegistry::CommandRegistry(QObject *parent) :
     m_commands.insert("look", look);
     m_commands.insert("lose", new LoseCommand(this));
     m_commands.insert("remove", new RemoveCommand(this));
-    m_commands.insert("search", new SearchCommand(this));
-    m_commands.insert("stats", new StatsCommand(this));
     m_commands.insert("take", get);
     m_commands.insert("wield", new WieldCommand(this));
     m_commands.insert("/me", new SlashMeCommand(this));

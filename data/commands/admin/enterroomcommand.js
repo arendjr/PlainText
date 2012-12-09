@@ -18,7 +18,7 @@ EnterRoomCommand.prototype.execute = function(player, command) {
         return;
     }
 
-    player.leave(this._currentRoom);
+    player.leave(this.currentRoom);
     player.enter(room);
 }
 

@@ -1,0 +1,7 @@
+
+var STRENGTH = 0;
+var DEXTERITY = 1;
+var VITALITY = 2;
+var ENDURANCE = 3;
+var INTELLIGENCE = 4;
+var FAITH = 5;

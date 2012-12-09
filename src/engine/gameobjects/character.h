@@ -18,8 +18,6 @@ class Character : public StatsItem {
         Character(Realm *realm, GameObjectType objectType, uint id, Options options = NoOptions);
         virtual ~Character();
 
-        Q_INVOKABLE virtual CharacterStats totalStats() const;
-
         int height() const { return m_height; }
         void setHeight(int height);
         Q_PROPERTY(int height READ height WRITE setHeight)
@@ -110,8 +108,6 @@ class Character : public StatsItem {
 
         Q_INVOKABLE int inventoryWeight() const;
 
-        Q_INVOKABLE int maxInventoryWeight() const;
-
         Q_INVOKABLE int totalWeight() const;
 
         const GameObjectPtr &group() const { return m_group; }
@@ -149,13 +145,13 @@ class Character : public StatsItem {
 
         Q_INVOKABLE void stun(int timeout);
 
-        int secondsStunned() const { return m_secondsStunned; }
+        Q_INVOKABLE int secondsStunned() const { return m_secondsStunned; }
 
         void setLeaveOnActive(bool leaveOnActive);
 
-        virtual void init();
+        Q_INVOKABLE virtual void init();
 
-        virtual GameObject *copy();
+        Q_INVOKABLE virtual GameObject *copy();
 
         virtual void invokeTimer(int timerId);
 

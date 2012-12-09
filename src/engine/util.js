@@ -27,6 +27,14 @@ var Options = {
 };
 
 
+Array.prototype.add = function(array) {
+
+    for (var i = 0, length = min(this.length, array.length); i < length; i++) {
+        this[i] += array[i];
+    }
+    return this;
+};
+
 Array.prototype.append = function(value) {
 
     if (value instanceof Array) {
@@ -114,6 +122,15 @@ Array.prototype.named = function(name) {
     return undefined;
 };
 
+Array.prototype.plus = function(array) {
+
+    var result = [];
+    for (var i = 0, length = min(this.length, array.length); i < length; i++) {
+        result[i] = this[i] + array[i];
+    }
+    return result;
+};
+
 Array.prototype.randomElement = function() {
 
     return this[randomInt(0, this.length)];
@@ -155,7 +172,7 @@ Array.prototype.removeOne = function(value) {
 
 Array.prototype.send = function(message) {
 
-    for (var i = 0; i < this.length; i++) {
+    for (var i = 0, length = this.length; i < length; i++) {
         var element = this[i];
         if (element && typeof element === "object" && element.send) {
             element.send(message);
@@ -171,6 +188,15 @@ Array.prototype.takeFirst = function() {
 Array.prototype.takeLast = function() {
 
     return this.splice(this.length - 1, 1)[0];
+};
+
+Array.prototype.total = function() {
+
+    var sum = 0;
+    for (var i = 0, length = this.length; i < length; i++) {
+        sum += this[i];
+    }
+    return sum;
 };
 
 Array.prototype.withId = function(id) {
@@ -311,6 +337,11 @@ String.prototype.startsWith = function(string) {
     return this.substr(0, string.length) === string;
 };
 
+String.prototype.toDouble = function() {
+
+    return parseFloat(this);
+};
+
 String.prototype.toInt = function() {
 
     return parseInt(this, 10);
@@ -341,7 +372,7 @@ function $(identifier) {
 
 function byChance(n, p) {
 
-    return randomInt(0, p) < n;
+    return Util.randomInt(0, p) < n;
 }
 
 
@@ -353,4 +384,10 @@ function min(a, b) {
 function max(a, b) {
 
     return a > b ? a : b;
+}
+
+
+function randomInt(min, max) {
+
+    return Util.randomInt(min, max);
 }

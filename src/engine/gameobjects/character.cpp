@@ -12,6 +12,7 @@
 #include "race.h"
 #include "realm.h"
 #include "room.h"
+#include "scriptengine.h"
 #include "shield.h"
 #include "speechevent.h"
 #include "util.h"
@@ -61,29 +62,6 @@ Character::~Character() {
 
     if (m_regenerationIntervalId) {
         realm()->stopInterval(m_regenerationIntervalId);
-    }
-}
-
-CharacterStats Character::totalStats() const {
-
-    try {
-        CharacterStats totalStats = super::totalStats();
-        if (!m_weapon.isNull()) {
-            totalStats += m_weapon.cast<Weapon *>()->totalStats();
-        }
-        if (!m_secondaryWeapon.isNull()) {
-            totalStats += m_secondaryWeapon.cast<Weapon *>()->totalStats();
-        }
-        if (!m_shield.isNull()) {
-            totalStats += m_shield.cast<Shield *>()->totalStats();
-        }
-
-        totalStats.dexterity = qMax(totalStats.dexterity - (inventoryWeight() / 5), 0);
-
-        return totalStats;
-    } catch (GameException &exception) {
-        qDebug() << "Exception in Character::totalStats(): " << exception.what();
-        return CharacterStats(0, 0, 0, 0, 0, 0);
     }
 }
 
@@ -341,11 +319,6 @@ int Character::inventoryWeight() const {
         inventoryWeight += m_shield.cast<Item *>()->weight();
     }
     return inventoryWeight;
-}
-
-int Character::maxInventoryWeight() const {
-
-    return 20 + ((stats().strength + stats().endurance) / 2);
 }
 
 int Character::totalWeight() const {
@@ -692,7 +665,8 @@ void Character::take(const GameObjectPtrList &items) {
                 room->removeItem(itemPtr);
                 takenItems << itemPtr;
             } else if (item->isPortable()) {
-                if (inventoryWeight() + item->weight() <= maxInventoryWeight()) {
+                if (inventoryWeight() + item->weight() <=
+                    invokeScriptMethod("maxInventoryWeight").toInt32()) {
                     addInventoryItem(itemPtr);
                     room->removeItem(itemPtr);
                     takenItems << itemPtr;
@@ -800,37 +774,19 @@ void Character::kill(const GameObjectPtr &characterPtr) {
         others.removeOne(this);
         others.removeOne(characterPtr);
 
-        CharacterStats myStats = totalStats();
-        CharacterStats enemyStats = character->totalStats();
-
-        qreal hitChance = 100 * ((80 + myStats.dexterity) / 160.0) *
-                                ((100 - enemyStats.dexterity) / 100.0);
-        int damage = 0;
-        if (qrand() % 100 < hitChance) {
-            damage = qrand() % (int) (20.0 * (myStats.strength / 40.0) *
-                                              ((80 - enemyStats.endurance) / 80.0)) + 1;
-
-            character->adjustHp(-damage);
-        }
-
         bool invoked = false;
         if (room->hasTrigger("oncombat")) {
-            invoked = room->invokeTrigger("oncombat", this, characterPtr, others, damage);
+            invoked = room->invokeTrigger("oncombat", this, characterPtr, others);
         }
         if (!invoked) {
-            realm()->invokeTrigger("oncombat", this, characterPtr, others, damage);
+            realm()->invokeTrigger("oncombat", this, characterPtr, others);
         }
 
-        stun(4000 - (25 * myStats.dexterity));
-
-        others = currentRoom().cast<Room *>()->characters();
-        others.removeOne(this);
-        others.removeOne(characterPtr);
         for (const GameObjectPtr &other : others) {
             other->invokeTrigger("oncharacterattacked", this, characterPtr);
         }
 
-        if (damage > 0 && character->hp() == 0) {
+        if (character->hp() == 0) {
             character->die(this);
         }
     } catch (GameException &exception) {
@@ -1153,7 +1109,7 @@ void Character::invokeTimer(int timerId) {
             }
         }
     } else if (timerId == m_regenerationIntervalId) {
-        adjustHp(qMax(stats().vitality / 15, 1));
+        invokeScriptMethod("regenerate");
     } else {
         super::invokeTimer(timerId);
     }
@@ -1192,8 +1148,7 @@ void Character::changeStats(const CharacterStats &newStats) {
 
     super::changeStats(newStats);
 
-    setMaxHp(2 * newStats.vitality);
-    setMaxMp(newStats.intelligence);
+    invokeScriptMethod("changeStats", ScriptEngine::instance()->toScriptValue(newStats));
 }
 
 void Character::enteredRoom() {

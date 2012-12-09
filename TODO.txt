@@ -18,7 +18,6 @@ GAME MECHANICS
 
 EXTENSIBILITY
 
-  -  Move hitChance from Character::kill() to oncombat trigger.
   -  Make look command more flexible.
 
 TECHNOLOGY

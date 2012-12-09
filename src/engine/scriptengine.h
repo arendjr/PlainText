@@ -26,6 +26,7 @@ class ScriptEngine : public QObject {
         static ScriptEngine *instance();
 
         void loadScripts();
+        void loadScripts(const QString &dirPath);
         void loadScript(const QString &path);
 
         QScriptValue evaluate(const QString &program,

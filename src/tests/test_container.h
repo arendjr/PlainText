@@ -9,6 +9,7 @@
 #include "container.h"
 #include "player.h"
 #include "realm.h"
+#include "session.h"
 
 
 class ContainerTest : public TestCase {
@@ -44,9 +45,11 @@ class ContainerTest : public TestCase {
         void testPutAllInContainer() {
 
             Realm *realm = Realm::instance();
+            Session *session = new Session(realm, "Mock", "", this);
             Player *player = (Player *) realm->getPlayer("Arie");
+            player->setSession(session);
 
-            QSignalSpy spy(player, SIGNAL(write(QString)));
+            QSignalSpy spy(player->session(), SIGNAL(write(QString)));
 
             player->execute("put all in container");
 

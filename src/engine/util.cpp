@@ -2,6 +2,7 @@
 
 #include <cmath>
 
+#include <QDebug>
 #include <QTextStream>
 #include <QtAlgorithms>
 
@@ -488,4 +489,13 @@ QString Util::randomString(int length) {
         string.append(QChar::fromAscii(40 + qrand() % 87));
     }
     return string;
+}
+
+int Util::randomInt(int min, int max) {
+
+    if (max == min) {
+        qWarning() << "Division by zero in Util::randomInt()";
+        return min;
+    }
+    return min + qrand() % (max - min);
 }

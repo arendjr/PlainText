@@ -1,6 +1,8 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+#include <cstdlib>
+
 #include <QObject>
 #include <QStringList>
 
@@ -74,6 +76,8 @@ class Util : public QObject {
         static QString fullPropertyName(QObject *object, const QString &propertyName);
 
         Q_INVOKABLE static QString randomString(int length);
+
+        Q_INVOKABLE static int randomInt(int min = 0, int max = RAND_MAX);
 };
 
 #endif // UTIL_H

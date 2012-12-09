@@ -29,12 +29,10 @@ SOURCES += \
     engine/scriptengine.cpp \
     engine/scriptfunction.cpp \
     engine/scriptfunctionmap.cpp \
-    engine/scriptwindow.cpp \
     engine/session.cpp \
     engine/triggerregistry.cpp \
     engine/util.cpp \
     engine/vector3d.cpp \
-    engine/commands/buycommand.cpp \
     engine/commands/command.cpp \
     engine/commands/descriptioncommand.cpp \
     engine/commands/disbandcommand.cpp \
@@ -42,7 +40,6 @@ SOURCES += \
     engine/commands/equipmentcommand.cpp \
     engine/commands/followcommand.cpp \
     engine/commands/getcommand.cpp \
-    engine/commands/givecommand.cpp \
     engine/commands/gocommand.cpp \
     engine/commands/helpcommand.cpp \
     engine/commands/inventorycommand.cpp \
@@ -51,9 +48,7 @@ SOURCES += \
     engine/commands/losecommand.cpp \
     engine/commands/removecommand.cpp \
     engine/commands/scriptcommand.cpp \
-    engine/commands/searchcommand.cpp \
     engine/commands/slashmecommand.cpp \
-    engine/commands/statscommand.cpp \
     engine/commands/wieldcommand.cpp \
     engine/commands/admin/addcharactercommand.cpp \
     engine/commands/admin/addcontainercommand.cpp \
@@ -159,12 +154,10 @@ HEADERS += \
     engine/scriptengine.h \
     engine/scriptfunction.h \
     engine/scriptfunctionmap.h \
-    engine/scriptwindow.h \
     engine/session.h \
     engine/triggerregistry.h \
     engine/util.h \
     engine/vector3d.h \
-    engine/commands/buycommand.h \
     engine/commands/command.h \
     engine/commands/descriptioncommand.h \
     engine/commands/disbandcommand.h \
@@ -172,7 +165,6 @@ HEADERS += \
     engine/commands/equipmentcommand.h \
     engine/commands/followcommand.h \
     engine/commands/getcommand.h \
-    engine/commands/givecommand.h \
     engine/commands/gocommand.h \
     engine/commands/helpcommand.h \
     engine/commands/inventorycommand.h \
@@ -181,9 +173,7 @@ HEADERS += \
     engine/commands/losecommand.h \
     engine/commands/removecommand.h \
     engine/commands/scriptcommand.h \
-    engine/commands/searchcommand.h \
     engine/commands/slashmecommand.h \
-    engine/commands/statscommand.h \
     engine/commands/wieldcommand.h \
     engine/commands/admin/addcharactercommand.h \
     engine/commands/admin/addcontainercommand.h \
@@ -266,29 +256,41 @@ HEADERS += \
 OTHER_FILES += \
     engine/util.js \
     engine/commands/command.js \
+    ../data/commands/buycommand.js \
     ../data/commands/closecommand.js \
     ../data/commands/drinkcommand.js \
     ../data/commands/eatcommand.js \
+    ../data/commands/givecommand.js \
     ../data/commands/groupcommand.js \
     ../data/commands/gtalkcommand.js \
     ../data/commands/opencommand.js \
     ../data/commands/putcommand.js \
     ../data/commands/quitcommand.js \
     ../data/commands/saycommand.js \
+    ../data/commands/searchcommand.js \
     ../data/commands/shoutcommand.js \
+    ../data/commands/statscommand.js \
     ../data/commands/talkcommand.js \
     ../data/commands/tellcommand.js \
     ../data/commands/usecommand.js \
     ../data/commands/whocommand.js \
     ../data/commands/admin/enterroomcommand.js \
+    ../data/scripts/combat.js \
     ../data/scripts/sessionhandler.js \
+    ../data/scripts/gameobjects/character.js \
+    ../data/scripts/gameobjects/gameobject.js \
+    ../data/scripts/gameobjects/item.js \
+    ../data/scripts/gameobjects/player.js \
+    ../data/scripts/gameobjects/statsitem.js \
     ../web/index.html \
     ../web/css/admin.css \
     ../web/css/main.css \
+    ../web/js/controller.js \
     ../web/js/kinetic.js \
     ../web/js/main.js \
     ../web/js/notifications.js \
     ../web/js/require.js \
+    ../web/js/util.js \
     ../web/js/zepto.js \
     ../web/js/admin/admin.js \
     ../web/js/admin/kinetic.js \
@@ -307,8 +309,7 @@ OTHER_FILES += \
     ../DESIGN.txt \
     ../README.md \
     ../TODO.txt \
-    ../web/js/util.js \
-    ../web/js/controller.js \
+    ../data/scripts/stats.js
 
 INCLUDEPATH += \
     engine \

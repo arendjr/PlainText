@@ -105,8 +105,8 @@ class GameObject : public QObject {
         const ScriptFunctionMap &triggers() const { return m_triggers; }
         ScriptFunction trigger(const QString &name) const { return m_triggers[name]; }
         Q_INVOKABLE bool hasTrigger(const QString &name) const { return m_triggers.contains(name); }
-        void setTrigger(const QString &name, const ScriptFunction &function);
-        void unsetTrigger(const QString &name);
+        Q_INVOKABLE void setTrigger(const QString &name, const ScriptFunction &function);
+        Q_INVOKABLE void unsetTrigger(const QString &name);
         void setTriggers(const ScriptFunctionMap &triggers);
         Q_PROPERTY(ScriptFunctionMap triggers READ triggers WRITE setTriggers)
 
@@ -145,6 +145,12 @@ class GameObject : public QObject {
                            const QScriptValue &arg2 = QScriptValue(),
                            const QScriptValue &arg3 = QScriptValue(),
                            const QScriptValue &arg4 = QScriptValue());
+
+        QScriptValue invokeScriptMethod(const QString &methodName,
+                                        const QScriptValue &arg1 = QScriptValue(),
+                                        const QScriptValue &arg2 = QScriptValue(),
+                                        const QScriptValue &arg3 = QScriptValue(),
+                                        const QScriptValue &arg4 = QScriptValue());
 
         Q_INVOKABLE virtual void send(const QString &message, int color = Silver) const;
 

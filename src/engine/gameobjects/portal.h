@@ -57,9 +57,9 @@ class Portal : public GameObject {
         Q_PROPERTY(GameEventMultiplierMap eventMultipliers READ eventMultipliers
                                                            WRITE setEventMultipliers)
 
-        Q_INVOKABLE const GameObjectPtr &oppositeOf(const GameObjectPtr &room) const;
-        Q_INVOKABLE const QString &nameFromRoom(const GameObjectPtr &room) const;
-        Q_INVOKABLE const QString &descriptionFromRoom(const GameObjectPtr &room) const;
+        Q_INVOKABLE GameObjectPtr oppositeOf(const GameObjectPtr &room) const;
+        Q_INVOKABLE QString nameFromRoom(const GameObjectPtr &room) const;
+        Q_INVOKABLE QString descriptionFromRoom(const GameObjectPtr &room) const;
         Q_INVOKABLE bool isHiddenFromRoom(const GameObjectPtr &room) const;
         Q_INVOKABLE bool canOpenFromRoom(const GameObjectPtr &room) const;
         Q_INVOKABLE bool canSeeThrough() const;

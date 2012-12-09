@@ -200,7 +200,7 @@ void Player::quit() {
 void Player::invokeTimer(int timerId) {
 
     if (timerId == m_regenerationIntervalId) {
-        adjustHp(qMax(stats().vitality / 15, 1));
+        invokeScriptMethod("regenerate");
         send("");
     } else {
         super::invokeTimer(timerId);

@@ -19,7 +19,7 @@ class SerializationTest : public TestCase {
         void testUserStrings() {
 
             QString userString = "[1, 1, 1, 1, 1, 1]";
-            CharacterStats expected(1, 1, 1, 1, 1, 1);
+            CharacterStats expected(1);
             CharacterStats actual;
             CharacterStats::fromUserString(userString, actual);
             QCOMPARE(actual, expected);
@@ -55,7 +55,7 @@ class SerializationTest : public TestCase {
                 QCOMPARE(QString(file.readAll()), QString("{\n"
                     "  \"name\": \"Room B\",\n"
                     "  \"position\": [ 0, 50, 0 ],\n"
-                    "  \"portals\": [ \"portal:3\" ],\n"
+                    "  \"portals\": [ \"portal:3\", \"portal:6\" ],\n"
                     "  \"flags\": \"\"\n"
                 "}"));
             }
@@ -68,7 +68,7 @@ class SerializationTest : public TestCase {
                     "  \"name2\": \"b-to-a\",\n"
                     "  \"room\": \"room:1\",\n"
                     "  \"room2\": \"room:2\",\n"
-                    "  \"flags\": \"CanPassThrough\"\n"
+                    "  \"flags\": \"CanSeeThrough|CanPassThrough\"\n"
                 "}"));
             }
 

@@ -12,20 +12,14 @@
 class CharacterStats {
 
     public:
-        int strength;
-        int dexterity;
-        int vitality;
-        int endurance;
-        int intelligence;
-        int faith;
+        static const int NUM_STATS = 6;
+
+        int value[NUM_STATS];
 
         CharacterStats() = default;
-        CharacterStats(int strength, int dexterity, int vitality,
-                       int endurance, int intelligence, int faith);
+        CharacterStats(int value);
 
-        inline int total() const {
-            return strength + dexterity + vitality + endurance + intelligence + faith;
-        }
+        int total() const;
 
         bool operator==(const CharacterStats &other) const;
         bool operator!=(const CharacterStats &other) const;

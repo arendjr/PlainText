@@ -269,14 +269,7 @@ function SessionHandler() {
                 var raceStats = signUpData.race.stats;
                 var classStats = signUpData.characterClass.stats;
 
-                var stats = {};
-                stats.strength = raceStats.strength + classStats.strength;
-                stats.dexterity = raceStats.dexterity + classStats.dexterity;
-                stats.vitality = raceStats.vitality + classStats.vitality;
-                stats.endurance = raceStats.endurance + classStats.endurance;
-                stats.intelligence = raceStats.intelligence + classStats.intelligence;
-                stats.faith = raceStats.faith + classStats.faith;
-                signUpData.stats = stats;
+                signUpData.stats = raceStats.plus(classStats);
 
                 signUpData.height = signUpData.race.height;
                 signUpData.weight = signUpData.race.weight;
@@ -287,16 +280,16 @@ function SessionHandler() {
                            signUpData.characterClass.name === "soldier") {
                     signUpData.weight += 5;
                 } else if (signUpData.characterClass.name === "barbarian") {
-                    signUpData.stats.intelligence = 0;
+                    signUpData.stats[4] = 0;
                     signUpData.weight += 5;
                 }
 
                 if (signUpData.gender === "male") {
-                    signUpData.stats.strength++;
+                    signUpData.stats[0]++;
                     signUpData.height += 10;
                     signUpData.weight += 10;
                 } else {
-                    signUpData.stats.dexterity++;
+                    signUpData.stats[1]++;
                     signUpData.weight -= 10;
                 }
 
@@ -307,9 +300,8 @@ function SessionHandler() {
                      "Your base character stats are: \n" +
                      "\n" +
                      "  *STR: %1*, *DEX: %2*, *VIT: %3*, *END: %4*, *INT: %5*, *FAI: %6*.\n"
-                     .arg(signUpData.stats.strength, signUpData.stats.dexterity,
-                          signUpData.stats.vitality, signUpData.stats.endurance,
-                          signUpData.stats.intelligence, signUpData.stats.faith) +
+                     .arg(signUpData.stats[0], signUpData.stats[1], signUpData.stats[2],
+                          signUpData.stats[3], signUpData.stats[4], signUpData.stats[5]) +
                      "\n" +
                      "You may assign an additional 9 points freely over your various " +
                      "attributes.\n");
@@ -372,29 +364,24 @@ function SessionHandler() {
                         return;
                     }
 
-                    var stats = {};
-                    stats.strength = max(attributes[0].toInt(), 0);
-                    stats.dexterity = max(attributes[1].toInt(), 0);
-                    stats.vitality = max(attributes[2].toInt(), 0);
-                    stats.endurance = max(attributes[3].toInt(), 0);
-                    stats.intelligence = isBarbarian ? 0 : max(attributes[4].toInt(), 0);
-                    stats.faith = max(attributes[isBarbarian ? 4 : 5].toInt(), 0);
+                    var stats = [
+                        max(attributes[0].toInt(), 0),
+                        max(attributes[1].toInt(), 0),
+                        max(attributes[2].toInt(), 0),
+                        max(attributes[3].toInt(), 0),
+                        isBarbarian ? 0 : max(attributes[4].toInt(), 0),
+                        max(attributes[isBarbarian ? 4 : 5].toInt(), 0)
+                    ];
 
-                    if (stats.strength + stats.dexterity + stats.vitality +
-                        stats.endurance + stats.intelligence + stats.faith !== 9) {
+                    if (stats.total() !== 9) {
                         send("\nThe total of attributes should be 9.\n", Color.Red);
                         return;
                     }
 
-                    signUpData.stats.strength += stats.strength;
-                    signUpData.stats.dexterity += stats.dexterity;
-                    signUpData.stats.vitality += stats.vitality;
-                    signUpData.stats.strength += stats.strength;
-                    signUpData.stats.endurance += stats.endurance;
-                    signUpData.stats.faith += stats.faith;
+                    signUpData.stats.add(stats);
 
-                    signUpData.height += stats.intelligence - Math.floor(stats.dexterity / 2);
-                    signUpData.weight += stats.strength;
+                    signUpData.height += stats[INTELLIGENCE] - Math.floor(stats[DEXTERITY] / 2);
+                    signUpData.weight += stats[STRENGTH];
 
                     send("\nYour character stats have been recorded.\n", Color.Green);
                     this.setState("AskingSignUpConfirmation");
@@ -411,9 +398,8 @@ function SessionHandler() {
                      "Your final character stats are: \n" +
                      "\n" +
                      "  *STR: %1*, *DEX: %2*, *VIT: %3*, *END: %4*, *INT: %5*, *FAI: %6*.\n"
-                     .arg(signUpData.stats.strength, signUpData.stats.dexterity,
-                          signUpData.stats.vitality, signUpData.stats.endurance,
-                          signUpData.stats.intelligence, signUpData.stats.faith));
+                     .arg(signUpData.stats[0], signUpData.stats[1], signUpData.stats[2],
+                          signUpData.stats[3], signUpData.stats[4], signUpData.stats[5]));
             },
             "prompt": function() {
                 send("\n" +

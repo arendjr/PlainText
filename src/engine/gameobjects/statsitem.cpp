@@ -9,7 +9,7 @@
 
 StatsItem::StatsItem(Realm *realm, GameObjectType objectType, uint id, Options options) :
     super(realm, objectType, id, options),
-    m_stats(0, 0, 0, 0, 0, 0),
+    m_stats(0),
     m_modifiersTimerId(0) {
 }
 
@@ -25,15 +25,6 @@ void StatsItem::setStats(const CharacterStats &stats) {
 
         changeStats(m_stats);
     }
-}
-
-CharacterStats StatsItem::totalStats() const {
-
-    CharacterStats totalStats = m_stats;
-    for (const Modifier &modifier : m_modifiers) {
-        totalStats += modifier.stats;
-    }
-    return totalStats;
 }
 
 void StatsItem::addModifier(const Modifier &modifier) {

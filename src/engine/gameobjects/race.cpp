@@ -5,7 +5,7 @@
 
 Race::Race(Realm *realm, uint id, Options options) :
     super(realm, GameObjectType::Race, id, options),
-    m_stats(0, 0, 0, 0, 0, 0),
+    m_stats(0),
     m_height(0),
     m_weight(0),
     m_playerSelectable(false) {

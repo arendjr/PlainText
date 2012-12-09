@@ -63,7 +63,7 @@ void Portal::setEventMultipliers(const GameEventMultiplierMap &multipliers) {
     }
 }
 
-const GameObjectPtr &Portal::oppositeOf(const GameObjectPtr &room) const {
+GameObjectPtr Portal::oppositeOf(const GameObjectPtr &room) const {
 
     if (room == m_room2) {
         return m_room;
@@ -71,7 +71,7 @@ const GameObjectPtr &Portal::oppositeOf(const GameObjectPtr &room) const {
     return m_room2;
 }
 
-const QString &Portal::nameFromRoom(const GameObjectPtr &room) const {
+QString Portal::nameFromRoom(const GameObjectPtr &room) const {
 
     if (room == m_room2 && !m_name2.isEmpty()) {
         return m_name2;
@@ -79,7 +79,7 @@ const QString &Portal::nameFromRoom(const GameObjectPtr &room) const {
     return name();
 }
 
-const QString &Portal::descriptionFromRoom(const GameObjectPtr &room) const {
+QString Portal::descriptionFromRoom(const GameObjectPtr &room) const {
 
     if (room == m_room2 && (!m_name2.isEmpty() || !m_description2.isEmpty())) {
         return m_description2;
