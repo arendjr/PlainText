@@ -38,13 +38,11 @@ SOURCES += \
     engine/commands/disbandcommand.cpp \
     engine/commands/dropcommand.cpp \
     engine/commands/equipmentcommand.cpp \
-    engine/commands/followcommand.cpp \
     engine/commands/gocommand.cpp \
     engine/commands/helpcommand.cpp \
     engine/commands/inventorycommand.cpp \
     engine/commands/killcommand.cpp \
     engine/commands/lookcommand.cpp \
-    engine/commands/losecommand.cpp \
     engine/commands/removecommand.cpp \
     engine/commands/scriptcommand.cpp \
     engine/commands/slashmecommand.cpp \
@@ -162,13 +160,11 @@ HEADERS += \
     engine/commands/disbandcommand.h \
     engine/commands/dropcommand.h \
     engine/commands/equipmentcommand.h \
-    engine/commands/followcommand.h \
     engine/commands/gocommand.h \
     engine/commands/helpcommand.h \
     engine/commands/inventorycommand.h \
     engine/commands/killcommand.h \
     engine/commands/lookcommand.h \
-    engine/commands/losecommand.h \
     engine/commands/removecommand.h \
     engine/commands/scriptcommand.h \
     engine/commands/slashmecommand.h \
@@ -258,10 +254,12 @@ OTHER_FILES += \
     ../data/commands/closecommand.js \
     ../data/commands/drinkcommand.js \
     ../data/commands/eatcommand.js \
+    ../data/commands/followcommand.js \
     ../data/commands/getcommand.js \
     ../data/commands/givecommand.js \
     ../data/commands/groupcommand.js \
     ../data/commands/gtalkcommand.js \
+    ../data/commands/losecommand.js \
     ../data/commands/opencommand.js \
     ../data/commands/putcommand.js \
     ../data/commands/quitcommand.js \
