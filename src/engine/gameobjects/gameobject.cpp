@@ -626,7 +626,6 @@ GameObject *GameObject::createByObjectType(Realm *realm, GameObjectType objectTy
         case GameObjectType::Weapon:
             return new Weapon(realm, id, options);
         case GameObjectType::Unknown:
-            break;
         default:
             break;
     }

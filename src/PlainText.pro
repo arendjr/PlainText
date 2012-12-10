@@ -39,7 +39,6 @@ SOURCES += \
     engine/commands/dropcommand.cpp \
     engine/commands/equipmentcommand.cpp \
     engine/commands/followcommand.cpp \
-    engine/commands/getcommand.cpp \
     engine/commands/gocommand.cpp \
     engine/commands/helpcommand.cpp \
     engine/commands/inventorycommand.cpp \
@@ -164,7 +163,6 @@ HEADERS += \
     engine/commands/dropcommand.h \
     engine/commands/equipmentcommand.h \
     engine/commands/followcommand.h \
-    engine/commands/getcommand.h \
     engine/commands/gocommand.h \
     engine/commands/helpcommand.h \
     engine/commands/inventorycommand.h \
@@ -260,6 +258,7 @@ OTHER_FILES += \
     ../data/commands/closecommand.js \
     ../data/commands/drinkcommand.js \
     ../data/commands/eatcommand.js \
+    ../data/commands/getcommand.js \
     ../data/commands/givecommand.js \
     ../data/commands/groupcommand.js \
     ../data/commands/gtalkcommand.js \
@@ -277,6 +276,7 @@ OTHER_FILES += \
     ../data/commands/admin/enterroomcommand.js \
     ../data/scripts/combat.js \
     ../data/scripts/sessionhandler.js \
+    ../data/scripts/stats.js \
     ../data/scripts/gameobjects/character.js \
     ../data/scripts/gameobjects/gameobject.js \
     ../data/scripts/gameobjects/item.js \
@@ -309,7 +309,6 @@ OTHER_FILES += \
     ../DESIGN.txt \
     ../README.md \
     ../TODO.txt \
-    ../data/scripts/stats.js
 
 INCLUDEPATH += \
     engine \

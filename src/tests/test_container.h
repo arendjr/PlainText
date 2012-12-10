@@ -42,6 +42,16 @@ class ContainerTest : public TestCase {
             player->addInventoryItem(item3);
         }
 
+        virtual void cleanup() {
+
+            m_container->setItems(GameObjectPtrList());
+            m_items.clear();
+
+            Realm *realm = Realm::instance();
+            Player *player = (Player *) realm->getPlayer("Arie");
+            player->setInventory(GameObjectPtrList());
+        }
+
         void testPutAllInContainer() {
 
             Realm *realm = Realm::instance();
@@ -67,6 +77,28 @@ class ContainerTest : public TestCase {
             QVERIFY(m_container->items().contains(m_items[0]));
             QVERIFY(m_container->items().contains(m_items[1]));
             QVERIFY(m_container->items().contains(m_items[2]));
+        }
+
+        void testTakeFromContainer() {
+
+            Realm *realm = Realm::instance();
+            Player *player = (Player *) realm->getPlayer("Arie");
+
+            QCOMPARE(player->inventory().length(), 4);
+            QCOMPARE(m_container->items().length(), 0);
+
+            player->execute("put item2 in container");
+            player->execute("put item3 in container");
+
+            QCOMPARE(player->inventory().length(), 2);
+            QCOMPARE(m_container->items().length(), 2);
+
+            player->execute("take item 2 from container");
+
+            QCOMPARE(player->inventory().length(), 3);
+            QCOMPARE(m_container->items().length(), 1);
+            QVERIFY(player->inventory().contains(m_items[2]));
+            QVERIFY(m_container->items().contains(m_items[1]));
         }
 
     private:
