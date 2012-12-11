@@ -23,12 +23,12 @@ void ListMethodsCommand::execute(Player *player, const QString &command) {
 
     super::prepareExecute(player, command);
 
-    GameObjectPtrList objects = takeObjects(currentRoom()->objects());
-    if (!requireUnique(objects, "Object not found.", "Object is not unique.")) {
+    GameObjectPtr object = takeObject(currentRoom()->exits() + currentRoom()->characters() +
+                                      currentRoom()->items());
+    if (!requireSome(object, "Object not found.")) {
         return;
     }
 
-    GameObjectPtr object = objects[0];
     send(QString("These are all known methods of %1:\n"
                  "\n").arg(Util::highlight(QString("object #%1").arg(object->id()))));
 

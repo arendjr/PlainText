@@ -16,10 +16,6 @@ GAME MECHANICS
      -  spells
      -  unread
 
-EXTENSIBILITY
-
-  -  Make look command more flexible.
-
 TECHNOLOGY
 
   -  Migrate to Qt5 after release.

@@ -72,7 +72,7 @@ QString ConversionUtil::toJsonString(const QVariant &variant, Options options) {
         case QVariant::List: {
             QStringList stringList;
             for (const QVariant &item : variant.toList()) {
-                stringList << ConversionUtil::toJsonString(item);
+                stringList.append(ConversionUtil::toJsonString(item));
             }
             if (stringList.isEmpty()) {
                 return QString();
@@ -83,7 +83,7 @@ QString ConversionUtil::toJsonString(const QVariant &variant, Options options) {
         case QVariant::StringList: {
             QStringList stringList;
             for (const QString &string : variant.toStringList()) {
-                stringList << jsString(string);
+                stringList.append(jsString(string));
             }
             if (stringList.isEmpty()) {
                 return QString();
@@ -98,14 +98,15 @@ QString ConversionUtil::toJsonString(const QVariant &variant, Options options) {
             QVariantMap map = variant.toMap();
             for (const QString &key : map.keys()) {
                 QVariant value = map[key];
-                if (options & IncludeTypeInfo) {
-                    stringList.append(QString("%1: [ %2, %3, %4 ]")
-                                      .arg(jsString(key), QString::number(value.type()),
-                                           QString::number(value.userType()),
-                                           toJsonString(value, options)));
-                } else {
-                    stringList.append(QString("%1: %2").arg(jsString(key),
-                                                            toJsonString(value, options)));
+                QString jsonString = toJsonString(value, options);
+                if (!jsonString.isEmpty()) {
+                    if (options & IncludeTypeInfo) {
+                        stringList.append(QString("%1: [ %2, %3, %4 ]")
+                                          .arg(jsString(key), QString::number(value.type()),
+                                               QString::number(value.userType()), jsonString));
+                    } else {
+                        stringList.append(QString("%1: %2").arg(jsString(key), jsonString));
+                    }
                 }
             }
             return stringList.isEmpty() ? QString() : "{ " + stringList.join(", ") + " }";

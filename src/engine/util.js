@@ -111,6 +111,15 @@ Array.prototype.mid = function(begin, end) {
     return this.slice(begin, end - begin);
 };
 
+Array.prototype.minus = function(array) {
+
+    var result = [];
+    for (var i = 0, length = min(this.length, array.length); i < length; i++) {
+        result[i] = this[i] - array[i];
+    }
+    return result;
+};
+
 Array.prototype.named = function(name) {
 
     for (var i = 0; i < this.length; i++) {

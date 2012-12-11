@@ -131,7 +131,6 @@ define(["zepto"], function($) {
 
         socket.addEventListener("message", function(message) {
             if (message.data.substr(0, 1) === "{" && message.data.substr(-1) === "}") {
-                console.log(message.data);
                 var data = JSON.parse(message.data);
                 if (!data) {
                     return;

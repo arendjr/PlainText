@@ -180,7 +180,7 @@ Command.prototype.takeRest = function() {
 
 Command.prototype.objectByDescription = function(description, pool) {
 
-    var objects = objectsByDescription(description, pool);
+    var objects = this.objectsByDescription(description, pool);
     if (!objects.isEmpty()) {
         return objects[0];
     }

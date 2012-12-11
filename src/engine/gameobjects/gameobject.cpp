@@ -180,7 +180,7 @@ QString GameObject::definiteName(const GameObjectPtrList &pool, int options) con
             }
 
             return QString(options & Capitalized ? "The " : "the ") +
-                   (total > 1 ? QString(Util::writtenPosition(position) + " ") : QLatin1String("")) +
+                   (total > 1 ? QString(Util::writtenPosition(position) + " ") : QString("")) +
                    name();
         }
     } catch (GameException &exception) {
@@ -322,16 +322,16 @@ bool GameObject::invokeTrigger(const QString &name,
 
     QScriptValueList arguments;
     if (arg1.isValid()) {
-        arguments << arg1;
+        arguments.append(arg1);
 
         if (arg2.isValid()) {
-            arguments << arg2;
+            arguments.append(arg2);
 
             if (arg3.isValid()) {
-                arguments << arg3;
+                arguments.append(arg3);
 
                 if (arg4.isValid()) {
-                    arguments << arg4;
+                    arguments.append(arg4);
                 }
             }
         }
@@ -399,6 +399,15 @@ bool GameObject::invokeTrigger(const QString &triggerName,
     return invokeTrigger(triggerName, engine->toScriptValue(arg1), arg2, arg3, arg4);
 }
 
+bool GameObject::hasScriptMethod(const QString &methodName) {
+
+    ScriptEngine *engine = m_realm->scriptEngine();
+    QScriptValue scriptObject = engine->toScriptValue(this);
+
+    QScriptValue method = scriptObject.prototype().property(methodName);
+    return method.isFunction();
+}
+
 QScriptValue GameObject::invokeScriptMethod(const QString &methodName,
                                             const QScriptValue &arg1, const QScriptValue &arg2,
                                             const QScriptValue &arg3, const QScriptValue &arg4) {
@@ -406,20 +415,23 @@ QScriptValue GameObject::invokeScriptMethod(const QString &methodName,
     ScriptEngine *engine = m_realm->scriptEngine();
     QScriptValue scriptObject = engine->toScriptValue(this);
 
-    QScriptValue method = scriptObject.property(methodName);
+    QScriptValue method = scriptObject.prototype().property(methodName);
+    if (!method.isFunction()) {
+        return QScriptValue();
+    }
 
     QScriptValueList arguments;
     if (arg1.isValid()) {
-        arguments << arg1;
+        arguments.append(arg1);
 
         if (arg2.isValid()) {
-            arguments << arg2;
+            arguments.append(arg2);
 
             if (arg3.isValid()) {
-                arguments << arg3;
+                arguments.append(arg3);
 
                 if (arg4.isValid()) {
-                    arguments << arg4;
+                    arguments.append(arg4);
                 }
             }
         }
@@ -429,7 +441,10 @@ QScriptValue GameObject::invokeScriptMethod(const QString &methodName,
     if (engine->hasUncaughtException()) {
         QScriptValue exception = engine->uncaughtException();
         qWarning() << "Script Exception: " << exception.toString().toUtf8().constData() << endl
-                   << "While executing game object method: " << methodName.toUtf8().constData();
+                   << "While executing game object method: "
+                   << methodName.toUtf8().constData() << endl
+                   << "Backtrace:" << endl
+                   << exception.property("backtrace").toString().toUtf8().constData();
     }
     return result;
 }
@@ -438,6 +453,33 @@ void GameObject::send(const QString &message, int color) const {
 
     Q_UNUSED(message)
     Q_UNUSED(color)
+}
+
+QString GameObject::lookAtBy(GameObject *character) {
+
+    ScriptEngine *engine = m_realm->scriptEngine();
+    QScriptValue scriptObject = engine->toScriptValue(this);
+
+    QScriptValue method = scriptObject.prototype().property("lookAtBy");
+    if (method.isFunction()) {
+        QScriptValueList arguments;
+        arguments.append(engine->toScriptValue(character));
+        QScriptValue result = method.call(scriptObject, arguments);
+        if (engine->hasUncaughtException()) {
+            QScriptValue exception = engine->uncaughtException();
+            qWarning() << "Script Exception: " << exception.toString().toUtf8().constData() << endl
+                       << "While executing game object method:  lookAtBy" << endl
+                       << "Backtrace:" << endl
+                       << exception.property("backtrace").toString().toUtf8().constData();
+        }
+        return result.toString();
+    } else {
+        if (m_description.isEmpty()) {
+            return QString("There's nothing special about the %1.").arg(name());
+        } else {
+            return m_description;
+        }
+    }
 }
 
 int GameObject::setInterval(const QScriptValue &function, int delay) {
@@ -506,15 +548,15 @@ QString GameObject::toJsonString(Options options) const {
 
     QStringList dumpedProperties;
     if (~options & SkipId) {
-        dumpedProperties << QString("  \"id\": %1").arg(m_id);
+        dumpedProperties.append(QString("  \"id\": %1").arg(m_id));
     }
     for (const QMetaProperty &metaProperty : storedMetaProperties()) {
         const char *name = metaProperty.name();
 
-        QString propertyString = ConversionUtil::toJsonString(property(name),
-                                                              (Options) (options & IncludeTypeInfo));
-        if (!propertyString.isNull()) {
-            dumpedProperties << QString("  \"%1\": %2").arg(name, propertyString);
+        QString jsonString = ConversionUtil::toJsonString(property(name),
+                                                          (Options) (options & IncludeTypeInfo));
+        if (!jsonString.isEmpty()) {
+            dumpedProperties.append(QString("  \"%1\": %2").arg(name, jsonString));
         }
     }
     return "{\n" + dumpedProperties.join(",\n") + "\n}";

@@ -137,49 +137,6 @@ void Player::sendSellableItemsList(const GameObjectPtrList &items) {
     }
 }
 
-void Player::look() {
-
-    try {
-        Room *room = currentRoom().cast<Room *>();
-        QString text;
-
-        if (!room->name().isEmpty()) {
-            text += "\n" + Util::colorize(room->name(), Teal) + "\n\n";
-        }
-
-        text += room->description() + "\n";
-
-        if (room->exits().length() > 0) {
-            QStringList exitNames;
-            for (const GameObjectPtr &exitPtr : room->exits()) {
-                Exit *exit = exitPtr.cast<Exit *>();
-
-                if (exit->isHidden()) {
-                    continue;
-                }
-
-                exitNames << exit->name();
-            }
-            exitNames = Util::sortExitNames(exitNames);
-            text += Util::colorize("Obvious exits: " + exitNames.join(", ") + ".", Green) + "\n";
-        }
-
-        GameObjectPtrList others = room->characters();
-        others.removeOne(this);
-        if (others.length() > 0) {
-            text += QString("You see %1.\n").arg(others.joinFancy());
-        }
-
-        if (room->items().length() > 0) {
-            text += QString("You see %1.\n").arg(room->items().joinFancy());
-        }
-
-        send(text);
-    } catch (GameException &exception) {
-        qDebug() << "Exception in Player::look(): " << exception.what();
-    }
-}
-
 void Player::execute(const QString &command) {
 
     realm()->commandInterpreter()->execute(this, command);
@@ -214,9 +171,4 @@ void Player::changeName(const QString &newName) {
     if (~options() & Copy) {
         realm()->registerPlayer(this);
     }
-}
-
-void Player::enteredRoom() {
-
-    look();
 }

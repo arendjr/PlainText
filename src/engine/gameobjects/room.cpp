@@ -5,6 +5,7 @@
 #include "exit.h"
 #include "item.h"
 #include "portal.h"
+#include "util.h"
 
 
 #define super GameObject
@@ -146,6 +147,50 @@ void Room::setEventMultipliers(const GameEventMultiplierMap &multipliers) {
         m_eventMultipliers = multipliers;
 
         setModified();
+    }
+}
+
+QString Room::lookAtBy(GameObject *character) {
+
+    try {
+        QString text;
+
+        if (!name().isEmpty()) {
+            text += "\n" + Util::colorize(name(), Teal) + "\n\n";
+        }
+
+        text += description() + "\n";
+
+        if (!portals().isEmpty()) {
+            QStringList exitNames;
+            GameObjectPtr room(this);
+            for (const GameObjectPtr &portalPtr : portals()) {
+                Portal *portal = portalPtr.cast<Portal *>();
+
+                if (portal->isHiddenFromRoom(room)) {
+                    continue;
+                }
+
+                exitNames.append(portal->nameFromRoom(room));
+            }
+            exitNames = Util::sortExitNames(exitNames);
+            text += Util::colorize("Obvious exits: " + exitNames.join(", ") + ".", Green) + "\n";
+        }
+
+        GameObjectPtrList others = characters();
+        others.removeOne(character);
+        if (!others.isEmpty()) {
+            text += QString("You see %1.\n").arg(others.joinFancy());
+        }
+
+        if (!items().isEmpty()) {
+            text += QString("You see %1.\n").arg(items().joinFancy());
+        }
+
+        return text;
+    } catch (GameException &exception) {
+        qDebug() << "Exception in Room::lookAtBy(): " << exception.what();
+        return QString();
     }
 }
 

@@ -13,7 +13,6 @@
 #include "race.h"
 #include "realm.h"
 #include "room.h"
-#include "scriptengine.h"
 #include "shield.h"
 #include "speechevent.h"
 #include "util.h"
@@ -542,12 +541,10 @@ void Character::go(const GameObjectPtr &pointer) {
 
         for (const GameObjectPtr &followerPtr : followers) {
             Character *follower = followerPtr.cast<Character *>();
-            if (follower->currentRoom() == currentRoom()) {
-                follower->leave(currentRoom());
-                follower->setDirection(direction);
-                follower->enter(destination);
-                follower->send(QString("You follow %1.").arg(name()));
-            }
+            follower->leave(currentRoom());
+            follower->setDirection(direction);
+            follower->enter(destination);
+            follower->send(QString("You follow %1.").arg(name()));
         }
 
         GameObjectPtrList party(1 + followers.length());
@@ -1202,16 +1199,10 @@ void Character::changeName(const QString &newName) {
     realm()->addReservedName(newName);
 }
 
-void Character::changeStats(const CharacterStats &newStats) {
-
-    super::changeStats(newStats);
-
-    invokeScriptMethod("changeStats", ScriptEngine::instance()->toScriptValue(newStats));
-}
-
 void Character::enteredRoom() {
 
     invokeTrigger("onentered");
+    invokeScriptMethod("enteredRoom");
 }
 
 int Character::updateEffects(qint64 now) {

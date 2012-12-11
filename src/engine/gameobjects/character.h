@@ -159,7 +159,6 @@ class Character : public StatsItem {
 
     protected:
         virtual void changeName(const QString &newName);
-        virtual void changeStats(const CharacterStats &newStats);
 
         virtual void enteredRoom();
 

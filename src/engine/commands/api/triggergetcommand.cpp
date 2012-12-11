@@ -1,5 +1,7 @@
 #include "triggergetcommand.h"
 
+#include "realm.h"
+
 
 #define super ApiCommand
 
@@ -16,7 +18,7 @@ void TriggerGetCommand::execute(Player *player, const QString &command) {
 
     super::prepareExecute(player, command);
 
-    GameObjectPtr object = takeObject(currentRoom()->objects());
+    GameObjectPtr object = realm()->getObject(GameObjectType::Unknown, takeWord().toInt());
     if (object.isNull()) {
         sendError(404, "Object not found");
         return;

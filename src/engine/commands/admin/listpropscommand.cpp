@@ -21,7 +21,8 @@ void ListPropsCommand::execute(Player *player, const QString &command) {
 
     super::prepareExecute(player, command);
 
-    GameObjectPtr object = takeObject(currentRoom()->objects());
+    GameObjectPtr object = takeObject(currentRoom()->exits() + currentRoom()->characters() +
+                                      currentRoom()->items());
     if (!requireSome(object, "Object not found.")) {
         return;
     }

@@ -77,7 +77,7 @@ define(["controller", "admin/mapeditor", "admin/propertyeditor", "zepto"],
                 if (triggers.hasOwnProperty(triggerName)) {
                     Controller.sendApiCall("trigger-get " + rest, function(data) {
                         var triggerSource = data.triggerSource;
-                        if (triggerSource.isEmpty()) {
+                        if (!triggerSource || triggerSource.isEmpty()) {
                             var trigger = triggers[triggerName];
                             if (trigger.contains("(")) {
                                 var argsString = trigger.substring(trigger.indexOf("(") + 1,
@@ -95,7 +95,7 @@ define(["controller", "admin/mapeditor", "admin/propertyeditor", "zepto"],
                         propertyEditor.edit(triggerSource, {
                             "mode": "javascript",
                             "onsave": function(value) {
-                                Controller.sendApiCall("trigger-set #" + data.id + " " +
+                                Controller.sendApiCall("trigger-set " + data.id + " " +
                                                        triggerName + " " + value, function() {
                                     propertyEditor.close();
                                 });

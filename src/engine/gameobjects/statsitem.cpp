@@ -3,6 +3,7 @@
 #include <QDateTime>
 
 #include "realm.h"
+#include "scriptengine.h"
 
 
 #define super Item
@@ -23,7 +24,9 @@ void StatsItem::setStats(const CharacterStats &stats) {
 
         setModified();
 
-        changeStats(m_stats);
+        if (~options() & Copy) {
+            changeStats(m_stats);
+        }
     }
 }
 
@@ -89,7 +92,7 @@ void StatsItem::killAllTimers() {
 
 void StatsItem::changeStats(const CharacterStats &newStats) {
 
-    Q_UNUSED(newStats);
+    invokeScriptMethod("changeStats", ScriptEngine::instance()->toScriptValue(newStats));
 }
 
 int StatsItem::updateModifiers(qint64 now) {

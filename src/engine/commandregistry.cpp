@@ -19,7 +19,6 @@
 #include "commands/helpcommand.h"
 #include "commands/inventorycommand.h"
 #include "commands/killcommand.h"
-#include "commands/lookcommand.h"
 #include "commands/removecommand.h"
 #include "commands/scriptcommand.h"
 #include "commands/slashmecommand.h"
@@ -63,7 +62,6 @@ CommandRegistry::CommandRegistry(QObject *parent) :
 
     Command *go = new GoCommand(this);
     Command *kill = new KillCommand(this);
-    Command *look = new LookCommand(this);
 
     m_commands.insert("attack", kill);
     m_commands.insert("description", new DescriptionCommand(this));
@@ -71,13 +69,10 @@ CommandRegistry::CommandRegistry(QObject *parent) :
     m_commands.insert("drop", new DropCommand(this));
     m_commands.insert("enter", go);
     m_commands.insert("equipment", new EquipmentCommand(this));
-    m_commands.insert("examine", look);
     m_commands.insert("go", go);
     m_commands.insert("help", new HelpCommand(this));
     m_commands.insert("inventory", new InventoryCommand(this));
     m_commands.insert("kill", kill);
-    m_commands.insert("l", look);
-    m_commands.insert("look", look);
     m_commands.insert("remove", new RemoveCommand(this));
     m_commands.insert("wield", new WieldCommand(this));
     m_commands.insert("/me", new SlashMeCommand(this));

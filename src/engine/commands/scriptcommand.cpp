@@ -34,7 +34,10 @@ void ScriptCommand::execute(Player *player, const QString &command) {
     arguments.append(command);
     m_scriptCommand.property("execute").call(m_scriptCommand, arguments);
     if (engine->hasUncaughtException()) {
+        QScriptValue exception = engine->uncaughtException();
         qWarning() << "Exception while executing command " << command << ": "
-                   << engine->uncaughtException().toString();
+                   << exception.toString() << endl
+                   << "Backtrace:" << endl
+                   << exception.property("backtrace").toString().toUtf8().constData();
     }
 }

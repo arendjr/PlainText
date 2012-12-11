@@ -88,7 +88,7 @@ define(["controller"], function(Controller) {
         }
 
         var self = this;
-        Controller.sendApiCall("property-set #" + this.id + " " + propertyName + " " + value,
+        Controller.sendApiCall("property-set " + this.id + " " + propertyName + " " + value,
                                function() {
             self[propertyName] = resolvedValue;
             self.model.notifyChangeListeners();

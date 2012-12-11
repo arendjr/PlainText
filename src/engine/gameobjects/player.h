@@ -39,8 +39,6 @@ class Player : public Character {
 
         Q_INVOKABLE void sendSellableItemsList(const GameObjectPtrList &items);
 
-        Q_INVOKABLE void look();
-
         Q_INVOKABLE void execute(const QString &command);
 
         Q_INVOKABLE void quit();
@@ -49,8 +47,6 @@ class Player : public Character {
 
     protected:
         virtual void changeName(const QString &name);
-
-        virtual void enteredRoom();
 
     private:
         QString m_passwordSalt;

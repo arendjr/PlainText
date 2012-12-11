@@ -57,10 +57,9 @@ class Room : public GameObject {
         Q_PROPERTY(GameEventMultiplierMap eventMultipliers READ eventMultipliers
                                                            WRITE setEventMultipliers)
 
-        Q_INVOKABLE void addGold(double amount);
+        Q_INVOKABLE virtual QString lookAtBy(GameObject *character);
 
-        GameObjectPtrList objects() { return exits() + characters() + m_items; }
-        Q_PROPERTY(GameObjectPtrList objects READ objects STORED false)
+        Q_INVOKABLE void addGold(double amount);
 
     private:
         Point3D m_position;

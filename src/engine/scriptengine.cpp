@@ -95,7 +95,9 @@ bool ScriptEngine::hasUncaughtException() const {
 QScriptValue ScriptEngine::uncaughtException() {
 
     QScriptValue exception = m_jsEngine.uncaughtException();
+    QStringList backtrace = m_jsEngine.uncaughtExceptionBacktrace();
     m_jsEngine.evaluate("");
+    exception.setProperty("backtrace", QString("  " + backtrace.join("\n  ")));
     return exception;
 }
 
@@ -107,7 +109,9 @@ QScriptValue ScriptEngine::executeFunction(ScriptFunction &function,
     if (hasUncaughtException()) {
         QScriptValue exception = uncaughtException();
         qWarning() << "Script Exception: " << exception.toString().toUtf8().constData() << endl
-                   << "While executing function: " << function.source.toUtf8().constData();
+                   << "While executing function: " << function.source.toUtf8().constData()
+                   << "Backtrace:" << endl
+                   << exception.property("backtrace").toString().toUtf8().constData();
     }
     return result;
 }

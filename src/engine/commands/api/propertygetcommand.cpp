@@ -1,5 +1,6 @@
 #include "propertygetcommand.h"
 
+#include "realm.h"
 #include "util.h"
 
 
@@ -18,7 +19,7 @@ void PropertyGetCommand::execute(Player *player, const QString &command) {
 
     super::prepareExecute(player, command);
 
-    GameObjectPtr object = takeObject(currentRoom()->objects());
+    GameObjectPtr object = realm()->getObject(GameObjectType::Unknown, takeWord().toInt());
     if (object.isNull()) {
         sendError(404, "Object not found");
         return;
