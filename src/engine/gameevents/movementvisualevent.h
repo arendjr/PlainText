@@ -1,5 +1,5 @@
-#ifndef MOVEMENTEVENT_H
-#define MOVEMENTEVENT_H
+#ifndef MOVEMENTVISUALEVENT_H
+#define MOVEMENTVISUALEVENT_H
 
 #include "visualevent.h"
 
@@ -8,13 +8,13 @@
 
 class Character;
 
-class MovementEvent : public VisualEvent {
+class MovementVisualEvent : public VisualEvent {
 
     Q_OBJECT
 
     public:
-        MovementEvent(Character *character, Room *origin, double strength);
-        virtual ~MovementEvent();
+        MovementVisualEvent(Room *origin, double strength);
+        virtual ~MovementVisualEvent();
 
         void setDestination(Room *destination);
 
@@ -27,11 +27,10 @@ class MovementEvent : public VisualEvent {
         virtual bool isWithinSight(Room *targetRoom, Room *sourceRoom);
 
     private:
-        Character *m_character;
         Room *m_destination;
 
         Vector3D m_movement;
         Vector3D m_direction;
 };
 
-#endif // MOVEMENTEVENT_H
+#endif // MOVEMENTVISUALEVENT_H

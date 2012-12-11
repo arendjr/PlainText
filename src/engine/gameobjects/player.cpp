@@ -3,10 +3,10 @@
 #include <QCryptographicHash>
 #include <QDebug>
 
-#include "room.h"
 #include "commandinterpreter.h"
 #include "exit.h"
 #include "realm.h"
+#include "room.h"
 #include "session.h"
 #include "util.h"
 

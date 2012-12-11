@@ -28,6 +28,7 @@ void VisualEvent::visitRoom(Room *room, double strength) {
                 continue;
             }
 
+            // make sure the character is actually looking in the direction of the event
             Character *character = characterPtr.cast<Character *>();
             Vector3D eventDirection = originRoom()->position() - room->position();
             if (!eventDirection.isNull()) {

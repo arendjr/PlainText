@@ -99,11 +99,13 @@ QString ConversionUtil::toJsonString(const QVariant &variant, Options options) {
             for (const QString &key : map.keys()) {
                 QVariant value = map[key];
                 if (options & IncludeTypeInfo) {
-                    stringList << QString("%1: [ %2, %3, %4 ]")
-                                  .arg(jsString(key), QString::number(value.type()),
-                                       QString::number(value.userType()), toJsonString(value, options));
+                    stringList.append(QString("%1: [ %2, %3, %4 ]")
+                                      .arg(jsString(key), QString::number(value.type()),
+                                           QString::number(value.userType()),
+                                           toJsonString(value, options)));
                 } else {
-                    stringList << QString("%1: %2").arg(jsString(key), toJsonString(value, options));
+                    stringList.append(QString("%1: %2").arg(jsString(key),
+                                                            toJsonString(value, options)));
                 }
             }
             return stringList.isEmpty() ? QString() : "{ " + stringList.join(", ") + " }";

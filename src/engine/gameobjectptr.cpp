@@ -472,32 +472,14 @@ void GameObjectPtrList::append(const GameObjectPtr &value) {
 
 void GameObjectPtrList::append(const GameObjectPtrList &value) {
 
-    int numRemaining = value.length();
-    if (numRemaining == 0) {
+    if (value.isEmpty()) {
         return;
     }
 
-    if (!m_capacity) {
-        m_capacity = qMax(numRemaining, 16);
-
-        m_items = new GameObjectPtr[m_capacity];
-
-        for (int i = 0; i < m_capacity; i++) {
-            m_items[i].setOwnerList(this);
-        }
-    }
+    reserve(qMax(length() + value.length(), 16));
 
     for (const GameObjectPtr &item : value) {
-        if (m_size == m_capacity) {
-            if (!m_nextList) {
-                m_nextList = new GameObjectPtrList(qMax(2 * m_capacity, numRemaining));
-            }
-
-            m_nextList->append(item);
-        } else {
-            append(item);
-            numRemaining--;
-        }
+        append(item);
     }
 }
 
@@ -729,12 +711,25 @@ bool GameObjectPtrList::removeOne(const GameObjectPtr &value) {
 
 void GameObjectPtrList::reserve(int size) {
 
-    if (size && !m_capacity) {
-        m_capacity = size;
-        m_items = new GameObjectPtr[m_capacity];
+    if (size) {
+        if (m_capacity) {
+            if (m_size >= size) {
+                return;
+            }
+            if (m_size == m_capacity) {
+                if (m_nextList) {
+                    m_nextList->reserve(size - m_size);
+                } else {
+                    m_nextList = new GameObjectPtrList(qMax(2 * m_capacity, m_size - size));
+                }
+            }
+        } else {
+            m_capacity = size;
+            m_items = new GameObjectPtr[m_capacity];
 
-        for (int i = 0; i < m_capacity; i++) {
-            m_items[i].setOwnerList(this);
+            for (int i = 0; i < m_capacity; i++) {
+                m_items[i].setOwnerList(this);
+            }
         }
     }
 }
@@ -773,7 +768,9 @@ bool GameObjectPtrList::operator!=(const GameObjectPtrList &other) const {
 
 GameObjectPtrList GameObjectPtrList::operator+(const GameObjectPtrList &other) const {
 
-    GameObjectPtrList list(*this);
+    GameObjectPtrList list;
+    list.reserve(length() + other.length());
+    list.append(*this);
     list.append(other);
     return list;
 }

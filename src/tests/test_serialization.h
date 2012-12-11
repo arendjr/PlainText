@@ -68,7 +68,7 @@ class SerializationTest : public TestCase {
                     "  \"name2\": \"b-to-a\",\n"
                     "  \"room\": \"room:1\",\n"
                     "  \"room2\": \"room:2\",\n"
-                    "  \"flags\": \"CanSeeThrough|CanPassThrough\"\n"
+                    "  \"flags\": \"CanSeeThrough|CanHearThrough|CanPassThrough\"\n"
                 "}"));
             }
 

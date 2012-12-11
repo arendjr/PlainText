@@ -61,7 +61,8 @@ void TestCase::createTestWorld() {
     portal->setRoom2(roomB);
     portal->setName("a-to-b");
     portal->setName2("b-to-a");
-    portal->setFlags(PortalFlags::CanPassThrough | PortalFlags::CanSeeThrough);
+    portal->setFlags(PortalFlags::CanPassThrough | PortalFlags::CanSeeThrough |
+                     PortalFlags::CanHearThrough);
 
     roomA->addPortal(portal);
     roomB->addPortal(portal);
@@ -80,7 +81,8 @@ void TestCase::createTestWorld() {
     portal->setRoom2(roomC);
     portal->setName("b-to-c");
     portal->setName2("c-to-b");
-    portal->setFlags(PortalFlags::CanPassThrough | PortalFlags::CanSeeThrough);
+    portal->setFlags(PortalFlags::CanPassThrough | PortalFlags::CanSeeThrough |
+                     PortalFlags::CanHearThrough);
 
     roomB->addPortal(portal);
     roomC->addPortal(portal);

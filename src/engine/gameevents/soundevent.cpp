@@ -56,7 +56,7 @@ void SoundEvent::visitRoom(Room *room, double strength) {
             }
 
             Vector3D vector = room2->position() - room1->position();
-            multiplier *= qMax(1.0 - 0.005 * vector.length(), 0.0);
+            multiplier *= qMax(1.0 - 0.05 * vector.length(), 0.0);
 
             double propagatedStrength = strength * multiplier;
             if (propagatedStrength >= 0.1) {

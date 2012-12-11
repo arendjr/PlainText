@@ -6,7 +6,8 @@
 #include "exit.h"
 #include "group.h"
 #include "logutil.h"
-#include "movementevent.h"
+#include "movementsoundevent.h"
+#include "movementvisualevent.h"
 #include "player.h"
 #include "portal.h"
 #include "race.h"
@@ -549,13 +550,70 @@ void Character::go(const GameObjectPtr &pointer) {
             }
         }
 
-        MovementEvent *event = new MovementEvent(this, sourceRoom, 1.0);
-        event->setDestination(destinationRoom);
-        event->setMovement(movement);
-        event->setDirection(direction);
-        event->setExcludedCharacters(followers);
-        event->addExcludedCharacter(this);
-        event->fire();
+        GameObjectPtrList party(1 + followers.length());
+        party.append(this);
+        party.append(followers);
+
+        QString visualDescription;
+        QString distantVisualDescription;
+        QString veryDistantVisualDescription;
+        if (followers.isEmpty()) {
+            visualDescription = indefiniteName();
+            distantVisualDescription = (m_gender == "male" ? "a man" : "a woman");
+            veryDistantVisualDescription = "someone";
+        } else {
+            visualDescription = party.joinFancy();
+            int numMales = 0, numFemales = 0;
+            for (const GameObjectPtr &characterPtr : party) {
+                Character *character = characterPtr.cast<Character *>();
+                if (character->gender() == "male") {
+                    numMales++;
+                } else {
+                    numFemales++;
+                }
+            }
+            QString what = QString(numMales > 0 ? numFemales > 0 ? "people" : "men" : "women");
+            if (party.length() > 10) {
+                distantVisualDescription = "a lot of " + what;
+                veryDistantVisualDescription = "a lot of people";
+            } else if (party.length() > 2) {
+                distantVisualDescription = "a group of " + what;
+                veryDistantVisualDescription = "some people";
+            } else {
+                distantVisualDescription = "two " + what;
+                veryDistantVisualDescription = "some people";
+            }
+        }
+
+        MovementVisualEvent *visualEvent = new MovementVisualEvent(sourceRoom, 1.0);
+        visualEvent->setDescription(visualDescription);
+        visualEvent->setDistantDescription(distantVisualDescription);
+        visualEvent->setVeryDistantDescription(veryDistantVisualDescription);
+        visualEvent->setDestination(destinationRoom);
+        visualEvent->setMovement(movement);
+        visualEvent->setDirection(direction);
+        visualEvent->setExcludedCharacters(party);
+        visualEvent->fire();
+
+        double soundStrength = 1.0;
+        QString soundDescription = "someone";
+        QString veryDistantSoundDescription = "something";
+        if (!followers.isEmpty()) {
+            soundDescription = "some people";
+            for (int i = 0; i < followers.length(); i++) {
+                soundStrength += qMax(0.8 - 0.2 * i, 0.3);
+            }
+        }
+
+        MovementSoundEvent *soundEvent = new MovementSoundEvent(sourceRoom, soundStrength);
+        soundEvent->setDescription(soundDescription);
+        soundEvent->setDistantDescription(soundDescription);
+        soundEvent->setVeryDistantDescription(veryDistantSoundDescription);
+        soundEvent->setDestination(destinationRoom);
+        soundEvent->setMovement(movement);
+        soundEvent->setDirection(direction);
+        soundEvent->setExcludedCharacters(party + visualEvent->affectedCharacters());
+        soundEvent->fire();
 
         if (isPlayer()) {
             LogUtil::countRoomVisit(destination.toString(), 1 + followers.length());

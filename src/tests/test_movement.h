@@ -79,80 +79,81 @@ class MovementTest : public TestCase {
             character->setName("Boris");
             character->enter(roomC);
 
-            evaluate("var visuals = [];");
+            evaluate("var sounds = [], visuals = [];");
+            character->setTrigger("onsound", "function(message) { sounds.append(message); }");
             character->setTrigger("onvisual", "function(message) { visuals.append(message); }");
 
-            {
-                character->setDirection(roomA->position() - roomC->position());
+            // the character's looking toward room A, seeing all the action
+            character->setDirection(roomA->position() - roomC->position());
 
+            {
                 player->go(roomB);
 
+                QCOMPARE(evaluate("sounds.length").toInt32(), 0);
                 QCOMPARE(evaluate("visuals.length").toInt32(), 1);
                 QCOMPARE(evaluate("visuals[0]").toString(),
                          QString("You see Arie walking toward you."));
             }
 
             {
-                character->setDirection(roomA->position() - roomC->position());
-
                 player->go(roomC);
 
+                QCOMPARE(evaluate("sounds.length").toInt32(), 0);
                 QCOMPARE(evaluate("visuals.length").toInt32(), 2);
                 QCOMPARE(evaluate("visuals[1]").toString(),
-                         QString("Arie walked to you."));
+                         QString("Arie walks to you."));
             }
 
             {
-                character->setDirection(roomA->position() - roomC->position());
-
                 player->go(roomB);
 
+                QCOMPARE(evaluate("sounds.length").toInt32(), 0);
                 QCOMPARE(evaluate("visuals.length").toInt32(), 3);
                 QCOMPARE(evaluate("visuals[2]").toString(),
-                         QString("Arie walked to the north."));
+                         QString("Arie walks to the c-to-b."));
             }
 
             {
-                character->setDirection(roomA->position() - roomC->position());
-
                 player->go(roomA);
 
+                QCOMPARE(evaluate("sounds.length").toInt32(), 0);
                 QCOMPARE(evaluate("visuals.length").toInt32(), 4);
                 QCOMPARE(evaluate("visuals[3]").toString(),
-                         QString("You see Arie walking to the north."));
+                         QString("You see Arie walking north."));
             }
 
-            {
-                character->setDirection(roomC->position() - roomA->position());
+            // the character's looking away from room A, still hearing most of the action
+            character->setDirection(roomC->position() - roomA->position());
 
+            {
                 player->go(roomB);
 
+                QCOMPARE(evaluate("sounds.length").toInt32(), 0);
                 QCOMPARE(evaluate("visuals.length").toInt32(), 4);
             }
 
             {
-                character->setDirection(roomC->position() - roomA->position());
-
                 player->go(roomC);
 
+                QCOMPARE(evaluate("sounds.length").toInt32(), 1);
                 QCOMPARE(evaluate("visuals.length").toInt32(), 4);
+                QCOMPARE(evaluate("sounds[0]").toString(),
+                         QString("You hear someone walking up to you."));
             }
 
             {
-                character->setDirection(roomC->position() - roomA->position());
-
                 player->go(roomB);
 
+                QCOMPARE(evaluate("sounds.length").toInt32(), 1);
                 QCOMPARE(evaluate("visuals.length").toInt32(), 5);
                 QCOMPARE(evaluate("visuals[4]").toString(),
-                         QString("Arie walked to the north."));
+                         QString("Arie walks to the c-to-b."));
             }
 
             {
-                character->setDirection(roomC->position() - roomA->position());
-
                 player->go(roomA);
 
+                QCOMPARE(evaluate("sounds.length").toInt32(), 1);
                 QCOMPARE(evaluate("visuals.length").toInt32(), 5);
             }
         }

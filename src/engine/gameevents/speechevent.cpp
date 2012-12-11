@@ -82,17 +82,20 @@ QString SpeechEvent::descriptionForStrengthInRoom(double strength, Room *room) c
                                                             QString("to the " + direction + " "))) +
                        (m_isShout ? "shouting" : "saying") +
                        garbledMessage);
-    } else if (strength >= (m_speaker->gender() == "male" ? 0.4 : 0.3)) {
-        QString direction = Util::directionForVector(originRoom()->position() - room->position());
-        if (direction == "up") {
-            return QString("You hear a distant %1 from above.").arg(m_isShout ? "shout" : "mutter");
-        } else if (direction == "down") {
-            return QString("You hear a distant %1 from below.").arg(m_isShout ? "shout" : "mutter");
-        } else {
-            return QString("You hear a distant %1 from the %2.").arg(m_isShout ? "shout" : "mutter",
-                                                                     direction);
-        }
     } else {
-        return QString("You hear a distant %1.").arg(m_isShout ? "shout" : "mutter");
+        QString what = m_isShout ? "shout" : "mutter";
+        if (strength >= (m_speaker->gender() == "male" ? 0.4 : 0.3)) {
+            QString direction = Util::directionForVector(originRoom()->position() -
+                                                         room->position());
+            if (direction == "up") {
+                return QString("You hear a distant %1 from above.").arg(what);
+            } else if (direction == "down") {
+                return QString("You hear a distant %1 from below.").arg(what);
+            } else {
+                return QString("You hear a distant %1 from the %2.").arg(what, direction);
+            }
+        } else {
+            return QString("You hear a distant %1.").arg(what);
+        }
     }
 }
