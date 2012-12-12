@@ -33,12 +33,13 @@ TriggerRegistry::TriggerRegistry(QObject *parent) :
     m_triggers.insert("oncombat(attacker : character, defendant : character, observers : list, "
                       "damage : integer) : bool",
                       "This trigger is defined on the realm, and may be defined on individual "
-                      "rooms. Its primary responsibility is generating the messages that are "
-                      "displayed during combat, but it may also provide special combat effects. "
-                      "If the room in which the combat takes place has this trigger defined, it "
-                      "is used instead of the generic trigger from the realm. For this trigger, "
-                      "the return value cannot be used to cancel the combat, but if a room's "
-                      "trigger returns false it will fall back to the realm's trigger.");
+                      "rooms. It calculates how much damage (if any) is done and is responsible "
+                      "for generating the messages that are displayed during combat, but it may "
+                      "also provide special combat effects. If the room in which the combat takes "
+                      "place has this trigger defined, it is used instead of the generic trigger "
+                      "from the realm. For this trigger, the return value cannot be used to cancel "
+                      "the combat, but if a room's trigger returns false it will fall back to the "
+                      "realm's trigger.");
     m_triggers.insert("ondie(attacker : optional character) : bool",
                       "The ondie trigger is invoked on any character when it dies. When "
                       "attacker is omitted, the character died because of a non-combat cause "

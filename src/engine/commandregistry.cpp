@@ -11,18 +11,9 @@
 #include "logutil.h"
 #include "player.h"
 #include "util.h"
-#include "commands/descriptioncommand.h"
-#include "commands/disbandcommand.h"
-#include "commands/dropcommand.h"
-#include "commands/equipmentcommand.h"
 #include "commands/gocommand.h"
 #include "commands/helpcommand.h"
-#include "commands/inventorycommand.h"
-#include "commands/killcommand.h"
-#include "commands/removecommand.h"
 #include "commands/scriptcommand.h"
-#include "commands/slashmecommand.h"
-#include "commands/wieldcommand.h"
 #include "commands/admin/addcharactercommand.h"
 #include "commands/admin/addcontainercommand.h"
 #include "commands/admin/additemcommand.h"
@@ -36,6 +27,7 @@
 #include "commands/admin/gettriggercommand.h"
 #include "commands/admin/listmethodscommand.h"
 #include "commands/admin/listpropscommand.h"
+#include "commands/admin/reloadscriptscommand.h"
 #include "commands/admin/removeexitcommand.h"
 #include "commands/admin/removeitemcommand.h"
 #include "commands/admin/setclasscommand.h"
@@ -61,21 +53,10 @@ CommandRegistry::CommandRegistry(QObject *parent) :
     QObject(parent) {
 
     Command *go = new GoCommand(this);
-    Command *kill = new KillCommand(this);
 
-    m_commands.insert("attack", kill);
-    m_commands.insert("description", new DescriptionCommand(this));
-    m_commands.insert("disband", new DisbandCommand(this));
-    m_commands.insert("drop", new DropCommand(this));
     m_commands.insert("enter", go);
-    m_commands.insert("equipment", new EquipmentCommand(this));
     m_commands.insert("go", go);
     m_commands.insert("help", new HelpCommand(this));
-    m_commands.insert("inventory", new InventoryCommand(this));
-    m_commands.insert("kill", kill);
-    m_commands.insert("remove", new RemoveCommand(this));
-    m_commands.insert("wield", new WieldCommand(this));
-    m_commands.insert("/me", new SlashMeCommand(this));
 
     m_adminCommands.insert("add-character", new AddCharacterCommand(this));
     m_adminCommands.insert("add-container", new AddContainerCommand(this));
@@ -90,6 +71,7 @@ CommandRegistry::CommandRegistry(QObject *parent) :
     m_adminCommands.insert("get-trigger", new GetTriggerCommand(this));
     m_adminCommands.insert("list-methods", new ListMethodsCommand(this));
     m_adminCommands.insert("list-props", new ListPropsCommand(this));
+    m_adminCommands.insert("reload-scripts", new ReloadScriptsCommand(this));
     m_adminCommands.insert("remove-exit", new RemoveExitCommand(this));
     m_adminCommands.insert("remove-item", new RemoveItemCommand(this));
     m_adminCommands.insert("set-class", new SetClassCommand(this));

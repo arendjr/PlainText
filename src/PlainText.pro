@@ -34,18 +34,9 @@ SOURCES += \
     engine/util.cpp \
     engine/vector3d.cpp \
     engine/commands/command.cpp \
-    engine/commands/descriptioncommand.cpp \
-    engine/commands/disbandcommand.cpp \
-    engine/commands/dropcommand.cpp \
-    engine/commands/equipmentcommand.cpp \
     engine/commands/gocommand.cpp \
     engine/commands/helpcommand.cpp \
-    engine/commands/inventorycommand.cpp \
-    engine/commands/killcommand.cpp \
-    engine/commands/removecommand.cpp \
     engine/commands/scriptcommand.cpp \
-    engine/commands/slashmecommand.cpp \
-    engine/commands/wieldcommand.cpp \
     engine/commands/admin/addcharactercommand.cpp \
     engine/commands/admin/addcontainercommand.cpp \
     engine/commands/admin/additemcommand.cpp \
@@ -60,6 +51,7 @@ SOURCES += \
     engine/commands/admin/gettriggercommand.cpp \
     engine/commands/admin/listmethodscommand.cpp \
     engine/commands/admin/listpropscommand.cpp \
+    engine/commands/admin/reloadscriptscommand.cpp \
     engine/commands/admin/removeexitcommand.cpp \
     engine/commands/admin/removeitemcommand.cpp \
     engine/commands/admin/setclasscommand.cpp \
@@ -156,18 +148,9 @@ HEADERS += \
     engine/util.h \
     engine/vector3d.h \
     engine/commands/command.h \
-    engine/commands/descriptioncommand.h \
-    engine/commands/disbandcommand.h \
-    engine/commands/dropcommand.h \
-    engine/commands/equipmentcommand.h \
     engine/commands/gocommand.h \
     engine/commands/helpcommand.h \
-    engine/commands/inventorycommand.h \
-    engine/commands/killcommand.h \
-    engine/commands/removecommand.h \
     engine/commands/scriptcommand.h \
-    engine/commands/slashmecommand.h \
-    engine/commands/wieldcommand.h \
     engine/commands/admin/addcharactercommand.h \
     engine/commands/admin/addcontainercommand.h \
     engine/commands/admin/additemcommand.h \
@@ -182,6 +165,7 @@ HEADERS += \
     engine/commands/admin/gettriggercommand.h \
     engine/commands/admin/listmethodscommand.h \
     engine/commands/admin/listpropscommand.h \
+    engine/commands/admin/reloadscriptscommand.h \
     engine/commands/admin/removeexitcommand.h \
     engine/commands/admin/removeitemcommand.h \
     engine/commands/admin/setclasscommand.h \
@@ -252,25 +236,34 @@ OTHER_FILES += \
     engine/commands/command.js \
     ../data/commands/buycommand.js \
     ../data/commands/closecommand.js \
+    ../data/commands/descriptioncommand.js \
+    ../data/commands/disbandcommand.js \
+    ../data/commands/dropcommand.js \
     ../data/commands/drinkcommand.js \
     ../data/commands/eatcommand.js \
+    ../data/commands/equipmentcommand.js \
     ../data/commands/followcommand.js \
     ../data/commands/getcommand.js \
     ../data/commands/givecommand.js \
     ../data/commands/groupcommand.js \
     ../data/commands/gtalkcommand.js \
+    ../data/commands/inventorycommand.js \
+    ../data/commands/killcommand.js \
     ../data/commands/lookcommand.js \
     ../data/commands/losecommand.js \
     ../data/commands/opencommand.js \
     ../data/commands/putcommand.js \
     ../data/commands/quitcommand.js \
+    ../data/commands/removecommand.js \
     ../data/commands/saycommand.js \
     ../data/commands/searchcommand.js \
     ../data/commands/shoutcommand.js \
+    ../data/commands/slashmecommand.js \
     ../data/commands/statscommand.js \
     ../data/commands/talkcommand.js \
     ../data/commands/tellcommand.js \
     ../data/commands/usecommand.js \
+    ../data/commands/wieldcommand.js \
     ../data/commands/whocommand.js \
     ../data/commands/admin/enterroomcommand.js \
     ../data/scripts/combat.js \
