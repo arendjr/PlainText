@@ -21,6 +21,8 @@ void ReloadScriptsCommand::execute(Player *player, const QString &command) {
 
     super::prepareExecute(player, command);
 
+    GameObject::clearPrototypeMap();
+
     realm()->scriptEngine()->loadScripts();
 
     send("Scripts reloaded.");

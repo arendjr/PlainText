@@ -23,7 +23,7 @@ Character.prototype.lookAtBy = function(character) {
     }
 
     if (!this.description.isEmpty()) {
-        text += description + "\n";
+        text += this.description + "\n";
     }
 
     var wieldedItems = [];

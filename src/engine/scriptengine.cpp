@@ -35,7 +35,7 @@ void ScriptEngine::loadScripts() {
     loadScript(":/script/util.js");
     loadScript(":/script/commands/command.js");
     loadScript(":/script/commands/admin/admincommand.js");
-    
+
     loadScripts(DiskUtil::dataDir() + "/commands");
     loadScripts(DiskUtil::dataDir() + "/scripts");
 }

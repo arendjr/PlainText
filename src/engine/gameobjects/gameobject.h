@@ -176,6 +176,13 @@ class GameObject : public QObject {
 
         Q_INVOKABLE void setDeleted();
 
+        QVector<QMetaProperty> metaProperties() const;
+        QVector<QMetaProperty> storedMetaProperties() const;
+
+        virtual void invokeTimer(int timerId);
+
+        virtual void killAllTimers();
+
         static GameObject *createByObjectType(Realm *realm, GameObjectType objectType, uint id = 0,
                                               Options options = NoOptions);
 
@@ -186,12 +193,7 @@ class GameObject : public QObject {
         static QScriptValue toScriptValue(QScriptEngine *engine, GameObject *const &gameObject);
         static void fromScriptValue(const QScriptValue &object, GameObject *&gameObject);
 
-        QVector<QMetaProperty> metaProperties() const;
-        QVector<QMetaProperty> storedMetaProperties() const;
-
-        virtual void invokeTimer(int timerId);
-
-        virtual void killAllTimers();
+        static void clearPrototypeMap();
 
     protected:
         bool mayReferenceOtherProperties() const;
@@ -226,6 +228,8 @@ class GameObject : public QObject {
 
         QHash<int, QScriptValue> *m_intervalHash;
         QHash<int, QScriptValue> *m_timeoutHash;
+
+        static QMap<QString, QScriptValue> s_prototypeMap;
 };
 
 Q_DECLARE_METATYPE(GameObject *)

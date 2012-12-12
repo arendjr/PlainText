@@ -37,6 +37,9 @@
 #include "weapon.h"
 
 
+QMap<QString, QScriptValue> GameObject::s_prototypeMap;
+
+
 GameObject::GameObject(Realm *realm, GameObjectType objectType, uint id, Options options) :
     QObject(),
     m_realm(realm),
@@ -635,6 +638,77 @@ void GameObject::setDeleted() {
     }
 }
 
+QVector<QMetaProperty> GameObject::metaProperties() const {
+
+    QVector<QMetaProperty> properties;
+    int count = metaObject()->propertyCount(),
+        offset = GameObject::staticMetaObject.propertyOffset();
+    for (int i = offset; i < count; i++) {
+        properties << metaObject()->property(i);
+    }
+    return properties;
+}
+
+QVector<QMetaProperty> GameObject::storedMetaProperties() const {
+
+    static QHash<int, QVector<QMetaProperty> > storedProperties;
+    if (!storedProperties.contains(m_objectType.intValue())) {
+        QVector<QMetaProperty> properties;
+        int count = metaObject()->propertyCount(),
+            offset = GameObject::staticMetaObject.propertyOffset();
+        for (int i = offset; i < count; i++) {
+            QMetaProperty metaProperty = metaObject()->property(i);
+            if (metaProperty.isStored()) {
+                properties << metaProperty;
+            }
+        }
+        storedProperties[m_objectType.intValue()] = properties;
+    }
+    return storedProperties[m_objectType.intValue()];
+}
+
+void GameObject::invokeTimer(int timerId) {
+
+    QScriptValue function;
+    if (m_intervalHash) {
+        function = m_intervalHash->value(timerId);
+    }
+    if (!function.isValid() && m_timeoutHash) {
+        function = m_timeoutHash->value(timerId);
+    }
+
+    ScriptEngine *scriptEngine = m_realm->scriptEngine();
+    if (function.isString()) {
+        scriptEngine->evaluate(function.toString());
+    } else if (function.isFunction()) {
+        function.call(scriptEngine->toScriptValue(this));
+    }
+
+    if (scriptEngine->hasUncaughtException()) {
+        QScriptValue exception = scriptEngine->uncaughtException();
+        qWarning() << "Script Exception: " << exception.toString().toUtf8().constData() << endl
+                   << "While executing function: " << function.toString().toUtf8().constData();
+    }
+}
+
+void GameObject::killAllTimers() {
+
+    if (m_intervalHash) {
+        for (int id : m_intervalHash->keys()) {
+            m_realm->stopInterval(id);
+        }
+        delete m_intervalHash;
+        m_intervalHash = nullptr;
+    }
+    if (m_timeoutHash) {
+        for (int id : m_timeoutHash->keys()) {
+            m_realm->stopTimer(id);
+        }
+        delete m_timeoutHash;
+        m_timeoutHash = nullptr;
+    }
+}
+
 GameObject *GameObject::createByObjectType(Realm *realm, GameObjectType objectType, uint id,
                                            Options options) {
 
@@ -722,8 +796,6 @@ GameObject *GameObject::createCopy(const GameObject *other) {
 
 QScriptValue GameObject::toScriptValue(QScriptEngine *engine, GameObject *const &gameObject) {
 
-    static QMap<QString, QScriptValue> prototypeMap;
-
     QScriptValue object = engine->newQObject(gameObject, QScriptEngine::QtOwnership,
                                              QScriptEngine::ExcludeDeleteLater |
                                              QScriptEngine::PreferExistingWrapperObject);
@@ -735,7 +807,7 @@ QScriptValue GameObject::toScriptValue(QScriptEngine *engine, GameObject *const 
     const QMetaObject *metaObject = gameObject->metaObject();
     QString className(metaObject->className());
 
-    if (!prototypeMap.contains(className)) {
+    if (!s_prototypeMap.contains(className)) {
         QScriptValue prototype = engine->evaluate(className);
         if (!prototype.isFunction()) {
             prototype = engine->evaluate(QString("function %1() {}; %1").arg(className));
@@ -772,10 +844,10 @@ QScriptValue GameObject::toScriptValue(QScriptEngine *engine, GameObject *const 
             superPrototype = prototype;
         }
 
-        prototypeMap[className] = prototype;
+        s_prototypeMap[className] = prototype;
     }
 
-    object.setPrototype(prototypeMap[className].construct());
+    object.setPrototype(s_prototypeMap[className].construct());
 
     return object;
 }
@@ -786,75 +858,9 @@ void GameObject::fromScriptValue(const QScriptValue &object, GameObject *&gameOb
     Q_ASSERT(gameObject);
 }
 
-QVector<QMetaProperty> GameObject::metaProperties() const {
+void GameObject::clearPrototypeMap() {
 
-    QVector<QMetaProperty> properties;
-    int count = metaObject()->propertyCount(),
-        offset = GameObject::staticMetaObject.propertyOffset();
-    for (int i = offset; i < count; i++) {
-        properties << metaObject()->property(i);
-    }
-    return properties;
-}
-
-QVector<QMetaProperty> GameObject::storedMetaProperties() const {
-
-    static QHash<int, QVector<QMetaProperty> > storedProperties;
-    if (!storedProperties.contains(m_objectType.intValue())) {
-        QVector<QMetaProperty> properties;
-        int count = metaObject()->propertyCount(),
-            offset = GameObject::staticMetaObject.propertyOffset();
-        for (int i = offset; i < count; i++) {
-            QMetaProperty metaProperty = metaObject()->property(i);
-            if (metaProperty.isStored()) {
-                properties << metaProperty;
-            }
-        }
-        storedProperties[m_objectType.intValue()] = properties;
-    }
-    return storedProperties[m_objectType.intValue()];
-}
-
-void GameObject::invokeTimer(int timerId) {
-
-    QScriptValue function;
-    if (m_intervalHash) {
-        function = m_intervalHash->value(timerId);
-    }
-    if (!function.isValid() && m_timeoutHash) {
-        function = m_timeoutHash->value(timerId);
-    }
-
-    ScriptEngine *scriptEngine = m_realm->scriptEngine();
-    if (function.isString()) {
-        scriptEngine->evaluate(function.toString());
-    } else if (function.isFunction()) {
-        function.call(scriptEngine->toScriptValue(this));
-    }
-
-    if (scriptEngine->hasUncaughtException()) {
-        QScriptValue exception = scriptEngine->uncaughtException();
-        qWarning() << "Script Exception: " << exception.toString().toUtf8().constData() << endl
-                   << "While executing function: " << function.toString().toUtf8().constData();
-    }
-}
-
-void GameObject::killAllTimers() {
-
-    if (m_intervalHash) {
-        for (int id : m_intervalHash->keys()) {
-            m_realm->stopInterval(id);
-        }
-        delete m_intervalHash;
-        m_intervalHash = nullptr;
-    }
-    if (m_timeoutHash) {
-        for (int id : m_timeoutHash->keys()) {
-            m_realm->stopTimer(id);
-        }
-        delete m_timeoutHash;
-        m_timeoutHash = nullptr;
-    }
+    s_prototypeMap.clear();
 }
 
 bool GameObject::mayReferenceOtherProperties() const {

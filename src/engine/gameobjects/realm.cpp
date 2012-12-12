@@ -27,12 +27,12 @@ Realm::Realm(Options options) :
         s_instance = this;
     }
 
-    m_commandRegistry = new CommandRegistry(this);
+    m_commandRegistry = new CommandRegistry();
 
-    m_commandInterpreter = new CommandInterpreter(this);
+    m_commandInterpreter = new CommandInterpreter();
     m_commandInterpreter->setRegistry(m_commandRegistry);
 
-    m_triggerRegistry = new TriggerRegistry(this);
+    m_triggerRegistry = new TriggerRegistry();
 
     m_reservedNames << "all" << "down" << "east" << "north" << "northeast" << "northwest" << "out"
                     << "room" << "south" << "southeast" << "southwest" << "west";
@@ -58,6 +58,10 @@ Realm::~Realm() {
 
     m_syncThread.wait();
     m_logThread.wait();
+
+    delete m_triggerRegistry;
+    delete m_commandInterpreter;
+    delete m_commandRegistry;
 }
 
 Realm *Realm::instance() {
@@ -89,6 +93,10 @@ void Realm::init() {
     }
 
     m_timeIntervalId = startInterval(this, 150000);
+
+    m_commandRegistry->moveToThread(&m_gameThread);
+    m_commandInterpreter->moveToThread(&m_gameThread);
+    m_triggerRegistry->moveToThread(&m_gameThread);
 
     m_gameThread.start(QThread::HighestPriority);
 }
