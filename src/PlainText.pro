@@ -121,7 +121,6 @@ SOURCES += \
 
 HEADERS += \
     engine/application.h \
-    engine/character.h \
     engine/characterstats.h \
     engine/commandinterpreter.h \
     engine/commandregistry.h \
@@ -132,7 +131,6 @@ HEADERS += \
     engine/engine.h \
     engine/foreach.h \
     engine/gameeventmultipliermap.h \
-    engine/gameeventobject.h \
     engine/gameexception.h \
     engine/gameobjectptr.h \
     engine/gameobjectsyncthread.h \
