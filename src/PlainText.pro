@@ -78,12 +78,14 @@ SOURCES += \
     engine/events/event.cpp \
     engine/events/signinevent.cpp \
     engine/events/timerevent.cpp \
+    engine/gameevents/areaevent.cpp \
     engine/gameevents/gameevent.cpp \
     engine/gameevents/movementsoundevent.cpp \
     engine/gameevents/movementvisualevent.cpp \
     engine/gameevents/soundevent.cpp \
     engine/gameevents/speechevent.cpp \
     engine/gameevents/visualevent.cpp \
+    engine/gameobjects/area.cpp \
     engine/gameobjects/character.cpp \
     engine/gameobjects/class.cpp \
     engine/gameobjects/container.cpp \
@@ -192,12 +194,14 @@ HEADERS += \
     engine/events/event.h \
     engine/events/signinevent.h \
     engine/events/timerevent.h \
+    engine/gameevents/areaevent.h \
     engine/gameevents/gameevent.h \
     engine/gameevents/movementsoundevent.h \
     engine/gameevents/movementvisualevent.h \
     engine/gameevents/soundevent.h \
     engine/gameevents/speechevent.h \
     engine/gameevents/visualevent.h \
+    engine/gameobjects/area.h \
     engine/gameobjects/character.h \
     engine/gameobjects/class.h \
     engine/gameobjects/container.h \

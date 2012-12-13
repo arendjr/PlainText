@@ -20,6 +20,15 @@ Room::Room(Realm *realm, uint id, Options options) :
 Room::~Room() {
 }
 
+void Room::setArea(const GameObjectPtr &area) {
+
+    if (m_area != area) {
+        m_area = area;
+
+        setModified();
+    }
+}
+
 void Room::setPosition(const Point3D &position) {
 
     if (m_position != position) {

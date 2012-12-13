@@ -23,6 +23,10 @@ class Room : public GameObject {
         Room(Realm *realm, uint id = 0, Options options = NoOptions);
         virtual ~Room();
 
+        const GameObjectPtr &area() const { return m_area; }
+        void setArea(const GameObjectPtr &area);
+        Q_PROPERTY(GameObjectPtr area READ area WRITE setArea)
+
         const Point3D &position() const { return m_position; }
         void setPosition(const Point3D &position);
         Q_PROPERTY(Point3D position READ position WRITE setPosition)
@@ -60,6 +64,7 @@ class Room : public GameObject {
         Q_INVOKABLE virtual QString lookAtBy(GameObject *character);
 
     private:
+        GameObjectPtr m_area;
         Point3D m_position;
         GameObjectPtrList m_portals;
         GameObjectPtrList m_exits;

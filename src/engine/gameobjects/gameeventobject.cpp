@@ -1,5 +1,6 @@
 #include "gameeventobject.h"
 
+#include "areaevent.h"
 #include "gameexception.h"
 #include "soundevent.h"
 #include "visualevent.h"
@@ -55,6 +56,9 @@ GameEvent *GameEventObject::createInRoom(Room *origin, double strength,
 
     GameEvent *event;
     switch (m_eventType.value) {
+        case GameEventType::AreaEvent:
+            event = new AreaEvent(origin, strength);
+            break;
         case GameEventType::SoundEvent:
             event = new SoundEvent(origin, strength);
             break;

@@ -17,7 +17,8 @@ PT_DEFINE_ENUM(GameEventType,
     Unknown,
     SoundEvent,
     VisualEvent,
-    MovementEvent
+    MovementEvent,
+    AreaEvent
 )
 
 
@@ -66,7 +67,7 @@ class GameEvent : public QObject {
         Q_PROPERTY(GameObjectPtrList affectedCharacters READ affectedCharacters
                                                         WRITE setAffectedCharacters)
 
-        Q_INVOKABLE virtual void fire();
+        Q_INVOKABLE void fire();
 
         int numVisitedRooms() const;
 

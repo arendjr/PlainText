@@ -20,20 +20,21 @@ class Realm;
 
 PT_DEFINE_ENUM(GameObjectType,
     Unknown,
-    Portal,
-    Exit,
-    Room,
-    Item,
-    Event,
+    Area,
     Character,
-    Player,
     Class,
-    Race,
     Container,
+    Event,
+    Exit,
     Group,
-    Weapon,
+    Item,
+    Player,
+    Portal,
+    Room,
+    Race,
+    Realm,
     Shield,
-    Realm
+    Weapon
 )
 
 
@@ -54,6 +55,7 @@ class GameObject : public QObject {
         GameObjectType objectType() const { return m_objectType; }
         Q_PROPERTY(GameObjectType objectType READ objectType STORED false)
 
+        Q_INVOKABLE bool isArea() const;
         Q_INVOKABLE bool isClass() const;
         Q_INVOKABLE bool isContainer() const;
         Q_INVOKABLE bool isEvent() const;

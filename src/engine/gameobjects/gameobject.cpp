@@ -14,6 +14,7 @@
 
 #include "qjson/json_driver.hh"
 
+#include "area.h"
 #include "character.h"
 #include "class.h"
 #include "container.h"
@@ -74,6 +75,11 @@ GameObject::~GameObject() {
     }
 
     killAllTimers();
+}
+
+bool GameObject::isArea() const {
+
+    return m_objectType == GameObjectType::Area;
 }
 
 bool GameObject::isClass() const {
@@ -713,6 +719,8 @@ GameObject *GameObject::createByObjectType(Realm *realm, GameObjectType objectTy
                                            Options options) {
 
     switch (objectType.value) {
+        case GameObjectType::Area:
+            return new Area(realm, id, options);
         case GameObjectType::Character:
             return new Character(realm, id, options);
         case GameObjectType::Class:
