@@ -72,7 +72,6 @@ class Character : public StatsItem {
         Q_PROPERTY(int respawnTimeVariation READ respawnTimeVariation WRITE setRespawnTimeVariation)
 
         int hp() const { return m_hp; }
-        void adjustHp(int delta);
         void setHp(int hp);
         Q_PROPERTY(int hp READ hp WRITE setHp)
 
@@ -81,7 +80,6 @@ class Character : public StatsItem {
         Q_PROPERTY(int maxHp READ maxHp WRITE setMaxHp)
 
         int mp() const { return m_mp; }
-        void adjustMp(int delta);
         void setMp(int mp);
         Q_PROPERTY(int mp READ mp WRITE setMp)
 
@@ -90,7 +88,6 @@ class Character : public StatsItem {
         Q_PROPERTY(int maxMp READ maxMp WRITE setMaxMp)
 
         double gold() const { return m_gold; }
-        void adjustGold(double delta);
         void setGold(double gold);
         Q_PROPERTY(double gold READ gold WRITE setGold)
 
@@ -131,13 +128,8 @@ class Character : public StatsItem {
         Q_INVOKABLE void talk(const GameObjectPtr &character, const QString &message);
         Q_INVOKABLE void tell(const GameObjectPtr &player, const QString &message);
 
-        Q_INVOKABLE void take(const GameObjectPtrList &items);
-
         Q_INVOKABLE void wield(const GameObjectPtr &item);
         Q_INVOKABLE void remove(const GameObjectPtr &item);
-
-        Q_INVOKABLE void kill(const GameObjectPtr &character);
-        Q_INVOKABLE void die(const GameObjectPtr &attacker = GameObjectPtr());
 
         Q_INVOKABLE void follow(const GameObjectPtr &character);
         Q_INVOKABLE void lose(const GameObjectPtr &character = GameObjectPtr());
@@ -153,9 +145,8 @@ class Character : public StatsItem {
 
         Q_INVOKABLE virtual GameObject *copy();
 
-        virtual void invokeTimer(int timerId);
-
-        virtual void killAllTimers();
+        Q_INVOKABLE virtual void invokeTimer(int timerId);
+        Q_INVOKABLE virtual void killAllTimers();
 
     protected:
         virtual void changeName(const QString &newName);
@@ -177,7 +168,6 @@ class Character : public StatsItem {
 
         int m_respawnTime;
         int m_respawnTimeVariation;
-        int m_respawnTimerId;
 
         int m_hp;
         int m_maxHp;

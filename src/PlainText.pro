@@ -275,6 +275,7 @@ OTHER_FILES += \
     ../data/scripts/gameobjects/item.js \
     ../data/scripts/gameobjects/player.js \
     ../data/scripts/gameobjects/portal.js \
+    ../data/scripts/gameobjects/room.js \
     ../data/scripts/gameobjects/statsitem.js \
     ../web/index.html \
     ../web/css/admin.css \

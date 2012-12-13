@@ -8,6 +8,114 @@ Character.prototype.changeStats = function(newStats) {
     this.maxMp = newStats[INTELLIGENCE];
 };
 
+Character.prototype.die = function(attacker) {
+
+    if (!this.invokeTrigger("ondie", attacker)) {
+        return;
+    }
+
+    this.send("You died.", Color.Red);
+
+    var room = this.currentRoom;
+    var myName = this.definiteName(room.characters, Options.Capitalized);
+
+    var others = room.characters;
+    others.removeOne(this);
+    others.send("%1 died.".arg(myName), Color.Teal);
+
+    if (!this.inventory.isEmpty() || this.gold > 0.0) {
+        var droppedItemsDescription;
+
+        if (!this.inventory.isEmpty()) {
+            this.inventory.forEach(function(item) {
+                room.addItem(item);
+            });
+
+            droppedItemsDescription = inventory.joinFancy();
+
+            this.inventory = [];
+        }
+
+        if (this.gold > 0.0) {
+            room.addGold(this.gold);
+
+            if (!droppedItemsDescription.isEmpty()) {
+                droppedItemsDescription += " and ";
+            }
+            droppedItemsDescription += "$%1 worth of gold".arg(this.gold);
+
+            this.gold = 0.0;
+        }
+
+        others.send("%1 was carrying %2.".arg(myName, droppedItemsDescription), Color.Teal);
+    }
+
+    for (var i = 0, length = others.length; i < length; i++) {
+        others[i].invokeTrigger("oncharacterdied", this, attacker);
+    };
+
+    this.killAllTimers();
+
+    room.removeCharacter(this);
+
+    if (this.isPlayer()) {
+        LogUtil.countPlayerDeath(room.toString());
+
+        this.enter(this.race.startingRoom);
+
+        this.hp = 1;
+        this.stun(5000);
+    } else {
+        if (this.respawnTime) {
+            var respawnTime = this.respawnTime + randomInt(0, this.respawnTimeVariation);
+            this.setTimeout(function() {
+                this.hp = this.maxHp;
+                this.mp = this.maxMp;
+
+                this.enter(this.currentRoom);
+
+                this.invokeTrigger("onspawn");
+            }, respawnTime);
+        } else {
+            this.setDeleted();
+        }
+    }
+};
+
+Character.prototype.kill = function(character) {
+
+    if (this.secondsStunned() > 0) {
+        this.send("Please wait %1 seconds.".arg(this.secondsStunned()), Color.Olive);
+        return;
+    }
+
+    if (!character.invokeTrigger("onattack", this)) {
+        return;
+    }
+
+    var room = this.currentRoom;
+
+    var others = room.characters;
+    others.removeOne(this);
+    others.removeOne(character);
+
+    var invoked = false;
+    if (room.hasTrigger("oncombat")) {
+        invoked = room.invokeTrigger("oncombat", this, character, others);
+    }
+    if (!invoked) {
+        Realm.invokeTrigger("oncombat", this, character, others);
+    }
+
+    for (var i = 0, length = others.length; i < length; i++) {
+        others[i].invokeTrigger("oncharacterattacked", this, character);
+    }
+
+    if (character.hp === 0) {
+        character.die(this);
+    }
+};
+
 Character.prototype.lookAtBy = function(character) {
 
     var pool = this.currentRoom.characters;
@@ -91,4 +199,40 @@ Character.prototype.maxInventoryWeight = function() {
 Character.prototype.regenerate = function() {
 
     this.hp += max(Math.floor(this.stats[VITALITY] / 15), 1);
+};
+
+Character.prototype.take = function(items) {
+
+    var room = this.currentRoom;
+
+    var takenItems = [];
+    for (var i = 0, length = items.length; i < length; i++) {
+        var item = items[i];
+        if (item.name.endsWith("worth of gold")) {
+            this.gold += item.cost;
+            room.removeItem(item);
+            takenItems.append(item);
+        } else if (item.portable) {
+            if (this.inventoryWeight() + item.weight <= this.maxInventoryWeight()) {
+                this.addInventoryItem(item);
+                room.removeItem(item);
+                takenItems.append(item);
+            } else {
+                this.send("You can't take %1, because it's too heavy."
+                          .arg(item.definiteName(room.items)));
+            }
+        } else {
+            this.send("You can't take %1.".arg(item.definiteName(room.items)));
+        }
+    }
+
+    if (!takenItems.isEmpty()) {
+        var description = takenItems.joinFancy(Options.DefiniteArticles);
+        this.send("You take %2.".arg(description));
+
+        var others = room.characters;
+        others.removeOne(this);
+        others.send("%1 takes %3.".arg(this.definiteName(room.characters, Options.Capitalized),
+                                       description));
+    }
 };

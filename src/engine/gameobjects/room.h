@@ -59,8 +59,6 @@ class Room : public GameObject {
 
         Q_INVOKABLE virtual QString lookAtBy(GameObject *character);
 
-        Q_INVOKABLE void addGold(double amount);
-
     private:
         Point3D m_position;
         GameObjectPtrList m_portals;

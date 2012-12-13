@@ -494,7 +494,6 @@ QString Util::randomString(int length) {
 int Util::randomInt(int min, int max) {
 
     if (max == min) {
-        qWarning() << "Division by zero in Util::randomInt()";
         return min;
     }
     return min + qrand() % (max - min);

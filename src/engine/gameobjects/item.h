@@ -27,8 +27,6 @@ class Item : public GameObject {
         void setCost(double cost);
         Q_PROPERTY(double cost READ cost WRITE setCost)
 
-        static Item *createGold(Realm *realm, double amount);
-
     private:
         bool m_portable;
 

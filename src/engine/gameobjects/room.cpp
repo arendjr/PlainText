@@ -193,23 +193,3 @@ QString Room::lookAtBy(GameObject *character) {
         return QString();
     }
 }
-
-void Room::addGold(double amount) {
-
-    GameObjectPtr goldPtr;
-    for (const GameObjectPtr &itemPtr : m_items) {
-        if (itemPtr->name().endsWith("worth of gold")) {
-            goldPtr = itemPtr;
-            break;
-        }
-    }
-
-    if (goldPtr.isNull()) {
-        Item *gold = Item::createGold(realm(), amount);
-        addItem(gold);
-    } else {
-        Item *gold = goldPtr.cast<Item *>();
-        gold->setCost(gold->cost() + amount);
-        gold->setName(QString("$%1 worth of gold").arg(gold->cost()));
-    }
-}

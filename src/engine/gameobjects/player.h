@@ -43,7 +43,7 @@ class Player : public Character {
 
         Q_INVOKABLE void quit();
 
-        virtual void invokeTimer(int timerId);
+        Q_INVOKABLE virtual void invokeTimer(int timerId);
 
     protected:
         virtual void changeName(const QString &name);

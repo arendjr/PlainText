@@ -531,6 +531,48 @@ void GameObject::clearTimeout(int timerId) {
     }
 }
 
+void GameObject::invokeTimer(int timerId) {
+
+    QScriptValue function;
+    if (m_intervalHash) {
+        function = m_intervalHash->value(timerId);
+    }
+    if (!function.isValid() && m_timeoutHash) {
+        function = m_timeoutHash->value(timerId);
+    }
+
+    ScriptEngine *scriptEngine = m_realm->scriptEngine();
+    if (function.isString()) {
+        scriptEngine->evaluate(function.toString());
+    } else if (function.isFunction()) {
+        function.call(scriptEngine->toScriptValue(this));
+    }
+
+    if (scriptEngine->hasUncaughtException()) {
+        QScriptValue exception = scriptEngine->uncaughtException();
+        qWarning() << "Script Exception: " << exception.toString().toUtf8().constData() << endl
+                   << "While executing function: " << function.toString().toUtf8().constData();
+    }
+}
+
+void GameObject::killAllTimers() {
+
+    if (m_intervalHash) {
+        for (int id : m_intervalHash->keys()) {
+            m_realm->stopInterval(id);
+        }
+        delete m_intervalHash;
+        m_intervalHash = nullptr;
+    }
+    if (m_timeoutHash) {
+        for (int id : m_timeoutHash->keys()) {
+            m_realm->stopTimer(id);
+        }
+        delete m_timeoutHash;
+        m_timeoutHash = nullptr;
+    }
+}
+
 void GameObject::init() {
 
     invokeTrigger("oninit");
@@ -545,6 +587,19 @@ GameObject *GameObject::copy() {
     }
     object->init();
     return object;
+}
+
+void GameObject::setDeleted() {
+
+    if (~m_options & Copy && !m_deleted) {
+        m_deleted = true;
+
+        if (m_options & DontSave) {
+            m_realm->enqueueEvent(new DeleteObjectEvent(this));
+        } else {
+            m_realm->addModifiedObject(this);
+        }
+    }
 }
 
 QString GameObject::toJsonString(Options options) const {
@@ -625,19 +680,6 @@ void GameObject::resolvePointers() {
     }
 }
 
-void GameObject::setDeleted() {
-
-    if (~m_options & Copy && !m_deleted) {
-        m_deleted = true;
-
-        if (m_options & DontSave) {
-            m_realm->enqueueEvent(new DeleteObjectEvent(this));
-        } else {
-            m_realm->addModifiedObject(this);
-        }
-    }
-}
-
 QVector<QMetaProperty> GameObject::metaProperties() const {
 
     QVector<QMetaProperty> properties;
@@ -665,48 +707,6 @@ QVector<QMetaProperty> GameObject::storedMetaProperties() const {
         storedProperties[m_objectType.intValue()] = properties;
     }
     return storedProperties[m_objectType.intValue()];
-}
-
-void GameObject::invokeTimer(int timerId) {
-
-    QScriptValue function;
-    if (m_intervalHash) {
-        function = m_intervalHash->value(timerId);
-    }
-    if (!function.isValid() && m_timeoutHash) {
-        function = m_timeoutHash->value(timerId);
-    }
-
-    ScriptEngine *scriptEngine = m_realm->scriptEngine();
-    if (function.isString()) {
-        scriptEngine->evaluate(function.toString());
-    } else if (function.isFunction()) {
-        function.call(scriptEngine->toScriptValue(this));
-    }
-
-    if (scriptEngine->hasUncaughtException()) {
-        QScriptValue exception = scriptEngine->uncaughtException();
-        qWarning() << "Script Exception: " << exception.toString().toUtf8().constData() << endl
-                   << "While executing function: " << function.toString().toUtf8().constData();
-    }
-}
-
-void GameObject::killAllTimers() {
-
-    if (m_intervalHash) {
-        for (int id : m_intervalHash->keys()) {
-            m_realm->stopInterval(id);
-        }
-        delete m_intervalHash;
-        m_intervalHash = nullptr;
-    }
-    if (m_timeoutHash) {
-        for (int id : m_timeoutHash->keys()) {
-            m_realm->stopTimer(id);
-        }
-        delete m_timeoutHash;
-        m_timeoutHash = nullptr;
-    }
 }
 
 GameObject *GameObject::createByObjectType(Realm *realm, GameObjectType objectType, uint id,

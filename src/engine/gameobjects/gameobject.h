@@ -163,9 +163,14 @@ class GameObject : public QObject {
         Q_INVOKABLE int setTimeout(const QScriptValue &function, int delay);
         Q_INVOKABLE void clearTimeout(int timerId);
 
+        Q_INVOKABLE virtual void invokeTimer(int timerId);
+        Q_INVOKABLE virtual void killAllTimers();
+
         Q_INVOKABLE virtual void init();
 
         Q_INVOKABLE virtual GameObject *copy();
+
+        Q_INVOKABLE void setDeleted();
 
         QString toJsonString(Options options = NoOptions) const;
 
@@ -174,14 +179,8 @@ class GameObject : public QObject {
 
         void resolvePointers();
 
-        Q_INVOKABLE void setDeleted();
-
         QVector<QMetaProperty> metaProperties() const;
         QVector<QMetaProperty> storedMetaProperties() const;
-
-        virtual void invokeTimer(int timerId);
-
-        virtual void killAllTimers();
 
         static GameObject *createByObjectType(Realm *realm, GameObjectType objectType, uint id = 0,
                                               Options options = NoOptions);
