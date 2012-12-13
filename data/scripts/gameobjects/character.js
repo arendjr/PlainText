@@ -8,6 +8,30 @@ Character.prototype.changeStats = function(newStats) {
     this.maxMp = newStats[INTELLIGENCE];
 };
 
+Character.prototype.close = function(portal) {
+
+    if (!portal.canOpenFromRoom(this.currentRoom)) {
+        this.send("Exit cannot be closed.");
+        return;
+    }
+
+    var name = portal.nameFromRoom(this.currentRoom);
+    if (portal.open) {
+        if (!portal.invokeTrigger("onclose", this)) {
+            return;
+        }
+
+        portal.open = false;
+        this.send("You close the %1.".arg(name));
+
+        var others = this.currentRoom.characters;
+        others.removeOne(this);
+        others.send("%1 closes the %2.".arg(this.definiteName(this.currentRoom.characters), name));
+    } else {
+        this.send("The %1 is already closed.".arg(name));
+    }
+};
+
 Character.prototype.die = function(attacker) {
 
     if (!this.invokeTrigger("ondie", attacker)) {
@@ -194,6 +218,30 @@ Character.prototype.lookAtBy = function(character) {
 Character.prototype.maxInventoryWeight = function() {
 
     return 20 + this.stats[STRENGTH] + Math.floor(this.stats[ENDURANCE] / 2);
+};
+
+Character.prototype.open = function(portal) {
+
+    if (!portal.canOpenFromRoom(this.currentRoom)) {
+        this.send("Exit cannot be opened.");
+        return;
+    }
+
+    var name = portal.nameFromRoom(this.currentRoom);
+    if (portal.open) {
+        this.send("The %1 is already open.".arg(name));
+    } else {
+        if (!portal.invokeTrigger("onopen", this)) {
+            return;
+        }
+
+        portal.open = true;
+        this.send("You open the %1.".arg(name));
+
+        var others = this.currentRoom.characters;
+        others.removeOne(this);
+        others.send("%1 opens the %2.".arg(this.definiteName(this.currentRoom.characters), name));
+    }
 };
 
 Character.prototype.regenerate = function() {

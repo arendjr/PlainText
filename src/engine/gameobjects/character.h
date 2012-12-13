@@ -116,8 +116,6 @@ class Character : public StatsItem {
         Q_INVOKABLE void clearNegativeEffects();
         Q_PROPERTY(EffectList effects READ effects STORED false)
 
-        Q_INVOKABLE void open(const GameObjectPtr &exit);
-        Q_INVOKABLE void close(const GameObjectPtr &exit);
         Q_INVOKABLE void go(const GameObjectPtr &pointer);
 
         Q_INVOKABLE void enter(const GameObjectPtr &roomPtr);

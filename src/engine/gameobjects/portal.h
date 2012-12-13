@@ -70,7 +70,10 @@ class Portal : public GameObject {
         Q_INVOKABLE bool canHearThroughIfOpen() const;
         Q_INVOKABLE bool canShootThroughIfOpen() const;
         Q_INVOKABLE bool canPassThroughIfOpen() const;
-        Q_INVOKABLE bool isOpen() const;
+
+        bool isOpen() const { return m_flags & PortalFlags::IsOpen; }
+        void setOpen(bool open);
+        Q_PROPERTY(bool open READ isOpen WRITE setOpen STORED false)
 
     private:
         QString m_name2;

@@ -143,7 +143,11 @@ bool Portal::canPassThroughIfOpen() const {
     return m_flags & PortalFlags::CanPassThroughIfOpen;
 }
 
-bool Portal::isOpen() const {
+void Portal::setOpen(bool open) {
 
-    return m_flags & PortalFlags::IsOpen;
+    if (open) {
+        setFlags(m_flags | PortalFlags::IsOpen);
+    } else {
+        setFlags(m_flags & ~PortalFlags::IsOpen);
+    }
 }

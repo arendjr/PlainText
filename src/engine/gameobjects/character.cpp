@@ -352,69 +352,6 @@ void Character::clearNegativeEffects() {
     }
 }
 
-void Character::open(const GameObjectPtr &exitPtr) {
-
-    NO_STUN
-
-    try {
-        Exit *exit = exitPtr.cast<Exit *>();
-
-        if (!exit->isDoor()) {
-            send("Exit cannot be opened.");
-            return;
-        }
-
-        if (exit->isOpen()) {
-            send(QString("The %1 is already open.").arg(exit->name()));
-        } else {
-            if (!exit->invokeTrigger("onopen", this)) {
-                return;
-            }
-
-            exit->setOpen(true);
-
-            send(QString("You open the %1.").arg(exit->name()));
-
-            GameObjectPtrList others = currentRoom().cast<Room *>()->characters();
-            others.removeOne(this);
-            others.send(QString("%1 opens the %2.").arg(name(), exit->name()));
-        }
-    } catch (GameException &exception) {
-        qDebug() << "Exception in Character::open(): " << exception.what();
-    }
-}
-
-void Character::close(const GameObjectPtr &exitPtr) {
-
-    NO_STUN
-
-    try {
-        Exit *exit = exitPtr.cast<Exit *>();
-
-        if (!exit->isDoor()) {
-            send("Exit cannot be closed.");
-            return;
-        }
-
-        if (exit->isOpen()) {
-            if (!exit->invokeTrigger("onclose", this)) {
-                return;
-            }
-
-            exit->setOpen(false);
-            send(QString("You close the %1.").arg(exit->name()));
-
-            GameObjectPtrList others = currentRoom().cast<Room *>()->characters();
-            others.removeOne(this);
-            others.send(QString("%1 closes the %2.").arg(name(), exit->name()));
-        } else {
-            send(QString("The %1 is already closed.").arg(exit->name()));
-        }
-    } catch (GameException &exception) {
-        qDebug() << "Exception in Character::close(): " << exception.what();
-    }
-}
-
 void Character::go(const GameObjectPtr &pointer) {
 
     NO_STUN
