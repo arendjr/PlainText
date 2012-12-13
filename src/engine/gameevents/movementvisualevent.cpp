@@ -35,6 +35,12 @@ void MovementVisualEvent::setDirection(const Vector3D &direction) {
     m_direction = direction;
 }
 
+void MovementVisualEvent::setVerb(const QString &simplePresent, const QString &continuous) {
+
+    m_simplePresent = simplePresent;
+    m_continuous = continuous;
+}
+
 QString MovementVisualEvent::descriptionForStrengthInRoom(double strength, Room *room) const {
 
     if (room == originRoom()) {
@@ -44,20 +50,23 @@ QString MovementVisualEvent::descriptionForStrengthInRoom(double strength, Room 
             if (portal->room() == m_destination || portal->room2() == m_destination) {
                 QString exitName = portal->nameFromRoom(room);
                 if (Util::isDirection(exitName)) {
-                    return QString("%1 walks %2.").arg(characterName, exitName);
+                    return QString("%1 %2 %3.").arg(characterName, m_simplePresent, exitName);
                 } else {
                     if (portal->canOpenFromRoom(room)) {
-                        return QString("%1 walks through the %2.").arg(characterName, exitName);
+                        return QString("%1 %2 through the %3.").arg(characterName, m_simplePresent,
+                                                                    exitName);
                     } else {
-                        return QString("%1 walks to the %2.").arg(characterName, exitName);
+                        return QString("%1 %2 to the %3.").arg(characterName, m_simplePresent,
+                                                               exitName);
                     }
                 }
             }
         }
 
-        return QString("%1 walks %2.").arg(characterName, Util::directionForVector(m_direction));
+        return QString("%1 %2 %3.").arg(characterName, m_simplePresent,
+                                        Util::directionForVector(m_direction));
     } else if (room == m_destination) {
-        return QString("%1 walks to you.").arg(Util::capitalize(description()));
+        return QString("%1 %2 to you.").arg(Util::capitalize(description()), m_simplePresent);
     }
 
     QString direction;
@@ -68,9 +77,9 @@ QString MovementVisualEvent::descriptionForStrengthInRoom(double strength, Room 
         direction = Util::directionForVector(m_direction);
     }
 
-    return QString("You see %1 walking %2.").arg(strength > 0.9 ? description() :
-                                                 strength > 0.8 ? distantDescription() :
-                                                 veryDistantDescription(), direction);
+    return QString("You see %1 %2 %3.").arg(strength > 0.9 ? description() :
+                                            strength > 0.8 ? distantDescription() :
+                                            veryDistantDescription(), m_continuous, direction);
 }
 
 bool MovementVisualEvent::isWithinSight(Room *targetRoom, Room *sourceRoom) {

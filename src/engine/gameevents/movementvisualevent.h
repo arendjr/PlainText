@@ -21,6 +21,8 @@ class MovementVisualEvent : public VisualEvent {
         void setMovement(const Vector3D &movement);
         void setDirection(const Vector3D &direction);
 
+        void setVerb(const QString &simplePresent, const QString &continuous);
+
         Q_INVOKABLE virtual QString descriptionForStrengthInRoom(double strength, Room *room) const;
 
     protected:
@@ -31,6 +33,9 @@ class MovementVisualEvent : public VisualEvent {
 
         Vector3D m_movement;
         Vector3D m_direction;
+
+        QString m_simplePresent;
+        QString m_continuous;
 };
 
 #endif // MOVEMENTVISUALEVENT_H

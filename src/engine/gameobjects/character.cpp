@@ -535,6 +535,9 @@ void Character::go(const GameObjectPtr &pointer) {
         party.append(this);
         party.append(followers);
 
+        QString simplePresent = followers.isEmpty() ? "walks" : "walk";
+        QString continuous = "walking";
+
         QString visualDescription;
         QString distantVisualDescription;
         QString veryDistantVisualDescription;
@@ -573,6 +576,7 @@ void Character::go(const GameObjectPtr &pointer) {
         visualEvent->setDestination(destinationRoom);
         visualEvent->setMovement(movement);
         visualEvent->setDirection(direction);
+        visualEvent->setVerb(simplePresent, continuous);
         visualEvent->setExcludedCharacters(party);
         visualEvent->fire();
 
@@ -593,6 +597,7 @@ void Character::go(const GameObjectPtr &pointer) {
         soundEvent->setDestination(destinationRoom);
         soundEvent->setMovement(movement);
         soundEvent->setDirection(direction);
+        soundEvent->setVerb(simplePresent, continuous);
         soundEvent->setExcludedCharacters(party + visualEvent->affectedCharacters());
         soundEvent->fire();
 
