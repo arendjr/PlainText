@@ -24,7 +24,11 @@ Features
  * Support for both telnet (including ANSI colors, MCCP, MSDP and MSSP
    extensions) and HTML5 (WebSockets) 
  * Command-line OLC
- * Graphical HTML5 map editor, with perspective view for designing 3D areas 
+ * Graphical HTML5 map editor, with perspective view for designing 3D areas
+ * Game events propagate through rooms
+   * Hear sounds and see visuals as they happen in nearby rooms
+   * Sounds and visuals lose strength and become increasingly blurry over distance
+   * Semi-realistic line-of-sight algorithm
  * Scripting support using JavaScript
    * Commands may be implemented in JavaScript
    * Customizable combat
