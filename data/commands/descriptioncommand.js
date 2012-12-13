@@ -27,6 +27,6 @@ DescriptionCommand.prototype.execute = function(player, command) {
     player.description = description;
 
     player.send("Your description has been changed to:\n" + description);
-}
+};
 
 CommandRegistry.registerCommand("description", new DescriptionCommand());

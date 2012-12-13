@@ -26,6 +26,6 @@ GtalkCommand.prototype.execute = function(player, command) {
     } else {
         this.send("You are not in a group.");
     }
-}
+};
 
 CommandRegistry.registerCommand("gtalk", new GtalkCommand());

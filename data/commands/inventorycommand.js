@@ -34,6 +34,6 @@ InventoryCommand.prototype.execute = function(player, command) {
     }
 
     player.send(carriedInventoryString + carriedGoldString);
-}
+};
 
 CommandRegistry.registerCommand("inventory", new InventoryCommand());

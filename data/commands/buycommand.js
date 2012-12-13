@@ -97,7 +97,7 @@ BuyCommand.prototype.execute = function(player, command) {
     if (!boughtItems.isEmpty()) {
         this.send("You bought %1.", boughtItems.joinFancy());
     }
-}
+};
 
 CommandRegistry.registerCommand("buy", new BuyCommand());
 CommandRegistry.registerCommand("enquiry", new BuyCommand());

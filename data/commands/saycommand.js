@@ -17,9 +17,9 @@ SayCommand.prototype.execute = function(player, command) {
         return;
     }
 
-    var message = takeRest();
+    var message = this.takeRest();
 
     player.say(message);
-}
+};
 
 CommandRegistry.registerCommand("say", new SayCommand());

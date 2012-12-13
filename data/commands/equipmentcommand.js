@@ -29,6 +29,6 @@ EquipmentCommand.prototype.execute = function(player, command) {
     } else {
         player.send("You're wielding %1.".arg(wieldedEquipment.joinFancy()));
     }
-}
+};
 
 CommandRegistry.registerCommand("equipment", new EquipmentCommand());

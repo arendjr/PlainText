@@ -40,6 +40,6 @@ StatsCommand.prototype.execute = function(player, command) {
                               " \\=====================/   \\=====================/ \n",
                               Color.Olive) +
              "\n");
-}
+};
 
 CommandRegistry.registerCommand("stats", new StatsCommand());

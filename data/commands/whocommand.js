@@ -19,6 +19,6 @@ WhoCommand.prototype.execute = function(player, command) {
     } else {
         this.send("%1 are online.", players.joinFancy(Options.Capitalized));
     }
-}
+};
 
 CommandRegistry.registerCommand("who", new WhoCommand());

@@ -30,6 +30,6 @@ LoseCommand.prototype.execute = function(player, command) {
     } else {
         player.lose();
     }
-}
+};
 
 CommandRegistry.registerCommand("lose", new LoseCommand());

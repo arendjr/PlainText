@@ -29,6 +29,6 @@ EatCommand.prototype.execute = function(player, command) {
     }
 
     item.setDeleted();
-}
+};
 
 CommandRegistry.registerCommand("eat", new EatCommand());

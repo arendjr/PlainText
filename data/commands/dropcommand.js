@@ -59,6 +59,6 @@ DropCommand.prototype.execute = function(player, command) {
     var others = this.currentRoom.characters;
     others.removeOne(player);
     others.send("%1 drops %2.".arg(player.name, description));
-}
+};
 
 CommandRegistry.registerCommand("drop", new DropCommand());

@@ -257,6 +257,7 @@ OTHER_FILES += \
     ../data/commands/putcommand.js \
     ../data/commands/quitcommand.js \
     ../data/commands/removecommand.js \
+    ../data/commands/replycommand.js \
     ../data/commands/saycommand.js \
     ../data/commands/searchcommand.js \
     ../data/commands/shoutcommand.js \

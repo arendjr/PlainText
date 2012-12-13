@@ -19,7 +19,7 @@ KillCommand.prototype.execute = function(player, command) {
     }
 
     player.kill(character);
-}
+};
 
 CommandRegistry.registerCommand("attack", new KillCommand());
 CommandRegistry.registerCommand("kill", new KillCommand());

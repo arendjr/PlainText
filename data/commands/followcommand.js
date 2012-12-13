@@ -20,6 +20,6 @@ FollowCommand.prototype.execute = function(player, command) {
     }
 
     player.follow(character);
-}
+};
 
 CommandRegistry.registerCommand("follow", new FollowCommand());

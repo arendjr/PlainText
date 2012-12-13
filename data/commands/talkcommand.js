@@ -26,6 +26,6 @@ TalkCommand.prototype.execute = function(player, command) {
     var message = this.takeRest();
 
     player.talk(character, message);
-}
+};
 
 CommandRegistry.registerCommand("talk", new TalkCommand());

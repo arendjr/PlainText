@@ -14,6 +14,6 @@ DisbandCommand.prototype.execute = function(player, command) {
     this.prepareExecute(player, command);
 
     player.disband();
-}
+};
 
 CommandRegistry.registerCommand("disband", new DisbandCommand());

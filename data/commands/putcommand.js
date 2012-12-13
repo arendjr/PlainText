@@ -43,6 +43,6 @@ PutCommand.prototype.execute = function(player, command) {
 
     this.send("You put %1 in %2.", items.joinFancy(Options.DefiniteArticles),
               container.definiteName(player.inventory));
-}
+};
 
 CommandRegistry.registerCommand("put", new PutCommand());

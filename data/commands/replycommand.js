@@ -30,6 +30,6 @@ ReplyCommand.prototype.execute = function(player, command) {
     player.tell(other, message);
 
     other.lastTell = player;
-}
+};
 
 CommandRegistry.registerCommand("reply", new ReplyCommand());

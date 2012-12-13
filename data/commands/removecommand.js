@@ -37,6 +37,6 @@ RemoveCommand.prototype.execute = function(player, command) {
     }
 
     player.remove(item);
-}
+};
 
 CommandRegistry.registerCommand("remove", new RemoveCommand());

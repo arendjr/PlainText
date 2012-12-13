@@ -21,6 +21,6 @@ WieldCommand.prototype.execute = function(player, command) {
     }
 
     player.wield(item);
-}
+};
 
 CommandRegistry.registerCommand("wield", new WieldCommand());

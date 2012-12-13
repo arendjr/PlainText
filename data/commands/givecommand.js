@@ -95,6 +95,6 @@ GiveCommand.prototype.execute = function(player, command) {
     others.removeOne(player);
     others.removeOne(recipient);
     others.send("%1 gives %2 to %3.".arg(player.name, description, recipientName));
-}
+};
 
 CommandRegistry.registerCommand("give", new GiveCommand());

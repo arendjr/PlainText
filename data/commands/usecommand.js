@@ -25,6 +25,6 @@ UseCommand.prototype.execute = function(player, command) {
     }
 
     item.invokeTrigger("onuse", player);
-}
+};
 
 CommandRegistry.registerCommand("use", new UseCommand());

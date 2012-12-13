@@ -41,6 +41,6 @@ SearchCommand.prototype.execute = function(player, command) {
         this.send("You didn't find anything.");
         player.stun(isWanderer ? 3000 : 4000);
     }
-}
+};
 
 CommandRegistry.registerCommand("search", new SearchCommand());

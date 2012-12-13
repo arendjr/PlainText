@@ -48,7 +48,7 @@ GetCommand.prototype.execute = function(player, command) {
 
         player.take(items);
     }
-}
+};
 
 CommandRegistry.registerCommand("get", new GetCommand());
 CommandRegistry.registerCommand("take", new GetCommand());

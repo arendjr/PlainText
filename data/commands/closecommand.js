@@ -13,12 +13,12 @@ CloseCommand.prototype.execute = function(player, command) {
 
     this.prepareExecute(player, command);
 
-    var portal = takeObject(this.currentRoom.portals);
+    var portal = this.takeObject(this.currentRoom.portals);
     if (!this.requireSome(portal, "Close what?")) {
         return;
     }
 
     player.close(portal);
-}
+};
 
 CommandRegistry.registerCommand("close", new CloseCommand());

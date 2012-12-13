@@ -29,6 +29,6 @@ DrinkCommand.prototype.execute = function(player, command) {
     }
 
     item.setDeleted();
-}
+};
 
 CommandRegistry.registerCommand("drink", new DrinkCommand());

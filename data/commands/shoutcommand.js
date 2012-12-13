@@ -18,9 +18,9 @@ ShoutCommand.prototype.execute = function(player, command) {
         return;
     }
 
-    var message = takeRest();
+    var message = this.takeRest();
 
     player.shout(message);
-}
+};
 
 CommandRegistry.registerCommand("shout", new ShoutCommand());

@@ -15,7 +15,7 @@ SlashMeCommand.prototype.execute = function(player, command) {
 
     var action = this.takeRest();
 
-    this.currentRoom.characters.send("%1 %2".arg(player.name, action), Color.Purple);
-}
+    this.currentRoom.characters.send(Util.colorize("%1 %2".arg(player.name, action), Color.Purple));
+};
 
 CommandRegistry.registerCommand("/me", new SlashMeCommand());

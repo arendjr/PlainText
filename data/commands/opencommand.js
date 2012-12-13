@@ -14,12 +14,12 @@ OpenCommand.prototype.execute = function(player, command) {
 
     this.prepareExecute(player, command);
 
-    var portal = takeObject(this.currentRoom.portals);
+    var portal = this.takeObject(this.currentRoom.portals);
     if (!this.requireSome(portal, "Open what?")) {
         return;
     }
 
     player.open(portal);
-}
+};
 
 CommandRegistry.registerCommand("open", new OpenCommand());
