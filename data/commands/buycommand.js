@@ -59,7 +59,7 @@ BuyCommand.prototype.execute = function(player, command) {
         return;
     }
 
-    if (!itemDescription) {
+    if (!itemDescription || !itemDescription.name) {
         seller.invokeTrigger("onbuy", player);
         return;
     }

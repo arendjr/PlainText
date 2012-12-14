@@ -21,14 +21,14 @@ RemoveCommand.prototype.execute = function(player, command) {
     this.takeWord("my");
 
     var allItems = [];
-    if (this.weapon) {
-        allItems.append(this.weapon);
+    if (player.weapon) {
+        allItems.append(player.weapon);
     }
-    if (this.secondaryWeapon) {
-        allItems.append(this.secondaryWeapon);
+    if (player.secondaryWeapon) {
+        allItems.append(player.secondaryWeapon);
     }
-    if (this.shield) {
-        allItems.append(this.shield);
+    if (player.shield) {
+        allItems.append(player.shield);
     }
 
     var item = this.takeObject(allItems);

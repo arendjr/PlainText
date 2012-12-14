@@ -126,9 +126,6 @@ class Character : public StatsItem {
         Q_INVOKABLE void talk(const GameObjectPtr &character, const QString &message);
         Q_INVOKABLE void tell(const GameObjectPtr &player, const QString &message);
 
-        Q_INVOKABLE void wield(const GameObjectPtr &item);
-        Q_INVOKABLE void remove(const GameObjectPtr &item);
-
         Q_INVOKABLE void follow(const GameObjectPtr &character);
         Q_INVOKABLE void lose(const GameObjectPtr &character = GameObjectPtr());
         Q_INVOKABLE void disband();

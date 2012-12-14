@@ -17,7 +17,7 @@ GetCommand.prototype.execute = function(player, command) {
     var description = this.takeObjectsDescription();
 
     var items;
-    if (!this.takeWord("from").isEmpty()) {
+    if (this.takeWord("from") === "from") {
         var container = this.takeObject(player.inventory);
         if (!this.requireSome(container, "%1 from what?".arg(this.alias.capitalized()))) {
             return;

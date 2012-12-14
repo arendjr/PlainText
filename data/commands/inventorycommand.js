@@ -13,17 +13,22 @@ InventoryCommand.prototype.execute = function(player, command) {
 
     this.prepareExecute(player, command);
 
+    var weight = player.inventoryWeight();
     var carriedInventoryString;
     if (player.inventory.isEmpty()) {
         carriedInventoryString = "You don't carry anything.\n";
-    } else if (player.inventory.length === 1) {
-        carriedInventoryString = "You carry %1, weighing %2.\n"
-                                 .arg(player.inventory[0].indefiniteName(),
-                                      Util.formatWeight(player.inventoryWeight));
     } else {
-        carriedInventoryString = "You carry %1, weighing a total of %2.\n"
-                                 .arg(player.inventory.joinFancy(),
-                                      Util.formatWeight(player.inventoryWeight));
+        if (weight === 0) {
+            carriedInventoryString = "You carry %1, weighing %2.\n"
+                                     .arg(player.inventory.joinFancy());
+        } else if (player.inventory.length === 1) {
+            carriedInventoryString = "You carry %1, weighing %2.\n"
+                                     .arg(player.inventory[0].indefiniteName(),
+                                          Util.formatWeight(weight));
+        } else {
+            carriedInventoryString = "You carry %1, weighing a total of %2.\n"
+                                     .arg(player.inventory.joinFancy(), Util.formatWeight(weight));
+        }
     }
 
     var carriedGoldString;
