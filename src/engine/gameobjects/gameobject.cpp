@@ -805,6 +805,7 @@ GameObject *GameObject::createCopy(const GameObject *other) {
 QScriptValue GameObject::toScriptValue(QScriptEngine *engine, GameObject *const &gameObject) {
 
     QScriptValue object = engine->newQObject(gameObject, QScriptEngine::QtOwnership,
+                                             QScriptEngine::ExcludeChildObjects |
                                              QScriptEngine::ExcludeDeleteLater |
                                              QScriptEngine::PreferExistingWrapperObject);
 

@@ -54,7 +54,7 @@ DropCommand.prototype.execute = function(player, command) {
         description = items.joinFancy(Options.DefiniteArticles);
     }
 
-    this.send("You drop %2.", description);
+    this.send("You drop %1.", description);
 
     var others = this.currentRoom.characters;
     others.removeOne(player);

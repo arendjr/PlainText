@@ -59,8 +59,11 @@ void ScriptEngine::loadScript(const QString &path) {
         evaluate(file.readAll(), "commands/command.js");
         file.close();
         if (hasUncaughtException()) {
+            QScriptValue exception = uncaughtException();
             qWarning() << "Exception while evaluating " << info.fileName() << ": "
-                       << uncaughtException().toString();
+                       << exception.toString().toUtf8().constData() << endl
+                       << "Backtrace:" << endl
+                       << exception.property("backtrace").toString().toUtf8().constData();
         }
     } else {
         qWarning() << "Could not open " << info.fileName();

@@ -13,7 +13,7 @@ StatsCommand.prototype.execute = function(player, command) {
 
     this.prepareExecute(player, command);
 
-    var stats = player.stats();
+    var stats = player.stats;
 
     player.send("\n" +
                 Util.colorize("/===================== Overview ==================\\\n" +

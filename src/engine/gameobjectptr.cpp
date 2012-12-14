@@ -232,9 +232,7 @@ void GameObjectPtr::fromVariant(const QVariant &variant, GameObjectPtr &pointer)
 QScriptValue GameObjectPtr::toScriptValue(QScriptEngine *engine, const GameObjectPtr &pointer) {
 
     if (pointer.m_gameObject) {
-        return engine->newQObject(pointer.m_gameObject, QScriptEngine::QtOwnership,
-                                  QScriptEngine::ExcludeDeleteLater |
-                                  QScriptEngine::PreferExistingWrapperObject);
+        return GameObject::toScriptValue(engine, pointer.m_gameObject);
     } else {
         return engine->nullValue();
     }

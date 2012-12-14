@@ -13,14 +13,14 @@ Room.prototype.addGold = function(amount) {
         }
     }
 
-    if (goldItem === null) {
+    if (goldItem) {
+        goldItem.cost += amount;
+    } else {
         goldItem = Realm.createObject("Item");
         goldItem.cost = amount;
         goldItem.portable = true;
         this.addItem(goldItem);
-    } else {
-        goldItem.cost += amount;
     }
 
     goldItem.name = "$%1 worth of gold".arg(amount);
-}
+};

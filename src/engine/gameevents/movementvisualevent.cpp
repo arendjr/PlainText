@@ -51,6 +51,8 @@ QString MovementVisualEvent::descriptionForStrengthInRoom(double strength, Room 
                 QString exitName = portal->nameFromRoom(room);
                 if (Util::isDirection(exitName)) {
                     return QString("%1 %2 %3.").arg(characterName, m_simplePresent, exitName);
+                } else if (exitName == "out") {
+                    return QString("%1 %2 outside.");
                 } else {
                     if (portal->canOpenFromRoom(room)) {
                         return QString("%1 %2 through the %3.").arg(characterName, m_simplePresent,
@@ -70,16 +72,32 @@ QString MovementVisualEvent::descriptionForStrengthInRoom(double strength, Room 
     }
 
     QString direction;
-    double angle = m_direction.angle(room->position() - originRoom()->position());
-    if (angle < TAU / 8) {
-        direction = "toward you";
-    } else {
-        direction = Util::directionForVector(m_direction);
-    }
+    Vector3D vector = room->position() - originRoom()->position();
 
-    return QString("You see %1 %2 %3.").arg(strength > 0.9 ? description() :
-                                            strength > 0.8 ? distantDescription() :
-                                            veryDistantDescription(), m_continuous, direction);
+    if (vector.length() > 100) {
+        double angle = m_direction.angle(vector);
+        if (angle < TAU / 8) {
+            direction = "in your direction";
+        } else {
+            direction = Util::directionForVector(m_direction);
+        }
+        return QString("In the distance, you see %1 %2 %3.")
+                .arg(strength > 0.9 ? description() :
+                     strength > 0.8 ? distantDescription() :
+                     veryDistantDescription(), m_continuous, direction);
+    } else {
+        double angle = m_direction.angle(vector);
+        if (angle < TAU / 8) {
+            direction = "toward you";
+        } else if (angle >= TAU * 3 / 8) {
+            direction = "away from you";
+        } else {
+            direction = Util::directionForVector(m_direction);
+        }
+        return QString("You see %1 %2 %3.").arg(strength > 0.9 ? description() :
+                                                strength > 0.8 ? distantDescription() :
+                                                veryDistantDescription(), m_continuous, direction);
+    }
 }
 
 bool MovementVisualEvent::isWithinSight(Room *targetRoom, Room *sourceRoom) {

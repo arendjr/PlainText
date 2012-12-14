@@ -33,19 +33,34 @@ void ListMethodsCommand::execute(Player *player, const QString &command) {
                  "\n").arg(Util::highlight(QString("object #%1").arg(object->id()))));
 
     ScriptEngine *scriptEngine = ScriptEngine::instance();
-    QScriptValue value = scriptEngine->evaluate(QString("Object.keys($('%1:%2'))")
-                                                .arg(QString(object->objectType().toString()).toLower())
+    QScriptValue value = scriptEngine->evaluate(QString("(function(){"
+                                                        "  var keys = [];"
+                                                        "  var object = $('%1:%2');"
+                                                        "  for (var key in object) {"
+                                                        "    keys.push(key);"
+                                                        "  }"
+                                                        "  return keys;"
+                                                        "})()")
+                                                .arg(object->objectType().toString())
                                                 .arg(object->id()));
 
     QScriptValueIterator it(value);
     while (it.hasNext()) {
         it.next();
-        QString key = it.value().toString();
-        if (key.contains('(') && !key.startsWith("destroyed(") &&
-            !key.contains(QRegExp("[(,]Options\\)"))) {
-            key = key.replace("QString", "string").replace("QScriptValue", "value")
-                     .replace("GameObjectPtr", "GameObject").replace(",", ", ");
-            send(QString("  %1\n").arg(Util::highlight(key)));
+        QString signature = it.value().toString();
+        if (signature.contains('(') && !signature.startsWith("destroyed(") &&
+            !signature.contains(QRegExp("[(,]Options\\)"))) {
+            if (signature.startsWith("function ")) {
+                signature = it.name() + signature.mid(9);
+            } else {
+                signature = signature.replace("QString", "string")
+                                     .replace("QScriptValue", "value")
+                                     .replace("GameObjectPtr", "GameObject")
+                                     .replace("GameObject*", "GameObject")
+                                     .replace("ScriptFunction", "function")
+                                     .replace(",", ", ");
+            }
+            send(QString("  %1\n").arg(Util::highlight(signature)));
         }
     }
 }
