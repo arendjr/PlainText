@@ -22,12 +22,16 @@ void ApiCommand::prepareExecute(Player *player, const QString &command) {
 
 void ApiCommand::sendReply(const QVariant &variant) {
 
+    QString data = ConversionUtil::toJsonString(variant);
+    if (data.isEmpty()) {
+        data = "\"\"";
+    }
     send(QString("{ "
                  "\"requestId\": \"%1\", "
                  "\"errorCode\": 0, "
                  "\"errorMessage\": \"\", "
                  "\"data\": %2 "
-                 "}").arg(m_requestId, ConversionUtil::toJsonString(variant)));
+                 "}").arg(m_requestId, data));
 }
 
 void ApiCommand::sendError(int errorCode, const QString &errorMessage) {
