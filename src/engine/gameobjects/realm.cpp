@@ -108,10 +108,18 @@ void Realm::registerObject(GameObject *gameObject) {
     uint id = gameObject->id();
     m_objectMap.insert(id, gameObject);
 
-    if (gameObject->isRace()) {
-        m_races.append(gameObject);
-    } else if (gameObject->isClass()) {
-        m_classes.append(gameObject);
+    switch (gameObject->objectType().value) {
+        case GameObjectType::Area:
+            m_areas.append(gameObject);
+            break;
+        case GameObjectType::Class:
+            m_classes.append(gameObject);
+            break;
+        case GameObjectType::Race:
+            m_races.append(gameObject);
+            break;
+        default:
+            break;
     }
 
     if (id >= m_nextId) {
