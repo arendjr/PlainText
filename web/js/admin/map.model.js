@@ -37,6 +37,20 @@ define(["controller"], function(Controller) {
     };
 
 
+    function Area(model, jsonString) {
+
+        GameObject.call(this, model);
+
+        var area = JSON.parse(jsonString);
+        for (var key in area) {
+            this[key] = area[key];
+        }
+    }
+
+    Area.prototype = new GameObject();
+    Area.prototype.constructor = Area;
+
+
     function Room(model, jsonString) {
 
         GameObject.call(this, model);
@@ -115,6 +129,7 @@ define(["controller"], function(Controller) {
 
     function MapModel() {
 
+        this.areas = {};
         this.rooms = {};
         this.portals = {};
 
@@ -141,26 +156,40 @@ define(["controller"], function(Controller) {
     MapModel.prototype.load = function() {
 
         var self = this;
-        Controller.sendApiCall("objects-list room", function(data) {
+        Controller.sendApiCall("objects-list area", function(data) {
             for (var i = 0; i < data.length; i++) {
-                var room = new Room(self, data[i]);
-                self.rooms[room.id] = room;
+                var area = new Area(self, data[i]);
+                self.areas[area.id] = area;
             }
 
-            Controller.sendApiCall("objects-list portal", function(data) {
+            Controller.sendApiCall("objects-list room", function(data) {
                 for (var i = 0; i < data.length; i++) {
-                    var portal = new Portal(self, data[i]);
-                    self.portals[portal.id] = portal;
+                    var room = new Room(self, data[i]);
+                    self.rooms[room.id] = room;
                 }
 
-                for (var id in self.rooms) {
-                    self.rooms[id].resolvePointers(["portals"]);
-                }
-                for (id in self.portals) {
-                    self.portals[id].resolvePointers(["room", "room2"]);
-                }
+                Controller.sendApiCall("objects-list portal", function(data) {
+                    for (var i = 0; i < data.length; i++) {
+                        var portal = new Portal(self, data[i]);
+                        self.portals[portal.id] = portal;
+                    }
 
-                self.notifyChangeListeners();
+                    for (var id in self.rooms) {
+                        self.rooms[id].resolvePointers(["portals"]);
+                    }
+                    for (id in self.portals) {
+                        self.portals[id].resolvePointers(["room", "room2"]);
+                    }
+                    for (id in self.areas) {
+                        var area = self.areas[id];
+                        area.resolvePointers(["rooms"]);
+                        area.rooms.forEach(function(room) {
+                            room.area = area;
+                        });
+                    }
+
+                    self.notifyChangeListeners();
+                });
             });
         });
     };

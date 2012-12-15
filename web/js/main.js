@@ -74,6 +74,18 @@ Object.defineProperty(Object.prototype, "contains", {
     "writable": true
 });
 
+Object.defineProperty(Object.prototype, "isEmpty", {
+    "value": function() { for (var key in this) { return false; } return true; },
+    "configurable": true,
+    "writable": true
+});
+
+Object.defineProperty(Object.prototype, "keys", {
+    "value": function() { return Object.keys(this) },
+    "configurable": true,
+    "writable": true
+});
+
 
 String.prototype.arg = function() {
 

@@ -13,6 +13,8 @@ define(["controller", "admin/map.model", "admin/map.view", "admin/portaleditor",
         this.model = null;
         this.view = null;
 
+        this.areas = [];
+
         this.portalEditor = null;
         this.portalDeleteDialog = null;
         this.propertyEditor = null;
@@ -27,10 +29,17 @@ define(["controller", "admin/map.model", "admin/map.view", "admin/portaleditor",
 
     MapEditor.prototype.init = function() {
 
+        var initialZoom = 0.5;
+
         this.model = new MapModel();
 
         this.view = new MapView($(".canvas", this.element)[0]);
         this.view.setModel(this.model);
+        this.view.setZoom(initialZoom);
+
+        // these are for debugging only
+        window.model = this.model;
+        window.view = this.view;
 
         this.portalEditor = new PortalEditor();
         this.portalEditor.setMapModel(this.model);
@@ -42,7 +51,7 @@ define(["controller", "admin/map.model", "admin/map.view", "admin/portaleditor",
 
         this.zoomSlider = new SliderWidget($(".zoom.slider", this.element)[0], {
             "width": 200,
-            "initialValue": 0.5
+            "initialValue": initialZoom
         });
         this.perspectiveSlider = new SliderWidget($(".perspective.slider", this.element)[0], {
             "width": 400
@@ -61,11 +70,20 @@ define(["controller", "admin/map.model", "admin/map.view", "admin/portaleditor",
             if (self.selectedRoomId) {
                 self.onRoomSelectionChanged();
             }
+
+            if (self.areas !== self.model.areas) {
+                self.updateAreas();
+            }
         });
 
         this.view.addSelectionListener(function(selectedRoomId) {
             self.selectedRoomId = selectedRoomId;
             self.onRoomSelectionChanged();
+        });
+
+        $(".areas.menu", this.element).on("change", "input", function(event) {
+            var areaId = $(event.target).data("area-id");
+            self.view.setAreaVisible(self.areas[areaId], event.target.checked);
         });
 
         $(".plot.altitude", this.element).on("click", function() {
@@ -162,8 +180,24 @@ define(["controller", "admin/map.model", "admin/map.view", "admin/portaleditor",
             room.setProperty(event.target.className, event.target.value);
         });
 
+        $(".up.arrow", this.element).on("click", function() {
+            self.view.move(0, -1);
+        });
+
+        $(".right.arrow", this.element).on("click", function() {
+            self.view.move(1, 0);
+        });
+
+        $(".down.arrow", this.element).on("click", function() {
+            self.view.move(0, 1);
+        });
+
+        $(".left.arrow", this.element).on("click", function() {
+            self.view.move(-1, 0);
+        });
+
         this.zoomSlider.element.addEventListener("change", function(event) {
-            self.view.setZoom(2 * event.detail.value);
+            self.view.setZoom(event.detail.value);
         }, false);
 
         this.perspectiveSlider.element.addEventListener("change", function(event) {
@@ -219,6 +253,29 @@ define(["controller", "admin/map.model", "admin/map.view", "admin/portaleditor",
         });
 
         this.selectedRoomDiv.show();
+    };
+
+    MapEditor.prototype.updateAreas = function() {
+
+        this.areas = this.model.areas;
+        if (this.areas.isEmpty()) {
+            $(".areas.menu", this.element).hide();
+        } else {
+            $(".areas.menu", this.element).show();
+        }
+
+        var menuContent = $(".areas.menu-content", this.element);
+        menuContent.html("");
+        for (var id in this.areas) {
+            var area = this.areas[id];
+            menuContent.append(
+                ("<div class=\"menu-item\">" +
+                 "<input id=\"toggle-area-%1\" type=\"checkbox\" data-area-id=\"%1\"%3>" +
+                 "<label for=\"toggle-area-%1\"> %2</label>" +
+                 "</div>")
+                .arg(area.id, area.name, this.view.isAreaVisible(area) ? " checked" : "")
+            );
+        }
     };
 
     MapEditor.prototype.plotStats = function(type) {

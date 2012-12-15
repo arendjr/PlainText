@@ -218,3 +218,44 @@
 
         cursor: pointer;
     }
+
+.pad {
+    position: absolute;
+    top: 54px;
+    left: 20px;
+    z-index: 2;
+}
+    .pad .arrow {
+        position: absolute;
+        width: 32px;
+        height: 32px;
+
+        background-color: rgba(255, 255, 255, 0.4);
+        background-size: 32px 32px;
+
+        cursor: pointer;
+    }
+    .pad .up {
+        top: 0px;
+        left: 32px;
+
+        background-image: url(/img/arrow_up.png);
+    }
+    .pad .right {
+        top: 32px;
+        left: 64px;
+
+        background-image: url(/img/arrow_right.png);
+    }
+    .pad .down {
+        top: 64px;
+        left: 32px;
+
+        background-image: url(/img/arrow_down.png);
+    }
+    .pad .left {
+        top: 32px;
+        left: 0px;
+
+        background-image: url(/img/arrow_left.png);
+    }

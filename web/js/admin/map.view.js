@@ -13,11 +13,14 @@ define(["kinetic"], function(Kinetic) {
         this.layer = null;
         this.shapes = [];
 
+        this.visibleAreas = [];
+
         this.selectedShape = null;
         this.selectedRoomId = 0;
 
         this.selectionListeners = [];
 
+        this.center = { "x": 0, "y": 0 };
         this.zoom = 1.0;
         this.perspective = 0.0;
 
@@ -29,8 +32,7 @@ define(["kinetic"], function(Kinetic) {
         this.stage = new Kinetic.Stage({
             "container": this.element,
             "width": this.element.clientWidth,
-            "height": this.element.clientHeight,
-            "draggable": true
+            "height": this.element.clientHeight
         });
         this.layer = new Kinetic.Layer();
         this.stage.add(this.layer);
@@ -68,6 +70,7 @@ define(["kinetic"], function(Kinetic) {
         this.model = model;
 
         var self = this;
+        var firstUpdate = true;
 
         this.model.addChangeListener(function() {
             if (self.selectedRoomId !== 0) {
@@ -77,16 +80,32 @@ define(["kinetic"], function(Kinetic) {
                 }
             }
 
+            if (firstUpdate) {
+                self.visibleAreas = [];
+                for (var id in self.model.areas) {
+                    self.visibleAreas.append(self.model.areas[id]);
+                }
+                firstUpdate = false;
+            }
+
             self.draw();
         });
     };
 
+    MapView.prototype.move = function(dx, dy) {
+
+        this.center.x += (5.1 - 5 * this.zoom) * 20 * dx;
+        this.center.y += (5.1 - 5 * this.zoom) * 20 * dy;
+
+        this.draw();
+    };
+
     MapView.prototype.setZoom = function(zoom) {
 
+        zoom = (0.1 + 0.9 * zoom);
         if (zoom !== this.zoom) {
             this.zoom = zoom;
 
-            this.layer.setScale(zoom);
             this.draw();
         }
     };
@@ -102,23 +121,48 @@ define(["kinetic"], function(Kinetic) {
 
     MapView.prototype.draw = function() {
 
-        this.stage.setWidth(this.element.clientWidth);
-        this.stage.setHeight(this.element.clientHeight);
+        var stageWidth = this.element.clientWidth;
+        var stageHeight = this.element.clientHeight;
+
+        this.stage.setWidth(stageWidth);
+        this.stage.setHeight(stageHeight);
+
+        var centerX = Math.floor(stageWidth / 2);
+        var centerY = Math.floor(stageHeight / 2);
+        var zoom = this.zoom * 10;
+
+        var roomSize = 30;
+        var halfRoomSize = roomSize / 2;
+
+        var minX = -roomSize, maxX = stageWidth + roomSize,
+            minY = -roomSize, maxY = stageHeight + roomSize;
+        function isWithinStage(x, y) {
+            return (x >= minX && x <= maxX && y >= minY && y <= maxY);
+        }
 
         var portals = this.model.portals;
-        var portalIds = Object.keys(portals);
-        if (portalIds.isEmpty()) {
-            return;
+        var portalIds = [];
+        for (var portalId in portals) {
+            var portal = portals[portalId];
+            if (zoom >= 4 &&
+                (!portal.room.area || this.visibleAreas.contains(portal.room.area)) &&
+                (!portal.room2.area || this.visibleAreas.contains(portal.room2.area))) {
+                portalIds.append(portalId);
+            } else {
+                delete portal.shape;
+            }
         }
 
         var rooms = this.model.rooms;
-        var roomIds = Object.keys(rooms);
-        if (roomIds.isEmpty()) {
-            return;
+        var roomIds = [];
+        for (var roomId in rooms) {
+            var room = rooms[roomId];
+            if (!room.area || this.visibleAreas.contains(room.area)) {
+                roomIds.append(roomId);
+            } else {
+                delete room.shape;
+            }
         }
-
-        var roomSize = 30;
-        var halfRoomSize = 15;
 
         var self = this;
         var perspective = 2 * this.perspective;
@@ -130,49 +174,63 @@ define(["kinetic"], function(Kinetic) {
             var portal = portals[id];
             var room = portal.room;
             var room2 = portal.room2;
-            var points = [room.x + perspective * room.z, room.y - perspective * room.z,
-                          room2.x + perspective * room2.z, room2.y - perspective * room2.z];
-            if (portal.shape) {
-                portal.shape.setPoints(points);
-            } else {
-                portal.shape = new Kinetic.Line({
-                    "points": points,
-                    "stroke": "blue",
-                    "strokeWidth": 2,
-                    "listening": false
-                });
-                self.layer.add(portal.shape);
-            }
+            var z = perspective * room.z;
+            var z2 = perspective * room2.z;
+            var points = [centerX + (room.x - self.center.x + z) * zoom,
+                          centerY + (room.y - self.center.y + z) * zoom,
+                          centerX + (room2.x - self.center.x + z2) * zoom,
+                          centerY + (room2.y - self.center.y + z2) * zoom];
 
-            shapesToProcess.removeOne(portal.shape);
-            processedShapes.append(portal.shape);
+            if (isWithinStage(points[0], points[1]) || isWithinStage(points[2], points[3])) {
+                if (portal.shape) {
+                    portal.shape.setPoints(points);
+                } else {
+                    portal.shape = new Kinetic.Line({
+                        "points": points,
+                        "stroke": "blue",
+                        "strokeWidth": 2,
+                        "listening": false
+                    });
+                    self.layer.add(portal.shape);
+                }
+
+                shapesToProcess.removeOne(portal.shape);
+                processedShapes.append(portal.shape);
+            } else {
+                delete portal.shape;
+            }
         });
 
         roomIds.forEach(function(id) {
             var room = rooms[id];
             var z = perspective * room.z;
-            var x = room.x - halfRoomSize + z;
-            var y = room.y - halfRoomSize - z;
-            if (room.shape) {
-                room.shape.setX(x);
-                room.shape.setY(y);
-                room.shape.moveToTop();
-            } else {
-                room.shape = new Kinetic.Rect({
-                    "id": room.id,
-                    "x": x,
-                    "y": y,
-                    "width": roomSize,
-                    "height": roomSize,
-                    "stroke": "black",
-                    "strokeWidth": 2,
-                    "fill": "grey"
-                });
-                self.layer.add(room.shape);
-            }
+            var x = centerX + (room.x - self.center.x + z) * zoom - halfRoomSize;
+            var y = centerY + (room.y - self.center.y + z) * zoom - halfRoomSize;
 
-            shapesToProcess.removeOne(room.shape);
-            processedShapes.append(room.shape);
+            if (isWithinStage(x, y)) {
+                if (room.shape) {
+                    room.shape.setX(x);
+                    room.shape.setY(y);
+                    room.shape.moveToTop();
+                } else {
+                    room.shape = new Kinetic.Rect({
+                        "id": room.id,
+                        "x": x,
+                        "y": y,
+                        "width": roomSize,
+                        "height": roomSize,
+                        "stroke": (room.id === self.selectedRoomId ? "orange" : "black"),
+                        "strokeWidth": 2,
+                        "fill": "grey"
+                    });
+                    self.layer.add(room.shape);
+                }
+
+                shapesToProcess.removeOne(room.shape);
+                processedShapes.append(room.shape);
+            } else {
+                delete room.shape;
+            }
         });
 
         this.shapes = processedShapes;
@@ -201,6 +259,10 @@ define(["kinetic"], function(Kinetic) {
 
         for (id in rooms) {
             var shape = rooms[id].shape;
+            if (!shape) {
+                continue;
+            }
+
             value = data.contains(id) ? data[id] : 0;
 
             var red = 0, green = 0, blue = 0;
@@ -261,6 +323,22 @@ define(["kinetic"], function(Kinetic) {
         this.selectionListeners.forEach(function(listener) {
             listener(self.selectedRoomId);
         });
+    };
+
+    MapView.prototype.isAreaVisible = function(area) {
+
+        return this.visibleAreas.contains(area);
+    };
+
+    MapView.prototype.setAreaVisible = function(area, visible) {
+
+        if (visible) {
+            this.visibleAreas.insert(area);
+        } else {
+            this.visibleAreas.removeOne(area);
+        }
+
+        this.draw();
     };
 
     return MapView;

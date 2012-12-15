@@ -35,24 +35,21 @@ void HttpServer::onReadyRead() {
     if (socket->canReadLine()) {
         QStringList tokens = QString(socket->readLine()).split(QRegExp("[ \r\n]+"));
         if (tokens[0] == "GET") {
-            QTextStream os(socket);
-            os.setAutoDetectUnicode(true);
-
             if (tokens.length() < 2) {
-                os << "HTTP/1.0 400 Bad Request\r\n"
-                      "Content-Type: text/html; charset=\"utf-8\"\r\n"
-                      "\r\n"
-                      "<h1>Bad Request</h1>\n";
+                socket->write("HTTP/1.0 400 Bad Request\r\n"
+                              "Content-Type: text/html; charset=\"utf-8\"\r\n"
+                              "\r\n"
+                              "<h1>Bad Request</h1>\n");
                 socket->close();
                 return;
             }
 
             QString path = tokens[1];
             if (!path.startsWith('/') || path.contains("/.")) {
-                os << "HTTP/1.0 403 Forbidden\r\n"
-                      "Content-Type: text/html; charset=\"utf-8\"\r\n"
-                      "\r\n"
-                      "<h1>Forbidden</h1>\n";
+                socket->write("HTTP/1.0 403 Forbidden\r\n"
+                              "Content-Type: text/html; charset=\"utf-8\"\r\n"
+                              "\r\n"
+                              "<h1>Forbidden</h1>\n");
                 socket->close();
                 return;
             }
@@ -75,29 +72,36 @@ void HttpServer::onReadyRead() {
 
             QFile file(path);
             if (!file.open(QIODevice::ReadOnly)) {
-                os << "HTTP/1.0 404 Not Found"
-                      "Content-Type: text/html; charset=\"utf-8\"\r\n"
-                      "\r\n"
-                      "<h1>Not Found</h1>\n";
+                socket->write("HTTP/1.0 404 Not Found"
+                              "Content-Type: text/html; charset=\"utf-8\"\r\n"
+                              "\r\n"
+                              "<h1>Not Found</h1>\n");
                 socket->close();
                 return;
             }
 
-            QString content = file.readAll();
+            QByteArray content = file.readAll();
 
             QFileInfo info(path);
             QString mimeType = "text/html";
+            QString charset;
             if (info.suffix() == "js") {
                 mimeType = "text/javascript";
+            } else if (info.suffix() == "png") {
+                mimeType = "image/png";
             } else if (info.suffix() == "css") {
                 mimeType = "text/css";
+            } else {
+                charset = "; charset=\"utf-8\"";
             }
 
-            os << "HTTP/1.0 200 Ok\r\n"
-                  "Content-Type: " << mimeType << "; charset=\"utf-8\"\r\n"
-                  "\r\n"
-               << content;
-
+            socket->write(QString("HTTP/1.0 200 Ok\r\n"
+                                  "Content-Type: %1%2\r\n"
+                                  "Content-Length: %3\r\n"
+                                  "\r\n")
+                          .arg(mimeType, charset, QString::number(content.length()))
+                          .toLatin1() +
+                          content);
             socket->close();
 
             if (socket->state() == QTcpSocket::UnconnectedState) {
