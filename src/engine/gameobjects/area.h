@@ -19,6 +19,8 @@ class Area : public GameObject {
         void setRooms(const GameObjectPtrList &rooms);
         Q_PROPERTY(GameObjectPtrList rooms READ rooms WRITE setRooms)
 
+        Q_INVOKABLE virtual void init();
+
     private:
         GameObjectPtrList m_rooms;
 };

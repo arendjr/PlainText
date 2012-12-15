@@ -25,7 +25,7 @@ class Room : public GameObject {
 
         const GameObjectPtr &area() const { return m_area; }
         void setArea(const GameObjectPtr &area);
-        Q_PROPERTY(GameObjectPtr area READ area WRITE setArea)
+        Q_PROPERTY(GameObjectPtr area READ area WRITE setArea STORED false)
 
         const Point3D &position() const { return m_position; }
         void setPosition(const Point3D &position);
