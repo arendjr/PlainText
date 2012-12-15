@@ -87,8 +87,8 @@ void SetPropCommand::execute(Player *player, const QString &command) {
 
         send("Property %1 modified.", propertyName);
 
-        if (propertyName == "name" || propertyName == "plural" ||
-            propertyName == "indefiniteArticle") {
+        if ((propertyName == "name" || propertyName == "plural" ||
+             propertyName == "indefiniteArticle") && !object->plural().isEmpty()) {
             send(QString("New forms: %1 %2, one %3, two %4.").arg(object->indefiniteArticle(),
                                                                   object->name(),
                                                                   object->name(),

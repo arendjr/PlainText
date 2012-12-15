@@ -8,7 +8,7 @@ Item::Item(Realm *realm, uint id, Options options) :
 }
 
 Item::Item(Realm *realm, GameObjectType objectType, uint id, Options options) :
-    super(realm, objectType, id, options),
+    super(realm, objectType, id, (Options) (options | AutomaticNameForms)),
     m_portable(false),
     m_weight(0),
     m_cost(0.0) {

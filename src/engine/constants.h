@@ -23,19 +23,20 @@ enum Color {
 
 
 enum Options {
-    NoOptions = 0x0000,
-    Capitalized = 0x0001,
-    DefiniteArticles = 0x0002,
-    Copy = 0x0004 | 0x0008,
-    DontSave = 0x0008,
-    SkipId = 0x0010,
-    IncludeTypeInfo = 0x0020,
-    IfNotLast = 0x0040,
-    DontRegister = 0x0080,
-    DontServe = 0x0100,
-    AutoDelete = 0x0200,
-    NeverDelete = 0x0400,
-    Highlighted = 0x0800
+    NoOptions = 0,
+    Capitalized = (1 << 0),
+    DefiniteArticles = (1 << 1),
+    Copy = (1 << 2) | (1 << 3),
+    DontSave = (1 << 3),
+    SkipId = (1 << 4),
+    IncludeTypeInfo = (1 << 5),
+    IfNotLast = (1 << 6),
+    DontRegister = (1 << 7),
+    DontServe = (1 << 8),
+    AutoDelete = (1 << 9),
+    NeverDelete = (1 << 10),
+    Highlighted = (1 << 11),
+    AutomaticNameForms = (1 << 12)
 };
 
 #endif // CONSTANTS_H

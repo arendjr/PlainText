@@ -4,7 +4,7 @@
 #define super GameObject
 
 Race::Race(Realm *realm, uint id, Options options) :
-    super(realm, GameObjectType::Race, id, options),
+    super(realm, GameObjectType::Race, id, (Options) (options | AutomaticNameForms)),
     m_stats(0),
     m_height(0),
     m_weight(0),

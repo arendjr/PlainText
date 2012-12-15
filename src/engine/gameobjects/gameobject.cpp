@@ -920,32 +920,29 @@ void GameObject::unregisterPointer(GameObjectPtr *pointer) {
 
 void GameObject::changeName(const QString &newName) {
 
-    if (isRoom() || isExit() || isPlayer() || isPortal() || isRealm()) {
-        // specific optimization to avoid useless inflation of some objects
-        return;
-    }
+    if (m_options & AutomaticNameForms) {
+        int length = newName.length();
+        if (length > 1 && !newName.startsWith('$')) {
+            if (newName.endsWith("y") && !Util::isVowel(newName[length - 2])) {
+                m_plural = newName.left(length - 1) + "ies";
+            } else if (newName.endsWith("f")) {
+                m_plural = newName.left(length - 1) + "ves";
+            } else if (newName.endsWith("fe")) {
+                m_plural = newName.left(length - 2) + "ves";
+            } else if (newName.endsWith("s") || newName.endsWith("x") ||
+                       newName.endsWith("sh") || newName.endsWith("ch")) {
+                m_plural = newName + "es";
+            } else if (newName.endsWith("ese")) {
+                m_plural = newName;
+            } else {
+                m_plural = newName + "s";
+            }
 
-    int length = newName.length();
-    if (length > 1 && !newName.startsWith('$')) {
-        if (newName.endsWith("y") && !Util::isVowel(newName[length - 2])) {
-            m_plural = newName.left(length - 1) + "ies";
-        } else if (newName.endsWith("f")) {
-            m_plural = newName.left(length - 1) + "ves";
-        } else if (newName.endsWith("fe")) {
-            m_plural = newName.left(length - 2) + "ves";
-        } else if (newName.endsWith("s") || newName.endsWith("x") ||
-                   newName.endsWith("sh") || newName.endsWith("ch")) {
-            m_plural = newName + "es";
-        } else if (newName.endsWith("ese")) {
-            m_plural = newName;
-        } else {
-            m_plural = newName + "s";
-        }
-
-        if (Util::isVowel(newName[0])) {
-            m_indefiniteArticle = "an";
-        } else {
-            m_indefiniteArticle = "a";
+            if (Util::isVowel(newName[0])) {
+                m_indefiniteArticle = "an";
+            } else {
+                m_indefiniteArticle = "a";
+            }
         }
     }
 }
