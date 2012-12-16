@@ -5,7 +5,7 @@ define(["zepto"], function($) {
 
     function PortalDeleteDialog() {
 
-        this.element = $(".portal-delete-dialog");
+        this.element = $(".portal-delete");
 
         this.init();
     }

@@ -1,26 +1,34 @@
-.property-editor {
+.dialog {
     position: absolute;
-    top: 150px;
-    left: 150px;
-    right: 150px;
     z-index: 3;
 
-    border: 1px solid #000;
+    border: 1px solid black;
     background-color: white;
+    box-shadow: 0 3px 15px 0px black;
 
     font-family: "Helvetica", "Arial", sans-serif;
 
     -webkit-user-select: text;
 }
-    .property-editor .button-list {
+    .dialog p {
+        margin: 1em;
+    }
+    .dialog .button-list {
+        position: relative;
+
         padding: 5px 10px 5px;
         background-color: #ccc;
 
         text-align: right;
     }
 
+.property-editor {
+    top: 150px;
+    left: 150px;
+    right: 150px;
+}
+
 .portal-editor {
-    position: absolute;
     top: 180px;
     left: -webkit-calc(50% - 330px);
     left: -moz-calc(50% - 330px);
@@ -28,15 +36,10 @@
     right: -webkit-calc(50% - 330px);
     right: -moz-calc(50% - 330px);
     right: calc(50% - 330px);
-    z-index: 3;
-
-    border: 1px solid #000;
-    background-color: white;
-
-    font-family: "Helvetica", "Arial", sans-serif;
-
-    -webkit-user-select: text;
 }
+    .portal-editor p {
+        margin: 0;
+    }
     .portal-editor .column {
         display: inline-block;
         width: 50%;
@@ -48,20 +51,14 @@
     }
     .portal-editor .label {
         display: inline-block;
+        margin: 4px;
         width: 80px;
         font-weight: bold;
         text-align: right;
+        vertical-align: top;
     }
     .portal-editor .x,.portal-editor .y,.portal-editor .z {
         width: 5em;
-    }
-    .portal-editor .button-list {
-        position: relative;
-
-        padding: 5px 10px 5px;
-        background-color: #ccc;
-
-        text-align: right;
     }
         .portal-editor .delete-button {
             position: absolute;
@@ -73,8 +70,7 @@
             font-weight: bold;
         }
 
-.portal-delete-dialog {
-    position: absolute;
+.portal-delete {
     top: 200px;
     left: -webkit-calc(50% - 200px);
     left: -moz-calc(50% - 200px);
@@ -82,26 +78,7 @@
     right: -webkit-calc(50% - 200px);
     right: -moz-calc(50% - 200px);
     right: calc(50% - 200px);
-    z-index: 4;
-
-    border: 1px solid #000;
-    background-color: white;
-
-    font-family: "Helvetica", "Arial", sans-serif;
-
-    -webkit-user-select: text;
 }
-    .portal-delete-dialog p {
-        margin: 1em;
-    }
-    .portal-delete-dialog .button-list {
-        position: relative;
-
-        padding: 5px 10px 5px;
-        background-color: #ccc;
-
-        text-align: right;
-    }
 
 .map-editor {
     position: absolute;
@@ -125,40 +102,51 @@
         top: 0;
         left: 0;
         right: 0;
-        height: 22px;
+        height: 23px;
         z-index: 3;
 
-        border-bottom: 2px solid black;
+        border-bottom: 1px solid black;
         padding: 5px;
         background-color: white;
+        background-image: -moz-linear-gradient(top, #fff, #ccc);
+        background-image: -ms-linear-gradient(top, #fff, #ccc);
+        background-image: -webkit-linear-gradient(top, #fff, #ccc);
+        background-image: linear-gradient(top, #fff, #ccc);
+        box-shadow: -15px 3px 15px 0 black;
 
         font-family: "Helvetica", "Arial", sans-serif;
     }
-        .label {
+        .toolbar .label {
             display: inline-block;
 
-            margin: 4px;
+            margin: -6px 0;
+            padding: 10px 4px;
 
             vertical-align: top;
         }
-        .menu {
+        .toolbar .menu {
             cursor: pointer;
         }
-            .menu .menu-content {
+            .toolbar .menu .menu-content {
                 display: none;
                 position: absolute;
                 z-index: 4;
 
-                border: 2px solid black;
-                background: white;
+                margin: 9px 0 0 -10px;
+                border: 1px solid #ccc;
+                border-bottom-left-radius: 3px;
+                border-bottom-right-radius: 3px;
+                padding: 4px;
+                background: rgba(250, 250, 250, 0.95);
+                box-shadow: 0 3px 15px 0 #888;
             }
-            .menu:hover .menu-content {
+            .toolbar .menu:hover .menu-content {
                 display: block;
             }
-                .menu .menu-item {
+                .toolbar .menu .menu-item {
                     padding: 5px;
                 }
-                .z-restriction {
+                .toolbar .z-restriction {
                     width: 5em;
                 }
     .map-editor .sidebar {
@@ -191,13 +179,13 @@
         }
     .map-editor .close {
         position: absolute;
-        top: 0;
-        right: 0;
+        top: 8px;
+        right: 8px;
+        width: 16px;
+        height: 16px;
 
-        padding: 4px 7px;
-
-        font: bold 18px "Andale Mono", "Courier";
-        color: black;
+        background-image: url(/img/close.png);
+        background-size: 16px 16px;
 
         cursor: pointer;
     }
@@ -206,9 +194,10 @@
     display: inline-block;
     height: 8px;
 
-    margin: 5px;
+    margin: 6px 5px;
     border: 1px solid gray;
     border-radius: 2px;
+    background-color: #f0f0f0;
 }
     .slider .handle {
         position: relative;

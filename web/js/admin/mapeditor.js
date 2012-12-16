@@ -177,7 +177,7 @@ define(["controller", "admin/map.model", "admin/map.view", "admin/portaleditor",
             self.portalEditor.add(sourceRoom, {
                 "onsave": function(portal) {
                     self.model.setPortal(portal);
-                    self.portalEditor.close();
+                    self.portalEditor.close();                    
                 }
             });
         }, false);
