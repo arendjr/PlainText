@@ -158,6 +158,9 @@
                 .menu .menu-item {
                     padding: 5px;
                 }
+                .z-restriction {
+                    width: 5em;
+                }
     .map-editor .sidebar {
         position: absolute;
         top: 34px;

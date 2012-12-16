@@ -14,6 +14,7 @@ define(["kinetic"], function(Kinetic) {
         this.shapes = [];
 
         this.visibleAreas = [];
+        this.zRestriction = null;
 
         this.selectedShape = null;
         this.selectedRoomId = 0;
@@ -140,13 +141,19 @@ define(["kinetic"], function(Kinetic) {
             return (x >= minX && x <= maxX && y >= minY && y <= maxY);
         }
 
+        var visibleAreas = this.visibleAreas;
+        var zRestriction = this.zRestriction;
+
         var portals = this.model.portals;
         var portalIds = [];
         for (var portalId in portals) {
             var portal = portals[portalId];
-            if (zoom >= 4 &&
-                (!portal.room.area || this.visibleAreas.contains(portal.room.area)) &&
-                (!portal.room2.area || this.visibleAreas.contains(portal.room2.area))) {
+            var isVisible = (zoom >= 4 &&
+                             (!portal.room.area || visibleAreas.contains(portal.room.area)) &&
+                             (!portal.room2.area || visibleAreas.contains(portal.room2.area)) &&
+                             (zRestriction === null || portal.room.z === zRestriction ||
+                                                       portal.room2.z === zRestriction));
+            if (isVisible) {
                 portalIds.append(portalId);
             } else {
                 delete portal.shape;
@@ -157,7 +164,9 @@ define(["kinetic"], function(Kinetic) {
         var roomIds = [];
         for (var roomId in rooms) {
             var room = rooms[roomId];
-            if (!room.area || this.visibleAreas.contains(room.area)) {
+            isVisible = ((!room.area || visibleAreas.contains(room.area)) &&
+                         (zRestriction === null || room.z === zRestriction));
+            if (isVisible) {
                 roomIds.append(roomId);
             } else {
                 delete room.shape;
@@ -219,10 +228,14 @@ define(["kinetic"], function(Kinetic) {
                         "y": y,
                         "width": roomSize,
                         "height": roomSize,
-                        "stroke": (room.id === self.selectedRoomId ? "orange" : "black"),
+                        "stroke": "black",
                         "strokeWidth": 2,
                         "fill": "grey"
                     });
+                    if (room.id === self.selectedRoomId) {
+                        self.selectedShape = room.shape;
+                        self.selectedShape.setStroke("orange");
+                    }
                     self.layer.add(room.shape);
                 }
 
@@ -336,6 +349,17 @@ define(["kinetic"], function(Kinetic) {
             this.visibleAreas.insert(area);
         } else {
             this.visibleAreas.removeOne(area);
+        }
+
+        this.draw();
+    };
+
+    MapView.prototype.setZRestriction = function(zRestriction) {
+
+        if (zRestriction === undefined || zRestriction === null) {
+            this.zRestriction = null;
+        } else {
+            this.zRestriction = parseInt(zRestriction, 10);
         }
 
         this.draw();

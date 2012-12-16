@@ -83,7 +83,9 @@ define(["controller", "admin/map.model", "admin/map.view", "admin/portaleditor",
 
         $(".areas.menu", this.element).on("change", "input", function(event) {
             var areaId = $(event.target).data("area-id");
-            self.view.setAreaVisible(self.areas[areaId], event.target.checked);
+            if (areaId) {
+                self.view.setAreaVisible(self.areas[areaId], event.target.checked);
+            }
         });
 
         $(".plot.altitude", this.element).on("click", function() {
@@ -96,6 +98,11 @@ define(["controller", "admin/map.model", "admin/map.view", "admin/portaleditor",
 
         $(".plot.playerdeath", this.element).on("click", function() {
             self.plotStats("playerdeath");
+        });
+
+        $("#toggle-z-restriction,.z-restriction", this.element).on("change", function(event) {
+            var isChecked = $("#toggle-z-restriction", this.element).prop("checked");
+            self.view.setZRestriction(isChecked ? $(".z-restriction").val() : null);
         });
 
         $(".close", this.element).on("click", function() {
@@ -257,15 +264,10 @@ define(["controller", "admin/map.model", "admin/map.view", "admin/portaleditor",
 
     MapEditor.prototype.updateAreas = function() {
 
-        this.areas = this.model.areas;
-        if (this.areas.isEmpty()) {
-            $(".areas.menu", this.element).hide();
-        } else {
-            $(".areas.menu", this.element).show();
-        }
-
         var menuContent = $(".areas.menu-content", this.element);
         menuContent.html("");
+
+        this.areas = this.model.areas;
         for (var id in this.areas) {
             var area = this.areas[id];
             menuContent.append(
