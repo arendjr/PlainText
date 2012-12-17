@@ -16,6 +16,12 @@ GAME MECHANICS
      -  spells
      -  unread
 
+MAP EDITOR
+
+  -  Implement export to PNG.
+  -  Add printing support.
+  -  Add support for terrain types.
+
 TECHNOLOGY
 
   -  Migrate to Qt5 after release.
