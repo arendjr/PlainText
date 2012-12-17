@@ -53,6 +53,8 @@ Features
 Community
 ---------
 
+Follow updates on the official PlainText blog: http://plaintext-mud.blogspot.com/
+
 If you have questions, or just want to discuss anything related to the PlainText
 engine, please join us at one of the following forums:
 
