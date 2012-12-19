@@ -68,9 +68,41 @@ define(["zepto"], function($) {
 
         socket = new WebSocket("ws://" + document.location.hostname + ":4802");
 
+        correctScrollbars();
+
         attachListeners();
 
         setFocus();
+    }
+
+    function correctScrollbars() {
+
+        var scrollDiv = document.createElement("div");
+        scrollDiv.setAttribute("style", "width: 100px; height: 100px; " +
+                                        "overflow: scroll; position: absolute; top: -9999px");
+        document.body.appendChild(scrollDiv);
+
+        var scrollbarWidth = scrollDiv.offsetWidth - scrollDiv.clientWidth;
+
+        document.body.removeChild(scrollDiv);
+
+        if (scrollbarWidth === 0) {
+            return;
+        }
+
+        var styleSheets = document.styleSheets;
+        for (var i = 0, length = styleSheets.length; i < length; i++) {
+            var styleSheet = styleSheets[i];
+            for (var j = 0, numRules = styleSheet.cssRules.length; j < numRules; j++) {
+                var cssRule = styleSheet.cssRules[j];
+                if (cssRule.selectorText === ".status-header, .screen, .command-input") {
+                    cssRule.style.width = (640 + scrollbarWidth) + "px";
+                    break;
+                }
+            }
+        }
+
+        $(".screen").css("overflow-y", "scroll");
     }
 
     function attachListeners() {
