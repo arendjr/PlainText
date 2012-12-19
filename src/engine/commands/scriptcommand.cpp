@@ -20,7 +20,7 @@ ScriptCommand::ScriptCommand(const QScriptValue &object, QObject *parent) :
         qDebug() << "Script command has no valid execute() method";
     }
 
-    setDescription(m_scriptCommand.property("description").call(m_scriptCommand).toString());
+    setDescription(m_scriptCommand.property("description").toString());
 }
 
 ScriptCommand::~ScriptCommand() {

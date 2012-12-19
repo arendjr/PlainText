@@ -8,11 +8,6 @@ function Command() {
     this.alias = "";
 }
 
-Command.prototype.description = function() {
-
-    return this.description;
-};
-
 Command.prototype.setDescription = function(description) {
 
     this.description = Util.processHighlights(description);
