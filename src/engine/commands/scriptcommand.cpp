@@ -3,7 +3,6 @@
 #include <QDebug>
 #include <QScriptValueList>
 
-#include "player.h"
 #include "realm.h"
 #include "scriptengine.h"
 
@@ -28,9 +27,9 @@ ScriptCommand::~ScriptCommand() {
 
 void ScriptCommand::execute(Player *player, const QString &command) {
 
-    ScriptEngine *engine = player->realm()->scriptEngine();
+    ScriptEngine *engine = ScriptEngine::instance();
     QScriptValueList arguments;
-    arguments.append(engine->toScriptValue(static_cast<GameObject *>(player)));
+    arguments.append(engine->toScriptValue<GameObject *>(player));
     arguments.append(command);
     m_scriptCommand.property("execute").call(m_scriptCommand, arguments);
     if (engine->hasUncaughtException()) {

@@ -40,6 +40,7 @@ void TestCase::initTestCase() {
 void TestCase::cleanupTestCase() {
 
     destroyTestWorld();
+    GameObject::clearPrototypeMap();
 
     delete m_engine;
 }

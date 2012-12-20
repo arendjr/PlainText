@@ -1,7 +1,7 @@
 function OpenCommand() {
     Command.call(this);
 
-    this.setDescription("Open an exit, typically a door or a window. Note that doors " +
+    this.setDescription("Open an exit, typically a door or a window. Note that doors may " +
                         "automatically close after a while.\n" +
                         "\n" +
                         "Example: open door");

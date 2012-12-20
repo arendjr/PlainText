@@ -119,7 +119,7 @@ class MovementTest : public TestCase {
                 QCOMPARE(evaluate("sounds.length").toInt32(), 0);
                 QCOMPARE(evaluate("visuals.length").toInt32(), 4);
                 QCOMPARE(evaluate("visuals[3]").toString(),
-                         QString("You see Arie walking north."));
+                         QString("You see Arie walking away from you."));
             }
 
             // the character's looking away from room A, still hearing most of the action

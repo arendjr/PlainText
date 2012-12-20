@@ -86,7 +86,7 @@ void CommandInterpreter::execute(Player *player, const QString &command) {
                 } else {
                     for (const QString &name : m_registry->adminCommandNames()) {
                         if (name.startsWith(commandName)) {
-                            commands << name;
+                            commands.append(name);
                         }
                     }
                 }
@@ -99,7 +99,7 @@ void CommandInterpreter::execute(Player *player, const QString &command) {
         } else {
             for (const QString &name : m_registry->commandNames()) {
                 if (name.startsWith(commandName)) {
-                    commands << name;
+                    commands.append(name);
                 }
             }
         }

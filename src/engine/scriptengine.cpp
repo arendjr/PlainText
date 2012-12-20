@@ -121,12 +121,12 @@ QScriptValue ScriptEngine::executeFunction(ScriptFunction &function,
 
 QScriptValue ScriptEngine::toScriptValue(GameObject *object) {
 
-    return m_jsEngine.toScriptValue(object);
+    return GameObject::toScriptValue(&m_jsEngine, object);
 }
 
 QScriptValue ScriptEngine::toScriptValue(const GameObjectPtr &object) {
 
-    return m_jsEngine.toScriptValue(object);
+    return GameObjectPtr::toScriptValue(&m_jsEngine, object);
 }
 
 void ScriptEngine::setGlobalObject(const char *name, QObject *object) {
