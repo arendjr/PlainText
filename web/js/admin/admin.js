@@ -55,7 +55,7 @@ define(["controller", "admin/mapeditor", "admin/propertyeditor", "zepto"],
 
                     propertyEditor.edit(data[propertyName], {
                         "onsave": function(value) {
-                            Controller.socket.send("set-prop #" + data.id + " " + propertyName +
+                            Controller.sendCommand("set-prop #" + data.id + " " + propertyName +
                                                    " " + value.replace(/\n/g, "\\n"));
                             propertyEditor.close();
                         },

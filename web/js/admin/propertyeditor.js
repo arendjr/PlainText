@@ -81,6 +81,10 @@ define(["codemirror/codemirror", "zepto"],
 
     PropertyEditor.prototype.save = function() {
 
+        if (this.editor === null) {
+            return;
+        }
+
         var value = this.editor.getValue();
 
         if (this.options.onsave) {

@@ -15,12 +15,12 @@ HelpCommand.prototype.execute = function(player, command) {
 
     var m = "";
 
-    if (hasWordsLeft()) {
-        var commandName = takeWord();
+    if (this.hasWordsLeft()) {
+        var commandName = this.takeWord();
 
         if (commandName === "commands") {
             var commandNames = CommandRegistry.commandNames().filter(function(commandName) {
-                return !commandName.startsWith("/");
+                return !commandName.startsWith("/") && commandName.length > 1;
             });
             m = "\nHere is a list of all the commands you can use:\n\n" +
                 Util.formatColumns(commandNames, Options.Highlighted) +

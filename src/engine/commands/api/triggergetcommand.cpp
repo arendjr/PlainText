@@ -18,7 +18,13 @@ void TriggerGetCommand::execute(Character *player, const QString &command) {
 
     super::prepareExecute(player, command);
 
-    GameObjectPtr object = realm()->getObject(GameObjectType::Unknown, takeWord().toInt());
+    GameObjectPtr object;
+    if (peekWord().toInt()) {
+        object = realm()->getObject(GameObjectType::Unknown, takeWord().toInt());
+    } else {
+        object = takeObject(currentRoom()->characters() + currentRoom()->items());
+    }
+
     if (object.isNull()) {
         sendError(404, "Object not found");
         return;
