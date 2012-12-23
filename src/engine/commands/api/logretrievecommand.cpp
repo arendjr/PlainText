@@ -1,6 +1,7 @@
 #include "logretrievecommand.h"
 
 #include "diskutil.h"
+#include "player.h"
 #include "retrievestatslogmessage.h"
 #include "realm.h"
 #include "util.h"
@@ -17,9 +18,14 @@ LogRetrieveCommand::LogRetrieveCommand(QObject *parent) :
 LogRetrieveCommand::~LogRetrieveCommand() {
 }
 
-void LogRetrieveCommand::execute(Player *player, const QString &command) {
+void LogRetrieveCommand::execute(Character *character, const QString &command) {
 
-    super::prepareExecute(player, command);
+    super::prepareExecute(character, command);
+
+    if (!character->isPlayer()) {
+        sendError(403, "Only players may retrieve logs");
+        return;
+    }
 
     if (takeWord() != "stats") {
         sendError(400, "First argument should be stats");
@@ -34,6 +40,7 @@ void LogRetrieveCommand::execute(Player *player, const QString &command) {
         return;
     }
 
+    Player *player = qobject_cast<Player *>(character);
     Realm::instance()->enqueueLogMessage(new RetrieveStatsLogMessage(player, requestId(),
                                                                      statsType, numDays));
 }

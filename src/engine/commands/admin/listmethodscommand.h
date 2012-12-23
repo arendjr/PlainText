@@ -12,7 +12,7 @@ class ListMethodsCommand : public AdminCommand {
         ListMethodsCommand(QObject *parent = 0);
         virtual ~ListMethodsCommand();
 
-        virtual void execute(Player *player, const QString &command);
+        virtual void execute(Character *character, const QString &command);
 };
 
 #endif // LISTMETHODSCOMMAND_H

@@ -35,7 +35,6 @@ SOURCES += \
     engine/vector3d.cpp \
     engine/commands/command.cpp \
     engine/commands/gocommand.cpp \
-    engine/commands/helpcommand.cpp \
     engine/commands/scriptcommand.cpp \
     engine/commands/admin/addcharactercommand.cpp \
     engine/commands/admin/addcontainercommand.cpp \
@@ -149,7 +148,6 @@ HEADERS += \
     engine/vector3d.h \
     engine/commands/command.h \
     engine/commands/gocommand.h \
-    engine/commands/helpcommand.h \
     engine/commands/scriptcommand.h \
     engine/commands/admin/addcharactercommand.h \
     engine/commands/admin/addcontainercommand.h \
@@ -249,6 +247,7 @@ OTHER_FILES += \
     ../data/commands/givecommand.js \
     ../data/commands/groupcommand.js \
     ../data/commands/gtalkcommand.js \
+    ../data/commands/helpcommand.js \
     ../data/commands/inventorycommand.js \
     ../data/commands/killcommand.js \
     ../data/commands/lookcommand.js \

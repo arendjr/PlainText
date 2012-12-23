@@ -14,7 +14,7 @@ ObjectDeleteCommand::ObjectDeleteCommand(QObject *parent) :
 ObjectDeleteCommand::~ObjectDeleteCommand() {
 }
 
-void ObjectDeleteCommand::execute(Player *player, const QString &command) {
+void ObjectDeleteCommand::execute(Character *player, const QString &command) {
 
     super::prepareExecute(player, command);
 

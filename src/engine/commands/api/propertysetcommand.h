@@ -10,7 +10,7 @@ class PropertySetCommand : public ApiCommand {
         PropertySetCommand(QObject *parent = 0);
         virtual ~PropertySetCommand();
 
-        virtual void execute(Player *player, const QString &command);
+        virtual void execute(Character *character, const QString &command);
 };
 
 #endif // PROPERTYSETCOMMAND_H

@@ -17,7 +17,7 @@ ReloadScriptsCommand::ReloadScriptsCommand(QObject *parent) :
 ReloadScriptsCommand::~ReloadScriptsCommand() {
 }
 
-void ReloadScriptsCommand::execute(Player *player, const QString &command) {
+void ReloadScriptsCommand::execute(Character *player, const QString &command) {
 
     super::prepareExecute(player, command);
 

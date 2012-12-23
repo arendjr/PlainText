@@ -12,7 +12,7 @@ class ObjectDeleteCommand : public ApiCommand {
         ObjectDeleteCommand(QObject *parent = 0);
         virtual ~ObjectDeleteCommand();
 
-        virtual void execute(Player *player, const QString &command);
+        virtual void execute(Character *character, const QString &command);
 };
 
 #endif // OBJECTDELETECOMMAND_H

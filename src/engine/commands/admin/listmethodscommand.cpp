@@ -19,7 +19,7 @@ ListMethodsCommand::ListMethodsCommand(QObject *parent) :
 ListMethodsCommand::~ListMethodsCommand() {
 }
 
-void ListMethodsCommand::execute(Player *player, const QString &command) {
+void ListMethodsCommand::execute(Character *player, const QString &command) {
 
     super::prepareExecute(player, command);
 

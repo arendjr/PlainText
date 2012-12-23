@@ -16,7 +16,7 @@ TriggersListCommand::TriggersListCommand(QObject *parent) :
 TriggersListCommand::~TriggersListCommand() {
 }
 
-void TriggersListCommand::execute(Player *player, const QString &command) {
+void TriggersListCommand::execute(Character *player, const QString &command) {
 
     super::prepareExecute(player, command);
 

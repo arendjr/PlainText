@@ -17,7 +17,7 @@ GetPropCommand::GetPropCommand(QObject *parent) :
 GetPropCommand::~GetPropCommand() {
 }
 
-void GetPropCommand::execute(Player *player, const QString &command) {
+void GetPropCommand::execute(Character *player, const QString &command) {
 
     super::prepareExecute(player, command);
 

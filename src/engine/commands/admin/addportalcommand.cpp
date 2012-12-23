@@ -34,7 +34,7 @@ AddPortalCommand::AddPortalCommand(QObject *parent) :
 AddPortalCommand::~AddPortalCommand() {
 }
 
-void AddPortalCommand::execute(Player *player, const QString &command) {
+void AddPortalCommand::execute(Character *player, const QString &command) {
 
     super::prepareExecute(player, command);
 

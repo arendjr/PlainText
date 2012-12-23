@@ -16,7 +16,7 @@ AddItemCommand::AddItemCommand(QObject *parent) :
 AddItemCommand::~AddItemCommand() {
 }
 
-void AddItemCommand::execute(Player *player, const QString &command) {
+void AddItemCommand::execute(Character *player, const QString &command) {
 
     super::prepareExecute(player, command);
 

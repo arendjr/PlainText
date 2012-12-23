@@ -3,7 +3,6 @@
 #include <QCryptographicHash>
 #include <QDebug>
 
-#include "commandinterpreter.h"
 #include "exit.h"
 #include "realm.h"
 #include "room.h"
@@ -116,30 +115,6 @@ void Player::send(const QString &_message, int color) const {
     }
 
     m_session->send(message);
-}
-
-void Player::sendSellableItemsList(const GameObjectPtrList &items) {
-
-    if (!m_session) {
-        return;
-    }
-
-    try {
-        QString message;
-        for (const GameObjectPtr &item : items) {
-            message += QString("  %1$%3\n")
-                       .arg(item->name().leftJustified(30))
-                       .arg(item.cast<Item *>()->cost());
-        }
-        m_session->send(message);
-    } catch (GameException &exception) {
-        qDebug() << "Exception in Player::sendSellableItemsList(): " << exception.what();
-    }
-}
-
-void Player::execute(const QString &command) {
-
-    realm()->commandInterpreter()->execute(this, command);
 }
 
 void Player::quit() {

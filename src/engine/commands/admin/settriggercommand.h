@@ -12,7 +12,7 @@ class SetTriggerCommand : public AdminCommand {
         SetTriggerCommand(QObject *parent = 0);
         virtual ~SetTriggerCommand();
 
-        virtual void execute(Player *player, const QString &command);
+        virtual void execute(Character *character, const QString &command);
 };
 
 #endif // SETTRIGGERCOMMAND_H

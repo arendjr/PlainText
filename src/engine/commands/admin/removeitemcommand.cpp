@@ -14,7 +14,7 @@ RemoveItemCommand::RemoveItemCommand(QObject *parent) :
 RemoveItemCommand::~RemoveItemCommand() {
 }
 
-void RemoveItemCommand::execute(Player *player, const QString &command) {
+void RemoveItemCommand::execute(Character *player, const QString &command) {
 
     super::prepareExecute(player, command);
     if (!assertWordsLeft("Usage: remove-item <item-name> [#]")) {

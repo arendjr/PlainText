@@ -12,7 +12,6 @@
 #include "player.h"
 #include "util.h"
 #include "commands/gocommand.h"
-#include "commands/helpcommand.h"
 #include "commands/scriptcommand.h"
 #include "commands/admin/addcharactercommand.h"
 #include "commands/admin/addcontainercommand.h"
@@ -56,7 +55,6 @@ CommandRegistry::CommandRegistry(QObject *parent) :
 
     m_commands.insert("enter", go);
     m_commands.insert("go", go);
-    m_commands.insert("help", new HelpCommand(this));
 
     m_adminCommands.insert("add-character", new AddCharacterCommand(this));
     m_adminCommands.insert("add-container", new AddContainerCommand(this));

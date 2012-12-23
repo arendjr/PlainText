@@ -7,7 +7,6 @@
 
 
 class Command;
-class Player;
 class QScriptValue;
 
 class CommandRegistry : public QObject {
@@ -22,22 +21,23 @@ class CommandRegistry : public QObject {
         Q_INVOKABLE void registerCommand(const QString &commandName, const QScriptValue &object);
 
         void registerAdminCommand(const QString &commandName, Command *command);
-        Q_INVOKABLE void registerAdminCommand(const QString &commandName, const QScriptValue &object);
+        Q_INVOKABLE void registerAdminCommand(const QString &commandName,
+                                              const QScriptValue &object);
 
-        QStringList commandNames() const { return m_commands.keys(); }
-        bool contains(const QString &commandName) const;
+        Q_INVOKABLE QStringList commandNames() const { return m_commands.keys(); }
+        Q_INVOKABLE bool contains(const QString &commandName) const;
         Command *command(const QString &commandName) const;
-        QString description(const QString &commandName) const;
+        Q_INVOKABLE QString description(const QString &commandName) const;
 
-        QStringList adminCommandNames() const { return m_adminCommands.keys(); }
-        bool adminCommandsContains(const QString &commandName) const;
+        Q_INVOKABLE QStringList adminCommandNames() const { return m_adminCommands.keys(); }
+        Q_INVOKABLE bool adminCommandsContains(const QString &commandName) const;
         Command *adminCommand(const QString &commandName) const;
-        QString adminCommandDescription(const QString &commandName) const;
+        Q_INVOKABLE QString adminCommandDescription(const QString &commandName) const;
 
-        QStringList apiCommandNames() const { return m_apiCommands.keys(); }
-        bool apiCommandsContains(const QString &commandName) const;
+        Q_INVOKABLE QStringList apiCommandNames() const { return m_apiCommands.keys(); }
+        Q_INVOKABLE bool apiCommandsContains(const QString &commandName) const;
         Command *apiCommand(const QString &commandName) const;
-        QString apiCommandDescription(const QString &commandName) const;
+        Q_INVOKABLE QString apiCommandDescription(const QString &commandName) const;
 
     private:
         QMap<QString, Command *> m_commands;

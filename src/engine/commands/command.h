@@ -5,10 +5,10 @@
 #include <QPair>
 #include <QStringList>
 
+#include "character.h"
 #include "constants.h"
 #include "room.h"
 #include "gameobjectptr.h"
-#include "player.h"
 
 
 class QRegExp;
@@ -31,16 +31,19 @@ class Command : public QObject {
         const QString &description() const { return m_description; }
         void setDescription(const QString &description);
 
-        virtual void execute(Player *player, const QString &command) = 0;
+        virtual void execute(Character *character, const QString &command) = 0;
 
     protected:
-        virtual void prepareExecute(Player *player, const QString &command);
+        virtual void prepareExecute(Character *character, const QString &command);
 
-        inline Player *player() const { return m_player; }
-        inline Room *currentRoom() const { return m_player->currentRoom().cast<Room *>(); }
-        inline Realm *realm() const { return m_player->realm(); }
+        inline Character *character() const { return m_character; }
+        inline Room *currentRoom() const { return m_character->currentRoom().cast<Room *>(); }
+        inline Realm *realm() const { return m_character->realm(); }
         inline const QString &alias() const { return m_alias; }
 
+        virtual void setCommand(const QString &command);
+
+        void setWords(const QStringList &words);
         void prependWord(const QString &word);
         void appendWord(const QString &word);
 
@@ -70,18 +73,16 @@ class Command : public QObject {
                            const QString &tooFewText,
                            const QString &tooManyText);
 
-        inline void send(const QString &message) { m_player->send(message); }
+        inline void send(const QString &message) { m_character->send(message); }
         void send(const QString &message, const QString &arg1);
         void send(const QString &message, const QString &arg1, const QString &arg2);
 
     private:
-        void setPlayer(Player *player);
-
-        void setCommand(const QString &command);
+        void setCharacter(Character *character);
 
         QString m_description;
 
-        Player *m_player;
+        Character *m_character;
 
         QStringList m_words;
 

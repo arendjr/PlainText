@@ -18,7 +18,7 @@ SetPropCommand::SetPropCommand(QObject *parent) :
 SetPropCommand::~SetPropCommand() {
 }
 
-void SetPropCommand::execute(Player *player, const QString &command) {
+void SetPropCommand::execute(Character *player, const QString &command) {
 
     super::prepareExecute(player, command);
 
@@ -94,5 +94,16 @@ void SetPropCommand::execute(Player *player, const QString &command) {
                                                                   object->name(),
                                                                   object->plural()));
         }
+    }
+}
+
+void SetPropCommand::setCommand(const QString &command) {
+
+    static QRegExp whitespace("\\s+");
+
+    if (command.contains(" description ")) {
+        setWords(command.split(whitespace));
+    } else {
+        super::setCommand(command);
     }
 }

@@ -15,7 +15,7 @@ class ApiCommand : public AdminCommand {
         const QString &requestId() const { return m_requestId; }
 
     protected:
-        virtual void prepareExecute(Player *player, const QString &command);
+        virtual void prepareExecute(Character *character, const QString &command);
 
         void sendReply(const QVariant &variant);
         void sendError(int errorCode, const QString &errorMessage);

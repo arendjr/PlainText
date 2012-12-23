@@ -12,7 +12,7 @@ class ListPropsCommand : public AdminCommand {
         ListPropsCommand(QObject *parent = 0);
         virtual ~ListPropsCommand();
 
-        virtual void execute(Player *player, const QString &command);
+        virtual void execute(Character *character, const QString &command);
 };
 
 #endif // LISTPROPSCOMMAND_H

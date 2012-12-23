@@ -134,6 +134,8 @@ class Character : public StatsItem {
 
         Q_INVOKABLE int secondsStunned() const { return m_secondsStunned; }
 
+        Q_INVOKABLE void execute(const QString &command);
+
         Q_INVOKABLE void setLeaveOnActive(bool leaveOnActive);
 
         Q_INVOKABLE virtual void init();

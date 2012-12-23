@@ -16,7 +16,7 @@ CopyItemCommand::CopyItemCommand(QObject *parent) :
 CopyItemCommand::~CopyItemCommand() {
 }
 
-void CopyItemCommand::execute(Player *player, const QString &command) {
+void CopyItemCommand::execute(Character *player, const QString &command) {
 
     super::prepareExecute(player, command);
 

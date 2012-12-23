@@ -4,8 +4,8 @@
 #include <QObject>
 
 
+class Character;
 class CommandRegistry;
-class Player;
 
 class CommandInterpreter : public QObject {
 
@@ -17,7 +17,7 @@ class CommandInterpreter : public QObject {
 
         void setRegistry(CommandRegistry *registry);
 
-        void execute(Player *player, const QString &command);
+        void execute(Character *character, const QString &command);
 
     private:
         CommandRegistry *m_registry;

@@ -16,7 +16,7 @@ AddContainerCommand::AddContainerCommand(QObject *parent) :
 AddContainerCommand::~AddContainerCommand() {
 }
 
-void AddContainerCommand::execute(Player *player, const QString &command) {
+void AddContainerCommand::execute(Character *player, const QString &command) {
 
     super::prepareExecute(player, command);
 

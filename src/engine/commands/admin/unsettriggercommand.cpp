@@ -14,7 +14,7 @@ UnsetTriggerCommand::UnsetTriggerCommand(QObject *parent) :
 UnsetTriggerCommand::~UnsetTriggerCommand() {
 }
 
-void UnsetTriggerCommand::execute(Player *player, const QString &command) {
+void UnsetTriggerCommand::execute(Character *player, const QString &command) {
 
     super::prepareExecute(player, command);
 

@@ -25,11 +25,11 @@ ScriptCommand::ScriptCommand(const QScriptValue &object, QObject *parent) :
 ScriptCommand::~ScriptCommand() {
 }
 
-void ScriptCommand::execute(Player *player, const QString &command) {
+void ScriptCommand::execute(Character *character, const QString &command) {
 
     ScriptEngine *engine = ScriptEngine::instance();
     QScriptValueList arguments;
-    arguments.append(engine->toScriptValue<GameObject *>(player));
+    arguments.append(engine->toScriptValue<GameObject *>(character));
     arguments.append(command);
     m_scriptCommand.property("execute").call(m_scriptCommand, arguments);
     if (engine->hasUncaughtException()) {

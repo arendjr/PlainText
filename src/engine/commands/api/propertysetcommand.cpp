@@ -15,7 +15,7 @@ PropertySetCommand::PropertySetCommand(QObject *parent) :
 PropertySetCommand::~PropertySetCommand() {
 }
 
-void PropertySetCommand::execute(Player *player, const QString &command) {
+void PropertySetCommand::execute(Character *player, const QString &command) {
 
     super::prepareExecute(player, command);
 

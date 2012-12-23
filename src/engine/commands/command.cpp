@@ -20,12 +20,39 @@ void Command::setDescription(const QString &description) {
     m_description = Util::processHighlights(description);
 }
 
-void Command::prepareExecute(Player *player, const QString &command) {
+void Command::prepareExecute(Character *player, const QString &command) {
 
-    setPlayer(player);
+    setCharacter(player);
     setCommand(command);
 
     m_alias = takeWord();
+}
+
+void Command::setCommand(const QString &command) {
+
+    static QRegExp whitespace("\\s+");
+
+    m_words = command.split(whitespace);
+
+    for (int i = 0; i < m_words.length(); i++) {
+        QString word = m_words[i];
+        if (word.startsWith("\"")) {
+            while (i < m_words.length() - 1 && !word.endsWith("\"")) {
+                word += " " + m_words[i + 1];
+                m_words.removeAt(i);
+            }
+            if (word.endsWith("\"")) {
+                m_words[i] = word.mid(1, word.length() - 2);
+            } else {
+                m_words[i] = word.mid(1);
+            }
+        }
+    }
+}
+
+void Command::setWords(const QStringList &words) {
+
+    m_words = words;
 }
 
 void Command::prependWord(const QString &word) {
@@ -41,7 +68,7 @@ void Command::appendWord(const QString &word) {
 bool Command::assertWordsLeft(const QString &noneLeftText) {
 
     if (!hasWordsLeft()) {
-        m_player->send(noneLeftText);
+        m_character->send(noneLeftText);
         return false;
     } else {
         return true;
@@ -192,7 +219,7 @@ GameObjectPtrList Command::objectsByDescription(const ObjectDescription &descrip
 bool Command::requireSome(const GameObjectPtr &object, const QString &tooFewText) {
 
     if (object.isNull()) {
-        m_player->send(tooFewText);
+        m_character->send(tooFewText);
         return false;
     } else {
         return true;
@@ -203,7 +230,7 @@ bool Command::requireSome(const GameObjectPtrList &objects,
                           const QString &tooFewText) {
 
     if (objects.length() == 0) {
-        m_player->send(tooFewText);
+        m_character->send(tooFewText);
         return false;
     } else {
         return true;
@@ -215,10 +242,10 @@ bool Command::requireUnique(const GameObjectPtrList &objects,
                             const QString &tooManyText) {
 
     if (objects.length() == 0) {
-        m_player->send(tooFewText);
+        m_character->send(tooFewText);
         return false;
     } else if (objects.length() > 1) {
-        m_player->send(tooManyText);
+        m_character->send(tooManyText);
         return false;
     } else {
         return true;
@@ -235,54 +262,7 @@ void Command::send(const QString &message, const QString &arg1, const QString &a
     send(QString(message).arg(arg1, arg2));
 }
 
-void Command::setPlayer(Player *player) {
+void Command::setCharacter(Character *character) {
 
-    m_player = player;
-}
-
-void Command::setCommand(const QString &_command) {
-
-    static QRegExp whitespace("\\s+");
-
-    QString command = _command.trimmed();
-    m_words = command.split(whitespace);
-
-    if (m_player->isAdmin()) {
-        if (command.startsWith("exec-script ")) {
-            m_words.clear();
-            m_words << command.section(whitespace, 0, 0);
-            m_words << command.section(whitespace, 1);
-            return;
-        } else if (command.startsWith("api-trigger-set ")) {
-            m_words.clear();
-            m_words << command.section(whitespace, 0, 0);
-            m_words << command.section(whitespace, 1, 1);
-            m_words << command.section(whitespace, 2, 2);
-            m_words << command.section(whitespace, 3, 3);
-            if (m_words.last().toInt() > 0) {
-                m_words << command.section(whitespace, 4, 4);
-                m_words << command.section(whitespace, 5);
-            } else {
-                m_words << command.section(whitespace, 4);
-            }
-            return;
-        } else if (command.startsWith("set-prop ") && command.contains(" description ")) {
-            return;
-        }
-    }
-
-    for (int i = 0; i < m_words.length(); i++) {
-        QString word = m_words[i];
-        if (word.startsWith("\"")) {
-            while (i < m_words.length() - 1 && !word.endsWith("\"")) {
-                word += " " + m_words[i + 1];
-                m_words.removeAt(i);
-            }
-            if (word.endsWith("\"")) {
-                m_words[i] = word.mid(1, word.length() - 2);
-            } else {
-                m_words[i] = word.mid(1);
-            }
-        }
-    }
+    m_character = character;
 }

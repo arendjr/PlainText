@@ -12,7 +12,7 @@ class ReloadScriptsCommand : public AdminCommand {
         ReloadScriptsCommand(QObject *parent = 0);
         virtual ~ReloadScriptsCommand();
 
-        virtual void execute(Player *player, const QString &command);
+        virtual void execute(Character *character, const QString &command);
 };
 
 #endif // RELOADSCRIPTSCOMMAND_H

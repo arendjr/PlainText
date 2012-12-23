@@ -12,7 +12,7 @@ class AddWeaponCommand : public AdminCommand {
         AddWeaponCommand(QObject *parent = 0);
         virtual ~AddWeaponCommand();
 
-        virtual void execute(Player *player, const QString &command);
+        virtual void execute(Character *character, const QString &command);
 };
 
 #endif // ADDWEAPONCOMMAND_H

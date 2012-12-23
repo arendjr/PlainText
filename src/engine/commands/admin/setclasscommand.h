@@ -12,7 +12,7 @@ class SetClassCommand : public AdminCommand {
         SetClassCommand(QObject *parent = 0);
         virtual ~SetClassCommand();
 
-        virtual void execute(Player *player, const QString &command);
+        virtual void execute(Character *character, const QString &command);
 };
 
 #endif // SETCLASSCOMMAND_H

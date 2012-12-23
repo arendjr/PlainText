@@ -17,7 +17,7 @@ SetRaceCommand::SetRaceCommand(QObject *parent) :
 SetRaceCommand::~SetRaceCommand() {
 }
 
-void SetRaceCommand::execute(Player *player, const QString &command) {
+void SetRaceCommand::execute(Character *player, const QString &command) {
 
     super::prepareExecute(player, command);
 

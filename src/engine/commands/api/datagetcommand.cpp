@@ -15,7 +15,7 @@ DataGetCommand::DataGetCommand(QObject *parent) :
 DataGetCommand::~DataGetCommand() {
 }
 
-void DataGetCommand::execute(Player *player, const QString &command) {
+void DataGetCommand::execute(Character *player, const QString &command) {
 
     super::prepareExecute(player, command);
 

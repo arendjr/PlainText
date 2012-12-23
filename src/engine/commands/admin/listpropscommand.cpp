@@ -17,7 +17,7 @@ ListPropsCommand::ListPropsCommand(QObject *parent) :
 ListPropsCommand::~ListPropsCommand() {
 }
 
-void ListPropsCommand::execute(Player *player, const QString &command) {
+void ListPropsCommand::execute(Character *player, const QString &command) {
 
     super::prepareExecute(player, command);
 

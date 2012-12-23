@@ -12,7 +12,7 @@ class AddContainerCommand : public AdminCommand {
         AddContainerCommand(QObject *parent = 0);
         virtual ~AddContainerCommand();
 
-        virtual void execute(Player *player, const QString &command);
+        virtual void execute(Character *character, const QString &command);
 };
 
 #endif // ADDCONTAINERCOMMAND_H

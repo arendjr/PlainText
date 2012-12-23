@@ -16,7 +16,7 @@ AddShieldCommand::AddShieldCommand(QObject *parent) :
 AddShieldCommand::~AddShieldCommand() {
 }
 
-void AddShieldCommand::execute(Player *player, const QString &command) {
+void AddShieldCommand::execute(Character *player, const QString &command) {
 
     super::prepareExecute(player, command);
 

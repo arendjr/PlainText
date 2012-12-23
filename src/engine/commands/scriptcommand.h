@@ -14,7 +14,7 @@ class ScriptCommand : public Command {
         ScriptCommand(const QScriptValue &object, QObject *parent = 0);
         virtual ~ScriptCommand();
 
-        virtual void execute(Player *player, const QString &command);
+        virtual void execute(Character *character, const QString &command);
 
     private:
         QScriptValue m_scriptCommand;

@@ -16,7 +16,7 @@ GoCommand::GoCommand(QObject *parent) :
 GoCommand::~GoCommand() {
 }
 
-void GoCommand::execute(Player *player, const QString &command) {
+void GoCommand::execute(Character *player, const QString &command) {
 
     super::prepareExecute(player, command);
 

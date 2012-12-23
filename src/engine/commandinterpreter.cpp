@@ -27,14 +27,15 @@ void CommandInterpreter::setRegistry(CommandRegistry *registry) {
     m_registry = registry;
 }
 
-void CommandInterpreter::execute(Player *player, const QString &command) {
+void CommandInterpreter::execute(Character *character, const QString &_command) {
 
     static QRegExp whitespace("\\s+");
 
     try {
-        LogUtil::logCommand(player->name(), command);
+        QString command = _command.trimmed();
+        LogUtil::logCommand(character->name(), command);
 
-        QStringList words = command.trimmed().split(whitespace);
+        QStringList words = command.split(whitespace);
         QString commandName = words[0].toLower();
         if (commandName.isEmpty()) {
             return;
@@ -46,14 +47,14 @@ void CommandInterpreter::execute(Player *player, const QString &command) {
         }
         if (Util::isDirection(commandName)) {
             words.prepend("go");
-            m_registry->command("go")->execute(player, words.join(" "));
+            m_registry->command("go")->execute(character, words.join(" "));
             return;
         } else {
-            Room *currentRoom = player->currentRoom().cast<Room *>();
+            Room *currentRoom = character->currentRoom().cast<Room *>();
             bool matchedPortal = false;
             for (const GameObjectPtr &portalPtr : currentRoom->portals()) {
                 Portal *portal = portalPtr.cast<Portal *>();
-                QString portalName = portal->nameFromRoom(player->currentRoom());
+                QString portalName = portal->nameFromRoom(character->currentRoom());
                 if (portalName == commandName) {
                     matchedPortal = true;
                 } else {
@@ -66,22 +67,33 @@ void CommandInterpreter::execute(Player *player, const QString &command) {
             }
             if (matchedPortal) {
                 words.prepend("go");
-                m_registry->command("go")->execute(player, words.join(" "));
+                m_registry->command("go")->execute(character, words.join(" "));
                 return;
             }
         }
 
         QStringList commands;
 
-        if (player->isAdmin()) {
+        if (m_registry->contains(commandName)) {
+            m_registry->command(commandName)->execute(character, command);
+            return;
+        } else {
+            for (const QString &name : m_registry->commandNames()) {
+                if (name.startsWith(commandName)) {
+                    commands.append(name);
+                }
+            }
+        }
+
+        if (character->isPlayer() && qobject_cast<Player *>(character)->isAdmin()) {
             if (commandName.startsWith("api-")) {
                 if (m_registry->apiCommandsContains(commandName)) {
-                    m_registry->apiCommand(commandName)->execute(player, command);
+                    m_registry->apiCommand(commandName)->execute(character, command);
                     return;
                 }
             } else {
                 if (m_registry->adminCommandsContains(commandName)) {
-                    m_registry->adminCommand(commandName)->execute(player, command);
+                    m_registry->adminCommand(commandName)->execute(character, command);
                     return;
                 } else {
                     for (const QString &name : m_registry->adminCommandNames()) {
@@ -93,38 +105,33 @@ void CommandInterpreter::execute(Player *player, const QString &command) {
             }
         }
 
-        if (m_registry->contains(commandName)) {
-            m_registry->command(commandName)->execute(player, command);
-            return;
-        } else {
-            for (const QString &name : m_registry->commandNames()) {
-                if (name.startsWith(commandName)) {
-                    commands.append(name);
-                }
-            }
-        }
-
         if (commands.length() == 1) {
             commandName = commands[0];
             if (m_registry->contains(commandName)) {
-                m_registry->command(commandName)->execute(player, command);
+                m_registry->command(commandName)->execute(character, command);
             } else if (m_registry->adminCommandsContains(commandName)) {
-                m_registry->adminCommand(commandName)->execute(player, command);
+                m_registry->adminCommand(commandName)->execute(character, command);
             }
         } else if (commands.length() > 1) {
-            player->send("Command is not unique.");
+            character->send("Command is not unique.");
         } else {
-            player->send(QString("Command \"%1\" does not exist.").arg(words[0]));
+            character->send(QString("Command \"%1\" does not exist.").arg(words[0]));
         }
     } catch (GameException &exception) {
-        player->send(QString("Executing the command gave an exception: %1").arg(exception.what()));
-        if (!player->isAdmin()) {
-            player->send("This is not good. You may want to contact a game admin about this.");
+        if (character->isPlayer()) {
+            Player *player = qobject_cast<Player *>(character);
+            player->send(QString("Executing the command gave an exception: ") + exception.what());
+            if (!player->isAdmin()) {
+                player->send("This is not good. You may want to contact a game admin about this.");
+            }
         }
     } catch (...) {
-        player->send("Executing the command gave an unknown exception.");
-        if (!player->isAdmin()) {
-            player->send("This is not good. You may want to contact a game admin about this.");
+        if (character->isPlayer()) {
+            Player *player = qobject_cast<Player *>(character);
+            player->send("Executing the command gave an unknown exception.");
+            if (!player->isAdmin()) {
+                player->send("This is not good. You may want to contact a game admin about this.");
+            }
         }
     }
 }

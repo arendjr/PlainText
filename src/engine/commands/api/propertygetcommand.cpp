@@ -15,7 +15,7 @@ PropertyGetCommand::PropertyGetCommand(QObject *parent) :
 PropertyGetCommand::~PropertyGetCommand() {
 }
 
-void PropertyGetCommand::execute(Player *player, const QString &command) {
+void PropertyGetCommand::execute(Character *player, const QString &command) {
 
     super::prepareExecute(player, command);
 

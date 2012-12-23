@@ -13,7 +13,7 @@ ApiCommand::ApiCommand(QObject *parent) :
 ApiCommand::~ApiCommand() {
 }
 
-void ApiCommand::prepareExecute(Player *player, const QString &command) {
+void ApiCommand::prepareExecute(Character *player, const QString &command) {
 
     super::prepareExecute(player, command);
 

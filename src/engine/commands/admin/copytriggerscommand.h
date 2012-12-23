@@ -12,7 +12,7 @@ class CopyTriggersCommand : public AdminCommand {
         CopyTriggersCommand(QObject *parent = 0);
         virtual ~CopyTriggersCommand();
 
-        virtual void execute(Player *player, const QString &command);
+        virtual void execute(Character *character, const QString &command);
 };
 
 #endif // COPYTRIGGERSCOMMAND_H

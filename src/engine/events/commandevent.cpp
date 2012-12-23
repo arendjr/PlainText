@@ -5,7 +5,7 @@
 #include "player.h"
 
 
-CommandEvent::CommandEvent(Player *player, const QString &command) :
+CommandEvent::CommandEvent(Character *player, const QString &command) :
     Event(),
     m_player(player),
     m_command(command) {

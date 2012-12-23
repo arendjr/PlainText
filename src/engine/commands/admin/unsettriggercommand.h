@@ -12,7 +12,7 @@ class UnsetTriggerCommand : public AdminCommand {
         UnsetTriggerCommand(QObject *parent = 0);
         virtual ~UnsetTriggerCommand();
 
-        virtual void execute(Player *player, const QString &command);
+        virtual void execute(Character *character, const QString &command);
 };
 
 #endif // UNSETTRIGGERCOMMAND_H

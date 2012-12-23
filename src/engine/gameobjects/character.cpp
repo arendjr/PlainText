@@ -3,6 +3,7 @@
 #include <QDateTime>
 #include <QDebug>
 
+#include "commandinterpreter.h"
 #include "exit.h"
 #include "group.h"
 #include "logutil.h"
@@ -790,6 +791,11 @@ void Character::stun(int timeout) {
 
     m_secondsStunned = seconds;
     m_stunTimerId = realm()->startTimer(this, firstTimeout);
+}
+
+void Character::execute(const QString &command) {
+
+    realm()->commandInterpreter()->execute(this, command);
 }
 
 void Character::setLeaveOnActive(bool leaveOnActive) {

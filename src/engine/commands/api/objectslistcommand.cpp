@@ -16,7 +16,7 @@ ObjectsListCommand::ObjectsListCommand(QObject *parent) :
 ObjectsListCommand::~ObjectsListCommand() {
 }
 
-void ObjectsListCommand::execute(Player *player, const QString &command) {
+void ObjectsListCommand::execute(Character *player, const QString &command) {
 
     super::prepareExecute(player, command);
 

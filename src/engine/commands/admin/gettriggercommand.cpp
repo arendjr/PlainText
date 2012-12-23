@@ -18,7 +18,7 @@ GetTriggerCommand::GetTriggerCommand(QObject *parent) :
 GetTriggerCommand::~GetTriggerCommand() {
 }
 
-void GetTriggerCommand::execute(Player *player, const QString &command) {
+void GetTriggerCommand::execute(Character *player, const QString &command) {
 
     super::prepareExecute(player, command);
 

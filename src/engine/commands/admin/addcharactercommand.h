@@ -12,7 +12,7 @@ class AddCharacterCommand : public AdminCommand {
         AddCharacterCommand(QObject *parent = 0);
         virtual ~AddCharacterCommand();
 
-        virtual void execute(Player *player, const QString &command);
+        virtual void execute(Character *character, const QString &command);
 };
 
 #endif // ADDCHARACTERCOMMAND_H

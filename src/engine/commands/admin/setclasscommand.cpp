@@ -17,7 +17,7 @@ SetClassCommand::SetClassCommand(QObject *parent) :
 SetClassCommand::~SetClassCommand() {
 }
 
-void SetClassCommand::execute(Player *player, const QString &command) {
+void SetClassCommand::execute(Character *player, const QString &command) {
 
     super::prepareExecute(player, command);
 

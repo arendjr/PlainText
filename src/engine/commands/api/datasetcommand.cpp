@@ -15,7 +15,7 @@ DataSetCommand::DataSetCommand(QObject *parent) :
 DataSetCommand::~DataSetCommand() {
 }
 
-void DataSetCommand::execute(Player *player, const QString &command) {
+void DataSetCommand::execute(Character *player, const QString &command) {
 
     super::prepareExecute(player, command);
 

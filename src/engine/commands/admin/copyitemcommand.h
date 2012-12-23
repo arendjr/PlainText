@@ -12,7 +12,7 @@ class CopyItemCommand : public AdminCommand {
         CopyItemCommand(QObject *parent = 0);
         virtual ~CopyItemCommand();
 
-        virtual void execute(Player *player, const QString &command);
+        virtual void execute(Character *character, const QString &command);
 };
 
 #endif // COPYITEMCOMMAND_H

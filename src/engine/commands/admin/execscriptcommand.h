@@ -12,7 +12,10 @@ class ExecScriptCommand : public AdminCommand {
         ExecScriptCommand(QObject *parent = 0);
         virtual ~ExecScriptCommand();
 
-        virtual void execute(Player *player, const QString &command);
+        virtual void execute(Character *character, const QString &command);
+
+    protected:
+        virtual void setCommand(const QString &command);
 };
 
 #endif // EXECSCRIPTCOMMAND_H

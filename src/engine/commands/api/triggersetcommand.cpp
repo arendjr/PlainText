@@ -16,7 +16,7 @@ TriggerSetCommand::TriggerSetCommand(QObject *parent) :
 TriggerSetCommand::~TriggerSetCommand() {
 }
 
-void TriggerSetCommand::execute(Player *player, const QString &command) {
+void TriggerSetCommand::execute(Character *player, const QString &command) {
 
     super::prepareExecute(player, command);
 
@@ -54,4 +54,22 @@ void TriggerSetCommand::execute(Player *player, const QString &command) {
         send(QString("Respawn emulated for %1.")
              .arg(Util::highlight(QString("object #%1").arg(object->id()))));
     }
+}
+
+void TriggerSetCommand::setCommand(const QString &command) {
+
+    static QRegExp whitespace("\\s+");
+
+    QStringList words;
+    words.append(command.section(whitespace, 0, 0));
+    words.append(command.section(whitespace, 1, 1));
+    words.append(command.section(whitespace, 2, 2));
+    words.append(command.section(whitespace, 3, 3));
+    if (words.last().toInt() > 0) {
+        words.append(command.section(whitespace, 4, 4));
+        words.append(command.section(whitespace, 5));
+    } else {
+        words.append(command.section(whitespace, 4));
+    }
+    setWords(words);
 }

@@ -16,7 +16,7 @@ AddWeaponCommand::AddWeaponCommand(QObject *parent) :
 AddWeaponCommand::~AddWeaponCommand() {
 }
 
-void AddWeaponCommand::execute(Player *player, const QString &command) {
+void AddWeaponCommand::execute(Character *player, const QString &command) {
 
     super::prepareExecute(player, command);
 

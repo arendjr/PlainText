@@ -17,7 +17,7 @@ CopyTriggersCommand::CopyTriggersCommand(QObject *parent) :
 CopyTriggersCommand::~CopyTriggersCommand() {
 }
 
-void CopyTriggersCommand::execute(Player *player, const QString &command) {
+void CopyTriggersCommand::execute(Character *player, const QString &command) {
 
     super::prepareExecute(player, command);
 

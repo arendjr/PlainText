@@ -37,10 +37,6 @@ class Player : public Character {
 
         virtual void send(const QString &message, int color = Silver) const;
 
-        Q_INVOKABLE void sendSellableItemsList(const GameObjectPtrList &items);
-
-        Q_INVOKABLE void execute(const QString &command);
-
         Q_INVOKABLE void quit();
 
         Q_INVOKABLE virtual void invokeTimer(int timerId);

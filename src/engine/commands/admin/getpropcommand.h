@@ -12,7 +12,7 @@ class GetPropCommand : public AdminCommand {
         GetPropCommand(QObject *parent = 0);
         virtual ~GetPropCommand();
 
-        virtual void execute(Player *player, const QString &command);
+        virtual void execute(Character *character, const QString &command);
 };
 
 #endif // GETPROPCOMMAND_H

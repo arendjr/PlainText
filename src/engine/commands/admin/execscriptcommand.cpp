@@ -18,7 +18,7 @@ ExecScriptCommand::ExecScriptCommand(QObject *parent) :
 ExecScriptCommand::~ExecScriptCommand() {
 }
 
-void ExecScriptCommand::execute(Player *player, const QString &command) {
+void ExecScriptCommand::execute(Character *player, const QString &command) {
 
     super::prepareExecute(player, command);
 
@@ -34,4 +34,14 @@ void ExecScriptCommand::execute(Player *player, const QString &command) {
     }
 
     send("Result: " + value.toString());
+}
+
+void ExecScriptCommand::setCommand(const QString &command) {
+
+    static QRegExp whitespace("\\s+");
+
+    QStringList words;
+    words.append(command.section(whitespace, 0, 0));
+    words.append(command.section(whitespace, 1));
+    setWords(words);
 }

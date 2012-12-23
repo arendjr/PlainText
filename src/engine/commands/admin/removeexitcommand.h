@@ -12,7 +12,7 @@ class RemoveExitCommand : public AdminCommand {
         RemoveExitCommand(QObject *parent = 0);
         virtual ~RemoveExitCommand();
 
-        virtual void execute(Player *player, const QString &command);
+        virtual void execute(Character *character, const QString &command);
 };
 
 #endif // REMOVEEXITCOMMAND_H

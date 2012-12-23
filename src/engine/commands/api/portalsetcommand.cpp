@@ -20,7 +20,7 @@ PortalSetCommand::PortalSetCommand(QObject *parent) :
 PortalSetCommand::~PortalSetCommand() {
 }
 
-void PortalSetCommand::execute(Player *player, const QString &command) {
+void PortalSetCommand::execute(Character *player, const QString &command) {
 
     super::prepareExecute(player, command);
 

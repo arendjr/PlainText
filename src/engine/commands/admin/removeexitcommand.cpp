@@ -14,7 +14,7 @@ RemoveExitCommand::RemoveExitCommand(QObject *parent) :
 RemoveExitCommand::~RemoveExitCommand() {
 }
 
-void RemoveExitCommand::execute(Player *player, const QString &command) {
+void RemoveExitCommand::execute(Character *player, const QString &command) {
 
     super::prepareExecute(player, command);
 

@@ -16,7 +16,7 @@ StopServerCommand::StopServerCommand(QObject *parent) :
 StopServerCommand::~StopServerCommand() {
 }
 
-void StopServerCommand::execute(Player *player, const QString &command) {
+void StopServerCommand::execute(Character *player, const QString &command) {
 
     Q_UNUSED(player);
     Q_UNUSED(command);
