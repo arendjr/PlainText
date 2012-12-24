@@ -1,17 +1,18 @@
 /*global define:false, require:false*/
-define(["kinetic"], function(Kinetic) {
+define(["fabric", "zepto"], function(Fabric, $) {
 
     "use strict";
 
-    function MapView(element) {
+    var ROOM_SIZE = 30;
+    var ROOM_BORDER_WIDTH = 2;
 
-        this.element = element;
+    function MapView(container) {
+
+        this.container = container;
 
         this.model = null;
 
-        this.stage = null;
-        this.layer = null;
-        this.shapes = [];
+        this.canvas = null;
 
         this.visibleAreas = [];
         this.zRestriction = null;
@@ -24,19 +25,15 @@ define(["kinetic"], function(Kinetic) {
         this.center = { "x": 0, "y": 0 };
         this.zoom = 1.0;
         this.perspective = 0.0;
+        this.displayRoomNames = false;
 
         this.init();
     }
 
     MapView.prototype.init = function() {
 
-        this.stage = new Kinetic.Stage({
-            "container": this.element,
-            "width": this.element.clientWidth,
-            "height": this.element.clientHeight
-        });
-        this.layer = new Kinetic.Layer();
-        this.stage.add(this.layer);
+        this.canvas = new Fabric.Canvas(this.container.children().first()[0]);
+        this.canvas.selection = false;
 
         this.attachListeners();
     };
@@ -45,22 +42,15 @@ define(["kinetic"], function(Kinetic) {
 
         var self = this;
 
-        this.layer.on("click", function(event) {
-            if (self.selectedShape) {
-                self.selectedShape.setStroke("black");
-            }
-
-            if (event.shape.getId()) {
-                self.selectedShape = event.shape;
-                self.selectedShape.setStroke("orange");
-
-                self.selectedRoomId = event.shape.getId();
+        this.canvas.on("object:selected", function(event) {
+            var shape = event.target;
+            if (shape.get("id")) {
+                self.selectedShape = shape;
+                self.selectedRoomId = shape.get("id");
             } else {
                 self.selectedShape = null;
                 self.selectedRoomId = 0;
             }
-
-            self.layer.draw();
 
             self.notifySelectionListeners();
         });
@@ -86,6 +76,9 @@ define(["kinetic"], function(Kinetic) {
                 for (var id in self.model.areas) {
                     self.visibleAreas.append(self.model.areas[id]);
                 }
+
+                $(".loading").hide();
+
                 firstUpdate = false;
             }
 
@@ -113,6 +106,7 @@ define(["kinetic"], function(Kinetic) {
 
     MapView.prototype.setPerspective = function(perspective) {
 
+        perspective = 2 * perspective;
         if (perspective !== this.perspective) {
             this.perspective = perspective;
 
@@ -120,25 +114,26 @@ define(["kinetic"], function(Kinetic) {
         }
     };
 
-    MapView.prototype.draw = function() {
+    MapView.prototype.draw = function(options) {
 
-        var stageWidth = this.element.clientWidth;
-        var stageHeight = this.element.clientHeight;
+        options = options || {};
 
-        this.stage.setWidth(stageWidth);
-        this.stage.setHeight(stageHeight);
+        var canvasWidth = options.width || this.container.width();
+        var canvasHeight = options.height || this.container.height();
 
-        var centerX = Math.floor(stageWidth / 2);
-        var centerY = Math.floor(stageHeight / 2);
-        var zoom = this.zoom * 10;
+        this.canvas.setWidth(canvasWidth);
+        this.canvas.setHeight(canvasHeight);
 
-        var roomSize = 30;
-        var halfRoomSize = roomSize / 2;
+        var center = options.center || this.center;
+        var offsetX = options.offsetX === undefined ? Math.floor(canvasWidth / 2) : options.offsetX;
+        var offsetY = options.offsetY === undefined ? Math.floor(canvasHeight / 2): options.offsetY;
 
-        var minX = -roomSize, maxX = stageWidth + roomSize,
-            minY = -roomSize, maxY = stageHeight + roomSize;
-        function isWithinStage(x, y) {
-            return (x >= minX && x <= maxX && y >= minY && y <= maxY);
+        var zoom = 10 * this.zoom;
+
+        var minX = -ROOM_SIZE, maxX = canvasWidth + ROOM_SIZE,
+            minY = -ROOM_SIZE, maxY = canvasHeight + ROOM_SIZE;
+        var isWithinCanvas = options.isWithinCanvas || function(x, y) {
+            return x >= minX && x <= maxX && y >= minY && y <= maxY;
         }
 
         var visibleAreas = this.visibleAreas;
@@ -148,7 +143,7 @@ define(["kinetic"], function(Kinetic) {
         var portalIds = [];
         for (var portalId in portals) {
             var portal = portals[portalId];
-            var isVisible = (zoom >= 4 &&
+            var isVisible = (zoom >= 3 &&
                              (!portal.room.area || visibleAreas.contains(portal.room.area)) &&
                              (!portal.room2.area || visibleAreas.contains(portal.room2.area)) &&
                              (zRestriction === null || portal.room.z === zRestriction ||
@@ -174,37 +169,37 @@ define(["kinetic"], function(Kinetic) {
         }
 
         var self = this;
-        var perspective = 2 * this.perspective;
 
-        var processedShapes = [];
-        var shapesToProcess = this.shapes;
+        var shapesToProcess = this.canvas.getObjects().clone();
 
         portalIds.forEach(function(id) {
             var portal = portals[id];
             var room = portal.room;
             var room2 = portal.room2;
-            var z = perspective * room.z;
-            var z2 = perspective * room2.z;
-            var points = [centerX + (room.x - self.center.x + z) * zoom,
-                          centerY + (room.y - self.center.y + z) * zoom,
-                          centerX + (room2.x - self.center.x + z2) * zoom,
-                          centerY + (room2.y - self.center.y + z2) * zoom];
+            var z1 = self.perspective * room.z;
+            var x1 = offsetX + (room.x - center.x + z1) * zoom;
+            var y1 = offsetY + (room.y - center.y + z1) * zoom;
+            var z2 = self.perspective * room2.z;
+            var x2 = offsetX + (room2.x - center.x + z2) * zoom;
+            var y2 = offsetY + (room2.y - center.y + z2) * zoom;
 
-            if (isWithinStage(points[0], points[1]) || isWithinStage(points[2], points[3])) {
+            if (isWithinCanvas(x1, y1) || isWithinCanvas(x2, y2)) {
                 if (portal.shape) {
-                    portal.shape.setPoints(points);
-                } else {
-                    portal.shape = new Kinetic.Line({
-                        "points": points,
-                        "stroke": "blue",
-                        "strokeWidth": 2,
-                        "listening": false
+                    portal.shape.set({
+                        "x1": x1, "y1": y1,
+                        "x2": x2, "y2": y2
                     });
-                    self.layer.add(portal.shape);
+                } else {
+                    portal.shape = new Fabric.Line([ x1, y1, x2, y2 ], {
+                        "fill": "blue",
+                        "stroke": "blue",
+                        "strokeWidth": ROOM_BORDER_WIDTH,
+                        "selectable": false
+                    });
+                    self.canvas.add(portal.shape);
                 }
 
                 shapesToProcess.removeOne(portal.shape);
-                processedShapes.append(portal.shape);
             } else {
                 delete portal.shape;
             }
@@ -212,46 +207,109 @@ define(["kinetic"], function(Kinetic) {
 
         roomIds.forEach(function(id) {
             var room = rooms[id];
-            var z = perspective * room.z;
-            var x = centerX + (room.x - self.center.x + z) * zoom - halfRoomSize;
-            var y = centerY + (room.y - self.center.y + z) * zoom - halfRoomSize;
+            var z = self.perspective * room.z;
+            var x = offsetX + (room.x - center.x + z) * zoom;
+            var y = offsetY + (room.y - center.y + z) * zoom;
 
-            if (isWithinStage(x, y)) {
+            if (isWithinCanvas(x, y)) {
                 if (room.shape) {
-                    room.shape.setX(x);
-                    room.shape.setY(y);
-                    room.shape.moveToTop();
-                } else {
-                    room.shape = new Kinetic.Rect({
-                        "id": room.id,
-                        "x": x,
-                        "y": y,
-                        "width": roomSize,
-                        "height": roomSize,
-                        "stroke": "black",
-                        "strokeWidth": 2,
-                        "fill": "grey"
+                    room.shape.set({
+                        "left": x,
+                        "top": y
                     });
+                    room.shape.bringToFront();
+                } else {
+                    room.shape = new Fabric.Rect({
+                        "id": room.id,
+                        "left": x,
+                        "top": y,
+                        "fill": "grey",
+                        "width": ROOM_SIZE,
+                        "height": ROOM_SIZE,
+                        "stroke": "black",
+                        "strokeWidth": ROOM_BORDER_WIDTH,
+                        "selectable": true,
+                        "hasControls": false
+                    });
+                    self.canvas.add(room.shape);
+
                     if (room.id === self.selectedRoomId) {
                         self.selectedShape = room.shape;
-                        self.selectedShape.setStroke("orange");
                     }
-                    self.layer.add(room.shape);
                 }
-
                 shapesToProcess.removeOne(room.shape);
-                processedShapes.append(room.shape);
+
+                if (self.displayRoomNames) {
+                    if (room.textShape) {
+                        room.textShape.set({
+                            "left": x,
+                            "top": y - ROOM_SIZE
+                        });
+                        room.textShape.bringToFront();
+                    } else {
+                        room.textShape = new Fabric.Text(room.name || "", {
+                            "left": x,
+                            "top": y - ROOM_SIZE,
+                            "fontSize": 14,
+                            "selectable": false
+                        });
+                        self.canvas.add(room.textShape);
+                    }
+                    shapesToProcess.removeOne(room.textShape);
+                } else {
+                    delete room.textShape;
+                }
             } else {
                 delete room.shape;
+                delete room.textShape;
             }
         });
 
-        this.shapes = processedShapes;
         shapesToProcess.forEach(function(shape) {
-            self.layer.remove(shape);
+            self.canvas.remove(shape);
         });
 
-        this.stage.draw();
+        this.canvas.renderAll();
+    };
+
+    MapView.prototype.export = function(options) {
+
+        options = options || {};
+
+        $(".loading").show();
+
+        var target = window.open("", "_blank");
+
+        var self = this;
+        setTimeout(function() {
+            var dimensions = self.getMapDimensions();
+            self.draw({
+                "width": dimensions.width + (self.displayRoomNames ? 4 : 2) * ROOM_SIZE,
+                "height": dimensions.height + (self.displayRoomNames ? 4 : 2) * ROOM_SIZE,
+                "offsetX": ROOM_SIZE + (self.displayRoomNames ? ROOM_SIZE : 0),
+                "offsetY": ROOM_SIZE + (self.displayRoomNames ? ROOM_SIZE : 0),
+                "center": dimensions.topLeft,
+                "isWithinStage": function(x, y) { return true; }
+            });
+
+            if (options.callback) {
+                options.callback(target, self.canvas.toSVG());
+            } else {
+                target.document.location = "data:image/svg+xml;utf8," + self.canvas.toSVG();
+            }
+
+            $(".loading").hide();
+        }, 1);
+    };
+
+    MapView.prototype.print = function() {
+
+        this.export({
+            "callback": function(target, data) {
+                target.document.write(data);
+                target.window.print();
+            }
+        });
     };
 
     MapView.prototype.plotData = function(data) {
@@ -298,10 +356,10 @@ define(["kinetic"], function(Kinetic) {
                 }
             }
 
-            shape.setFill("rgb(" + red + ", " + green + ", " + blue + ")");
+            shape.set("fill", "rgb(" + red + ", " + green + ", " + blue + ")");
         }
 
-        this.stage.draw();
+        this.canvas.renderAll();
     };
 
     MapView.prototype.addSelectionListener = function(listener) {
@@ -363,6 +421,44 @@ define(["kinetic"], function(Kinetic) {
         }
 
         this.draw();
+    };
+
+    MapView.prototype.setDisplayRoomNames = function(displayRoomNames) {
+
+        if (displayRoomNames !== this.displayRoomNames) {
+            this.displayRoomNames = !!displayRoomNames;
+
+            this.draw();
+        }
+    };
+
+    MapView.prototype.getMapDimensions = function() {
+
+        var minX = 0, minY = 0, maxX = 0, maxY = 0;
+        for (var id in this.model.rooms) {
+            var room = this.model.rooms[id];
+            var z = this.perspective * room.z;
+            var x = (room.x + z);
+            var y = (room.y + z);
+            if (x < minX) {
+                minX = x;
+            } else if (x > maxX) {
+                maxX = x;
+            }
+            if (y < minY) {
+                minY = y;
+            } else if (y > maxY) {
+                maxY = y;
+            }
+        }
+        return {
+            "width": 10 * this.zoom * (maxX - minX),
+            "height": 10 * this.zoom * (maxY - minY),
+            "topLeft": {
+                "x": minX,
+                "y": minY
+            }
+        };
     };
 
     return MapView;

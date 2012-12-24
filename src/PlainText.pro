@@ -279,18 +279,18 @@ OTHER_FILES += \
     ../data/scripts/gameobjects/portal.js \
     ../data/scripts/gameobjects/room.js \
     ../data/scripts/gameobjects/statsitem.js \
+    ../web/grunt.js \
     ../web/index.html \
     ../web/css/admin.css \
     ../web/css/main.css \
     ../web/js/controller.js \
-    ../web/js/kinetic.js \
+    ../web/js/fabric.js \
     ../web/js/main.js \
     ../web/js/notifications.js \
     ../web/js/require.js \
     ../web/js/util.js \
     ../web/js/zepto.js \
     ../web/js/admin/admin.js \
-    ../web/js/admin/kinetic.js \
     ../web/js/admin/mapeditor.js \
     ../web/js/admin/map.model.js \
     ../web/js/admin/map.view.js \

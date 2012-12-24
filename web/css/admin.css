@@ -22,6 +22,20 @@
         text-align: right;
     }
 
+.loading {
+    top: 250px;
+    left: -webkit-calc(50% - 100px);
+    left: -moz-calc(50% - 100px);
+    left: calc(50% - 100px);
+    right: -webkit-calc(50% - 100px);
+    right: -moz-calc(50% - 100px);
+    right: calc(50% - 100px);
+}
+    .loading p {
+        font-weight: bold;
+        text-align: center;
+    }
+
 .property-editor {
     top: 150px;
     left: 150px;
@@ -88,7 +102,7 @@
     bottom: 0;
     z-index: 2;
 }
-    .map-editor .canvas {
+    .map-editor .map-canvas {
         position: absolute;
         top: 0;
         left: 0;

@@ -18,6 +18,9 @@
         </div>
         <div class="screen"></div>
         <input type="text" class="command-input" maxlength="160">
+        <div class="loading dialog" style="display: none">
+            <p>Loading...</p>
+        </div>
         <div class="property-editor dialog" style="display: none">
             <textarea></textarea>
             <div class="button-list">
@@ -67,8 +70,20 @@
             </div>
         </div>
         <div class="map-editor" style="display: none">
-            <div class="canvas"></div>
+            <div class="map-canvas">
+                <canvas></canvas>
+            </div>
             <div class="toolbar">
+                <div class="label menu">Map
+                    <div class="menu-content">
+                        <div class="menu-item">
+                            <a href="#" class="export-as-svg">Export as SVG</a>
+                        </div>
+                        <div class="menu-item">
+                            <a href="#" class="print">Print...</a>
+                        </div>
+                    </div>
+                </div>
                 <div class="areas label menu">Areas
                     <div class="areas menu-content">
                     </div>
@@ -83,6 +98,10 @@
                         </div>
                         <div class="menu-item">
                             <a href="#" class="plot playerdeath">Plot player deaths</a>
+                        </div>
+                        <div class="menu-item">
+                            <input id="toggle-room-names" type="checkbox">
+                            <label for="toggle-room-names"> Show room names</label>
                         </div>
                         <div class="menu-item">
                             <input id="toggle-z-restriction" type="checkbox">

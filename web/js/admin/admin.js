@@ -32,7 +32,7 @@ define(["controller", "admin/mapeditor", "admin/propertyeditor", "zepto"],
             element.setAttribute("href", ["java", "script:void(0)"].join(""));
         });
 
-        $(".command-input").attr("maxlength", null);
+        $(".command-input").removeAttr("maxlength");
 
         attachListeners();
 

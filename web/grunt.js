@@ -6,7 +6,14 @@ module.exports = function(grunt) {
     meta: {
     },
     lint: {
-      files: ['grunt.js', 'js/admin/*.js', 'js/controller.js', 'js/main.js', 'js/notifications.js', 'js/util.js']
+      files: [
+        'grunt.js',
+        'js/admin/*.js',
+        'js/controller.js',
+        'js/main.js',
+        'js/notifications.js',
+        'js/util.js'
+      ]
     },
     qunit: {
       files: ['test/**/*.html']
@@ -45,7 +52,7 @@ module.exports = function(grunt) {
             {
               name: "admin/admin",
               include: [
-                "kinetic",
+                "fabric",
                 "admin/mapeditor",
                 "codemirror/codemirror",
                 "codemirror/javascript",

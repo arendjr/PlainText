@@ -33,7 +33,7 @@ define(["controller", "admin/map.model", "admin/map.view", "admin/portaleditor",
 
         this.model = new MapModel();
 
-        this.view = new MapView($(".canvas", this.element)[0]);
+        this.view = new MapView($(".map-canvas", this.element));
         this.view.setModel(this.model);
         this.view.setZoom(initialZoom);
 
@@ -81,6 +81,14 @@ define(["controller", "admin/map.model", "admin/map.view", "admin/portaleditor",
             self.onRoomSelectionChanged();
         });
 
+        $(".export-as-svg", this.element).on("click", function() {
+            self.view.export();
+        });
+
+        $(".print", this.element).on("click", function() {
+            self.view.print();
+        });
+
         $(".areas.menu", this.element).on("change", "input", function(event) {
             var areaId = $(event.target).data("area-id");
             if (areaId) {
@@ -98,6 +106,11 @@ define(["controller", "admin/map.model", "admin/map.view", "admin/portaleditor",
 
         $(".plot.playerdeath", this.element).on("click", function() {
             self.plotStats("playerdeath");
+        });
+
+        $("#toggle-room-names", this.element).on("change", function(event) {
+            var isChecked = $("#toggle-room-names", this.element).prop("checked");
+            self.view.setDisplayRoomNames(isChecked);
         });
 
         $("#toggle-z-restriction,.z-restriction", this.element).on("change", function(event) {
@@ -214,6 +227,8 @@ define(["controller", "admin/map.model", "admin/map.view", "admin/portaleditor",
     };
 
     MapEditor.prototype.open = function() {
+
+        $(".loading").show();
 
         this.element.show();
 
