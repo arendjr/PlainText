@@ -230,6 +230,11 @@ define(["fabric", "zepto"], function(Fabric, $) {
                         "stroke": "black",
                         "strokeWidth": ROOM_BORDER_WIDTH,
                         "selectable": true,
+                        "lockMovementX": true,
+                        "lockMovementY": true,
+                        "lockScalingX": true,
+                        "lockScalingY": true,
+                        "lockRotation": true,
                         "hasControls": false
                     });
                     self.canvas.add(room.shape);
