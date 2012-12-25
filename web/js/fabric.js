@@ -5045,7 +5045,7 @@ fabric.util.string = {
         this.discardActiveObject();
         this.fire('selection:cleared');
       }
-      this.renderAll();
+      this.renderOnAddition && this.renderAll();
       return object;
     },
 
@@ -5059,7 +5059,7 @@ fabric.util.string = {
     sendToBack: function (object) {
       removeFromArray(this._objects, object);
       this._objects.unshift(object);
-      return this.renderAll();
+      this.renderOnAddition && this.renderAll();
     },
 
     /**
@@ -5072,7 +5072,7 @@ fabric.util.string = {
     bringToFront: function (object) {
       removeFromArray(this._objects, object);
       this._objects.push(object);
-      return this.renderAll();
+      this.renderOnAddition && this.renderAll();
     },
 
     /**
@@ -5104,7 +5104,7 @@ fabric.util.string = {
         removeFromArray(this._objects, object);
         this._objects.splice(nextIntersectingIdx, 0, object);
       }
-      return this.renderAll();
+      this.renderOnAddition && this.renderAll();
     },
 
     /**
@@ -5138,7 +5138,7 @@ fabric.util.string = {
         removeFromArray(objects, object);
         objects.splice(nextIntersectingIdx, 0, object);
       }
-      this.renderAll();
+      this.renderOnAddition && this.renderAll();
     },
 
     /**
@@ -8563,13 +8563,7 @@ fabric.util.object.extend(fabric.StaticCanvas.prototype, {
 
       ctx.lineWidth = this.strokeWidth;
 
-      // TODO: test this
-      // make sure setting "fill" changes color of a line
-      // (by copying fillStyle to strokeStyle, since line is stroked, not filled)
-      var origStrokeStyle = ctx.strokeStyle;
-      ctx.strokeStyle = ctx.fillStyle;
       ctx.stroke();
-      ctx.strokeStyle = origStrokeStyle;
     },
 
     /**

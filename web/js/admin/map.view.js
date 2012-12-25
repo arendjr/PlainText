@@ -34,6 +34,7 @@ define(["fabric", "zepto"], function(Fabric, $) {
 
         this.canvas = new Fabric.Canvas(this.container.children().first()[0]);
         this.canvas.selection = false;
+        this.canvas.renderOnAddition = false;
 
         this.attachListeners();
     };
