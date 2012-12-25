@@ -18,6 +18,9 @@ class HttpServer : public QTcpServer {
     private slots:
         void onReadyRead();
         void onDisconnected();
+
+    private:
+        QByteArray m_title;
 };
 
 #endif // HTTPSERVER_H

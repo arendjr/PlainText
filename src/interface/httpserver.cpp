@@ -7,6 +7,8 @@
 #include <QStringList>
 #include <QTcpSocket>
 
+#include "realm.h"
+
 
 HttpServer::HttpServer(quint16 port, QObject *parent) :
     QTcpServer(parent) {
@@ -16,6 +18,12 @@ HttpServer::HttpServer(quint16 port, QObject *parent) :
     } else {
         qDebug() << "HTTP server is listening on port" << port;
     }
+
+    QString name = Realm::instance()->name();
+    m_title = QString("<title>" +
+                      name.replace("&", "&amp;").replace("<", "&lt;")
+                          .replace(">", "&gt;").replace("\"", "&quot;") +
+                      "</title>").toUtf8();
 }
 
 HttpServer::~HttpServer() {
@@ -93,6 +101,10 @@ void HttpServer::onReadyRead() {
                 mimeType = "text/css";
             } else {
                 charset = "; charset=\"utf-8\"";
+            }
+
+            if (info.fileName() == "index.html") {
+                content.replace("<title>MUD</title>", m_title);
             }
 
             socket->write(QString("HTTP/1.0 200 Ok\r\n"
