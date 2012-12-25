@@ -20,7 +20,7 @@ StatsCommand.prototype.execute = function(player, command) {
                               "| %1 |\n".arg(Util.center("%1, a %2 %3"
                                                          .arg(player.name,
                                                               player.race.adjective,
-                                                              player.characterClass.name))) +
+                                                              player.characterClass.name), 47)) +
                               "\\=================================================/\n",
                               Color.Green) +
                 "\n" +
