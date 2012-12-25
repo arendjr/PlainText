@@ -408,7 +408,16 @@ function SessionHandler() {
             "processInput": function(input) {
                 var answer = input.toLower();
                 if (answer === "yes" || answer === "y") {
-                    var player = Realm.createObject("Player");
+                    var player = Realm.getPlayer(signUpData.userName);
+                    if (player) {
+                        send("Uh-oh, it appears someone has claimed your character name while " +
+                             "you were creating yours. I'm terribly sorry, but it appears you " +
+                             "will have to start over.\n");
+                        this.setState("SessionClosed");
+                        return;
+                    }
+
+                    player = Realm.createObject("Player");
                     player.admin = Realm.players().isEmpty();
                     player.name = signUpData.userName;
                     player.race = signUpData.race;
