@@ -1,0 +1,13 @@
+.loading {
+    top: 250px;
+    left: -webkit-calc(50% - 100px);
+    left: -moz-calc(50% - 100px);
+    left: calc(50% - 100px);
+    right: -webkit-calc(50% - 100px);
+    right: -moz-calc(50% - 100px);
+    right: calc(50% - 100px);
+}
+    .loading p {
+        font-weight: bold;
+        text-align: center;
+    }

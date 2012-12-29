@@ -92,7 +92,7 @@ Running your own server
 <a id="compiling"></a>
 ### Compiling ###
 
-Run the following commands from the src/ directory:
+Run the following commands from the project directory:
 
  * qmake PlainText.pro
  * make
@@ -103,7 +103,7 @@ Run the following commands from the src/ directory:
  * Set the PT_DATA_DIR environment variable to point to the data/ directory.
  * If you want to enable logging, set the PT_LOG_DIR variable to the directory
    where you want your logs to be stored.
- * Run your compiled PlainText executable.
+ * Run your compiled PlainText executable from the project directory.
 
 <a id="playing-the-game"></a>
 Playing the game

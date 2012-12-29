@@ -6,14 +6,14 @@
 
 #include "commandregistry.h"
 #include "gameexception.h"
+#include "httpserver.h"
 #include "logutil.h"
 #include "realm.h"
 #include "scriptengine.h"
+#include "telnetserver.h"
 #include "triggerregistry.h"
 #include "util.h"
-#include "interface/httpserver.h"
-#include "interface/telnetserver.h"
-#include "interface/websocketserver.h"
+#include "websocketserver.h"
 
 
 Engine::Engine() :

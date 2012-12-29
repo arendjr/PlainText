@@ -68,11 +68,10 @@ void HttpServer::onReadyRead() {
             if (path == "/") {
                 path = "/index.html";
             }
-            path = "../web" + path;
+            path = "web" + path;
 
-            if (path.contains("/js/")) {
-                QString minifiedPath = path;
-                minifiedPath.replace("/js/", "/min/");
+            if (path.endsWith(".js")) {
+                QString minifiedPath = "/min" + path;
                 if (QFile::exists(minifiedPath)) {
                     path = minifiedPath;
                 }
