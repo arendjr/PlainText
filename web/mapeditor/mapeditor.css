@@ -1,0 +1,154 @@
+.map-editor {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+}
+    .map-editor .map-canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 80%;
+        height: 100%;
+
+        background-color: white;
+    }
+    .map-editor .toolbar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 23px;
+        z-index: 3;
+
+        border-bottom: 1px solid black;
+        padding: 5px;
+        background-color: white;
+        background-image: -moz-linear-gradient(top, #fff, #ccc);
+        background-image: -ms-linear-gradient(top, #fff, #ccc);
+        background-image: -webkit-linear-gradient(top, #fff, #ccc);
+        background-image: linear-gradient(top, #fff, #ccc);
+        box-shadow: -15px 3px 15px 0 black;
+
+        font-family: "Helvetica", "Arial", sans-serif;
+    }
+        .map-editor .toolbar .label {
+            display: inline-block;
+
+            margin: -6px 0;
+            padding: 10px 4px;
+
+            vertical-align: top;
+        }
+        .map-editor .toolbar .menu {
+            cursor: pointer;
+        }
+            .map-editor .toolbar .menu .menu-content {
+                display: none;
+                position: absolute;
+                z-index: 4;
+
+                margin: 9px 0 0 -10px;
+                border: 1px solid #ccc;
+                border-bottom-left-radius: 3px;
+                border-bottom-right-radius: 3px;
+                padding: 4px;
+                background: rgba(250, 250, 250, 0.95);
+                box-shadow: 0 3px 15px 0 #888;
+            }
+            .map-editor .toolbar .menu:hover .menu-content {
+                display: block;
+            }
+                .map-editor .toolbar .menu .menu-item {
+                    padding: 5px;
+                }
+                .map-editor .toolbar .z-restriction {
+                    width: 5em;
+                }
+    .map-editor .sidebar {
+        position: absolute;
+        top: 34px;
+        right: 0;
+        width: -webkit-calc(20% - 2px);
+        width: -moz-calc(20% - 2px);
+        width: calc(20% - 2px);
+        min-width: 18em;
+        height: -webkit-calc(100% - 44px);
+        height: -moz-calc(100% - 44px);
+        height: calc(100% - 44px);
+        z-index: 3;
+
+        border-left: 2px solid #000;
+        padding: 5px;
+        background-color: white;
+
+        font-family: "Helvetica", "Arial", sans-serif;
+    }
+        .map-editor .sidebar .x,
+        .map-editor .sidebar .y,
+        .map-editor .sidebar .z {
+            width: 5em;
+        }
+        .map-editor .sidebar .add,
+        .map-editor .sidebar .edit.name,
+        .map-editor .sidebar .edit.description {
+            font-size: 75%;
+        }
+        .map-editor .sidebar .description {
+            white-space: pre-line;
+        }
+    .map-editor .close {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 16px;
+        height: 16px;
+
+        background-image: url(/img/close.png);
+        background-size: 16px 16px;
+
+        cursor: pointer;
+    }
+
+.pad {
+    position: absolute;
+    top: 54px;
+    left: 20px;
+    z-index: 2;
+}
+    .pad .arrow {
+        position: absolute;
+        width: 32px;
+        height: 32px;
+
+        background-color: rgba(255, 255, 255, 0.4);
+        background-size: 32px 32px;
+
+        cursor: pointer;
+    }
+    .pad .up {
+        top: 0px;
+        left: 32px;
+
+        background-image: url(/img/arrow_up.png);
+    }
+    .pad .right {
+        top: 32px;
+        left: 64px;
+
+        background-image: url(/img/arrow_right.png);
+    }
+    .pad .down {
+        top: 64px;
+        left: 32px;
+
+        background-image: url(/img/arrow_down.png);
+    }
+    .pad .left {
+        top: 32px;
+        left: 0px;
+
+        background-image: url(/img/arrow_left.png);
+    }

@@ -361,5 +361,5 @@ CodeMirror.defineMIME("text/javascript", "javascript");
 CodeMirror.defineMIME("application/json", {name: "javascript", json: true});
 
 if (typeof define === "function" && define.amd) {
-  define("codemirror/javascript");
+  define("lib/codemirror/javascript");
 }

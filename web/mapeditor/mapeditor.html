@@ -1,0 +1,74 @@
+<div class="map-editor" style="display: none">
+    <div class="map-canvas">
+        <canvas></canvas>
+    </div>
+    <div class="toolbar">
+        <div class="label menu">Map
+            <div class="menu-content">
+                <div class="menu-item">
+                    <a href="javascript:void(0)" class="export-as-svg">Export as SVG</a>
+                </div>
+                <div class="menu-item">
+                    <a href="javascript:void(0)" class="print">Print...</a>
+                </div>
+            </div>
+        </div>
+        <div class="areas label menu">Areas
+            <div class="areas menu-content">
+            </div>
+        </div>
+        <div class="label menu">Options
+            <div class="menu-content">
+                <div class="menu-item">
+                    <a href="javascript:void(0)" class="plot altitude">Plot altitude</a>
+                </div>
+                <div class="menu-item">
+                    <a href="javascript:void(0)" class="plot roomvisit">Plot room visits</a>
+                </div>
+                <div class="menu-item">
+                    <a href="javascript:void(0)" class="plot playerdeath">Plot player deaths</a>
+                </div>
+                <div class="menu-item">
+                    <input id="toggle-room-names" type="checkbox">
+                    <label for="toggle-room-names"> Show room names</label>
+                </div>
+                <div class="menu-item">
+                    <input id="toggle-z-restriction" type="checkbox">
+                    <label for="toggle-z-restriction"> Restrict Z-level to: </label>
+                    <input class="z-restriction" type="number" value="0">
+                </div>
+            </div>
+        </div>
+        <div class="label">Zoom: </div>
+        <div class="zoom slider"></div>
+        <div class="label">Perspective: </div>
+        <div class="perspective slider"></div>
+        <div class="close"></div>
+    </div>
+    <div class="sidebar">
+        <div class="selected-room" style="display: none">
+            <p><strong>Room #<span class="id"></span></strong>
+                <button class="enter-room-button"
+                        title="Enter this room with your in-game character, regardless of where you
+                               currently are.">Enter</button></p>
+            <p><input type="number" class="x" step="50">,
+                <input type="number" class="y" step="50">,
+                <input type="number" class="z" step="50"></p>
+            <p><strong>Name:</strong>
+                <span class="name"></span>
+                <a href="javascript:void(0)" class="edit name">(edit)</a></p>
+            <p><strong>Description:</strong><br>
+                <span class="description"></span>
+                <a href="javascript:void(0)" class="edit description">(edit)</a></p>
+            <p><strong>Portals:</strong><br>
+                <span class="portals"></span>
+                <a href="javascript:void(0)" class="add portal">(add)</a></p>
+        </div>
+    </div>
+    <div class="pad">
+        <div class="up arrow"></div>
+        <div class="right arrow"></div>
+        <div class="down arrow"></div>
+        <div class="left arrow"></div>
+    </div>
+</div>

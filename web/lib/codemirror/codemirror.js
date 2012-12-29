@@ -3237,5 +3237,5 @@ window.CodeMirror = (function() {
 })();
 
 if (typeof define === "function" && define.amd) {
-  define( "codemirror/codemirror", [], function () { return CodeMirror; } );
+  define("lib/codemirror/codemirror", [], function () { return CodeMirror; });
 }

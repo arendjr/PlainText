@@ -10,7 +10,9 @@ define(["controller"], function(Controller) {
 
     GameObject.prototype.resolvePointer = function(pointer) {
 
-        if (pointer.startsWith("room:")) {
+        if (pointer.startsWith("area:")) {
+            return this.model.areas[parseInt(pointer.substr(5), 10)];
+        } else if (pointer.startsWith("room:")) {
             return this.model.rooms[parseInt(pointer.substr(5), 10)];
         } else if (pointer.startsWith("portal:")) {
             return this.model.portals[parseInt(pointer.substr(7), 10)];

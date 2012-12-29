@@ -1,6 +1,7 @@
 /*global define:false, require:false*/
-define(["controller", "lib/codemirror/codemirror", "lib/zepto"],
-       function(Controller, CodeMirror, $) {
+define(["controller", "lib/codemirror/codemirror", "lib/hogan", "lib/zepto",
+        "text!propertyeditor/propertyeditor.html"],
+       function(Controller, CodeMirror, Hogan, $, propertyEditorHtml) {
 
     "use strict";
 
@@ -15,7 +16,7 @@ define(["controller", "lib/codemirror/codemirror", "lib/zepto"],
 
     function PropertyEditor() {
 
-        this.element = $(".property-editor");
+        this.element = null;
 
         this.editor = null;
 
@@ -25,6 +26,12 @@ define(["controller", "lib/codemirror/codemirror", "lib/zepto"],
     }
 
     PropertyEditor.prototype.init = function() {
+
+        Controller.addStyle("dialog/dialog");
+        Controller.addStyle("propertyeditor/propertyeditor");
+
+        var propertyEditorTemplate = Hogan.compile(propertyEditorHtml);
+        this.element = $(propertyEditorTemplate.render()).appendTo(document.body);
 
         this.attachListeners();
     };

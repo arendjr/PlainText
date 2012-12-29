@@ -1,0 +1,23 @@
+.dialog {
+    position: absolute;
+    z-index: 3;
+
+    border: 1px solid black;
+    background-color: white;
+    box-shadow: 0 3px 15px 0px black;
+
+    font-family: "Helvetica", "Arial", sans-serif;
+
+    -webkit-user-select: text;
+}
+    .dialog p {
+        margin: 1em;
+    }
+    .dialog .button-list {
+        position: relative;
+
+        padding: 5px 10px 5px;
+        background-color: #ccc;
+
+        text-align: right;
+    }

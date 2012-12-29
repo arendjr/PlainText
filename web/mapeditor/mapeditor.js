@@ -1,15 +1,19 @@
 /*global define:false, require:false*/
 define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapview",
         "portaleditor/portaleditor", "portaleditor/portaldeletedialog",
-        "propertyeditor/propertyeditor", "sliderwidget/slider", "lib/zepto"],
+        "propertyeditor/propertyeditor", "sliderwidget/slider", "lib/hogan", "lib/zepto",
+        "text!mapeditor/mapeditor.html", "text!mapeditor/areas-menu.html"],
        function(Controller, Loading, MapModel, MapView, PortalEditor,
-                PortalDeleteDialog, PropertyEditor, SliderWidget, $) {
+                PortalDeleteDialog, PropertyEditor, SliderWidget, Hogan, $,
+                mapEditorHtml, areasMenuHtml) {
 
     "use strict";
 
     function MapEditor() {
 
-        this.element = $(".map-editor");
+        this.element = null;
+
+        this.areasMenuTemplate = null;
 
         this.model = null;
         this.view = null;
@@ -33,6 +37,13 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
         var initialZoom = 0.2;
 
         this.model = new MapModel();
+
+        Controller.addStyle("mapeditor/mapeditor");
+
+        var mapEditorTemplate = Hogan.compile(mapEditorHtml);
+        this.element = $(mapEditorTemplate.render()).appendTo(document.body);
+
+        this.areasMenuTemplate = Hogan.compile(areasMenuHtml);
 
         this.view = new MapView($(".map-canvas", this.element));
         this.view.setModel(this.model);
@@ -224,7 +235,6 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
         this.perspectiveSlider.element.addEventListener("change", function(event) {
             self.view.setPerspective(event.detail.value);
         }, false);
-
     };
 
     MapEditor.prototype.open = function() {
@@ -280,20 +290,14 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
 
     MapEditor.prototype.updateAreas = function() {
 
-        var menuContent = $(".areas.menu-content", this.element);
-        menuContent.html("");
-
-        this.areas = this.model.areas;
-        for (var id in this.areas) {
-            var area = this.areas[id];
-            menuContent.append(
-                ("<div class=\"menu-item\">" +
-                 "<input id=\"toggle-area-%1\" type=\"checkbox\" data-area-id=\"%1\"%3>" +
-                 "<label for=\"toggle-area-%1\"> %2</label>" +
-                 "</div>")
-                .arg(area.id, area.name, this.view.isAreaVisible(area) ? " checked" : "")
-            );
+        this.areas = [];
+        for (var key in this.model.areas) {
+            var area = this.areas[key];
+            area.visible = this.view.isAreaVisible(area);
         }
+
+        var menuContent = $(".areas.menu-content", this.element);
+        menuContent.html(this.areasMenuTemplate.render({ "areas": this.areas }));
     };
 
     MapEditor.prototype.plotStats = function(type) {
@@ -322,5 +326,4 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
     };
 
     return MapEditor;
-
 });

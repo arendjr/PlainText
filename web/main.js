@@ -116,7 +116,7 @@ String.prototype.arg = function() {
 
 String.prototype.capitalized = function() {
 
-    return Util.capitalize(this);
+    return this.substr(0, 1).toUpperCase() + this.substr(1);
 };
 
 String.prototype.contains = function(string) {
@@ -127,11 +127,6 @@ String.prototype.contains = function(string) {
 String.prototype.endsWith = function(string) {
 
     return this.substr(this.length - string.length) === string;
-};
-
-String.prototype.highlighted = function() {
-
-    return Util.highlight(this);
 };
 
 String.prototype.isEmpty = function() {

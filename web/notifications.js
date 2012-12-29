@@ -51,5 +51,4 @@ define(["controller"], function(Controller) {
     }
 
     init();
-
 });

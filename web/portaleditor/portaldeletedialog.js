@@ -1,16 +1,20 @@
 /*global define:false, require:false*/
-define(["lib/zepto"], function($) {
+define(["lib/hogan", "lib/zepto", "text!portaleditor/portaldeletedialog.html"],
+       function(Hogan, $, portalDeleteDialogHtml) {
 
     "use strict";
 
     function PortalDeleteDialog() {
 
-        this.element = $(".portal-delete");
+        this.element = null;
 
         this.init();
     }
 
     PortalDeleteDialog.prototype.init = function() {
+
+        var portalDeleteDialogTemplate = Hogan.compile(portalDeleteDialogHtml);
+        this.element = $(portalDeleteDialogTemplate.render()).appendTo(document.body);
 
         this.attachListeners();
     };
@@ -59,5 +63,4 @@ define(["lib/zepto"], function($) {
     };
 
     return PortalDeleteDialog;
-
 });

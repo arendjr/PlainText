@@ -27,6 +27,8 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
         this.perspective = 0.0;
         this.displayRoomNames = false;
 
+        this.roomFills = {};
+
         this.init();
     }
 
@@ -78,12 +80,12 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
                     self.visibleAreas.append(self.model.areas[id]);
                 }
 
-                Loading.hideLoader();
-
                 firstUpdate = false;
             }
 
             self.draw();
+
+            Loading.hideLoader();
         });
     };
 
@@ -145,7 +147,7 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
         var portalIds = [];
         for (var portalId in portals) {
             var portal = portals[portalId];
-            isVisible = (zoom >= 3 &&
+            isVisible = (zoom >= 2 &&
                          (!portal.room.area || visibleAreas.contains(portal.room.area)) &&
                          (!portal.room2.area || visibleAreas.contains(portal.room2.area)) &&
                          (zRestriction === null || portal.room.z === zRestriction ||
@@ -221,11 +223,12 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
                     });
                     room.shape.bringToFront();
                 } else {
+                    var fill = self.roomFills.contains(room.id) ? self.roomFills[room.id] : "grey";
                     room.shape = new Fabric.Rect({
                         "id": room.id,
                         "left": x,
                         "top": y,
-                        "fill": "grey",
+                        "fill": fill,
                         "width": ROOM_SIZE,
                         "height": ROOM_SIZE,
                         "stroke": "black",
@@ -338,11 +341,6 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
         var rooms = this.model.rooms;
 
         for (id in rooms) {
-            var shape = rooms[id].shape;
-            if (!shape) {
-                continue;
-            }
-
             value = data.contains(id) ? data[id] : 0;
 
             var red = 0, green = 0, blue = 0;
@@ -365,7 +363,13 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
                 }
             }
 
-            shape.set("fill", "rgb(" + red + ", " + green + ", " + blue + ")");
+            var fill = "rgb(" + red + ", " + green + ", " + blue + ")";
+            this.roomFills[id] = fill;
+
+            var shape = rooms[id].shape;
+            if (shape) {
+                shape.set("fill", fill);
+            }
         }
 
         this.canvas.renderAll();

@@ -134,5 +134,5 @@
 })();
 
 if (typeof define === "function" && define.amd) {
-  define("codemirror/util/javascript-hint");
+  define("lib/codemirror/util/javascript-hint");
 }

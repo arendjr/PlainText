@@ -282,16 +282,16 @@ OTHER_FILES += \
     data/scripts/gameobjects/statsitem.js \
     src/engine/util.js \
     src/engine/commands/command.js \
-    web/Gruntfile.js \
-    web/index.html \
-    web/css/admin.css \
     web/admin.js \
     web/controller.js \
+    web/Gruntfile.js \
+    web/index.html \
     web/main.css \
     web/main.js \
     web/notifications.js \
     web/require.js \
     web/util.js \
+    web/dialog/dialog.css \
     web/lib/fabric.js \
     web/lib/hogan.js \
     web/lib/zepto.js \
@@ -299,10 +299,14 @@ OTHER_FILES += \
     web/lib/codemirror/codemirror.js \
     web/lib/codemirror/javascript.js \
     web/lib/codemirror/util/javascript-hint.js \
+    web/lib/codemirror/util/simple-hint.css \
     web/lib/codemirror/util/simple-hint.js \
     web/loadingwidget/loading.css \
+    web/loadingwidget/loading.html \
     web/loadingwidget/loading.js \
+    web/mapeditor/areas-menu.html \
     web/mapeditor/mapeditor.css \
+    web/mapeditor/mapeditor.html \
     web/mapeditor/mapeditor.js \
     web/mapeditor/mapview.js \
     web/mapmodel/model.js \
@@ -311,8 +315,11 @@ OTHER_FILES += \
     web/portaleditor/portaleditor.js \
     web/propertyeditor/propertyeditor.css \
     web/propertyeditor/propertyeditor.js \
+    web/portaleditor/portaleditor.html \
+    web/portaleditor/portaldeletedialog.html \
+    web/propertyeditor/propertyeditor.html \
+    web/sliderwidget/slider.css \
     web/sliderwidget/slider.js \
-    web/loadingwidget/loading.html
 
 INCLUDEPATH += \
     src/engine \

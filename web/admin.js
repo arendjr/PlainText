@@ -17,7 +17,10 @@ define(["controller", "mapeditor/mapeditor", "propertyeditor/propertyeditor", "l
 
         propertyEditor = new PropertyEditor();
 
-        var editMapLink = $("<a />", { "text": "Edit Map", "href": "#" });
+        var editMapLink = $("<a />", {
+            "text": "Edit Map",
+            "href": ["javas", "cript:void(0)"].join("")
+        });
         editMapLink.on("click", function() {
             mapEditor.open();
         });
@@ -25,12 +28,6 @@ define(["controller", "mapeditor/mapeditor", "propertyeditor/propertyeditor", "l
         var statusHeader = $(".status-header");
         statusHeader.append(" ");
         statusHeader.append(editMapLink);
-
-        loadStyle("css/admin.css");
-
-        $("a[href='#']").each(function(i, element) {
-            element.setAttribute("href", ["java", "script:void(0)"].join(""));
-        });
 
         $(".command-input").removeAttr("maxlength");
 
@@ -146,14 +143,6 @@ define(["controller", "mapeditor/mapeditor", "propertyeditor/propertyeditor", "l
         });
     }
 
-    function loadStyle(fileName) {
-
-        var link = document.createElement("link");
-        link.setAttribute("rel", "stylesheet");
-        link.setAttribute("href", fileName);
-        document.head.appendChild(link);
-    }
-
     function fetchTriggers() {
 
         Controller.sendApiCall("triggers-list", function(data) {
@@ -170,5 +159,4 @@ define(["controller", "mapeditor/mapeditor", "propertyeditor/propertyeditor", "l
     }
 
     init();
-
 });

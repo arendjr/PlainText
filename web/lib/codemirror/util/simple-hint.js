@@ -97,5 +97,5 @@
 })();
 
 if (typeof define === "function" && define.amd) {
-  define("codemirror/util/simple-hint");
+  define("lib/codemirror/util/simple-hint");
 }

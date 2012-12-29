@@ -1,11 +1,12 @@
 /*global define:false, require:false*/
-define(["util", "lib/zepto"], function(Util, $) {
+define(["controller", "util", "lib/hogan", "lib/zepto", "text!portaleditor/portaleditor.html"],
+       function(Controller, Util, Hogan, $, portalEditorHtml) {
 
     "use strict";
 
     function PortalEditor() {
 
-        this.element = $(".portal-editor");
+        this.element = null;
 
         this.orderedDirections = ["north", "northeast", "east", "southeast",
                                   "south", "southwest", "west", "northwest",
@@ -23,6 +24,12 @@ define(["util", "lib/zepto"], function(Util, $) {
     }
 
     PortalEditor.prototype.init = function() {
+
+        Controller.addStyle("dialog/dialog");
+        Controller.addStyle("portaleditor/portaleditor");
+
+        var portalEditorTemplate = Hogan.compile(portalEditorHtml);
+        this.element = $(portalEditorTemplate.render()).appendTo(document.body);
 
         this.attachListeners();
     };
@@ -276,5 +283,4 @@ define(["util", "lib/zepto"], function(Util, $) {
     };
 
     return PortalEditor;
-
 });

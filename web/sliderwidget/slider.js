@@ -1,5 +1,5 @@
 /*global define:false, require:false, CustomEvent:false*/
-define([], function() {
+define(["controller"], function(Controller) {
 
     "use strict";
 
@@ -19,6 +19,8 @@ define([], function() {
     }
 
     SliderWidget.prototype.init = function() {
+
+        Controller.addStyle("sliderwidget/slider");
 
         this.element.style.width = this.options.width + "px";
 
