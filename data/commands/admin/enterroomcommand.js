@@ -7,7 +7,7 @@ function EnterRoomCommand() {
 }
 
 EnterRoomCommand.prototype = new AdminCommand();
-EnterRoomCommand.prototype.constructor = AdminCommand;
+EnterRoomCommand.prototype.constructor = EnterRoomCommand;
 
 EnterRoomCommand.prototype.execute = function(player, command) {
 
@@ -20,6 +20,6 @@ EnterRoomCommand.prototype.execute = function(player, command) {
 
     player.leave(this.currentRoom);
     player.enter(room);
-}
+};
 
 CommandRegistry.registerAdminCommand("enter-room", new EnterRoomCommand());

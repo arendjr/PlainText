@@ -36,12 +36,6 @@ SOURCES += \
     src/engine/commands/command.cpp \
     src/engine/commands/gocommand.cpp \
     src/engine/commands/scriptcommand.cpp \
-    src/engine/commands/admin/addcharactercommand.cpp \
-    src/engine/commands/admin/addcontainercommand.cpp \
-    src/engine/commands/admin/additemcommand.cpp \
-    src/engine/commands/admin/addportalcommand.cpp \
-    src/engine/commands/admin/addshieldcommand.cpp \
-    src/engine/commands/admin/addweaponcommand.cpp \
     src/engine/commands/admin/admincommand.cpp \
     src/engine/commands/admin/copyitemcommand.cpp \
     src/engine/commands/admin/copytriggerscommand.cpp \
@@ -51,7 +45,6 @@ SOURCES += \
     src/engine/commands/admin/listmethodscommand.cpp \
     src/engine/commands/admin/listpropscommand.cpp \
     src/engine/commands/admin/reloadscriptscommand.cpp \
-    src/engine/commands/admin/removeexitcommand.cpp \
     src/engine/commands/admin/removeitemcommand.cpp \
     src/engine/commands/admin/setclasscommand.cpp \
     src/engine/commands/admin/setpropcommand.cpp \
@@ -149,12 +142,6 @@ HEADERS += \
     src/engine/commands/command.h \
     src/engine/commands/gocommand.h \
     src/engine/commands/scriptcommand.h \
-    src/engine/commands/admin/addcharactercommand.h \
-    src/engine/commands/admin/addcontainercommand.h \
-    src/engine/commands/admin/additemcommand.h \
-    src/engine/commands/admin/addportalcommand.h \
-    src/engine/commands/admin/addshieldcommand.h \
-    src/engine/commands/admin/addweaponcommand.h \
     src/engine/commands/admin/admincommand.h \
     src/engine/commands/admin/copyitemcommand.h \
     src/engine/commands/admin/copytriggerscommand.h \
@@ -164,7 +151,6 @@ HEADERS += \
     src/engine/commands/admin/listmethodscommand.h \
     src/engine/commands/admin/listpropscommand.h \
     src/engine/commands/admin/reloadscriptscommand.h \
-    src/engine/commands/admin/removeexitcommand.h \
     src/engine/commands/admin/removeitemcommand.h \
     src/engine/commands/admin/setclasscommand.h \
     src/engine/commands/admin/setpropcommand.h \
@@ -268,6 +254,12 @@ OTHER_FILES += \
     data/commands/usecommand.js \
     data/commands/wieldcommand.js \
     data/commands/whocommand.js \
+    data/commands/admin/addcharactercommand.js \
+    data/commands/admin/addcontainercommand.js \
+    data/commands/admin/additemcommand.js \
+    data/commands/admin/addportalcommand.js \
+    data/commands/admin/addshieldcommand.js \
+    data/commands/admin/addweaponcommand.js \
     data/commands/admin/enterroomcommand.js \
     data/scripts/combat.js \
     data/scripts/sessionhandler.js \

@@ -13,12 +13,6 @@
 #include "util.h"
 #include "commands/gocommand.h"
 #include "commands/scriptcommand.h"
-#include "commands/admin/addcharactercommand.h"
-#include "commands/admin/addcontainercommand.h"
-#include "commands/admin/additemcommand.h"
-#include "commands/admin/addportalcommand.h"
-#include "commands/admin/addshieldcommand.h"
-#include "commands/admin/addweaponcommand.h"
 #include "commands/admin/copyitemcommand.h"
 #include "commands/admin/copytriggerscommand.h"
 #include "commands/admin/execscriptcommand.h"
@@ -27,7 +21,6 @@
 #include "commands/admin/listmethodscommand.h"
 #include "commands/admin/listpropscommand.h"
 #include "commands/admin/reloadscriptscommand.h"
-#include "commands/admin/removeexitcommand.h"
 #include "commands/admin/removeitemcommand.h"
 #include "commands/admin/setclasscommand.h"
 #include "commands/admin/setpropcommand.h"
@@ -56,12 +49,6 @@ CommandRegistry::CommandRegistry(QObject *parent) :
     m_commands.insert("enter", go);
     m_commands.insert("go", go);
 
-    m_adminCommands.insert("add-character", new AddCharacterCommand(this));
-    m_adminCommands.insert("add-container", new AddContainerCommand(this));
-    m_adminCommands.insert("add-portal", new AddPortalCommand(this));
-    m_adminCommands.insert("add-item", new AddItemCommand(this));
-    m_adminCommands.insert("add-shield", new AddShieldCommand(this));
-    m_adminCommands.insert("add-weapon", new AddWeaponCommand(this));
     m_adminCommands.insert("copy-item", new CopyItemCommand(this));
     m_adminCommands.insert("copy-triggers", new CopyTriggersCommand(this));
     m_adminCommands.insert("exec-script", new ExecScriptCommand(this));
@@ -70,7 +57,6 @@ CommandRegistry::CommandRegistry(QObject *parent) :
     m_adminCommands.insert("list-methods", new ListMethodsCommand(this));
     m_adminCommands.insert("list-props", new ListPropsCommand(this));
     m_adminCommands.insert("reload-scripts", new ReloadScriptsCommand(this));
-    m_adminCommands.insert("remove-exit", new RemoveExitCommand(this));
     m_adminCommands.insert("remove-item", new RemoveItemCommand(this));
     m_adminCommands.insert("set-class", new SetClassCommand(this));
     m_adminCommands.insert("set-prop", new SetPropCommand(this));
