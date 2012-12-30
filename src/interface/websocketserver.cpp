@@ -26,6 +26,10 @@ WebSocketServer::WebSocketServer(Realm *realm, quint16 port, QObject *parent) :
 }
 
 WebSocketServer::~WebSocketServer() {
+
+    for (QWsSocket *socket : m_clients) {
+        socket->close();
+    }
 }
 
 void WebSocketServer::onClientConnected() {

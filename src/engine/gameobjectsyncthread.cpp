@@ -53,6 +53,8 @@ void GameObjectSyncThread::run() {
         GameObject *object = m_objectQueue.dequeue();
         syncObject(object);
     }
+
+    qDebug() << "All objects synced. Quit.";
 }
 
 void GameObjectSyncThread::syncObject(GameObject *object) {
