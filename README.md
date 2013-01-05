@@ -79,7 +79,7 @@ Running your own server
 <a id="supported-platforms"></a>
 ### Supported platforms ###
 
- * Linux (tested on Gentoo Linux and openSUSE 12.2)
+ * Linux (tested on Gentoo Linux, openSUSE 12.2 and Ubuntu 12.10)
  * Mac OS X 10.7 and up (recently only tested on OS X 10.8)
 
 <a id="dependencies"></a>
@@ -88,6 +88,11 @@ Running your own server
  * Clang 3.1 or higher, or GCC 4.7 or higher
  * Qt framework 4.7 or higher
  * Zlib development package
+
+If you are using Ubuntu Linux, you can use the following command to install
+the necessary dependencies:
+
+    sudo apt-get install libqt4-dev libz
 
 <a id="compiling"></a>
 ### Compiling ###
