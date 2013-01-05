@@ -92,7 +92,7 @@ Running your own server
 If you are using Ubuntu Linux, you can use the following command to install
 the necessary dependencies:
 
-    sudo apt-get install libqt4-dev libz
+    sudo apt-get install libqt4-dev libz-dev
 
 <a id="compiling"></a>
 ### Compiling ###
