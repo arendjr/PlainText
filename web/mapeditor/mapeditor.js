@@ -297,9 +297,11 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
 
         var areas = [];
         for (var id in this.model.areas) {
-            var area = this.model.areas[id];
-            area.visible = this.view.isAreaVisible(area);
-            areas.append(area);
+            if (this.model.areas.hasOwnProperty(id)) {
+                var area = this.model.areas[id];
+                area.visible = this.view.isAreaVisible(area);
+                areas.append(area);
+            }
         }
 
         var menuContent = $(".areas.menu-content", this.element);

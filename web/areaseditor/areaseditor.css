@@ -28,6 +28,9 @@
         background-image: url(/img/remove.png);
         margin-right: 6px;
     }
+    .areas-editor input {
+        width: 494px;
+    }
 
 .area-delete {
     top: 200px;

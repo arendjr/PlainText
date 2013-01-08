@@ -37,7 +37,9 @@ define(["controller", "lib/hogan", "lib/zepto", "text!areaseditor/areaseditor.ht
 
         var areas = [];
         for (var id in this.mapModel.areas) {
-            areas.append(this.mapModel.areas[id]);
+            if (this.mapModel.areas.hasOwnProperty(id)) {
+                areas.append(this.mapModel.areas[id]);
+            }
         }
 
         var areasEditorTemplate = Hogan.compile(areasEditorHtml);
