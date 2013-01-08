@@ -1,0 +1,40 @@
+.areas-editor {
+    top: 180px;
+    left: -webkit-calc(50% - 300px);
+    left: -moz-calc(50% - 300px);
+    left: calc(50% - 300px);
+    right: -webkit-calc(50% - 300px);
+    right: -moz-calc(50% - 300px);
+    right: calc(50% - 300px);
+}
+    .areas-editor .areas-container {
+        margin: 1em;
+        border: 1px solid grey;
+        height: 12em;
+        overflow: auto;
+    }
+    .areas-editor .icon {
+        display: inline-block;
+        border: 0;
+        width: 12px;
+        height: 12px;
+        background-size: 12px 12px;
+    }
+    .areas-editor .add.icon {
+        background-image: url(/img/add.png);
+        margin-right: 4px;
+    }
+    .areas-editor .remove.icon {
+        background-image: url(/img/remove.png);
+        margin-right: 6px;
+    }
+
+.area-delete {
+    top: 200px;
+    left: -webkit-calc(50% - 200px);
+    left: -moz-calc(50% - 200px);
+    left: calc(50% - 200px);
+    right: -webkit-calc(50% - 200px);
+    right: -moz-calc(50% - 200px);
+    right: calc(50% - 200px);
+}

@@ -120,6 +120,15 @@ Array.prototype.minus = function(array) {
     return result;
 };
 
+Array.prototype.mul = function(scalar) {
+
+    var result = [];
+    for (var i = 0, length = this.length; i < length; i++) {
+        result[i] = scalar * this[i];
+    }
+    return result;
+};
+
 Array.prototype.named = function(name) {
 
     for (var i = 0; i < this.length; i++) {
@@ -339,6 +348,12 @@ String.prototype.rightJustified = function(n, fill) {
         padding += fill;
     }
     return padding + this;
+};
+
+String.prototype.section = function(separator, start, end) {
+
+    var parts = this.split(separator).slice(start, end);
+    return parts.join(separator);
 };
 
 String.prototype.startsWith = function(string) {

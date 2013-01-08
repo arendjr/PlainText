@@ -1,10 +1,11 @@
 /*global define:false, require:false*/
 define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapview",
-        "portaleditor/portaleditor", "portaleditor/portaldeletedialog",
+        "areaseditor/areaseditor", "portaleditor/portaleditor", "portaleditor/portaldeletedialog",
         "propertyeditor/propertyeditor", "sliderwidget/slider", "lib/hogan", "lib/zepto",
-        "text!mapeditor/mapeditor.html", "text!mapeditor/areas-menu.html"],
-       function(Controller, Loading, MapModel, MapView, PortalEditor,
-                PortalDeleteDialog, PropertyEditor, SliderWidget, Hogan, $,
+        "text!mapeditor/mapeditor.html", "text!mapeditor/areasmenu.html"],
+       function(Controller, Loading, MapModel, MapView,
+                AreasEditor, PortalEditor, PortalDeleteDialog,
+                PropertyEditor, SliderWidget, Hogan, $,
                 mapEditorHtml, areasMenuHtml) {
 
     "use strict";
@@ -18,6 +19,7 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
         this.model = null;
         this.view = null;
 
+        this.areasEditor = null;
         this.portalEditor = null;
         this.portalDeleteDialog = null;
         this.propertyEditor = null;
@@ -51,6 +53,9 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
         window.model = this.model;
         window.view = this.view;
 
+        this.areasEditor = new AreasEditor();
+        this.areasEditor.setMapModel(this.model);
+
         this.portalEditor = new PortalEditor();
         this.portalEditor.setMapModel(this.model);
         this.portalEditor.setMapView(this.view);
@@ -81,9 +86,7 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
                 self.onRoomSelectionChanged();
             }
 
-            if (self.areas !== self.model.areas) {
-                self.updateAreas();
-            }
+            self.updateAreasMenu();
         });
 
         this.view.addSelectionListener(function(selectedRoomId) {
@@ -102,8 +105,12 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
         $(".areas.menu", this.element).on("change", "input", function(event) {
             var areaId = $(event.target).data("area-id");
             if (areaId) {
-                self.view.setAreaVisible(self.areas[areaId], event.target.checked);
+                self.view.setAreaVisible(self.model.areas[areaId], event.target.checked);
             }
+        });
+
+        $(".areas.menu", this.element).on("click", ".edit.areas", function(event) {
+            self.areasEditor.show();
         });
 
         $(".plot.altitude", this.element).on("click", function() {
@@ -176,21 +183,21 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
                         self.portalDeleteDialog.show({
                             "ondeleteone": function() {
                                 var sourceRoom = self.model.rooms[self.selectedRoomId];
-                                var portals = sourceRoom.portals.slice(0);
+                                var portals = sourceRoom.portals.clone();
                                 portals.removeOne(portal);
                                 sourceRoom.portals = portals;
                                 self.portalDeleteDialog.close();
+                                self.portalEditor.close();
                             },
                             "ondeleteboth": function() {
                                 self.model.deletePortal(portalId);
                                 self.portalDeleteDialog.close();
+                                self.portalEditor.close();
                             }
                         });
                     } else {
                         self.model.deletePortal(portalId);
                     }
-
-                    self.portalEditor.close();
                 }
             });
         });
@@ -286,11 +293,11 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
         this.selectedRoomDiv.show();
     };
 
-    MapEditor.prototype.updateAreas = function() {
+    MapEditor.prototype.updateAreasMenu = function() {
 
         var areas = [];
-        for (var key in this.model.areas) {
-            var area = this.model.areas[key];
+        for (var id in this.model.areas) {
+            var area = this.model.areas[id];
             area.visible = this.view.isAreaVisible(area);
             areas.append(area);
         }

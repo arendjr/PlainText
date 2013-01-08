@@ -14,12 +14,17 @@ Area::Area(Realm *realm, uint id, Options options) :
 Area::~Area() {
 }
 
-void Area::addRoom(const GameObjectPtr &room) {
+void Area::addRoom(const GameObjectPtr &roomPtr) {
 
-    if (!m_rooms.contains(room)) {
-        m_rooms.append(room);
+    if (!m_rooms.contains(roomPtr)) {
+        m_rooms.append(roomPtr);
 
-        room.cast<Room *>()->setArea(this);
+        Room *room = roomPtr.cast<Room *>();
+        if (!room->area().isNull()) {
+            Area *other = room->area().cast<Area *>();
+            other->removeRoom(roomPtr);
+        }
+        room->setArea(this);
 
         setModified();
     }

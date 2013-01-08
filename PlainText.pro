@@ -283,6 +283,11 @@ OTHER_FILES += \
     web/notifications.js \
     web/require.js \
     web/util.js \
+    web/areaseditor/areadeletedialog.html \
+    web/areaseditor/areadeletedialog.js \
+    web/areaseditor/areaseditor.css \
+    web/areaseditor/areaseditor.html \
+    web/areaseditor/areaseditor.js \
     web/dialog/dialog.css \
     web/lib/fabric.js \
     web/lib/hogan.js \
@@ -297,20 +302,20 @@ OTHER_FILES += \
     web/loadingwidget/loading.css \
     web/loadingwidget/loading.html \
     web/loadingwidget/loading.js \
-    web/mapeditor/areas-menu.html \
+    web/mapeditor/areasmenu.html \
     web/mapeditor/mapeditor.css \
     web/mapeditor/mapeditor.html \
     web/mapeditor/mapeditor.js \
     web/mapeditor/mapview.js \
     web/mapmodel/model.js \
+    web/portaleditor/portaldeletedialog.html \
     web/portaleditor/portaldeletedialog.js \
     web/portaleditor/portaleditor.css \
+    web/portaleditor/portaleditor.html \
     web/portaleditor/portaleditor.js \
     web/propertyeditor/propertyeditor.css \
-    web/propertyeditor/propertyeditor.js \
-    web/portaleditor/portaleditor.html \
-    web/portaleditor/portaldeletedialog.html \
     web/propertyeditor/propertyeditor.html \
+    web/propertyeditor/propertyeditor.js \
     web/sliderwidget/slider.css \
     web/sliderwidget/slider.js \
 

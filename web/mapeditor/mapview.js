@@ -17,7 +17,6 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
         this.visibleAreas = [];
         this.zRestriction = null;
 
-        this.selectedShape = null;
         this.selectedRoomId = 0;
 
         this.selectionListeners = [];
@@ -37,6 +36,7 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
         this.canvas = new Fabric.Canvas(this.container.children().first()[0]);
         this.canvas.selection = false;
         this.canvas.renderOnAddition = false;
+        this.canvas.hoverCursor = "pointer";
 
         this.attachListeners();
     };
@@ -48,10 +48,8 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
         this.canvas.on("object:selected", function(event) {
             var shape = event.target;
             if (shape.get("id")) {
-                self.selectedShape = shape;
                 self.selectedRoomId = shape.get("id");
             } else {
-                self.selectedShape = null;
                 self.selectedRoomId = 0;
             }
 
@@ -155,8 +153,6 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
                                                        portal.room2.z === zRestriction));
                 if (isVisible) {
                     portalIds.append(portalId);
-                } else {
-                    delete portal.shape;
                 }
             }
         }
@@ -170,16 +166,13 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
                              (zRestriction === null || room.z === zRestriction));
                 if (isVisible) {
                     roomIds.append(roomId);
-                } else {
-                    delete room.shape;
                 }
             }
         }
 
+        this.canvas.clear();
+
         var self = this;
-
-        var shapesToProcess = this.canvas.getObjects().clone();
-
         portalIds.forEach(function(id) {
             var portal = portals[id];
             var room = portal.room;
@@ -192,24 +185,13 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
             var y2 = offsetY + (room2.y - center.y + z2) * zoom;
 
             if (isWithinCanvas(x1, y1) || isWithinCanvas(x2, y2)) {
-                if (portal.shape) {
-                    portal.shape.set({
-                        "x1": x1, "y1": y1,
-                        "x2": x2, "y2": y2
-                    });
-                } else {
-                    portal.shape = new Fabric.Line([ x1, y1, x2, y2 ], {
-                        "fill": "blue",
-                        "stroke": "blue",
-                        "strokeWidth": ROOM_BORDER_WIDTH,
-                        "selectable": false
-                    });
-                    self.canvas.add(portal.shape);
-                }
-
-                shapesToProcess.removeOne(portal.shape);
-            } else {
-                delete portal.shape;
+                var shape = new Fabric.Line([ x1, y1, x2, y2 ], {
+                    "fill": "blue",
+                    "stroke": "blue",
+                    "strokeWidth": ROOM_BORDER_WIDTH,
+                    "selectable": false
+                });
+                self.canvas.add(shape);
             }
         });
 
@@ -220,67 +202,34 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
             var y = offsetY + (room.y - center.y + z) * zoom;
 
             if (isWithinCanvas(x, y)) {
-                if (room.shape) {
-                    room.shape.set({
-                        "left": x,
-                        "top": y
-                    });
-                    room.shape.bringToFront();
-                } else {
-                    var fill = self.roomFills.contains(room.id) ? self.roomFills[room.id] : "grey";
-                    room.shape = new Fabric.Rect({
-                        "id": room.id,
-                        "left": x,
-                        "top": y,
-                        "fill": fill,
-                        "width": ROOM_SIZE,
-                        "height": ROOM_SIZE,
-                        "stroke": "black",
-                        "strokeWidth": ROOM_BORDER_WIDTH,
-                        "selectable": true,
-                        "lockMovementX": true,
-                        "lockMovementY": true,
-                        "lockScalingX": true,
-                        "lockScalingY": true,
-                        "lockRotation": true,
-                        "hasControls": false
-                    });
-                    self.canvas.add(room.shape);
-
-                    if (room.id === self.selectedRoomId) {
-                        self.selectedShape = room.shape;
-                    }
-                }
-                shapesToProcess.removeOne(room.shape);
+                var fill = self.roomFills.contains(room.id) ? self.roomFills[room.id] : "grey";
+                var shape = new Fabric.Rect({
+                    "id": room.id,
+                    "left": x,
+                    "top": y,
+                    "fill": fill,
+                    "width": ROOM_SIZE,
+                    "height": ROOM_SIZE,
+                    "stroke": "black",
+                    "strokeWidth": ROOM_BORDER_WIDTH,
+                    "selectable": true,
+                    "lockMovementX": true, "lockMovementY": true,
+                    "lockScalingX": true, "lockScalingY": true,
+                    "lockRotation": true,
+                    "hasControls": false
+                });
+                self.canvas.add(shape);
 
                 if (self.displayRoomNames) {
-                    if (room.textShape) {
-                        room.textShape.set({
-                            "left": x,
-                            "top": y - ROOM_SIZE
-                        });
-                        room.textShape.bringToFront();
-                    } else {
-                        room.textShape = new Fabric.Text(room.name || "", {
-                            "left": x,
-                            "top": y - ROOM_SIZE,
-                            "fontSize": 14,
-                            "selectable": false
-                        });
-                        self.canvas.add(room.textShape);
-                    }
-                    shapesToProcess.removeOne(room.textShape);
-                } else {
-                    delete room.textShape;
+                    var textShape = new Fabric.Text(room.name || "", {
+                        "left": x,
+                        "top": y - ROOM_SIZE,
+                        "fontSize": 14,
+                        "selectable": false
+                    });
+                    self.canvas.add(textShape);
                 }
-            } else {
-                delete room.shape;
-                delete room.textShape;
             }
-        });
-
-        shapesToProcess.forEach(function(shape) {
-            self.canvas.remove(shape);
         });
 
         this.canvas.renderAll();
