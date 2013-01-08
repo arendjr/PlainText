@@ -165,6 +165,7 @@ define(["lib/zepto"], function($) {
             if (message.data.substr(0, 1) === "{" && message.data.substr(-1) === "}") {
                 var data = JSON.parse(message.data);
                 if (!data) {
+                    writeToScreen("Error: Invalid JSON in reply: " + message.data);
                     return;
                 }
 
@@ -172,8 +173,11 @@ define(["lib/zepto"], function($) {
 
                 if (pendingRequests.hasOwnProperty(requestId)) {
                     if (data.errorCode === 0) {
-                        pendingRequests[requestId](data.data);
+                        pendingRequests[requestId].success(data.data);
                     } else {
+                        if (pendingRequests[requestId].error) {
+                            pendingRequests[requestId].error();
+                        }
                         writeToScreen("Error: " + data.errorMessage);
                     }
 
@@ -313,11 +317,14 @@ define(["lib/zepto"], function($) {
         socket.send(command);
     }
 
-    function sendApiCall(command, callback) {
+    function sendApiCall(command, callback, errorCallback) {
 
         var id = "request" + requestId;
         if (callback) {
-            pendingRequests[id] = callback;
+            pendingRequests[id] = {
+                "success": callback,
+                "error": errorCallback
+            }
         }
 
         var parts = command.split(" ");

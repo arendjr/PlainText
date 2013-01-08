@@ -66,7 +66,7 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
         var self = this;
         var firstUpdate = true;
 
-        this.model.addChangeListener(function() {
+        this.model.bind("change", function() {
             if (self.selectedRoomId !== 0) {
                 if (!self.model.rooms.contains(self.selectedRoomId)) {
                     self.selectedRoomId = 0;
@@ -146,29 +146,33 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
         var portals = this.model.portals;
         var portalIds = [];
         for (var portalId in portals) {
-            var portal = portals[portalId];
-            isVisible = (zoom >= 2 &&
-                         (!portal.room.area || visibleAreas.contains(portal.room.area)) &&
-                         (!portal.room2.area || visibleAreas.contains(portal.room2.area)) &&
-                         (zRestriction === null || portal.room.z === zRestriction ||
-                                                   portal.room2.z === zRestriction));
-            if (isVisible) {
-                portalIds.append(portalId);
-            } else {
-                delete portal.shape;
+            if (portals.hasOwnProperty(portalId)) {
+                var portal = portals[portalId];
+                isVisible = (zoom >= 2 &&
+                             (!portal.room.area || visibleAreas.contains(portal.room.area)) &&
+                             (!portal.room2.area || visibleAreas.contains(portal.room2.area)) &&
+                             (zRestriction === null || portal.room.z === zRestriction ||
+                                                       portal.room2.z === zRestriction));
+                if (isVisible) {
+                    portalIds.append(portalId);
+                } else {
+                    delete portal.shape;
+                }
             }
         }
 
         var rooms = this.model.rooms;
         var roomIds = [];
         for (var roomId in rooms) {
-            var room = rooms[roomId];
-            isVisible = ((!room.area || visibleAreas.contains(room.area)) &&
-                         (zRestriction === null || room.z === zRestriction));
-            if (isVisible) {
-                roomIds.append(roomId);
-            } else {
-                delete room.shape;
+            if (rooms.hasOwnProperty(roomId)) {
+                var room = rooms[roomId];
+                isVisible = ((!room.area || visibleAreas.contains(room.area)) &&
+                             (zRestriction === null || room.z === zRestriction));
+                if (isVisible) {
+                    roomIds.append(roomId);
+                } else {
+                    delete room.shape;
+                }
             }
         }
 
