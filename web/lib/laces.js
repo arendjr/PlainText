@@ -20,7 +20,13 @@ function LacesObject() {
 // listener - Callback function that will be invoked when the event is fired.
 //            The callback will receive an event parameter, the contents of
 //            which relies on the event parameter given to the fire() method.
-LacesObject.prototype.bind = function(eventName, listener) {
+// options - Optional options object. If you set the "initialFire" property to
+//           true, the listener will be invoked immediately. Beware that unless
+//           eventName specifies a specific property, the event object will be
+//           completely empty the first time.
+LacesObject.prototype.bind = function(eventName, listener, options) {
+
+    options = options || {};
 
     if (eventName.indexOf(" ") > -1) {
         var eventNames = eventName.split(" ");
@@ -32,6 +38,16 @@ LacesObject.prototype.bind = function(eventName, listener) {
             this._eventListeners[eventName] = [];
         }
         this._eventListeners[eventName].push(listener);
+
+        if (options.initialFire) {
+            var event = {};
+            if (eventName.indexOf(":") > -1) {
+                var propertyName = eventName.substr(eventName.indexOf(":") + 1);
+                event.key = propertyName;
+                event.value = this[propertyName];
+            }
+            this.fire(eventName, event);
+        }
     }
 };
 
@@ -323,6 +339,9 @@ LacesMap.prototype._setValue = function(key, value) {
     var newProperty = false;
     if (this._values.hasOwnProperty(key)) {
         var oldValue = this._values[key];
+        if (oldValue === value) {
+            return;
+        }
 
         this._unbindValue(oldValue);
 
@@ -441,7 +460,10 @@ function LacesArray() {
 
     var array = [];
     for (var method in LacesArray.prototype) {
-        array[method] = LacesArray.prototype[method];
+        Object.defineProperty(array, method, {
+            "value": LacesArray.prototype[method],
+            "writable": false
+        });
     }
     LacesObject.call(array);
     return array;
@@ -535,10 +557,12 @@ LacesArray.prototype.sort = function() {
 // elements.
 LacesArray.prototype.splice = function(index, howMany) {
 
-    var removedElements = Array.prototype.splice(this, arguments);
-    var addedElements = arguments.slice(2);
+    var removedElements = Array.prototype.splice.apply(this, arguments);
+    var addedElements = [];
+    for (var i = 2, length = arguments.length; i < length; i++) {
+        addedElements.push(arguments[i]);
+    }
 
-    var i, length;
     if (removedElements.length > 0) {
         for (i = 0, length = removedElements.length; i < length; i++) {
             this._unbindValue(removedElements[i]);
@@ -553,7 +577,7 @@ LacesArray.prototype.splice = function(index, howMany) {
         this.fire("add", { "elements": addedElements });
         this.fire("change", { "elements": addedElements });
     }
-    
+
     return removedElements;
 };
 
