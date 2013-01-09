@@ -147,9 +147,29 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
         });
 
         var self = this;
+        this.areas.bind("remove", function(event) {
+            self.holdEvents();
+
+            var areaId = event.key;
+            var area = event.oldValue;
+            for (var roomId in self.rooms) {
+                if (self.rooms.hasOwnProperty(roomId)) {
+                    var room = this.rooms[roomId];
+                    if (room.area === area) {
+                        room.area = null;
+                    }
+                }
+            }
+
+            Controller.sendApiCall("object-delete " + areaId);
+            self.fireHeldEvents();
+        });
+
         this.portals.bind("remove", function(event) {
+            self.holdEvents();
+
             var portalId = event.key;
-            var portal = self.portals[portalId];
+            var portal = event.oldValue;
             for (var roomId in self.rooms) {
                 if (self.rooms.hasOwnProperty(roomId)) {
                     var room = this.rooms[roomId];
@@ -158,6 +178,7 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
             }
 
             Controller.sendApiCall("object-delete " + portalId);
+            self.fireHeldEvents();
         });
     }
 
