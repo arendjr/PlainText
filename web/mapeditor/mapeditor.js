@@ -190,13 +190,13 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
                                 self.portalEditor.close();
                             },
                             "ondeleteboth": function() {
-                                self.model.deletePortal(portalId);
+                                self.model.portals.remove(portalId);
                                 self.portalDeleteDialog.close();
                                 self.portalEditor.close();
                             }
                         });
                     } else {
-                        self.model.deletePortal(portalId);
+                        self.model.portals.remove(portalId);
                     }
                 }
             });
