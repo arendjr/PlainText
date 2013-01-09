@@ -145,6 +145,20 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
             "portals": {},
             "rooms": {}
         });
+
+        var self = this;
+        this.portals.bind("remove", function(event) {
+            var portalId = event.key;
+            var portal = self.portals[portalId];
+            for (var roomId in self.rooms) {
+                if (self.rooms.hasOwnProperty(roomId)) {
+                    var room = this.rooms[roomId];
+                    room.portals.removeOne(portal);
+                }
+            }
+
+            Controller.sendApiCall("object-delete " + portalId);
+        });
     }
 
     MapModel.prototype = new Laces.Model();
@@ -224,19 +238,6 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
             }
 
             portal.resolvePointers(["room", "room2"]);
-        });
-    };
-
-    MapModel.prototype.deletePortal = function(portalId) {
-
-        var self = this;
-        Controller.sendApiCall("portal-delete " + portalId, function() {
-            var portal = self.portals[portalId];
-            for (var roomId in self.rooms) {
-                var room = self.rooms[roomId];
-                room.portals.removeOne(portal);
-            }
-            delete self.portals[portalId];
         });
     };
 
