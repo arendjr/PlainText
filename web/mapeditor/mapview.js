@@ -325,7 +325,7 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
             }
         }
 
-        this.canvas.renderAll();
+        this.draw();
     };
 
     MapView.prototype.addSelectionListener = function(listener) {
