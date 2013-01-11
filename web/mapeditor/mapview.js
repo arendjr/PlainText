@@ -146,6 +146,10 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
         for (var portalId in portals) {
             if (portals.hasOwnProperty(portalId)) {
                 var portal = portals[portalId];
+                if (!portal.room || !portal.room2) {
+                    continue;
+                }
+
                 isVisible = (zoom >= 2 &&
                              (!portal.room.area || visibleAreas.contains(portal.room.area)) &&
                              (!portal.room2.area || visibleAreas.contains(portal.room2.area)) &&

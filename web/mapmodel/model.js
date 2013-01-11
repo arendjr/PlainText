@@ -9,11 +9,10 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
 
         this.model = model;
 
-        var self = this;
         this.bind("change", function(event) {
             var propertyName = event.key;
-            if (self.constructor.savedProperties.contains(propertyName)) {
-                self.saveProperty(propertyName);
+            if (this.constructor.savedProperties.contains(propertyName)) {
+                this.saveProperty(propertyName);
             }
         });
     }
@@ -62,11 +61,11 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
         var value = this[propertyName];
 
         if (options.type === "pointer") {
-            value = value.constructor.name.toLower() + ":" + value.id;
+            value = value.toPointer();
         } else if (options.type === "pointerlist") {
             var pointerList = [];
-            value.forEach(function(pointer) {
-                pointerList.append(value.constructor.name.toLower() + ":" + pointer.id);
+            value.forEach(function(object) {
+                pointerList.append(object.toPointer());
             });
             value = "[" + pointerList.join(",") + "]";
         } else if (options.type === "point") {
@@ -74,6 +73,11 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
         }
 
         Controller.sendApiCall("property-set " + this.id + " " + propertyName + " " + value);
+    };
+
+    GameObject.prototype.toPointer = function() {
+
+        return this.constructor.name.toLower() + ":" + this.id;
     };
 
 
@@ -137,6 +141,11 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
     Portal.prototype = new GameObject();
     Portal.prototype.constructor = Portal;
 
+    Portal.prototype.nameFromRoom = function(room) {
+
+        return room && this.room && room.id === this.room.id ? this.name : this.name2;
+    }
+
 
     function MapModel() {
 
@@ -165,6 +174,35 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
             self.fireHeldEvents();
         });
 
+        Object.defineProperty(this.areas, "save", {
+            "value": function(area) {
+                var command = "portal-set " + portal.id + " " + portal.room + " " + portal.room2 +
+                              " " + portal.name + " " + portal.name2;
+                if (portal.x !== undefined) {
+                    command += " (" + portal.x + "," + portal.y + "," + portal.z + ")";
+                }
+
+                Controller.sendApiCall(command, function(data) {
+                    var portal = new Portal(self, data["portal"]);
+                    self.portals.set(portal.id, portal);
+
+                    if (data.contains("source")) {
+                        var source = new Room(self, data["source"]);
+                        self.rooms.set(source.id, source);
+                        source.resolvePointers(["portals"]);
+                    }
+
+                    if (data.contains("destination")) {
+                        var destination = new Room(self, data["destination"]);
+                        self.rooms.set(destination.id, destination);
+                        destination.resolvePointers(["portals"]);
+                    }
+
+                    portal.resolvePointers(["room", "room2"]);
+                });
+            }
+        });
+
         this.portals.bind("remove", function(event) {
             self.holdEvents();
 
@@ -172,13 +210,42 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
             var portal = event.oldValue;
             for (var roomId in self.rooms) {
                 if (self.rooms.hasOwnProperty(roomId)) {
-                    var room = this.rooms[roomId];
+                    var room = self.rooms[roomId];
                     room.portals.removeOne(portal);
                 }
             }
 
             Controller.sendApiCall("object-delete " + portalId);
             self.fireHeldEvents();
+        });
+
+        Object.defineProperty(this.portals, "save", {
+            "value": function(portal) {
+                var command = "portal-set " + portal.id + " " + portal.room + " " + portal.room2 +
+                              " " + portal.name + " " + portal.name2;
+                if (portal.x !== undefined) {
+                    command += " (" + portal.x + "," + portal.y + "," + portal.z + ")";
+                }
+
+                Controller.sendApiCall(command, function(data) {
+                    var portal = new Portal(self, data["portal"]);
+                    self.portals.set(portal.id, portal);
+
+                    if (data.contains("source")) {
+                        var source = new Room(self, data["source"]);
+                        self.rooms.set(source.id, source);
+                        source.resolvePointers(["portals"]);
+                    }
+
+                    if (data.contains("destination")) {
+                        var destination = new Room(self, data["destination"]);
+                        self.rooms.set(destination.id, destination);
+                        destination.resolvePointers(["portals"]);
+                    }
+
+                    portal.resolvePointers(["room", "room2"]);
+                });
+            }
         });
     }
 
@@ -232,33 +299,6 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
                     self.fireHeldEvents();
                 });
             });
-        });
-    };
-
-    MapModel.prototype.setPortal = function(portal) {
-
-        var command = "portal-set " + portal.id + " " + portal.room + " " + portal.room2 +
-                      " " + portal.name + " " + portal.name2 +
-                      (portal.position ? " (" + portal.position.join(",") + ")" : "");
-
-        var self = this;
-        Controller.sendApiCall(command, function(data) {
-            var portal = new Portal(self, data["portal"]);
-            self.portals[portal.id] = portal;
-
-            if (data.contains("source")) {
-                var source = new Room(self, data["source"]);
-                self.rooms[source.id] = source;
-                source.resolvePointers(["portals"]);
-            }
-
-            if (data.contains("destination")) {
-                var destination = new Room(self, data["destination"]);
-                self.rooms[destination.id] = destination;
-                destination.resolvePointers(["portals"]);
-            }
-
-            portal.resolvePointers(["room", "room2"]);
         });
     };
 

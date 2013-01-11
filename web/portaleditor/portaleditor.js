@@ -124,9 +124,9 @@ define(["controller", "util", "lib/hogan", "lib/zepto", "text!portaleditor/porta
             $(".new.destination", this.element).prop("checked", true);
             $(".room2-id", this.element).val("");
 
-            $(".x", this.element).val(portal.room.position[0]);
-            $(".y", this.element).val(portal.room.position[1]);
-            $(".z", this.element).val(portal.room.position[2]);
+            $(".x", this.element).val(portal.room.x);
+            $(".y", this.element).val(portal.room.y);
+            $(".z", this.element).val(portal.room.z);
 
             this.selectRoom2();
         }
@@ -186,9 +186,9 @@ define(["controller", "util", "lib/hogan", "lib/zepto", "text!portaleditor/porta
                     var room = self.mapModel.rooms[selectedRoomId];
                     var room2 = self.mapModel.rooms[room2Id];
                     self.setDirection(Util.directionForVector({
-                        "x": room2.position[0] - room.position[0],
-                        "y": room2.position[1] - room.position[1],
-                        "z": room2.position[2] - room.position[2]
+                        "x": room2.x - room.x,
+                        "y": room2.y - room.y,
+                        "z": room2.z - room.z
                     }));
                 }
             });
@@ -212,9 +212,9 @@ define(["controller", "util", "lib/hogan", "lib/zepto", "text!portaleditor/porta
                     var room = self.mapModel.rooms[roomId];
                     var room2 = self.mapModel.rooms[selectedRoomId];
                     self.setDirection(Util.directionForVector({
-                        "x": room2.position[0] - room.position[0],
-                        "y": room2.position[1] - room.position[1],
-                        "z": room2.position[2] - room.position[2]
+                        "x": room2.x - room.x,
+                        "y": room2.y - room.y,
+                        "z": room2.z - room.z
                     }));
                 }
             });
@@ -223,8 +223,8 @@ define(["controller", "util", "lib/hogan", "lib/zepto", "text!portaleditor/porta
 
     PortalEditor.prototype.save = function() {
 
-        var portal = {};
-        portal.id = this.portal.id || "new";
+        var portal = this.portal.id ? this.portal.clone() : { "id": "new" };
+
         portal.name = $(".name", this.element).val();
         portal.name2 = $(".name2", this.element).val();
         portal.room = $(".room-id", this.element).val();
@@ -239,25 +239,19 @@ define(["controller", "util", "lib/hogan", "lib/zepto", "text!portaleditor/porta
                 var distance = parseInt($(".distance", this.element).val(), 10);
                 var sourcePosition = this.portal.room.position;
                 var vector = Util.vectorForDirection(direction);
-                portal.position = [
-                    sourcePosition[0] + distance * vector[0],
-                    sourcePosition[1] + distance * vector[1],
-                    sourcePosition[2] + distance * vector[2]
-                ];
+                portal.x = sourcePosition[0] + distance * vector[0];
+                portal.y = sourcePosition[1] + distance * vector[1];
+                portal.z = sourcePosition[2] + distance * vector[2];
             } else {
-                portal.position = [
-                    parseInt($(".x", this.element).val(), 10),
-                    parseInt($(".y", this.element).val(), 10),
-                    parseInt($(".z", this.element).val(), 10)
-                ];
+                portal.x = $(".x", this.element).val();
+                portal.y = $(".y", this.element).val();
+                portal.z = $(".z", this.element).val();
             }
         }
 
-        if (this.options.onsave) {
-            this.options.onsave(portal);
-        } else {
-            this.close();
-        }
+        this.mapModel.portals.save(portal);
+
+        this.close();
     };
 
     PortalEditor.prototype.deletePortal = function() {

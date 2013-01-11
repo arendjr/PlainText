@@ -173,10 +173,6 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
         this.selectedRoomDiv.on("click", ".edit.portal", function() {
             var portal = self.model.portals[event.target.getAttribute("data-portal-id")];
             self.portalEditor.edit(portal, {
-                "onsave": function(portal) {
-                    self.model.setPortal(portal);
-                    self.portalEditor.close();
-                },
                 "ondelete": function(portalId) {
                     if (portal.room.portals.contains(portal) &&
                         portal.room2.portals.contains(portal)) {
@@ -204,12 +200,7 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
 
         $(".add.portal", this.selectedRoomDiv).on("click", function() {
             var sourceRoom = self.model.rooms[self.selectedRoomId];
-            self.portalEditor.add(sourceRoom, {
-                "onsave": function(portal) {
-                    self.model.setPortal(portal);
-                    self.portalEditor.close();                    
-                }
-            });
+            self.portalEditor.add(sourceRoom);
         }, false);
 
         $(".x,.y,.z", this.selectedRoomDiv).on("change", function(event) {
@@ -282,7 +273,7 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
             }
 
             var portalSpan = $("<a />", {
-                "text": portal.room === room ? portal.name : portal.name2,
+                "text": portal.nameFromRoom(room),
                 "class": "edit portal",
                 "data-portal-id": portal.id,
                 "href": ["java", "script:void(0)"].join("")

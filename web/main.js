@@ -68,6 +68,20 @@ Array.prototype.removeOne = function(value) {
 };
 
 
+Object.defineProperty(Object.prototype, "clone", {
+    "value": function() {
+        var result = {};
+        for (var key in this) {
+            if (this.hasOwnProperty(key)) {
+                result[key] = this[key];
+            }
+        }
+        return result;
+    },
+    "configurable": true,
+    "writable": true
+});
+
 Object.defineProperty(Object.prototype, "contains", {
     "value": Object.prototype.hasOwnProperty,
     "configurable": true,
