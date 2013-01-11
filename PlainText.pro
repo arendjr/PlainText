@@ -57,6 +57,7 @@ SOURCES += \
     src/engine/commands/api/datasetcommand.cpp \
     src/engine/commands/api/logretrievecommand.cpp \
     src/engine/commands/api/objectdeletecommand.cpp \
+    src/engine/commands/api/objectsetcommand.cpp \
     src/engine/commands/api/objectslistcommand.cpp \
     src/engine/commands/api/portalsetcommand.cpp \
     src/engine/commands/api/propertygetcommand.cpp \
@@ -163,6 +164,7 @@ HEADERS += \
     src/engine/commands/api/datasetcommand.h \
     src/engine/commands/api/logretrievecommand.h \
     src/engine/commands/api/objectdeletecommand.h \
+    src/engine/commands/api/objectsetcommand.h \
     src/engine/commands/api/objectslistcommand.h \
     src/engine/commands/api/portalsetcommand.h \
     src/engine/commands/api/propertygetcommand.h \

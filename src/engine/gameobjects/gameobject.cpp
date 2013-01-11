@@ -640,18 +640,23 @@ bool GameObject::save() {
     }
 }
 
-bool GameObject::load(const QString &path) {
+void GameObject::load(const QString &path) {
 
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly)) {
-        throw GameException(GameException::CouldNotOpenGameObjectFile, path.toUtf8().constData());
+        throw GameException(GameException::CouldNotOpenGameObjectFile, path);
     }
+
+    loadJson(file.readAll());
+}
+
+void GameObject::loadJson(const QString &jsonString) {
 
     bool error;
     JSonDriver driver;
-    QVariantMap map = driver.parse(&file, &error).toMap();
+    QVariantMap map = driver.parse(jsonString, &error).toMap();
     if (error) {
-        throw GameException(GameException::CorruptGameObjectFile, path.toUtf8().constData());
+        throw GameException(GameException::InvalidGameObjectJson, jsonString);
     }
 
     for (const QMetaProperty &meta : storedMetaProperties()) {
@@ -662,8 +667,6 @@ bool GameObject::load(const QString &path) {
 
         setProperty(name, ConversionUtil::fromVariant(meta.type(), meta.userType(), map[name]));
     }
-
-    return true;
 }
 
 void GameObject::resolvePointers() {
@@ -770,7 +773,7 @@ GameObject *GameObject::createFromFile(Realm *realm, const QString &path) {
 
     QString objectType = Util::capitalize(components[0]);
     GameObject *gameObject = createByObjectType(realm, GameObjectType::fromString(objectType),
-                                                       components[1].toInt());
+                                                       components[1].toUInt());
     gameObject->load(path);
     return gameObject;
 }

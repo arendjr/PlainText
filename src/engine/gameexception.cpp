@@ -8,7 +8,7 @@
 const char *GameException::s_messages[] = {
     "Unknown game object type",
     "Cannot open game object file",
-    "Corrupt game object file",
+    "Invalid game object JSON",
     "Invalid game object file name",
     "Invalid game object pointer",
     "Null pointer referenced",

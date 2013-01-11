@@ -177,7 +177,8 @@ class GameObject : public QObject {
         QString toJsonString(Options options = NoOptions) const;
 
         bool save();
-        bool load(const QString &path);
+        void load(const QString &path);
+        void loadJson(const QString &jsonString);
 
         void resolvePointers();
 

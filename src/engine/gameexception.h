@@ -14,7 +14,7 @@ class GameException : public std::exception {
         enum Cause {
             UnknownGameObjectType = 0,
             CouldNotOpenGameObjectFile,
-            CorruptGameObjectFile,
+            InvalidGameObjectJson,
             InvalidGameObjectFileName,
             InvalidGameObjectPointer,
             NullPointerReference,

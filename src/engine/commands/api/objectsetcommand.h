@@ -13,6 +13,9 @@ class ObjectSetCommand : public ApiCommand {
         virtual ~ObjectSetCommand();
 
         virtual void execute(Character *character, const QString &command);
+
+    protected:
+        virtual void setCommand(const QString &command);
 };
 
 #endif // OBJECTSETCOMMAND_H

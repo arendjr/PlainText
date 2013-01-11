@@ -32,6 +32,7 @@
 #include "commands/api/datasetcommand.h"
 #include "commands/api/logretrievecommand.h"
 #include "commands/api/objectdeletecommand.h"
+#include "commands/api/objectsetcommand.h"
 #include "commands/api/objectslistcommand.h"
 #include "commands/api/portalsetcommand.h"
 #include "commands/api/propertygetcommand.h"
@@ -69,6 +70,7 @@ CommandRegistry::CommandRegistry(QObject *parent) :
     m_apiCommands.insert("api-data-set", new DataSetCommand(this));
     m_apiCommands.insert("api-log-retrieve", new LogRetrieveCommand(this));
     m_apiCommands.insert("api-object-delete", new ObjectDeleteCommand(this));
+    m_apiCommands.insert("api-object-set", new ObjectSetCommand(this));
     m_apiCommands.insert("api-objects-list", new ObjectsListCommand(this));
     m_apiCommands.insert("api-portal-set", new PortalSetCommand(this));
     m_apiCommands.insert("api-property-get", new PropertyGetCommand(this));
