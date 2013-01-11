@@ -26,6 +26,11 @@ void ObjectDeleteCommand::execute(Character *player, const QString &command) {
         return;
     }
 
+    if (!object->canBeDeleted()) {
+        sendError(400, "Object cannot be deleted");
+        return;
+    }
+
     object->setDeleted();
 
     QVariantMap data;

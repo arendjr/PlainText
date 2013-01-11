@@ -1,6 +1,6 @@
 /*global define:false, require:false*/
-define(["controller", "lib/hogan", "lib/zepto", "text!areaseditor/areaseditor.html"],
-       function(Controller, Hogan, $, areasEditorHtml) {
+define(["controller", "util", "lib/hogan", "lib/zepto", "text!areaseditor/areaseditor.html"],
+       function(Controller, Util, Hogan, $, areasEditorHtml) {
 
     "use strict";
 
@@ -9,6 +9,8 @@ define(["controller", "lib/hogan", "lib/zepto", "text!areaseditor/areaseditor.ht
         this.element = null;
 
         this.mapModel = null;
+
+        this.areasEditorTemplate = Hogan.compile(areasEditorHtml);
 
         this.init();
     }
@@ -23,9 +25,43 @@ define(["controller", "lib/hogan", "lib/zepto", "text!areaseditor/areaseditor.ht
 
         var self = this;
 
-        $(".close-button", this.element).on("click", function() {
+        this.element.on("keypress", "input.name", function(event) {
+            if (event.keyCode === Util.Keys.RETURN) {
+                event.preventDefault();
+
+                var name = $(event.target).val();
+                if (name === "") {
+                    return;
+                }
+
+                self.mapModel.areas.save({ "id": "new", "name": name });
+            }
+        });
+        this.element.on("click", ".add.icon", function() {
+            var name = $("input.name", self.element).val();
+            if (name === "") {
+                $("input.name", self.element).focus();
+                return;
+            }
+
+            self.mapModel.areas.save({ "id": "new", "name": name });
+        });
+
+        this.element.on("click", ".close-button", function() {
             self.close();
         });
+
+        this.mapModel.areas.bind("change", function() {
+            var areas = [];
+            for (var id in this) {
+                if (this.hasOwnProperty(id)) {
+                    areas.append(this[id]);
+                }
+            }
+
+            self.element.html(self.areasEditorTemplate.render({ "areas": areas }));
+            $("input.name", self.element).focus();
+        }, { "initialFire": true });
     };
 
     AreasEditor.prototype.setMapModel = function(mapModel) {
@@ -35,15 +71,7 @@ define(["controller", "lib/hogan", "lib/zepto", "text!areaseditor/areaseditor.ht
 
     AreasEditor.prototype.show = function() {
 
-        var areas = [];
-        for (var id in this.mapModel.areas) {
-            if (this.mapModel.areas.hasOwnProperty(id)) {
-                areas.append(this.mapModel.areas[id]);
-            }
-        }
-
-        var areasEditorTemplate = Hogan.compile(areasEditorHtml);
-        this.element = $(areasEditorTemplate.render({ "areas": areas })).appendTo(document.body);
+        this.element = $("<div />").appendTo(document.body);
 
         this.attachListeners();
     };

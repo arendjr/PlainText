@@ -172,6 +172,7 @@ class GameObject : public QObject {
 
         Q_INVOKABLE virtual GameObject *copy();
 
+        Q_INVOKABLE bool canBeDeleted();
         Q_INVOKABLE void setDeleted();
 
         QString toJsonString(Options options = NoOptions) const;

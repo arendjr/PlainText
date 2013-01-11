@@ -1,5 +1,7 @@
 (function(window) {
 
+"use strict";
+
 // Laces Object constructor.
 //
 // This is the base class for the other laces object types. You should not

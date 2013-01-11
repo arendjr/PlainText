@@ -80,6 +80,9 @@ define(function() {
         "isDirection": isDirection,
         "opposingDirection": opposingDirection,
         "vectorForDirection": vectorForDirection,
-        "directionForVector": directionForVector
+        "directionForVector": directionForVector,
+        "Keys": {
+            "RETURN": 13
+        }
     };
 });

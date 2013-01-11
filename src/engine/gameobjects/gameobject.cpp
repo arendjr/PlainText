@@ -595,9 +595,14 @@ GameObject *GameObject::copy() {
     return object;
 }
 
+bool GameObject::canBeDeleted() {
+
+    return ~m_options & NeverDelete;
+}
+
 void GameObject::setDeleted() {
 
-    if (~m_options & Copy && !m_deleted) {
+    if (~m_options & Copy && ~m_options & NeverDelete && !m_deleted) {
         m_deleted = true;
 
         if (m_options & DontSave) {

@@ -20,22 +20,31 @@ void ObjectSetCommand::execute(Character *character, const QString &command) {
     super::prepareExecute(character, command);
 
     GameObjectType objectType = GameObjectType::fromString(takeWord());
-    uint objectId = takeWord().toUInt();
+    QString objectId = takeWord();
 
-    if (objectType == GameObjectType::Unknown ||
-        (objectId == 0 && objectType != GameObjectType::Realm)) {
-        sendError(400, "Invalid object type or ID");
+    if (objectType == GameObjectType::Unknown) {
+        sendError(400, "Invalid object type");
         return;
     }
 
-    GameObject *object = realm()->getObject(GameObjectType::Unknown, objectId);
-    if (object) {
-        if (object->objectType() != objectType) {
-            sendError(400, QString("Invalid type for object with ID %1").arg(objectId));
+    GameObject *object;
+    if (objectId == "new") {
+        object = GameObject::createByObjectType(realm(), objectType);
+    } else {
+        if (objectId.toUInt() == 0 && objectType != GameObjectType::Realm) {
+            sendError(400, "Invalid object ID");
             return;
         }
-    } else {
-        object = GameObject::createByObjectType(realm(), objectType, objectId);
+
+        object = realm()->getObject(GameObjectType::Unknown, objectId.toUInt());
+        if (object) {
+            if (object->objectType() != objectType) {
+                sendError(400, QString("Invalid type for object with ID %1").arg(objectId));
+                return;
+            }
+        } else {
+            object = GameObject::createByObjectType(realm(), objectType, objectId.toUInt());
+        }
     }
 
     object->loadJson(takeRest());

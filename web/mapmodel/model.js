@@ -30,6 +30,7 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
                 return this.model[pointerType + "s"][objectId];
             }
         }
+        console.log("Could not resolve pointer: " + pointer);
         return null;
     };
 
@@ -61,7 +62,7 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
         var value = this[propertyName];
 
         if (options.type === "pointer") {
-            value = value.toPointer();
+            value = (value === null ? "0" : value.toPointer());
         } else if (options.type === "pointerlist") {
             var pointerList = [];
             value.forEach(function(object) {
@@ -75,6 +76,33 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
         Controller.sendApiCall("property-set " + this.id + " " + propertyName + " " + value);
     };
 
+    GameObject.prototype.stringify = function() {
+
+        var object = {};
+        for (var propertyName in this) {
+            if (this.constructor.savedProperties.hasOwnProperty(propertyName)) {
+                var options = this.constructor.savedProperties[propertyName] || {};
+
+                var value = this[propertyName];
+
+                if (options.type === "pointer") {
+                    value = (value === null ? "0" : value.toPointer());
+                } else if (options.type === "pointerlist") {
+                    var pointerList = [];
+                    value.forEach(function(object) {
+                        pointerList.append(object.toPointer());
+                    });
+                    value = pointerList;
+                } else if (options.type === "point") {
+                    value = [value[0], value[1], value[2]];
+                }
+
+                object[propertyName] = value;
+            }
+        }
+        return JSON.stringify(object);
+    };
+
     GameObject.prototype.toPointer = function() {
 
         return this.constructor.name.toLower() + ":" + this.id;
@@ -84,7 +112,24 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
     function Area(model, jsonString) {
 
         var area = JSON.parse(jsonString);
+        area.rooms = area.rooms || [];
         GameObject.call(this, model, area);
+
+        var self = this;
+        this.rooms.bind("add update", function(event) {
+            event.elements.forEach(function(room) {
+                if (room !== null) {
+                    room.area = self;
+                }
+            });
+        });
+        this.rooms.bind("remove", function(event) {
+            event.elements.forEach(function(room) {
+                if (room !== null && room.area === self) {
+                    room.area = null;
+                }
+            });
+        });
     }
 
     Area.savedProperties = {
@@ -111,7 +156,6 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
     }
 
     Room.savedProperties = {
-        "area": { "type": "pointer" },
         "description": { "type": "string" },
         "name": { "type": "string" },
         "portals": { "type": "pointerlist" },
@@ -176,29 +220,14 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
 
         Object.defineProperty(this.areas, "save", {
             "value": function(area) {
-                var command = "portal-set " + portal.id + " " + portal.room + " " + portal.room2 +
-                              " " + portal.name + " " + portal.name2;
-                if (portal.x !== undefined) {
-                    command += " (" + portal.x + "," + portal.y + "," + portal.z + ")";
-                }
+                var areaJson = area.stringify ? area.stringify() : JSON.stringify(area);
+                var command = "object-set Area " + area.id + " " + areaJson;
 
                 Controller.sendApiCall(command, function(data) {
-                    var portal = new Portal(self, data["portal"]);
-                    self.portals.set(portal.id, portal);
+                    var area = new Area(self, data["object"]);
+                    self.areas.set(area.id, area);
 
-                    if (data.contains("source")) {
-                        var source = new Room(self, data["source"]);
-                        self.rooms.set(source.id, source);
-                        source.resolvePointers(["portals"]);
-                    }
-
-                    if (data.contains("destination")) {
-                        var destination = new Room(self, data["destination"]);
-                        self.rooms.set(destination.id, destination);
-                        destination.resolvePointers(["portals"]);
-                    }
-
-                    portal.resolvePointers(["room", "room2"]);
+                    area.resolvePointers(["rooms"]);
                 });
             }
         });
