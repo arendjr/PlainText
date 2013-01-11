@@ -1,11 +1,14 @@
 #include "deleteobjectevent.h"
 
+#include <QDebug>
+
 #include "gameobject.h"
+#include "realm.h"
 
 
-DeleteObjectEvent::DeleteObjectEvent(GameObject *object) :
+DeleteObjectEvent::DeleteObjectEvent(uint objectId) :
     Event(),
-    m_object(object) {
+    m_objectId(objectId) {
 }
 
 DeleteObjectEvent::~DeleteObjectEvent() {
@@ -13,11 +16,15 @@ DeleteObjectEvent::~DeleteObjectEvent() {
 
 void DeleteObjectEvent::process() {
 
-    delete m_object;
+    GameObject *object = Realm::instance()->getObject(GameObjectType::Unknown, m_objectId);
+    if (object) {
+        delete object;
+    } else {
+        qDebug() << "Attempt to delete non-existing (already deleted?) object";
+    }
 }
 
 QString DeleteObjectEvent::toString() const {
 
-    return QString("Delete object %2:%3").arg(m_object->objectType().toString())
-                                         .arg(m_object->id());
+    return QString("Delete #%1").arg(m_objectId);
 }

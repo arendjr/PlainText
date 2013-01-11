@@ -9,7 +9,7 @@ class GameObject;
 class DeleteObjectEvent : public Event {
 
     public:
-        DeleteObjectEvent(GameObject *object);
+        DeleteObjectEvent(uint objectId);
         virtual ~DeleteObjectEvent();
 
         virtual void process();
@@ -17,7 +17,7 @@ class DeleteObjectEvent : public Event {
         virtual QString toString() const;
 
     private:
-        GameObject *m_object;
+        uint m_objectId;
 };
 
 #endif // DELETEOBJECTEVENT_H

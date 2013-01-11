@@ -1,8 +1,10 @@
 #include "portal.h"
 
 
+#define super GameObject
+
 Portal::Portal(Realm *realm, uint id, Options options) :
-    GameObject(realm, GameObjectType::Portal, id, options),
+    super(realm, GameObjectType::Portal, id, options),
     m_flags(PortalFlags::NoFlags) {
 }
 

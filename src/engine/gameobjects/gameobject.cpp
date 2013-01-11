@@ -46,7 +46,7 @@ GameObject::GameObject(Realm *realm, GameObjectType objectType, uint id, Options
     m_realm(realm),
     m_objectType(objectType),
     m_id(id),
-    m_options((Options) (options | AutoDelete)),
+    m_options((Options) (options & Copy ? options : options | AutoDelete)),
     m_deleted(false),
     m_intervalHash(nullptr),
     m_timeoutHash(nullptr) {
@@ -71,8 +71,8 @@ GameObject::~GameObject() {
 
     for (GameObjectPtr *pointer : m_pointers) {
         pointer->unresolve(false);
-        *pointer = GameObjectPtr();
     }
+    m_pointers.clear();
 
     killAllTimers();
 }
@@ -601,7 +601,7 @@ void GameObject::setDeleted() {
         m_deleted = true;
 
         if (m_options & DontSave) {
-            m_realm->enqueueEvent(new DeleteObjectEvent(this));
+            m_realm->enqueueEvent(new DeleteObjectEvent(m_id));
         } else {
             m_realm->addModifiedObject(this);
         }
@@ -631,7 +631,7 @@ bool GameObject::save() {
     if (m_deleted) {
         bool result = QFile::remove(DiskUtil::gameObjectPath(m_objectType.toString(), m_id));
 
-        m_realm->enqueueEvent(new DeleteObjectEvent(this));
+        m_realm->enqueueEvent(new DeleteObjectEvent(m_id));
 
         return result;
     } else {
