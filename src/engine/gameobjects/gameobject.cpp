@@ -629,9 +629,11 @@ QString GameObject::toJsonString(Options options) const {
 bool GameObject::save() {
 
     if (m_deleted) {
-        return QFile::remove(DiskUtil::gameObjectPath(m_objectType.toString(), m_id));
+        bool result = QFile::remove(DiskUtil::gameObjectPath(m_objectType.toString(), m_id));
 
         m_realm->enqueueEvent(new DeleteObjectEvent(this));
+
+        return result;
     } else {
         return DiskUtil::writeGameObject(m_objectType.toString(), m_id,
                                          toJsonString((Options) (SkipId | IncludeTypeInfo)));

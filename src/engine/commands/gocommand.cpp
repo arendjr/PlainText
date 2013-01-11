@@ -27,7 +27,7 @@ void GoCommand::execute(Character *player, const QString &command) {
     ObjectDescription description = takeObjectsDescription();
     GameObjectPtrList portals;
     for (const GameObjectPtr &portalPtr : currentRoom()->portals()) {
-        Portal *portal = portalPtr.cast<Portal *>();
+        Portal *portal = portalPtr.unsafeCast<Portal *>();
         QString loweredName = portal->nameFromRoom(player->currentRoom()).toLower();
         for (const QString &word : loweredName.split(' ')) {
             if (word.startsWith(description.name)) {

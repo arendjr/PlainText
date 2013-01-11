@@ -123,7 +123,10 @@ void Realm::registerObject(GameObject *gameObject) {
     }
 
     if (id >= m_nextId) {
-        m_nextId = id + 1;
+        m_nextId = id;
+        do {
+            m_nextId++;
+        } while (m_objectMap.contains(m_nextId));
     }
 }
 
@@ -233,7 +236,11 @@ void Realm::setDateTime(const QDateTime &dateTime) {
 
 uint Realm::uniqueObjectId() {
 
-    return m_nextId++;
+    uint uniqueId = m_nextId;
+    do {
+        m_nextId++;
+    } while (m_objectMap.contains(m_nextId));
+    return uniqueId;
 }
 
 void Realm::enqueueEvent(Event *event) {
