@@ -93,6 +93,7 @@
         }
         .map-editor .sidebar .add,
         .map-editor .sidebar .edit.name,
+        .map-editor .sidebar .edit.area,
         .map-editor .sidebar .edit.description {
             font-size: 75%;
         }

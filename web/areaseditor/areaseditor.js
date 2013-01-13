@@ -46,6 +46,10 @@ define(["controller", "util", "lib/hogan", "lib/zepto", "text!areaseditor/arease
 
             self.mapModel.areas.save({ "id": "new", "name": name });
         });
+        this.element.on("click", ".remove.icon", function() {
+            var areaId = $(event.target).data("area-id").toInt();
+            self.mapModel.areas.remove(areaId);
+        });
 
         this.element.on("click", ".close-button", function() {
             self.close();

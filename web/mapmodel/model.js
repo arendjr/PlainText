@@ -207,7 +207,7 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
             var area = event.oldValue;
             for (var roomId in self.rooms) {
                 if (self.rooms.hasOwnProperty(roomId)) {
-                    var room = this.rooms[roomId];
+                    var room = self.rooms[roomId];
                     if (room.area === area) {
                         room.area = null;
                     }
@@ -225,9 +225,8 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
 
                 Controller.sendApiCall(command, function(data) {
                     var area = new Area(self, data["object"]);
-                    self.areas.set(area.id, area);
-
                     area.resolvePointers(["rooms"]);
+                    self.areas.set(area.id, area);
                 });
             }
         });
