@@ -149,6 +149,7 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
         room.position = room.position || [0, 0, 0];
         GameObject.call(this, model, room);
 
+        this.set("areaName", function() { return this.area ? this.area.name : "(none)"; });
         this.set("x", room.position[0], { "type": "integer" });
         this.set("y", room.position[1], { "type": "integer" });
         this.set("z", room.position[2], { "type": "integer" });

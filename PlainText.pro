@@ -294,6 +294,7 @@ OTHER_FILES += \
     web/lib/fabric.js \
     web/lib/hogan.js \
     web/lib/laces.js \
+    web/lib/laces.tie.js \
     web/lib/zepto.js \
     web/lib/codemirror/codemirror.css \
     web/lib/codemirror/codemirror.js \

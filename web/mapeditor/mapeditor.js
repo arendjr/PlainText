@@ -1,12 +1,11 @@
 /*global define:false, require:false*/
 define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapview",
         "areaseditor/areaseditor", "portaleditor/portaleditor", "portaleditor/portaldeletedialog",
-        "propertyeditor/propertyeditor", "sliderwidget/slider", "lib/hogan", "lib/zepto",
-        "text!mapeditor/mapeditor.html", "text!mapeditor/areasmenu.html"],
+        "propertyeditor/propertyeditor", "sliderwidget/slider", "lib/hogan", "lib/laces.tie",
+        "lib/zepto", "text!mapeditor/mapeditor.html", "text!mapeditor/areasmenu.html"],
        function(Controller, Loading, MapModel, MapView,
                 AreasEditor, PortalEditor, PortalDeleteDialog,
-                PropertyEditor, SliderWidget, Hogan, $,
-                mapEditorHtml, areasMenuHtml) {
+                PropertyEditor, SliderWidget, Hogan, Laces, $, mapEditorHtml, areasMenuHtml) {
 
     "use strict";
 
@@ -26,9 +25,6 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
         this.zoomSlider = null;
         this.perspectiveSlider = null;
 
-        this.selectedRoomDiv = null;
-        this.selectedRoomId = 0;
-
         this.init();
     }
 
@@ -36,17 +32,20 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
 
         var initialZoom = 0.2;
 
-        this.model = new MapModel();
+        this.model = new Laces.Model();
+        this.model.set("map", new MapModel());
+        this.model.set("selectedRoom", null);
 
         Controller.addStyle("mapeditor/mapeditor");
 
-        var mapEditorTemplate = Hogan.compile(mapEditorHtml);
-        this.element = $(mapEditorTemplate.render()).appendTo(document.body);
+        var tie = new Laces.Tie(this.model, mapEditorHtml);
+        document.body.appendChild(tie.render());
+        this.element = $(".map-editor");
 
         this.areasMenuTemplate = Hogan.compile(areasMenuHtml);
 
         this.view = new MapView($(".map-canvas", this.element));
-        this.view.setModel(this.model);
+        this.view.setModel(this.model.map);
         this.view.setZoom(initialZoom);
 
         // these are for debugging only
@@ -54,10 +53,10 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
         window.view = this.view;
 
         this.areasEditor = new AreasEditor();
-        this.areasEditor.setMapModel(this.model);
+        this.areasEditor.setMapModel(this.model.map);
 
         this.portalEditor = new PortalEditor();
-        this.portalEditor.setMapModel(this.model);
+        this.portalEditor.setMapModel(this.model.map);
         this.portalEditor.setMapView(this.view);
 
         this.portalDeleteDialog = new PortalDeleteDialog();
@@ -72,8 +71,6 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
             "width": 300
         });
 
-        this.selectedRoomDiv = $(".selected-room", this.element);
-
         this.attachListeners();
     };
 
@@ -81,19 +78,38 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
 
         var self = this;
 
-        this.model.bind("change", function() {
-            if (self.selectedRoomId) {
-                self.onRoomsUpdated();
-            }
-        });
-
-        this.model.areas.bind("change", function() {
+        this.model.map.areas.bind("change", function() {
             self.updateAreasMenu();
         });
 
+        this.model.bind("change:selectedRoom", function() {
+            if (self.model.selectedRoom) {
+                $(".selected-room", self.element).show();
+
+                var room = self.model.selectedRoom
+
+                var portalsSpan = $(".portals", self.element);
+                portalsSpan.empty();
+                room.portals.forEach(function(portal) {
+                    if (portalsSpan.children().length) {
+                        portalsSpan.append(", ");
+                    }
+
+                    var portalSpan = $("<a />", {
+                        "text": portal.nameFromRoom(room),
+                        "class": "edit portal",
+                        "data-portal-id": portal.id,
+                        "href": ["java", "script:void(0)"].join("")
+                    });
+                    portalsSpan.append(portalSpan);
+                });
+            } else {
+                $(".selected-room", self.element).hide();
+            }
+        });
+
         this.view.addSelectionListener(function(selectedRoomId) {
-            self.selectedRoomId = selectedRoomId;
-            self.onRoomsUpdated();
+            self.model.selectedRoom = self.model.map.rooms[selectedRoomId];
         });
 
         $(".export-as-svg", this.element).on("click", function() {
@@ -107,7 +123,7 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
         $(".areas.menu", this.element).on("change", "input", function(event) {
             var areaId = $(event.target).data("area-id");
             if (areaId) {
-                self.view.setAreaVisible(self.model.areas[areaId], event.target.checked);
+                self.view.setAreaVisible(self.model.map.areas[areaId], event.target.checked);
             }
         });
 
@@ -141,28 +157,16 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
             self.close();
         });
 
-        $(".enter-room-button", this.selectedRoomDiv).on("click", function() {
-            if (self.selectedRoomId) {
-                Controller.sendCommand("enter-room #" + self.selectedRoomId);
+        $(".enter-room-button", this.element).on("click", function() {
+            if (self.model.selectedRoom) {
+                Controller.sendCommand("enter-room #" + self.model.selectedRoom.id);
                 self.close();
             }
         });
 
-        $(".edit.name", this.selectedRoomDiv).on("click", function() {
-            if (self.selectedRoomId) {
-                var room = self.model.rooms[self.selectedRoomId];
-                self.propertyEditor.edit(room.name, {
-                    "onsave": function(value) {
-                        room.name = value;
-                        self.propertyEditor.close();
-                    }
-                });
-            }
-        }, false);
-
-        $(".edit.description", this.selectedRoomDiv).on("click", function() {
-            if (self.selectedRoomId) {
-                var room = self.model.rooms[self.selectedRoomId];
+        $(".description", this.element).on("dblclick", function() {
+            if (self.model.selectedRoom) {
+                var room = self.model.map.rooms[self.model.selectedRoom.id];
                 self.propertyEditor.edit(room.description, {
                     "onsave": function(value) {
                         room.description = value;
@@ -172,15 +176,15 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
             }
         }, false);
 
-        this.selectedRoomDiv.on("click", ".edit.portal", function() {
-            var portal = self.model.portals[event.target.getAttribute("data-portal-id")];
+        this.element.on("click", ".edit.portal", function() {
+            var portal = self.model.map.portals[event.target.getAttribute("data-portal-id")];
             self.portalEditor.edit(portal, {
                 "ondelete": function(portalId) {
                     if (portal.room.portals.contains(portal) &&
                         portal.room2.portals.contains(portal)) {
                         self.portalDeleteDialog.show({
                             "ondeleteone": function() {
-                                var sourceRoom = self.model.rooms[self.selectedRoomId];
+                                var sourceRoom = self.model.map.rooms[self.selectedRoom.id];
                                 var portals = sourceRoom.portals.clone();
                                 portals.removeOne(portal);
                                 sourceRoom.portals = portals;
@@ -188,27 +192,21 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
                                 self.portalEditor.close();
                             },
                             "ondeleteboth": function() {
-                                self.model.portals.remove(portalId);
+                                self.model.map.portals.remove(portalId);
                                 self.portalDeleteDialog.close();
                                 self.portalEditor.close();
                             }
                         });
                     } else {
-                        self.model.portals.remove(portalId);
+                        self.model.map.portals.remove(portalId);
                     }
                 }
             });
         });
 
-        $(".add.portal", this.selectedRoomDiv).on("click", function() {
-            var sourceRoom = self.model.rooms[self.selectedRoomId];
-            self.portalEditor.add(sourceRoom);
+        $(".add.portal", this.element).on("click", function() {
+            self.portalEditor.add(self.model.selectedRoom);
         }, false);
-
-        $(".x,.y,.z", this.selectedRoomDiv).on("change", function(event) {
-            var room = self.model.rooms[self.selectedRoomId];
-            room[event.target.className] = event.target.value;
-        });
 
         $(".up.arrow", this.element).on("click", function() {
             self.view.move(0, -1);
@@ -241,7 +239,7 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
 
         this.element.show();
 
-        this.model.load();
+        this.model.map.load();
     };
 
     MapEditor.prototype.close = function() {
@@ -251,48 +249,12 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
         Controller.setFocus();
     };
 
-    MapEditor.prototype.onRoomsUpdated = function() {
-
-        if (!this.selectedRoomId) {
-            this.selectedRoomDiv.hide();
-            return;
-        }
-
-        var room = this.model.rooms[this.selectedRoomId];
-
-        $(".id", this.selectedRoomDiv).text(room.id);
-        $(".name", this.selectedRoomDiv).not(".edit").text(room.name);
-        $(".x", this.selectedRoomDiv).val(room.x);
-        $(".y", this.selectedRoomDiv).val(room.y);
-        $(".z", this.selectedRoomDiv).val(room.z);
-        $(".area", this.selectedRoomDiv).not(".edit").text(room.area ? room.area.name : "(none)");
-        $(".description", this.selectedRoomDiv).not(".edit").text(room.description);
-
-        var portalsSpan = $(".portals", this.selectedRoomDiv);
-        portalsSpan.empty();
-        room.portals.forEach(function(portal) {
-            if (portalsSpan.children().length) {
-                portalsSpan.append(", ");
-            }
-
-            var portalSpan = $("<a />", {
-                "text": portal.nameFromRoom(room),
-                "class": "edit portal",
-                "data-portal-id": portal.id,
-                "href": ["java", "script:void(0)"].join("")
-            });
-            portalsSpan.append(portalSpan);
-        });
-
-        this.selectedRoomDiv.show();
-    };
-
     MapEditor.prototype.updateAreasMenu = function() {
 
         var areas = [];
-        for (var id in this.model.areas) {
-            if (this.model.areas.hasOwnProperty(id)) {
-                var area = this.model.areas[id];
+        for (var id in this.model.map.areas) {
+            if (this.model.map.areas.hasOwnProperty(id)) {
+                var area = this.model.map.areas[id];
                 area.visible = this.view.isAreaVisible(area);
                 areas.append(area);
             }
@@ -319,7 +281,7 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
 
     MapEditor.prototype.plotAltitude = function(type) {
 
-        var rooms = this.model.rooms;
+        var rooms = this.model.map.rooms;
         var data = {};
         for (var id in rooms) {
             data[id] = rooms[id].z;

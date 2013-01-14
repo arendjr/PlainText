@@ -86,19 +86,38 @@
 
         font-family: "Helvetica", "Arial", sans-serif;
     }
+        .map-editor .sidebar .label {
+            display: inline-block;
+            width: 5.5em;
+            color: #669;
+        }
         .map-editor .sidebar .x,
         .map-editor .sidebar .y,
         .map-editor .sidebar .z {
             width: 5em;
         }
-        .map-editor .sidebar .add,
-        .map-editor .sidebar .edit.name,
-        .map-editor .sidebar .edit.area,
-        .map-editor .sidebar .edit.description {
-            font-size: 75%;
+        .map-editor .sidebar .add {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+
+            background-image: url(/img/create.png);
+            background-size: 12px 12px;
         }
         .map-editor .sidebar .description {
             white-space: pre-line;
+        }
+        .map-editor .sidebar .help {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 16px;
+            height: 16px;
+
+            background-image: url(/img/help.png);
+            background-size: 16px 16px;
+
+            cursor: help;
         }
     .map-editor .close {
         position: absolute;
