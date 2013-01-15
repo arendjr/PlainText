@@ -162,7 +162,7 @@ define(["lib/zepto"], function($) {
         }, false);
 
         socket.addEventListener("message", function(message) {
-            if (message.data.substr(0, 1) === "{" && message.data.substr(-1) === "}") {
+            if (message.data.startsWith("{") && message.data.endsWith("}")) {
                 var data = JSON.parse(message.data);
                 if (!data) {
                     writeToScreen("Error: Invalid JSON in reply: " + message.data);
@@ -204,6 +204,8 @@ define(["lib/zepto"], function($) {
                     } else {
                         statusHeader.mp.css("color", "");
                     }
+                } else if (data.inputType) {
+                    commandInput.attr("type", data.inputType);
                 }
             } else {
                 notifyIncomingMessageListeners(message.data);

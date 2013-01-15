@@ -164,6 +164,10 @@ void TelnetServer::onSessionOutput(QString data) {
         return;
     }
 
+    if (data.startsWith("{") && data.endsWith("}")) {
+        return;
+    }
+
     write(socket, data.replace("\n", "\r\n").toUtf8());
 
     if (session->authenticated()) {

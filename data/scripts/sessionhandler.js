@@ -20,6 +20,9 @@ function SessionHandler() {
 
     var self = this;
     function send(message, color) {
+        if (typeof message !== "string") {
+            message = JSON.stringify(message);
+        }
         message = Util.processHighlights(message);
         if (color !== undefined) {
             message = Util.colorize(message, color);
@@ -57,6 +60,12 @@ function SessionHandler() {
         },
 
         "AskingPassword": {
+            "enter": function() {
+                send({ "inputType": "password" });
+            },
+            "exit": function() {
+                send({ "inputType": "text" });
+            },
             "prompt": function() {
                 send("Please enter your password: ");
             },
@@ -101,6 +110,9 @@ function SessionHandler() {
         },
 
         "AskingSignUpPassword": {
+            "enter": function() {
+                send({ "inputType": "password" });
+            },
             "prompt": function() {
                 send("Please choose a password: ");
             },
@@ -123,6 +135,9 @@ function SessionHandler() {
         },
 
         "AskingSignUpPasswordConfirmation": {
+            "exit": function() {
+                send({ "inputType": "text" });
+            },
             "prompt": function() {
                 send("Please confirm your password: ");
             },
@@ -493,6 +508,10 @@ SessionHandler.prototype.setState = function(name) {
 
     if (this.states[name] === this.state) {
         return;
+    }
+
+    if (this.state && this.state.exit) {
+        this.state.exit.call(this);
     }
 
     this.state = this.states[name];
