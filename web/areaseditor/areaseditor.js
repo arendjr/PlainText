@@ -1,6 +1,8 @@
 /*global define:false, require:false*/
-define(["controller", "util", "lib/hogan", "lib/zepto", "text!areaseditor/areaseditor.html"],
-       function(Controller, Util, Hogan, $, areasEditorHtml) {
+define(["controller", "util", "lib/hogan", "lib/laces.tie", "lib/zepto",
+        "text!areaseditor/areaseditor.html"],
+       function(Controller, Util, Hogan, Laces, $,
+                areasEditorHtml) {
 
     "use strict";
 
@@ -8,9 +10,8 @@ define(["controller", "util", "lib/hogan", "lib/zepto", "text!areaseditor/arease
 
         this.element = null;
 
-        this.mapModel = null;
-
-        this.areasEditorTemplate = Hogan.compile(areasEditorHtml);
+        this.model = null;
+        this.areasEditorTie = null;
 
         this.init();
     }
@@ -34,7 +35,7 @@ define(["controller", "util", "lib/hogan", "lib/zepto", "text!areaseditor/arease
                     return;
                 }
 
-                self.mapModel.areas.save({ "id": "new", "name": name });
+                self.model.map.areas.save({ "id": "new", "name": name });
             }
         });
         this.element.on("click", ".add.icon", function() {
@@ -44,33 +45,28 @@ define(["controller", "util", "lib/hogan", "lib/zepto", "text!areaseditor/arease
                 return;
             }
 
-            self.mapModel.areas.save({ "id": "new", "name": name });
+            self.model.map.areas.save({ "id": "new", "name": name });
         });
         this.element.on("click", ".remove.icon", function() {
             var areaId = $(event.target).data("area-id").toInt();
-            self.mapModel.areas.remove(areaId);
+            self.model.map.areas.remove(areaId);
         });
 
         this.element.on("click", ".close-button", function() {
             self.close();
         });
 
-        this.mapModel.areas.bind("change", function() {
-            var areas = [];
-            for (var id in this) {
-                if (this.hasOwnProperty(id)) {
-                    areas.append(this[id]);
-                }
-            }
-
-            self.element.html(self.areasEditorTemplate.render({ "areas": areas }));
+        this.model.bind("change:areasArray", function() {
+            self.element.html("");
+            self.element[0].appendChild(self.areasEditorTie.render());
             $("input.name", self.element).focus();
         }, { "initialFire": true });
     };
 
-    AreasEditor.prototype.setMapModel = function(mapModel) {
+    AreasEditor.prototype.setModel = function(model) {
 
-        this.mapModel = mapModel;
+        this.model = model;
+        this.areasEditorTie = new Laces.Tie(this.model, Hogan.compile(areasEditorHtml));
     };
 
     AreasEditor.prototype.show = function() {

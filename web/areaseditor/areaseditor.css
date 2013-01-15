@@ -23,10 +23,12 @@
     .areas-editor .add.icon {
         background-image: url(/img/add.png);
         margin-right: 4px;
+        cursor: pointer;
     }
     .areas-editor .remove.icon {
         background-image: url(/img/remove.png);
         margin-right: 6px;
+        cursor: pointer;
     }
     .areas-editor input {
         width: 494px;

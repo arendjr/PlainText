@@ -98,11 +98,16 @@
         }
         .map-editor .sidebar .add {
             display: inline-block;
+            padding: 2px;
             width: 12px;
             height: 12px;
 
             background-image: url(/img/create.png);
+            background-position: 2px 2px;
+            background-repeat: no-repeat;
             background-size: 12px 12px;
+
+            vertical-align: middle;
         }
         .map-editor .sidebar .description {
             white-space: pre-line;

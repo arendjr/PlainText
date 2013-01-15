@@ -1,8 +1,9 @@
 <div class="areas-editor dialog">
     <div class="areas-container">
-        {{#areas}}
-            <p><a class="remove icon" data-area-id="{{id}}"></a> {{name}}</p>
-        {{/areas}}
+        {{#areasArray}}
+        <p><a class="remove icon" data-area-id="{{id}}"></a>
+            <span data-laces="{ property: map.areas[{{id}}].name, editable: true }"></span></p>
+        {{/areasArray}}
         <p><a class="add icon"></a> <input class="name" type="text"></p>
     </div>
     <div class="button-list">

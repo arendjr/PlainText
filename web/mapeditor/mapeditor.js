@@ -5,7 +5,8 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
         "lib/zepto", "text!mapeditor/mapeditor.html", "text!mapeditor/areasmenu.html"],
        function(Controller, Loading, MapModel, MapView,
                 AreasEditor, PortalEditor, PortalDeleteDialog,
-                PropertyEditor, SliderWidget, Hogan, Laces, $, mapEditorHtml, areasMenuHtml) {
+                PropertyEditor, SliderWidget, Hogan, Laces,
+                $, mapEditorHtml, areasMenuHtml) {
 
     "use strict";
 
@@ -32,9 +33,22 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
 
         var initialZoom = 0.2;
 
+        var self = this;
+
         this.model = new Laces.Model();
         this.model.set("map", new MapModel());
         this.model.set("selectedRoom", null);
+        this.model.set("areasArray", function() {
+            var areas = [];
+            for (var id in this.map.areas) {
+                if (this.map.areas.hasOwnProperty(id)) {
+                    var area = this.map.areas[id].clone();
+                    area.visible = self.view.isAreaVisible(area);
+                    areas.append(area);
+                }
+            }
+            return areas;
+        });
 
         Controller.addStyle("mapeditor/mapeditor");
 
@@ -42,7 +56,7 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
         document.body.appendChild(tie.render());
         this.element = $(".map-editor");
 
-        this.areasMenuTemplate = Hogan.compile(areasMenuHtml);
+        this.areasMenuTie = new Laces.Tie(this.model, Hogan.compile(areasMenuHtml));
 
         this.view = new MapView($(".map-canvas", this.element));
         this.view.setModel(this.model.map);
@@ -53,7 +67,7 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
         window.view = this.view;
 
         this.areasEditor = new AreasEditor();
-        this.areasEditor.setMapModel(this.model.map);
+        this.areasEditor.setModel(this.model);
 
         this.portalEditor = new PortalEditor();
         this.portalEditor.setMapModel(this.model.map);
@@ -77,10 +91,6 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
     MapEditor.prototype.attachListeners = function() {
 
         var self = this;
-
-        this.model.map.areas.bind("change", function() {
-            self.updateAreasMenu();
-        });
 
         this.model.bind("change:selectedRoom", function() {
             if (self.model.selectedRoom) {
@@ -107,6 +117,12 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
                 $(".selected-room", self.element).hide();
             }
         });
+
+        this.model.bind("change:areasArray", function() {
+            var menuContent = $(".areas.menu-content", this.element)[0];
+            menuContent.innerHTML = "";
+            menuContent.appendChild(self.areasMenuTie.render());
+        }, { "initialFire": true });
 
         this.view.addSelectionListener(function(selectedRoomId) {
             self.model.selectedRoom = self.model.map.rooms[selectedRoomId];
@@ -247,21 +263,6 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
         this.element.hide();
 
         Controller.setFocus();
-    };
-
-    MapEditor.prototype.updateAreasMenu = function() {
-
-        var areas = [];
-        for (var id in this.model.map.areas) {
-            if (this.model.map.areas.hasOwnProperty(id)) {
-                var area = this.model.map.areas[id];
-                area.visible = this.view.isAreaVisible(area);
-                areas.append(area);
-            }
-        }
-
-        var menuContent = $(".areas.menu-content", this.element);
-        menuContent.html(this.areasMenuTemplate.render({ "areas": areas }));
     };
 
     MapEditor.prototype.plotStats = function(type) {
