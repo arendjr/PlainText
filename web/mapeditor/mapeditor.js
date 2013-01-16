@@ -1,12 +1,14 @@
 /*global define:false, require:false*/
 define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapview",
         "areaseditor/areaseditor", "portaleditor/portaleditor", "portaleditor/portaldeletedialog",
-        "propertyeditor/propertyeditor", "sliderwidget/slider", "lib/hogan", "lib/laces.tie",
-        "lib/zepto", "text!mapeditor/mapeditor.html", "text!mapeditor/areasmenu.html"],
+        "propertyeditor/propertyeditor", "sliderwidget/slider", "util", "lib/hogan",
+        "lib/laces.tie", "lib/zepto",
+        "text!mapeditor/mapeditor.html", "text!mapeditor/areasmenu.html"],
        function(Controller, Loading, MapModel, MapView,
                 AreasEditor, PortalEditor, PortalDeleteDialog,
-                PropertyEditor, SliderWidget, Hogan, Laces,
-                $, mapEditorHtml, areasMenuHtml) {
+                PropertyEditor, SliderWidget, Util, Hogan,
+                Laces, $,
+                mapEditorHtml, areasMenuHtml) {
 
     "use strict";
 
@@ -222,17 +224,30 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
         $(".up.arrow", this.element).on("click", function() {
             self.view.move(0, -1);
         });
-
         $(".right.arrow", this.element).on("click", function() {
             self.view.move(1, 0);
         });
-
         $(".down.arrow", this.element).on("click", function() {
             self.view.move(0, 1);
         });
-
         $(".left.arrow", this.element).on("click", function() {
             self.view.move(-1, 0);
+        });
+
+        $(document.body).on("keydown", function(event) {
+            if (event.target.tagName === "INPUT" || event.target.tagName === "TEXTAREA") {
+                return;
+            }
+
+            if (event.keyCode === Util.Keys.LEFT_ARROW) {
+                self.view.move(-1, 0);
+            } else if (event.keyCode === Util.Keys.UP_ARROW) {
+                self.view.move(0, -1);
+            } else if (event.keyCode === Util.Keys.RIGHT_ARROW) {
+                self.view.move(1, 0);
+            } else if (event.keyCode === Util.Keys.DOWN_ARROW) {
+                self.view.move(0, 1);
+            }
         });
 
         this.zoomSlider.element.addEventListener("change", function(event) {
