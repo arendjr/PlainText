@@ -93,11 +93,8 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
         var self = this;
 
         this.model.bind("change:selectedRoom", function() {
-            if (self.model.selectedRoom) {
-                $(".selected-room", self.element).show();
-
-                var room = self.model.selectedRoom
-
+            var room = self.model.selectedRoom;
+            if (room) {
                 var portalsSpan = $(".portals", self.element);
                 portalsSpan.empty();
                 room.portals.forEach(function(portal) {
@@ -113,8 +110,6 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
                     });
                     portalsSpan.append(portalSpan);
                 });
-            } else {
-                $(".selected-room", self.element).hide();
             }
         });
 
@@ -181,8 +176,8 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
         });
 
         $(".description", this.element).on("dblclick", function() {
-            if (self.model.selectedRoom) {
-                var room = self.model.map.rooms[self.model.selectedRoom.id];
+            var room = self.model.selectedRoom;
+            if (room) {
                 self.propertyEditor.edit(room.description, {
                     "onsave": function(value) {
                         room.description = value;
