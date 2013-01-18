@@ -22,6 +22,6 @@ MAP EDITOR
 
 TECHNOLOGY
 
-  -  Migrate to Qt5 after release.
+  -  Migrate to Qt5.
      -  Use QCryptographicHash::Sha512 for password encryption.
      -  Use QLatin1String / QStringLiteral where it makes sense.
