@@ -18,8 +18,6 @@ GAME MECHANICS
 
 MAP EDITOR
 
-  -  Implement export to PNG.
-  -  Add printing support.
   -  Add support for terrain types.
 
 TECHNOLOGY
