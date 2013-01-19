@@ -48,9 +48,23 @@ bool Engine::start(Options options) {
         m_realm->init();
 
         if (~options & DontServe) {
-            m_telnetServer = new TelnetServer(m_realm, 4801);
-            m_webSocketServer = new WebSocketServer(m_realm, 4802);
-            m_httpServer = new HttpServer(8080);
+            quint16 telnetPort = qgetenv("PT_TELNET_PORT").toUInt();
+            quint16 webSocketPort = qgetenv("PT_WEBSOCKET_PORT").toUInt();
+            quint16 httpPort = qgetenv("PT_HTTP_PORT").toUInt();
+
+            if (telnetPort == 0) {
+                telnetPort = 4801;
+            }
+            if (webSocketPort == 0) {
+                webSocketPort = 4802;
+            }
+            if (httpPort == 0) {
+                httpPort = 8080;
+            }
+
+            m_telnetServer = new TelnetServer(m_realm, telnetPort);
+            m_webSocketServer = new WebSocketServer(m_realm, webSocketPort);
+            m_httpServer = new HttpServer(httpPort, webSocketPort);
         }
 
         return true;

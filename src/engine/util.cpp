@@ -491,6 +491,12 @@ QString Util::randomString(int length) {
     return string;
 }
 
+QString Util::htmlEscape(QString string) {
+
+    string.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
+    return string;
+}
+
 int Util::randomInt(int min, int max) {
 
     if (max == min) {

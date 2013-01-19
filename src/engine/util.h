@@ -77,6 +77,8 @@ class Util : public QObject {
 
         Q_INVOKABLE static QString randomString(int length);
 
+        Q_INVOKABLE static QString htmlEscape(QString string);
+
         Q_INVOKABLE static int randomInt(int min = 0, int max = RAND_MAX);
 };
 

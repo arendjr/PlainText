@@ -8,10 +8,12 @@
 #include <QTcpSocket>
 
 #include "realm.h"
+#include "util.h"
 
 
-HttpServer::HttpServer(quint16 port, QObject *parent) :
-    QTcpServer(parent) {
+HttpServer::HttpServer(quint16 port, quint16 webSocketPort, QObject *parent) :
+    QTcpServer(parent),
+    m_webSocketPort(webSocketPort) {
 
     if (!listen(QHostAddress::Any, port)) {
         qDebug() << "Error: Can't launch HTTP server";
@@ -19,11 +21,7 @@ HttpServer::HttpServer(quint16 port, QObject *parent) :
         qDebug() << "HTTP server is listening on port" << port;
     }
 
-    QString name = Realm::instance()->name();
-    m_title = QString("<title>" +
-                      name.replace("&", "&amp;").replace("<", "&lt;")
-                          .replace(">", "&gt;").replace("\"", "&quot;") +
-                      "</title>").toUtf8();
+    m_title = Util::htmlEscape(Realm::instance()->name()).toUtf8();
 }
 
 HttpServer::~HttpServer() {
@@ -103,7 +101,9 @@ void HttpServer::onReadyRead() {
             }
 
             if (info.fileName() == "index.html") {
-                content.replace("<title>MUD</title>", m_title);
+                content.replace("{{title}}", m_title);
+                content.replace("{{headerScript}}", QString("var PT_WEBSOCKET_PORT = %1;")
+                                                    .arg((uint) m_webSocketPort).toUtf8());
             }
 
             socket->write(QString("HTTP/1.0 200 Ok\r\n"
