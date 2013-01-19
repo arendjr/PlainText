@@ -11,7 +11,8 @@
     -webkit-user-select: text;
 }
     .dialog p {
-        margin: 1em;
+        margin: 0;
+        padding: 1em;
     }
     .dialog .button-list {
         position: relative;

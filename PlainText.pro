@@ -305,6 +305,9 @@ OTHER_FILES += \
     web/loadingwidget/loading.css \
     web/loadingwidget/loading.html \
     web/loadingwidget/loading.js \
+    web/mapeditor/areaselectiondialog.css \
+    web/mapeditor/areaselectiondialog.html \
+    web/mapeditor/areaselectiondialog.js \
     web/mapeditor/areasmenu.html \
     web/mapeditor/mapeditor.css \
     web/mapeditor/mapeditor.html \

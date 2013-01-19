@@ -209,9 +209,13 @@ LacesObject.prototype._gotLaces = true;
 LacesObject.prototype._bindValue = function(key, value) {
 
     if (value && value._gotLaces) {
-        var self = this;
+        var self = this, recursionGuard = false;
         var binding = function() {
-            self.fire("change", { "key": key, "value": value });
+            if (!recursionGuard) {
+                recursionGuard = true;
+                self.fire("change", { "key": key, "value": value });
+                recursionGuard = false;
+            }
         };
         value.bind("change", binding);
         this._bindings.push(binding);
@@ -318,7 +322,7 @@ LacesMap.prototype.set = function(key, value, options) {
 
     var self = this;
     var getter = function() { return this._values[key]; };
-    var setter = function(newValue) { self._setValue(key, newValue); };
+    var setter = function(newValue) { this._setValue(key, newValue); };
 
     if (options.type) {
         if (options.type === "boolean") {
@@ -347,7 +351,7 @@ LacesMap.prototype.set = function(key, value, options) {
         "enumerable": true
     });
 
-    setter(value);
+    setter.call(this, value);
 };
 
 LacesMap.prototype._setValue = function(key, value) {
@@ -521,15 +525,16 @@ LacesArray.prototype.pop = function() {
 // of the array.
 LacesArray.prototype.push = function() {
 
+    var elements = [];
     for (var i = 0, length = arguments.length; i < length; i++) {
         var value = this.wrap(arguments[i]);
         this._bindValue(this.length, value);
-        arguments[i] = value;
+        elements.push(value);
     }
 
-    Array.prototype.push.apply(this, arguments);
+    Array.prototype.push.apply(this, elements);
 
-    this.fire("add change", { "elements": arguments });
+    this.fire("add change", { "elements": elements });
 };
 
 // Remove the element at the specified index.

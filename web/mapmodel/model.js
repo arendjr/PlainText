@@ -7,7 +7,7 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
 
         Laces.Model.call(this, object);
 
-        this.model = model;
+        Object.defineProperty(this, "model", { "value": model });
 
         this.bind("change", function(event) {
             var propertyName = event.key;
@@ -22,15 +22,17 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
 
     GameObject.prototype.resolvePointer = function(pointer) {
 
-        var pointerTypes = ["area", "room", "portal"];
-        for (var i = 0, length = pointerTypes.length; i < length; i++) {
-            var pointerType = pointerTypes[i];
-            if (pointer.startsWith(pointerType + ":")) {
-                var objectId = pointer.mid(pointerType.length + 1).toInt();
-                return this.model[pointerType + "s"][objectId];
+        if (pointer !== null) {
+            var pointerTypes = ["area", "room", "portal"];
+            for (var i = 0, length = pointerTypes.length; i < length; i++) {
+                var pointerType = pointerTypes[i];
+                if (pointer.startsWith(pointerType + ":")) {
+                    var objectId = pointer.mid(pointerType.length + 1).toInt();
+                    return this.model[pointerType + "s"][objectId];
+                }
             }
+            console.log("Could not resolve pointer: " + pointer);
         }
-        console.log("Could not resolve pointer: " + pointer);
         return null;
     };
 
@@ -116,7 +118,7 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
         GameObject.call(this, model, area);
 
         var self = this;
-        this.rooms.bind("add update", function(event) {
+        this.rooms.bind("add", function(event) {
             event.elements.forEach(function(room) {
                 if (room !== null) {
                     room.area = self;
@@ -145,6 +147,7 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
     function Room(model, jsonString) {
 
         var room = JSON.parse(jsonString);
+        room.area = room.area || null;
         room.portals = room.portals || [];
         room.position = room.position || [0, 0, 0];
         GameObject.call(this, model, room);

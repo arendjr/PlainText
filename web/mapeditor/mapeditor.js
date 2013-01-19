@@ -1,13 +1,13 @@
 /*global define:false, require:false*/
 define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapview",
-        "areaseditor/areaseditor", "portaleditor/portaleditor", "portaleditor/portaldeletedialog",
-        "propertyeditor/propertyeditor", "sliderwidget/slider", "util", "lib/hogan",
-        "lib/laces.tie", "lib/zepto",
+        "mapeditor/areaselectiondialog", "areaseditor/areaseditor", "portaleditor/portaleditor",
+        "portaleditor/portaldeletedialog", "propertyeditor/propertyeditor", "sliderwidget/slider",
+        "util", "lib/hogan", "lib/laces.tie", "lib/zepto",
         "text!mapeditor/mapeditor.html", "text!mapeditor/areasmenu.html"],
        function(Controller, Loading, MapModel, MapView,
-                AreasEditor, PortalEditor, PortalDeleteDialog,
-                PropertyEditor, SliderWidget, Util, Hogan,
-                Laces, $,
+                AreaSelectionDialog, AreasEditor, PortalEditor,
+                PortalDeleteDialog, PropertyEditor, SliderWidget,
+                Util, Hogan, Laces, $,
                 mapEditorHtml, areasMenuHtml) {
 
     "use strict";
@@ -21,6 +21,7 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
         this.model = null;
         this.view = null;
 
+        this.areaSelectionDialog = null;
         this.areasEditor = null;
         this.portalEditor = null;
         this.portalDeleteDialog = null;
@@ -67,6 +68,9 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
         // these are for debugging only
         window.model = this.model;
         window.view = this.view;
+
+        this.areaSelectionDialog = new AreaSelectionDialog();
+        this.areaSelectionDialog.setModel(this.model);
 
         this.areasEditor = new AreasEditor();
         this.areasEditor.setModel(this.model);
@@ -177,12 +181,28 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
             }
         });
 
+        $(".area", this.element).on("dblclick", function() {
+            var room = self.model.selectedRoom;
+            if (room) {
+                self.areaSelectionDialog.show({
+                    "onselect": function(area) {
+                        if (room.area) {
+                            room.area.rooms.removeOne(room);
+                        }
+                        area.rooms.removeOne(room); // could use insert() instead of remove and
+                        area.rooms.append(room);    // append, but I want to force an update
+                        self.areaSelectionDialog.close();
+                    }
+                });
+            }
+        });
+
         $(".description", this.element).on("dblclick", function() {
             var room = self.model.selectedRoom;
             if (room) {
                 self.propertyEditor.edit(room.description, {
-                    "onsave": function(value) {
-                        room.description = value;
+                    "onsave": function(description) {
+                        room.description = description;
                         self.propertyEditor.close();
                     }
                 });
