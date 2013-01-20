@@ -14,7 +14,7 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
 
         this.canvas = null;
 
-        this.visibleAreas = [];
+        this.hiddenAreas = [];
         this.zRestriction = null;
 
         this.selectedRoomId = 0;
@@ -62,23 +62,12 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
         this.model = model;
 
         var self = this;
-        var firstUpdate = true;
-
         this.model.bind("change", function() {
             if (self.selectedRoomId !== 0) {
                 if (!self.model.rooms.contains(self.selectedRoomId)) {
                     self.selectedRoomId = 0;
                     self.notifySelectionListeners();
                 }
-            }
-
-            if (firstUpdate) {
-                self.visibleAreas = [];
-                for (var id in self.model.areas) {
-                    self.visibleAreas.append(self.model.areas[id]);
-                }
-
-                firstUpdate = false;
             }
 
             self.draw();
@@ -137,7 +126,7 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
             return x >= minX && x <= maxX && y >= minY && y <= maxY;
         };
 
-        var visibleAreas = this.visibleAreas;
+        var hiddenAreas = this.hiddenAreas;
         var zRestriction = this.zRestriction;
         var isVisible;
 
@@ -151,8 +140,8 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
                 }
 
                 isVisible = (zoom >= 2 &&
-                             (!portal.room.area || visibleAreas.contains(portal.room.area)) &&
-                             (!portal.room2.area || visibleAreas.contains(portal.room2.area)) &&
+                             (!portal.room.area || !hiddenAreas.contains(portal.room.area)) &&
+                             (!portal.room2.area || !hiddenAreas.contains(portal.room2.area)) &&
                              (zRestriction === null || portal.room.z === zRestriction ||
                                                        portal.room2.z === zRestriction));
                 if (isVisible) {
@@ -166,7 +155,7 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
         for (var roomId in rooms) {
             if (rooms.hasOwnProperty(roomId)) {
                 var room = rooms[roomId];
-                isVisible = ((!room.area || visibleAreas.contains(room.area)) &&
+                isVisible = ((!room.area || !hiddenAreas.contains(room.area)) &&
                              (zRestriction === null || room.z === zRestriction));
                 if (isVisible) {
                     roomIds.append(roomId);
@@ -368,15 +357,15 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
 
     MapView.prototype.isAreaVisible = function(area) {
 
-        return this.visibleAreas.contains(area);
+        return !this.hiddenAreas.contains(area);
     };
 
     MapView.prototype.setAreaVisible = function(area, visible) {
 
         if (visible) {
-            this.visibleAreas.insert(area);
+            this.hiddenAreas.removeOne(area);
         } else {
-            this.visibleAreas.removeOne(area);
+            this.hiddenAreas.insert(area);
         }
 
         this.draw();

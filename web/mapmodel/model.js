@@ -5,6 +5,11 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
 
     function GameObject(model, object) {
 
+        if (object) {
+            object.name = object.name || "";
+            object.description = object.description || "";
+        }
+
         Laces.Model.call(this, object);
 
         Object.defineProperty(this, "model", { "value": model });
@@ -143,6 +148,15 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
     Area.prototype = new GameObject();
     Area.prototype.constructor = Area;
 
+    Area.prototype.resolvePointers = function(propertyNames) {
+
+        GameObject.prototype.resolvePointers.call(this, propertyNames);
+
+        for (var i = 0, length = this.rooms.length; i < length; i++) {
+            this.rooms[i].area = this;
+        }
+    };
+
 
     function Room(model, jsonString) {
 
@@ -275,6 +289,12 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
                         destination.resolvePointers(["portals"]);
                     }
 
+                    if (data.contains("area")) {
+                        var area = new Area(self, data["area"]);
+                        self.areas.set(area.id, area);
+                        area.resolvePointers(["rooms"]);
+                    }
+
                     portal.resolvePointers(["room", "room2"]);
                 });
             }
@@ -320,11 +340,6 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
                     for (id in self.areas) {
                         if (self.areas.hasOwnProperty(id)) {
                             self.areas[id].resolvePointers(["rooms"]);
-                        }
-                    }
-                    for (id in self.rooms) {
-                        if (self.rooms.hasOwnProperty(id)) {
-                            self.rooms[id].resolvePointers(["area"]);
                         }
                     }
 

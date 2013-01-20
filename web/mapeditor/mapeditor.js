@@ -16,8 +16,6 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
 
         this.element = null;
 
-        this.areasMenuTemplate = null;
-
         this.model = null;
         this.view = null;
 
@@ -197,7 +195,7 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
             }
         });
 
-        $(".description", this.element).on("dblclick", function() {
+        function editDescription() {
             var room = self.model.selectedRoom;
             if (room) {
                 self.propertyEditor.edit(room.description, {
@@ -207,7 +205,9 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
                     }
                 });
             }
-        }, false);
+        }
+        $(".description", this.element).on("dblclick", editDescription);
+        $(".add.description", this.element).on("click", editDescription);
 
         this.element.on("click", ".edit.portal", function() {
             var portal = self.model.map.portals[event.target.getAttribute("data-portal-id")];

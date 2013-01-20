@@ -8,7 +8,7 @@
     right: calc(50% - 330px);
 }
     .portal-editor p {
-        margin: 1em 0;
+        padding: 1em 0;
     }
     .portal-editor .column {
         display: inline-block;

@@ -1,5 +1,6 @@
 #include "portalsetcommand.h"
 
+#include "area.h"
 #include "conversionutil.h"
 #include "point3d.h"
 #include "portal.h"
@@ -70,6 +71,10 @@ void PortalSetCommand::execute(Character *player, const QString &command) {
     if (!destination) {
         destination = new Room(realm());
         destination->setPosition(point);
+
+        if (!source->area().isNull()) {
+            source->area().cast<Area *>()->addRoom(destination);
+        }
     }
 
     if (!portal) {
@@ -94,5 +99,8 @@ void PortalSetCommand::execute(Character *player, const QString &command) {
     data["portal"] = portal->toJsonString();
     data["source"] = source->toJsonString();
     data["destination"] = destination->toJsonString();
+    if (!source->area().isNull()) {
+        data["area"] = source->area()->toJsonString();
+    }
     sendReply(data);
 }
