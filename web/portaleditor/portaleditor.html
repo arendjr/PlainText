@@ -1,29 +1,105 @@
 <div class="portal-editor dialog" style="display: none">
     <div class="column">
-        <p><span class="label">Name:</span>
-            <input type="text" class="name"></p>
-        <p><span class="label">Room:</span>
-            #<input type="text" size="8" class="room-id"></p>
-        <p><span class="label">Direction:</span>
-            <select class="direction"></select></p>
+        <p>
+            <span class="label">Name:</span>
+            <input type="text" data-laces-property="name">
+        </p>
+        <p>
+            <span class="label">Room:</span>
+            #<input type="text" size="8" class="room-id"
+                    data-laces="{ property: room.id, disabled: id }">
+        </p>
+        <p>
+            <span class="label">Direction:</span>
+            <select class="direction" data-laces-property="direction">
+                <option></option>
+                <option>north</option>
+                <option>northeast</option>
+                <option>east</option>
+                <option>southeast</option>
+                <option>south</option>
+                <option>southwest</option>
+                <option>west</option>
+                <option>northwest</option>
+                <option>up</option>
+                <option>down</option>
+            </select>
+        </p>
     </div>
     <div class="column">
-        <p><span class="label">Name:</span>
-            <input type="text" class="name2"></p>
-        <p><span class="label">Room:</span>
-            <input type="radio" name="destination" class="destination new" value="new">
+        <p>
+            <span class="label">Name:</span>
+            <input type="text" data-laces-property="name2">
+        </p>
+        <p>
+            <span class="label">Room:</span>
+            <input type="radio" name="destination" class="destination new" value="new"
+                   data-laces="{ checked: !room2.id, disabled: id }">
             New room
-            <input type="radio" name="destination" class="destination id" value="id">
-            #<input type="text" size="8" class="room2-id"></p>
-        <p class="distance-paragraph"><span class="label">Distance:</span>
-            <input type="text" class="distance"></p>
-        <p class="position-paragraph"><span class="label">Position:</span>
-            <input type="number" class="x" step="50">,
-            <input type="number" class="y" step="50">,
-            <input type="number" class="z" step="50"></p>
+            <input type="radio" name="destination" class="destination id" value="id"
+                   data-laces="{ checked: room2.id, disabled: id }">
+            #<input type="text" size="8" class="room2-id"
+                    data-laces="{ property: room2.id, disabled: id }">
+        </p>
+        <p class="distance-paragraph" data-laces-visible="distanceVisible">
+            <span class="label">Distance:</span>
+            <input type="text" class="distance">
+        </p>
+        <p class="position-paragraph" data-laces-visible="positionVisible">
+            <span class="label">Position:</span>
+            <input type="number" class="x" data-laces-property="room2.x">,
+            <input type="number" class="y" data-laces-property="room2.y">,
+            <input type="number" class="z" data-laces-property="room2.z">
+        </p>
+    </div>
+    <hr>
+    <div class="column">
+        <p>
+            <span class="label"><input type="checkbox"></span>
+            <span class="end-label">Hidden from room #<span data-laces-property="room.id"></span>
+            </span>
+        </p>
+        <p>
+            <span class="label"><input type="checkbox"></span>
+            <span class="end-label">Can open from room #<span data-laces-property="room.id"></span>
+            </span>
+        </p>
+    </div>
+    <div class="column">
+        <p>
+            <span class="label"><input type="checkbox"></span>
+            <span class="end-label">Hidden from new room</span>
+        </p>
+        <p>
+            <span class="label"><input type="checkbox"></span>
+            <span class="end-label">Can open from new room</span>
+        </p>
+    </div>
+    <hr>
+    <div class="column">
+        <p><span class="label"><input type="checkbox"></span>
+            <span class="end-label">Can pass through</span></p>
+        <p><span class="label"><input type="checkbox"></span>
+            <span class="end-label">Can look through
+            <input type="number" min="0" max="100">%</span></p>
+        <p><span class="label"><input type="checkbox"></span>
+            <span class="end-label">Can hear through
+            <input type="number" min="0" max="100">%</span></p>
+        <p><span class="label"><input type="checkbox"></span>
+            <span class="end-label">Can shoot through</span></p>
+    </div>
+    <div class="column">
+        <p><span class="label"><input type="checkbox"></span>
+            <span class="end-label">if open</span></p>
+        <p><span class="label"><input type="checkbox"></span>
+            <span class="end-label">if open</span></p>
+        <p><span class="label"><input type="checkbox"></span>
+            <span class="end-label">if open</span></p>
+        <p><span class="label"><input type="checkbox"></span>
+            <span class="end-label">if open</span></p>
     </div>
     <div class="button-list">
-        <button class="delete-button">Delete</button>
+        <button class="delete-button" data-laces-visible="id">Delete</button>
         <button class="cancel-button">Cancel</button>
         <button class="submit-button">Save</button>
     </div>

@@ -8,16 +8,19 @@
     right: calc(50% - 330px);
 }
     .portal-editor p {
-        padding: 1em 0;
+        padding: 0;
+        margin: 1em 0;
+    }
+    .portal-editor hr {
+        margin: 0;
+        border: 0;
+        border-top: 1px solid black;
+        padding: 0;
     }
     .portal-editor .column {
         display: inline-block;
-        width: 50%;
-    }
-    .portal-editor .column:nth-child(2) {
-        position: absolute;
-        top: 0;
-        left: 50%;
+        width: 49%;
+        vertical-align: top;
     }
     .portal-editor .label {
         display: inline-block;
@@ -27,6 +30,14 @@
         text-align: right;
         vertical-align: top;
     }
+    .portal-editor .end-label {
+        display: inline-block;
+        margin: 5px 1px;
+        vertical-align: top;
+    }
+        .portal-editor .end-label input {
+            margin-top: -5px;
+        }
     .portal-editor .x,
     .portal-editor .y,
     .portal-editor .z {

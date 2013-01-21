@@ -1,6 +1,6 @@
 /*global define:false, require:false*/
-define(["controller", "util", "lib/hogan", "lib/zepto", "text!portaleditor/portaleditor.html"],
-       function(Controller, Util, Hogan, $, portalEditorHtml) {
+define(["controller", "util", "lib/laces", "lib/zepto", "text!portaleditor/portaleditor.html"],
+       function(Controller, Util, Laces, $, portalEditorHtml) {
 
     "use strict";
 
@@ -8,15 +8,19 @@ define(["controller", "util", "lib/hogan", "lib/zepto", "text!portaleditor/porta
 
         this.element = null;
 
-        this.orderedDirections = ["north", "northeast", "east", "southeast",
-                                  "south", "southwest", "west", "northwest",
-                                  "up", "down"];
-
         this.mapModel = null;
         this.mapView = null;
         this.originalSelectionListeners = [];
 
-        this.portal = null;
+        this.portal = new Laces.Model();
+        this.portal.set("room2", {});
+        this.portal.set("direction", "");
+        this.portal.set("distanceVisible", function() {
+            return !this.room2.id && this.direction;
+        });
+        this.portal.set("positionVisible", function() {
+            return !this.room2.id && !this.direction;
+        });
 
         this.options = {};
 
@@ -28,8 +32,9 @@ define(["controller", "util", "lib/hogan", "lib/zepto", "text!portaleditor/porta
         Controller.addStyle("dialog/dialog");
         Controller.addStyle("portaleditor/portaleditor");
 
-        var portalEditorTemplate = Hogan.compile(portalEditorHtml);
-        this.element = $(portalEditorTemplate.render()).appendTo(document.body);
+        var tie = new Laces.Tie(this.portal, portalEditorHtml);
+        document.body.appendChild(tie.render());
+        this.element = $(".portal-editor.dialog");
 
         this.attachListeners();
     };
@@ -42,23 +47,22 @@ define(["controller", "util", "lib/hogan", "lib/zepto", "text!portaleditor/porta
             self.setDirection($(".direction", self.element).val());
         });
 
-        $(".new.destination", this.element).on("change", function() {
-            self.updatePositionAndDistanceVisibility();
-        });
-
-        $(".destination.id", this.element).on("change", function() {
-            self.updatePositionAndDistanceVisibility();
-        });
-
         $(".room-id", this.element).on("focus", function() {
             self.selectRoom();
         });
 
         $(".room2-id", this.element).on("focus", function() {
-            $(".destination.id", self.element).prop("checked", true);
-            self.updatePositionAndDistanceVisibility();
-
             self.selectRoom2();
+        });
+
+        $(".new.destination", this.element).on("change", function() {
+            if ($(this).prop("checked")) {
+                self.portal.room2 = {
+                    "x": self.portal.room.x,
+                    "y": self.portal.room.y,
+                    "z": self.portal.room.z
+                };
+            }
         });
 
         $(".delete-button", this.element).on("click", function() {
@@ -91,7 +95,18 @@ define(["controller", "util", "lib/hogan", "lib/zepto", "text!portaleditor/porta
 
     PortalEditor.prototype.edit = function(portal, options) {
 
-        this.portal = portal;
+        this.portal.set("id", portal.id);
+        this.portal.set("name", portal.name);
+        this.portal.set("name2", portal.name2);
+        this.portal.set("room", portal.room);
+        this.portal.set("room2", portal.room2 || {
+            "x": portal.room.x,
+            "y": portal.room.y,
+            "z": portal.room.z
+        });
+        this.portal.set("direction", Util.isDirection(portal.name) ? portal.name : "");
+        this.portal.set("flags", portal.flags || "");
+
         this.options = options || {};
 
         if (this.mapView) {
@@ -99,76 +114,23 @@ define(["controller", "util", "lib/hogan", "lib/zepto", "text!portaleditor/porta
             this.mapView.removeSelectionListeners();
         }
 
-        var directionSelect = $(".direction", this.element);
-        directionSelect.html("<option></option>");
-        this.orderedDirections.forEach(function(direction) {
-            var option = $("<option />");
-            if (direction === portal.name) {
-                option.attr("selected", "selected");
-            }
-            option.text(direction);
-            directionSelect.append(option);
-        });
-
-        $(".name", this.element).val(portal.name || "");
-        $(".name2", this.element).val(portal.name2 || "");
-
-        $(".room-id", this.element).val(portal.room ? portal.room.id : "");
-
-        $(".delete-button", this.element).css("display", portal.id ? "" : "none");
-
-        if (portal.room2) {
-            $(".destination.id", this.element).prop("checked", true);
-            $(".room2-id", this.element).val(portal.room2.id);
-        } else {
-            $(".new.destination", this.element).prop("checked", true);
-            $(".room2-id", this.element).val("");
-
-            $(".x", this.element).val(portal.room.x);
-            $(".y", this.element).val(portal.room.y);
-            $(".z", this.element).val(portal.room.z);
-
+        if (!portal.room2) {
             this.selectRoom2();
         }
 
-        this.updatePositionAndDistanceVisibility();
-
-        this.element.show();
+        $(this.element).show();
     };
 
     PortalEditor.prototype.setDirection = function(direction) {
 
-        $(".direction", this.element).val(Util.isDirection(direction) ? direction : "");
+        this.portal.direction = Util.isDirection(direction) ? direction : "";
 
-        var name = $(".name", this.element).val();
-        if (name === "" || Util.isDirection(name)) {
-            $(".name").val(direction);
+        if (this.portal.name === "" || Util.isDirection(this.portal.name)) {
+            this.portal.name = direction;
         }
 
-        var name2 = $(".name2", this.element).val();
-        if (name2 === "" || Util.isDirection(name2)) {
-            if (Util.isDirection(direction)) {
-                $(".name2", this.element).val(Util.opposingDirection(direction));
-            }
-        }
-
-        this.updatePositionAndDistanceVisibility();
-    };
-
-    PortalEditor.prototype.updatePositionAndDistanceVisibility = function() {
-
-        if ($(".new.destination", this.element).prop("checked")) {
-            var direction = $(".direction", this.element).val();
-            if (Util.isDirection(direction)) {
-                $(".distance-paragraph", this.element).show();
-                $(".position-paragraph", this.element).hide();
-            } else {
-                $(".distance-paragraph", this.element).hide();
-                $(".position-paragraph", this.element).show();
-            }
-        } else {
-            $(".distance-paragraph", this.element).hide();
-            $(".position-paragraph", this.element).hide();
+        if (this.portal.name2 === "" || Util.isDirection(this.portal.name2)) {
+            this.portal.name2 = Util.opposingDirection(direction);
         }
     };
 
@@ -179,12 +141,11 @@ define(["controller", "util", "lib/hogan", "lib/zepto", "text!portaleditor/porta
 
             this.mapView.removeSelectionListeners();
             this.mapView.addSelectionListener(function(selectedRoomId) {
-                $(".room-id", self.element).val(selectedRoomId);
+                self.portal.room = self.mapModel.rooms[selectedRoomId];
 
-                var room2Id = $(".room2-id", self.element).val();
-                if (self.mapModel && room2Id) {
-                    var room = self.mapModel.rooms[selectedRoomId];
-                    var room2 = self.mapModel.rooms[room2Id];
+                if (self.mapModel && self.portal.room2) {
+                    var room = self.portal.room;
+                    var room2 = self.portal.room2;
                     self.setDirection(Util.directionForVector({
                         "x": room2.x - room.x,
                         "y": room2.y - room.y,
@@ -202,15 +163,11 @@ define(["controller", "util", "lib/hogan", "lib/zepto", "text!portaleditor/porta
 
             this.mapView.removeSelectionListeners();
             this.mapView.addSelectionListener(function(selectedRoomId) {
-                $(".destination.id", self.element).prop("checked", true);
-                self.updatePositionAndDistanceVisibility();
+                self.portal.room2 = self.mapModel.rooms[selectedRoomId];
 
-                $(".room2-id", self.element).val(selectedRoomId);
-
-                var roomId = $(".room-id", self.element).val();
-                if (self.mapModel && roomId) {
-                    var room = self.mapModel.rooms[roomId];
-                    var room2 = self.mapModel.rooms[selectedRoomId];
+                if (self.mapModel && self.portal.room) {
+                    var room = self.portal.room;
+                    var room2 = self.portal.room2;
                     self.setDirection(Util.directionForVector({
                         "x": room2.x - room.x,
                         "y": room2.y - room.y,
@@ -225,27 +182,27 @@ define(["controller", "util", "lib/hogan", "lib/zepto", "text!portaleditor/porta
 
         var portal = this.portal.id ? this.portal.clone() : { "id": "new" };
 
-        portal.name = $(".name", this.element).val();
-        portal.name2 = $(".name2", this.element).val();
-        portal.room = $(".room-id", this.element).val();
+        portal.name = this.portal.name;
+        portal.name2 = this.portal.name2;
+        portal.room = this.portal.room.id;
 
-        if ($(".destination.id", this.element).prop("checked")) {
-            portal.room2 = $(".room2-id", this.element).val();
+        if (this.portal.room2) {
+            portal.room2 = this.portal.room2.id;
         } else {
             portal.room2 = "new";
 
             var direction = $(".direction", this.element).val();
-            if (Util.isDirection(direction)) {
+            if (Util.isDirection(portal.direction)) {
                 var distance = parseInt($(".distance", this.element).val(), 10);
                 var sourcePosition = this.portal.room.position;
-                var vector = Util.vectorForDirection(direction);
+                var vector = Util.vectorForDirection(portal.direction);
                 portal.x = sourcePosition[0] + distance * vector[0];
                 portal.y = sourcePosition[1] + distance * vector[1];
                 portal.z = sourcePosition[2] + distance * vector[2];
             } else {
-                portal.x = $(".x", this.element).val();
-                portal.y = $(".y", this.element).val();
-                portal.z = $(".z", this.element).val();
+                portal.x = this.portal.x;
+                portal.y = this.portal.y;
+                portal.z = this.portal.z;
             }
         }
 
@@ -273,7 +230,7 @@ define(["controller", "util", "lib/hogan", "lib/zepto", "text!portaleditor/porta
             this.mapView.setSelectionListeners(this.originalSelectionListeners);
         }
 
-        this.element.hide();
+        $(this.element).hide();
     };
 
     return PortalEditor;

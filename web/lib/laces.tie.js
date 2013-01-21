@@ -26,7 +26,7 @@ function LacesTie(model, template, options) {
 
         for (var i = 0, length = bindings.length; i < length; i++) {
             var binding = bindings[i];
-            binding.parent.unbind(binding);
+            model.unbind(binding);
         }
         bindings = [];
     }
@@ -39,18 +39,18 @@ function LacesTie(model, template, options) {
         }
 
         var parts = lacesProperty.split(".");
-        var part, value, parent;
-        for (var i = 0, length = parts.length; i < length; i++) {
+        var part, value, parent, root;
+        for (var i = 0; i < parts.length; i++) {
             parent = value || model;
 
             part = parts[i];
             var bracketOpen = part.indexOf("[");
             if (bracketOpen > -1 && part.indexOf("]") === part.length - 1) {
-                var subscript = part.substring(bracketOpen + 1, part.length - 1);
-                parent = parent[part.substr(0, bracketOpen)];
-                part = subscript;
+                parts.splice(i + 1, 0, part.substring(bracketOpen + 1, part.length - 1));
+                part = part.substr(0, bracketOpen);
             }
 
+            root = root || part;
             value = parent[part];
             if (value === undefined || value === null) {
                 break;
@@ -60,7 +60,7 @@ function LacesTie(model, template, options) {
         if (inversed) {
             value = !value;
         }
-        return { propertyName: part, value: value, parent: parent };
+        return { propertyName: part, value: value, parent: parent, root: root };
     }
 
     function getLaces(node) {
@@ -79,7 +79,7 @@ function LacesTie(model, template, options) {
 
     function update(element, lacesProperty, defaultValue) {
         var value = reference(lacesProperty).value;
-        if (element.tagName === "INPUT") {
+        if (element.tagName === "INPUT" || element.tagName === "SELECT") {
             element.value = value || defaultValue;
         } else {
             element.textContent = value || defaultValue;
@@ -93,6 +93,10 @@ function LacesTie(model, template, options) {
 
     function updateChecked(element, lacesProperty) {
         element.checked = !!reference(lacesProperty).value;
+    }
+
+    function updateDisabled(element, lacesProperty) {
+        element.disabled = !!reference(lacesProperty).value;
     }
 
     function process(node) {
@@ -114,12 +118,11 @@ function LacesTie(model, template, options) {
             }
             bindings.push(binding);
 
-            ref = reference(lacesProperty);
-            binding.parent = ref.parent;
-            if (ref.parent instanceof Laces.Model) {
-                ref.parent.bind("change:" + ref.propertyName, binding);
+            if (model instanceof Laces.Model) {
+                ref = reference(lacesProperty);
+                model.bind("change:" + ref.root, binding);
             } else {
-                ref.parent.bind("change", binding);
+                model.bind("change", binding);
             }
 
             if (node.tagName === "INPUT") {
@@ -179,12 +182,11 @@ function LacesTie(model, template, options) {
             }
             bindings.push(binding);
 
-            ref = reference(lacesVisible);
-            binding.parent = ref.parent;
-            if (ref.parent instanceof Laces.Model) {
-                ref.parent.bind("change:" + ref.propertyName, binding);
+            if (model instanceof Laces.Model) {
+                ref = reference(lacesVisible);
+                model.bind("change:" + ref.root, binding);
             } else {
-                ref.parent.bind("change", binding);
+                model.bind("change", binding);
             }
 
             updateVisibility(node, lacesVisible);
@@ -197,15 +199,31 @@ function LacesTie(model, template, options) {
             }
             bindings.push(binding);
 
-            ref = reference(lacesChecked);
-            binding.parent = ref.parent;
-            if (ref.parent instanceof Laces.Model) {
-                ref.parent.bind("change:" + ref.propertyName, binding);
+            if (model instanceof Laces.Model) {
+                ref = reference(lacesChecked);
+                model.bind("change:" + ref.root, binding);
             } else {
-                ref.parent.bind("change", binding);
+                model.bind("change", binding);
             }
 
             updateChecked(node, lacesChecked);
+        }
+
+        var lacesDisabled = (laces ? laces.disabled : node.getAttribute("data-laces-disabled"));
+        if (lacesDisabled) {
+            binding = function() {
+                updateDisabled(node, lacesDisabled);
+            }
+            bindings.push(binding);
+
+            if (model instanceof Laces.Model) {
+                ref = reference(lacesDisabled);
+                model.bind("change:" + ref.root, binding);
+            } else {
+                model.bind("change", binding);
+            }
+
+            updateDisabled(node, lacesDisabled);
         }
 
         for (var i = 0, length = node.childNodes.length; i < length; i++) {

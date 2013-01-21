@@ -34,12 +34,14 @@ define(function() {
 
     function opposingDirection(direction) {
 
-        return directions[indexOfDirection(direction)].opposite;
+        var directionObject = directions[indexOfDirection(direction)];
+        return directionObject ? directionObject.opposite : "";
     }
 
     function vectorForDirection(direction) {
 
-        return directions[indexOfDirection(direction)].vector;
+        var directionObject = directions[indexOfDirection(direction)];
+        return directionObject ? directionObject.vector : [0, 0, 0];
     }
 
     function directionForVector(vector) {
