@@ -14,7 +14,7 @@ GameObjectSyncThread::GameObjectSyncThread() :
 GameObjectSyncThread::~GameObjectSyncThread() {
 }
 
-void GameObjectSyncThread::enqueueObject(const GameObject *object) {
+void GameObjectSyncThread::enqueueObject(GameObject *object) {
 
     GameObject *copy = GameObject::createCopy(object);
 

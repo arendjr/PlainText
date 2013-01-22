@@ -17,7 +17,7 @@ class GameObjectSyncThread : public QThread {
         GameObjectSyncThread();
         virtual ~GameObjectSyncThread();
 
-        void enqueueObject(const GameObject *object);
+        void enqueueObject(GameObject *object);
 
         void terminate();
 

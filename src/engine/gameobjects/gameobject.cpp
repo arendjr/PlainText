@@ -22,12 +22,14 @@
 #include "deleteobjectevent.h"
 #include "diskutil.h"
 #include "exit.h"
+#include "gameeventmultipliermap.h"
 #include "gameeventobject.h"
 #include "gameexception.h"
 #include "gameobjectptr.h"
 #include "group.h"
 #include "item.h"
 #include "player.h"
+#include "point3d.h"
 #include "portal.h"
 #include "race.h"
 #include "realm.h"
@@ -41,8 +43,11 @@
 QMap<QString, QScriptValue> GameObject::s_prototypeMap;
 
 
+static int GameEventMultiplierMapType;
 static int GameObjectPtrType;
 static int GameObjectPtrListType;
+static int Point3DType;
+static int ScriptFunctionMapType;
 
 
 GameObject::GameObject(Realm *realm, GameObjectType objectType, uint id, Options options) :
@@ -66,8 +71,11 @@ GameObject::GameObject(Realm *realm, GameObjectType objectType, uint id, Options
         }
     } else {
         if (m_id == 0) {
+            GameEventMultiplierMapType = QMetaType::type("GameEventMultiplierMap");
             GameObjectPtrType = QMetaType::type("GameObjectPtr");
             GameObjectPtrListType = QMetaType::type("GameObjectPtrList");
+            Point3DType = QMetaType::type("Point3D");
+            ScriptFunctionMapType = QMetaType::type("ScriptFunctionMap");
         }
     }
 }
@@ -793,25 +801,54 @@ GameObject *GameObject::createFromFile(Realm *realm, const QString &path) {
     return gameObject;
 }
 
-GameObject *GameObject::createCopy(const GameObject *other) {
+GameObject *GameObject::createCopy(GameObject *other) {
 
     Q_ASSERT(other);
     GameObject *copy = createByObjectType(other->realm(), other->objectType(), other->id(), Copy);
     copy->m_deleted = other->m_deleted;
 
     for (const QMetaProperty &metaProperty : other->storedMetaProperties()) {
-        // game object pointers need to be unresolved to avoid them being
-        // registrated in the other thread
         if (metaProperty.type() == QVariant::UserType) {
-            if (metaProperty.userType() == GameObjectPtrType) {
-                GameObjectPtr pointer = metaProperty.read(other).value<GameObjectPtr>();
-                metaProperty.write(copy, QVariant::fromValue(pointer.copyUnresolved()));
+            if (metaProperty.userType() == GameEventMultiplierMapType) {
+                GameEventMultiplierMap map;
+                void *value = &map;
+                other->qt_metacall(QMetaObject::ReadProperty, metaProperty.propertyIndex(), &value);
+                copy->qt_metacall(QMetaObject::WriteProperty, metaProperty.propertyIndex(), &value);
+            } else if (metaProperty.userType() == GameObjectPtrType) {
+                GameObjectPtr pointer;
+                void *value = &pointer;
+                other->qt_metacall(QMetaObject::ReadProperty, metaProperty.propertyIndex(), &value);
+                pointer.unresolve();
+                copy->qt_metacall(QMetaObject::WriteProperty, metaProperty.propertyIndex(), &value);
             } else if (metaProperty.userType() == GameObjectPtrListType) {
-                GameObjectPtrList list = metaProperty.read(other).value<GameObjectPtrList>();
-                metaProperty.write(copy, QVariant::fromValue(list.copyUnresolved()));
+                GameObjectPtrList list;
+                void *value = &list;
+                other->qt_metacall(QMetaObject::ReadProperty, metaProperty.propertyIndex(), &value);
+                list.unresolvePointers();
+                copy->qt_metacall(QMetaObject::WriteProperty, metaProperty.propertyIndex(), &value);
+            } else if (metaProperty.userType() == Point3DType) {
+                Point3D point;
+                void *value = &point;
+                other->qt_metacall(QMetaObject::ReadProperty, metaProperty.propertyIndex(), &value);
+                copy->qt_metacall(QMetaObject::WriteProperty, metaProperty.propertyIndex(), &value);
+            } else if (metaProperty.userType() == ScriptFunctionMapType) {
+                ScriptFunctionMap map;
+                void *value = &map;
+                other->qt_metacall(QMetaObject::ReadProperty, metaProperty.propertyIndex(), &value);
+                copy->qt_metacall(QMetaObject::WriteProperty, metaProperty.propertyIndex(), &value);
             } else {
                 metaProperty.write(copy, metaProperty.read(other));
             }
+        } else if (metaProperty.type() == QVariant::Map) {
+            QVariantMap map;
+            void *value = &map;
+            other->qt_metacall(QMetaObject::ReadProperty, metaProperty.propertyIndex(), &value);
+            copy->qt_metacall(QMetaObject::WriteProperty, metaProperty.propertyIndex(), &value);
+        } else if (metaProperty.type() == QVariant::String) {
+            QString string;
+            void *value = &string;
+            other->qt_metacall(QMetaObject::ReadProperty, metaProperty.propertyIndex(), &value);
+            copy->qt_metacall(QMetaObject::WriteProperty, metaProperty.propertyIndex(), &value);
         } else {
             metaProperty.write(copy, metaProperty.read(other));
         }

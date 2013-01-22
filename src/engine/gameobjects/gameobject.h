@@ -191,7 +191,7 @@ class GameObject : public QObject {
 
         static GameObject *createFromFile(Realm *realm, const QString &path);
 
-        static GameObject *createCopy(const GameObject *other);
+        static GameObject *createCopy(GameObject *other);
 
         static QScriptValue toScriptValue(QScriptEngine *engine, GameObject *const &gameObject);
         static void fromScriptValue(const QScriptValue &object, GameObject *&gameObject);
