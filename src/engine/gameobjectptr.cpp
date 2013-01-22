@@ -159,14 +159,6 @@ void GameObjectPtr::unresolve(bool unregister) {
     }
 }
 
-GameObjectPtr GameObjectPtr::copyUnresolved() const {
-
-    GameObjectPtr copy;
-    copy.m_id = m_id;
-    copy.m_objectType = m_objectType;
-    return copy;
-}
-
 void GameObjectPtr::setOwnerList(GameObjectPtrList *list) {
 
     m_list = list;
@@ -841,19 +833,6 @@ void GameObjectPtrList::unresolvePointers() {
     if (m_nextList) {
         m_nextList->unresolvePointers();
     }
-}
-
-GameObjectPtrList GameObjectPtrList::copyUnresolved() const {
-
-    GameObjectPtrList copy(length());
-    copy.m_size = copy.m_capacity;
-
-    int index = 0;
-    for (const GameObjectPtr &item : *this) {
-        copy.m_items[index] = item.copyUnresolved();
-        index++;
-    }
-    return copy;
 }
 
 void GameObjectPtrList::send(const QString &message, int color) const {

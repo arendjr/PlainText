@@ -70,8 +70,6 @@ class GameObjectPtr {
         void resolve(Realm *realm);
         void unresolve(bool unregister = true);
 
-        GameObjectPtr copyUnresolved() const;
-
         void setOwnerList(GameObjectPtrList *list);
 
         QString toString() const;
@@ -233,8 +231,6 @@ class GameObjectPtrList {
 
         void resolvePointers(Realm *realm);
         void unresolvePointers();
-
-        GameObjectPtrList copyUnresolved() const;
 
         void send(const QString &message, int color = Silver) const;
 
