@@ -41,6 +41,10 @@
 QMap<QString, QScriptValue> GameObject::s_prototypeMap;
 
 
+static int GameObjectPtrType;
+static int GameObjectPtrListType;
+
+
 GameObject::GameObject(Realm *realm, GameObjectType objectType, uint id, Options options) :
     QObject(),
     m_realm(realm),
@@ -59,6 +63,11 @@ GameObject::GameObject(Realm *realm, GameObjectType objectType, uint id, Options
         }
         if (~m_options & Copy) {
             m_realm->registerObject(this);
+        }
+    } else {
+        if (m_id == 0) {
+            GameObjectPtrType = QMetaType::type("GameObjectPtr");
+            GameObjectPtrListType = QMetaType::type("GameObjectPtrList");
         }
     }
 }
@@ -277,7 +286,7 @@ void GameObject::setStringData(const QString &name, const QString &value) {
 void GameObject::setGameObjectData(const QString &name, const GameObjectPtr &value) {
 
     if (!m_data.contains(name) || m_data[name].type() != QVariant::UserType ||
-        m_data[name].userType() != QMetaType::type("GameObjectPtr") ||
+        m_data[name].userType() != GameObjectPtrType ||
         m_data[name].value<GameObjectPtr>() != value) {
         m_data[name] = QVariant::fromValue(value);
 
@@ -288,7 +297,7 @@ void GameObject::setGameObjectData(const QString &name, const GameObjectPtr &val
 void GameObject::setGameObjectListData(const QString &name, const GameObjectPtrList &value) {
 
     if (!m_data.contains(name) || m_data[name].type() != QVariant::UserType ||
-        m_data[name].userType() != QMetaType::type("GameObjectPtrList") ||
+        m_data[name].userType() != GameObjectPtrListType ||
         m_data[name].value<GameObjectPtrList>() != value) {
         m_data[name] = QVariant::fromValue(value);
 
@@ -679,15 +688,16 @@ void GameObject::resolvePointers() {
     for (const QMetaProperty &metaProperty : storedMetaProperties()) {
         if (metaProperty.type() == QVariant::UserType) {
             const char *name = metaProperty.name();
-            if (metaProperty.userType() == QMetaType::type("GameObjectPtr")) {
+            if (metaProperty.userType() == GameObjectPtrType) {
                 GameObjectPtr pointer = property(name).value<GameObjectPtr>();
                 try {
                     pointer.resolve(m_realm);
                 } catch (const GameException &exception) {
+                    Q_UNUSED(exception)
                     pointer = GameObjectPtr();
                 }
                 setProperty(name, QVariant::fromValue(pointer));
-            } else if (metaProperty.userType() == QMetaType::type("GameObjectPtrList")) {
+            } else if (metaProperty.userType() == GameObjectPtrListType) {
                 GameObjectPtrList pointerList = property(name).value<GameObjectPtrList>();
                 pointerList.resolvePointers(m_realm);
                 setProperty(name, QVariant::fromValue(pointerList));
@@ -790,22 +800,20 @@ GameObject *GameObject::createCopy(const GameObject *other) {
     copy->m_deleted = other->m_deleted;
 
     for (const QMetaProperty &metaProperty : other->storedMetaProperties()) {
-        const char *name = metaProperty.name();
-
         // game object pointers need to be unresolved to avoid them being
         // registrated in the other thread
         if (metaProperty.type() == QVariant::UserType) {
-            if (metaProperty.userType() == QMetaType::type("GameObjectPtr")) {
-                GameObjectPtr pointer = other->property(name).value<GameObjectPtr>();
-                copy->setProperty(name, QVariant::fromValue(pointer.copyUnresolved()));
-            } else if (metaProperty.userType() == QMetaType::type("GameObjectPtrList")) {
-                GameObjectPtrList list = other->property(name).value<GameObjectPtrList>();
-                copy->setProperty(name, QVariant::fromValue(list.copyUnresolved()));
+            if (metaProperty.userType() == GameObjectPtrType) {
+                GameObjectPtr pointer = metaProperty.read(other).value<GameObjectPtr>();
+                metaProperty.write(copy, QVariant::fromValue(pointer.copyUnresolved()));
+            } else if (metaProperty.userType() == GameObjectPtrListType) {
+                GameObjectPtrList list = metaProperty.read(other).value<GameObjectPtrList>();
+                metaProperty.write(copy, QVariant::fromValue(list.copyUnresolved()));
             } else {
-                copy->setProperty(name, other->property(name));
+                metaProperty.write(copy, metaProperty.read(other));
             }
         } else {
-            copy->setProperty(name, other->property(name));
+            metaProperty.write(copy, metaProperty.read(other));
         }
     }
 
