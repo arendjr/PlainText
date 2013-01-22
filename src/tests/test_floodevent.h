@@ -1,5 +1,5 @@
-#ifndef TEST_VISUALEVENTS_H
-#define TEST_VISUALEVENTS_H
+#ifndef TEST_FLOODEVENT_H
+#define TEST_FLOODEVENT_H
 
 #include "testcase.h"
 
@@ -10,14 +10,14 @@
 #include <QTest>
 
 #include "character.h"
+#include "floodevent.h"
 #include "portal.h"
 #include "realm.h"
 #include "room.h"
 #include "util.h"
-#include "visualevent.h"
 
 
-class VisualEventsTest : public TestCase {
+class FloodEventTest : public TestCase {
 
     Q_OBJECT
 
@@ -29,7 +29,7 @@ class VisualEventsTest : public TestCase {
             portal->setRoom2(roomB);
             portal->setName(Util::directionForVector(roomB->position() - roomA->position()));
             portal->setName2(Util::directionForVector(roomA->position() - roomB->position()));
-            portal->setFlags(PortalFlags::CanSeeThrough);
+            portal->setFlags(PortalFlags::CanPassThrough);
 
             roomA->addPortal(portal);
             roomB->addPortal(portal);
@@ -39,8 +39,6 @@ class VisualEventsTest : public TestCase {
         virtual void init() {
 
             Realm *realm = Realm::instance();
-
-            qint64 start = QDateTime::currentMSecsSinceEpoch();
 
             const int numRows = 100;
             const int numColumns = 100;
@@ -72,45 +70,6 @@ class VisualEventsTest : public TestCase {
                     m_rooms.append(room);
                 }
             }
-
-            qint64 end = QDateTime::currentMSecsSinceEpoch();
-            qDebug() << "Generating rooms took " << (end - start) << "ms";
-
-            {
-                Character *character = new Character(realm);
-                character->setName("Character A");
-                Room *room = m_rooms[0].cast<Room *>();
-                room->addCharacter(character);
-                character->setCurrentRoom(room);
-                m_characters.append(character);
-            }
-
-            {
-                Character *character = new Character(realm);
-                character->setName("Character B");
-                Room *room = m_rooms[numColumns - 1].cast<Room *>();
-                room->addCharacter(character);
-                character->setCurrentRoom(room);
-                m_characters.append(character);
-            }
-
-            {
-                Character *character = new Character(realm);
-                character->setName("Character C");
-                Room *room = m_rooms[(numRows - 1) * numColumns].cast<Room *>();
-                room->addCharacter(character);
-                character->setCurrentRoom(room);
-                m_characters.append(character);
-            }
-
-            {
-                Character *character = new Character(realm);
-                character->setName("Character D");
-                Room *room = m_rooms[numRows * numColumns - 1].cast<Room *>();
-                room->addCharacter(character);
-                character->setCurrentRoom(room);
-                m_characters.append(character);
-            }
         }
 
         virtual void cleanup() {
@@ -119,7 +78,7 @@ class VisualEventsTest : public TestCase {
             m_characters.clear();
         }
 
-        void testVisualEvent() {
+        void testFloodEvent() {
 
             Realm *realm = Realm::instance();
             realm->enqueueModifiedObjects();
@@ -128,21 +87,30 @@ class VisualEventsTest : public TestCase {
             QCOMPARE(numRooms, 10000);
 
             Room *room = m_rooms[numRooms / 2].cast<Room *>();
-            VisualEvent *event = new VisualEvent(room, 100.0);
-            event->setDescription("You see a bright white flash.");
+            FloodEvent *event = new FloodEvent(room, 0.1);
+            event->setDescription("The water is up above your waist");
+            event->setDistantDescription("There's a considerable amount of water here");
+            event->setVeryDistantDescription("There's a little water on the ground");
 
-            qint64 start = QDateTime::currentMSecsSinceEpoch();
+            {
+                qint64 start = QDateTime::currentMSecsSinceEpoch();
 
-            event->fire();
+                event->fire();
 
-            qint64 end = QDateTime::currentMSecsSinceEpoch();
-            qDebug() << "Event fire took " << (end - start) << "ms";
+                qint64 end = QDateTime::currentMSecsSinceEpoch();
+                qDebug() << "Event fire took " << (end - start) << "ms";
+            }
+
+            {
+                qint64 start = QDateTime::currentMSecsSinceEpoch();
+
+                realm->enqueueModifiedObjects();
+
+                qint64 end = QDateTime::currentMSecsSinceEpoch();
+                qDebug() << "Queuing modified objects took " << (end - start) << "ms";
+            }
 
             QCOMPARE(event->numVisitedRooms(), 10000);
-            QVERIFY(event->affectedCharacters().contains(m_characters[0]));
-            QVERIFY(event->affectedCharacters().contains(m_characters[1]));
-            QVERIFY(event->affectedCharacters().contains(m_characters[2]));
-            QVERIFY(event->affectedCharacters().contains(m_characters[3]));
         }
 
     private:
@@ -150,4 +118,4 @@ class VisualEventsTest : public TestCase {
         GameObjectPtrList m_characters;
 };
 
-#endif // TEST_VISUALEVENTS_H
+#endif // TEST_FLOODEVENT_H

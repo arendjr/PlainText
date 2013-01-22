@@ -18,7 +18,8 @@ PT_DEFINE_ENUM(GameEventType,
     SoundEvent,
     VisualEvent,
     MovementEvent,
-    AreaEvent
+    AreaEvent,
+    FloodEvent
 )
 
 

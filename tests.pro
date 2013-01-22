@@ -15,6 +15,7 @@ HEADERS += \
     src/tests/testcase.h \
     src/tests/test_container.h \
     src/tests/test_crashes.h \
+    src/tests/test_floodevent.h \
     src/tests/test_help.h \
     src/tests/test_movement.h \
     src/tests/test_openandclose.h \

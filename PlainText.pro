@@ -72,6 +72,7 @@ SOURCES += \
     src/engine/events/signinevent.cpp \
     src/engine/events/timerevent.cpp \
     src/engine/gameevents/areaevent.cpp \
+    src/engine/gameevents/floodevent.cpp \
     src/engine/gameevents/gameevent.cpp \
     src/engine/gameevents/movementsoundevent.cpp \
     src/engine/gameevents/movementvisualevent.cpp \
@@ -179,6 +180,7 @@ HEADERS += \
     src/engine/events/signinevent.h \
     src/engine/events/timerevent.h \
     src/engine/gameevents/areaevent.h \
+    src/engine/gameevents/floodevent.h \
     src/engine/gameevents/gameevent.h \
     src/engine/gameevents/movementsoundevent.h \
     src/engine/gameevents/movementvisualevent.h \

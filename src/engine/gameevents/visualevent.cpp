@@ -43,7 +43,7 @@ void VisualEvent::visitRoom(Room *room, double strength) {
             } else {
                 character->invokeTrigger("onvisual", message);
             }
-            addAffectedCharacter(character);
+            addAffectedCharacter(characterPtr);
         }
 
         for (const GameObjectPtr &portalPtr : room->portals()) {
