@@ -3,6 +3,14 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
 
     "use strict";
 
+
+    var pointerTypes = {
+        "area:": "areas",
+        "room:": "rooms",
+        "portal:": "portals"
+    };
+
+
     function GameObject(model, object) {
 
         if (object) {
@@ -10,7 +18,7 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
             object.description = object.description || "";
         }
 
-        Laces.Model.call(this, object);
+        Laces.Model.call(this, object, { "bindChildren": false });
 
         Object.defineProperty(this, "model", { "value": model });
 
@@ -27,17 +35,13 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
 
     GameObject.prototype.resolvePointer = function(pointer) {
 
-        if (pointer !== null) {
-            var pointerTypes = ["area", "room", "portal"];
-            for (var i = 0, length = pointerTypes.length; i < length; i++) {
-                var pointerType = pointerTypes[i];
-                if (pointer.startsWith(pointerType + ":")) {
-                    var objectId = pointer.mid(pointerType.length + 1).toInt();
-                    return this.model[pointerType + "s"][objectId];
-                }
+        for (var key in pointerTypes) {
+            if (pointerTypes.hasOwnProperty(key) && pointer.startsWith(key)) {
+                var objectId = parseInt(pointer.substr(key.length), 10);
+                return this.model[pointerTypes[key]][objectId];
             }
-            console.log("Could not resolve pointer: " + pointer);
         }
+        console.log("Could not resolve pointer: " + pointer);
         return null;
     };
 
@@ -47,19 +51,21 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
 
         for (var i = 0; i < propertyNames.length; i++) {
             var propertyName = propertyNames[i];
-            if (this.contains(propertyName)) {
+            if (this.hasOwnProperty(propertyName)) {
                 var value = this[propertyName];
                 if (value instanceof Array) {
                     for (var j = 0, length = value.length; j < length; j++) {
                         value[j] = this.resolvePointer(value[j]);
                     }
                 } else {
-                    this[propertyName] = this.resolvePointer(value);
+                    if (value !== null) {
+                        this[propertyName] = this.resolvePointer(value);
+                    }
                 }
             }
         }
 
-        this.fireHeldEvents();
+        this.discardHeldEvents();
     };
 
     GameObject.prototype.saveProperty = function(propertyName) {
@@ -308,25 +314,32 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
 
         var self = this;
         self.holdEvents();
+        self.areas.holdEvents();
+        self.rooms.holdEvents();
+        self.portals.holdEvents();
 
         Controller.sendApiCall("objects-list area", function(data) {
+            console.log("Got areas");
             for (var i = 0; i < data.length; i++) {
                 var area = new Area(self, data[i]);
                 self.areas.set(area.id, area);
             }
 
             Controller.sendApiCall("objects-list room", function(data) {
+                console.log("Got rooms");
                 for (var i = 0; i < data.length; i++) {
                     var room = new Room(self, data[i]);
                     self.rooms.set(room.id, room);
                 }
 
                 Controller.sendApiCall("objects-list portal", function(data) {
+                    console.log("Got portals");
                     for (var i = 0; i < data.length; i++) {
                         var portal = new Portal(self, data[i]);
                         self.portals.set(portal.id, portal);
                     }
 
+                    console.log("Resolving pointers");
                     for (var id in self.rooms) {
                         if (self.rooms.hasOwnProperty(id)) {
                             self.rooms[id].resolvePointers(["portals"]);
@@ -343,7 +356,12 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
                         }
                     }
 
+                    console.log("Firing held events");
+                    self.areas.fireHeldEvents();
+                    self.rooms.fireHeldEvents();
+                    self.portals.fireHeldEvents();
                     self.fireHeldEvents();
+                    console.log("Done");
                 });
             });
         });
