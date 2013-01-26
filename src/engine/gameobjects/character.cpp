@@ -378,7 +378,7 @@ void Character::go(const GameObjectPtr &pointer) {
             Portal *portal = pointer.unsafeCast<Portal *>();
 
             exitName = portal->nameFromRoom(currentRoom());
-            if (portal->canOpenFromRoom(currentRoom()) && !portal->isOpen()) {
+            if (portal->canOpen() && !portal->isOpen()) {
                 send(QString("The %1 is closed.").arg(exitName));
                 return;
             }
@@ -390,10 +390,13 @@ void Character::go(const GameObjectPtr &pointer) {
                 Portal *portal = portalPtr.cast<Portal *>();
                 if (portal->oppositeOf(currentRoom()) == pointer) {
                     exitName = portal->nameFromRoom(currentRoom());
-                    if (portal->canOpenFromRoom(currentRoom()) && !portal->isOpen()) {
+                    if (portal->canOpen() && !portal->isOpen()) {
                         send(QString("The %1 is closed.").arg(exitName));
                         return;
                     }
+
+                    portalOrExit = portal;
+                    break;
                 }
             }
 
@@ -409,8 +412,18 @@ void Character::go(const GameObjectPtr &pointer) {
             }
         }
 
-        if (!portalOrExit.isNull() && !portalOrExit->invokeTrigger("onenter", this)) {
-            return;
+        if (!portalOrExit.isNull()) {
+            if (!portalOrExit->invokeTrigger("onenter", this)) {
+                return;
+            }
+            if (portalOrExit->isPortal()) {
+                Portal *portal = portalOrExit.unsafeCast<Portal *>();
+                if ((portal->isOpen() && ~portal->flags() & PortalFlags::CanPassThroughIfOpen) ||
+                    (!portal->isOpen() && ~portal->flags() & PortalFlags::CanPassThrough)) {
+                    send("You cannot go there.");
+                    return;
+                }
+            }
         }
 
         GameObjectPtrList followers;

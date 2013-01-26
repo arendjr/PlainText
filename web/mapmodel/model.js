@@ -275,11 +275,16 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
             "value": function(portal) {
                 var command = "portal-set " + portal.id + " " + portal.room + " " + portal.room2 +
                               " " + portal.name + " " + portal.name2;
+                if (portal.flags !== undefined) {
+                    command += " " + portal.flags;
+                }
                 if (portal.x !== undefined) {
                     command += " (" + portal.x + "," + portal.y + "," + portal.z + ")";
                 }
 
                 Controller.sendApiCall(command, function(data) {
+                    self.holdEvents();
+
                     var portal = new Portal(self, data["portal"]);
                     self.portals.set(portal.id, portal);
 
@@ -302,6 +307,8 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
                     }
 
                     portal.resolvePointers(["room", "room2"]);
+
+                    self.fireHeldEvents();
                 });
             }
         });
@@ -310,14 +317,29 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
     MapModel.prototype = new Laces.Model();
     MapModel.prototype.constructor = MapModel;
 
+    MapModel.prototype.holdEvents = function() {
+
+        Laces.Model.prototype.holdEvents.call(this);
+
+        this.areas.holdEvents();
+        this.rooms.holdEvents();
+        this.portals.holdEvents();
+    };
+
+    MapModel.prototype.fireHeldEvents = function() {
+
+        this.areas.fireHeldEvents();
+        this.rooms.fireHeldEvents();
+        this.portals.fireHeldEvents();
+
+        Laces.Model.prototype.fireHeldEvents.call(this);
+    };
+
     MapModel.prototype.load = function() {
 
-        var self = this;
-        self.holdEvents();
-        self.areas.holdEvents();
-        self.rooms.holdEvents();
-        self.portals.holdEvents();
+        this.holdEvents();
 
+        var self = this;
         Controller.sendApiCall("objects-list area", function(data) {
             console.log("Got areas");
             for (var i = 0; i < data.length; i++) {
@@ -357,9 +379,6 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
                     }
 
                     console.log("Firing held events");
-                    self.areas.fireHeldEvents();
-                    self.rooms.fireHeldEvents();
-                    self.portals.fireHeldEvents();
                     self.fireHeldEvents();
                     console.log("Done");
                 });

@@ -15,7 +15,8 @@ PortalSetCommand::PortalSetCommand(QObject *parent) :
     super(parent) {
 
     setDescription("Syntax: api-portal-set <request-id> <portal-id-or-new> <room-from-id> \n"
-                   "                       <room-to-id> <name> [<opposite-name>] [<position>]");
+                   "                       <room-to-id> <name> <opposite-name> <flags> \n"
+                   "                       [<position>]");
 }
 
 PortalSetCommand::~PortalSetCommand() {
@@ -30,6 +31,7 @@ void PortalSetCommand::execute(Character *player, const QString &command) {
     QString roomToId = takeWord();
     QString name = takeWord();
     QString oppositeName = takeWord();
+    QString flags = takeWord();
     QString position = takeRest();
 
     Room *source = qobject_cast<Room *>(realm()->getObject(GameObjectType::Room,
@@ -60,10 +62,6 @@ void PortalSetCommand::execute(Character *player, const QString &command) {
     }
 
     Point3D point(0, 0, 0);
-    if (oppositeName.startsWith("(")) {
-        position.prepend(oppositeName);
-        oppositeName = "";
-    }
     if (!position.isEmpty()) {
         Point3D::fromUserString(position, point);
     }
@@ -93,6 +91,8 @@ void PortalSetCommand::execute(Character *player, const QString &command) {
 
     portal->setName2(oppositeName);
     portal->setRoom2(destination);
+
+    portal->setFlags(PortalFlags::fromString(flags));
 
     QVariantMap data;
     data["success"] = true;

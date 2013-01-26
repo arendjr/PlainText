@@ -105,6 +105,11 @@ bool Portal::canOpenFromRoom(const GameObjectPtr &room) const {
     return m_flags & PortalFlags::CanOpenFromSide1;
 }
 
+bool Portal::canOpen() const {
+
+    return m_flags & (PortalFlags::CanOpenFromSide1 | PortalFlags::CanOpenFromSide2);
+}
+
 bool Portal::canSeeThrough() const {
 
     return m_flags & PortalFlags::CanSeeThrough;

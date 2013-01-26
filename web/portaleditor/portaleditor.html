@@ -55,48 +55,97 @@
     <hr>
     <div class="column">
         <p>
-            <span class="label"><input type="checkbox"></span>
+            <span class="label">
+                <input type="checkbox" data-laces-property="flags.IsHiddenFromSide1">
+            </span>
             <span class="end-label">Hidden from room #<span data-laces-property="room.id"></span>
             </span>
         </p>
         <p>
-            <span class="label"><input type="checkbox"></span>
+            <span class="label">
+                <input type="checkbox" data-laces-property="flags.CanOpenFromSide1">
+            </span>
             <span class="end-label">Can open from room #<span data-laces-property="room.id"></span>
             </span>
         </p>
     </div>
     <div class="column">
         <p>
-            <span class="label"><input type="checkbox"></span>
-            <span class="end-label">Hidden from new room</span>
+            <span class="label">
+                <input type="checkbox" data-laces-property="flags.IsHiddenFromSide2">
+            </span>
+            <span class="end-label">Hidden from
+                <span data-laces-property="oppositeRoomText"></span>
+            </span>
         </p>
         <p>
-            <span class="label"><input type="checkbox"></span>
-            <span class="end-label">Can open from new room</span>
+            <span class="label">
+                <input type="checkbox" data-laces-property="flags.CanOpenFromSide2">
+            </span>
+            <span class="end-label">Can open from
+                <span data-laces-property="oppositeRoomText"></span>
+            </span>
         </p>
     </div>
     <hr>
+    <div class="help" title="The checkboxes on the left apply to the default state of the portal (not opened), whereas the ones on the right apply if the portal is open."></div>
     <div class="column">
-        <p><span class="label"><input type="checkbox"></span>
-            <span class="end-label">Can pass through</span></p>
-        <p><span class="label"><input type="checkbox"></span>
-            <span class="end-label">Can look through
-            <input type="number" min="0" max="100">%</span></p>
-        <p><span class="label"><input type="checkbox"></span>
+        <p>
+            <span class="label">
+                <input type="checkbox" data-laces-property="flags.CanPassThrough">
+            </span>
+            <span class="end-label">Can pass through</span>
+        </p>
+        <p>
+            <span class="label">
+                <input type="checkbox" data-laces-property="flags.CanSeeThrough">
+            </span>
+            <span class="end-label">Can see through
+            <input type="number" min="0" max="100">%</span>
+        </p>
+        <p>
+            <span class="label">
+                <input type="checkbox" data-laces-property="flags.CanHearThrough">
+            </span>
             <span class="end-label">Can hear through
-            <input type="number" min="0" max="100">%</span></p>
-        <p><span class="label"><input type="checkbox"></span>
-            <span class="end-label">Can shoot through</span></p>
+            <input type="number" min="0" max="100">%</span>
+        </p>
+        <p>
+            <span class="label">
+                <input type="checkbox" data-laces-property="flags.CanShootThrough">
+            </span>
+            <span class="end-label">Can shoot through</span>
+        </p>
     </div>
     <div class="column">
-        <p><span class="label"><input type="checkbox"></span>
-            <span class="end-label">if open</span></p>
-        <p><span class="label"><input type="checkbox"></span>
-            <span class="end-label">if open</span></p>
-        <p><span class="label"><input type="checkbox"></span>
-            <span class="end-label">if open</span></p>
-        <p><span class="label"><input type="checkbox"></span>
-            <span class="end-label">if open</span></p>
+        <p>
+            <span class="label">
+                <input type="checkbox"
+                       data-laces="{ property: flags.CanPassThroughIfOpen, disabled: !canOpen }">
+            </span>
+            <span class="end-label">if open</span>
+        </p>
+        <p>
+            <span class="label">
+                <input type="checkbox"
+                       data-laces="{ property: flags.CanSeeThroughIfOpen, disabled: !canOpen }">
+            </span>
+            <span class="end-label">if open</span>
+        </p>
+        <p>
+            <span class="label">
+                <input type="checkbox"
+                       data-laces="{ property: flags.CanHearThroughIfOpen, disabled: !canOpen }">
+            </span>
+            <span class="end-label">if open</span>
+        </p>
+        <p>
+            <span class="label">
+                <input type="checkbox"
+                       data-laces="{ property: flags.CanShootThroughIfOpen, disabled: !canOpen }">
+            </span>
+            <span class="end-label">if open</span>
+        </p>
     </div>
     <div class="button-list">
         <button class="delete-button" data-laces-visible="id">Delete</button>

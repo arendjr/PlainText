@@ -62,6 +62,7 @@ class Portal : public GameObject {
         Q_INVOKABLE QString descriptionFromRoom(const GameObjectPtr &room) const;
         Q_INVOKABLE bool isHiddenFromRoom(const GameObjectPtr &room) const;
         Q_INVOKABLE bool canOpenFromRoom(const GameObjectPtr &room) const;
+        Q_INVOKABLE bool canOpen() const;
         Q_INVOKABLE bool canSeeThrough() const;
         Q_INVOKABLE bool canHearThrough() const;
         Q_INVOKABLE bool canShootThrough() const;

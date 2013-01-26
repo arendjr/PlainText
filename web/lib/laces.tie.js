@@ -80,7 +80,11 @@ function LacesTie(model, template, options) {
     function update(element, lacesProperty, defaultValue) {
         var value = reference(lacesProperty).value;
         if (element.tagName === "INPUT" || element.tagName === "SELECT") {
-            element.value = value || defaultValue;
+            if (element.getAttribute("type") === "checkbox") {
+                element.checked = !!value;
+            } else {
+                element.value = value || defaultValue;
+            }
         } else {
             element.textContent = value || defaultValue;
         }
@@ -128,7 +132,8 @@ function LacesTie(model, template, options) {
             if (node.tagName === "INPUT") {
                 node.addEventListener(saveEvent, function() {
                     var newRef = reference(lacesProperty);
-                    newRef.parent[newRef.propertyName] = node.value;
+                    newRef.parent[newRef.propertyName] = (node.getAttribute("type") === "checkbox" ?
+                                                          !!node.checked : node.value);
                 });
             }
 

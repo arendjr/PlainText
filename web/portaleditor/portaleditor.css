@@ -43,15 +43,27 @@
     .portal-editor .z {
         width: 5em;
     }
-        .portal-editor .delete-button {
-            position: absolute;
-            top: 3px;
-            left: 3px;
+    .portal-editor .help {
+        position: absolute;
+        margin-top: 8px;
+        right: 8px;
+        width: 16px;
+        height: 16px;
 
-            background-color: red;
-            color: white;
-            font-weight: bold;
-        }
+        background-image: url(/img/help.png);
+        background-size: 16px 16px;
+
+        cursor: help;
+    }
+    .portal-editor .delete-button {
+        position: absolute;
+        top: 3px;
+        left: 3px;
+
+        background-color: red;
+        color: white;
+        font-weight: bold;
+    }
 
 .portal-delete {
     top: 200px;

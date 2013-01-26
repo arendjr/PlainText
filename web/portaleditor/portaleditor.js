@@ -21,6 +21,41 @@ define(["controller", "util", "lib/laces", "lib/zepto", "text!portaleditor/porta
         this.portal.set("positionVisible", function() {
             return !this.room2.id && !this.direction;
         });
+        this.portal.set("oppositeRoomText", function() {
+            return this.room2.id ? "room #" + this.room2.id : "new room";
+        });
+        this.portal.set("flags", {
+            IsHiddenFromSide1: false,
+            IsHiddenFromSide2: false,
+            CanOpenFromSide1: false,
+            CanOpenFromSide2: false,
+            CanSeeThrough: false,
+            CanHearThrough: false,
+            CanShootThrough: false,
+            CanPassThrough: false,
+            CanSeeThroughIfOpen: false,
+            CanHearThroughIfOpen: false,
+            CanShootThroughIfOpen: false,
+            CanPassThroughIfOpen: false,
+            IsOpen: false
+        });
+        this.portal.set("canOpen", function() {
+            return this.flags.CanOpenFromSide1 || this.flags.CanOpenFromSide2;
+        });
+
+        var self = this;
+        this.portal.bind("change:canOpen", function(event) {
+            if (!event.value) {
+                self.portal.flags.CanSeeThroughIfOpen = false;
+                self.portal.flags.CanHearThroughIfOpen = false;
+                self.portal.flags.CanShootThroughIfOpen = false;
+                self.portal.flags.CanPassThroughIfOpen = false;
+                self.portal.flags.IsOpen = false;
+            }
+        });
+
+        // for debugging only
+        window.portal = this.portal;
 
         this.options = {};
 
@@ -105,7 +140,14 @@ define(["controller", "util", "lib/laces", "lib/zepto", "text!portaleditor/porta
             "z": portal.room.z
         });
         this.portal.set("direction", Util.isDirection(portal.name) ? portal.name : "");
-        this.portal.set("flags", portal.flags || "");
+
+        var self = this;
+        Object.keys(this.portal.flags).forEach(function(flag) {
+            self.portal.flags.set(flag, false);
+        });
+        (portal.flags || "").split("|").forEach(function(flag) {
+            self.portal.flags.set(flag, true);
+        });
 
         this.options = options || {};
 
@@ -205,6 +247,15 @@ define(["controller", "util", "lib/laces", "lib/zepto", "text!portaleditor/porta
                 portal.z = this.portal.z;
             }
         }
+
+        var flags = [];
+        var self = this;
+        Object.keys(this.portal.flags).forEach(function(flag) {
+            if (self.portal.flags[flag]) {
+                flags.push(flag);
+            }
+        });
+        portal.flags = flags.join("|");
 
         this.mapModel.portals.save(portal);
 

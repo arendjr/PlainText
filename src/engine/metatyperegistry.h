@@ -239,6 +239,9 @@ class MetaTypeRegistry {
                 value = (Flags) ((unsigned int) value ^ other);                                   \
                 return *this;                                                                     \
             }                                                                                     \
+            Flags operator~() {                                                                   \
+                return (Flags) ~value;                                                            \
+            }                                                                                     \
             bool operator==(Type other) const {                                                   \
                 return value == other.value;                                                      \
             }                                                                                     \
