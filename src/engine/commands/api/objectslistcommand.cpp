@@ -26,9 +26,10 @@ void ObjectsListCommand::execute(Character *player, const QString &command) {
         return;
     }
 
-    QVariantList data;
-    for (const GameObjectPtr &room : realm()->allObjects(objectType)) {
-        data << room->toJsonString();
+    QVector<GameObject *> objects = realm()->allObjects(objectType);
+    QStringList data;
+    for (GameObject *object : objects) {
+        data.append(object->toJsonString());
     }
     sendReply(data);
 }

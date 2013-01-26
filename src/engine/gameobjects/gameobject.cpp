@@ -687,7 +687,7 @@ void GameObject::loadJson(const QString &jsonString) {
             continue;
         }
 
-        setProperty(name, ConversionUtil::fromVariant(meta.type(), meta.userType(), map[name]));
+        meta.write(this, ConversionUtil::fromVariant(meta.type(), meta.userType(), map[name]));
     }
 }
 
@@ -695,20 +695,23 @@ void GameObject::resolvePointers() {
 
     for (const QMetaProperty &metaProperty : storedMetaProperties()) {
         if (metaProperty.type() == QVariant::UserType) {
-            const char *name = metaProperty.name();
             if (metaProperty.userType() == GameObjectPtrType) {
-                GameObjectPtr pointer = property(name).value<GameObjectPtr>();
+                GameObjectPtr pointer;
+                void *value = &pointer;
+                qt_metacall(QMetaObject::ReadProperty, metaProperty.propertyIndex(), &value);
                 try {
                     pointer.resolve(m_realm);
                 } catch (const GameException &exception) {
                     Q_UNUSED(exception)
                     pointer = GameObjectPtr();
                 }
-                setProperty(name, QVariant::fromValue(pointer));
+                qt_metacall(QMetaObject::WriteProperty, metaProperty.propertyIndex(), &value);
             } else if (metaProperty.userType() == GameObjectPtrListType) {
-                GameObjectPtrList pointerList = property(name).value<GameObjectPtrList>();
-                pointerList.resolvePointers(m_realm);
-                setProperty(name, QVariant::fromValue(pointerList));
+                GameObjectPtrList list;
+                void *value = &list;
+                qt_metacall(QMetaObject::ReadProperty, metaProperty.propertyIndex(), &value);
+                list.resolvePointers(m_realm);
+                qt_metacall(QMetaObject::WriteProperty, metaProperty.propertyIndex(), &value);
             }
         }
     }

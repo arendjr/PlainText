@@ -40,6 +40,10 @@ Realm::Realm(Options options) :
         m_reservedNames.append(commandName);
     }
 
+    for (int i = 0; i < GameObjectType::NumValues; i++) {
+        m_numObjects[i] = 0;
+    }
+
     load(DiskUtil::gameObjectPath("Realm", id()));
 }
 
@@ -108,9 +112,13 @@ void Realm::registerObject(GameObject *gameObject) {
     uint id = gameObject->id();
     m_objectMap.insert(id, gameObject);
 
-    switch (gameObject->objectType().value) {
+    int objectType = gameObject->objectType().value;
+    switch (objectType) {
         case GameObjectType::Area:
             m_areas.append(gameObject);
+            break;
+        case GameObjectType::Room:
+            m_rooms.append(gameObject);
             break;
         case GameObjectType::Class:
             m_classes.append(gameObject);
@@ -119,6 +127,7 @@ void Realm::registerObject(GameObject *gameObject) {
             m_races.append(gameObject);
             break;
         default:
+            m_numObjects[objectType]++;
             break;
     }
 
@@ -134,6 +143,11 @@ void Realm::unregisterObject(GameObject *gameObject) {
 
     Q_ASSERT(gameObject);
     m_objectMap.remove(gameObject->id());
+
+    int objectType = gameObject->objectType().value;
+    if (m_numObjects[objectType] > 0) {
+        m_numObjects[objectType]--;
+    }
 }
 
 GameObject *Realm::getObject(GameObjectType objectType, uint id) {
@@ -165,12 +179,19 @@ GameObject *Realm::createObject(const QString &objectType) {
     return GameObject::createByObjectType(this, GameObjectType::fromString(objectType));
 }
 
-GameObjectPtrList Realm::allObjects(GameObjectType objectType) const {
+QVector<GameObject *> Realm::allObjects(GameObjectType objectType) const {
 
-    GameObjectPtrList objects;
-    for (GameObject *object : m_objectMap) {
-        if (objectType == GameObjectType::Unknown || object->objectType() == objectType) {
+    QVector<GameObject *> objects;
+    objects.reserve(m_numObjects[objectType.value]);
+    if (objectType == GameObjectType::Unknown) {
+        for (GameObject *object : m_objectMap) {
             objects.append(object);
+        }
+    } else {
+        for (GameObject *object : m_objectMap) {
+            if (object->objectType() == objectType) {
+                objects.append(object);
+            }
         }
     }
     return objects;
