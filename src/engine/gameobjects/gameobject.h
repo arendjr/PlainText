@@ -25,7 +25,6 @@ PT_DEFINE_ENUM(GameObjectType,
     Class,
     Container,
     Event,
-    Exit,
     Group,
     Item,
     Player,
@@ -59,7 +58,6 @@ class GameObject : public QObject {
         Q_INVOKABLE bool isClass() const;
         Q_INVOKABLE bool isContainer() const;
         Q_INVOKABLE bool isEvent() const;
-        Q_INVOKABLE bool isExit() const;
         Q_INVOKABLE bool isItem() const;
         Q_INVOKABLE bool isCharacter() const;
         Q_INVOKABLE bool isGroup() const;

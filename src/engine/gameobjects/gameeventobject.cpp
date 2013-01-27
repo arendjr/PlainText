@@ -1,10 +1,5 @@
 #include "gameeventobject.h"
 
-#include "areaevent.h"
-#include "gameexception.h"
-#include "soundevent.h"
-#include "visualevent.h"
-
 
 #define super GameObject
 
@@ -54,20 +49,7 @@ void GameEventObject::setVeryDistantDescription(const QString &veryDistantDescri
 GameEvent *GameEventObject::createInRoom(Room *origin, double strength,
                                          const GameObjectPtrList &excludedCharacters) {
 
-    GameEvent *event;
-    switch (m_eventType.value) {
-        case GameEventType::AreaEvent:
-            event = new AreaEvent(origin, strength);
-            break;
-        case GameEventType::SoundEvent:
-            event = new SoundEvent(origin, strength);
-            break;
-        case GameEventType::VisualEvent:
-            event = new VisualEvent(origin, strength);
-            break;
-        default:
-            throw GameException(GameException::UnknownGameEventType);
-    }
+    GameEvent *event = GameEvent::createByEventType(m_eventType, origin, strength);
 
     for (const QMetaProperty &metaProperty : event->storedMetaProperties()) {
         const char *name = metaProperty.name();

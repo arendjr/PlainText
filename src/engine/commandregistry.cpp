@@ -5,13 +5,11 @@
 #include <QStringList>
 
 #include "room.h"
-#include "exit.h"
 #include "gameexception.h"
 #include "gameobjectptr.h"
 #include "logutil.h"
 #include "player.h"
 #include "util.h"
-#include "commands/gocommand.h"
 #include "commands/scriptcommand.h"
 #include "commands/admin/copyitemcommand.h"
 #include "commands/admin/copytriggerscommand.h"
@@ -44,11 +42,6 @@
 
 CommandRegistry::CommandRegistry(QObject *parent) :
     QObject(parent) {
-
-    Command *go = new GoCommand(this);
-
-    m_commands.insert("enter", go);
-    m_commands.insert("go", go);
 
     m_adminCommands.insert("copy-item", new CopyItemCommand(this));
     m_adminCommands.insert("copy-triggers", new CopyTriggersCommand(this));

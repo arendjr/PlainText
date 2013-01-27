@@ -1,6 +1,9 @@
 #include "movementsoundevent.h"
 
+#include <QDebug>
+
 #include "character.h"
+#include "gameexception.h"
 #include "point3d.h"
 #include "room.h"
 #include "util.h"
@@ -10,18 +13,24 @@
 #define super SoundEvent
 
 MovementSoundEvent::MovementSoundEvent(Room *origin, double strength) :
-    super(origin, strength),
-    m_destination(nullptr) {
+    super(GameEventType::MovementSound, origin, strength),
+    m_destination(nullptr),
+    m_movement(0, 0, 0),
+    m_direction(0, 0, 0) {
 }
 
 MovementSoundEvent::~MovementSoundEvent() {
 }
 
-void MovementSoundEvent::setDestination(Room *destination) {
+void MovementSoundEvent::setDestination(const GameObjectPtr &destination) {
 
-    m_destination = destination;
+    try {
+        m_destination = destination.cast<Room *>();
 
-    addVisit(destination, strengthForRoom(originRoom()));
+        addVisit(m_destination, strengthForRoom(originRoom()));
+    } catch (GameException &exception) {
+        qDebug() << "Exception in MovementSoundEvent::setDestination(): " << exception.what();
+    }
 }
 
 void MovementSoundEvent::setMovement(const Vector3D &movement) {

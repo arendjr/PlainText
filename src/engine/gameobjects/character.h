@@ -116,15 +116,8 @@ class Character : public StatsItem {
         Q_INVOKABLE void clearNegativeEffects();
         Q_PROPERTY(EffectList effects READ effects STORED false)
 
-        Q_INVOKABLE void go(const GameObjectPtr &pointer);
-
         Q_INVOKABLE void enter(const GameObjectPtr &roomPtr);
         Q_INVOKABLE void leave(const GameObjectPtr &roomPtr);
-
-        Q_INVOKABLE void say(const QString &message);
-        Q_INVOKABLE void shout(const QString &message);
-        Q_INVOKABLE void talk(const GameObjectPtr &character, const QString &message);
-        Q_INVOKABLE void tell(const GameObjectPtr &player, const QString &message);
 
         Q_INVOKABLE void follow(const GameObjectPtr &character);
         Q_INVOKABLE void lose(const GameObjectPtr &character = GameObjectPtr());

@@ -5,7 +5,10 @@
 #include "commandinterpreter.h"
 #include "commandregistry.h"
 #include "diskutil.h"
+#include "gameevent.h"
+#include "gameexception.h"
 #include "player.h"
+#include "room.h"
 #include "triggerregistry.h"
 #include "util.h"
 
@@ -40,7 +43,7 @@ Realm::Realm(Options options) :
         m_reservedNames.append(commandName);
     }
 
-    for (int i = 0; i < GameObjectType::NumValues; i++) {
+    for (uint i = 0; i < GameObjectType::NumValues; i++) {
         m_numObjects[i] = 0;
     }
 
@@ -252,6 +255,18 @@ void Realm::setDateTime(const QDateTime &dateTime) {
         m_dateTime = dateTime;
 
         setModified();
+    }
+}
+
+GameEvent *Realm::createEvent(const QString &eventType, const GameObjectPtr &origin,
+                              double strength) {
+
+    try {
+        return GameEvent::createByEventType(GameEventType::fromString(eventType),
+                                            origin.cast<Room *>(), strength);
+    } catch(GameException &exception) {
+        qDebug() << "Exception in Realm::createEvent(): " << exception.what();
+        return nullptr;
     }
 }
 

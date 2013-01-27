@@ -6,7 +6,7 @@
 Shield::Shield(Realm *realm, uint id, Options options) :
     super(realm, GameObjectType::Shield, id, options) {
 
-    setPortable(true);
+    setFlags(ItemFlags::Portable);
 }
 
 Shield::~Shield() {

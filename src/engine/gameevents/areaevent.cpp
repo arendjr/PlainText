@@ -7,7 +7,7 @@
 #define super GameEvent
 
 AreaEvent::AreaEvent(Room *origin, double strength) :
-    super(GameEventType::AreaEvent, origin, strength) {
+    super(GameEventType::Area, origin, strength) {
 
     if (!origin->area().isNull()) {
         Area *area = origin->area().cast<Area *>();

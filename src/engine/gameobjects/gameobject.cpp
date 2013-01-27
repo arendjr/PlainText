@@ -21,7 +21,6 @@
 #include "conversionutil.h"
 #include "deleteobjectevent.h"
 #include "diskutil.h"
-#include "exit.h"
 #include "gameeventmultipliermap.h"
 #include "gameeventobject.h"
 #include "gameexception.h"
@@ -117,11 +116,6 @@ bool GameObject::isContainer() const {
 bool GameObject::isEvent() const {
 
     return m_objectType == GameObjectType::Event;
-}
-
-bool GameObject::isExit() const {
-
-    return m_objectType == GameObjectType::Exit;
 }
 
 bool GameObject::isItem() const {
@@ -760,8 +754,6 @@ GameObject *GameObject::createByObjectType(Realm *realm, GameObjectType objectTy
             return new Container(realm, id, options);
         case GameObjectType::Event:
             return new GameEventObject(realm, id, options);
-        case GameObjectType::Exit:
-            return new Exit(realm, options);
         case GameObjectType::Group:
             return new Group(realm, id, options);
         case GameObjectType::Item:

@@ -8,10 +8,23 @@
 #include "point3d.h"
 
 
+PT_DEFINE_ENUM(RoomType,
+    Room,
+    Corridor,
+    House,
+    City,
+    Grass,
+    Forest,
+    Mountain,
+    Cave
+)
+
 PT_DEFINE_FLAGS(RoomFlags,
-    NoCeiling,
-    NoFloor,
-    Outside
+    HasCeiling,
+    HasFloor,
+    HasWalls,
+    HasRoad,
+    HasRiver
 )
 
 
@@ -27,18 +40,23 @@ class Room : public GameObject {
         void setArea(const GameObjectPtr &area);
         Q_PROPERTY(GameObjectPtr area READ area WRITE setArea STORED false)
 
+        RoomType type() const { return m_type; }
+        void setType(RoomType type);
+        Q_PROPERTY(RoomType type READ type WRITE setType)
+
         const Point3D &position() const { return m_position; }
         void setPosition(const Point3D &position);
         Q_PROPERTY(Point3D position READ position WRITE setPosition)
+
+        RoomFlags flags() const { return m_flags; }
+        void setFlags(RoomFlags flags);
+        Q_PROPERTY(RoomFlags flags READ flags WRITE setFlags)
 
         const GameObjectPtrList &portals() const { return m_portals; }
         Q_INVOKABLE void addPortal(const GameObjectPtr &portal);
         Q_INVOKABLE void removePortal(const GameObjectPtr &portal);
         void setPortals(const GameObjectPtrList &portals);
         Q_PROPERTY(GameObjectPtrList portals READ portals WRITE setPortals)
-
-        const GameObjectPtrList &exits();
-        Q_PROPERTY(GameObjectPtrList exits READ exits STORED false)
 
         const GameObjectPtrList &characters() const { return m_characters; }
         Q_INVOKABLE void addCharacter(const GameObjectPtr &character);
@@ -52,25 +70,26 @@ class Room : public GameObject {
         void setItems(const GameObjectPtrList &items);
         Q_PROPERTY(GameObjectPtrList items READ items WRITE setItems)
 
-        RoomFlags flags() const { return m_flags; }
-        void setFlags(RoomFlags flags);
-        Q_PROPERTY(RoomFlags flags READ flags WRITE setFlags)
-
         const GameEventMultiplierMap &eventMultipliers() const { return m_eventMultipliers; }
         void setEventMultipliers(const GameEventMultiplierMap &multipliers);
         Q_PROPERTY(GameEventMultiplierMap eventMultipliers READ eventMultipliers
                                                            WRITE setEventMultipliers)
 
-        Q_INVOKABLE virtual QString lookAtBy(GameObject *character);
-
     private:
         GameObjectPtr m_area;
+
+        RoomType m_type;
+
         Point3D m_position;
-        GameObjectPtrList m_portals;
-        GameObjectPtrList m_exits;
-        GameObjectPtrList m_characters;
-        GameObjectPtrList m_items;
+
         RoomFlags m_flags;
+
+        GameObjectPtrList m_portals;
+
+        GameObjectPtrList m_characters;
+
+        GameObjectPtrList m_items;
+
         GameEventMultiplierMap m_eventMultipliers;
 };
 

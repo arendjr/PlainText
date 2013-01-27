@@ -3,7 +3,14 @@
 #include <QHash>
 #include <QScriptEngine>
 
+#include "areaevent.h"
+#include "floodevent.h"
+#include "movementsoundevent.h"
+#include "movementvisualevent.h"
 #include "room.h"
+#include "soundevent.h"
+#include "speechevent.h"
+#include "visualevent.h"
 
 
 GameEvent::GameEvent(GameEventType eventType, Room *origin, double strength) :
@@ -20,12 +27,15 @@ GameEvent::~GameEvent() {
 
 bool GameEvent::isSoundEvent() const {
 
-    return m_eventType == GameEventType::SoundEvent;
+    return m_eventType == GameEventType::Sound ||
+           m_eventType == GameEventType::MovementSound ||
+           m_eventType == GameEventType::Speech;
 }
 
 bool GameEvent::isVisualEvent() const {
 
-    return m_eventType == GameEventType::VisualEvent;
+    return m_eventType == GameEventType::Visual ||
+           m_eventType == GameEventType::MovementVisual;
 }
 
 GameObjectPtr GameEvent::origin() const {
@@ -109,6 +119,31 @@ void GameEvent::fromScriptValue(const QScriptValue &object, GameEvent *&event) {
 
     event = qobject_cast<GameEvent *>(object.toQObject());
     Q_ASSERT(event);
+}
+
+GameEvent *GameEvent::createByEventType(GameEventType eventType, Room *origin, double strength) {
+
+    switch (eventType.value) {
+        case GameEventType::Area:
+            return new AreaEvent(origin, strength);
+        case GameEventType::Flood:
+            return new FloodEvent(origin, strength);
+        case GameEventType::MovementSound:
+            return new MovementSoundEvent(origin, strength);
+        case GameEventType::MovementVisual:
+            return new MovementVisualEvent(origin, strength);
+        case GameEventType::Sound:
+            return new SoundEvent(origin, strength);
+        case GameEventType::Speech:
+            return new SpeechEvent(origin, strength);
+        case GameEventType::Visual:
+            return new VisualEvent(origin, strength);
+        case GameObjectType::Unknown:
+        default:
+            break;
+    }
+
+    throw GameException(GameException::UnknownGameEventType);
 }
 
 QVector<QMetaProperty> GameEvent::storedMetaProperties() const {

@@ -1,22 +1,41 @@
 #include "speechevent.h"
 
+#include <QDebug>
+
 #include "character.h"
+#include "gameexception.h"
 #include "room.h"
 #include "util.h"
 
 
 #define super SoundEvent
 
-SpeechEvent::SpeechEvent(Character *speaker, const QString &message,
-                         Room *origin, double strength, const GameObjectPtr &target) :
-    super(origin, strength),
-    m_speaker(speaker),
-    m_message(message),
-    m_isShout(strength > 1.0),
-    m_target(target) {
+SpeechEvent::SpeechEvent(Room *origin, double strength) :
+    super(GameEventType::Speech, origin, strength),
+    m_speaker(nullptr),
+    m_isShout(strength > 2.0) {
 }
 
 SpeechEvent::~SpeechEvent() {
+}
+
+void SpeechEvent::setSpeaker(const GameObjectPtr &speaker) {
+
+    try {
+        m_speaker = speaker.cast<Character *>();
+    } catch (GameException &exception) {
+        qDebug() << "Exception in SpeechEvent::setSpeaker(): " << exception.what();
+    }
+}
+
+void SpeechEvent::setMessage(const QString &message) {
+
+    m_message = message;
+}
+
+void SpeechEvent::setTarget(const GameObjectPtr &target) {
+
+    m_target = target;
 }
 
 QString SpeechEvent::descriptionForStrengthInRoom(double strength, Room *room) const {

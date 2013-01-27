@@ -7,6 +7,7 @@
 #include <QStringList>
 #include <QVector>
 
+#include "gameevent.h"
 #include "gameobject.h"
 #include "gameobjectptr.h"
 #include "gameobjectsyncthread.h"
@@ -59,6 +60,9 @@ class Realm : public GameObject {
         Q_INVOKABLE GameObjectPtrList rooms() const { return m_rooms; }
         Q_INVOKABLE GameObjectPtrList races() const { return m_races; }
         Q_INVOKABLE GameObjectPtrList classes() const { return m_classes; }
+
+        Q_INVOKABLE GameEvent *createEvent(const QString &eventType, const GameObjectPtr &origin,
+                                           double strength);
 
         uint uniqueObjectId();
 

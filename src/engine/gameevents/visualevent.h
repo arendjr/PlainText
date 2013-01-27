@@ -10,6 +10,7 @@ class VisualEvent : public GameEvent {
 
     public:
         VisualEvent(Room *origin, double strength);
+        VisualEvent(GameEventType eventType, Room *origin, double strength);
         virtual ~VisualEvent();
 
     protected:

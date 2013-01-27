@@ -6,7 +6,7 @@
 Weapon::Weapon(Realm *realm, uint id, Options options) :
     super(realm, GameObjectType::Weapon, id, options) {
 
-    setPortable(true);
+    setFlags(ItemFlags::Portable);
 }
 
 Weapon::~Weapon() {

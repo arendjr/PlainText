@@ -9,6 +9,7 @@
 #include "gameeventmultipliermap.h"
 #include "gameobject.h"
 #include "gameobjectptr.h"
+#include "item.h"
 #include "modifier.h"
 #include "point3d.h"
 #include "portal.h"
@@ -69,12 +70,15 @@ void MetaTypeRegistry::registerMetaTypes(QScriptEngine *engine) {
     REGISTER_META_LIST_TYPE(EffectList)
 
     REGISTER_META_TYPE_POINTER(GameEvent)
+    REGISTER_SERIALIZABLE_META_TYPE(GameEventType)
     REGISTER_SERIALIZABLE_META_TYPE(GameEventMultiplierMap)
 
     REGISTER_META_TYPE_POINTER(GameObject)
     REGISTER_SERIALIZABLE_META_TYPE(GameObjectType)
     REGISTER_SERIALIZABLE_META_TYPE(GameObjectPtr)
     REGISTER_SERIALIZABLE_META_LIST_TYPE(GameObjectPtrList)
+
+    REGISTER_SERIALIZABLE_META_TYPE(ItemFlags)
 
     REGISTER_META_TYPE(Modifier)
     REGISTER_META_LIST_TYPE(ModifierList)
@@ -84,6 +88,7 @@ void MetaTypeRegistry::registerMetaTypes(QScriptEngine *engine) {
     REGISTER_SERIALIZABLE_META_TYPE(PortalFlags)
 
     REGISTER_SERIALIZABLE_META_TYPE(RoomFlags)
+    REGISTER_SERIALIZABLE_META_TYPE(RoomType)
 
     REGISTER_SERIALIZABLE_META_TYPE(ScriptFunction)
     REGISTER_SERIALIZABLE_META_TYPE(ScriptFunctionMap)

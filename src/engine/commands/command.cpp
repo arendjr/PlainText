@@ -3,6 +3,7 @@
 #include <QRegExp>
 
 #include "container.h"
+#include "portal.h"
 #include "util.h"
 
 
@@ -195,8 +196,14 @@ GameObjectPtrList Command::objectsByDescription(const ObjectDescription &descrip
         objects = pool;
     } else {
         for (const GameObjectPtr &object : pool) {
-            QString loweredName = object->name().toLower();
-            for (const QString &word : loweredName.split(' ')) {
+            QString name;
+            if (object->isPortal()) {
+                name = object.unsafeCast<Portal *>()->nameFromRoom(currentRoom());
+            } else {
+                name = object->name();
+            }
+            QStringList words = name.toLower().split(' ');
+            for (const QString &word : words) {
                 if (word.startsWith(description.name)) {
                     objects.append(object);
                     break;

@@ -10,6 +10,7 @@ class SoundEvent : public GameEvent {
 
     public:
         SoundEvent(Room *origin, double strength);
+        SoundEvent(GameEventType eventType, Room *origin, double strength);
         virtual ~SoundEvent();
 
     protected:

@@ -34,7 +34,6 @@ SOURCES += \
     src/engine/util.cpp \
     src/engine/vector3d.cpp \
     src/engine/commands/command.cpp \
-    src/engine/commands/gocommand.cpp \
     src/engine/commands/scriptcommand.cpp \
     src/engine/commands/admin/admincommand.cpp \
     src/engine/commands/admin/copyitemcommand.cpp \
@@ -83,7 +82,6 @@ SOURCES += \
     src/engine/gameobjects/character.cpp \
     src/engine/gameobjects/class.cpp \
     src/engine/gameobjects/container.cpp \
-    src/engine/gameobjects/exit.cpp \
     src/engine/gameobjects/gameeventobject.cpp \
     src/engine/gameobjects/gameobject.cpp \
     src/engine/gameobjects/group.cpp \
@@ -142,7 +140,6 @@ HEADERS += \
     src/engine/util.h \
     src/engine/vector3d.h \
     src/engine/commands/command.h \
-    src/engine/commands/gocommand.h \
     src/engine/commands/scriptcommand.h \
     src/engine/commands/admin/admincommand.h \
     src/engine/commands/admin/copyitemcommand.h \
@@ -191,7 +188,6 @@ HEADERS += \
     src/engine/gameobjects/character.h \
     src/engine/gameobjects/class.h \
     src/engine/gameobjects/container.h \
-    src/engine/gameobjects/exit.h \
     src/engine/gameobjects/gameeventobject.h \
     src/engine/gameobjects/gameobject.h \
     src/engine/gameobjects/group.h \
@@ -236,6 +232,7 @@ OTHER_FILES += \
     data/commands/followcommand.js \
     data/commands/getcommand.js \
     data/commands/givecommand.js \
+    data/commands/gocommand.js \
     data/commands/groupcommand.js \
     data/commands/gtalkcommand.js \
     data/commands/helpcommand.js \

@@ -12,7 +12,7 @@
 #define super GameEvent
 
 FloodEvent::FloodEvent(Room *origin, double strength) :
-    super(GameEventType::FloodEvent, origin, strength) {
+    super(GameEventType::Flood, origin, strength) {
 }
 
 FloodEvent::~FloodEvent() {

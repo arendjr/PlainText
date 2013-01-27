@@ -7,7 +7,11 @@
 #define super GameEvent
 
 SoundEvent::SoundEvent(Room *origin, double strength) :
-    super(GameEventType::SoundEvent, origin, strength) {
+    SoundEvent(GameEventType::Sound, origin, strength) {
+}
+
+SoundEvent::SoundEvent(GameEventType eventType, Room *origin, double strength) :
+    super(eventType, origin, strength) {
 }
 
 SoundEvent::~SoundEvent() {
@@ -15,7 +19,7 @@ SoundEvent::~SoundEvent() {
 
 void SoundEvent::visitRoom(Room *room, double strength) {
 
-    strength *= room->eventMultipliers()[GameEventType::SoundEvent];
+    strength *= room->eventMultipliers()[GameEventType::Sound];
 
     if (strength >= 0.1) {
         QString message = descriptionForStrengthInRoom(strength, room);
@@ -52,7 +56,7 @@ void SoundEvent::visitRoom(Room *room, double strength) {
                 if (!portal->canHearThrough()) {
                     continue;
                 }
-                multiplier = portal->eventMultipliers()[GameEventType::SoundEvent];
+                multiplier = portal->eventMultipliers()[GameEventType::Sound];
             }
 
             Vector3D vector = room2->position() - room1->position();

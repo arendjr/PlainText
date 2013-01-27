@@ -1,6 +1,9 @@
 #include "movementvisualevent.h"
 
+#include <QDebug>
+
 #include "character.h"
+#include "gameexception.h"
 #include "point3d.h"
 #include "portal.h"
 #include "room.h"
@@ -11,18 +14,22 @@
 #define super VisualEvent
 
 MovementVisualEvent::MovementVisualEvent(Room *origin, double strength) :
-    super(origin, strength),
+    super(GameEventType::MovementVisual, origin, strength),
     m_destination(nullptr) {
 }
 
 MovementVisualEvent::~MovementVisualEvent() {
 }
 
-void MovementVisualEvent::setDestination(Room *destination) {
+void MovementVisualEvent::setDestination(const GameObjectPtr &destination) {
 
-    m_destination = destination;
+    try {
+        m_destination = destination.cast<Room *>();
 
-    addVisit(destination, strengthForRoom(originRoom()));
+        addVisit(m_destination, strengthForRoom(originRoom()));
+    } catch (GameException &exception) {
+        qDebug() << "Exception in MovementVisualEvent::setDestination(): " << exception.what();
+    }
 }
 
 void MovementVisualEvent::setMovement(const Vector3D &movement) {
@@ -112,12 +119,12 @@ bool MovementVisualEvent::isWithinSight(Room *targetRoom, Room *sourceRoom) {
         return true;
     }
 
-    if (sourceRoom->flags() & RoomFlags::NoCeiling) {
+    if (~sourceRoom->flags() & RoomFlags::HasCeiling) {
         if (targetVector.z >= sourceVector.z) {
             return true;
         }
     }
-    if (sourceRoom->flags() & RoomFlags::NoFloor) {
+    if (~sourceRoom->flags() & RoomFlags::HasFloor) {
         if (targetVector.z <= sourceVector.z) {
             return true;
         }
@@ -128,12 +135,12 @@ bool MovementVisualEvent::isWithinSight(Room *targetRoom, Room *sourceRoom) {
         return true;
     }
 
-    if (sourceRoom->flags() & RoomFlags::NoCeiling) {
+    if (~sourceRoom->flags() & RoomFlags::HasCeiling) {
         if (targetVector.z >= sourceVector.z) {
             return true;
         }
     }
-    if (sourceRoom->flags() & RoomFlags::NoFloor) {
+    if (~sourceRoom->flags() & RoomFlags::HasFloor) {
         if (targetVector.z <= sourceVector.z) {
             return true;
         }

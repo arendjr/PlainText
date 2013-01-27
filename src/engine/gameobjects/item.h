@@ -3,6 +3,16 @@
 
 #include "gameobject.h"
 #include "gameobjectptr.h"
+#include "point3d.h"
+
+
+PT_DEFINE_FLAGS(ItemFlags,
+    AttachedToCeiling,
+    AttachedToWall,
+    Relevant,
+    Hidden,
+    Portable
+)
 
 
 class Item : public GameObject {
@@ -14,12 +24,11 @@ class Item : public GameObject {
         Item(Realm *realm, GameObjectType objectType, uint id, Options options = NoOptions);
         virtual ~Item();
 
-        bool isPortable() const { return m_portable; }
-        void setPortable(bool portable);
-        Q_PROPERTY(bool portable READ isPortable WRITE setPortable)
+        const Point3D &position() const { return m_position; }
+        void setPosition(const Point3D &position);
+        Q_PROPERTY(Point3D position READ position WRITE setPosition)
 
         int weight() const { return m_weight; }
-        Q_INVOKABLE void adjustWeight(int delta);
         void setWeight(int weight);
         Q_PROPERTY(int weight READ weight WRITE setWeight)
 
@@ -27,12 +36,24 @@ class Item : public GameObject {
         void setCost(double cost);
         Q_PROPERTY(double cost READ cost WRITE setCost)
 
+        ItemFlags flags() const { return m_flags; }
+        void setFlags(ItemFlags flags);
+        Q_PROPERTY(ItemFlags flags READ flags WRITE setFlags)
+
+        bool isHidden() const { return m_flags & ItemFlags::Hidden; }
+        Q_PROPERTY(bool hidden READ isHidden STORED false)
+
+        bool isPortable() const { return m_flags & ItemFlags::Portable; }
+        Q_PROPERTY(bool portable READ isPortable STORED false)
+
     private:
-        bool m_portable;
+        Point3D m_position;
 
         int m_weight;
 
         double m_cost;
+
+        ItemFlags m_flags;
 };
 
 #endif // ITEM_H

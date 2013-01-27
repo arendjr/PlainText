@@ -12,10 +12,14 @@ Container::~Container() {
 
 void Container::addItem(const GameObjectPtr &item) {
 
+    if (!item->isItem()) {
+        return;
+    }
+
     if (!m_items.contains(item)) {
         m_items.append(item);
 
-        adjustWeight(item.cast<Item *>()->weight());
+        setWeight(weight() + item.unsafeCast<Item *>()->weight());
 
         setModified();
     }
@@ -24,7 +28,7 @@ void Container::addItem(const GameObjectPtr &item) {
 void Container::removeItem(const GameObjectPtr &item) {
 
     if (m_items.removeOne(item)) {
-        adjustWeight(-item.cast<Item *>()->weight());
+        setWeight(weight() - item.unsafeCast<Item *>()->weight());
 
         setModified();
     }

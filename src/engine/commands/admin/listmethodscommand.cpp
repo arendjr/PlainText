@@ -23,7 +23,7 @@ void ListMethodsCommand::execute(Character *player, const QString &command) {
 
     super::prepareExecute(player, command);
 
-    GameObjectPtr object = takeObject(currentRoom()->exits() + currentRoom()->characters() +
+    GameObjectPtr object = takeObject(currentRoom()->portals() + currentRoom()->characters() +
                                       currentRoom()->items());
     if (!requireSome(object, "Object not found.")) {
         return;

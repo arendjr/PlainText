@@ -10,7 +10,11 @@
 #define super GameEvent
 
 VisualEvent::VisualEvent(Room *origin, double strength) :
-    super(GameEventType::VisualEvent, origin, strength) {
+    VisualEvent(GameEventType::Visual, origin, strength) {
+}
+
+VisualEvent::VisualEvent(GameEventType eventType, Room *origin, double strength) :
+    super(eventType, origin, strength) {
 }
 
 VisualEvent::~VisualEvent() {
@@ -18,7 +22,7 @@ VisualEvent::~VisualEvent() {
 
 void VisualEvent::visitRoom(Room *room, double strength) {
 
-    strength *= room->eventMultipliers()[GameEventType::VisualEvent];
+    strength *= room->eventMultipliers()[GameEventType::Visual];
 
     if (strength >= 0.1) {
         QString message = descriptionForStrengthInRoom(strength, room);
@@ -69,7 +73,7 @@ void VisualEvent::visitRoom(Room *room, double strength) {
                 if (!portal->canSeeThrough()) {
                     continue;
                 }
-                multiplier = portal->eventMultipliers()[GameEventType::VisualEvent];
+                multiplier = portal->eventMultipliers()[GameEventType::Visual];
             }
 
             Vector3D vector = oppositeRoom->position() - room->position();
@@ -95,12 +99,12 @@ bool VisualEvent::isWithinSight(Room *targetRoom, Room *sourceRoom) {
         return true;
     }
 
-    if (sourceRoom->flags() & RoomFlags::NoCeiling) {
+    if (~sourceRoom->flags() & RoomFlags::HasCeiling) {
         if (targetVector.z >= sourceVector.z) {
             return true;
         }
     }
-    if (sourceRoom->flags() & RoomFlags::NoFloor) {
+    if (~sourceRoom->flags() & RoomFlags::HasFloor) {
         if (targetVector.z <= sourceVector.z) {
             return true;
         }

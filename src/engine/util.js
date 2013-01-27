@@ -140,6 +140,17 @@ Array.prototype.named = function(name) {
     return undefined;
 };
 
+Array.prototype.normalized = function() {
+
+    var l = Math.sqrt(this[0] * this[0] + this[1] * this[1] + this[2] * this[2]);
+    var result = [];
+    if (l > 0) {
+        return [100 * this[0] / l, 100 * this[1] / l, 100 * this[2] / l];
+    } else {
+        return [0, 0, 0];
+    }
+};
+
 Array.prototype.plus = function(array) {
 
     var result = [];
@@ -290,6 +301,11 @@ String.prototype.arg = function() {
 String.prototype.capitalized = function() {
 
     return Util.capitalize(this);
+};
+
+String.prototype.colorized = function(color) {
+
+    return Util.colorize(this, color);
 };
 
 String.prototype.contains = function(string) {

@@ -15,11 +15,13 @@ class QScriptEngine;
 
 PT_DEFINE_ENUM(GameEventType,
     Unknown,
-    SoundEvent,
-    VisualEvent,
-    MovementEvent,
-    AreaEvent,
-    FloodEvent
+    Area,
+    Flood,
+    MovementSound,
+    MovementVisual,
+    Sound,
+    Speech,
+    Visual
 )
 
 
@@ -74,6 +76,8 @@ class GameEvent : public QObject {
 
         static QScriptValue toScriptValue(QScriptEngine *engine, GameEvent *const &event);
         static void fromScriptValue(const QScriptValue &object, GameEvent *&event);
+
+        static GameEvent *createByEventType(GameEventType eventType, Room *origin, double strength);
 
         QVector<QMetaProperty> storedMetaProperties() const;
 
