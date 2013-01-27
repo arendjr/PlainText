@@ -55,7 +55,7 @@ Character.prototype.die = function(attacker) {
             room.addItem(item);
         });
 
-        var droppedItemsDescription = inventory.joinFancy();
+        var droppedItemsDescription = this.inventory.joinFancy();
         others.send("%1 was carrying %2.".arg(myName, droppedItemsDescription), Color.Teal);
 
         this.inventory = [];
