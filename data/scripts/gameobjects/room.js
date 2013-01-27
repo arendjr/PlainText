@@ -58,3 +58,14 @@ Room.prototype.lookAtBy = function(character) {
 
     return text;
 };
+
+Room.prototype.portalNamed = function(name) {
+
+    for (var i = 0, length = this.portals.length; i < length; i++) {
+        var portal = this.portals[i];
+        if (portal.nameFromRoom(this) === name) {
+            return portal;
+        }
+    }
+    return undefined;
+};

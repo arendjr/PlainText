@@ -206,7 +206,7 @@ Character.prototype.go = function(pointer) {
     var distantVisualDescription;
     var veryDistantVisualDescription;
     if (followers.isEmpty()) {
-        visualDescription = this.indefiniteName;
+        visualDescription = this.indefiniteName();
         distantVisualDescription = (this.gender === "male" ? "a man" : "a woman");
         veryDistantVisualDescription = "someone";
     } else {
@@ -466,7 +466,7 @@ Character.prototype.shout = function(message) {
     event.message = message;
     event.fire();
 
-    event.affectedCharacters().forEach(function(character) {
+    event.affectedCharacters.forEach(function(character) {
         character.invokeTrigger("onshout", this, message);
     });
 

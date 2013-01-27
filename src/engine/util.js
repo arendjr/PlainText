@@ -129,7 +129,7 @@ Array.prototype.mul = function(scalar) {
     return result;
 };
 
-Array.prototype.named = function(name) {
+Array.prototype.named = function(name, room) {
 
     for (var i = 0; i < this.length; i++) {
         var element = this[i];
