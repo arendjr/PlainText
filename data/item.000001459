@@ -3,7 +3,8 @@
   "plural": "buckets full of water",
   "indefiniteArticle": "a",
   "description": "It's a bucket. It's filled with water.",
-  "portable": true,
+  "position": [ 0, 0, 0 ],
   "weight": 10,
-  "cost": 0
+  "cost": 0,
+  "flags": ""
 }
