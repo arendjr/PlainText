@@ -1,6 +1,9 @@
 {
   "name": "Main Street / Market Street",
   "description": "You're at the junction of Main Street and the Market Street. On the north side of the junction is a little field with a well.\n\nAt the southwest corner is the city's bakery.",
+  "type": "Room",
   "position": [ -100, -500, 0 ],
-  "portals": [ "portal:1470", "portal:1477", "portal:1501", "portal:1503" ]
+  "flags": "",
+  "portals": [ "portal:1470", "portal:1477", "portal:1501", "portal:1503" ],
+  "items": [ "item:1459" ]
 }
