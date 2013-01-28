@@ -25,14 +25,14 @@ class MovementTest : public TestCase {
             QCOMPARE(player->currentRoom()->name(), QString("Room A"));
 
             {
-                player->go(portal);
+                player->invokeScriptMethod("go", portal);
                 QCOMPARE(player->currentRoom()->name(), QString("Room B"));
 
                 QCOMPARE(player->direction(), Vector3D(0, 100, 0));
             }
 
             {
-                player->go(portal);
+                player->invokeScriptMethod("go", portal);
                 QCOMPARE(player->currentRoom()->name(), QString("Room A"));
 
                 QCOMPARE(player->direction(), Vector3D(0, -100, 0));
@@ -40,7 +40,7 @@ class MovementTest : public TestCase {
 
             {
                 Room *currentRoom = player->currentRoom().cast<Room *>();
-                player->go(currentRoom->exits()[0]);
+                player->invokeScriptMethod("go", currentRoom->portals()[0]);
                 QCOMPARE(player->currentRoom()->name(), QString("Room B"));
             }
 
@@ -55,7 +55,7 @@ class MovementTest : public TestCase {
             }
 
             {
-                player->go(realm->getObject(GameObjectType::Room, 1));
+                player->invokeScriptMethod("go", realm->getObject(GameObjectType::Room, 1));
                 QCOMPARE(player->currentRoom()->name(), QString("Room A"));
             }
 
@@ -87,74 +87,94 @@ class MovementTest : public TestCase {
             character->setDirection(roomA->position() - roomC->position());
 
             {
-                player->go(roomB);
+                player->invokeScriptMethod("go", roomB);
 
                 QCOMPARE(evaluate("sounds.length").toInt32(), 0);
                 QCOMPARE(evaluate("visuals.length").toInt32(), 1);
                 QCOMPARE(evaluate("visuals[0]").toString(),
-                         QString("You see Arie walking toward you."));
+                         QString("You see Arie running toward you."));
             }
 
             {
-                player->go(roomC);
+                player->invokeScriptMethod("go", roomC);
 
                 QCOMPARE(evaluate("sounds.length").toInt32(), 0);
                 QCOMPARE(evaluate("visuals.length").toInt32(), 2);
                 QCOMPARE(evaluate("visuals[1]").toString(),
-                         QString("Arie walks to you."));
+                         QString("Arie runs to you."));
             }
 
             {
-                player->go(roomB);
+                player->invokeScriptMethod("go", roomB);
 
                 QCOMPARE(evaluate("sounds.length").toInt32(), 0);
                 QCOMPARE(evaluate("visuals.length").toInt32(), 3);
                 QCOMPARE(evaluate("visuals[2]").toString(),
-                         QString("Arie walks to the c-to-b."));
+                         QString("Arie runs to the c-to-b."));
             }
 
             {
-                player->go(roomA);
+                player->invokeScriptMethod("go", roomA);
 
                 QCOMPARE(evaluate("sounds.length").toInt32(), 0);
                 QCOMPARE(evaluate("visuals.length").toInt32(), 4);
                 QCOMPARE(evaluate("visuals[3]").toString(),
-                         QString("You see Arie walking away from you."));
+                         QString("You see Arie running away from you."));
             }
 
             // the character's looking away from room A, still hearing most of the action
             character->setDirection(roomC->position() - roomA->position());
 
             {
-                player->go(roomB);
+                player->invokeScriptMethod("go", roomB);
 
                 QCOMPARE(evaluate("sounds.length").toInt32(), 0);
                 QCOMPARE(evaluate("visuals.length").toInt32(), 4);
             }
 
             {
-                player->go(roomC);
+                player->invokeScriptMethod("go", roomC);
 
                 QCOMPARE(evaluate("sounds.length").toInt32(), 1);
                 QCOMPARE(evaluate("visuals.length").toInt32(), 4);
                 QCOMPARE(evaluate("sounds[0]").toString(),
-                         QString("You hear someone walking up to you."));
+                         QString("You hear someone running up to you from behind."));
             }
 
             {
-                player->go(roomB);
+                player->invokeScriptMethod("go", roomB);
 
                 QCOMPARE(evaluate("sounds.length").toInt32(), 1);
                 QCOMPARE(evaluate("visuals.length").toInt32(), 5);
                 QCOMPARE(evaluate("visuals[4]").toString(),
-                         QString("Arie walks to the c-to-b."));
+                         QString("Arie runs to the c-to-b."));
             }
 
             {
-                player->go(roomA);
+                player->invokeScriptMethod("go", roomA);
 
                 QCOMPARE(evaluate("sounds.length").toInt32(), 1);
                 QCOMPARE(evaluate("visuals.length").toInt32(), 5);
+            }
+
+            // the character's looking to the left, hears approaches from his right
+            Vector3D direction = roomA->position() - roomC->position();
+            character->setDirection(Vector3D(direction.y, direction.x, direction.z));
+
+            {
+                player->invokeScriptMethod("go", roomB);
+
+                QCOMPARE(evaluate("sounds.length").toInt32(), 1);
+                QCOMPARE(evaluate("visuals.length").toInt32(), 5);
+            }
+
+            {
+                player->invokeScriptMethod("go", roomC);
+
+                QCOMPARE(evaluate("sounds.length").toInt32(), 2);
+                QCOMPARE(evaluate("visuals.length").toInt32(), 5);
+                QCOMPARE(evaluate("sounds[1]").toString(),
+                         QString("You hear someone running up to you from the right."));
             }
         }
 };

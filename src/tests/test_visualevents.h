@@ -51,7 +51,6 @@ class VisualEventsTest : public TestCase {
                     int z = 0 - 40 * sin(i * TAU / 200) - 40 * sin(j * TAU / 200);
 
                     Room *room = new Room(realm);
-                    room->setFlags(RoomFlags::NoCeiling);
                     room->setPosition(Point3D(x, y, z));
 
                     if (i > 0) {

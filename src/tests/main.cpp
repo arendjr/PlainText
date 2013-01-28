@@ -25,13 +25,13 @@ int main(int argc, char *argv[]) {
     OpenAndCloseTest test7;
     FloodEventTest test8;
 
-    //QTest::qExec(&test1);
-    //QTest::qExec(&test2);
-    //QTest::qExec(&test3);
-    //QTest::qExec(&test4);
-    //QTest::qExec(&test5);
-    //QTest::qExec(&test6);
-    //QTest::qExec(&test7);
+    QTest::qExec(&test1);
+    QTest::qExec(&test2);
+    QTest::qExec(&test3);
+    QTest::qExec(&test4);
+    QTest::qExec(&test5);
+    QTest::qExec(&test6);
+    QTest::qExec(&test7);
     QTest::qExec(&test8);
 
     return 0;

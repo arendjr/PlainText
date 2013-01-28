@@ -32,7 +32,10 @@ class SerializationTest : public TestCase {
 
             // wait for sync thread to catch up
             int waitTimeMs = 0;
-            while (!QFile::exists(DiskUtil::gameObjectPath("Player", 4))) {
+            while (!QFile::exists(DiskUtil::gameObjectPath("Room", 1)) ||
+                   !QFile::exists(DiskUtil::gameObjectPath("Room", 2)) ||
+                   !QFile::exists(DiskUtil::gameObjectPath("Portal", 3)) ||
+                   !QFile::exists(DiskUtil::gameObjectPath("Player", 4))) {
                 QTest::qWait(20);
                 waitTimeMs += 20;
                 QVERIFY(waitTimeMs < 5000);
@@ -43,9 +46,10 @@ class SerializationTest : public TestCase {
                 QVERIFY(file.open(QIODevice::ReadOnly));
                 QCOMPARE(QString(file.readAll()), QString("{\n"
                     "  \"name\": \"Room A\",\n"
+                    "  \"type\": \"Room\",\n"
                     "  \"position\": [ 0, 0, 0 ],\n"
-                    "  \"portals\": [ \"portal:3\" ],\n"
-                    "  \"flags\": \"\"\n"
+                    "  \"flags\": \"\",\n"
+                    "  \"portals\": [ \"portal:3\" ]\n"
                 "}"));
             }
 
@@ -54,9 +58,10 @@ class SerializationTest : public TestCase {
                 QVERIFY(file.open(QIODevice::ReadOnly));
                 QCOMPARE(QString(file.readAll()), QString("{\n"
                     "  \"name\": \"Room B\",\n"
+                    "  \"type\": \"Room\",\n"
                     "  \"position\": [ 0, 50, 0 ],\n"
-                    "  \"portals\": [ \"portal:3\", \"portal:6\" ],\n"
-                    "  \"flags\": \"\"\n"
+                    "  \"flags\": \"\",\n"
+                    "  \"portals\": [ \"portal:3\", \"portal:6\" ]\n"
                 "}"));
             }
 
@@ -77,9 +82,10 @@ class SerializationTest : public TestCase {
                 QVERIFY(file.open(QIODevice::ReadOnly));
                 QCOMPARE(QString(file.readAll()), QString("{\n"
                     "  \"name\": \"Arie\",\n"
-                    "  \"portable\": false,\n"
+                    "  \"position\": [ 0, 0, 0 ],\n"
                     "  \"weight\": 0,\n"
                     "  \"cost\": 0,\n"
+                    "  \"flags\": \"\",\n"
                     "  \"stats\": [0, 0, 0, 0, 0, 0],\n"
                     "  \"height\": 0,\n"
                     "  \"currentRoom\": \"room:1\",\n"
