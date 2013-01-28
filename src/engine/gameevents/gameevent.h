@@ -9,6 +9,7 @@
 #include "metatyperegistry.h"
 
 
+class Character;
 class Room;
 class QScriptEngine;
 
@@ -56,7 +57,9 @@ class GameEvent : public QObject {
         Q_PROPERTY(QString veryDistantDescription READ veryDistantDescription
                                                   WRITE setVeryDistantDescription)
 
-        Q_INVOKABLE virtual QString descriptionForStrengthInRoom(double strength, Room *room) const;
+        Q_INVOKABLE virtual QString descriptionForStrengthAndCharacterInRoom(double strength,
+                                                                             Character *character,
+                                                                             Room *room) const;
 
         const GameObjectPtrList &excludedCharacters() const { return m_excludedCharacters; }
         void addExcludedCharacter(const GameObjectPtr &excludedCharacter);

@@ -872,8 +872,8 @@ QString GameObjectPtrList::joinFancy(Options options) const {
 
         if (objectCounts[i] > 1) {
             if (i == 0 && options & Capitalized) {
-                strings.append(Util::capitalize(Util::writtenNumber(objectCounts[i])) +
-                               " " + object->plural());
+                strings.append(Util::capitalize(Util::writtenNumber(objectCounts[i])) + " " +
+                               object->plural());
             } else {
                 strings.append(Util::writtenNumber(objectCounts[i]) + " " +
                                object->plural());
@@ -885,9 +885,8 @@ QString GameObjectPtrList::joinFancy(Options options) const {
                 strings.append((i == 0 && options & Capitalized ?
                                 "The " : "the ") + object->name());
             } else {
-                strings.append(object->indefiniteName(i == 0 ?
-                                                      (options & Capitalized) :
-                                                      NoOptions));
+                strings.append(object->indefiniteName(i == 0 ? (options & Capitalized) :
+                                                               NoOptions));
             }
         }
     }

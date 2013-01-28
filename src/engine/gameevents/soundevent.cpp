@@ -1,5 +1,6 @@
 #include "soundevent.h"
 
+#include "character.h"
 #include "portal.h"
 #include "room.h"
 
@@ -22,19 +23,20 @@ void SoundEvent::visitRoom(Room *room, double strength) {
     strength *= room->eventMultipliers()[GameEventType::Sound];
 
     if (strength >= 0.1) {
-        QString message = descriptionForStrengthInRoom(strength, room);
-
-        for (const GameObjectPtr &character : room->characters()) {
-            if (excludedCharacters().contains(character)) {
+        for (const GameObjectPtr &characterPtr : room->characters()) {
+            if (excludedCharacters().contains(characterPtr)) {
                 continue;
             }
 
+            Character *character = characterPtr.cast<Character *>();
+            QString message = descriptionForStrengthAndCharacterInRoom(strength, character, room);
             if (character->isPlayer()) {
                 character->send(message);
             } else {
                 character->invokeTrigger("onsound", message);
             }
-            addAffectedCharacter(character);
+
+            addAffectedCharacter(characterPtr);
         }
 
         for (const GameObjectPtr &portalPtr : room->portals()) {

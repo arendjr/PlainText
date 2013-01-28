@@ -38,7 +38,7 @@ void SpeechEvent::setTarget(const GameObjectPtr &target) {
     m_target = target;
 }
 
-QString SpeechEvent::descriptionForStrengthInRoom(double strength, Room *room) const {
+QString SpeechEvent::descriptionForStrengthAndCharacterInRoom(double strength, Room *room) const {
 
     if (strength >= 0.8) {
         QString description;

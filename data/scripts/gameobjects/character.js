@@ -188,7 +188,14 @@ Character.prototype.go = function(pointer) {
     this.leave(source);
     this.direction = direction;
     this.enter(destination);
-    this.setLastAction("walk");
+
+    var action;
+    if (this.lastAction === "walk" || this.lastAction === "run") {
+        action = "run";
+    } else {
+        action = "walk";
+    }
+    this.setLastAction(action);
 
     for (i = 0, length = followers.length; i < length; i++) {
         var follower = followers[i];
@@ -203,8 +210,8 @@ Character.prototype.go = function(pointer) {
     party.append(this);
     party.append(followers);
 
-    var simplePresent = followers.isEmpty() ? "walks" : "walk";
-    var continuous = "walking";
+    var simplePresent = (followers.isEmpty() ? action + "s" : action);
+    var continuous = (action === "walk" ? "walking" : "running");
 
     var visualDescription;
     var distantVisualDescription;
@@ -247,7 +254,7 @@ Character.prototype.go = function(pointer) {
     visualEvent.excludedCharacters = party;
     visualEvent.fire();
 
-    var soundStrength = 1.0;
+    var soundStrength = (action === "walk" ? 1.0 : 3.0);
     var soundDescription = "someone";
     var veryDistantSoundDescription = "something";
     if (!followers.isEmpty()) {
@@ -447,11 +454,7 @@ Character.prototype.say = function(message) {
 
 Character.prototype.setLastAction = function(lastAction) {
 
-    if (this.lastAction === "walk" && lastAction === "walk") {
-        this.lastAction = "run";
-    } else {
-        this.lastAction = lastAction;
-    }
+    this.lastAction = lastAction;
 
     if (this.lastActionTimerId) {
         this.clearTimeout(this.lastActionTimerId);

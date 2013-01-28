@@ -48,7 +48,11 @@ void MovementVisualEvent::setVerb(const QString &simplePresent, const QString &c
     m_continuous = continuous;
 }
 
-QString MovementVisualEvent::descriptionForStrengthInRoom(double strength, Room *room) const {
+QString MovementVisualEvent::descriptionForStrengthAndCharacterInRoom(double strength,
+                                                                      Character *character,
+                                                                      Room *room) const {
+
+    Q_UNUSED(character)
 
     if (room == originRoom()) {
         QString characterName = Util::capitalize(description());

@@ -1,5 +1,7 @@
 #include "movementsoundevent.h"
 
+#include <cmath>
+
 #include <QDebug>
 
 #include "character.h"
@@ -49,12 +51,34 @@ void MovementSoundEvent::setVerb(const QString &simplePresent, const QString &co
     m_continuous = continuous;
 }
 
-QString MovementSoundEvent::descriptionForStrengthInRoom(double strength, Room *room) const {
+QString MovementSoundEvent::descriptionForStrengthAndCharacterInRoom(double strength,
+                                                                     Character *character,
+                                                                     Room *room) const {
 
     if (room == originRoom()) {
         return QString("You hear %1 %2 away.").arg(description(), m_continuous);
     } else if (room == m_destination) {
-        return QString("You hear %1 %2 up to you.").arg(description(), m_continuous);
+        double angle = atan2(originRoom()->position().y, originRoom()->position().x) -
+                       atan2(character->direction().y, character->direction().x);
+        if (angle < -TAU / 2) {
+            angle += TAU;
+        } else if (angle > TAU / 2) {
+            angle -= TAU;
+        }
+
+        QString direction;
+        if (angle > TAU * 3 / 8 || angle < -TAU * 3 / 8) {
+            // from the front
+        } else if (angle < TAU / 8 && angle > -TAU / 8) {
+            direction = " from behind";
+        } else {
+            if (angle > 0) {
+                direction = " from the left";
+            } else {
+                direction = " from the right";
+            }
+        }
+        return QString("You hear %1 %2 up to you%3.").arg(description(), m_continuous, direction);
     }
 
     if (strength > 0.8) {

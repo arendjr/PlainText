@@ -25,8 +25,6 @@ void VisualEvent::visitRoom(Room *room, double strength) {
     strength *= room->eventMultipliers()[GameEventType::Visual];
 
     if (strength >= 0.1) {
-        QString message = descriptionForStrengthInRoom(strength, room);
-
         for (const GameObjectPtr &characterPtr : room->characters()) {
             if (excludedCharacters().contains(characterPtr)) {
                 continue;
@@ -42,11 +40,13 @@ void VisualEvent::visitRoom(Room *room, double strength) {
                 }
             }
 
+            QString message = descriptionForStrengthAndCharacterInRoom(strength, character, room);
             if (character->isPlayer()) {
                 character->send(message);
             } else {
                 character->invokeTrigger("onvisual", message);
             }
+
             addAffectedCharacter(characterPtr);
         }
 

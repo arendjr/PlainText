@@ -18,7 +18,7 @@ FloodEvent::FloodEvent(Room *origin, double strength) :
 FloodEvent::~FloodEvent() {
 }
 
-QString FloodEvent::descriptionForStrengthInRoom(double strength, Room *room) const {
+QString FloodEvent::descriptionForStrengthAndCharacterInRoom(double strength, Room *room) const {
 
     Q_UNUSED(room)
 
@@ -33,7 +33,7 @@ QString FloodEvent::descriptionForStrengthInRoom(double strength, Room *room) co
 
 void FloodEvent::visitRoom(Room *room, double strength) {
 
-    QString message = descriptionForStrengthInRoom(strength - room->position().z, room);
+    QString message = descriptionForStrengthAndCharacterInRoom(strength - room->position().z, room);
 
     room->setDescription(room->description() + "\n" + message);
 

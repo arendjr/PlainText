@@ -152,6 +152,16 @@ class GameObject : public QObject {
                                         const QScriptValue &arg2 = QScriptValue(),
                                         const QScriptValue &arg3 = QScriptValue(),
                                         const QScriptValue &arg4 = QScriptValue());
+        QScriptValue invokeScriptMethod(const QString &methodName,
+                                        GameObject *arg1,
+                                        const QScriptValue &arg2 = QScriptValue(),
+                                        const QScriptValue &arg3 = QScriptValue(),
+                                        const QScriptValue &arg4 = QScriptValue());
+        QScriptValue invokeScriptMethod(const QString &methodName,
+                                        const GameObjectPtr &arg1,
+                                        const QScriptValue &arg2 = QScriptValue(),
+                                        const QScriptValue &arg3 = QScriptValue(),
+                                        const QScriptValue &arg4 = QScriptValue());
 
         Q_INVOKABLE virtual void send(const QString &message, int color = Silver) const;
 

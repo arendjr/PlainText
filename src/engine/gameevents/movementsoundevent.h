@@ -35,7 +35,9 @@ class MovementSoundEvent : public SoundEvent {
 
         Q_INVOKABLE void setVerb(const QString &simplePresent, const QString &continuous);
 
-        Q_INVOKABLE virtual QString descriptionForStrengthInRoom(double strength, Room *room) const;
+        Q_INVOKABLE virtual QString descriptionForStrengthAndCharacterInRoom(double strength,
+                                                                             Character *character,
+                                                                             Room *room) const;
 
     private:
         Room *m_destination;

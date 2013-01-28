@@ -58,8 +58,10 @@ void GameEvent::setVeryDistantDescription(const QString &veryDistantDescription)
     m_veryDistantDescription = veryDistantDescription;
 }
 
-QString GameEvent::descriptionForStrengthInRoom(double strength, Room *room) const {
+QString GameEvent::descriptionForStrengthAndCharacterInRoom(double strength, Character *character,
+                                                            Room *room) const {
 
+    Q_UNUSED(character)
     Q_UNUSED(room)
 
     if (strength >= 0.7 || m_distantDescription.isEmpty()) {

@@ -469,6 +469,26 @@ QScriptValue GameObject::invokeScriptMethod(const QString &methodName,
     return result;
 }
 
+QScriptValue GameObject::invokeScriptMethod(const QString &methodName,
+                                            GameObject *arg1,
+                                            const QScriptValue &arg2,
+                                            const QScriptValue &arg3,
+                                            const QScriptValue &arg4) {
+
+    ScriptEngine *engine = m_realm->scriptEngine();
+    return invokeScriptMethod(methodName, engine->toScriptValue(arg1), arg2, arg3, arg4);
+}
+
+QScriptValue GameObject::invokeScriptMethod(const QString &methodName,
+                                            const GameObjectPtr &arg1,
+                                            const QScriptValue &arg2,
+                                            const QScriptValue &arg3,
+                                            const QScriptValue &arg4) {
+
+    ScriptEngine *engine = m_realm->scriptEngine();
+    return invokeScriptMethod(methodName, engine->toScriptValue(arg1), arg2, arg3, arg4);
+}
+
 void GameObject::send(const QString &message, int color) const {
 
     Q_UNUSED(message)

@@ -12,7 +12,7 @@ class FloodEvent : public GameEvent {
         FloodEvent(Room *origin, double strength);
         virtual ~FloodEvent();
 
-        Q_INVOKABLE virtual QString descriptionForStrengthInRoom(double strength, Room *room) const;
+        Q_INVOKABLE virtual QString descriptionForStrengthAndCharacterInRoom(double strength, Room *room) const;
 
     protected:
         virtual void visitRoom(Room *room, double strength);

@@ -1,6 +1,7 @@
 #include "areaevent.h"
 
 #include "area.h"
+#include "character.h"
 #include "room.h"
 
 
@@ -24,15 +25,15 @@ AreaEvent::~AreaEvent() {
 
 void AreaEvent::visitRoom(Room *room, double strength) {
 
-    QString message = descriptionForStrengthInRoom(strength, room);
-
-    for (const GameObjectPtr &character : room->characters()) {
-        if (excludedCharacters().contains(character)) {
+    for (const GameObjectPtr &characterPtr : room->characters()) {
+        if (excludedCharacters().contains(characterPtr)) {
             continue;
         }
 
+        Character *character = characterPtr.cast<Character *>();
+        QString message = descriptionForStrengthAndCharacterInRoom(strength, character, room);
         character->send(message);
 
-        addAffectedCharacter(character);
+        addAffectedCharacter(characterPtr);
     }
 }

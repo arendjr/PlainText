@@ -35,7 +35,9 @@ class MovementVisualEvent : public VisualEvent {
 
         Q_INVOKABLE void setVerb(const QString &simplePresent, const QString &continuous);
 
-        Q_INVOKABLE virtual QString descriptionForStrengthInRoom(double strength, Room *room) const;
+        Q_INVOKABLE virtual QString descriptionForStrengthAndCharacterInRoom(double strength,
+                                                                             Character *character,
+                                                                             Room *room) const;
 
     protected:
         virtual bool isWithinSight(Room *targetRoom, Room *sourceRoom);

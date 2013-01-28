@@ -66,6 +66,19 @@ Array.prototype.containsAny = function(array) {
     return this.findFirstAmong(array) !== null;
 };
 
+Array.prototype.equals = function(array) {
+
+    if (this.length === array.length) {
+        return false;
+    }
+    for (var i = 0; i < this.length; i++) {
+        if (this[i] !== array[i]) {
+            return false;
+        }
+    }
+    return true;
+};
+
 Array.prototype.findFirstAmong = function(array) {
 
     for (var i = 0; i < this.length; i++) {
@@ -158,6 +171,17 @@ Array.prototype.plus = function(array) {
         result[i] = this[i] + array[i];
     }
     return result;
+};
+
+Array.prototype.prepend = function(value) {
+
+    if (value instanceof Array) {
+        var args = [0, 0].concat(value);
+        this.splice.apply(this, args);
+    } else {
+        this.splice(0, 0, value);
+        return value;
+    }
 };
 
 Array.prototype.randomElement = function() {

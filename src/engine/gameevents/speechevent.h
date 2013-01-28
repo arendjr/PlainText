@@ -28,7 +28,7 @@ class SpeechEvent : public SoundEvent {
         void setTarget(const GameObjectPtr &target);
         Q_PROPERTY(GameObjectPtr target READ target WRITE setTarget)
 
-        Q_INVOKABLE virtual QString descriptionForStrengthInRoom(double strength, Room *room) const;
+        Q_INVOKABLE virtual QString descriptionForStrengthAndCharacterInRoom(double strength, Room *room) const;
 
     private:
         Character *m_speaker;
