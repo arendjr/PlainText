@@ -1,0 +1,10 @@
+{
+  "name": "well",
+  "plural": "wells",
+  "indefiniteArticle": "a",
+  "description": "This well is the main source of water for the people of this city. During the day, there's a near constant stream of people going to and from the well.",
+  "position": [ 0, -4, 0 ],
+  "weight": 0,
+  "cost": 0,
+  "flags": ""
+}
