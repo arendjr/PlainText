@@ -98,6 +98,10 @@ Character.prototype.die = function(attacker) {
 
 Character.prototype.go = function(pointer) {
 
+    if (!pointer) {
+        return;
+    }
+
     if (this.secondsStunned() > 0) {
         this.send("Please wait %1 seconds.".arg(this.secondsStunned()), Color.Olive);
         return;
