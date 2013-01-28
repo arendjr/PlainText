@@ -20,11 +20,11 @@ bool DiskUtil::writeFile(const QString &path, const QString &content) {
 
     file.write(content.toUtf8());
     file.flush();
-#ifdef Q_OS_LINUX
-    fdatasync(file.handle());
-#else
-    fsync(file.handle());
-#endif
+//#ifdef Q_OS_LINUX
+//    fdatasync(file.handle());
+//#else
+//    fsync(file.handle());
+//#endif
     return true;
 }
 
