@@ -60,6 +60,9 @@ TriggerRegistry::TriggerRegistry(QObject *parent) :
                       "The oninit trigger is invoked once on every object when the game server "
                       "is started. Note: For characters that do have an onspawn trigger, but "
                       "no oninit trigger, onspawn is triggered instead.");
+    m_triggers.insert("onitemdropped(item : item, owner : character) : void",
+                      "The onitemdropped trigger is invoked on all characters in a room when an "
+                      "item is dropped in that room.");
     m_triggers.insert("onopen(activator : character) : bool",
                       "The onopen trigger is invoked on any item or exit when it's opened.");
     m_triggers.insert("onreceive(giver : character, item : item or amount) : bool",
