@@ -451,6 +451,12 @@ String.prototype.trimmed = function() {
 };
 
 
+Util.randomAlternative = function() {
+
+    return arguments[Util.randomInt(0, arguments.length)];
+}
+
+
 function $(identifier) {
 
     var split = identifier.split(":");

@@ -1,6 +1,7 @@
 #include "util.h"
 
 #include <cmath>
+#include <cstdarg>
 
 #include <QDebug>
 #include <QTextStream>
@@ -568,4 +569,19 @@ int Util::randomInt(int min, int max) {
         return min;
     }
     return min + qrand() % (max - min);
+}
+
+QString Util::randomAlternative(int amount, ...) {
+
+    QStringList alternatives;
+
+    va_list vl;
+    va_start(vl, amount);
+    for (int i = 0; i < amount; i++) {
+        char *val = va_arg(vl, char *);
+        alternatives.append(val);
+    }
+    va_end(vl);
+
+    return alternatives[randomInt(0, amount)];
 }

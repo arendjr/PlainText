@@ -79,36 +79,44 @@ QString MovementVisualEvent::descriptionForStrengthAndCharacterInRoom(double str
         return QString("%1 %2 %3.").arg(characterName, m_simplePresent,
                                         Util::directionForVector(m_direction));
     } else if (room == m_destination) {
-        return QString("%1 %2 to you.").arg(Util::capitalize(description()), m_simplePresent);
+        return QString("%1 %2 up to you.").arg(Util::capitalize(description()), m_simplePresent);
+    }
+
+    Vector3D vector = room->position() - originRoom()->position();
+    int distance = vector.length();
+    double angle = m_direction.angle(vector);
+
+    QString prefix;
+    if (distance > 100) {
+        if (Util::randomInt(0, 5) < 3) {
+            prefix = "In the distance," +
+                     Util::randomAlternative(3, " you see", " you can see", "");
+        } else {
+            prefix = "From afar," + Util::randomAlternative(2, " you see", " you can see");
+        }
+    } else {
+        prefix = "You see";
+    }
+
+    QString subject = strength > 0.9 ? description() :
+                      strength > 0.8 ? distantDescription() :
+                                       veryDistantDescription();
+
+    QString helperVerb;
+    if (prefix.endsWith(",")) {
+        helperVerb = (m_simplePresent.endsWith("s") ? "is " : "are ");
     }
 
     QString direction;
-    Vector3D vector = room->position() - originRoom()->position();
-
-    if (vector.length() > 100) {
-        double angle = m_direction.angle(vector);
-        if (angle < TAU / 8) {
-            direction = "in your direction";
-        } else {
-            direction = Util::directionForVector(m_direction);
-        }
-        return QString("In the distance, you see %1 %2 %3.")
-                .arg(strength > 0.9 ? description() :
-                     strength > 0.8 ? distantDescription() :
-                     veryDistantDescription(), m_continuous, direction);
+    if (angle < TAU / 8) {
+        direction = (distance > 100 ? "in your direction" : "toward you");
+    } else if (angle >= TAU * 3 / 8 && distance <= 100) {
+        direction = "away from you";
     } else {
-        double angle = m_direction.angle(vector);
-        if (angle < TAU / 8) {
-            direction = "toward you";
-        } else if (angle >= TAU * 3 / 8) {
-            direction = "away from you";
-        } else {
-            direction = Util::directionForVector(m_direction);
-        }
-        return QString("You see %1 %2 %3.").arg(strength > 0.9 ? description() :
-                                                strength > 0.8 ? distantDescription() :
-                                                veryDistantDescription(), m_continuous, direction);
+        direction = Util::directionForVector(m_direction);
     }
+
+    return QString("%1 %2 %3%4 %5.").arg(prefix, subject, helperVerb, m_continuous, direction);
 }
 
 bool MovementVisualEvent::isWithinSight(Room *targetRoom, Room *sourceRoom) {
