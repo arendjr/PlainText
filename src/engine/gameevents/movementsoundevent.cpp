@@ -63,7 +63,8 @@ QString MovementSoundEvent::descriptionForStrengthAndCharacterInRoom(double stre
     if (room == originRoom()) {
         return QString("You hear %1 %2 away.").arg(description(), m_continuous);
     } else if (room == m_destination) {
-        double angle = atan2(originRoom()->position().y, originRoom()->position().x) -
+        Vector3D vector = room->position() - originRoom()->position();
+        double angle = atan2(vector.y, vector.x) -
                        atan2(character->direction().y, character->direction().x);
         if (angle < -TAU / 2) {
             angle += TAU;

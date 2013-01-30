@@ -48,9 +48,10 @@ void TriggerSetCommand::execute(Character *player, const QString &command) {
 
     sendReply(QString("Trigger %1 set.").arg(triggerName));
 
-    if (triggerName == "onspawn") {
+    if (triggerName == "oninit" || triggerName == "onspawn") {
         object->killAllTimers();
-        object->invokeTrigger(triggerName);
+        object->invokeTrigger("oninit");
+        object->invokeTrigger("onspawn");
         send(QString("Respawn emulated for %1.")
              .arg(Util::highlight(QString("object #%1").arg(object->id()))));
     }

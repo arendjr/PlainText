@@ -58,8 +58,7 @@ TriggerRegistry::TriggerRegistry(QObject *parent) :
                       "character leaves that room.");
     m_triggers.insert("oninit : void",
                       "The oninit trigger is invoked once on every object when the game server "
-                      "is started. Note: For characters that do have an onspawn trigger, but "
-                      "no oninit trigger, onspawn is triggered instead.");
+                      "is started.");
     m_triggers.insert("onitemdropped(item : item, owner : character) : void",
                       "The onitemdropped trigger is invoked on all characters in a room when an "
                       "item is dropped in that room.");
@@ -75,7 +74,8 @@ TriggerRegistry::TriggerRegistry(QObject *parent) :
     m_triggers.insert("onsound(message : string) : void",
                       "The onsound trigger is invoked when a sound event is perceived.");
     m_triggers.insert("onspawn : void",
-                      "The onspawn trigger is invoked on any character when it respawns.");
+                      "The onspawn trigger is invoked on any character when it (re)spawns. Note: "
+                      "This is also triggered right after oninit at a server start.");
     m_triggers.insert("ontalk(speaker : character, message : string) : void",
                       "The ontalk trigger is invoked on any character when talked to.");
     m_triggers.insert("onuse(activator : character) : void",

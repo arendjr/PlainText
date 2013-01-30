@@ -289,7 +289,9 @@ var VisualUtil = (function() {
                 }
             }
 
-            sentences.append("%1, you see %2.".arg(prefix, Util.joinFancy(characterTexts)));
+            if (!characterTexts.isEmpty()) {
+                sentences.append("%1, you see %2.".arg(prefix, Util.joinFancy(characterTexts)));
+            }
         }
 
         return sentences.join(" ");
