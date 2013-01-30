@@ -38,7 +38,14 @@ void SpeechEvent::setTarget(const GameObjectPtr &target) {
     m_target = target;
 }
 
-QString SpeechEvent::descriptionForStrengthAndCharacterInRoom(double strength, Room *room) const {
+QString SpeechEvent::descriptionForStrengthAndCharacterInRoom(double strength, Character *character,
+                                                              Room *room) const {
+
+    Q_UNUSED(character)
+    if (!m_speaker) {
+        qDebug() << "No speaker set for SpeechEvent.";
+        return "";
+    }
 
     if (strength >= 0.8) {
         QString description;
