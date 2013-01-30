@@ -1,6 +1,8 @@
 {
   "name": "Private Room",
   "description": "As you walk in there's no mistake what this room is made for. Two large two person beds are placed sideways. At the head of both beds are two opposing, golden statues of naked woman lying belly down. For those that want extra entertainment, there's a pole from ceiling till floor in the middle of the room.",
+  "type": "Room",
   "position": [ -250, -450, 10 ],
+  "flags": "HasCeiling|HasWalls",
   "portals": [ "portal:1519" ]
 }

@@ -1,6 +1,8 @@
 {
   "name": "Light Tower",
   "description": "As you've climbed up the stairs, you find a mostly empty floor. It seems there's little else to do but continue up, or go back down.",
+  "type": "Room",
   "position": [ 0, 200, 20 ],
+  "flags": "HasCeiling|HasWalls",
   "portals": [ "portal:1475", "portal:1479" ]
 }

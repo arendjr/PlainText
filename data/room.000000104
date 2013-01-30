@@ -1,6 +1,8 @@
 {
   "name": "Boatman's Street",
   "description": "The street takes a bit of a turn here to move around the large shipyard that owns this street its name.",
+  "type": "Room",
   "position": [ -300, -300, 0 ],
+  "flags": "HasFloor|HasWalls",
   "portals": [ "portal:1498", "portal:1502" ]
 }

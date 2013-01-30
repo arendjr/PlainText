@@ -1,6 +1,8 @@
 {
   "name": "Sleeping Tent",
   "description": "Just like the first two tents, this tent is filled with rows of beds. Unlike the other tents, there is one bed that is not double-decked, and which has some basic furniture around it. Probably it is meant for some higher ranked officer. Of all the tents among the barracks, this officer has just picked himself the smelliest one though.",
+  "type": "Room",
   "position": [ 150, -600, 0 ],
+  "flags": "HasFloor|HasWalls",
   "portals": [ "portal:1516" ]
 }

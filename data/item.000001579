@@ -1,0 +1,9 @@
+{
+  "name": "mechanical light",
+  "plural": "mechanical lights",
+  "indefiniteArticle": "a",
+  "position": [ 0, 0, 0 ],
+  "weight": 0,
+  "cost": 0,
+  "flags": "Portable"
+}

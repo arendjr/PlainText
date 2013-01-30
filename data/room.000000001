@@ -1,6 +1,8 @@
 {
   "name": "Light Tower Road's End",
   "description": "From where you are standing you can clearly see the light tower that has earned this road its name. The tower is of an impressive size, with impressive alternating red and white strokes that make the tower particularly stand out among its environment. But maybe even more impressive is the pulsating light at the top of the tower. It emits three strong beams of light, each about a second in length. After the third beam there's a pause that lasts at least three or four seconds, after which the pattern repeats.\n\nOn the opposite side of the road, there's an open area across the ditch, before the forest begins. In the middle of the area stands a single lonesome house. It looks like there is still someone living there, however.",
+  "type": "Room",
   "position": [ -100, 200, 0 ],
+  "flags": "HasFloor|HasWalls",
   "portals": [ "portal:1467", "portal:1468", "portal:1469" ]
 }

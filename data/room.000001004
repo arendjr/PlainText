@@ -3,7 +3,7 @@
   "description": "From here you have a good look on Castle Blackwater's Keep, towering above the castle's walls across the canal that runs north of the street.",
   "type": "Room",
   "position": [ -300, -500, 10 ],
-  "flags": "",
+  "flags": "HasFloor|HasWalls",
   "portals": [ "portal:1478", "portal:1512", "portal:1517" ],
   "items": [ "item:1572" ]
 }

@@ -1,6 +1,8 @@
 {
   "name": "Weapons Stall",
   "description": "The stall is nothing more than a table and a wooden side used for presenting the various goods. The weapons here are nothing special, but they appear to be of general good quality.",
+  "type": "Room",
   "position": [ -150, -250, 0 ],
+  "flags": "HasFloor|HasWalls",
   "portals": [ "portal:1489" ]
 }

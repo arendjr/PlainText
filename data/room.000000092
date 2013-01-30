@@ -1,6 +1,8 @@
 {
   "name": "Market Street",
   "description": "Leading up to the market square, the street is filled with little shops that hope to get attention from those going to and from the market.",
+  "type": "Room",
   "position": [ -100, -300, 0 ],
+  "flags": "HasFloor|HasWalls",
   "portals": [ "portal:1492", "portal:1495", "portal:1496", "portal:1497" ]
 }

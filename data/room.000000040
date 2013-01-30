@@ -1,6 +1,9 @@
 {
   "name": "Light Tower Keeper's House",
   "description": "The room looks like it is mainly used for storing various stuff. Of all the things you have seen, the light tower keeper certainly has some interesting stuff laying around.",
-  "position": [ -150, 150, 0 ],
-  "portals": [ "portal:1482" ]
+  "type": "Room",
+  "position": [ -170, 200, 0 ],
+  "flags": "HasCeiling|HasWalls",
+  "portals": [ "portal:1482" ],
+  "items": [ "item:1579" ]
 }

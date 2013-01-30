@@ -1,6 +1,8 @@
 {
   "name": "Hidden Path",
   "description": "You're on a tight path that seems to move south from the light tower. The path itself is barely visible because of thick vegetation all over.",
+  "type": "Room",
   "position": [ 0, 250, 0 ],
+  "flags": "HasFloor|HasWalls",
   "portals": [ "portal:1474", "portal:1480" ]
 }

@@ -1,6 +1,8 @@
 {
   "name": "Stables",
   "description": "As you step inside the stables, the smell of horses almost overwhelms you. There are more horses here than would reasonably fit in the allocated space.",
+  "type": "Room",
   "position": [ 200, -450, 0 ],
+  "flags": "HasCeiling|HasWalls",
   "portals": [ "portal:1511" ]
 }

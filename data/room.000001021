@@ -1,6 +1,8 @@
 {
   "name": "Private Room",
   "description": "This room is large and luxeous. There are many fine decorations on the walls, and there are large, comfortable, white couches and chairs, accompanied by marmer tables used for placing drinks and ash trays.\n\nIn fact, this room looks more appropriate for meetings with high class noblemen, rather than for the enjoyment of a woman's flesh.",
+  "type": "Room",
   "position": [ -350, -450, 10 ],
+  "flags": "HasCeiling|HasWalls",
   "portals": [ "portal:1518" ]
 }

@@ -3,6 +3,6 @@
   "description": "The market square is buzzing with people. Various stalls are promoting their merchandise to those walking by.\n\n{{items}}",
   "type": "Room",
   "position": [ -100, -200, 0 ],
-  "flags": "",
+  "flags": "HasFloor|HasWalls",
   "portals": [ "portal:1485", "portal:1487", "portal:1488", "portal:1489", "portal:1490", "portal:1491", "portal:1492", "portal:1493" ]
 }

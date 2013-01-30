@@ -3,6 +3,6 @@
   "description": "Four tents are standing in a half circle. They provide a place to stay for any new soldiers who are arriving from the haven, before they get send off to battle.{{none}}",
   "type": "Room",
   "position": [ 200, -550, 0 ],
-  "flags": "",
+  "flags": "HasFloor|HasWalls",
   "portals": [ "portal:1510", "portal:1513", "portal:1514", "portal:1515", "portal:1516" ]
 }
