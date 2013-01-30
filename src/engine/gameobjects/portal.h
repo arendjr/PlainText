@@ -58,7 +58,7 @@ class Portal : public GameObject {
         Q_PROPERTY(GameObjectPtr room2 READ room2 WRITE setRoom2)
 
         Point3D position() const;
-        Q_PROPERTY(Point3D position READ position)
+        Q_PROPERTY(Point3D position READ position STORED false)
 
         PortalFlags flags() const { return m_flags; }
         void setFlags(PortalFlags flags);
