@@ -1,7 +1,8 @@
 {
   "name": "gate",
   "name2": "gate",
+  "destination": "Middle Port",
   "room": "room:122",
   "room2": "room:125",
-  "flags": "CanSeeThrough|CanHearThrough|CanShootThrough|CanPassThrough"
+  "flags": "CanPassThrough"
 }
