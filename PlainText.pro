@@ -252,6 +252,7 @@ OTHER_FILES += \
     data/commands/statscommand.js \
     data/commands/talkcommand.js \
     data/commands/tellcommand.js \
+    data/commands/turncommand.js \
     data/commands/usecommand.js \
     data/commands/wieldcommand.js \
     data/commands/whocommand.js \
