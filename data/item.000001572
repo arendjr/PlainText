@@ -1,0 +1,9 @@
+{
+  "name": "large and beautiful houses",
+  "plural": "large and beautiful houseses",
+  "indefiniteArticle": "a",
+  "position": [ 0, 10, 0 ],
+  "weight": 0,
+  "cost": 0,
+  "flags": "ImpliedPlural"
+}
