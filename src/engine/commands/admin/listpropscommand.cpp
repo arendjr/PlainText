@@ -41,6 +41,10 @@ void ListPropsCommand::execute(Character *player, const QString &command) {
 
         QString value = ConversionUtil::toUserString(object->property(propertyName));
 
+        if (name == "flags") {
+            value.replace("|", ",\n");
+        }
+
         if (!metaProperty.isWritable()) {
             value += " (read-only)";
         }
