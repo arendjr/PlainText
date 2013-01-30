@@ -363,7 +363,9 @@ void Character::enter(const GameObjectPtr &roomPtr) {
         enteredRoom();
 
         for (const GameObjectPtr &character : room->characters()) {
-            character->invokeTrigger("oncharacterentered", this);
+            if (character != this) {
+                character->invokeTrigger("oncharacterentered", this);
+            }
         }
     } catch (GameException &exception) {
         qDebug() << "Exception in Character::enter(): " << exception.what();
@@ -562,11 +564,9 @@ void Character::init() {
             room->addCharacter(this);
         }
 
-        if (hasTrigger("oninit")) {
-            super::init();
-        } else {
-            invokeTrigger("onspawn");
-        }
+        super::init();
+
+        invokeTrigger("onspawn");
     } catch (GameException &exception) {
         qDebug() << "Exception in Character::init(): " << exception.what();
     }

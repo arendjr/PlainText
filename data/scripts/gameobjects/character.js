@@ -130,8 +130,10 @@ Character.prototype.go = function(pointer) {
     var character, numCharacters = this.currentRoom.characters.length;
     for (i = 0; i < numCharacters; i++) {
         character = this.currentRoom.characters[i];
-        if (!character.invokeTrigger("oncharacterexit", this, exitName)) {
-            return;
+        if (character !== this) {
+            if (!character.invokeTrigger("oncharacterexit", this, exitName)) {
+                return;
+            }
         }
     }
 
@@ -511,7 +513,7 @@ Character.prototype.take = function(items) {
 
         var others = room.characters;
         others.removeOne(this);
-        others.send("%1 takes %3.".arg(this.definiteName(room.characters, Options.Capitalized),
+        others.send("%1 takes %2.".arg(this.definiteName(room.characters, Options.Capitalized),
                                        description));
     }
 };
