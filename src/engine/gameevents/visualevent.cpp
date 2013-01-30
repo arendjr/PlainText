@@ -99,16 +99,16 @@ bool VisualEvent::isWithinSight(Room *targetRoom, Room *sourceRoom) {
         return true;
     }
 
-    if (~sourceRoom->flags() & RoomFlags::HasCeiling) {
-        if (targetVector.z >= sourceVector.z) {
+    if (~sourceRoom->flags() & RoomFlags::HasWalls) {
+        if (targetVector.z == sourceVector.z) {
             return true;
         }
-    }
-    if (~sourceRoom->flags() & RoomFlags::HasFloor) {
-        if (targetVector.z <= sourceVector.z) {
-            return true;
+    } else {
+        if (targetVector.x != sourceVector.x || targetVector.y != sourceVector.y) {
+            return false;
         }
     }
 
-    return false;
+    return ((~sourceRoom->flags() & RoomFlags::HasCeiling && targetVector.z >= sourceVector.z) ||
+            (~sourceRoom->flags() & RoomFlags::HasFloor && targetVector.z <= sourceVector.z));
 }
