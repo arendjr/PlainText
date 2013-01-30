@@ -172,10 +172,10 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
             var room2 = portal.room2;
             var z1 = self.perspective * room.z;
             var x1 = offsetX + (room.x - center.x + z1) * zoom;
-            var y1 = offsetY + (room.y - center.y + z1) * zoom;
+            var y1 = offsetY + (room.y - center.y - z1) * zoom;
             var z2 = self.perspective * room2.z;
             var x2 = offsetX + (room2.x - center.x + z2) * zoom;
-            var y2 = offsetY + (room2.y - center.y + z2) * zoom;
+            var y2 = offsetY + (room2.y - center.y - z2) * zoom;
 
             if (isWithinCanvas(x1, y1) || isWithinCanvas(x2, y2)) {
                 var shape = new Fabric.Line([ x1, y1, x2, y2 ], {
@@ -192,7 +192,7 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
             var room = rooms[id];
             var z = self.perspective * room.z;
             var x = offsetX + (room.x - center.x + z) * zoom;
-            var y = offsetY + (room.y - center.y + z) * zoom;
+            var y = offsetY + (room.y - center.y - z) * zoom;
 
             if (isWithinCanvas(x, y)) {
                 var fill = self.roomFills.contains(room.id) ? self.roomFills[room.id] : "grey";
