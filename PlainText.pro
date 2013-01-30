@@ -275,6 +275,7 @@ OTHER_FILES += \
     data/scripts/gameobjects/statsitem.js \
     src/engine/util.js \
     src/engine/commands/command.js \
+    src/engine/commands/admin/admincommand.js \
     web/admin.js \
     web/controller.js \
     web/Gruntfile.js \

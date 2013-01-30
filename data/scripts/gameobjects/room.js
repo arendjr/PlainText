@@ -33,6 +33,21 @@ Room.prototype.lookAtBy = function(character) {
         text += "\n" + this.name.colorized(Color.Teal) + "\n\n";
     }
 
+    function prefixForItemKey(key) {
+        switch (key) {
+            case "left":        return [ "To your left", "is", "are" ];
+            case "right":       return [ "To your right", "is", "are" ];
+            case "ahead":       return [ "Ahead of you, there", "is", "are" ];
+            case "behind":      return [ "Behind you", "is", "are" ];
+            case "above":       return [ "Above you", "is", "are" ];
+            case "left wall":   return [ "On the left wall", "hangs", "hang" ];
+            case "right wall":  return [ "On the right wall", "hangs", "hang" ];
+            case "wall":        return [ "On the wall", "hangs", "hang" ];
+            case "ceiling":     return [ "From the ceiling", "hangs", "hang" ];
+            default:            return [ "There", "is", "are" ];
+        }
+    }
+
     var itemGroups = {
         "left": [],
         "right": [],
@@ -41,81 +56,123 @@ Room.prototype.lookAtBy = function(character) {
         "center": [],
         "above": [],
         "left wall": [],
-        "right wall": []
+        "right wall": [],
+        "wall": [],
+        "ceiling": []
     };
+    var portalGroups = itemGroups.clone();
+
+    var self = this;
     this.items.forEach(function(item) {
         if (item.hidden) {
             return;
         }
 
-        if (item.position[0] === 0 && item.position[1] === 0) {
+        var flags = item.flags.split("|");
+        var angle = Util.angleBetweenDirectionAndPosition(character.direction, item.position);
+
+        if (flags.contains("AttachedToCeiling")) {
+            itemGroups["ceiling"].append(item);
+        } else if (flags.contains("AttachedToWall")) {
+            if ((item.position[0] === 0 && item.position[1] === 0) ||
+                (angle > Math.PI * 3 / 4 || angle < -Math.PI * 3 / 4) ||
+                (angle < Math.PI / 4 && angle > -Math.PI / 4)) {
+                itemGroups["wall"].append(item);
+            } else if (angle > 0) {
+                itemGroups["right wall"].append(item);
+            } else {
+                itemGroups["left wall"].append(item);
+            }
+        } else if (item.position[0] === 0 && item.position[1] === 0) {
             itemGroups["center"].append(item);
         } else {
-            var angle = Math.atan2(item.position[1], item.position[0]) -
-                        Math.atan2(character.direction[1], character.direction[0]);
-            if (angle < -Math.PI) {
-                angle += 2 * Math.PI;
-            } else if (angle > Math.PI) {
-                angle -= 2 * Math.PI;
-            }
-
             if (angle > Math.PI * 3 / 4 || angle < -Math.PI * 3 / 4) {
                 itemGroups["behind"].append(item);
             } else if (angle < Math.PI / 4 && angle > -Math.PI / 4) {
                 itemGroups["ahead"].append(item);
             } else if (angle > 0) {
                 itemGroups["right"].append(item);
-            } else if (angle < 0) {
+            } else {
                 itemGroups["left"].append(item);
             }
+        }
+    });
+    this.portals.forEach(function(portal) {
+        var name = portal.nameFromRoom(self);
+        if (Util.isDirection(name) || name === "out" || portal.isHiddenFromRoom(self)) {
+            return;
+        }
+
+        var angle = Util.angleBetweenDirectionAndPosition(character.direction,
+                                                          portal.position.minus(self.position));
+
+        if (angle > Math.PI * 3 / 4 || angle < -Math.PI * 3 / 4) {
+            portalGroups["behind"].append(portal);
+        } else if (angle < Math.PI / 4 && angle > -Math.PI / 4) {
+            portalGroups["ahead"].append(portal);
+        } else if (angle > 0) {
+            portalGroups["right"].append(portal);
+        } else {
+            portalGroups["left"].append(portal);
         }
     });
 
     var items = [];
     for (var key in itemGroups) {
-        if (itemGroups.hasOwnProperty(key) && !itemGroups[key].isEmpty()) {
-            var prefix;
-            if (key === "left") {
-                prefix = "To your left";
-            } else if (key === "right") {
-                prefix = "To your right";
-            } else if (key === "ahead") {
-                prefix = "Ahead of you, there";
-            } else if (key === "behind") {
-                prefix = "Behind you";
-            } else {
-                prefix = "There";
+        if (itemGroups.hasOwnProperty(key) &&
+            (!itemGroups[key].isEmpty() || !portalGroups[key].isEmpty())) {
+            var prefix = prefixForItemKey(key);
+
+            var plural = false;
+            var itemGroup = itemGroups[key];
+            if (itemGroup.length > 0) {
+                if (itemGroup[0].flags.split("|").contains("ImpliedPlural")) {
+                    plural = true;
+                } else {
+                    var firstName = itemGroup[0].name;
+                    for (i = 1, length = itemGroup.length; i < length; i++) {
+                        if (itemGroup[i].name === firstName) {
+                            plural = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            var combinedItems = Util.combinePtrList(itemGroup);
+
+            var portalGroup = portalGroups[key];
+            for (i = 0, length = portalGroup.length; i < length; i++) {
+                var portal = portalGroup[i];
+                var name = portal.nameFromRoom(self);
+                var destination = portal.destinationFromRoom(self);
+                if (destination.isEmpty()) {
+                    if (name === "door") {
+                        combinedItems.append("a door");
+                    } else {
+                        combinedItems.append("the " + name);
+                    }
+                } else {
+                    combinedItems.append("the %1 to %2".arg(name, destination));
+                }
             }
 
             var itemText;
-            var group = itemGroups[key];
-            if (group.length === 1) {
-                var item = group[0];
-                itemText = "%1 is %2 %3.".arg(prefix, item.indefiniteArticle, item.name);
+            if (plural) {
+                itemText = "%1 %2 %3.".arg(prefix[0], prefix[2], Util.joinFancy(combinedItems));
             } else {
-                var plural = false;
-                var firstName = group[0].name;
-                for (i = 1, length = group.length; i < length; i++) {
-                    if (group[i].name === firstName) {
-                        plural = true;
-                        break;
-                    }
-                }
-                if (plural) {
-                    itemText = "%1 are %2.".arg(prefix, group.joinFancy());
-                } else {
-                    itemText = "%1 is %2.".arg(prefix, group.joinFancy());
-                }
+                itemText = "%1 %2 %3.".arg(prefix[0], prefix[1], Util.joinFancy(combinedItems));
             }
 
             itemText = itemText.replace("there is", "there's");
-            items.prepend(itemText);
+            items.append(itemText);
         }
     }
 
     var description;
-    if (this.description.contains("[items]")) {
-        description = this.description.replace("[items]", items.join(" "));
+    if (this.description.contains("{{items}}") || this.description.contains("{{none}}")) {
+        description = this.description.replace("{{items}}", items.join(" "))
+                                      .replace("{{none}}", "");
     } else {
         description = [this.description].concat(items).join(" ");
     }
@@ -125,7 +182,7 @@ Room.prototype.lookAtBy = function(character) {
     if (!this.portals.isEmpty()) {
         var exitNames = [];
         for (i = 0, length = this.portals.length; i < length; i++) {
-            var portal = this.portals[i];
+            portal = this.portals[i];
 
             if (portal.isHiddenFromRoom(this)) {
                 continue;

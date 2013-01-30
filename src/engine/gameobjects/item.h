@@ -10,7 +10,9 @@ PT_DEFINE_FLAGS(ItemFlags,
     AttachedToCeiling,
     AttachedToWall,
     Hidden,
-    Portable
+    Portable,
+    AlwaysUseDefiniteArticle,
+    ImpliedPlural
 )
 
 

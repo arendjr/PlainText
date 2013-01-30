@@ -7,7 +7,6 @@
 #include <QDebug>
 #include <QMetaProperty>
 #include <QStringList>
-#include <QVector>
 
 #include "conversionutil.h"
 #include "realm.h"
@@ -847,51 +846,7 @@ void GameObjectPtrList::send(const QString &message, int color) const {
 
 QString GameObjectPtrList::joinFancy(Options options) const {
 
-    if (isEmpty()) {
-        return (options & Capitalized ? "Nothing" : "nothing");
-    }
-
-    QVector<GameObject *> objects;
-    QStringList objectNames;
-    QList<int> objectCounts;
-
-    for (const GameObjectPtr &object : *this) {
-        int index = objectNames.indexOf(object->name());
-        if (index > -1) {
-            objectCounts[index]++;
-        } else {
-            objects.append(object.cast<GameObject *>());
-            objectNames.append(object->name());
-            objectCounts.append(1);
-        }
-    }
-
-    QStringList strings;
-    for (int i = 0; i < objects.size(); i++) {
-        const GameObject *object = objects[i];
-
-        if (objectCounts[i] > 1) {
-            if (i == 0 && options & Capitalized) {
-                strings.append(Util::capitalize(Util::writtenNumber(objectCounts[i])) + " " +
-                               object->plural());
-            } else {
-                strings.append(Util::writtenNumber(objectCounts[i]) + " " +
-                               object->plural());
-            }
-        } else {
-            if (object->indefiniteArticle().isEmpty()) {
-                strings.append(object->name());
-            } else if (options & DefiniteArticles) {
-                strings.append((i == 0 && options & Capitalized ?
-                                "The " : "the ") + object->name());
-            } else {
-                strings.append(object->indefiniteName(i == 0 ? (options & Capitalized) :
-                                                               NoOptions));
-            }
-        }
-    }
-
-    return Util::joinFancy(strings);
+    return Util::joinPtrList(*this, options);
 }
 
 QString GameObjectPtrList::toUserString(const GameObjectPtrList &pointerList) {

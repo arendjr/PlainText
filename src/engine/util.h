@@ -26,6 +26,9 @@ class Util : public QObject {
         Q_INVOKABLE static QString joinPtrList(const GameObjectPtrList &list,
                                                int options = NoOptions);
 
+        Q_INVOKABLE static QStringList combinePtrList(const GameObjectPtrList &list,
+                                                      int options = NoOptions);
+
         Q_INVOKABLE static QStringList sortExitNames(const QStringList &exitNames);
 
         Q_INVOKABLE static QString writtenNumber(int number);
@@ -69,6 +72,9 @@ class Util : public QObject {
         Q_INVOKABLE static Vector3D vectorForDirection(const QString &direction);
 
         Q_INVOKABLE static QString directionForVector(const Vector3D &vector);
+
+        Q_INVOKABLE static double angleBetweenDirectionAndPosition(const Vector3D &direction,
+                                                                   const Vector3D &position);
 
         Q_INVOKABLE static QString toCamelCase(QString string);
         Q_INVOKABLE static QString fromCamelCase(const QString &string);

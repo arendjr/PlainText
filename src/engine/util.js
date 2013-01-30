@@ -276,6 +276,24 @@ Array.prototype.withoutId = function(id) {
 };
 
 
+Object.defineProperty(Object.prototype, "clone", {
+    "value": function() {
+        var clone = {};
+        for (var key in this) {
+            if (this.hasOwnProperty(key)) {
+                var value = this[key];
+                if (value instanceof Object) {
+                    value = value.clone();
+                }
+                clone[key] = value;
+            }
+        }
+        return clone;
+    },
+    "configurable": true,
+    "writable": true
+});
+
 Object.defineProperty(Object.prototype, "contains", {
     "value": Object.prototype.hasOwnProperty,
     "configurable": true,

@@ -4,9 +4,11 @@
 
 #include <QDebug>
 #include <QTextStream>
+#include <QVector>
 #include <QtAlgorithms>
 
 #include "gameobjectptr.h"
+#include "item.h"
 #include "player.h"
 #include "scriptengine.h"
 
@@ -28,7 +30,59 @@ QString Util::joinFancy(const QStringList &list, const QString &separator, const
 
 QString Util::joinPtrList(const GameObjectPtrList &list, int options) {
 
-    return list.joinFancy((Options) options);
+    if (list.isEmpty()) {
+        return (options & Capitalized ? "Nothing" : "nothing");
+    }
+
+    return joinFancy(combinePtrList(list, options));
+}
+
+QStringList Util::combinePtrList(const GameObjectPtrList &list, int options) {
+
+    QVector<GameObject *> objects;
+    QStringList objectNames;
+    QList<int> objectCounts;
+
+    for (const GameObjectPtr &object : list) {
+        int index = objectNames.indexOf(object->name());
+        if (index > -1) {
+            objectCounts[index]++;
+        } else {
+            objects.append(object.cast<GameObject *>());
+            objectNames.append(object->name());
+            objectCounts.append(1);
+        }
+    }
+
+    QStringList strings;
+    for (int i = 0; i < objects.size(); i++) {
+        const GameObject *object = objects[i];
+
+        if (objectCounts[i] > 1) {
+            if (i == 0 && options & Capitalized) {
+                strings.append(capitalize(writtenNumber(objectCounts[i])) + " " + object->plural());
+            } else {
+                strings.append(writtenNumber(objectCounts[i]) + " " + object->plural());
+            }
+        } else {
+            bool capital = (i == 0 && options & Capitalized);
+            bool useDefiniteArticle = (options & DefiniteArticles);
+            bool impliedPlural = false;
+            if (!useDefiniteArticle && object->isItem()) {
+                const Item *item = qobject_cast<const Item *>(object);
+                useDefiniteArticle = (item->flags() & ItemFlags::AlwaysUseDefiniteArticle);
+                impliedPlural = (item->flags() & ItemFlags::ImpliedPlural);
+            }
+            if (useDefiniteArticle) {
+                strings.append((capital ? "The " : "the ") + object->name());
+            } else if (impliedPlural) {
+                strings.append(capital ? Util::capitalize(object->name()) : object->name());
+            } else {
+                strings.append(object->indefiniteName(capital ? Capitalized : NoOptions));
+            }
+        }
+    }
+    return strings;
 }
 
 struct Direction {
@@ -437,6 +491,17 @@ QString Util::directionForVector(const Vector3D &vector) {
             return directions[5].name;
         }
     }
+}
+
+double Util::angleBetweenDirectionAndPosition(const Vector3D &direction, const Vector3D &position) {
+
+    double angle = atan2(position.y, position.x) - atan2(direction.y, direction.x);
+    if (angle < -TAU / 2) {
+        angle += TAU;
+    } else if (angle > TAU / 2) {
+        angle -= TAU;
+    }
+    return angle;
 }
 
 QString Util::toCamelCase(QString string) {

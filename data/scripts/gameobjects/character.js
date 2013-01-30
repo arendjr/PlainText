@@ -124,7 +124,6 @@ Character.prototype.go = function(pointer) {
         }
         destination = pointer;
     } else {
-        console.log("Character.go(): Expected a pointer to a portal or room");
         return;
     }
 
@@ -217,7 +216,8 @@ Character.prototype.go = function(pointer) {
     var distantVisualDescription;
     var veryDistantVisualDescription;
     if (followers.isEmpty()) {
-        visualDescription = this.indefiniteName();
+        visualDescription = this.flags.split("|").contains("AlwaysUseDefiniteArticle") ?
+                            "the " + this.name : this.indefiniteName();
         distantVisualDescription = (this.gender === "male" ? "a man" : "a woman");
         veryDistantVisualDescription = "someone";
     } else {

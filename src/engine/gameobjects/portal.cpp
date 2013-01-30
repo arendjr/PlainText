@@ -1,5 +1,7 @@
 #include "portal.h"
 
+#include "room.h"
+
 
 #define super GameObject
 
@@ -29,6 +31,24 @@ void Portal::setDescription2(const QString &description2) {
     }
 }
 
+void Portal::setDestination(const QString &destination) {
+
+    if (m_destination != destination) {
+        m_destination = destination;
+
+        setModified();
+    }
+}
+
+void Portal::setDestination2(const QString &destination2) {
+
+    if (m_destination2 != destination2) {
+        m_destination2 = destination2;
+
+        setModified();
+    }
+}
+
 void Portal::setRoom(const GameObjectPtr &room) {
 
     if (m_room != room) {
@@ -45,6 +65,15 @@ void Portal::setRoom2(const GameObjectPtr &room2) {
 
         setModified();
     }
+}
+
+Point3D Portal::position() const {
+
+    Point3D position1 = m_room.cast<Room *>()->position();
+    Point3D position2 = m_room2.cast<Room *>()->position();
+    return Point3D((position1.x + position2.x) / 2,
+                   (position1.y + position2.y) / 2,
+                   (position1.z + position2.z) / 2);
 }
 
 void Portal::setFlags(PortalFlags flags) {
@@ -87,6 +116,14 @@ QString Portal::descriptionFromRoom(const GameObjectPtr &room) const {
         return m_description2;
     }
     return description();
+}
+
+QString Portal::destinationFromRoom(const GameObjectPtr &room) const {
+
+    if (room == m_room2) {
+        return m_destination2;
+    }
+    return m_destination;
 }
 
 bool Portal::isHiddenFromRoom(const GameObjectPtr &room) const {

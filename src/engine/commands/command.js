@@ -33,7 +33,7 @@ Command.prototype.setCommand = function(command) {
 
     var words = command.trimmed().split(/\s+/);
 
-    for (var i = 0, length = words.length; i < length; i++) {
+    for (var i = 0; i < words.length; i++) {
         var word = words[i];
         if (word.startsWith("\"")) {
             while (i < words.length - 1 && !word.endsWith("\"")) {

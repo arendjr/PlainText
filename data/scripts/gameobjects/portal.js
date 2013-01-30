@@ -6,20 +6,30 @@ Portal.prototype.lookAtBy = function(character) {
 
     var room = character.currentRoom;
     var name = this.nameFromRoom(room);
+    var description = this.descriptionFromRoom(room);
+    var destination = this.destinationFromRoom(room);
 
-    var text;
-    if (this.description.isEmpty()) {
-        if (Util.isDirection(name)) {
-            text = "You look %1.".arg(name);
+    var text = "";
+    if (destination.isEmpty()) {
+        if (description.isEmpty()) {
+            if (Util.isDirection(name)) {
+                text = "You look %1.".arg(name);
+            } else if (!this.canOpenFromRoom(room)) {
+                text = "There's nothing special about the %1.".arg(name);
+            }
         } else {
-            text = "There's nothing special about the %1.".arg(name);
+            text = description + "\n";
         }
     } else {
-        text = this.descriptionFromRoom(room) + "\n";
+        if (description.isEmpty()) {
+            text = "The %1 leads to %2.\n".arg(name, destination);
+        } else {
+            text = "The %1 leads to %2. %3\n".arg(name, destination, description);
+        }
     }
 
     if (this.canOpenFromRoom(room)) {
-        text += "The %1 is %2.\n".arg(name, this.isOpen() ? "open" : "closed");
+        text += "The %1 is %2.\n".arg(name, this.open ? "open" : "closed");
     }
 
     if (room === this.room) {
