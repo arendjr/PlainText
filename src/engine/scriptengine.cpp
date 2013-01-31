@@ -56,8 +56,7 @@ void ScriptEngine::loadScript(const QString &path) {
     QFile file(path);
     QFileInfo info(path);
     if (file.open(QIODevice::ReadOnly)) {
-        evaluate(file.readAll(), "commands/command.js");
-        file.close();
+        evaluate(file.readAll(), path);
         if (hasUncaughtException()) {
             QScriptValue exception = uncaughtException();
             qWarning() << "Exception while evaluating " << info.fileName() << ": "

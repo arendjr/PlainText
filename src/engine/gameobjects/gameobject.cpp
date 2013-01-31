@@ -495,6 +495,33 @@ void GameObject::send(const QString &message, int color) const {
     Q_UNUSED(color)
 }
 
+QString GameObject::nameAtStrength(double strength) {
+
+    ScriptEngine *engine = m_realm->scriptEngine();
+    QScriptValue scriptObject = engine->toScriptValue(this);
+
+    QScriptValue method = scriptObject.prototype().property("nameAtStrength");
+    if (method.isFunction()) {
+        QScriptValueList arguments;
+        arguments.append(strength);
+        QScriptValue result = method.call(scriptObject, arguments);
+        if (engine->hasUncaughtException()) {
+            QScriptValue exception = engine->uncaughtException();
+            qWarning() << "Script Exception: " << exception.toString().toUtf8().constData() << endl
+                       << "While executing game object method:  nameAtStrength" << endl
+                       << "Backtrace:" << endl
+                       << exception.property("backtrace").toString().toUtf8().constData();
+        }
+        return result.toString();
+    } else {
+        if (strength >= 1.0) {
+            return m_name;
+        } else {
+            return "something";
+        }
+    }
+}
+
 QString GameObject::lookAtBy(GameObject *character) {
 
     ScriptEngine *engine = m_realm->scriptEngine();

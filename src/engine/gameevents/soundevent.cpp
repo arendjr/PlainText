@@ -44,27 +44,11 @@ void SoundEvent::visitRoom(Room *room, double strength) {
             Room *room1 = portal->room().cast<Room *>();
             Room *room2 = portal->room2().cast<Room *>();
             Room *oppositeRoom = (room == room1 ? room2 : room1);
-            if (hasBeenVisited(oppositeRoom)) {
+            if (hasBeenVisited(oppositeRoom) || !portal->canHearThrough()) {
                 continue;
             }
 
-            double multiplier;
-            if (portal->isOpen()) {
-                if (!portal->canHearThroughIfOpen()) {
-                    continue;
-                }
-                multiplier = 1.0;
-            } else {
-                if (!portal->canHearThrough()) {
-                    continue;
-                }
-                multiplier = portal->eventMultipliers()[GameEventType::Sound];
-            }
-
-            Vector3D vector = room2->position() - room1->position();
-            multiplier *= qMax(1.0 - 0.05 * vector.length(), 0.0);
-
-            double propagatedStrength = strength * multiplier;
+            double propagatedStrength = strength * portal->eventMultiplier(GameEventType::Sound);
             if (propagatedStrength >= 0.1) {
                 addVisit(oppositeRoom, propagatedStrength);
             }

@@ -15,6 +15,10 @@ class MovementVisualEvent : public VisualEvent {
         MovementVisualEvent(Room *origin, double strength);
         virtual ~MovementVisualEvent();
 
+        const GameObjectPtr &subject() const { return m_subject; }
+        void setSubject(const GameObjectPtr &subject);
+        Q_PROPERTY(GameObjectPtr subject READ subject WRITE setSubject)
+
         GameObjectPtr destination() { return GameObjectPtr(m_destination); }
         void setDestination(const GameObjectPtr &destination);
         Q_PROPERTY(GameObjectPtr destination READ destination WRITE setDestination)
@@ -43,12 +47,15 @@ class MovementVisualEvent : public VisualEvent {
         virtual bool isWithinSight(Room *targetRoom, Room *sourceRoom);
 
     private:
+        GameObjectPtr m_subject;
+
         Room *m_destination;
 
         Vector3D m_movement;
         Vector3D m_direction;
 
         QString m_simplePresent;
+        QString m_helperVerb;
         QString m_continuous;
 };
 

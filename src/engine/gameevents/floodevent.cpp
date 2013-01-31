@@ -55,22 +55,12 @@ void FloodEvent::visitRoom(Room *room, double strength) {
         Room *room1 = portal->room().unsafeCast<Room *>();
         Room *room2 = portal->room2().unsafeCast<Room *>();
         Room *oppositeRoom = (room == room1 ? room2 : room1);
-        if (hasBeenVisited(oppositeRoom)) {
+        if (hasBeenVisited(oppositeRoom) || !portal->canPassThrough()) {
             continue;
         }
 
         if (oppositeRoom->position().z > strength) {
             continue;
-        }
-
-        if (portal->isOpen()) {
-            if (!portal->canPassThroughIfOpen()) {
-                continue;
-            }
-        } else {
-            if (!portal->canPassThrough()) {
-                continue;
-            }
         }
 
         addVisit(oppositeRoom, strength);

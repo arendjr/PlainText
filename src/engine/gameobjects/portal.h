@@ -69,6 +69,8 @@ class Portal : public GameObject {
         Q_PROPERTY(GameEventMultiplierMap eventMultipliers READ eventMultipliers
                                                            WRITE setEventMultipliers)
 
+        Q_INVOKABLE double eventMultiplier(GameEventType eventType) const;
+
         Q_INVOKABLE GameObjectPtr oppositeOf(const GameObjectPtr &room) const;
         Q_INVOKABLE QString nameFromRoom(const GameObjectPtr &room) const;
         Q_INVOKABLE QString descriptionFromRoom(const GameObjectPtr &room) const;
@@ -80,10 +82,6 @@ class Portal : public GameObject {
         Q_INVOKABLE bool canHearThrough() const;
         Q_INVOKABLE bool canShootThrough() const;
         Q_INVOKABLE bool canPassThrough() const;
-        Q_INVOKABLE bool canSeeThroughIfOpen() const;
-        Q_INVOKABLE bool canHearThroughIfOpen() const;
-        Q_INVOKABLE bool canShootThroughIfOpen() const;
-        Q_INVOKABLE bool canPassThroughIfOpen() const;
 
         bool isOpen() const { return m_flags & PortalFlags::IsOpen; }
         void setOpen(bool open);

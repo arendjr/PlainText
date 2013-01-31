@@ -46,6 +46,7 @@ class MovementSoundEvent : public SoundEvent {
         Vector3D m_direction;
 
         QString m_simplePresent;
+        QString m_helperVerb;
         QString m_continuous;
 };
 

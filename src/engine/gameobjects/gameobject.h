@@ -165,6 +165,8 @@ class GameObject : public QObject {
 
         Q_INVOKABLE virtual void send(const QString &message, int color = Silver) const;
 
+        Q_INVOKABLE virtual QString nameAtStrength(double strength);
+
         Q_INVOKABLE virtual QString lookAtBy(GameObject *character);
 
         Q_INVOKABLE int setInterval(const QScriptValue &function, int delay);

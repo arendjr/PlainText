@@ -101,7 +101,7 @@ class MovementTest : public TestCase {
                 QCOMPARE(evaluate("sounds.length").toInt32(), 0);
                 QCOMPARE(evaluate("visuals.length").toInt32(), 2);
                 QCOMPARE(evaluate("visuals[1]").toString(),
-                         QString("Arie runs to you."));
+                         QString("Arie runs up to you."));
             }
 
             {

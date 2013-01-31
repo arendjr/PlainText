@@ -48,7 +48,12 @@ void MovementSoundEvent::setDirection(const Vector3D &direction) {
 void MovementSoundEvent::setVerb(const QString &simplePresent, const QString &continuous) {
 
     m_simplePresent = simplePresent;
-    m_continuous = continuous;
+    if (continuous.contains(' ')) {
+        m_helperVerb = continuous.split(' ')[0];
+        m_continuous = continuous.split(' ')[1];
+    } else {
+        m_continuous = continuous;
+    }
 }
 
 QString MovementSoundEvent::descriptionForStrengthAndCharacterInRoom(double strength,
@@ -81,24 +86,20 @@ QString MovementSoundEvent::descriptionForStrengthAndCharacterInRoom(double stre
         return QString("You hear %1 %2 up to you%3.").arg(description(), m_continuous, direction);
     }
 
+    QString description = (strength > 0.6 ? distantDescription() : veryDistantDescription());
+
+    QString direction;
     if (strength > 0.8) {
-        QString direction;
         double angle = m_direction.angle(room->position() - originRoom()->position());
         if (angle < TAU / 4) {
             direction = "toward you";
         } else {
             direction = "away from you";
         }
-
-        return QString("You hear %1 %2 %3.").arg(distantDescription(), m_continuous, direction);
     } else {
-        QString direction = Util::directionForVector(originRoom()->position() - room->position());
-        if (strength > 0.6) {
-            return QString("You hear %1 %2 to the %3.").arg(distantDescription(), m_continuous,
-                                                            direction);
-        } else {
-            return QString("You hear %1 %2 to the %3.").arg(veryDistantDescription(), m_continuous,
-                                                            direction);
-        }
+        direction = "to the " +
+                    Util::directionForVector(originRoom()->position() - room->position());
     }
+
+    return QString("You hear %1 %2 %3.").arg(description, m_continuous, direction);
 }

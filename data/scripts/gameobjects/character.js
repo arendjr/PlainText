@@ -1,8 +1,8 @@
 
 function Character() {
 
-    this.lastAction = "";
-    this.lastActionTimerId = 0;
+    this.currentAction = "";
+    this.currentActionTimerId = 0;
 }
 
 Character.prototype.changeStats = function(newStats) {
@@ -67,8 +67,7 @@ Character.prototype.die = function(attacker) {
 
     this.killAllTimers();
 
-    this.lastAction = "";
-    this.lastActionTimerId = 0;
+    this.setAction("");
 
     room.removeCharacter(this);
 
@@ -145,40 +144,37 @@ Character.prototype.go = function(pointer) {
         if (!portal.invokeTrigger("onenter", this)) {
             return;
         }
-        if ((portal.open && !portal.canPassThroughIfOpen()) ||
-            (!portal.open && !portal.canPassThrough())) {
+        if (!portal.canPassThrough()) {
             this.send("You cannot go there.");
             return;
         }
     }
 
     var followers = [];
-    if (this.group) {
-        if (this.group.leader === this) {
-            for (i = 0, length = this.group.members.length; i < length; i++) {
-                var member = this.group.members[i];
-                if (member.currentRoom !== this.currentRoom) {
-                    continue;
-                }
-
-                var blocked = false;
-                for (var j = 0; j < numCharacters; j++) {
-                    character = this.currentRoom.characters[j];
-                    if (!character.invokeTrigger("oncharacterexit", this, exitName)) {
-                        blocked = true;
-                        break;
-                    }
-                }
-                if (blocked) {
-                    continue;
-                }
-
-                if (portal && !portal.invokeTrigger("onenter", member)) {
-                    continue;
-                }
-
-                followers.append(member);
+    if (this.group && this.group.leader === this) {
+        for (i = 0, length = this.group.members.length; i < length; i++) {
+            var member = this.group.members[i];
+            if (member.currentRoom !== this.currentRoom) {
+                continue;
             }
+
+            var blocked = false;
+            for (var j = 0; j < numCharacters; j++) {
+                character = this.currentRoom.characters[j];
+                if (!character.invokeTrigger("oncharacterexit", this, exitName)) {
+                    blocked = true;
+                    break;
+                }
+            }
+            if (blocked) {
+                continue;
+            }
+
+            if (portal && !portal.invokeTrigger("onenter", member)) {
+                continue;
+            }
+
+            followers.append(member);
         }
     }
 
@@ -191,12 +187,12 @@ Character.prototype.go = function(pointer) {
     this.enter(destination);
 
     var action;
-    if (this.lastAction === "walk" || this.lastAction === "run") {
+    if (this.currentAction === "walk" || this.currentAction === "run") {
         action = "run";
     } else {
         action = "walk";
     }
-    this.setLastAction(action);
+    this.setAction(action, { "duration": 4000 });
 
     for (i = 0, length = followers.length; i < length; i++) {
         var follower = followers[i];
@@ -204,51 +200,16 @@ Character.prototype.go = function(pointer) {
         follower.direction = direction;
         follower.enter(destination);
         follower.send("You follow %1.".arg(this.name));
-        follower.setLastAction("walk");
+        this.setAction(action, { "duration": 4000 });
     }
 
-    var party = [];
-    party.append(this);
-    party.append(followers);
+    var party = [this].concat(followers);
 
     var simplePresent = (followers.isEmpty() ? action + "s" : action);
-    var continuous = (action === "walk" ? "walking" : "running");
-
-    var visualDescription;
-    var distantVisualDescription;
-    var veryDistantVisualDescription;
-    if (followers.isEmpty()) {
-        visualDescription = this.flags.split("|").contains("AlwaysUseDefiniteArticle") ?
-                            "the " + this.name : this.indefiniteName();
-        distantVisualDescription = (this.gender === "male" ? "a man" : "a woman");
-        veryDistantVisualDescription = "someone";
-    } else {
-        visualDescription = party.joinFancy();
-        var numMales = 0, numFemales = 0;
-        for (i = 0, length = party.length; i < length; i++) {
-            if (party[i].gender === "male") {
-                numMales++;
-            } else {
-                numFemales++;
-            }
-        }
-        var what = numMales > 0 ? numFemales > 0 ? "people" : "men" : "women";
-        if (party.length > 10) {
-            distantVisualDescription = "a lot of " + what;
-            veryDistantVisualDescription = "a lot of people";
-        } else if (party.length > 2) {
-            distantVisualDescription = "a group of " + what;
-            veryDistantVisualDescription = "some people";
-        } else {
-            distantVisualDescription = "two " + what;
-            veryDistantVisualDescription = "some people";
-        }
-    }
+    var continuous = (action === "walk" ? "is walking" : "is running");
 
     var visualEvent = Realm.createEvent("MovementVisual", source, 1.0);
-    visualEvent.description = visualDescription;
-    visualEvent.distantDescription = distantVisualDescription;
-    visualEvent.veryDistantDescription = veryDistantVisualDescription;
+    visualEvent.subject = (followers.isEmpty() ? this : this.group);
     visualEvent.destination = destination
     visualEvent.movement = movement;
     visualEvent.direction = direction;
@@ -315,7 +276,7 @@ Character.prototype.kill = function(character) {
         character.die(this);
     }
 
-    this.setLastAction("fight");
+    this.setAction("fight", { "duration": 4000 });
 };
 
 Character.prototype.lookAtBy = function(character) {
@@ -398,6 +359,18 @@ Character.prototype.maxInventoryWeight = function() {
     return 20 + this.stats[STRENGTH] + Math.floor(this.stats[ENDURANCE] / 2);
 };
 
+Character.prototype.nameAtStrength = function(strength) {
+
+    if (strength > 0.9) {
+        return this.flags.split("|").contains("AlwaysUseDefiniteArticle") ?
+               "the " + this.name : this.indefiniteName();
+    } else if (strength > 0.8) {
+        return this.gender === "male" ? "a man" : "a woman";
+    } else {
+        return "someone";
+    }
+};
+
 Character.prototype.open = function(portal) {
 
     if (!portal.canOpenFromRoom(this.currentRoom)) {
@@ -451,21 +424,27 @@ Character.prototype.say = function(message) {
     event.message = message;
     event.fire();
 
-    this.setLastAction("talk");
+    this.setAction("talk", { "duration": 4000 });
 };
 
-Character.prototype.setLastAction = function(lastAction) {
+Character.prototype.setAction = function(action, options) {
 
-    this.lastAction = lastAction;
+    options = options || {};
 
-    if (this.lastActionTimerId) {
-        this.clearTimeout(this.lastActionTimerId);
+    this.currentAction = action;
+
+    if (this.currentActionTimerId) {
+        this.clearTimeout(this.currentActionTimerId);
     }
 
-    this.setTimeout(function() {
-        this.lastAction = "";
-        this.lastActionTimerId = 0;
-    }, 4000);
+    if (options.duration) {
+        this.currentActionTimerId = this.setTimeout(function() {
+            this.currentAction = "";
+            this.currentActionTimerId = 0;
+        }, options.duration);
+    } else {
+        this.currentActionTimerId = 0;
+    }
 };
 
 Character.prototype.shout = function(message) {
@@ -479,7 +458,7 @@ Character.prototype.shout = function(message) {
         character.invokeTrigger("onshout", this, message);
     });
 
-    this.setLastAction("shout");
+    this.setAction("shout", { "duration": 4000 });
 };
 
 Character.prototype.take = function(items) {
@@ -534,7 +513,7 @@ Character.prototype.talk = function(character, message) {
         }
     }
 
-    this.setLastAction("talk");
+    this.setAction("talk", { "duration": 4000 });
 };
 
 Character.prototype.tell = function(player, message) {

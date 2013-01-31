@@ -94,6 +94,21 @@ void Portal::setEventMultipliers(const GameEventMultiplierMap &multipliers) {
     }
 }
 
+double Portal::eventMultiplier(GameEventType eventType) const {
+
+    double multiplier = (m_flags & PortalFlags::IsOpen ? 1.0 : m_eventMultipliers[eventType]);
+
+    Vector3D vector = m_room.unsafeCast<Room *>()->position() -
+                      m_room2.unsafeCast<Room *>()->position();
+    if (eventType == GameEventType::Sound) {
+        multiplier *= qMax(1.0 - 0.05 * vector.length(), 0.0);
+    } else if (eventType == GameEventType::Visual) {
+        multiplier *= qMax(1.0 - 0.0005 * vector.length(), 0.0);
+    }
+
+    return multiplier;
+}
+
 GameObjectPtr Portal::oppositeOf(const GameObjectPtr &room) const {
 
     if (room == m_room2) {
@@ -149,42 +164,26 @@ bool Portal::canOpen() const {
 
 bool Portal::canSeeThrough() const {
 
-    return m_flags & PortalFlags::CanSeeThrough;
+    return m_flags & PortalFlags::IsOpen ? m_flags & PortalFlags::CanSeeThroughIfOpen :
+                                           m_flags & PortalFlags::CanSeeThrough;
 }
 
 bool Portal::canHearThrough() const {
 
-    return m_flags & PortalFlags::CanHearThrough;
+    return m_flags & PortalFlags::IsOpen ? m_flags & PortalFlags::CanHearThroughIfOpen :
+                                           m_flags & PortalFlags::CanHearThrough;
 }
 
 bool Portal::canShootThrough() const {
 
-    return m_flags & PortalFlags::CanShootThrough;
+    return m_flags & PortalFlags::IsOpen ? m_flags & PortalFlags::CanShootThroughIfOpen :
+                                           m_flags & PortalFlags::CanShootThrough;
 }
 
 bool Portal::canPassThrough() const {
 
-    return m_flags & PortalFlags::CanPassThrough;
-}
-
-bool Portal::canSeeThroughIfOpen() const {
-
-    return m_flags & PortalFlags::CanSeeThroughIfOpen;
-}
-
-bool Portal::canHearThroughIfOpen() const {
-
-    return m_flags & PortalFlags::CanHearThroughIfOpen;
-}
-
-bool Portal::canShootThroughIfOpen() const {
-
-    return m_flags & PortalFlags::CanShootThroughIfOpen;
-}
-
-bool Portal::canPassThroughIfOpen() const {
-
-    return m_flags & PortalFlags::CanPassThroughIfOpen;
+    return m_flags & PortalFlags::IsOpen ? m_flags & PortalFlags::CanPassThroughIfOpen :
+                                           m_flags & PortalFlags::CanPassThrough;
 }
 
 void Portal::setOpen(bool open) {

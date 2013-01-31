@@ -59,27 +59,11 @@ void VisualEvent::visitRoom(Room *room, double strength) {
                 continue;
             }
 
-            if (!isWithinSight(oppositeRoom, room)) {
+            if (!portal->canSeeThrough() || !isWithinSight(oppositeRoom, room)) {
                 continue;
             }
 
-            double multiplier;
-            if (portal->isOpen()) {
-                if (!portal->canSeeThroughIfOpen()) {
-                    continue;
-                }
-                multiplier = 1.0;
-            } else {
-                if (!portal->canSeeThrough()) {
-                    continue;
-                }
-                multiplier = portal->eventMultipliers()[GameEventType::Visual];
-            }
-
-            Vector3D vector = oppositeRoom->position() - room->position();
-            multiplier *= qMax(1.0 - 0.0005 * vector.length(), 0.0);
-
-            double propagatedStrength = strength * multiplier;
+            double propagatedStrength = strength * portal->eventMultiplier(GameEventType::Visual);
             if (propagatedStrength >= 0.1) {
                 addVisit(oppositeRoom, propagatedStrength);
             }
