@@ -219,6 +219,7 @@ Room.prototype.lookAtBy = function(character) {
         }
     }
 
+    var characterText = "";
     if (characters.length > 0) {
         var other;
         for (i = 0; i < characters.length; i++) {
@@ -266,15 +267,18 @@ Room.prototype.lookAtBy = function(character) {
         } else if (numMen > 1) {
             characterTexts.prepend(Util.writtenNumber(numMen) + " men");
         }
-        items.append("Ahead of you, you see %1.".arg(Util.joinFancy(characterTexts)));
+        characterText = " Ahead of you, you see %1.".arg(Util.joinFancy(characterTexts));
     }
 
     var description;
-    if (this.description.contains("{{items}}") || this.description.contains("{{none}}")) {
+    if (this.description.contains("{{items}}") ||
+        this.description.contains("{{characters}}") ||
+        this.description.contains("{{none}}")) {
         description = this.description.replace("{{items}}", items.join(" "))
+                                      .replace("{{characters}}", characterText)
                                       .replace("{{none}}", "");
     } else {
-        description = [this.description].concat(items).join(" ");
+        description = [this.description].concat(items).join(" ") + characterText;
     }
 
     text += description + "\n";
