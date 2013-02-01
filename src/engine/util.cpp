@@ -11,6 +11,8 @@
 #include "gameobjectptr.h"
 #include "item.h"
 #include "player.h"
+#include "portal.h"
+#include "room.h"
 #include "scriptengine.h"
 
 

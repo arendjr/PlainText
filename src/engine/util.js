@@ -35,6 +35,15 @@ Array.prototype.add = function(array) {
     return this;
 };
 
+Array.prototype.angle = function(other) {
+
+    var x1 = this[0], y1 = this[1], z1 = this[2],
+        x2 = other[0], y2 = other[1], z2 = other[2];
+    return Math.acos((x1 * x2 + y1 * y2 + z1 * z2) /
+                     (Math.sqrt(x1 * x1 + y1 * y1 + z1 * z1) *
+                      Math.sqrt(x2 * x2 + y2 * y2 + z2 * z2)));
+};
+
 Array.prototype.append = function(value) {
 
     if (value instanceof Array) {
@@ -251,6 +260,11 @@ Array.prototype.total = function() {
     }
     return sum;
 };
+
+Array.prototype.vectorLength = function() {
+
+    return Math.sqrt(this[0] * this[0] + this[1] * this[1] + this[2] * this[2]);
+}
 
 Array.prototype.withId = function(id) {
 

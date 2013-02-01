@@ -325,6 +325,7 @@ OTHER_FILES += \
     web/propertyeditor/propertyeditor.js \
     web/sliderwidget/slider.css \
     web/sliderwidget/slider.js \
+    data/scripts/visualutil.js
 
 INCLUDEPATH += \
     src/engine \

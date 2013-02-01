@@ -131,3 +131,8 @@ void Room::setEventMultipliers(const GameEventMultiplierMap &multipliers) {
         setModified();
     }
 }
+
+double Room::eventMultiplier(GameEventType eventType) const {
+
+    return m_eventMultipliers[eventType];
+}

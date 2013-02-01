@@ -103,52 +103,7 @@ Room.prototype.lookAtBy = function(character) {
                                                           portal.position.minus(self.position));
 
         if (portal.canSeeThrough() && angle < Math.PI / 4 && angle > -Math.PI / 4) {
-            var room = portal.oppositeOf(self);
-            var roomStrength = self.eventMultipliers["Visual"] *
-                               portal.eventMultiplier("Visual") *
-                               room.eventMultipliers["Visual"];
-            for (var i = 0, length = room.characters.length; i < length; i++) {
-                characters.push({
-                    "character": room.characters[i],
-                    "strength": roomStrength
-                });
-            }
-            for (i = 0, length = room.portals.length; i < length; i++) {
-                var nextPortal = room.portals[i];
-                if (!nextPortal.canSeeThrough()) {
-                    continue;
-                }
-
-                var nextRoom = nextPortal.oppositeOf(room);
-                if (nextRoom === self) {
-                    continue;
-                }
-
-                var vector1 = room.position.minus(self.position);
-                var vector2 = nextRoom.position.minus(room.position);
-                var flags = room.flags.split("|");
-                if (flags.contains("HasWalls")) {
-                    if (vector1[0] !== vector2[0] || vector1[1] !== vector2[1]) {
-                        continue;
-                    }
-                }
-                if (flags.contains("HasCeiling") && vector2[2] > vector1[2]) {
-                    continue;
-                }
-                if (flags.contains("HasFloor") && vector2[2] < vector1[2]) {
-                    continue;
-                }
-
-                var nextRoomStrength = roomStrength *
-                                       nextPortal.eventMultiplier("Visual") *
-                                       nextRoom.eventMultipliers["Visual"];
-                for (var j = 0, length2 = nextRoom.characters.length; j < length2; j++) {
-                    characters.push({
-                        "character": nextRoom.characters[j],
-                        "strength": nextRoomStrength
-                    });
-                }
-            }
+            characters = VisualUtil.charactersVisibleThroughPortal(self, portal);
         }
 
         var name = portal.nameFromRoom(self);
@@ -219,55 +174,9 @@ Room.prototype.lookAtBy = function(character) {
         }
     }
 
-    var characterText = "";
-    if (characters.length > 0) {
-        var other;
-        for (i = 0; i < characters.length; i++) {
-            other = characters[i].character;
-            if (other && other.group && other.group.leader === other) {
-                characters.removeAt(i);
-                other.group.members.forEach(function(member) {
-                    for (var i = 0; i < characters.length; i++) {
-                        if (characters.character === member) {
-                            characters.splice(i, 1);
-                            return;
-                        }
-                    }
-                });
-                characters.append({
-                    "group": other.group,
-                    "strength": characters[i].strength
-                });
-                i = 0;
-            }
-        }
-        var characterTexts = [], numMen = 0, numWomen = 0;
-        for (i = 0, length = characters.length; i < length; i++) {
-            other = characters[i];
-            if (other.group) {
-                characterTexts.append("a group of " + other.group.nameAtStrength(other.strength));
-            } else {
-                name = other.character.nameAtStrength(other.strength);
-                if (name === "a man") {
-                    numMen++;
-                } else if (name === "a woman") {
-                    numWomen++;
-                } else {
-                    characterTexts.append(name);
-                }
-            }
-        }
-        if (numWomen === 1) {
-            characterTexts.prepend("a woman");
-        } else if (numWomen > 1) {
-            characterTexts.prepend(Util.writtenNumber(numWomen) + " women");
-        }
-        if (numMen === 1) {
-            characterTexts.prepend("a man");
-        } else if (numMen > 1) {
-            characterTexts.prepend(Util.writtenNumber(numMen) + " men");
-        }
-        characterText = " Ahead of you, you see %1.".arg(Util.joinFancy(characterTexts));
+    var characterText = VisualUtil.describeVisibleCharactersRelativeTo(characters, character);
+    if (characterText !== "") {
+        characterText = " " + characterText;
     }
 
     var description;

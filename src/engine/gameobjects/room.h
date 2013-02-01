@@ -75,6 +75,8 @@ class Room : public GameObject {
         Q_PROPERTY(GameEventMultiplierMap eventMultipliers READ eventMultipliers
                                                            WRITE setEventMultipliers)
 
+        Q_INVOKABLE double eventMultiplier(GameEventType eventType) const;
+
     private:
         GameObjectPtr m_area;
 
