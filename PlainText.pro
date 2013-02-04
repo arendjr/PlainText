@@ -269,6 +269,7 @@ OTHER_FILES += \
     data/scripts/gameobjects/character.js \
     data/scripts/gameobjects/container.js \
     data/scripts/gameobjects/gameobject.js \
+    data/scripts/gameobjects/group.js \
     data/scripts/gameobjects/item.js \
     data/scripts/gameobjects/player.js \
     data/scripts/gameobjects/portal.js \
