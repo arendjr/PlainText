@@ -213,6 +213,9 @@ QString GameObject::indefiniteName(int options) const {
 
     if (m_indefiniteArticle.isEmpty()) {
         return name();
+    } else if (isItem() &&
+               static_cast<const Item *>(this)->flags() & ItemFlags::AlwaysUseDefiniteArticle) {
+        return (options & Capitalized ? "The " : "the ") + name();
     } else {
         return (options & Capitalized ? Util::capitalize(m_indefiniteArticle) :
                                         m_indefiniteArticle) + " " + name();

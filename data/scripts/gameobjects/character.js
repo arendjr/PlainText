@@ -243,6 +243,11 @@ Character.prototype.go = function(pointer) {
     }
 };
 
+Character.prototype.guard = function(target) {
+
+    this.setAction("guard", { "target": target });
+};
+
 Character.prototype.kill = function(character) {
 
     if (this.secondsStunned() > 0) {
@@ -276,7 +281,7 @@ Character.prototype.kill = function(character) {
         character.die(this);
     }
 
-    this.setAction("fight", { "duration": 4000 });
+    this.setAction("fight", { "target": character, "duration": 4000 });
 };
 
 Character.prototype.lookAtBy = function(character) {
@@ -361,10 +366,10 @@ Character.prototype.maxInventoryWeight = function() {
 
 Character.prototype.nameAtStrength = function(strength) {
 
-    if (strength > 0.9) {
+    if (strength >= 0.9) {
         return this.flags.split("|").contains("AlwaysUseDefiniteArticle") ?
                "the " + this.name : this.indefiniteName();
-    } else if (strength > 0.8) {
+    } else if (strength >= 0.8) {
         return this.gender === "male" ? "a man" : "a woman";
     } else {
         return "someone";
@@ -432,6 +437,8 @@ Character.prototype.setAction = function(action, options) {
     options = options || {};
 
     this.currentAction = action;
+
+    this.target = options.target;
 
     if (this.currentActionTimerId) {
         this.clearTimeout(this.currentActionTimerId);
