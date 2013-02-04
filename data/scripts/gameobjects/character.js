@@ -206,7 +206,8 @@ Character.prototype.go = function(pointer) {
     var party = [this].concat(followers);
 
     var simplePresent = (followers.isEmpty() ? action + "s" : action);
-    var continuous = (action === "walk" ? "is walking" : "is running");
+    var continuous = (followers.isEmpty() ? "is" : "are") + " " +
+                     (action === "walk" ? "walking" : "running");
 
     var visualEvent = Realm.createEvent("MovementVisual", source, 1.0);
     visualEvent.subject = (followers.isEmpty() ? this : this.group);
@@ -217,26 +218,28 @@ Character.prototype.go = function(pointer) {
     visualEvent.excludedCharacters = party;
     visualEvent.fire();
 
-    var soundStrength = (action === "walk" ? 1.0 : 3.0);
-    var soundDescription = "someone";
-    var veryDistantSoundDescription = "something";
-    if (!followers.isEmpty()) {
-        soundDescription = "some people";
-        for (i = 0, length = followers.length; i < length; i++) {
-            soundStrength += max(0.8 - 0.2 * i, 0.3);
-        }
-    }
+    if (this.race && this.race.name !== "animal") {
+        var soundStrength = (action === "walk" ? 1.0 : 3.0);
+        var soundDescription = "someone";
 
-    var soundEvent = Realm.createEvent("MovementSound", source, soundStrength);
-    soundEvent.description = soundDescription;
-    soundEvent.distantDescription = soundDescription;
-    soundEvent.veryDistantDescription = veryDistantSoundDescription;
-    soundEvent.destination = destination;
-    soundEvent.movement = movement;
-    soundEvent.direction = direction;
-    soundEvent.setVerb(simplePresent, continuous);
-    soundEvent.excludedCharacters = party.concat(visualEvent.affectedCharacters);
-    soundEvent.fire();
+        if (!followers.isEmpty()) {
+            soundDescription = "some people";
+            for (i = 0, length = followers.length; i < length; i++) {
+                soundStrength += max(0.8 - 0.2 * i, 0.3);
+            }
+        }
+
+        var soundEvent = Realm.createEvent("MovementSound", source, soundStrength);
+        soundEvent.description = soundDescription;
+        soundEvent.distantDescription = soundDescription;
+        soundEvent.veryDistantDescription = soundDescription;
+        soundEvent.destination = destination;
+        soundEvent.movement = movement;
+        soundEvent.direction = direction;
+        soundEvent.setVerb(simplePresent, continuous);
+        soundEvent.excludedCharacters = party.concat(visualEvent.affectedCharacters);
+        soundEvent.fire();
+    }
 
     if (this.isPlayer()) {
         LogUtil.countRoomVisit(destination.toString(), 1 + followers.length);
@@ -349,7 +352,7 @@ Character.prototype.lookAtBy = function(character) {
             text += "%1 appears like %2 could put up one hell of a fight.\n"
                     .arg(this.subjectPronoun.capitalized(), this.subjectPronoun);
         } else if (statsDiff < -5) {
-            text += "You should think twice before attacking %2.\n".arg(this.objectPronoun);
+            text += "You better think twice before attacking %2.\n".arg(this.objectPronoun);
         } else {
             text += "%1 appears to be about as strong as you are.\n"
                     .arg(this.subjectPronoun.capitalized());

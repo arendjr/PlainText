@@ -191,6 +191,10 @@ Command.prototype.objectsByDescription = function(description, pool) {
     } else {
         for (var i = 0, length = pool.length; i < length; i++) {
             var object = pool[i];
+            if (object === null) {
+                continue;
+            }
+
             var name;
             if (object.nameFromRoom) {
                 name = object.nameFromRoom(this.currentRoom);

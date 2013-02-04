@@ -19,7 +19,7 @@ InventoryCommand.prototype.execute = function(player, command) {
         carriedInventoryString = "You don't carry anything.\n";
     } else {
         if (weight === 0) {
-            carriedInventoryString = "You carry %1, weighing %2.\n"
+            carriedInventoryString = "You carry %1.\n"
                                      .arg(player.inventory.joinFancy());
         } else if (player.inventory.length === 1) {
             carriedInventoryString = "You carry %1, weighing %2.\n"
