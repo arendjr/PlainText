@@ -3,7 +3,7 @@ function GoCommand() {
 
     this.setDescription("Go to or enter an exit.\n" +
                         "\n" +
-                        "Examples: go north, go to tower, enter door");
+                        "Examples: go north, go to tower, enter door, go forward");
 }
 
 GoCommand.prototype = new Command();
@@ -14,6 +14,12 @@ GoCommand.prototype.execute = function(character, command) {
     this.prepareExecute(character, command);
 
     if (this.alias === "go") {
+        var direction = this.peekWord();
+        if (direction === "forward" || direction === "back" ||
+            direction === "left" || direction === "right") {
+            character.execute(direction);
+        }
+
         this.takeWord("to", Options.IfNotLast);
     }
 

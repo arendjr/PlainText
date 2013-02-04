@@ -224,6 +224,7 @@ OTHER_FILES += \
     data/commands/buycommand.js \
     data/commands/closecommand.js \
     data/commands/descriptioncommand.js \
+    data/commands/directioncommand.js \
     data/commands/disbandcommand.js \
     data/commands/dropcommand.js \
     data/commands/drinkcommand.js \
@@ -266,6 +267,7 @@ OTHER_FILES += \
     data/scripts/combat.js \
     data/scripts/sessionhandler.js \
     data/scripts/stats.js \
+    data/scripts/visualutil.js \
     data/scripts/gameobjects/character.js \
     data/scripts/gameobjects/container.js \
     data/scripts/gameobjects/gameobject.js \
@@ -326,7 +328,6 @@ OTHER_FILES += \
     web/propertyeditor/propertyeditor.js \
     web/sliderwidget/slider.css \
     web/sliderwidget/slider.js \
-    data/scripts/visualutil.js
 
 INCLUDEPATH += \
     src/engine \
