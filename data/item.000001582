@@ -1,0 +1,10 @@
+{
+  "name": "empty bucket",
+  "plural": "empty buckets",
+  "indefiniteArticle": "an",
+  "description": "It's a bucket. It's empty.",
+  "position": [ 0, 0, 0 ],
+  "weight": 1,
+  "cost": 0,
+  "flags": "Portable"
+}
