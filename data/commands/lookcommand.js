@@ -41,6 +41,14 @@ LookCommand.prototype.execute = function(player, command) {
     }
 
     player.send(object.lookAtBy(player));
+
+    if (object.isPortal()) {
+        var characters = VisualUtil.charactersVisibleThroughPortal(player.currentRoom, object);
+        var characterText = VisualUtil.describeVisibleCharactersRelativeTo(characters, player);
+        if (characterText !== "") {
+            player.send(characterText);
+        }
+    }
 };
 
 CommandRegistry.registerCommand("examine", new LookCommand());
