@@ -8,6 +8,7 @@
 
 #include "constants.h"
 #include "gameobjectptr.h"
+#include "point3d.h"
 #include "vector3d.h"
 
 
