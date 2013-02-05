@@ -116,7 +116,7 @@ var VisualUtil = (function() {
                 if (characterInfo.group) {
                     name = characterInfo.group.nameAtStrength(characterInfo.strength);
                     if (numPeople > 0 || i < group.length - 1) {
-                        name = "a group of " + name;
+                        name = "a group of " + (name.startsWith("some ") ? name.mid(5) : name);
                     }
 
                     actionDescription = describeActionRelativeTo(characterInfo.group.leader,
