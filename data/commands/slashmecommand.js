@@ -14,6 +14,9 @@ SlashMeCommand.prototype.execute = function(player, command) {
     }
 
     var action = this.takeRest();
+    if (!action.endsWith(".") && !action.endsWith("!")) {
+        action += ".";
+    }
 
     this.currentRoom.characters.send(Util.colorize("%1 %2".arg(player.name, action), Color.Purple));
 };

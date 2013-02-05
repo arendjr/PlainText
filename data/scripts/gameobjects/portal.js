@@ -33,7 +33,7 @@ Portal.prototype.lookAtBy = function(character) {
                 text = "You look at the %1.".arg(name);
             }
         } else {
-            text = description + "\n";
+            text = description;
         }
     } else {
         if (description.isEmpty()) {
