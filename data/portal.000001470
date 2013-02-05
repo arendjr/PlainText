@@ -4,5 +4,5 @@
   "description2": "The bakery's building is made of a light yellow stone. There's a big window through which bread can be sold directly to people on the street, though the shutter is currently closed.",
   "room": "room:1029",
   "room2": "room:110",
-  "flags": "CanSeeThrough|CanHearThrough|CanShootThrough|CanPassThrough"
+  "flags": "CanPassThrough"
 }

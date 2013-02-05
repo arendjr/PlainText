@@ -1,6 +1,7 @@
 {
   "name": "Lady Xu",
   "plural": "Lady Xus",
+  "description": "She's a beautiful woman with long black hair. Judging by her skin and eyes, she's from a far eastern country.",
   "triggers": { "onbuy": "(function(buyer, items) {\n    if (!items) {\n        buyer.send('Welcome ' + (buyer.gender == 'male' ? 'dear' : 'my lovely') + ', what can I make for you? Here\\'s my list:'); \n        buyer.sendSellableItemsList(this.sellableItems);\n        return;\n    }\n})" },
   "position": [ 0, 0, 0 ],
   "weight": 0,
