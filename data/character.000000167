@@ -12,7 +12,7 @@
   "stats": [3, 60, 4, 2, 0, 0],
   "height": 30,
   "currentRoom": "room:151",
-  "direction": [ -100, 0, 0 ],
+  "direction": [ 0, -100, 0 ],
   "race": "race:198",
   "characterClass": "class:147",
   "gender": "male",

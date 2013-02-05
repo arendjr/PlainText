@@ -1,5 +1,6 @@
 {
   "name": "Gate Tower",
+  "description": "You are on top of the East Gate Tower. From here you have a clear view over the grasslands to the east, as well as over some of the buildings in the city.",
   "type": "Room",
   "position": [ 275, -495, 8 ],
   "flags": "HasFloor",

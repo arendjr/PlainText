@@ -1,5 +1,6 @@
 {
   "name": "down",
+  "description": "There's a narrow stairs down.",
   "name2": "up",
   "room": "room:1603",
   "room2": "room:1606",

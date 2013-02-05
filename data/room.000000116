@@ -1,6 +1,6 @@
 {
   "name": "Middle Port City Wall",
-  "description": "The high city wall stretches from the northeast to the southwest. Putting your back towards the wall, you see nothing but a wide-stretching open field.",
+  "description": "The high city wall stretches from the northeast to the southwest. Putting your back towards the wall, you see nothing but a wide-stretching grasslands.",
   "type": "Room",
   "position": [ 200, -200, 0 ],
   "flags": "HasFloor|HasWalls",

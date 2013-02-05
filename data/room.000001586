@@ -1,5 +1,6 @@
 {
   "name": "Gate Tower",
+  "description": "You are inside the gate tower. There's a narrow stairs up.",
   "type": "Room",
   "position": [ -95, -125, 0 ],
   "flags": "HasCeiling|HasFloor|HasWalls",

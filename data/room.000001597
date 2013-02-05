@@ -1,5 +1,6 @@
 {
   "name": "City Wall",
+  "description": "You are on top of the city wall. From here you have a clear view over the forest to the south and the grasslands to the east, as well as over some of the buildings in the city.",
   "type": "Room",
   "position": [ 185, -215, 8 ],
   "flags": "HasFloor",
