@@ -88,7 +88,7 @@
     }
         .map-editor .sidebar .label {
             display: inline-block;
-            width: 5.5em;
+            width: 35%;
             color: #669;
         }
         .map-editor .sidebar .x,

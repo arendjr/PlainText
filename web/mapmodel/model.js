@@ -273,14 +273,7 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
 
         Object.defineProperty(this.portals, "save", {
             "value": function(portal) {
-                var command = "portal-set " + portal.id + " " + portal.room + " " + portal.room2 +
-                              " " + portal.name + " " + portal.name2;
-                if (portal.flags !== undefined) {
-                    command += " " + portal.flags;
-                }
-                if (portal.x !== undefined) {
-                    command += " (" + portal.x + "," + portal.y + "," + portal.z + ")";
-                }
+                var command = "portal-set " + JSON.stringify(portal);
 
                 Controller.sendApiCall(command, function(data) {
                     self.holdEvents();
@@ -288,16 +281,16 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
                     var portal = new Portal(self, data["portal"]);
                     self.portals.set(portal.id, portal);
 
-                    if (data.contains("source")) {
-                        var source = new Room(self, data["source"]);
-                        self.rooms.set(source.id, source);
-                        source.resolvePointers(["portals"]);
+                    if (data.contains("room")) {
+                        var room = new Room(self, data["room"]);
+                        self.rooms.set(room.id, room);
+                        room.resolvePointers(["portals"]);
                     }
 
-                    if (data.contains("destination")) {
-                        var destination = new Room(self, data["destination"]);
-                        self.rooms.set(destination.id, destination);
-                        destination.resolvePointers(["portals"]);
+                    if (data.contains("room2")) {
+                        var room2 = new Room(self, data["room2"]);
+                        self.rooms.set(room2.id, room2);
+                        room2.resolvePointers(["portals"]);
                     }
 
                     if (data.contains("area")) {

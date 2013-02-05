@@ -1,7 +1,10 @@
 #include "portalsetcommand.h"
 
+#include "qjson/json_driver.hh"
+
 #include "area.h"
 #include "conversionutil.h"
+#include "gameexception.h"
 #include "point3d.h"
 #include "portal.h"
 #include "realm.h"
@@ -14,9 +17,7 @@
 PortalSetCommand::PortalSetCommand(QObject *parent) :
     super(parent) {
 
-    setDescription("Syntax: api-portal-set <request-id> <portal-id-or-new> <room-from-id> \n"
-                   "                       <room-to-id> <name> <opposite-name> <flags> \n"
-                   "                       [<position>]");
+    setDescription("Syntax: api-portal-set <request-id> <portal-JSON>");
 }
 
 PortalSetCommand::~PortalSetCommand() {
@@ -26,52 +27,52 @@ void PortalSetCommand::execute(Character *player, const QString &command) {
 
     super::prepareExecute(player, command);
 
-    QString portalId = takeWord();
-    QString roomFromId = takeWord();
-    QString roomToId = takeWord();
-    QString name = takeWord();
-    QString oppositeName = takeWord();
-    QString flags = takeWord();
-    QString position = takeRest();
+    bool error;
+    JSonDriver driver;
+    QString jsonString = takeRest();
+    QVariantMap map = driver.parse(jsonString, &error).toMap();
+    if (error) {
+        throw GameException(GameException::InvalidGameObjectJson, jsonString);
+    }
 
-    Room *source = qobject_cast<Room *>(realm()->getObject(GameObjectType::Room,
-                                                           roomFromId.toUInt()));
-    if (source == nullptr) {
+    uint roomId = map["room"].toUInt();
+    Room *room = qobject_cast<Room *>(realm()->getObject(GameObjectType::Room, roomId));
+    if (room == nullptr) {
         sendError(404, "Room not found");
         return;
     }
 
+    uint room2Id = 0;
+    Room *room2 = nullptr;
+    if (map["room2"].toString() != "new") {
+        room2Id = map["room2"].toUInt();
+        room2 = qobject_cast<Room *>(realm()->getObject(GameObjectType::Room, room2Id));
+        if (room2 == nullptr) {
+            sendError(404, "Room not found");
+            return;
+        }
+    }
+
+    uint portalId = 0;
     Portal *portal = nullptr;
-    if (portalId != "new") {
-        portal = qobject_cast<Portal *>(realm()->getObject(GameObjectType::Portal,
-                                                           portalId.toUInt()));
+    if (map["id"].toString() != "new") {
+        portalId = map["id"].toUInt();
+        portal = qobject_cast<Portal *>(realm()->getObject(GameObjectType::Portal, portalId));
         if (portal == nullptr) {
             sendError(404, "Portal not found");
             return;
         }
     }
 
-    Room *destination = nullptr;
-    if (roomToId != "new") {
-        destination = qobject_cast<Room *>(realm()->getObject(GameObjectType::Room,
-                                                              roomToId.toUInt()));
-        if (destination == nullptr) {
-            sendError(404, "Room not found");
-            return;
-        }
-    }
+    if (!room2) {
+        room2 = new Room(realm());
 
-    Point3D point(0, 0, 0);
-    if (!position.isEmpty()) {
-        Point3D::fromUserString(position, point);
-    }
+        Point3D position;
+        Point3D::fromVariant(map["position"], position);
+        room2->setPosition(position);
 
-    if (!destination) {
-        destination = new Room(realm());
-        destination->setPosition(point);
-
-        if (!source->area().isNull()) {
-            source->area().cast<Area *>()->addRoom(destination);
+        if (!room->area().isNull()) {
+            room->area().cast<Area *>()->addRoom(room2);
         }
     }
 
@@ -79,28 +80,32 @@ void PortalSetCommand::execute(Character *player, const QString &command) {
         portal = new Portal(realm());
     }
 
-    source->addPortal(portal);
-    destination->addPortal(portal);
+    room->addPortal(portal);
+    room2->addPortal(portal);
 
-    if (oppositeName.isEmpty() && Util::isDirection(name)) {
-        oppositeName = Util::opposingDirection(name);
-    }
+    portal->setRoom(room);
+    portal->setName(map["name"].toString());
+    portal->setDestination(map["destination"].toString());
+    portal->setDescription(map["description"].toString());
 
-    portal->setName(name);
-    portal->setRoom(source);
+    portal->setRoom2(room2);
+    portal->setName2(map["name2"].toString());
+    portal->setDestination2(map["destination2"].toString());
+    portal->setDescription2(map["description2"].toString());
 
-    portal->setName2(oppositeName);
-    portal->setRoom2(destination);
+    portal->setFlags(PortalFlags::fromString(map["flags"].toString()));
 
-    portal->setFlags(PortalFlags::fromString(flags));
+    GameEventMultiplierMap eventMultipliers;
+    GameEventMultiplierMap::fromVariant(map["eventMultipliers"], eventMultipliers);
+    portal->setEventMultipliers(eventMultipliers);
 
     QVariantMap data;
     data["success"] = true;
     data["portal"] = portal->toJsonString();
-    data["source"] = source->toJsonString();
-    data["destination"] = destination->toJsonString();
-    if (!source->area().isNull()) {
-        data["area"] = source->area()->toJsonString();
+    data["room"] = room->toJsonString();
+    data["room2"] = room2->toJsonString();
+    if (!room->area().isNull()) {
+        data["area"] = room->area()->toJsonString();
     }
     sendReply(data);
 }

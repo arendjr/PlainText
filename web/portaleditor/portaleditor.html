@@ -5,6 +5,14 @@
             <input type="text" data-laces-property="name">
         </p>
         <p>
+            <span class="label">Destination:</span>
+            <input type="text" data-laces-property="destination">
+        </p>
+        <p>
+            <span class="label">Description:</span>
+            <input type="text" data-laces-property="description">
+        </p>
+        <p>
             <span class="label">Room:</span>
             #<input type="text" size="8" class="room-id"
                     data-laces="{ property: room.id, disabled: id }">
@@ -30,6 +38,14 @@
         <p>
             <span class="label">Name:</span>
             <input type="text" data-laces-property="name2">
+        </p>
+        <p>
+            <span class="label">Destination:</span>
+            <input type="text" data-laces-property="destination2">
+        </p>
+        <p>
+            <span class="label">Description:</span>
+            <input type="text" data-laces-property="description2">
         </p>
         <p>
             <span class="label">Room:</span>
@@ -100,15 +116,15 @@
             <span class="label">
                 <input type="checkbox" data-laces-property="flags.CanSeeThrough">
             </span>
-            <span class="end-label">Can see through
-            <input type="number" min="0" max="100">%</span>
+            <span class="end-label">Can see through at
+            <input type="number" min="0" max="100" class="visualEventMultiplier">%</span>
         </p>
         <p>
             <span class="label">
                 <input type="checkbox" data-laces-property="flags.CanHearThrough">
             </span>
-            <span class="end-label">Can hear through
-            <input type="number" min="0" max="100">%</span>
+            <span class="end-label">Can hear through at
+            <input type="number" min="0" max="100" class="soundEventMultiplier">%</span>
         </p>
         <p>
             <span class="label">

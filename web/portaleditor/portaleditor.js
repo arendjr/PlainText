@@ -133,6 +133,10 @@ define(["controller", "util", "lib/laces", "lib/zepto", "text!portaleditor/porta
         this.portal.set("id", portal.id);
         this.portal.set("name", portal.name);
         this.portal.set("name2", portal.name2);
+        this.portal.set("destination", portal.destination);
+        this.portal.set("destination2", portal.destination2);
+        this.portal.set("description", portal.description);
+        this.portal.set("description2", portal.description2);
         this.portal.set("room", portal.room);
         this.portal.set("room2", portal.room2 || {
             "x": portal.room.x,
@@ -148,6 +152,10 @@ define(["controller", "util", "lib/laces", "lib/zepto", "text!portaleditor/porta
         (portal.flags || "").split("|").forEach(function(flag) {
             self.portal.flags.set(flag, true);
         });
+
+        var multipliers = portal.eventMultipliers || {};
+        $(".visualEventMultiplier", this.element).val(100 * (multipliers["Visual"] || 1.0));
+        $(".soundEventMultiplier", this.element).val(100 * (multipliers["Sound"] || 1.0));
 
         this.options = options || {};
 
@@ -167,11 +175,11 @@ define(["controller", "util", "lib/laces", "lib/zepto", "text!portaleditor/porta
 
         this.portal.direction = Util.isDirection(direction) ? direction : "";
 
-        if (this.portal.name === "" || Util.isDirection(this.portal.name)) {
+        if (!this.portal.name || Util.isDirection(this.portal.name)) {
             this.portal.name = direction;
         }
 
-        if (this.portal.name2 === "" || Util.isDirection(this.portal.name2)) {
+        if (!this.portal.name2 || Util.isDirection(this.portal.name2)) {
             this.portal.name2 = Util.opposingDirection(direction);
         }
     };
@@ -224,8 +232,13 @@ define(["controller", "util", "lib/laces", "lib/zepto", "text!portaleditor/porta
 
         var portal = this.portal.id ? this.portal.clone() : { "id": "new" };
 
-        portal.name = this.portal.name;
-        portal.name2 = this.portal.name2;
+        portal.name = this.portal.name || "";
+        portal.name2 = this.portal.name2 || "";
+        portal.destination = this.portal.destination || "";
+        portal.destination2 = this.portal.destination2 || "";
+        portal.description = this.portal.description || "";
+        portal.description2 = this.portal.description2 || "";
+
         portal.room = this.portal.room.id;
 
         if (this.portal.room2.id) {
@@ -233,18 +246,15 @@ define(["controller", "util", "lib/laces", "lib/zepto", "text!portaleditor/porta
         } else {
             portal.room2 = "new";
 
-            var direction = $(".direction", this.element).val();
             if (Util.isDirection(portal.direction)) {
                 var distance = $(".distance", this.element).val().toInt();
                 var sourcePosition = this.portal.room.position;
                 var vector = Util.vectorForDirection(portal.direction);
-                portal.x = sourcePosition[0] + distance * vector[0];
-                portal.y = sourcePosition[1] + distance * vector[1];
-                portal.z = sourcePosition[2] + distance * vector[2];
+                portal.position = [ sourcePosition[0] + distance * vector[0],
+                                    sourcePosition[1] + distance * vector[1],
+                                    sourcePosition[2] + distance * vector[2] ];
             } else {
-                portal.x = this.portal.room2.x;
-                portal.y = this.portal.room2.y;
-                portal.z = this.portal.room2.z;
+                portal.position = [ this.portal.room2.x, this.portal.room2.y, this.portal.room2.z ];
             }
         }
 
@@ -256,6 +266,11 @@ define(["controller", "util", "lib/laces", "lib/zepto", "text!portaleditor/porta
             }
         });
         portal.flags = flags.join("|");
+
+        portal.eventMultipliers = {
+            "Visual": $(".visualEventMultiplier", this.element).val().toDouble() / 100,
+            "Sound": $(".soundEventMultiplier", this.element).val().toDouble() / 100
+        };
 
         this.mapModel.portals.save(portal);
 
