@@ -178,11 +178,16 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
             var y2 = offsetY + (room2.y - center.y - z2) * zoom;
 
             if (isWithinCanvas(x1, y1) || isWithinCanvas(x2, y2)) {
+                var flags = portal.flags.split("|");
+                var isPassable = flags.contains("CanPassThrough") ||
+                                 flags.contains("CanPassThroughIfOpen");
+                var color = isPassable ? "blue" : "green";
+                var opacity = isPassable ? 1.0 : 0.4;
                 var shape = new Fabric.Line([ x1, y1, x2, y2 ], {
-                    "fill": "blue",
-                    "stroke": "blue",
+                    "stroke": color,
                     "strokeWidth": ROOM_BORDER_WIDTH,
-                    "selectable": false
+                    "selectable": false,
+                    "opacity": opacity
                 });
                 self.canvas.add(shape);
             }
