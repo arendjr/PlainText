@@ -27,7 +27,9 @@ SearchCommand.prototype.execute = function(player, command) {
     var foundPortal;
     for (var i = 0, length = this.currentRoom.portals.length; i < length; i++) {
         var portal = this.currentRoom.portals[i];
-        if (portal.isHiddenFromRoom(this.currentRoom)) {
+        var flags = portal.flags.split("|");
+        if (portal.isHiddenFromRoom(this.currentRoom) &&
+            (flags.contains("CanPassThrough") || flags.contains("CanPassThroughIfOpen"))) {
             if (byChance(searchSkill, 300)) {
                 foundPortal = portal;
                 break;

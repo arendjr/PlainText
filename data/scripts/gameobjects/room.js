@@ -203,8 +203,10 @@ Room.prototype.lookAtBy = function(character) {
 
             exitNames.append(portal.nameFromRoom(this));
         }
-        exitNames = Util.sortExitNames(exitNames);
-        text += ("Obvious exits: " + exitNames.join(", ") + ".").colorized(Color.Green) + "\n";
+        if (!exitNames.isEmpty()) {
+            exitNames = Util.sortExitNames(exitNames);
+            text += ("Obvious exits: " + exitNames.join(", ") + ".").colorized(Color.Green) + "\n";
+        }
     }
 
     var others = this.characters;
