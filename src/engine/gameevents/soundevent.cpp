@@ -20,7 +20,7 @@ SoundEvent::~SoundEvent() {
 
 void SoundEvent::visitRoom(Room *room, double strength) {
 
-    strength *= room->eventMultipliers()[GameEventType::Sound];
+    strength *= room->eventMultiplier(GameEventType::Sound);
 
     if (strength >= 0.1) {
         for (const GameObjectPtr &characterPtr : room->characters()) {
@@ -41,8 +41,8 @@ void SoundEvent::visitRoom(Room *room, double strength) {
 
         for (const GameObjectPtr &portalPtr : room->portals()) {
             Portal *portal = portalPtr.cast<Portal *>();
-            Room *room1 = portal->room().cast<Room *>();
-            Room *room2 = portal->room2().cast<Room *>();
+            Room *room1 = portal->room().unsafeCast<Room *>();
+            Room *room2 = portal->room2().unsafeCast<Room *>();
             Room *oppositeRoom = (room == room1 ? room2 : room1);
             if (hasBeenVisited(oppositeRoom) || !portal->canHearThrough()) {
                 continue;

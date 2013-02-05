@@ -464,8 +464,9 @@ Character.prototype.shout = function(message) {
     event.message = message;
     event.fire();
 
+    var self = this;
     event.affectedCharacters.forEach(function(character) {
-        character.invokeTrigger("onshout", this, message);
+        character.invokeTrigger("onshout", self, message);
     });
 
     this.setAction("shout", { "duration": 4000 });

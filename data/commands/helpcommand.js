@@ -49,8 +49,8 @@ HelpCommand.prototype.execute = function(player, command) {
             }
 
             if (m.isEmpty()) {
-                m = "The command \"%1\" is not recognized.\n" +
-                    "Type *help commands* to see a list of all commands.".arg(commandName);
+                m = "The command \"%1\" is not recognized.\n".arg(commandName) +
+                    "Type *help commands* to see a list of all commands.";
             }
         }
     } else {

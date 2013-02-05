@@ -101,7 +101,8 @@ double Portal::eventMultiplier(GameEventType eventType) const {
     Vector3D vector = m_room.unsafeCast<Room *>()->position() -
                       m_room2.unsafeCast<Room *>()->position();
     if (eventType == GameEventType::Sound) {
-        multiplier *= qMax(1.0 - 0.02 * vector.length(), 0.0);
+        int distance = vector.length();
+        multiplier *= qMax(1.0 - 0.00009 * distance * distance, 0.0);
     } else if (eventType == GameEventType::Visual) {
         multiplier *= qMax(1.0 - 0.001 * vector.length(), 0.0);
     }
