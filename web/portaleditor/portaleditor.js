@@ -228,23 +228,23 @@ define(["controller", "util", "lib/laces", "lib/zepto", "text!portaleditor/porta
         portal.name2 = this.portal.name2;
         portal.room = this.portal.room.id;
 
-        if (this.portal.room2) {
+        if (this.portal.room2.id) {
             portal.room2 = this.portal.room2.id;
         } else {
             portal.room2 = "new";
 
             var direction = $(".direction", this.element).val();
             if (Util.isDirection(portal.direction)) {
-                var distance = parseInt($(".distance", this.element).val(), 10);
+                var distance = $(".distance", this.element).val().toInt();
                 var sourcePosition = this.portal.room.position;
                 var vector = Util.vectorForDirection(portal.direction);
                 portal.x = sourcePosition[0] + distance * vector[0];
                 portal.y = sourcePosition[1] + distance * vector[1];
                 portal.z = sourcePosition[2] + distance * vector[2];
             } else {
-                portal.x = this.portal.x;
-                portal.y = this.portal.y;
-                portal.z = this.portal.z;
+                portal.x = this.portal.room2.x;
+                portal.y = this.portal.room2.y;
+                portal.z = this.portal.room2.z;
             }
         }
 
