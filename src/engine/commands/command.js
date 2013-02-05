@@ -79,12 +79,17 @@ Command.prototype.assertWordsLeft = function(noneLeftText) {
     } else {
         return true;
     }
-}
+};
+
+Command.prototype.peekRest = function() {
+
+    return this.words.join(" ");
+};
 
 Command.prototype.peekWord = function() {
 
     return this.words[0];
-}
+};
 
 Command.prototype.takeWord = function(pattern, options) {
 
@@ -130,7 +135,7 @@ Command.prototype.takeObjects = function(pool) {
     }
 
     return [];
-}
+};
 
 Command.prototype.takeObjectsDescription = function(options) {
 
@@ -181,7 +186,7 @@ Command.prototype.objectByDescription = function(description, pool) {
     }
 
     return null;
-}
+};
 
 Command.prototype.objectsByDescription = function(description, pool) {
 

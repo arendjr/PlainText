@@ -3,7 +3,8 @@ function LookCommand() {
 
     this.setDescription("Look at something (any object, character, or the current room).\n" +
                         "\n" +
-                        "Examples: look, look door, look earl, examine sign");
+                        "Examples: look, look at door, look earl, examine sign,\n" +
+                        "          look at key in inventory");
 }
 
 LookCommand.prototype = new Command();
@@ -23,6 +24,11 @@ LookCommand.prototype.execute = function(player, command) {
         if (!this.assertWordsLeft("Look at what?")) {
             return;
         }
+
+        if (this.peekWord() === "inventory" || this.peekRest() === "in inventory") {
+            player.execute("inventory");
+            return;
+        }
     } else {
         if (!this.assertWordsLeft("Examine what?")) {
             return;
@@ -31,11 +37,13 @@ LookCommand.prototype.execute = function(player, command) {
 
     var room = this.currentRoom;
     var description = this.takeObjectsDescription();
-    var object = this.objectByDescription(description, player.inventory);
-    if (!object) {
-        var pool = room.characters.concat(room.items).concat(room.portals);
-        object = this.objectByDescription(description, pool);
+    var pool;
+    if (this.peekRest() === "in inventory") {
+        pool = player.inventory;
+    } else {
+        pool = room.characters.concat(room.items).concat(room.portals).concat(player.inventory);
     }
+    var object = this.objectByDescription(description, pool);
     if (!this.requireSome(object, "That's not here.")) {
         return;
     }
