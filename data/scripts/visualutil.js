@@ -1,7 +1,7 @@
 
 var VisualUtil = (function() {
 
-    function charactersVisibleThroughPortal(sourceRoom, portal, strength) {
+    function charactersVisibleThroughPortal(sourceRoom, portal, strength, excludedRooms) {
 
         var room = portal.oppositeOf(sourceRoom);
         var roomStrength = (strength || sourceRoom.eventMultiplier("Visual")) *
@@ -10,6 +10,9 @@ var VisualUtil = (function() {
         if (roomStrength < 0.1) {
             return [];
         }
+
+        var visitedRooms = excludedRooms || {};
+        visitedRooms[room.id] = true;
 
         var characters = [];
         for (var i = 0, length = room.characters.length; i < length; i++) {
@@ -27,9 +30,11 @@ var VisualUtil = (function() {
             }
 
             var nextRoom = nextPortal.oppositeOf(room);
-            if (nextRoom === sourceRoom) {
+            if (nextRoom === sourceRoom || visitedRooms.hasOwnProperty(nextRoom.id)) {
                 continue;
             }
+
+            visitedRooms[nextRoom.id] = true;
 
             var vector1 = room.position.minus(sourceRoom.position);
             var vector2 = nextRoom.position.minus(room.position);
@@ -47,7 +52,8 @@ var VisualUtil = (function() {
             }
 
             characters = characters.concat(charactersVisibleThroughPortal(room, nextPortal,
-                                                                          roomStrength));
+                                                                          roomStrength,
+                                                                          visitedRooms));
         }
 
         return characters;

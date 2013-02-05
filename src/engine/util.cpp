@@ -496,7 +496,7 @@ QString Util::directionForVector(const Vector3D &vector) {
     }
 }
 
-double Util::angleBetweenDirectionAndPosition(const Vector3D &direction, const Vector3D &position) {
+double Util::angleBetweenDirectionAndPosition(const Vector3D &direction, const Point3D &position) {
 
     double angle = atan2(position.y, position.x) - atan2(direction.y, direction.x);
     if (angle < -TAU / 2) {

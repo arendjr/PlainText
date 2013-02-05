@@ -2,6 +2,21 @@
 function Portal() {
 }
 
+Portal.prototype.nameWithDestinationFromRoom = function(room) {
+
+    var name = this.nameFromRoom(room);
+    var destination = this.destinationFromRoom(room);
+    if (destination.isEmpty()) {
+        if (name === "door") {
+            return "a door";
+        } else {
+            return "the " + name;
+        }
+    } else {
+        return "the %1 to %2".arg(name, destination);
+    }
+};
+
 Portal.prototype.lookAtBy = function(character) {
 
     var room = character.currentRoom;
@@ -15,21 +30,25 @@ Portal.prototype.lookAtBy = function(character) {
             if (Util.isDirection(name)) {
                 text = "You look %1.".arg(name);
             } else if (!this.canOpenFromRoom(room)) {
-                text = "There's nothing special about the %1.".arg(name);
+                text = "You look at the %1.".arg(name);
             }
         } else {
             text = description + "\n";
         }
     } else {
         if (description.isEmpty()) {
-            text = "The %1 leads to %2.\n".arg(name, destination);
+            text = "The %1 leads to %2.".arg(name, destination);
         } else {
-            text = "The %1 leads to %2. %3\n".arg(name, destination, description);
+            text = "The %1 leads to %2. %3".arg(name, destination, description);
         }
     }
 
     if (this.canOpenFromRoom(room)) {
-        text += "The %1 is %2.\n".arg(name, this.open ? "open" : "closed");
+        if (text === "") {
+            text = "The %1 is %2.".arg(name, this.open ? "open" : "closed");
+        } else {
+            text += " It's %1.".arg(this.open ? "open" : "closed");
+        }
     }
 
     if (room === this.room) {

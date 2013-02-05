@@ -77,7 +77,7 @@ Array.prototype.containsAny = function(array) {
 
 Array.prototype.equals = function(array) {
 
-    if (this.length === array.length) {
+    if (this.length !== array.length) {
         return false;
     }
     for (var i = 0; i < this.length; i++) {

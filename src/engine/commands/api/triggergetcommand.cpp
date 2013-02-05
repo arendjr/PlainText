@@ -22,7 +22,8 @@ void TriggerGetCommand::execute(Character *player, const QString &command) {
     if (peekWord().toInt()) {
         object = realm()->getObject(GameObjectType::Unknown, takeWord().toInt());
     } else {
-        object = takeObject(currentRoom()->characters() + currentRoom()->items());
+        object = takeObject(currentRoom()->portals() + currentRoom()->characters() +
+                            currentRoom()->items());
     }
 
     if (object.isNull()) {

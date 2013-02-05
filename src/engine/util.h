@@ -74,7 +74,7 @@ class Util : public QObject {
         Q_INVOKABLE static QString directionForVector(const Vector3D &vector);
 
         Q_INVOKABLE static double angleBetweenDirectionAndPosition(const Vector3D &direction,
-                                                                   const Vector3D &position);
+                                                                   const Point3D &position);
 
         Q_INVOKABLE static QString toCamelCase(QString string);
         Q_INVOKABLE static QString fromCamelCase(const QString &string);

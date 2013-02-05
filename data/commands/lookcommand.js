@@ -29,10 +29,10 @@ LookCommand.prototype.execute = function(player, command) {
         }
     }
 
+    var room = this.currentRoom;
     var description = this.takeObjectsDescription();
     var object = this.objectByDescription(description, player.inventory);
     if (!object) {
-        var room = this.currentRoom;
         var pool = room.characters.concat(room.items).concat(room.portals);
         object = this.objectByDescription(description, pool);
     }
@@ -42,7 +42,43 @@ LookCommand.prototype.execute = function(player, command) {
 
     player.send(object.lookAtBy(player));
 
-    if (object.isPortal()) {
+    function describeNearbyObject(nearbyObject, vector, position) {
+        if (vector.angle(position) < Math.PI / 8) {
+            var angle = Util.angleBetweenDirectionAndPosition(vector, position);
+
+            if (nearbyObject.isPortal()) {
+                player.send("On its %1 is %2.".arg(angle > 0 ? "right" : "left",
+                                                   nearbyObject.nameWithDestinationFromRoom(room)));
+            } else {
+                player.send("On its %1 there's %2.".arg(angle > 0 ? "right" : "left",
+                                                        nearbyObject.indefiniteName()));
+            }
+        }
+    }
+
+    var showNearbyObjects = (object.isItem() && !object.position.equals([0, 0, 0]) ||
+                             object.isPortal());
+    if (showNearbyObjects) {
+        var vector = (object.isPortal() ? object.position.minus(room.position) : object.position);
+        room.items.forEach(function(item) {
+            if (item === object) {
+                return;
+            }
+
+            var position = item.position;
+            describeNearbyObject(item, vector, position);
+        });
+        room.portals.forEach(function(portal) {
+            if (portal === object) {
+                return;
+            }
+
+            var position = portal.position.minus(room.position);
+            describeNearbyObject(portal, vector, position);
+        });
+    }
+
+    if (object.isPortal() && object.canSeeThrough()) {
         var characters = VisualUtil.charactersVisibleThroughPortal(player.currentRoom, object);
         var characterText = VisualUtil.describeVisibleCharactersRelativeTo(characters, player);
         if (characterText !== "") {

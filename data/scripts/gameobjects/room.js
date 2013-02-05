@@ -149,17 +149,7 @@ Room.prototype.lookAtBy = function(character) {
             var portalGroup = portalGroups[key];
             for (i = 0, length = portalGroup.length; i < length; i++) {
                 var portal = portalGroup[i];
-                name = portal.nameFromRoom(self);
-                var destination = portal.destinationFromRoom(self);
-                if (destination.isEmpty()) {
-                    if (name === "door") {
-                        combinedItems.append("a door");
-                    } else {
-                        combinedItems.append("the " + name);
-                    }
-                } else {
-                    combinedItems.append("the %1 to %2".arg(name, destination));
-                }
+                combinedItems.append(portal.nameWithDestinationFromRoom(self));
             }
 
             var itemText;
