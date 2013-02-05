@@ -4,5 +4,5 @@
   "type": "Room",
   "position": [ 300, -300, 0 ],
   "flags": "HasFloor|HasWalls",
-  "portals": [ "portal:1505", "portal:1506" ]
+  "portals": [ "portal:1505", "portal:1506", "portal:1602" ]
 }

@@ -17,7 +17,7 @@
   "gender": "male",
   "respawnTime": 1800000,
   "respawnTimeVariation": 1800000,
-  "hp": 9,
+  "hp": 22,
   "maxHp": 22,
   "mp": 6,
   "maxMp": 6,

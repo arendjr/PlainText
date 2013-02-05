@@ -1,0 +1,8 @@
+{
+  "name": "up",
+  "name2": "down",
+  "room": "room:1586",
+  "room2": "room:1588",
+  "flags": "CanHearThrough|CanPassThrough",
+  "eventMultipliers": { "Sound": 0.5 }
+}

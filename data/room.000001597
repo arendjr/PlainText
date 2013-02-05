@@ -1,0 +1,7 @@
+{
+  "name": "City Wall",
+  "type": "Room",
+  "position": [ 185, -215, 8 ],
+  "flags": "HasFloor",
+  "portals": [ "portal:1598", "portal:1600", "portal:1601" ]
+}
