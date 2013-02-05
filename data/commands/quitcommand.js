@@ -16,5 +16,6 @@ QuitCommand.prototype.execute = function(player, command) {
     player.quit();
 };
 
+CommandRegistry.registerCommand("exit", new QuitCommand());
 CommandRegistry.registerCommand("goodbye", new QuitCommand());
 CommandRegistry.registerCommand("quit", new QuitCommand());
