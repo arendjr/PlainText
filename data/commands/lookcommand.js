@@ -53,6 +53,9 @@ LookCommand.prototype.execute = function(player, command) {
     object = this.objectByDescription(description, pool);
 
     if (!object) {
+        if (Util.isDirectionAbbreviation(description.name)) {
+            description.name = Util.direction(description.name);
+        }
         if (Util.isDirection(description.name)) {
             player.send("You look %1.".arg(description.name));
 

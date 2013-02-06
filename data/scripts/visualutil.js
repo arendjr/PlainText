@@ -1,6 +1,9 @@
 
 var VisualUtil = (function() {
 
+    var UNDER_QUART_PI = Math.PI / 4.01;
+    var OVER_QUART_PI = Math.PI / 3.99;
+
     var groupsTemplate = {
         "left": [],
         "right": [],
@@ -45,8 +48,7 @@ var VisualUtil = (function() {
                 groups["ceiling"].push(item);
             } else if (flags.contains("AttachedToWall")) {
                 if ((item.position[0] === 0 && item.position[1] === 0) ||
-                    (angle > Math.PI * 3 / 4 || angle < -Math.PI * 3 / 4) ||
-                    (angle < Math.PI / 4 && angle > -Math.PI / 4)) {
+                    Math.abs(angle) > 3 * OVER_QUART_PI || Math.abs(angle) < UNDER_QUART_PI) {
                     groups["wall"].push(item);
                 } else if (angle > 0) {
                     groups["right wall"].push(item);
@@ -56,9 +58,9 @@ var VisualUtil = (function() {
             } else if (item.position[0] === 0 && item.position[1] === 0) {
                 groups["center"].push(item);
             } else {
-                if (angle > Math.PI * 3 / 4 || angle < -Math.PI * 3 / 4) {
+                if (Math.abs(angle) > 3 * OVER_QUART_PI) {
                     groups["behind"].push(item);
-                } else if (angle < Math.PI / 4 && angle > -Math.PI / 4) {
+                } else if (Math.abs(angle) < UNDER_QUART_PI) {
                     groups["ahead"].push(item);
                 } else if (angle > 0) {
                     groups["right"].push(item);
@@ -82,7 +84,7 @@ var VisualUtil = (function() {
             var position = portal.position.minus(room.position);
             var angle = Util.angleBetweenDirectionAndPosition(direction, position);
 
-            if (portal.canSeeThrough() && angle < Math.PI / 4 && angle > -Math.PI / 4) {
+            if (portal.canSeeThrough() && Math.abs(angle) < UNDER_QUART_PI) {
                 groups["characters"] = charactersVisibleThroughPortal(room, portal);
             }
 
@@ -91,9 +93,9 @@ var VisualUtil = (function() {
                 continue;
             }
 
-            if (angle > Math.PI * 3 / 4 || angle < -Math.PI * 3 / 4) {
+            if (Math.abs(angle) > 3 * OVER_QUART_PI) {
                 groups["behind"].push(portal);
-            } else if (angle < Math.PI / 4 && angle > -Math.PI / 4) {
+            } else if (Math.abs(angle) < UNDER_QUART_PI) {
                 groups["ahead"].push(portal);
             } else if (angle > 0) {
                 groups["right"].push(portal);
@@ -413,9 +415,9 @@ var VisualUtil = (function() {
             var angle = character.direction.angle(vector);
 
             var direction;
-            if (Math.abs(angle) < Math.PI / 4) {
+            if (Math.abs(angle) < UNDER_QUART_PI) {
                 direction = "away from you";
-            } else if (Math.abs(angle) >= Math.PI * 3 / 4 && distance <= 100) {
+            } else if (Math.abs(angle) > 3 * OVER_QUART_PI && distance <= 100) {
                 direction = (distance > 100 ? "in your direction" : "toward you");
             } else {
                 direction = Util.directionForVector(character.direction);
