@@ -74,6 +74,9 @@ void PortalSetCommand::execute(Character *player, const QString &command) {
         if (!room->area().isNull()) {
             room->area().cast<Area *>()->addRoom(room2);
         }
+
+        room2->setType(room->type());
+        room2->setFlags(room->flags());
     }
 
     if (!portal) {
