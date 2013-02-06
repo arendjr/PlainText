@@ -88,7 +88,7 @@ LookCommand.prototype.execute = function(player, command) {
 
     if (object.isPortal() && object.canSeeThrough()) {
         var characters = VisualUtil.charactersVisibleThroughPortal(player.currentRoom, object);
-        var characterText = VisualUtil.describeVisibleCharactersRelativeTo(characters, player);
+        var characterText = VisualUtil.describeCharactersRelativeTo(characters, player);
         if (characterText !== "") {
             player.send(characterText);
         }

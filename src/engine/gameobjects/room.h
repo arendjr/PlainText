@@ -20,6 +20,8 @@ PT_DEFINE_ENUM(RoomType,
 )
 
 PT_DEFINE_FLAGS(RoomFlags,
+    OmitDynamicPortalsFromDescription,
+    OmitDistantCharactersFromDescription,
     HasCeiling,
     HasFloor,
     HasWalls,

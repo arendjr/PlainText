@@ -105,6 +105,22 @@ Array.prototype.first = function() {
     return this[0];
 };
 
+Array.prototype.firstItemIsPlural = function() {
+
+    if (this.length > 0) {
+        if (this[0].flags.split("|").indexOf("ImpliedPlural") > -1) {
+            return true;
+        } else {
+            for (var i = 1; i < this.length; i++) {
+                if (this[i].name === this[0].name) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+};
+
 Array.prototype.insert = function(element) {
 
     if (!this.contains(element)) {

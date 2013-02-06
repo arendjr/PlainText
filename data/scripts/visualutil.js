@@ -1,6 +1,109 @@
 
 var VisualUtil = (function() {
 
+    var groupsTemplate = {
+        "left": [],
+        "right": [],
+        "ahead": [],
+        "behind": [],
+        "center": [],
+        "above": [],
+        "left wall": [],
+        "right wall": [],
+        "wall": [],
+        "ceiling": []
+    };
+
+    function descriptionForGroup(group) {
+        switch (group) {
+            case "left":        return [ "To your left", "is", "are" ];
+            case "right":       return [ "To your right", "is", "are" ];
+            case "ahead":       return [ "Ahead of you, there", "is", "are" ];
+            case "behind":      return [ "Behind you", "is", "are" ];
+            case "above":       return [ "Above you", "is", "are" ];
+            case "left wall":   return [ "On the left wall", "hangs", "hang" ];
+            case "right wall":  return [ "On the right wall", "hangs", "hang" ];
+            case "wall":        return [ "On the wall", "hangs", "hang" ];
+            case "ceiling":     return [ "From the ceiling", "hangs", "hang" ];
+            default:            return [ "There", "is", "are" ];
+        }
+    }
+
+    function divideItemsIntoGroups(items, direction) {
+
+        var groups = groupsTemplate.clone();
+        for (var i = 0, length = items.length; i < length; i++) {
+            var item = items[i];
+            if (item.hidden) {
+                continue;
+            }
+
+            var flags = item.flags.split("|");
+            var angle = Util.angleBetweenDirectionAndPosition(direction, item.position);
+
+            if (flags.contains("AttachedToCeiling")) {
+                groups["ceiling"].push(item);
+            } else if (flags.contains("AttachedToWall")) {
+                if ((item.position[0] === 0 && item.position[1] === 0) ||
+                    (angle > Math.PI * 3 / 4 || angle < -Math.PI * 3 / 4) ||
+                    (angle < Math.PI / 4 && angle > -Math.PI / 4)) {
+                    groups["wall"].push(item);
+                } else if (angle > 0) {
+                    groups["right wall"].push(item);
+                } else {
+                    groups["left wall"].push(item);
+                }
+            } else if (item.position[0] === 0 && item.position[1] === 0) {
+                groups["center"].push(item);
+            } else {
+                if (angle > Math.PI * 3 / 4 || angle < -Math.PI * 3 / 4) {
+                    groups["behind"].push(item);
+                } else if (angle < Math.PI / 4 && angle > -Math.PI / 4) {
+                    groups["ahead"].push(item);
+                } else if (angle > 0) {
+                    groups["right"].push(item);
+                } else {
+                    groups["left"].push(item);
+                }
+            }
+        }
+        return groups;
+    }
+
+    function dividePortalsAndCharactersIntoGroups(room, direction) {
+
+        var groups = groupsTemplate.clone();
+        for (var i = 0, length = room.portals.length; i < length; i++) {
+            var portal = room.portals[i];
+            if (portal.isHiddenFromRoom(room)) {
+                continue;
+            }
+
+            var position = portal.position.minus(room.position);
+            var angle = Util.angleBetweenDirectionAndPosition(direction, position);
+
+            if (portal.canSeeThrough() && angle < Math.PI / 4 && angle > -Math.PI / 4) {
+                groups["characters"] = charactersVisibleThroughPortal(room, portal);
+            }
+
+            var name = portal.nameFromRoom(room);
+            if (Util.isDirection(name) || name === "out") {
+                continue;
+            }
+
+            if (angle > Math.PI * 3 / 4 || angle < -Math.PI * 3 / 4) {
+                groups["behind"].push(portal);
+            } else if (angle < Math.PI / 4 && angle > -Math.PI / 4) {
+                groups["ahead"].push(portal);
+            } else if (angle > 0) {
+                groups["right"].push(portal);
+            } else {
+                groups["left"].push(portal);
+            }
+        }
+        return groups;
+    }
+
     function charactersVisibleThroughPortal(sourceRoom, portal, strength, excludedRooms) {
 
         var room = portal.oppositeOf(sourceRoom);
@@ -11,55 +114,51 @@ var VisualUtil = (function() {
             return [];
         }
 
+        var vector1 = room.position.minus(sourceRoom.position);
+        var distance = vector1.vectorLength();
+
         var visitedRooms = excludedRooms || {};
         visitedRooms[room.id] = true;
 
         var characters = [];
-        for (var i = 0, length = room.characters.length; i < length; i++) {
+        room.characters.forEach(function(character) {
             characters.push({
-                "character": room.characters[i],
+                "character": character,
                 "strength": roomStrength,
-                "distance": sourceRoom.position.minus(room.position).vectorLength()
+                "distance": distance
             });
-        }
+        });
 
-        for (i = 0, length = room.portals.length; i < length; i++) {
-            var nextPortal = room.portals[i];
+        room.portals.forEach(function(nextPortal) {
             if (!nextPortal.canSeeThrough()) {
-                continue;
+                return;
             }
 
             var nextRoom = nextPortal.oppositeOf(room);
             if (nextRoom === sourceRoom || visitedRooms.hasOwnProperty(nextRoom.id)) {
-                continue;
+                return;
             }
 
-            visitedRooms[nextRoom.id] = true;
-
-            var vector1 = room.position.minus(sourceRoom.position);
             var vector2 = nextRoom.position.minus(room.position);
             var flags = room.flags.split("|");
             if (flags.contains("HasWalls")) {
                 if (vector1[0] !== vector2[0] || vector1[1] !== vector2[1]) {
-                    continue;
+                    return;
                 }
             }
-            if (flags.contains("HasCeiling") && vector2[2] > vector1[2]) {
-                continue;
-            }
-            if (flags.contains("HasFloor") && vector2[2] < vector1[2]) {
-                continue;
+            if ((flags.contains("HasCeiling") && vector2[2] > vector1[2]) ||
+                (flags.contains("HasFloor") && vector2[2] < vector1[2])) {
+                return;
             }
 
-            characters = characters.concat(charactersVisibleThroughPortal(room, nextPortal,
-                                                                          roomStrength,
-                                                                          visitedRooms));
-        }
+            characters.append(charactersVisibleThroughPortal(room, nextPortal,
+                                                             roomStrength, visitedRooms));
+        });
 
         return characters;
     }
 
-    function describeVisibleCharactersRelativeTo(characters, relative) {
+    function describeCharactersRelativeTo(characters, relative) {
 
         if (!characters || characters.length === 0) {
             return "";
@@ -101,7 +200,7 @@ var VisualUtil = (function() {
                             }
                         }
                     });
-                    group.append({
+                    group.push({
                         "group": character.group,
                         "strength": characterInfo.strength,
                         "distance": characterInfo.distance
@@ -129,7 +228,7 @@ var VisualUtil = (function() {
                     actionDescription = describeActionRelativeTo(characterInfo.group.leader,
                                                                  relative, characterInfo.distance);
 
-                    infos.append({
+                    infos.push({
                         "group": characterInfo.group,
                         "name": name,
                         "action": actionDescription.text
@@ -152,7 +251,7 @@ var VisualUtil = (function() {
                     } else if (name === "someone") {
                         numUnknown++;
                     } else {
-                        infos.append({
+                        infos.push({
                             "character": characterInfo.character,
                             "name": name,
                             "action": actionDescription.text
@@ -196,7 +295,7 @@ var VisualUtil = (function() {
                 if (info.action !== "") {
                     name += " " + info.action;
                 }
-                characterTexts.append(name);
+                characterTexts.push(name);
 
                 if (info.character) {
                     if (info.character.gender === "male") {
@@ -219,63 +318,63 @@ var VisualUtil = (function() {
                 if (numMen === 0) {
                     if (numWomen === 1) {
                         if (hasWoman) {
-                            characterTexts.append("another woman");
+                            characterTexts.push("another woman");
                         } else {
-                            characterTexts.append("a woman");
+                            characterTexts.push("a woman");
                         }
                     } else if (numWomen > 1) {
                         if (hasWoman) {
-                            characterTexts.append(writtenAmount(numWomen) + " other women");
+                            characterTexts.push(writtenAmount(numWomen) + " other women");
                         } else {
-                            characterTexts.append(writtenAmount(numWomen) + " women");
+                            characterTexts.push(writtenAmount(numWomen) + " women");
                         }
                     }
                 } else if (numMen === 1) {
                     if (numWomen <= 1) {
                         if (hasMan) {
-                            characterTexts.append("another man");
+                            characterTexts.push("another man");
                         } else {
-                            characterTexts.append("a man");
+                            characterTexts.push("a man");
                         }
                         if (numWomen === 1) {
                             if (hasWoman && !hasMan) {
-                                characterTexts.append("another woman");
+                                characterTexts.push("another woman");
                             } else {
-                                characterTexts.append("a woman");
+                                characterTexts.push("a woman");
                             }
                         }
                     } else {
                         if (hasWoman) {
-                            characterTexts.append(writtenAmount(numWomen) + " other women");
+                            characterTexts.push(writtenAmount(numWomen) + " other women");
                         } else {
-                            characterTexts.append(writtenAmount(numWomen) + " women");
+                            characterTexts.push(writtenAmount(numWomen) + " women");
                         }
                         if (hasMan && !hasWoman) {
-                            characterTexts.append("another man");
+                            characterTexts.push("another man");
                         } else {
-                            characterTexts.append("a man");
+                            characterTexts.push("a man");
                         }
                     }
                 } else {
                     if (numWomen <= 1) {
                         if (hasMan) {
-                            characterTexts.append(writtenAmount(numMen) + " other men");
+                            characterTexts.push(writtenAmount(numMen) + " other men");
                         } else {
-                            characterTexts.append(writtenAmount(numMen) + " men");
+                            characterTexts.push(writtenAmount(numMen) + " men");
                         }
                         if (numWomen === 1) {
                             if (hasWoman && !hasMan) {
-                                characterTexts.append("another woman");
+                                characterTexts.push("another woman");
                             } else {
-                                characterTexts.append("a woman");
+                                characterTexts.push("a woman");
                             }
                         }
                     } else {
                         if (numPeople > numMen + numWomen) {
-                            characterTexts.append(writtenAmount(numMen + numWomen) +
+                            characterTexts.push(writtenAmount(numMen + numWomen) +
                                                   " other people");
                         } else {
-                            characterTexts.append(writtenAmount(numMen + numWomen) + " people");
+                            characterTexts.push(writtenAmount(numMen + numWomen) + " people");
                         }
                     }
                 }
@@ -283,21 +382,21 @@ var VisualUtil = (function() {
                 numUnknown += numMen + numWomen;
                 if (numPeople > numUnknown) {
                     if (numUnknown === 1) {
-                        characterTexts.append("someone else");
+                        characterTexts.push("someone else");
                     } else {
-                        characterTexts.append(writtenAmount(numUnknown) + " other people");
+                        characterTexts.push(writtenAmount(numUnknown) + " other people");
                     }
                 } else {
                     if (numUnknown === 1) {
-                        characterTexts.append("someone");
+                        characterTexts.push("someone");
                     } else {
-                        characterTexts.append(writtenAmount(numUnknown) + " people");
+                        characterTexts.push(writtenAmount(numUnknown) + " people");
                     }
                 }
             }
 
             if (!characterTexts.isEmpty()) {
-                sentences.append("%1, you see %2.".arg(prefix, Util.joinFancy(characterTexts)));
+                sentences.push("%1, you see %2.".arg(prefix, Util.joinFancy(characterTexts)));
             }
         }
 
@@ -310,7 +409,7 @@ var VisualUtil = (function() {
         if (action === "walk" || action === "run") {
             var continuous = (action === "walk" ? "walking" : "running");
 
-            var vector = character.position.minus(relative.position);
+            var vector = character.currentRoom.position.minus(relative.currentRoom.position);
             var angle = character.direction.angle(vector);
 
             var direction;
@@ -360,8 +459,11 @@ var VisualUtil = (function() {
     }
 
     return {
+        "descriptionForGroup": descriptionForGroup,
+        "divideItemsIntoGroups": divideItemsIntoGroups,
+        "dividePortalsAndCharactersIntoGroups": dividePortalsAndCharactersIntoGroups,
         "charactersVisibleThroughPortal": charactersVisibleThroughPortal,
-        "describeVisibleCharactersRelativeTo": describeVisibleCharactersRelativeTo,
+        "describeCharactersRelativeTo": describeCharactersRelativeTo,
         "describeActionRelativeTo": describeActionRelativeTo
     };
 })();
