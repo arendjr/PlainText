@@ -38,6 +38,9 @@
         .portal-editor .end-label input {
             margin-top: -5px;
         }
+    .portal-editor .options {
+        margin-top: -0.5em;
+    }
     .portal-editor .x,
     .portal-editor .y,
     .portal-editor .z {
