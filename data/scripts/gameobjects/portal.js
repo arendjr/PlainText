@@ -7,8 +7,8 @@ Portal.prototype.nameWithDestinationFromRoom = function(room) {
     var name = this.nameFromRoom(room);
     var destination = this.destinationFromRoom(room);
     if (destination.isEmpty()) {
-        if (name === "door") {
-            return "a door";
+        if (name === "door" || name === "tent") {
+            return "a " + name;
         } else {
             return "the " + name;
         }

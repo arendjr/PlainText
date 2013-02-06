@@ -35,16 +35,49 @@ LookCommand.prototype.execute = function(player, command) {
         }
     }
 
-    var room = this.currentRoom;
+    var object;
     var description = this.takeObjectsDescription();
-    var pool;
+
     if (this.peekRest() === "in inventory") {
-        pool = player.inventory;
-    } else {
-        pool = room.characters.concat(room.items).concat(room.portals).concat(player.inventory);
+        object = this.objectByDescription(description, player.inventory);
+        if (object) {
+            player.send(object.lookAtBy(player));
+        } else {
+            player.send("You don't have that.");
+        }
+        return;
     }
-    var object = this.objectByDescription(description, pool);
-    if (!this.requireSome(object, "That's not here.")) {
+
+    var room = this.currentRoom;
+    var pool = room.characters.concat(room.items).concat(room.portals).concat(player.inventory);
+    object = this.objectByDescription(description, pool);
+
+    if (!object) {
+        if (Util.isDirection(description.name)) {
+            player.send("You look %1.".arg(description.name));
+
+            var direction = Util.vectorForDirection(description.name);
+            player.direction = direction;
+
+            var itemGroups = VisualUtil.divideItemsIntoGroups(room.items, direction);
+            var portalGroups = VisualUtil.dividePortalsAndCharactersIntoGroups(room, direction);
+
+            var combinedItems = Util.combinePtrList(itemGroups["ahead"]);
+            portalGroups["ahead"].forEach(function(portal) {
+                combinedItems.append(portal.nameWithDestinationFromRoom(room));
+            });
+
+            if (!combinedItems.isEmpty()) {
+                player.send("You see %1.".arg(Util.joinFancy(combinedItems)));
+            }
+
+            if (portalGroups.hasOwnProperty("characters")) {
+                player.send(VisualUtil.describeCharactersRelativeTo(portalGroups["characters"],
+                                                                    player));
+            }
+        } else {
+            player.send("That's not here.");
+        }
         return;
     }
 
@@ -64,8 +97,8 @@ LookCommand.prototype.execute = function(player, command) {
         }
     }
 
-    var showNearbyObjects = (object.isItem() && !object.position.equals([0, 0, 0]) ||
-                             object.isPortal());
+    var showNearbyObjects = (object.isItem() && !object.position.equals([0, 0, 0])) ||
+                            object.isPortal();
     if (showNearbyObjects) {
         var vector = (object.isPortal() ? object.position.minus(room.position) : object.position);
         room.items.forEach(function(item) {

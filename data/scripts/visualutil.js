@@ -413,9 +413,9 @@ var VisualUtil = (function() {
             var angle = character.direction.angle(vector);
 
             var direction;
-            if (angle < Math.PI / 4) {
+            if (Math.abs(angle) < Math.PI / 4) {
                 direction = "away from you";
-            } else if (angle >= Math.PI * 3 / 4 && distance <= 100) {
+            } else if (Math.abs(angle) >= Math.PI * 3 / 4 && distance <= 100) {
                 direction = (distance > 100 ? "in your direction" : "toward you");
             } else {
                 direction = Util.directionForVector(character.direction);
