@@ -2,7 +2,6 @@
   "name": "south gate tower key",
   "plural": "south gate tower keys",
   "indefiniteArticle": "a",
-  "description": "The key gives access to the south gate tower.",
   "position": [ 0, 0, 0 ],
   "weight": 0,
   "cost": 0,

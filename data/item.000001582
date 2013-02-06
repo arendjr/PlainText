@@ -1,10 +1,10 @@
 {
-  "name": "empty bucket",
-  "plural": "empty buckets",
-  "indefiniteArticle": "an",
-  "description": "It's a bucket. It's empty.",
+  "name": "bucket full of water",
+  "plural": "buckets full of water",
+  "indefiniteArticle": "a",
+  "description": "It's a bucket. It's filled with water.",
   "position": [ 0, 0, 0 ],
-  "weight": 1,
+  "weight": 10,
   "cost": 0,
   "flags": "Portable"
 }

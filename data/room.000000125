@@ -3,6 +3,6 @@
   "description": "This is the end of the Main Street, right at the East Gate of the city. On the north side of the street are the barracks used by newly arriving soldiers. Right on the opposite side of the street are the stables used by most of the soldiers for tending their horses.",
   "type": "Room",
   "position": [ 200, -500, 0 ],
-  "flags": "HasFloor|HasWalls",
+  "flags": "OmitDynamicPortalsFromDescription|HasFloor|HasWalls",
   "portals": [ "portal:1507", "portal:1509", "portal:1510", "portal:1511", "portal:1608" ]
 }

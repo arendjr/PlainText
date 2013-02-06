@@ -1,6 +1,6 @@
 {
   "name": "Middle Port Market Square",
-  "description": "The market square is buzzing with people. Various stalls are promoting their merchandise to those walking by.\n\n{{items}}{{characters}}",
+  "description": "The market square is buzzing with people. Various stalls are promoting their merchandise to those walking by.\n\n",
   "type": "Room",
   "position": [ -100, -200, 0 ],
   "flags": "HasFloor|HasWalls",

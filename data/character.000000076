@@ -10,7 +10,7 @@
   "stats": [0, 0, 0, 0, 0, 0],
   "height": 0,
   "currentRoom": "room:65",
-  "direction": [ -100, 0, 0 ],
+  "direction": [ 70, -70, 0 ],
   "race": "race:2",
   "characterClass": "class:147",
   "gender": "male",
@@ -20,7 +20,7 @@
   "maxHp": 1,
   "mp": 0,
   "maxMp": 0,
-  "gold": 19,
+  "gold": 13,
   "weapon": "0",
   "secondaryWeapon": "0",
   "shield": "0"
