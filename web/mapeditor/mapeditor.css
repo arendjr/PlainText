@@ -112,6 +112,9 @@
         .map-editor .sidebar .description {
             white-space: pre-line;
         }
+        .map-editor .sidebar .option {
+            margin-top: -0.5em;
+        }
         .map-editor .sidebar .help {
             position: absolute;
             top: 8px;

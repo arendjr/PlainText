@@ -49,23 +49,62 @@
         <div class="selected-room" data-laces-visible="selectedRoom">
             <div class="help" title="Double-click any property to edit"></div>
             <h2 data-laces="{ property: selectedRoom.name, editable: true, default: Unnamed Room }"></h2>
-
-            <p><span class="label">Room #<span data-laces-property="selectedRoom.id"></span></span>
-                <button class="enter-room-button"
-                        title="Enter this room with your in-game character, regardless of where you
-                               currently are.">Enter</button></p>
-            <p><input type="number" class="x" data-laces-property="selectedRoom.x">,
+            <p>
+                <span class="label">Room #<span data-laces-property="selectedRoom.id"></span></span>
+                <button class="enter-room-button" title="Enter this room with your in-game character, regardless of where you currently are.">Enter</button>
+                </p>
+            <p>
+                <input type="number" class="x" data-laces-property="selectedRoom.x">,
                 <input type="number" class="y" data-laces-property="selectedRoom.y">,
-                <input type="number" class="z" data-laces-property="selectedRoom.z"></p>
-            <p><span class="label">Area</span>
-                <span class="area" data-laces-property="selectedRoom.areaName"></span></p>
-            <p><span class="label">Description</span>
-                <a href="javascript:void(0)" data-laces-visible="!selectedRoom.description"
-                   class="add description"></a><br>
-                <span class="description" data-laces-property="selectedRoom.description"></span></p>
-            <p><span class="label">Portals</span>
+                <input type="number" class="z" data-laces-property="selectedRoom.z">
+            </p>
+            <p>
+                <span class="label">Area</span>
+                <span class="area" data-laces-property="selectedRoom.areaName"></span>
+            </p>
+            <p>
+                <span class="label">Description</span>
+                <a href="javascript:void(0)" data-laces-visible="!selectedRoom.description" class="add description"></a><br>
+                <span class="description" data-laces-property="selectedRoom.description"></span>
+            </p>
+            <p>
+                <span class="label">Portals</span>
                 <span class="portals"></span>
-                <a href="javascript:void(0)" class="add portal"></a></p>
+                <a href="javascript:void(0)" class="add portal"></a>
+            </p>
+            <p>
+                <span class="label">Options</span>
+            </p>
+            <p class="option">
+                <span title="If checked, dynamic room descriptions include information about portals.">
+                    <input id="omitDynamicPortals" type="checkbox" data-laces-property="selectedRoom.dynamicPortalDescriptions">
+                    <label for="omitDynamicPortals">Dynamic portals descriptions</label>
+                </span>
+            </p>
+            <p class="option">
+                <span title="If checked, dynamic room descriptions include information about characters in the distance.">
+                    <input id="omitDistantCharacters" type="checkbox" data-laces-property="selectedRoom.distantCharacterDescriptions">
+                    <label for="omitDistantCharacters">Distant character descriptions</label>
+                </span>
+            </p>
+            <p class="option">
+                <span title="Whether the room has walls or not is important for calculating line-of-sight.">
+                    <input id="hasWalls" type="checkbox" data-laces-property="selectedRoom.hasWalls">
+                    <label for="hasWalls">Has walls</label>
+                </span>
+            </p>
+            <p class="option">
+                <span title="Whether the room has a ceiling or not is important for calculating line-of-sight.">
+                    <input id="hasCeiling" type="checkbox" data-laces-property="selectedRoom.hasCeiling">
+                    <label for="hasCeiling">Has ceiling</label>
+                </span>
+            </p>
+            <p class="option">
+                <span title="Whether the room has a floor or not is important for calculating line-of-sight.">
+                    <input id="hasFloor" type="checkbox" data-laces-property="selectedRoom.hasFloor">
+                    <label for="hasFloor">Has floor</label>
+                </span>
+            </p>
         </div>
     </div>
     <div class="pad">

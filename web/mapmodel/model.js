@@ -177,13 +177,41 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
         this.set("y", room.position[1], { "type": "integer" });
         this.set("z", room.position[2], { "type": "integer" });
         this.set("position", function() { return [this.x, this.y, this.z]; });
+
+        var flags = room.flags.split("|");
+        this.set("dynamicPortalDescriptions", !flags.contains("OmitDynamicPortalsFromDescription"));
+        this.set("distantCharacterDescriptions",
+                 !flags.contains("OmitDistantCharactersFromDescription"));
+        this.set("hasWalls", flags.contains("HasWalls"));
+        this.set("hasCeiling", flags.contains("HasCeiling"));
+        this.set("hasFloor", flags.contains("HasFloor"));
+        this.set("flags", function() {
+            var array = [];
+            if (!this.dynamicPortalDescriptions) {
+                array.push("OmitDynamicPortalsFromDescription");
+            }
+            if (!this.distantCharacterDescriptions) {
+                array.push("OmitDistantCharactersFromDescription");
+            }
+            if (this.hasWalls) {
+                array.push("HasWalls");
+            }
+            if (this.hasCeiling) {
+                array.push("HasCeiling");
+            }
+            if (this.hasFloor) {
+                array.push("HasFloor");
+            }
+            return array.join("|");
+        });
     }
 
     Room.savedProperties = {
         "description": { "type": "string" },
         "name": { "type": "string" },
         "portals": { "type": "pointerlist" },
-        "position": { "type": "point" }
+        "position": { "type": "point" },
+        "flags": { "type": "flags" }
     };
 
     Room.prototype = new GameObject();
