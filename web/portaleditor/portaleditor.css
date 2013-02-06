@@ -33,6 +33,7 @@
     .portal-editor .end-label {
         display: inline-block;
         margin: 5px 1px;
+        max-height: 1em;
         vertical-align: top;
     }
         .portal-editor .end-label input {
