@@ -29,6 +29,9 @@ Features
    * Hear sounds and see visuals as they happen in nearby rooms
    * Sounds and visuals lose strength and become increasingly blurry over distance
    * Semi-realistic line-of-sight algorithm
+ * Dynamic room descriptions
+   * Reflect positions and directions for items, exits and characters
+   * Complements, not replaces, hand-written descriptions
  * Scripting support using JavaScript
    * Commands may be implemented in JavaScript
    * Customizable combat
