@@ -24,31 +24,27 @@ Portal.prototype.lookAtBy = function(character) {
     var description = this.descriptionFromRoom(room);
     var destination = this.destinationFromRoom(room);
 
-    var text = "";
-    if (destination.isEmpty()) {
-        if (description.isEmpty()) {
-            if (Util.isDirection(name)) {
-                text = "You look %1.".arg(name);
-            } else if (!this.canOpenFromRoom(room)) {
-                text = "You look at the %1.".arg(name);
-            }
-        } else {
-            text = description;
+    var text;
+    if (Util.isDirection(name)) {
+        text = "You look %1.".arg(name);
+
+        if (!destination.isEmpty()) {
+            text += " It leads to %1.".arg(destination);
         }
     } else {
-        if (description.isEmpty()) {
-            text = "The %1 leads to %2.".arg(name, destination);
+        if (destination.isEmpty()) {
+            text = "You look at the %1.".arg(name);
         } else {
-            text = "The %1 leads to %2. %3".arg(name, destination, description);
+            text = "You look at the %1 to %2.".arg(name, destination);
         }
     }
 
+    if (!description.isEmpty()) {
+        text += " " + description;
+    }
+
     if (this.canOpenFromRoom(room)) {
-        if (text === "") {
-            text = "The %1 is %2.".arg(name, this.open ? "open" : "closed");
-        } else {
-            text += " It's %1.".arg(this.open ? "open" : "closed");
-        }
+        text += " It's %1.".arg(this.open ? "open" : "closed");
     }
 
     if (room === this.room) {
