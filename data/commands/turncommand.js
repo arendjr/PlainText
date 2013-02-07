@@ -26,7 +26,8 @@ TurnCommand.prototype.execute = function(player, command) {
         return;
     }
 
-    this.send(player.currentRoom.lookAtBy(player));
+    player.send("You turn %1.".arg(direction));
+    player.lookAhead();
 };
 
 CommandRegistry.registerCommand("turn", new TurnCommand());

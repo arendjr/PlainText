@@ -50,11 +50,6 @@ LookCommand.prototype.execute = function(player, command) {
 
     var room = this.currentRoom;
 
-    var strength = room.eventMultiplier("Visual");
-    if (player.weapon && player.weapon.name === "binocular") {
-        strength *= 4;
-    }
-
     var pool = room.characters.concat(room.items).concat(room.portals).concat(player.inventory);
     object = this.objectByDescription(description, pool);
 
@@ -64,29 +59,22 @@ LookCommand.prototype.execute = function(player, command) {
         }
         if (Util.isDirection(description.name)) {
             player.send("You look %1.".arg(description.name));
-
-            var direction = Util.vectorForDirection(description.name);
-            player.direction = direction;
-
-            var itemGroups = VisualUtil.divideItemsIntoGroups(room.items, direction);
-            var portalGroups = VisualUtil.dividePortalsAndCharactersIntoGroups(room, direction,
-                                                                               strength);
-
-            var combinedItems = Util.combinePtrList(itemGroups["ahead"]);
-            portalGroups["ahead"].forEach(function(portal) {
-                combinedItems.append(portal.nameWithDestinationFromRoom(room));
-            });
-
-            if (!combinedItems.isEmpty()) {
-                player.send("You see %1.".arg(Util.joinFancy(combinedItems)));
-            }
-
-            if (portalGroups.hasOwnProperty("characters")) {
-                player.send(VisualUtil.describeCharactersRelativeTo(portalGroups["characters"],
-                                                                    player));
-            }
+            player.direction = Util.vectorForDirection(description.name);
+            player.lookAhead();
+        } else if (description.name === "left") {
+            player.send("You look to the left.");
+            player.direction = [player.direction[1], -player.direction[0], player.direction[2]];
+            player.lookAhead();
+        } else if (description.name === "right") {
+            player.send("You look to the right.");
+            player.direction = [-player.direction[1], player.direction[0], player.direction[2]];
+            player.lookAhead();
+        } else if (description.name === "back" || description.name === "behind") {
+            player.send("You look behind you.");
+            player.direction = [-player.direction[0], -player.direction[1], -player.direction[2]];
+            player.lookAhead();
         } else {
-            player.send("That's not here.");
+            player.send("Look where?");
         }
         return;
     }
@@ -112,24 +100,23 @@ LookCommand.prototype.execute = function(player, command) {
     if (showNearbyObjects) {
         var vector = (object.isPortal() ? object.position.minus(room.position) : object.position);
         room.items.forEach(function(item) {
-            if (item === object) {
-                return;
+            if (item !== object) {
+                describeNearbyObject(item, vector, item.position);
             }
-
-            var position = item.position;
-            describeNearbyObject(item, vector, position);
         });
         room.portals.forEach(function(portal) {
-            if (portal === object) {
-                return;
+            if (portal !== object) {
+                describeNearbyObject(portal, vector, portal.position.minus(room.position));
             }
-
-            var position = portal.position.minus(room.position);
-            describeNearbyObject(portal, vector, position);
         });
     }
 
     if (object.isPortal() && object.canSeeThrough()) {
+        var strength = room.eventMultiplier("Visual");
+        if (player.weapon && player.weapon.name === "binocular") {
+            strength *= 4;
+        }
+
         var characters = VisualUtil.charactersVisibleThroughPortal(room, object, strength);
         var characterText = VisualUtil.describeCharactersRelativeTo(characters, player);
         if (characterText !== "") {

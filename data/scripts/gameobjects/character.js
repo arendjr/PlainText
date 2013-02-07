@@ -305,6 +305,33 @@ Character.prototype.kill = function(character) {
     }
 };
 
+Character.prototype.lookAhead = function() {
+
+    var room = this.currentRoom;
+
+    var strength = room.eventMultiplier("Visual");
+    if (this.weapon && this.weapon.name === "binocular") {
+        strength *= 4;
+    }
+
+    var itemGroups = VisualUtil.divideItemsIntoGroups(room.items, this.direction);
+    var portalGroups = VisualUtil.dividePortalsAndCharactersIntoGroups(room, this.direction,
+                                                                       strength);
+
+    var combinedItems = Util.combinePtrList(itemGroups["ahead"]);
+    portalGroups["ahead"].forEach(function(portal) {
+        combinedItems.append(portal.nameWithDestinationFromRoom(room));
+    });
+
+    if (!combinedItems.isEmpty()) {
+        this.send("You see %1.".arg(Util.joinFancy(combinedItems)));
+    }
+
+    if (portalGroups.hasOwnProperty("characters")) {
+        this.send(VisualUtil.describeCharactersRelativeTo(portalGroups["characters"], this));
+    }
+};
+
 Character.prototype.lookAtBy = function(character) {
 
     var pool = this.currentRoom.characters;
