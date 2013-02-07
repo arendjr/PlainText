@@ -199,12 +199,20 @@ String.prototype.startsWith = function(string) {
 
 String.prototype.toDouble = function() {
 
-    return parseFloat(this);
+    var value = parseFloat(this);
+    if (isNaN(value)) {
+        value = 0.0;
+    }
+    return value;
 };
 
 String.prototype.toInt = function() {
 
-    return parseInt(this, 10);
+    var value = parseInt(this, 10);
+    if (isNaN(value)) {
+        value = 0;
+    }
+    return value;
 };
 
 String.prototype.toLower = function() {

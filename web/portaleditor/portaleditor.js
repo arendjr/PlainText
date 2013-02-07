@@ -157,6 +157,8 @@ define(["controller", "util", "lib/laces", "lib/zepto", "text!portaleditor/porta
         $(".visualEventMultiplier", this.element).val(100 * (multipliers["Visual"] || 1.0));
         $(".soundEventMultiplier", this.element).val(100 * (multipliers["Sound"] || 1.0));
 
+        $(".distance.label", this.element).css("color", "black");
+
         this.options = options || {};
 
         if (this.mapView) {
@@ -246,13 +248,18 @@ define(["controller", "util", "lib/laces", "lib/zepto", "text!portaleditor/porta
         } else {
             portal.room2 = "new";
 
-            if (Util.isDirection(portal.direction)) {
-                var distance = $(".distance", this.element).val().toInt();
+            if (Util.isDirection(this.portal.direction)) {
+                var distance = $("input.distance", this.element).val().toInt();
+                if (distance === 0) {
+                    $(".distance.label", this.element).css("color", "red");
+                    return;
+                }
+
                 var sourcePosition = this.portal.room.position;
-                var vector = Util.vectorForDirection(portal.direction);
-                portal.position = [ sourcePosition[0] + distance * vector[0],
-                                    sourcePosition[1] + distance * vector[1],
-                                    sourcePosition[2] + distance * vector[2] ];
+                var vector = Util.vectorForDirection(this.portal.direction);
+                portal.position = [ this.portal.room.x + distance * vector[0],
+                                    this.portal.room.y + distance * vector[1],
+                                    this.portal.room.z + distance * vector[2] ];
             } else {
                 portal.position = [ this.portal.room2.x, this.portal.room2.y, this.portal.room2.z ];
             }
