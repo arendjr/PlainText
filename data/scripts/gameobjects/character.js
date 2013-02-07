@@ -150,6 +150,14 @@ Character.prototype.go = function(pointer) {
         }
     }
 
+    var action;
+    if (this.currentAction === "walk" || this.currentAction === "run") {
+        action = "run";
+    } else {
+        action = "walk";
+    }
+    this.setAction(action, { "duration": 4000 });
+
     var followers = [];
     if (this.group && this.group.leader === this) {
         for (i = 0, length = this.group.members.length; i < length; i++) {
@@ -185,14 +193,6 @@ Character.prototype.go = function(pointer) {
     this.leave(source);
     this.direction = direction;
     this.enter(destination);
-
-    var action;
-    if (this.currentAction === "walk" || this.currentAction === "run") {
-        action = "run";
-    } else {
-        action = "walk";
-    }
-    this.setAction(action, { "duration": 4000 });
 
     for (i = 0, length = followers.length; i < length; i++) {
         var follower = followers[i];
@@ -276,6 +276,8 @@ Character.prototype.kill = function(character) {
         return;
     }
 
+    this.setAction("fight", { "target": character, "duration": 4000 });
+
     if (!character.invokeTrigger("onattack", this)) {
         return;
     }
@@ -301,8 +303,6 @@ Character.prototype.kill = function(character) {
     if (character.hp === 0) {
         character.die(this);
     }
-
-    this.setAction("fight", { "target": character, "duration": 4000 });
 };
 
 Character.prototype.lookAtBy = function(character) {
@@ -334,8 +334,12 @@ Character.prototype.lookAtBy = function(character) {
         wieldedItems.append(this.shield);
     }
     if (!wieldedItems.isEmpty()) {
-        text += "%1 is wielding %2.\n".arg(this.subjectPronoun.capitalized())
-                                      .arg(wieldedItems.joinFancy());
+        if (character.id === this.id) {
+            text += "You are holding %1.\n".arg(wieldedItems.joinFancy());
+        } else {
+            text += "%1 is holding %2.\n".arg(this.subjectPronoun.capitalfized())
+                                         .arg(wieldedItems.joinFancy());
+        }
     }
 
     if (character.id !== this.id) {
@@ -461,6 +465,10 @@ Character.prototype.setAction = function(action, options) {
 
     this.target = options.target;
 
+    if (this.weapon && this.weapon.name === "binocular") {
+        this.remove(this.weapon);
+    }
+
     if (this.currentActionTimerId) {
         this.clearTimeout(this.currentActionTimerId);
     }
@@ -573,14 +581,17 @@ Character.prototype.wield = function(item) {
             this.send("You wield your %1.".arg(item.name));
             this.weapon = item;
         } else {
-            if (this.characterClass.name === "wanderer" && this.secondaryWeapon === null) {
+            if (this.characterClass.name === "wanderer" && this.weapon.name !== "binocular" &&
+                this.secondaryWeapon === null) {
                 this.send("You wield your %1 as secondary weapon.".arg(item.name));
                 this.secondaryWeapon = item;
-            } else if (this.weapon.name === item.name) {
-                this.send("You swap your %1 for another %2.".arg(this.weapon.name, item.name));
-                this.weapon = item;
             } else {
-                this.send("You remove your %1 and wield your %2.".arg(this.weapon.name, item.name));
+                if (this.weapon.name === item.name) {
+                    this.send("You swap your %1 for another %2.".arg(this.weapon.name, item.name));
+                } else {
+                    this.send("You remove your %1 and wield your %2.".arg(this.weapon.name, item.name));
+                }
+                inventory.append(this.weapon);
                 this.weapon = item;
             }
         }
@@ -589,11 +600,11 @@ Character.prototype.wield = function(item) {
     } else if (item.isShield()) {
         if (this.shield === null) {
             this.send("You wield your %1.".arg(item.name));
-            this.shield = item;
         } else {
             this.send("You remove your %1 and wield your %2.".arg(this.shield.name, item.name));
-            this.shield = item;
+            inventory.append(this.shield);
         }
+        this.shield = item;
         inventory.removeOne(item);
         this.inventory = inventory;
     } else {

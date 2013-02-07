@@ -49,6 +49,12 @@ LookCommand.prototype.execute = function(player, command) {
     }
 
     var room = this.currentRoom;
+
+    var strength = room.eventMultiplier("Visual");
+    if (player.weapon && player.weapon.name === "binocular") {
+        strength *= 4;
+    }
+
     var pool = room.characters.concat(room.items).concat(room.portals).concat(player.inventory);
     object = this.objectByDescription(description, pool);
 
@@ -63,7 +69,8 @@ LookCommand.prototype.execute = function(player, command) {
             player.direction = direction;
 
             var itemGroups = VisualUtil.divideItemsIntoGroups(room.items, direction);
-            var portalGroups = VisualUtil.dividePortalsAndCharactersIntoGroups(room, direction);
+            var portalGroups = VisualUtil.dividePortalsAndCharactersIntoGroups(room, direction,
+                                                                               strength);
 
             var combinedItems = Util.combinePtrList(itemGroups["ahead"]);
             portalGroups["ahead"].forEach(function(portal) {
@@ -123,7 +130,7 @@ LookCommand.prototype.execute = function(player, command) {
     }
 
     if (object.isPortal() && object.canSeeThrough()) {
-        var characters = VisualUtil.charactersVisibleThroughPortal(player.currentRoom, object);
+        var characters = VisualUtil.charactersVisibleThroughPortal(room, object, strength);
         var characterText = VisualUtil.describeCharactersRelativeTo(characters, player);
         if (characterText !== "") {
             player.send(characterText);

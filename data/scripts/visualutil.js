@@ -72,7 +72,7 @@ var VisualUtil = (function() {
         return groups;
     }
 
-    function dividePortalsAndCharactersIntoGroups(room, direction) {
+    function dividePortalsAndCharactersIntoGroups(room, direction, strength) {
 
         var groups = groupsTemplate.clone();
         for (var i = 0, length = room.portals.length; i < length; i++) {
@@ -85,7 +85,7 @@ var VisualUtil = (function() {
             var angle = Util.angleBetweenDirectionAndPosition(direction, position);
 
             if (portal.canSeeThrough() && Math.abs(angle) < UNDER_QUART_PI) {
-                groups["characters"] = charactersVisibleThroughPortal(room, portal);
+                groups["characters"] = charactersVisibleThroughPortal(room, portal, strength);
             }
 
             var name = portal.nameFromRoom(room);
