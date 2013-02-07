@@ -35,14 +35,18 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
 
     GameObject.prototype.resolvePointer = function(pointer) {
 
-        for (var key in pointerTypes) {
-            if (pointerTypes.hasOwnProperty(key) && pointer.startsWith(key)) {
-                var objectId = parseInt(pointer.substr(key.length), 10);
-                return this.model[pointerTypes[key]][objectId];
+        if (typeof pointer === "string") {
+            for (var key in pointerTypes) {
+                if (pointerTypes.hasOwnProperty(key) && pointer.startsWith(key)) {
+                    var objectId = parseInt(pointer.substr(key.length), 10);
+                    return this.model[pointerTypes[key]][objectId];
+                }
             }
+            console.log("Could not resolve pointer: " + pointer);
+            return null;
+        } else {
+            return this.model[pointer.constructor.name.toLowerCase() + "s"][pointer.id];
         }
-        console.log("Could not resolve pointer: " + pointer);
-        return null;
     };
 
     GameObject.prototype.resolvePointers = function(propertyNames) {
@@ -313,12 +317,18 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
                         var room = new Room(self, data["room"]);
                         self.rooms.set(room.id, room);
                         room.resolvePointers(["portals"]);
+                        room.portals.forEach(function(portal) {
+                            portal.resolvePointers(["room", "room2"]);
+                        });
                     }
 
                     if (data.contains("room2")) {
                         var room2 = new Room(self, data["room2"]);
                         self.rooms.set(room2.id, room2);
                         room2.resolvePointers(["portals"]);
+                        room2.portals.forEach(function(portal) {
+                            portal.resolvePointers(["room", "room2"]);
+                        });
                     }
 
                     if (data.contains("area")) {
@@ -326,8 +336,6 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
                         self.areas.set(area.id, area);
                         area.resolvePointers(["rooms"]);
                     }
-
-                    portal.resolvePointers(["room", "room2"]);
 
                     self.fireHeldEvents();
                 });
