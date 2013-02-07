@@ -262,9 +262,9 @@ QString Util::formatHeight(int height) {
     return result;
 }
 
-QString Util::formatWeight(int weight) {
+QString Util::formatWeight(double weight) {
 
-    return QString::number(weight) + "kg";
+    return QString::number(round(weight)) + "kg";
 }
 
 QString Util::formatColumns(const QStringList &items, int options) {

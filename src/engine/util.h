@@ -44,7 +44,7 @@ class Util : public QObject {
 
         Q_INVOKABLE static QString formatHeight(int height);
 
-        Q_INVOKABLE static QString formatWeight(int weight);
+        Q_INVOKABLE static QString formatWeight(double weight);
 
         Q_INVOKABLE static QString formatColumns(const QStringList &items, int options = NoOptions);
 

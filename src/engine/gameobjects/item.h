@@ -29,9 +29,9 @@ class Item : public GameObject {
         void setPosition(const Point3D &position);
         Q_PROPERTY(Point3D position READ position WRITE setPosition)
 
-        int weight() const { return m_weight; }
-        void setWeight(int weight);
-        Q_PROPERTY(int weight READ weight WRITE setWeight)
+        double weight() const { return m_weight; }
+        void setWeight(double weight);
+        Q_PROPERTY(double weight READ weight WRITE setWeight)
 
         double cost() const { return m_cost; }
         void setCost(double cost);
@@ -50,7 +50,7 @@ class Item : public GameObject {
     private:
         Point3D m_position;
 
-        int m_weight;
+        double m_weight;
 
         double m_cost;
 

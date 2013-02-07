@@ -85,7 +85,9 @@ void SetPropCommand::execute(Character *player, const QString &command) {
     if (variant.isValid()) {
         object->setProperty(propertyName.toAscii().constData(), variant);
 
-        send("Property %1 modified.", propertyName);
+        QVariant newValue = object->property(propertyName.toAscii().constData());
+        send("Property %1 modified. New value: %2", propertyName,
+             ConversionUtil::toUserString(newValue));
 
         if ((propertyName == "name" || propertyName == "plural" ||
              propertyName == "indefiniteArticle") && !object->plural().isEmpty()) {

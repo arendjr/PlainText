@@ -287,29 +287,6 @@ void Character::setShield(const GameObjectPtr &shield) {
     }
 }
 
-int Character::inventoryWeight() const {
-
-    int inventoryWeight = 0;
-    for (const GameObjectPtr &item : m_inventory) {
-        inventoryWeight += item.cast<Item *>()->weight();
-    }
-    if (!m_weapon.isNull()) {
-        inventoryWeight += m_weapon.cast<Item *>()->weight();
-    }
-    if (!m_secondaryWeapon.isNull()) {
-        inventoryWeight += m_secondaryWeapon.cast<Item *>()->weight();
-    }
-    if (!m_shield.isNull()) {
-        inventoryWeight += m_shield.cast<Item *>()->weight();
-    }
-    return inventoryWeight;
-}
-
-int Character::totalWeight() const {
-
-    return weight() + inventoryWeight();
-}
-
 void Character::addEffect(const Effect &effect) {
 
     qint64 now = QDateTime::currentMSecsSinceEpoch();

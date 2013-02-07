@@ -103,10 +103,6 @@ class Character : public StatsItem {
         void setShield(const GameObjectPtr &shield);
         Q_PROPERTY(GameObjectPtr shield READ shield WRITE setShield)
 
-        Q_INVOKABLE int inventoryWeight() const;
-
-        Q_INVOKABLE int totalWeight() const;
-
         const GameObjectPtr &group() const { return m_group; }
         Q_PROPERTY(GameObjectPtr group READ group STORED false)
 

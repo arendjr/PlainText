@@ -251,6 +251,24 @@ Character.prototype.guard = function(target) {
     this.setAction("guard", { "target": target });
 };
 
+Character.prototype.inventoryWeight = function() {
+
+    var inventoryWeight = 0.0;
+    this.inventory.forEach(function(item) {
+        inventoryWeight += item.weight;
+    });
+    if (this.weapon) {
+        inventoryWeight += this.weapon.weight;
+    }
+    if (this.secondaryWeapon) {
+        inventoryWeight += this.secondaryWeapon.weight;
+    }
+    if (this.shield) {
+        inventoryWeight += this.shield.weight;
+    }
+    return inventoryWeight;
+};
+
 Character.prototype.kill = function(character) {
 
     if (this.secondsStunned() > 0) {
@@ -536,6 +554,11 @@ Character.prototype.tell = function(player, message) {
 
     player.send("%1 tells you, \"%2\".".arg(this.name, message));
     this.send("You tell %1, \"%2\".".arg(player.name, message));
+};
+
+Character.prototype.totalWeight = function() {
+
+    return this.weight + this.inventoryWeight();
 };
 
 Character.prototype.wield = function(item) {
