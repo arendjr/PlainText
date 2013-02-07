@@ -315,8 +315,7 @@ Character.prototype.lookAhead = function() {
     }
 
     var itemGroups = VisualUtil.divideItemsIntoGroups(room.items, this.direction);
-    var portalGroups = VisualUtil.dividePortalsAndCharactersIntoGroups(room, this.direction,
-                                                                       strength);
+    var portalGroups = VisualUtil.dividePortalsAndCharactersIntoGroups(this, room, strength);
 
     var combinedItems = Util.combinePtrList(itemGroups["ahead"]);
     portalGroups["ahead"].forEach(function(portal) {

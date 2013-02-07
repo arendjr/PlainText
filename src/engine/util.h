@@ -8,7 +8,6 @@
 
 #include "constants.h"
 #include "gameobjectptr.h"
-#include "point3d.h"
 #include "vector3d.h"
 
 
@@ -74,8 +73,8 @@ class Util : public QObject {
 
         Q_INVOKABLE static QString directionForVector(const Vector3D &vector);
 
-        Q_INVOKABLE static double angleBetweenDirectionAndPosition(const Vector3D &direction,
-                                                                   const Point3D &position);
+        Q_INVOKABLE static double angleBetweenXYVectors(const Vector3D &vector1,
+                                                        const Vector3D &vector2);
 
         Q_INVOKABLE static QString toCamelCase(QString string);
         Q_INVOKABLE static QString fromCamelCase(const QString &string);

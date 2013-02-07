@@ -41,7 +41,7 @@ Room.prototype.lookAtBy = function(character) {
 
     var portalGroups;
     if (hasDynamicPortals || hasDistantCharacters) {
-        portalGroups = VisualUtil.dividePortalsAndCharactersIntoGroups(this, character.direction);
+        portalGroups = VisualUtil.dividePortalsAndCharactersIntoGroups(character, this);
     }
 
     var itemTexts = [];

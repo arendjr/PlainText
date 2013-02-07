@@ -42,7 +42,7 @@ var VisualUtil = (function() {
             }
 
             var flags = item.flags.split("|");
-            var angle = Util.angleBetweenDirectionAndPosition(direction, item.position);
+            var angle = Util.angleBetweenXYVectors(direction, item.position);
 
             if (flags.contains("AttachedToCeiling")) {
                 groups["ceiling"].push(item);
@@ -72,7 +72,7 @@ var VisualUtil = (function() {
         return groups;
     }
 
-    function dividePortalsAndCharactersIntoGroups(room, direction, strength) {
+    function dividePortalsAndCharactersIntoGroups(character, room, strength) {
 
         var groups = groupsTemplate.clone();
         for (var i = 0, length = room.portals.length; i < length; i++) {
@@ -82,10 +82,11 @@ var VisualUtil = (function() {
             }
 
             var position = portal.position.minus(room.position);
-            var angle = Util.angleBetweenDirectionAndPosition(direction, position);
+            var angle = Util.angleBetweenXYVectors(character.direction, position);
 
             if (portal.canSeeThrough() && Math.abs(angle) < UNDER_QUART_PI) {
-                groups["characters"] = charactersVisibleThroughPortal(room, portal, strength);
+                groups["characters"] = charactersVisibleThroughPortal(character, room,
+                                                                      portal, strength);
             }
 
             var name = portal.nameFromRoom(room);
@@ -106,7 +107,8 @@ var VisualUtil = (function() {
         return groups;
     }
 
-    function charactersVisibleThroughPortal(sourceRoom, portal, strength, excludedRooms) {
+    function charactersVisibleThroughPortal(character, sourceRoom, portal,
+                                            strength, excludedRooms) {
 
         var room = portal.oppositeOf(sourceRoom);
         var roomStrength = (strength || sourceRoom.eventMultiplier("Visual")) *
@@ -142,18 +144,26 @@ var VisualUtil = (function() {
             }
 
             var vector2 = nextRoom.position.minus(room.position);
+
             var flags = room.flags.split("|");
             if (flags.contains("HasWalls")) {
                 if (vector1[0] !== vector2[0] || vector1[1] !== vector2[1]) {
                     return;
                 }
+            } else {
+                var vector3 = nextRoom.position.minus(character.currentRoom.position);
+                var angle = Util.angleBetweenXYVectors(character.direction, vector3);
+                if (Math.abs(angle) > UNDER_QUART_PI) {
+                    return;
+                }
             }
+
             if ((flags.contains("HasCeiling") && vector2[2] > vector1[2]) ||
                 (flags.contains("HasFloor") && vector2[2] < vector1[2])) {
                 return;
             }
 
-            characters.append(charactersVisibleThroughPortal(room, nextPortal,
+            characters.append(charactersVisibleThroughPortal(character, room, nextPortal,
                                                              roomStrength, visitedRooms));
         });
 

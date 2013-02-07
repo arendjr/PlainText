@@ -83,7 +83,7 @@ LookCommand.prototype.execute = function(player, command) {
 
     function describeNearbyObject(nearbyObject, vector, position) {
         if (vector.angle(position) < Math.PI / 8) {
-            var angle = Util.angleBetweenDirectionAndPosition(vector, position);
+            var angle = Util.angleBetweenXYVectors(vector, position);
 
             if (nearbyObject.isPortal()) {
                 player.send("On its %1 is %2.".arg(angle > 0 ? "right" : "left",
@@ -117,7 +117,7 @@ LookCommand.prototype.execute = function(player, command) {
             strength *= 4;
         }
 
-        var characters = VisualUtil.charactersVisibleThroughPortal(room, object, strength);
+        var characters = VisualUtil.charactersVisibleThroughPortal(player, room, object, strength);
         var characterText = VisualUtil.describeCharactersRelativeTo(characters, player);
         if (characterText !== "") {
             player.send(characterText);
