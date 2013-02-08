@@ -281,7 +281,7 @@ var VisualUtil = (function() {
                     for (var j = i + 1; j < group.length; j++) {
                         if (group[j].character === actionDescription.target) {
                             group.removeAt(j);
-                            return;
+                            break;
                         }
                     }
                 }
