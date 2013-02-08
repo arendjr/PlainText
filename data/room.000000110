@@ -5,5 +5,5 @@
   "position": [ -100, -500, 10 ],
   "flags": "HasFloor|HasWalls",
   "portals": [ "portal:1470", "portal:1477", "portal:1501", "portal:1503" ],
-  "items": [ "item:1459", "item:1568", "item:1570", "item:1574", "item:1581", "item:1614" ]
+  "items": [ "item:1459", "item:1568" ]
 }

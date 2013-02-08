@@ -1,0 +1,8 @@
+{
+  "name": "north",
+  "description": "You see various buildings next to the market square.",
+  "name2": "south",
+  "room": "room:1590",
+  "room2": "room:1636",
+  "flags": "IsHiddenFromSide1|IsHiddenFromSide2|CanSeeThrough|CanHearThrough|CanShootThrough"
+}

@@ -1,7 +1,7 @@
 {
   "name": "up",
   "name2": "down",
-  "description2": "There's a narrow stairs down.",
+  "description2": "There's a narrow stairs.",
   "room": "room:1586",
   "room2": "room:1588",
   "flags": "CanHearThrough|CanPassThrough",

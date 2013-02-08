@@ -1,0 +1,7 @@
+{
+  "name": "west",
+  "name2": "east",
+  "room": "room:1642",
+  "room2": "room:1636",
+  "flags": "CanSeeThrough|CanHearThrough|CanShootThrough"
+}

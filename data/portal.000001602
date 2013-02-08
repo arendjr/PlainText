@@ -3,5 +3,6 @@
   "name2": "up",
   "room": "room:1599",
   "room2": "room:119",
-  "flags": "IsHiddenFromSide1|IsHiddenFromSide2|CanSeeThrough|CanHearThrough|CanShootThrough"
+  "flags": "IsHiddenFromSide1|IsHiddenFromSide2|CanSeeThrough|CanHearThrough|CanShootThrough",
+  "eventMultipliers": { "Sound": 0.5 }
 }

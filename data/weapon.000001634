@@ -1,0 +1,11 @@
+{
+  "name": "spear",
+  "plural": "spears",
+  "indefiniteArticle": "a",
+  "description": "It's a basic spear, standard equipment of the city guards.",
+  "position": [ 0, 0, 0 ],
+  "weight": 3,
+  "cost": 45,
+  "flags": "Portable",
+  "stats": [12, 0, 0, 0, 0, 0]
+}

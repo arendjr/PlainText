@@ -1,0 +1,6 @@
+{
+  "type": "Room",
+  "position": [ 0, -300, 8 ],
+  "flags": "HasFloor|IsRoof",
+  "portals": [ "portal:1639", "portal:1649", "portal:1659" ]
+}
