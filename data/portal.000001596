@@ -1,8 +1,0 @@
-{
-  "name": "down",
-  "name2": "up",
-  "room": "room:1588",
-  "room2": "room:59",
-  "flags": "IsHiddenFromSide1|IsHiddenFromSide2|CanSeeThrough|CanHearThrough|CanShootThrough",
-  "eventMultipliers": { "Sound": 0.5 }
-}
