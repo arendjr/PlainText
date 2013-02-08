@@ -148,13 +148,18 @@ void GameObjectPtr::resolve(Realm *realm) {
     m_gameObject->registerPointer(this);
 }
 
-void GameObjectPtr::unresolve(bool unregister) {
+void GameObjectPtr::unresolve(Options options) {
 
     if (m_gameObject) {
-        if (unregister) {
+        if (options & EndOfLife) {
+            m_gameObject = nullptr;
+            if (m_list) {
+                m_list->removeOne(*this);
+            }
+        } else {
             m_gameObject->unregisterPointer(this);
+            m_gameObject = nullptr;
         }
-        m_gameObject = nullptr;
     }
 }
 

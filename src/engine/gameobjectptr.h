@@ -68,7 +68,7 @@ class GameObjectPtr {
         }
 
         void resolve(Realm *realm);
-        void unresolve(bool unregister = true);
+        void unresolve(Options options = NoOptions);
 
         void setOwnerList(GameObjectPtrList *list);
 

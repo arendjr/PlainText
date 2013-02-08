@@ -34,6 +34,7 @@ enum Options {
     DontRegister = (1 << 7),
     DontServe = (1 << 8),
     AutoDelete = (1 << 9),
+    EndOfLife = (1 << 9), // same as AutoDelete
     NeverDelete = (1 << 10),
     Highlighted = (1 << 11),
     AutomaticNameForms = (1 << 12)

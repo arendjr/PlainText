@@ -86,7 +86,7 @@ GameObject::~GameObject() {
     }
 
     for (GameObjectPtr *pointer : m_pointers) {
-        pointer->unresolve(false);
+        pointer->unresolve(EndOfLife);
     }
     m_pointers.clear();
 
