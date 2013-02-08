@@ -363,7 +363,7 @@ Character.prototype.lookAtBy = function(character) {
         if (character.id === this.id) {
             text += "You are holding %1.\n".arg(wieldedItems.joinFancy());
         } else {
-            text += "%1 is holding %2.\n".arg(this.subjectPronoun.capitalfized())
+            text += "%1 is holding %2.\n".arg(this.subjectPronoun.capitalized())
                                          .arg(wieldedItems.joinFancy());
         }
     }
