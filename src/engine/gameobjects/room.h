@@ -25,8 +25,9 @@ PT_DEFINE_FLAGS(RoomFlags,
     HasCeiling,
     HasFloor,
     HasWalls,
-    HasRoad,
-    HasRiver
+    IsRoad,
+    IsRiver,
+    IsRoof
 )
 
 

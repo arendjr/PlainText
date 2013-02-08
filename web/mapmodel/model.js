@@ -189,6 +189,9 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
         this.set("hasWalls", flags.contains("HasWalls"));
         this.set("hasCeiling", flags.contains("HasCeiling"));
         this.set("hasFloor", flags.contains("HasFloor"));
+        this.set("isRoad", flags.contains("IsRoad"));
+        this.set("isRiver", flags.contains("IsRiver"));
+        this.set("isRoof", flags.contains("IsRoof"));
         this.set("flags", function() {
             var array = [];
             if (!this.dynamicPortalDescriptions) {
@@ -205,6 +208,15 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
             }
             if (this.hasFloor) {
                 array.push("HasFloor");
+            }
+            if (this.isRoad) {
+                array.push("IsRoad");
+            }
+            if (this.isRiver) {
+                array.push("IsRiver");
+            }
+            if (this.isRoof) {
+                array.push("IsRoof");
             }
             return array.join("|");
         });

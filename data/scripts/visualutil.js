@@ -28,6 +28,8 @@ var VisualUtil = (function() {
             case "right wall":  return [ "On the right wall", "hangs", "hang" ];
             case "wall":        return [ "On the wall", "hangs", "hang" ];
             case "ceiling":     return [ "From the ceiling", "hangs", "hang" ];
+            case "distance":    return [ "In the distance", "you see", "you see" ];
+            case "roof":        return [ "On the roof", "you see", "you see" ];
             default:            return [ "There", "is", "are" ];
         }
     }
@@ -122,6 +124,7 @@ var VisualUtil = (function() {
         var distance = vector1.vectorLength();
 
         var visitedRooms = excludedRooms || {};
+        visitedRooms[sourceRoom.id] = true;
         visitedRooms[room.id] = true;
 
         var characters = [];
@@ -178,7 +181,8 @@ var VisualUtil = (function() {
 
         var groups = {
             "distance": [],
-            "ahead": []
+            "ahead": [],
+            "roof": []
         };
 
         var sentences = [];
@@ -186,7 +190,10 @@ var VisualUtil = (function() {
         var characterInfo;
         for (var i = 0, length = characters.length; i < length; i++) {
             characterInfo = characters[i];
-            if (characterInfo.distance > 50) {
+            var flags = characterInfo.character.currentRoom.flags.split("|");
+            if (flags.contains("IsRoof")) {
+                groups["roof"].push(characterInfo);
+            } else if (characterInfo.distance > 50) {
                 groups["distance"].push(characterInfo);
             } else {
                 groups["ahead"].push(characterInfo);
@@ -221,9 +228,7 @@ var VisualUtil = (function() {
                 }
             }
 
-            var prefix = (key === "distance" ?
-                          Util.randomAlternative("In the distance", "From afar") :
-                          "Ahead of you");
+            var prefix = descriptionForGroup(key)[0];
 
             var infos = [], numMen = 0, numWomen = 0, numUnknown = 0, numPeople = 0;
             for (i = 0; i < group.length; i++) {
