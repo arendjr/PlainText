@@ -1,7 +1,5 @@
 #include "gameexception.h"
 
-#include <cstring>
-
 #include "gameobject.h"
 
 
@@ -28,31 +26,28 @@ const char *GameException::s_messages[] = {
 GameException::GameException(Cause cause) :
     std::exception(),
     m_cause(cause),
-    m_what(strdup(s_messages[cause])) {
+    m_what(s_messages[cause]) {
 }
 
 GameException::GameException(Cause cause, GameObjectType objectType, uint id) :
     std::exception(),
     m_cause(cause) {
 
-    m_what = strdup(QString("%1 (%2:%3)").arg(QString(s_messages[cause]), objectType.toString(),
-                                              QString::number(id)).toUtf8().constData());
+    m_what = QString("%1 (%2:%3)").arg(QString(s_messages[cause]), objectType.toString(),
+                                       QString::number(id)).toUtf8();
 }
 
 GameException::GameException(GameException::Cause cause, const QString &message) :
     std::exception(),
     m_cause(cause) {
 
-    m_what = strdup(QString("%1: %2").arg(QString(s_messages[cause]), message)
-                    .toUtf8().constData());
+    m_what = QString("%1: %2").arg(QString(s_messages[cause]), message).toUtf8();
 }
 
 GameException::~GameException() throw () {
-
-    delete[] m_what;
 }
 
 const char *GameException::what() const throw () {
 
-    return m_what;
+    return m_what.constData();
 }

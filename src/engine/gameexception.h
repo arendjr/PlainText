@@ -3,6 +3,7 @@
 
 #include <exception>
 
+#include <QByteArray>
 #include <QString>
 
 #include "gameobject.h"
@@ -45,7 +46,7 @@ class GameException : public std::exception {
 
         Cause m_cause;
 
-        char *m_what;
+        QByteArray m_what;
 };
 
 #endif // GAMEEXCEPTION_H

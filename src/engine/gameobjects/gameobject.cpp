@@ -39,7 +39,7 @@
 #include "weapon.h"
 
 
-QMap<QString, QScriptValue> GameObject::s_prototypeMap;
+QMap<QString, QScriptValue> GameObject::s_prototypeMap = QMap<QString, QScriptValue>();
 
 
 static int GameEventMultiplierMapType;
