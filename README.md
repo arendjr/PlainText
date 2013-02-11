@@ -88,6 +88,11 @@ Running your own server
  * Linux (tested on Gentoo Linux, openSUSE 12.2 and Ubuntu 12.10)
  * Mac OS X 10.7 and up (recently only tested on OS X 10.8)
 
+It should also be possible to run the server on Windows (probably with a
+little bit of effort), but I did not personally test this, and will not be
+able to help those who try. Patches for Windows compatibility will be
+accepted though.
+
 <a id="dependencies"></a>
 ### Dependencies ###
 
