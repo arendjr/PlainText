@@ -12,10 +12,8 @@ class HttpServer : public QTcpServer {
         HttpServer(quint16 port, quint16 webSocketPort, QObject *parent = nullptr);
         virtual ~HttpServer();
 
-    protected:
-        virtual void incomingConnection(int socketDescriptor);
-
     private slots:
+        void onClientConnected();
         void onReadyRead();
         void onDisconnected();
 

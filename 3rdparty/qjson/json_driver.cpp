@@ -83,7 +83,7 @@ QVariant JSonDriver::parse (QIODevice* io, bool* status)
 QVariant JSonDriver::parse(const QString& jsonString, bool* status) {
   QBuffer buffer;
   buffer.open(QBuffer::ReadWrite);
-  buffer.write(jsonString.toAscii());
+  buffer.write(jsonString.toLatin1());
   buffer.seek(0);
   return parse (&buffer, status);
 }

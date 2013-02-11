@@ -75,6 +75,9 @@ Documentation
 There's documentation available in the
 [PlainText Wiki](https://github.com/arendjr/PlainText/wiki).
 
+You may want to jump straight to the
+[Frequently Asked Questions](https://github.com/arendjr/PlainText/wiki/Frequently-Asked-Questions).
+
 <a id="running-your-own-server"></a>
 Running your own server
 -----------------------
@@ -89,7 +92,7 @@ Running your own server
 ### Dependencies ###
 
  * Clang 3.1 or higher, or GCC 4.7 or higher
- * Qt framework 4.7 or higher
+ * Qt framework 4.7 or higher, or Qt framework 5.x
  * Zlib development package
 
 If you are using Ubuntu Linux, you can use the following command to install

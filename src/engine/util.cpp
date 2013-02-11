@@ -554,7 +554,7 @@ QString Util::randomString(int length) {
 
     QString string;
     for (int i = 0; i < length; i++) {
-        string.append(QChar::fromAscii(40 + qrand() % 87));
+        string.append(QChar::fromLatin1(40 + qrand() % 87));
     }
     return string;
 }

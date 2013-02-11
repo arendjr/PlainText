@@ -36,7 +36,7 @@ void GetPropCommand::execute(Character *player, const QString &command) {
     if (propertyName == "id") {
         send(QString::number(object->id()));
     } else {
-        QVariant value = object->property(propertyName.toAscii().constData());
+        QVariant value = object->property(propertyName.toLatin1().constData());
         send(ConversionUtil::toUserString(value));
     }
 }

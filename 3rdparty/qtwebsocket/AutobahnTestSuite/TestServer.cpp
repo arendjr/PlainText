@@ -65,7 +65,7 @@ void TestServer::onDataReceived(const QByteArray & data)
 
 void TestServer::onPong(quint64 elapsedTime)
 {
-	qDebug("ping: %s ms", QString::number(elapsedTime).toAscii().constData());
+	qDebug("ping: %s ms", QString::number(elapsedTime).toLatin1().constData());
 }
 
 void TestServer::onClientDisconnection()

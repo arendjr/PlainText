@@ -36,7 +36,7 @@ void SetPropCommand::execute(Character *player, const QString &command) {
 
     QString value = takeRest();
 
-    QVariant variant = object->property(propertyName.toAscii().constData());
+    QVariant variant = object->property(propertyName.toLatin1().constData());
     switch (variant.type()) {
         case QVariant::Bool:
             variant = (value == "true");
@@ -83,9 +83,9 @@ void SetPropCommand::execute(Character *player, const QString &command) {
     }
 
     if (variant.isValid()) {
-        object->setProperty(propertyName.toAscii().constData(), variant);
+        object->setProperty(propertyName.toLatin1().constData(), variant);
 
-        QVariant newValue = object->property(propertyName.toAscii().constData());
+        QVariant newValue = object->property(propertyName.toLatin1().constData());
         send("Property %1 modified. New value: %2", propertyName,
              ConversionUtil::toUserString(newValue));
 

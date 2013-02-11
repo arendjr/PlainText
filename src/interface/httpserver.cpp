@@ -22,17 +22,18 @@ HttpServer::HttpServer(quint16 port, quint16 webSocketPort, QObject *parent) :
     }
 
     m_title = Util::htmlEscape(Realm::instance()->name()).toUtf8();
+
+    connect(this, SIGNAL(newConnection()), SLOT(onClientConnected()));
 }
 
 HttpServer::~HttpServer() {
 }
 
-void HttpServer::incomingConnection(int socketDescriptor) {
+void HttpServer::onClientConnected() {
 
-    QTcpSocket *socket = new QTcpSocket(this);
+    QTcpSocket *socket = nextPendingConnection();
     connect(socket, SIGNAL(readyRead()), SLOT(onReadyRead()));
     connect(socket, SIGNAL(disconnected()), SLOT(onDisconnected()));
-    socket->setSocketDescriptor(socketDescriptor);
 }
 
 void HttpServer::onReadyRead() {

@@ -87,7 +87,7 @@ class MetaTypeRegistry {
             }                                                                                     \
             static Type fromString(const QString &string) {                                       \
                 static const char *strings[] = { FOR_EACH(PT_ENUM_STRING, __VA_ARGS__) "" };      \
-                QByteArray byteArray = string.toAscii();                                          \
+                QByteArray byteArray = string.toLatin1();                                         \
                 const char *data = byteArray.constData();                                         \
                 for (int i = 0; i < (int) NumValues; i++) {                                       \
                     if (strcmp(data, strings[i]) == 0) {                                          \

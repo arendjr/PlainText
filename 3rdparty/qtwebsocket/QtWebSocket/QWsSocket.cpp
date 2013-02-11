@@ -130,7 +130,7 @@ void QWsSocket::processDataV4()
 				emit frameReceived( currentFrame );
 				break;
 			case OpText:
-				emit frameReceived( QString::fromAscii(currentFrame) );
+				emit frameReceived( QString::fromLatin1(currentFrame) );
 				break;
 			case OpPing:
 				write( QWsSocket::composeHeader( true, OpPong, 0 ) );
@@ -225,10 +225,10 @@ qint64 QWsSocket::write ( const QString & string )
 {
 	if ( _version == WS_V0 )
 	{
-		return QWsSocket::write( string.toAscii() );
+		return QWsSocket::write( string.toLatin1() );
 	}
 
-    const QList<QByteArray> & framesList = QWsSocket::composeFrames( string.toAscii(), false, maxBytesPerFrame );
+    const QList<QByteArray> & framesList = QWsSocket::composeFrames( string.toLatin1(), false, maxBytesPerFrame );
 	return writeFrames( framesList );
 }
 
@@ -321,7 +321,7 @@ void QWsSocket::close( ECloseStatusCode closeStatusCode, QString reason )
 
 				// Reason (optional)
 				if ( reason.size() )
-					BA.append( reason.toAscii() );
+					BA.append( reason.toLatin1() );
 				
 				// Send closing handshake
 				tcpSocket->write( BA );
@@ -373,7 +373,7 @@ QByteArray QWsSocket::generateMaskingKey()
 QByteArray QWsSocket::generateMaskingKeyV4( QString key, QString nonce )
 {
 	QString concat = key + nonce + "61AC5F19-FBBA-4540-B96F-6561F1AB40A8";
-	QByteArray hash = QCryptographicHash::hash ( concat.toAscii(), QCryptographicHash::Sha1 );
+	QByteArray hash = QCryptographicHash::hash ( concat.toLatin1(), QCryptographicHash::Sha1 );
 	return hash;
 }
 

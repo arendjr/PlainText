@@ -163,7 +163,7 @@ void QWsServer::dataReceived()
 	{
 		// Send bad request response
 		QString response = QWsServer::composeBadRequestResponse( QList<EWebsocketVersion>() << WS_V6 << WS_V7 << WS_V8 << WS_V13 );
-		tcpSocket->write( response.toAscii() );
+		tcpSocket->write( response.toLatin1() );
 		tcpSocket->flush();
 		return;
 	}
@@ -217,7 +217,7 @@ void QWsServer::dataReceived()
 	disconnect( tcpSocket, SIGNAL(readyRead()), this, SLOT(dataReceived()) );
 
 	// Send opening handshake response
-	tcpSocket->write( response.toAscii() );
+	tcpSocket->write( response.toLatin1() );
 	tcpSocket->flush();
 
 	QWsSocket * wsSocket = new QWsSocket( this, tcpSocket, version );
@@ -346,7 +346,7 @@ QString QWsServer::computeAcceptV0( QString key1, QString key2, QString key3 )
 
 	QString concat = serializeInt( num1 ) + serializeInt( num2 ) + key3;
 
-	QByteArray md5 = QCryptographicHash::hash( concat.toAscii(), QCryptographicHash::Md5 );
+	QByteArray md5 = QCryptographicHash::hash( concat.toLatin1(), QCryptographicHash::Md5 );
   
 	return QString( md5 );
 }
@@ -354,7 +354,7 @@ QString QWsServer::computeAcceptV0( QString key1, QString key2, QString key3 )
 QString QWsServer::computeAcceptV4(QString key)
 {
 	key += "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-	QByteArray hash = QCryptographicHash::hash ( key.toAscii(), QCryptographicHash::Sha1 );
+	QByteArray hash = QCryptographicHash::hash ( key.toLatin1(), QCryptographicHash::Sha1 );
 	return hash.toBase64();
 }
 
@@ -376,13 +376,13 @@ QString QWsServer::serializeInt( quint32 number, quint8 nbBytes )
 	quint8 currentNbBytes = 0;
 	while (number > 0 && currentNbBytes < nbBytes)
 	{  
-		bin.prepend( QChar::fromAscii(number) );
+		bin.prepend( QChar::fromLatin1(number) );
 		number = number >> 8;
 		currentNbBytes++;
 	}
 	while (currentNbBytes < nbBytes)
 	{
-		bin.prepend( QChar::fromAscii(0) );
+		bin.prepend( QChar::fromLatin1(0) );
 		currentNbBytes++;
     }
 	return bin;

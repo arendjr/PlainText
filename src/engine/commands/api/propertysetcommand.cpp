@@ -29,7 +29,7 @@ void PropertySetCommand::execute(Character *player, const QString &command) {
 
     QString value = takeRest();
 
-    QVariant variant = object->property(propertyName.toAscii().constData());
+    QVariant variant = object->property(propertyName.toLatin1().constData());
     switch (variant.type()) {
         case QVariant::Bool:
             variant = (value == "true");
@@ -61,7 +61,7 @@ void PropertySetCommand::execute(Character *player, const QString &command) {
             return;
     }
 
-    object->setProperty(propertyName.toAscii().constData(), variant);
+    object->setProperty(propertyName.toLatin1().constData(), variant);
 
     QVariantMap data;
     data["success"] = true;

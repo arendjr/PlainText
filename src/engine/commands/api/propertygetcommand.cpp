@@ -35,7 +35,7 @@ void PropertyGetCommand::execute(Character *player, const QString &command) {
     QString propertyName = Util::fullPropertyName(object.cast<GameObject *>(), takeWord());
 
     const QMetaObject *metaObject = object->metaObject();
-    int propertyIndex = metaObject->indexOfProperty(propertyName.toAscii().constData());
+    int propertyIndex = metaObject->indexOfProperty(propertyName.toLatin1().constData());
     if (propertyIndex == -1) {
         sendError(400, "Unknown property name");
         return;
@@ -47,6 +47,6 @@ void PropertyGetCommand::execute(Character *player, const QString &command) {
     data["id"] = object->id();
     data["propertyName"] = propertyName;
     data["readOnly"] = !metaProperty.isStored();
-    data[propertyName] = object->property(propertyName.toAscii().constData());
+    data[propertyName] = object->property(propertyName.toLatin1().constData());
     sendReply(data);
 }
