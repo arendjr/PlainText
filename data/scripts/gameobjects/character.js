@@ -218,7 +218,7 @@ Character.prototype.go = function(pointer) {
     visualEvent.excludedCharacters = party;
     visualEvent.fire();
 
-    if (this.race && this.race.name !== "animal") {
+    if (!this.race || this.race.name !== "animal") {
         var soundStrength = (action === "walk" ? 1.0 : 3.0);
         var soundDescription = "someone";
 

@@ -128,23 +128,25 @@ class MovementTest : public TestCase {
             {
                 player->invokeScriptMethod("go", roomB);
 
-                QCOMPARE(evaluate("sounds.length").toInt32(), 0);
+                QCOMPARE(evaluate("sounds.length").toInt32(), 1);
                 QCOMPARE(evaluate("visuals.length").toInt32(), 4);
+                QCOMPARE(evaluate("sounds[0]").toString(),
+                         QString("You hear someone running toward you."));
             }
 
             {
                 player->invokeScriptMethod("go", roomC);
 
-                QCOMPARE(evaluate("sounds.length").toInt32(), 1);
+                QCOMPARE(evaluate("sounds.length").toInt32(), 2);
                 QCOMPARE(evaluate("visuals.length").toInt32(), 4);
-                QCOMPARE(evaluate("sounds[0]").toString(),
+                QCOMPARE(evaluate("sounds[1]").toString(),
                          QString("You hear someone running up to you from behind."));
             }
 
             {
                 player->invokeScriptMethod("go", roomB);
 
-                QCOMPARE(evaluate("sounds.length").toInt32(), 1);
+                QCOMPARE(evaluate("sounds.length").toInt32(), 2);
                 QCOMPARE(evaluate("visuals.length").toInt32(), 5);
                 QCOMPARE(evaluate("visuals[4]").toString(),
                          QString("Arie runs to the c-to-b."));
@@ -153,7 +155,7 @@ class MovementTest : public TestCase {
             {
                 player->invokeScriptMethod("go", roomA);
 
-                QCOMPARE(evaluate("sounds.length").toInt32(), 1);
+                QCOMPARE(evaluate("sounds.length").toInt32(), 3);
                 QCOMPARE(evaluate("visuals.length").toInt32(), 5);
             }
 
@@ -164,16 +166,18 @@ class MovementTest : public TestCase {
             {
                 player->invokeScriptMethod("go", roomB);
 
-                QCOMPARE(evaluate("sounds.length").toInt32(), 1);
+                QCOMPARE(evaluate("sounds.length").toInt32(), 4);
                 QCOMPARE(evaluate("visuals.length").toInt32(), 5);
+                QCOMPARE(evaluate("sounds[3]").toString(),
+                         QString("You hear someone running toward you."));
             }
 
             {
                 player->invokeScriptMethod("go", roomC);
 
-                QCOMPARE(evaluate("sounds.length").toInt32(), 2);
+                QCOMPARE(evaluate("sounds.length").toInt32(), 5);
                 QCOMPARE(evaluate("visuals.length").toInt32(), 5);
-                QCOMPARE(evaluate("sounds[1]").toString(),
+                QCOMPARE(evaluate("sounds[4]").toString(),
                          QString("You hear someone running up to you from the right."));
             }
         }

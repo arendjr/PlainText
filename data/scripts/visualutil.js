@@ -252,7 +252,8 @@ var VisualUtil = (function() {
                     });
                     numPeople += 1 + characterInfo.group.members.length;
                 } else {
-                    if (characterInfo.character.race.name === "animal") {
+                    if (characterInfo.character.race &&
+                        characterInfo.character.race.name === "animal") {
                         continue;
                     }
 
