@@ -47,9 +47,15 @@ void Player::setPasswordHash(const QString &passwordHash) {
 
 void Player::setPassword(const QString &password) {
 
+#if QT_VERSION >= 0x050000
+    m_passwordSalt = Util::randomString(12);
+    QByteArray data = QString(m_passwordSalt + password).toUtf8();
+    m_passwordHash = QCryptographicHash::hash(data, QCryptographicHash::Sha512).toBase64();
+#else
     m_passwordSalt = Util::randomString(8);
     QByteArray data = QString(m_passwordSalt + password).toUtf8();
     m_passwordHash = QCryptographicHash::hash(data, QCryptographicHash::Sha1).toBase64();
+#endif
 
     setModified();
 }
@@ -57,7 +63,16 @@ void Player::setPassword(const QString &password) {
 bool Player::matchesPassword(const QString &password) const {
 
     QByteArray data = QString(m_passwordSalt + password).toUtf8();
-    QString passwordHash = QCryptographicHash::hash(data, QCryptographicHash::Sha1).toBase64();
+    QString passwordHash;
+#if QT_VERSION >= 0x050000
+    if (m_passwordSalt.length() == 8) {
+        passwordHash = QCryptographicHash::hash(data, QCryptographicHash::Sha1).toBase64();
+    } else {
+        passwordHash = QCryptographicHash::hash(data, QCryptographicHash::Sha512).toBase64();
+    }
+#else
+    passwordHash = QCryptographicHash::hash(data, QCryptographicHash::Sha1).toBase64();
+#endif
     return m_passwordHash == passwordHash;
 }
 

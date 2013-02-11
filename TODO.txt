@@ -19,9 +19,3 @@ GAME MECHANICS
 MAP EDITOR
 
   -  Add support for terrain types.
-
-TECHNOLOGY
-
-  -  Migrate to Qt5.
-     -  Use QCryptographicHash::Sha512 for password encryption.
-     -  Use QLatin1String / QStringLiteral where it makes sense.
