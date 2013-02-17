@@ -1,9 +1,9 @@
 #include "conversionutil.h"
 
 #include <QDateTime>
-#include <QDebug>
 #include <QStringList>
 
+#include "logutil.h"
 #include "metatyperegistry.h"
 
 
@@ -30,7 +30,7 @@ QVariant ConversionUtil::fromVariant(QVariant::Type type, int userType, const QV
                     QVariant value = valueList[2];
                     variantMap[key] = fromVariant(valueType, valueUserType, value);
                 } else {
-                    qWarning() << "Invalid map format in key" << key;
+                    LogUtil::logError("Invalid map format in key: %1", key);
                 }
             }
             return variantMap;
@@ -43,15 +43,15 @@ QVariant ConversionUtil::fromVariant(QVariant::Type type, int userType, const QV
             } else {
                 const char *typeName = QMetaType::typeName(userType);
                 if (typeName) {
-                    qDebug() << "User type not serializable: " << typeName;
+                    LogUtil::logError("User type not serializable: %1", typeName);
                 } else {
-                    qDebug() << "Unknown user type: " << userType;
+                    LogUtil::logError("Unknown user type: %1", QString::number(userType));
                 }
                 return QVariant();
             }
         }
         default:
-            qDebug() << "Unknown type: " << type;
+            LogUtil::logError("Unknown type: %1", QVariant::typeToName(type));
             return QVariant();
     }
 }
@@ -119,15 +119,15 @@ QString ConversionUtil::toJsonString(const QVariant &variant, Options options) {
             } else {
                 const char *typeName = QMetaType::typeName(variant.userType());
                 if (typeName) {
-                    qDebug() << "User type not serializable: " << typeName;
+                    LogUtil::logError("User type not serializable: %1", typeName);
                 } else {
-                    qDebug() << "Unknown user type: " << variant.userType();
+                    LogUtil::logError("Unknown user type: %1", QString::number(variant.userType()));
                 }
                 return QString();
             }
         }
         default:
-            qDebug() << "Unknown type: " << variant.type();
+            LogUtil::logError("Unknown type: %1", variant.typeName());
             return QString();
     }
 }

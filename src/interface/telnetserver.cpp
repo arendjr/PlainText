@@ -1,12 +1,12 @@
 #include "telnetserver.h"
 
-#include <QDebug>
 #include <QTcpServer>
 #include <QTcpSocket>
 
 #include <QtIOCompressor>
 
 #include "commandregistry.h"
+#include "logutil.h"
 #include "player.h"
 #include "realm.h"
 #include "session.h"
@@ -45,10 +45,10 @@ TelnetServer::TelnetServer(Realm *realm, quint16 port, QObject *parent) :
     m_realm(realm) {
 
     m_server = new QTcpServer(this);
-    if (!m_server->listen(QHostAddress::Any, port)) {
-        qDebug() << "Error: Can't launch telnet server";
+    if (m_server->listen(QHostAddress::Any, port)) {
+        LogUtil::logInfo("Telnet server is listening on port %1", QString::number(port));
     } else {
-        qDebug() << "Telnet server is listening on port" << port;
+        LogUtil::logError("Error: Can't launch telnet server");
     }
 
     connect(m_server, SIGNAL(newConnection()), this, SLOT(onClientConnected()));

@@ -3,29 +3,25 @@
 #include <unistd.h>
 
 #include <QDate>
-#include <QDebug>
 #include <QDir>
 #include <QFile>
 #include <QMap>
 #include <QTime>
+
+#include "logutil.h"
 
 
 bool DiskUtil::writeFile(const QString &path, const QString &content) {
 
     QFile file(path);
     if (!file.open(QIODevice::WriteOnly)) {
-        qWarning() << "Could not open file" << file.fileName() << "for writing.";
+        LogUtil::logError("Could not open file %1 for writing", file.fileName());
         return false;
     }
 
-    file.write(content.toUtf8());
+    qint64 bytesWritten = file.write(content.toUtf8());
     file.flush();
-//#ifdef Q_OS_LINUX
-//    fdatasync(file.handle());
-//#else
-//    fsync(file.handle());
-//#endif
-    return true;
+    return (bytesWritten != -1);
 }
 
 bool DiskUtil::writeGameObject(const QString &objectType, uint id, const QString &content) {
@@ -76,14 +72,18 @@ void DiskUtil::appendToLogFile(const QString &fileName, const QString &line) {
     } else {
         QString dirPath = logDir() + "/" + today.toString("yyyyMMdd");
         if (!QDir(dirPath).exists() && !QDir(logDir()).mkpath(today.toString("yyyyMMdd"))) {
-            qWarning() << "Could not create log directory:" << dirPath;
+            LogUtil::setLoggingEnabled(false);
+            LogUtil::logError("Could not create log directory: %1\n"
+                              "Logging system disabled.", dirPath);
             return;
         }
 
         QString path = dirPath + "/" + fileName;
         file = new QFile(path);
         if (!file->open(QIODevice::WriteOnly | QIODevice::Append)) {
-            qWarning() << "Could not open log file:" << path;
+            LogUtil::setLoggingEnabled(false);
+            LogUtil::logError("Could not open log file: %1\n"
+                              "Logging system disabled.", path);
             return;
         }
 

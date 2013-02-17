@@ -1,10 +1,10 @@
 #include "engine.h"
 
 #include <QDateTime>
-#include <QDebug>
 #include <QMetaType>
 
 #include "commandregistry.h"
+#include "diskutil.h"
 #include "gameexception.h"
 #include "httpserver.h"
 #include "logutil.h"
@@ -32,6 +32,8 @@ Engine::Engine() :
 bool Engine::start(Options options) {
 
     try {
+        LogUtil::setLoggingEnabled(!DiskUtil::logDir().isEmpty());
+
         m_scriptEngine = new ScriptEngine();
         m_realm = new Realm();
         m_util = new Util();
@@ -69,7 +71,7 @@ bool Engine::start(Options options) {
 
         return true;
     } catch (const GameException &exception) {
-        qWarning() << "Could not start engine:" << exception.what();
+        LogUtil::logError("Could not start engine: %1", exception.what());
         return false;
     }
 }

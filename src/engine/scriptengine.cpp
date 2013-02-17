@@ -1,6 +1,5 @@
 #include "scriptengine.h"
 
-#include <QDebug>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -8,6 +7,7 @@
 
 #include "diskutil.h"
 #include "gameobject.h"
+#include "logutil.h"
 #include "metatyperegistry.h"
 
 
@@ -58,14 +58,11 @@ void ScriptEngine::loadScript(const QString &path) {
     if (file.open(QIODevice::ReadOnly)) {
         evaluate(file.readAll(), path);
         if (hasUncaughtException()) {
-            QScriptValue exception = uncaughtException();
-            qWarning() << "Exception while evaluating " << info.fileName() << ": "
-                       << exception.toString().toUtf8().constData() << endl
-                       << "Backtrace:" << endl
-                       << exception.property("backtrace").toString().toUtf8().constData();
+            LogUtil::logException("Exception while evaluating %2: %1\n",
+                                  uncaughtException(), info.fileName());
         }
     } else {
-        qWarning() << "Could not open " << info.fileName();
+        LogUtil::logError("Could not open %1", info.fileName());
     }
 }
 
@@ -109,11 +106,8 @@ QScriptValue ScriptEngine::executeFunction(ScriptFunction &function,
 
     QScriptValue result = function.value.call(m_jsEngine.toScriptValue(thisObject), arguments);
     if (hasUncaughtException()) {
-        QScriptValue exception = uncaughtException();
-        qWarning() << "Script Exception: " << exception.toString().toUtf8().constData() << endl
-                   << "While executing function: " << function.source.toUtf8().constData()
-                   << "Backtrace:" << endl
-                   << exception.property("backtrace").toString().toUtf8().constData();
+        LogUtil::logException("Script Exception: %1\n"
+                              "While executing function: %2", uncaughtException(), function.source);
     }
     return result;
 }

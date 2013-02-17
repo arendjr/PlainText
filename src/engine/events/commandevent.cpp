@@ -1,7 +1,6 @@
 #include "commandevent.h"
 
-#include <QDebug>
-
+#include "logutil.h"
 #include "player.h"
 
 
@@ -17,7 +16,7 @@ CommandEvent::~CommandEvent() {
 void CommandEvent::process() {
 
     if (!m_player || m_command.isEmpty()) {
-        qWarning() << "Processing uninitialized command event. Skipped.";
+        LogUtil::logDebug("Processing uninitialized command event. Skipped.");
         return;
     }
 

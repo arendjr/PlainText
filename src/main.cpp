@@ -1,16 +1,15 @@
 #include <csignal>
 
-#include <QDebug>
-
-#include "engine/application.h"
-#include "engine/engine.h"
+#include "application.h"
+#include "engine.h"
+#include "logutil.h"
 
 
 void signalHandler(int param) {
 
     Q_UNUSED(param)
 
-    qDebug() << endl << "Terminating...";
+    LogUtil::logInfo("\nTerminating...");
 
     qApp->quit();
 }

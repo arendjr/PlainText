@@ -1,9 +1,8 @@
 #include "gameobjectsyncthread.h"
 
-#include <QDebug>
-
 #include "gameexception.h"
 #include "gameobject.h"
+#include "logutil.h"
 
 
 GameObjectSyncThread::GameObjectSyncThread() :
@@ -35,7 +34,10 @@ void GameObjectSyncThread::run() {
 
     while (!m_quit) {
         m_mutex.lock();
-        m_waitCondition.wait(&m_mutex);
+
+        if (m_objectQueue.isEmpty()) {
+            m_waitCondition.wait(&m_mutex);
+        }
 
         while (!m_quit && !m_objectQueue.isEmpty()) {
             GameObject *object = m_objectQueue.dequeue();
@@ -54,21 +56,25 @@ void GameObjectSyncThread::run() {
         syncObject(object);
     }
 
-    qDebug() << "All objects synced. Quit.";
+    LogUtil::logInfo("All objects synced. Quit.");
 }
 
 void GameObjectSyncThread::syncObject(GameObject *object) {
 
     try {
-        object->save();
+        bool result = object->save();
+
+        if (!result) {
+            LogUtil::logError("Error while syncing object: %1:%2",
+                              object->objectType().toString(), QString::number(object->id()));
+        }
     } catch (const GameException &exception) {
-        qWarning() << "Game Exception: " << exception.what() << endl
-                   << QString("While syncing object: %1:%2")
-                      .arg(object->objectType().toString()).arg(object->id());
+        LogUtil::logError("Game Exception: %1\n"
+                          "While syncing object: %2:%3", exception.what(),
+                          object->objectType().toString(), QString::number(object->id()));
     } catch (...) {
-        qWarning() << "Unknown exception." << endl
-                   << QString("While syncing object: %1:%2")
-                      .arg(object->objectType().toString()).arg(object->id());
+        LogUtil::logError("Unknown exception while syncing object: %1:%2",
+                          object->objectType().toString(), QString::number(object->id()));
     }
 
     delete object;

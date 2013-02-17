@@ -95,6 +95,7 @@ SOURCES += \
     src/engine/gameobjects/statsitem.cpp \
     src/engine/gameobjects/weapon.cpp \
     src/engine/logmessages/commandlogmessage.cpp \
+    src/engine/logmessages/errorlogmessage.cpp \
     src/engine/logmessages/logmessage.cpp \
     src/engine/logmessages/npctalklogmessage.cpp \
     src/engine/logmessages/playerdeathstatslogmessage.cpp \
@@ -201,6 +202,7 @@ HEADERS += \
     src/engine/gameobjects/statsitem.h \
     src/engine/gameobjects/weapon.h \
     src/engine/logmessages/commandlogmessage.h \
+    src/engine/logmessages/errorlogmessage.h \
     src/engine/logmessages/logmessage.h \
     src/engine/logmessages/npctalklogmessage.h \
     src/engine/logmessages/playerdeathstatslogmessage.h \

@@ -1,12 +1,12 @@
 #include "httpserver.h"
 
-#include <QDebug>
 #include <QFile>
 #include <QFileInfo>
 #include <QRegExp>
 #include <QStringList>
 #include <QTcpSocket>
 
+#include "logutil.h"
 #include "realm.h"
 #include "util.h"
 
@@ -15,10 +15,10 @@ HttpServer::HttpServer(quint16 port, quint16 webSocketPort, QObject *parent) :
     QTcpServer(parent),
     m_webSocketPort(webSocketPort) {
 
-    if (!listen(QHostAddress::Any, port)) {
-        qDebug() << "Error: Can't launch HTTP server";
+    if (listen(QHostAddress::Any, port)) {
+        LogUtil::logInfo("HTTP server is listening on port %1", QString::number(port));
     } else {
-        qDebug() << "HTTP server is listening on port" << port;
+        LogUtil::logError("Error: Can't launch HTTP server");
     }
 
     m_title = Util::htmlEscape(Realm::instance()->name()).toUtf8();

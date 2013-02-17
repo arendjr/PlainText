@@ -1,12 +1,11 @@
 #include "realm.h"
 
-#include <QDebug>
-
 #include "commandinterpreter.h"
 #include "commandregistry.h"
 #include "diskutil.h"
 #include "gameevent.h"
 #include "gameexception.h"
+#include "logutil.h"
 #include "player.h"
 #include "room.h"
 #include "triggerregistry.h"
@@ -265,7 +264,7 @@ GameEvent *Realm::createEvent(const QString &eventType, const GameObjectPtr &ori
         return GameEvent::createByEventType(GameEventType::fromString(eventType),
                                             origin.cast<Room *>(), strength);
     } catch(GameException &exception) {
-        qDebug() << "Exception in Realm::createEvent(): " << exception.what();
+        LogUtil::logError("Exception in Realm::createEvent(): %1", exception.what());
         return nullptr;
     }
 }

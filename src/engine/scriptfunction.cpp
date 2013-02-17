@@ -1,8 +1,7 @@
 #include "scriptfunction.h"
 
-#include <QDebug>
-
 #include "conversionutil.h"
+#include "logutil.h"
 #include "scriptengine.h"
 
 
@@ -56,9 +55,9 @@ void ScriptFunction::fromUserString(const QString &string, ScriptFunction &funct
     ScriptEngine *scriptEngine = ScriptEngine::instance();
     function = scriptEngine->defineFunction(string);
     if (scriptEngine->hasUncaughtException()) {
-        QScriptValue exception = scriptEngine->uncaughtException();
-        qWarning() << "Script Exception: " << exception.toString() << endl
-                   << "While defining function: " << string;
+        LogUtil::logException("Script Exception: %1\n"
+                              "While defining function: %2",
+                              scriptEngine->uncaughtException(), string);
         throw GameException(GameException::InvalidFunctionCode);
     }
 }
@@ -76,9 +75,9 @@ void ScriptFunction::fromVariant(const QVariant &variant, ScriptFunction &functi
     ScriptEngine *scriptEngine = ScriptEngine::instance();
     function = scriptEngine->defineFunction(string);
     if (scriptEngine->hasUncaughtException()) {
-        QScriptValue exception = scriptEngine->uncaughtException();
-        qWarning() << "Script Exception: " << exception.toString() << endl
-                   << "While defining function: " << string;
+        LogUtil::logException("Script Exception: %1\n"
+                              "While defining function: %2",
+                              scriptEngine->uncaughtException(), string);
         throw GameException(GameException::InvalidFunctionCode);
     }
 }

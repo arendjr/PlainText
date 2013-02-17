@@ -1,8 +1,8 @@
 #include "scriptcommand.h"
 
-#include <QDebug>
 #include <QScriptValueList>
 
+#include "logutil.h"
 #include "realm.h"
 #include "scriptengine.h"
 
@@ -14,9 +14,9 @@ ScriptCommand::ScriptCommand(const QScriptValue &object, QObject *parent) :
     m_scriptCommand(object) {
 
     if (!m_scriptCommand.isObject()) {
-        qDebug() << "Script command must be a Command object";
+        LogUtil::logDebug("Script command must be a Command object");
     } else if (!m_scriptCommand.property("execute").isFunction()) {
-        qDebug() << "Script command has no valid execute() method";
+        LogUtil::logDebug("Script command has no valid execute() method");
     }
 
     setDescription(m_scriptCommand.property("description").toString());
@@ -33,10 +33,8 @@ void ScriptCommand::execute(Character *character, const QString &command) {
     arguments.append(command);
     m_scriptCommand.property("execute").call(m_scriptCommand, arguments);
     if (engine->hasUncaughtException()) {
-        QScriptValue exception = engine->uncaughtException();
-        qWarning() << "Exception while executing command " << command << ": "
-                   << exception.toString() << endl
-                   << "Backtrace:" << endl
-                   << exception.property("backtrace").toString().toUtf8().constData();
+        LogUtil::logException("Script Exception: %1\n"
+                              "While executing command: %2",
+                              engine->uncaughtException(), command);
     }
 }

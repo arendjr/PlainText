@@ -1,7 +1,6 @@
 #include "gameobject.h"
 
 #include <QDateTime>
-#include <QDebug>
 #include <QFile>
 #include <QFileInfo>
 #include <QMetaProperty>
@@ -27,6 +26,7 @@
 #include "gameobjectptr.h"
 #include "group.h"
 #include "item.h"
+#include "logutil.h"
 #include "player.h"
 #include "point3d.h"
 #include "portal.h"
@@ -204,7 +204,7 @@ QString GameObject::definiteName(const GameObjectPtrList &pool, int options) con
                    name();
         }
     } catch (GameException &exception) {
-        qDebug() << "Exception in GameObject::definiteName(): " << exception.what();
+        LogUtil::logError("Exception in GameObject::definiteName(): %1", exception.what());
         return m_name;
     }
 }
@@ -462,12 +462,9 @@ QScriptValue GameObject::invokeScriptMethod(const QString &methodName,
 
     QScriptValue result = method.call(scriptObject, arguments);
     if (engine->hasUncaughtException()) {
-        QScriptValue exception = engine->uncaughtException();
-        qWarning() << "Script Exception: " << exception.toString().toUtf8().constData() << endl
-                   << "While executing game object method: "
-                   << methodName.toUtf8().constData() << endl
-                   << "Backtrace:" << endl
-                   << exception.property("backtrace").toString().toUtf8().constData();
+        LogUtil::logException("Script Exception: %1\n"
+                              "While executing game object method: %2()\n",
+                              engine->uncaughtException(), methodName);
     }
     return result;
 }
@@ -509,11 +506,9 @@ QString GameObject::nameAtStrength(double strength) {
         arguments.append(strength);
         QScriptValue result = method.call(scriptObject, arguments);
         if (engine->hasUncaughtException()) {
-            QScriptValue exception = engine->uncaughtException();
-            qWarning() << "Script Exception: " << exception.toString().toUtf8().constData() << endl
-                       << "While executing game object method:  nameAtStrength" << endl
-                       << "Backtrace:" << endl
-                       << exception.property("backtrace").toString().toUtf8().constData();
+            LogUtil::logException("Script Exception: %1\n"
+                                  "While executing game object method: nameAtStrength()\n",
+                                  engine->uncaughtException());
         }
         return result.toString();
     } else {
@@ -536,11 +531,9 @@ QString GameObject::lookAtBy(GameObject *character) {
         arguments.append(engine->toScriptValue(character));
         QScriptValue result = method.call(scriptObject, arguments);
         if (engine->hasUncaughtException()) {
-            QScriptValue exception = engine->uncaughtException();
-            qWarning() << "Script Exception: " << exception.toString().toUtf8().constData() << endl
-                       << "While executing game object method:  lookAtBy" << endl
-                       << "Backtrace:" << endl
-                       << exception.property("backtrace").toString().toUtf8().constData();
+            LogUtil::logException("Script Exception: %1\n"
+                                  "While executing game object method: lookAtBy()\n",
+                                  engine->uncaughtException());
         }
         return result.toString();
     } else {
@@ -616,9 +609,9 @@ void GameObject::invokeTimer(int timerId) {
     }
 
     if (scriptEngine->hasUncaughtException()) {
-        QScriptValue exception = scriptEngine->uncaughtException();
-        qWarning() << "Script Exception: " << exception.toString().toUtf8().constData() << endl
-                   << "While executing function: " << function.toString().toUtf8().constData();
+        LogUtil::logException("Script Exception: %1\n"
+                              "While executing function: %2",
+                              scriptEngine->uncaughtException(), function.toString());
     }
 }
 

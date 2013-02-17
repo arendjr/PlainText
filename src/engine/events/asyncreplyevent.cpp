@@ -1,7 +1,6 @@
 #include "asyncreplyevent.h"
 
-#include <QDebug>
-
+#include "logutil.h"
 #include "player.h"
 
 
@@ -17,7 +16,7 @@ AsyncReplyEvent::~AsyncReplyEvent() {
 void AsyncReplyEvent::process() {
 
     if (!m_recipient) {
-        qWarning() << "Processing uninitialized async reply event. Skipped.";
+        LogUtil::logDebug("Processing uninitialized async reply event. Skipped.");
         return;
     }
 

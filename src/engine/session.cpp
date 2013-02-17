@@ -1,8 +1,5 @@
 #include "session.h"
 
-#include <QDebug>
-#include <QMap>
-
 #include "commandevent.h"
 #include "constants.h"
 #include "gameexception.h"
@@ -49,11 +46,11 @@ void Session::open() {
         setSession.call(m_scriptObject, args);
 
         if (engine->hasUncaughtException()) {
-            QScriptValue exception = engine->uncaughtException();
-            qWarning() << "Script Exception in Session::open(): " << exception.toString();
+            LogUtil::logException("Script Exception: %1\n"
+                                  "In Session::open()", engine->uncaughtException());
         }
     } catch (GameException &exception) {
-        qDebug() << "Exception in Session::open(): " << exception.what();
+        LogUtil::logError("Exception in Session::open(): %1", exception.what());
     }
 }
 
@@ -108,11 +105,11 @@ void Session::processSignIn(const QString &data) {
 
         ScriptEngine *engine = ScriptEngine::instance();
         if (engine->hasUncaughtException()) {
-            QScriptValue exception = engine->uncaughtException();
-            qWarning() << "Script Exception in Session::processSignIn(): " << exception.toString();
+            LogUtil::logException("Script Exception: %1\n"
+                                  "In Session::processSignIn()", engine->uncaughtException());
         }
     } catch (GameException &exception) {
-        qDebug() << "Exception in Session::processSignIn(): " << exception.what();
+        LogUtil::logError("Exception in Session::processSignIn(): %1", exception.what());
     }
 }
 
@@ -137,7 +134,7 @@ void Session::send(const QString &message) {
 void Session::onUserInput(QString data) {
 
     if (m_sessionState == SessionClosed) {
-        qDebug() << "User input on closed session";
+        LogUtil::logDebug("User input on closed session");
         return;
     }
 

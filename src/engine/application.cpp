@@ -1,8 +1,7 @@
 #include "application.h"
 
-#include <QDebug>
-
 #include "gameexception.h"
+#include "logutil.h"
 
 
 Application::Application(int &argc, char **argv) :
@@ -17,9 +16,9 @@ bool Application::notify(QObject *receiver, QEvent *event) {
     try {
         return receiver->event(event);
     } catch (GameException &exception) {
-        qWarning() << "Game Exception in event handler: " + QString(exception.what());
+        LogUtil::logError("Game Exception in event handler: %1", exception.what());
     } catch (...) {
-        qWarning() << "Unknown exception in event handler.";
+        LogUtil::logError("Unknown Exception in event handler.");
     }
     return false;
 }

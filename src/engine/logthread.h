@@ -31,6 +31,9 @@ class LogThread : public QThread {
 
         QQueue<LogMessage *> m_messageQueue;
 
+        int m_numMessagesToDrop;
+        int m_numDroppedMessages;
+
         void logMessage(LogMessage *message);
 };
 

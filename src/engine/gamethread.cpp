@@ -1,10 +1,10 @@
 #include "gamethread.h"
 
 #include <QDateTime>
-#include <QDebug>
 
 #include "event.h"
 #include "gameexception.h"
+#include "logutil.h"
 #include "realm.h"
 #include "timerevent.h"
 
@@ -120,11 +120,10 @@ void GameThread::processEvent(Event *event) {
 
         m_realm->enqueueModifiedObjects();
     } catch (const GameException &exception) {
-        qWarning() << "Game Exception: " << exception.what() << endl
-                   << "While processing event: " << event->toString().toUtf8().constData();
+        LogUtil::logError("Game Exception: %1\n"
+                          "While processing event: %2", exception.what(), event->toString());
     } catch (...) {
-        qWarning() << "Unknown exception." << endl
-                   << "While processing event: " << event->toString().toUtf8().constData();
+        LogUtil::logError("Unknown exception while processing event: %2", event->toString());
     }
 
     delete event;

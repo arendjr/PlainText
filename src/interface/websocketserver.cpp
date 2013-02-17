@@ -1,12 +1,10 @@
 #include "websocketserver.h"
 
-#include <QCoreApplication>
-#include <QDebug>
-
 #include <QWsServer.h>
 #include <QWsSocket.h>
 
 #include "conversionutil.h"
+#include "logutil.h"
 #include "player.h"
 #include "session.h"
 
@@ -16,10 +14,10 @@ WebSocketServer::WebSocketServer(Realm *realm, quint16 port, QObject *parent) :
     m_realm(realm) {
 
     m_server = new QWsServer(this);
-    if (!m_server->listen(QHostAddress::Any, port)) {
-        qDebug() << "Error: Can't launch WebSocket server";
+    if (m_server->listen(QHostAddress::Any, port)) {
+        LogUtil::logInfo("WebSocket server is listening on port %1", QString::number(port));
     } else {
-        qDebug() << "WebSocket server is listening on port" << port;
+        LogUtil::logError("Error: Can't launch WebSocket server");
     }
 
     connect(m_server, SIGNAL(newConnection()), this, SLOT(onClientConnected()));

@@ -1,7 +1,6 @@
 #include "signinevent.h"
 
-#include <QDebug>
-
+#include "logutil.h"
 #include "session.h"
 
 
@@ -17,7 +16,7 @@ SignInEvent::~SignInEvent() {
 void SignInEvent::process() {
 
     if (!m_session || m_input.isEmpty()) {
-        qWarning() << "Processing uninitialized sign-in event. Skipped.";
+        LogUtil::logDebug("Processing uninitialized sign-in event. Skipped.");
         return;
     }
 
