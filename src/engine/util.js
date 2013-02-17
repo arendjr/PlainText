@@ -489,10 +489,51 @@ String.prototype.trimmed = function() {
 };
 
 
-Util.randomAlternative = function() {
+var console = (function() {
 
-    return arguments[Util.randomInt(0, arguments.length)];
-}
+    var flagsRegExp = /%[sdifo]/;
+
+    function parseArguments(args) {
+        var strings = [];
+        for (var i = 0; i < args.length; i++) {
+            var string = args[i], result;
+            while ((result = flagsRegExp.exec(string)) !== null) {
+                i++;
+                string = string.replace(result[0], args[i].toString());
+            }
+            strings.push(string);
+        }
+        return strings;
+    }
+
+    function debug() {
+        LogUtil.logDebug(parseArguments(arguments).join(" "));
+    }
+
+    function error() {
+        LogUtil.logError(parseArguments(arguments).join(" "));
+    }
+
+    function info() {
+        LogUtil.logInfo(parseArguments(arguments).join(" "));
+    }
+
+    function log() {
+        LogUtil.logDebug(parseArguments(arguments).join(" "));
+    }
+
+    function warn() {
+        LogUtil.logError(parseArguments(arguments).join(" "));
+    }
+
+    return {
+        "debug": debug,
+        "error": error,
+        "info": info,
+        "log": log,
+        "warn": warn
+    };
+})();
 
 
 function $(identifier) {
