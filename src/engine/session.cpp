@@ -40,6 +40,12 @@ void Session::open() {
 
         ScriptEngine *engine = ScriptEngine::instance();
         m_scriptObject = engine->evaluate("new SessionHandler()");
+        if (engine->hasUncaughtException()) {
+            LogUtil::logException("Script Exception: %1\n"
+                                  "In Session::open()", engine->uncaughtException());
+            return;
+        }
+
         QScriptValue setSession = m_scriptObject.property("setSession");
         QScriptValueList args;
         args.append(engine->toScriptValue(this));

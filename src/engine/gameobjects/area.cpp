@@ -1,7 +1,6 @@
 #include "area.h"
 
-#include <QDebug>
-
+#include "logutil.h"
 #include "room.h"
 
 
@@ -60,7 +59,7 @@ void Area::init() {
 
         super::init();
     } catch (GameException &exception) {
-        qDebug() << "Exception in Area::init(): " << exception.what();
+        LogUtil::logError("Exception in Area::init(): %1", exception.what());
     }
 }
 

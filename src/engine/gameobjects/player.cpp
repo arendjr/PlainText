@@ -1,7 +1,6 @@
 #include "player.h"
 
 #include <QCryptographicHash>
-#include <QDebug>
 
 #include "realm.h"
 #include "room.h"

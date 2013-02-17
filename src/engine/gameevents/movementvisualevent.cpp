@@ -1,9 +1,8 @@
 #include "movementvisualevent.h"
 
-#include <QDebug>
-
 #include "character.h"
 #include "gameexception.h"
+#include "logutil.h"
 #include "point3d.h"
 #include "portal.h"
 #include "room.h"
@@ -33,7 +32,8 @@ void MovementVisualEvent::setDestination(const GameObjectPtr &destination) {
 
         addVisit(m_destination, strengthForRoom(originRoom()));
     } catch (GameException &exception) {
-        qDebug() << "Exception in MovementVisualEvent::setDestination(): " << exception.what();
+        LogUtil::logError("Exception in MovementVisualEvent::setDestination(): %1",
+                          exception.what());
     }
 }
 

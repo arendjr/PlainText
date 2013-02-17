@@ -1,7 +1,5 @@
 #include "floodevent.h"
 
-#include <QDebug>
-
 #include "character.h"
 #include "portal.h"
 #include "room.h"

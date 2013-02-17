@@ -1,8 +1,7 @@
 #include "deleteobjectevent.h"
 
-#include <QDebug>
-
 #include "gameobject.h"
+#include "logutil.h"
 #include "realm.h"
 
 
@@ -20,7 +19,7 @@ void DeleteObjectEvent::process() {
     if (object) {
         delete object;
     } else {
-        qDebug() << "Attempt to delete non-existing (already deleted?) object";
+        LogUtil::logDebug("Attempt to delete non-existing (already deleted?) object");
     }
 }
 

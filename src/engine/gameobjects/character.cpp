@@ -1,7 +1,6 @@
 #include "character.h"
 
 #include <QDateTime>
-#include <QDebug>
 
 #include "commandinterpreter.h"
 #include "group.h"
@@ -345,7 +344,7 @@ void Character::enter(const GameObjectPtr &roomPtr) {
             }
         }
     } catch (GameException &exception) {
-        qDebug() << "Exception in Character::enter(): " << exception.what();
+        LogUtil::logError("Exception in Character::enter(): %1", exception.what());
     }
 }
 
@@ -355,7 +354,7 @@ void Character::leave(const GameObjectPtr &roomPtr) {
         Room *room = roomPtr.cast<Room *>();
         room->removeCharacter(this);
     } catch (GameException &exception) {
-        qDebug() << "Exception in Character::leave(): " << exception.what();
+        LogUtil::logError("Exception in Character::leave(): %1", exception.what());
     }
 }
 
@@ -416,7 +415,7 @@ void Character::follow(const GameObjectPtr &characterPtr) {
         group->addMember(this);
         m_group = group;
     } catch (GameException &exception) {
-        qDebug() << "Exception in Character::follow(): " << exception.what();
+        LogUtil::logError("Exception in Character::follow(): %1", exception.what());
     }
 }
 
@@ -469,7 +468,7 @@ void Character::lose(const GameObjectPtr &character) {
             }
         }
     } catch (GameException &exception) {
-        qDebug() << "Exception in Character::lose(): " << exception.what();
+        LogUtil::logError("Exception in Character::lose(): %1", exception.what());
     }
 }
 
@@ -496,7 +495,7 @@ void Character::disband() {
         group->setDeleted();
         send("You disbanded the group.");
     } catch (GameException &exception) {
-        qDebug() << "Exception in Character::disband(): " << exception.what();
+        LogUtil::logError("Exception in Character::group(): %1", exception.what());
     }
 }
 
@@ -545,7 +544,7 @@ void Character::init() {
 
         invokeTrigger("onspawn");
     } catch (GameException &exception) {
-        qDebug() << "Exception in Character::init(): " << exception.what();
+        LogUtil::logError("Exception in Character::init(): %1", exception.what());
     }
 }
 

@@ -2,10 +2,9 @@
 
 #include <cmath>
 
-#include <QDebug>
-
 #include "character.h"
 #include "gameexception.h"
+#include "logutil.h"
 #include "point3d.h"
 #include "room.h"
 #include "util.h"
@@ -31,7 +30,8 @@ void MovementSoundEvent::setDestination(const GameObjectPtr &destination) {
 
         addVisit(m_destination, strengthForRoom(originRoom()));
     } catch (GameException &exception) {
-        qDebug() << "Exception in MovementSoundEvent::setDestination(): " << exception.what();
+        LogUtil::logError("Exception in MovementVisualEvent::setDestination(): %1",
+                          exception.what());
     }
 }
 

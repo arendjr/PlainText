@@ -1,9 +1,8 @@
 #include "speechevent.h"
 
-#include <QDebug>
-
 #include "character.h"
 #include "gameexception.h"
+#include "logutil.h"
 #include "room.h"
 #include "util.h"
 
@@ -24,7 +23,7 @@ void SpeechEvent::setSpeaker(const GameObjectPtr &speaker) {
     try {
         m_speaker = speaker.cast<Character *>();
     } catch (GameException &exception) {
-        qDebug() << "Exception in SpeechEvent::setSpeaker(): " << exception.what();
+        LogUtil::logError("Exception in SpeechEvent::setSpeaker(): %1", exception.what());
     }
 }
 
@@ -43,7 +42,7 @@ QString SpeechEvent::descriptionForStrengthAndCharacterInRoom(double strength, C
 
     Q_UNUSED(character)
     if (!m_speaker) {
-        qDebug() << "No speaker set for SpeechEvent.";
+        LogUtil::logDebug("No speaker set for SpeechEvent.");
         return "";
     }
 

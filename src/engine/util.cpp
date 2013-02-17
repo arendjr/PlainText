@@ -3,7 +3,6 @@
 #include <cmath>
 #include <cstdarg>
 
-#include <QDebug>
 #include <QTextStream>
 #include <QVector>
 #include <QtAlgorithms>

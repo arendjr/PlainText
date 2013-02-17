@@ -4,7 +4,6 @@
 #include <climits>
 #include <utility>
 
-#include <QDebug>
 #include <QMetaProperty>
 #include <QStringList>
 
