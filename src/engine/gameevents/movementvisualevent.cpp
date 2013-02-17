@@ -102,10 +102,9 @@ QString MovementVisualEvent::descriptionForStrengthAndCharacterInRoom(double str
     QString prefix;
     if (distance > 100) {
         if (Util::randomInt(0, 5) < 3) {
-            prefix = "In the distance," +
-                     Util::randomAlternative(3, " you see", " you can see", "");
+            prefix = "In the distance," + Util::randomAlternative("", " you see", " you can see");
         } else {
-            prefix = "From afar," + Util::randomAlternative(2, " you see", " you can see");
+            prefix = "From afar," + Util::randomAlternative(" you see", " you can see");
         }
     } else {
         prefix = "You see";

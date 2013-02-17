@@ -573,17 +573,20 @@ int Util::randomInt(int min, int max) {
     return min + qrand() % (max - min);
 }
 
-QString Util::randomAlternative(int amount, ...) {
+QString Util::randomAlternative(const QString &arg1, const QString &arg2,
+                                const QString &arg3, const QString &arg4) {
 
     QStringList alternatives;
-
-    va_list vl;
-    va_start(vl, amount);
-    for (int i = 0; i < amount; i++) {
-        char *val = va_arg(vl, char *);
-        alternatives.append(val);
+    alternatives.append(arg1);
+    if (!arg2.isEmpty()) {
+        alternatives.append(arg2);
+        if (!arg3.isEmpty()) {
+            alternatives.append(arg3);
+            if (!arg4.isEmpty()) {
+                alternatives.append(arg4);
+            }
+        }
     }
-    va_end(vl);
 
-    return alternatives[randomInt(0, amount)];
+    return alternatives[randomInt(0, alternatives.length())];
 }

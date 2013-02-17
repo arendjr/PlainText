@@ -87,7 +87,10 @@ class Util : public QObject {
 
         Q_INVOKABLE static int randomInt(int min = 0, int max = RAND_MAX);
 
-        static QString randomAlternative(int amount, ...);
+        Q_INVOKABLE static QString randomAlternative(const QString &arg1,
+                                                     const QString &arg2 = QString(),
+                                                     const QString &arg3 = QString(),
+                                                     const QString &arg4 = QString());
 };
 
 #endif // UTIL_H
