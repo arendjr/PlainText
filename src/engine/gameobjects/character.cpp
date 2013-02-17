@@ -5,17 +5,9 @@
 #include "commandinterpreter.h"
 #include "group.h"
 #include "logutil.h"
-#include "movementsoundevent.h"
-#include "movementvisualevent.h"
-#include "player.h"
-#include "portal.h"
-#include "race.h"
 #include "realm.h"
 #include "room.h"
-#include "shield.h"
-#include "speechevent.h"
 #include "util.h"
-#include "weapon.h"
 
 
 #define NO_STUN \

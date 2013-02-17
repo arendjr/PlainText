@@ -3,7 +3,6 @@
 #include <QCryptographicHash>
 
 #include "realm.h"
-#include "room.h"
 #include "session.h"
 #include "util.h"
 
