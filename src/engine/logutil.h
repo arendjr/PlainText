@@ -17,41 +17,32 @@ class LogUtil : public QObject {
         static void setLoggingEnabled(bool enabled);
 
         Q_INVOKABLE static void logDebug(const QString &message);
-        Q_INVOKABLE static void logDebug(const QString &message, const QString &arg1);
-        Q_INVOKABLE static void logDebug(const QString &message,
-                                         const QString &arg1, const QString &arg2);
-        Q_INVOKABLE static void logDebug(const QString &message,
-                                         const QString &arg1, const QString &arg2,
-                                         const QString &arg3);
-        Q_INVOKABLE static void logDebug(const QString &message,
-                                         const QString &arg1, const QString &arg2,
-                                         const QString &arg3, const QString &arg4);
+        static void logDebug(const QString &message, const QString &arg1);
+        static void logDebug(const QString &message, const QString &arg1, const QString &arg2);
+        static void logDebug(const QString &message, const QString &arg1, const QString &arg2,
+                                                     const QString &arg3);
+        static void logDebug(const QString &message, const QString &arg1, const QString &arg2,
+                                                     const QString &arg3, const QString &arg4);
 
         Q_INVOKABLE static void logInfo(const QString &message);
-        Q_INVOKABLE static void logInfo(const QString &message, const QString &arg1);
-        Q_INVOKABLE static void logInfo(const QString &message,
-                                        const QString &arg1, const QString &arg2);
-        Q_INVOKABLE static void logInfo(const QString &message,
-                                        const QString &arg1, const QString &arg2,
-                                        const QString &arg3);
-        Q_INVOKABLE static void logInfo(const QString &message,
-                                        const QString &arg1, const QString &arg2,
-                                        const QString &arg3, const QString &arg4);
+        static void logInfo(const QString &message, const QString &arg1);
+        static void logInfo(const QString &message, const QString &arg1, const QString &arg2);
+        static void logInfo(const QString &message, const QString &arg1, const QString &arg2,
+                                                    const QString &arg3);
+        static void logInfo(const QString &message, const QString &arg1, const QString &arg2,
+                                                    const QString &arg3, const QString &arg4);
 
         Q_INVOKABLE static void logError(const QString &message);
-        Q_INVOKABLE static void logError(const QString &message, const QString &arg1);
-        Q_INVOKABLE static void logError(const QString &message,
-                                         const QString &arg1, const QString &arg2);
-        Q_INVOKABLE static void logError(const QString &message,
-                                         const QString &arg1, const QString &arg2,
-                                         const QString &arg3);
-        Q_INVOKABLE static void logError(const QString &message,
-                                         const QString &arg1, const QString &arg2,
-                                         const QString &arg3, const QString &arg4);
+        static void logError(const QString &message, const QString &arg1);
+        static void logError(const QString &message, const QString &arg1, const QString &arg2);
+        static void logError(const QString &message, const QString &arg1, const QString &arg2,
+                                                     const QString &arg3);
+        static void logError(const QString &message, const QString &arg1, const QString &arg2,
+                                                     const QString &arg3, const QString &arg4);
 
         Q_INVOKABLE static void logException(const QString &message, const QScriptValue &exception);
-        Q_INVOKABLE static void logException(const QString &message, const QScriptValue &exception,
-                                             const QString &arg2);
+        static void logException(const QString &message, const QScriptValue &exception,
+                                 const QString &arg2);
 
         Q_INVOKABLE static void logCommand(const QString &playerName, const QString &command);
 

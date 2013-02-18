@@ -463,7 +463,7 @@ QScriptValue GameObject::invokeScriptMethod(const QString &methodName,
     QScriptValue result = method.call(scriptObject, arguments);
     if (engine->hasUncaughtException()) {
         LogUtil::logException("Script Exception: %1\n"
-                              "While executing game object method: %2()\n",
+                              "While executing game object method: %2()",
                               engine->uncaughtException(), methodName);
     }
     return result;
@@ -507,7 +507,7 @@ QString GameObject::nameAtStrength(double strength) {
         QScriptValue result = method.call(scriptObject, arguments);
         if (engine->hasUncaughtException()) {
             LogUtil::logException("Script Exception: %1\n"
-                                  "While executing game object method: nameAtStrength()\n",
+                                  "While executing game object method: nameAtStrength()",
                                   engine->uncaughtException());
         }
         return result.toString();
@@ -532,7 +532,7 @@ QString GameObject::lookAtBy(GameObject *character) {
         QScriptValue result = method.call(scriptObject, arguments);
         if (engine->hasUncaughtException()) {
             LogUtil::logException("Script Exception: %1\n"
-                                  "While executing game object method: lookAtBy()\n",
+                                  "While executing game object method: lookAtBy()",
                                   engine->uncaughtException());
         }
         return result.toString();
