@@ -237,7 +237,7 @@ GameObject *Realm::getPlayer(const QString &name) const {
         return m_playerMap[name];
     }
 
-    return 0;
+    return nullptr;
 }
 
 void Realm::addReservedName(const QString &name) {

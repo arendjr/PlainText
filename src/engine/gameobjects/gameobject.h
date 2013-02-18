@@ -2,7 +2,6 @@
 #define GAMEOBJECT_H
 
 #include <QHash>
-#include <QMetaProperty>
 #include <QObject>
 #include <QScriptEngine>
 #include <QVariantMap>
@@ -245,6 +244,6 @@ class GameObject : public QObject {
         static QMap<QString, QScriptValue> s_prototypeMap;
 };
 
-Q_DECLARE_METATYPE(GameObject *)
+PT_DECLARE_METATYPE(GameObject *)
 
 #endif // GAMEOBJECT_H

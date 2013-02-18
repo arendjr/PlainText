@@ -1,9 +1,10 @@
 #ifndef SESSION_H
 #define SESSION_H
 
-#include <QMetaType>
 #include <QObject>
 #include <QScriptEngine>
+
+#include "metatyperegistry.h"
 
 
 class GameObject;
@@ -64,6 +65,6 @@ class Session : public QObject {
         QScriptValue m_scriptObject;
 };
 
-Q_DECLARE_METATYPE(Session *)
+PT_DECLARE_METATYPE(Session *)
 
 #endif // SESSION_H

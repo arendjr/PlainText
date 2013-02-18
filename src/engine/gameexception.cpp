@@ -10,7 +10,7 @@ const char *GameException::s_messages[] = {
     "Invalid game object file name",
     "Invalid game object pointer",
     "Null pointer referenced",
-    "Game object pointer casted to invalid type",
+    "Game object pointer cast to invalid type",
     "Invalid function code (Parse Error)",
     "Invalid character stats",
     "Invalid combat message",

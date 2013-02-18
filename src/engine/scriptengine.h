@@ -10,11 +10,6 @@
 #include "scriptfunction.h"
 
 
-class MetaTypeRegistry;
-class Room;
-class Player;
-class Session;
-
 class ScriptEngine : public QObject {
 
     Q_OBJECT
