@@ -1,7 +1,5 @@
 #include "gameexception.h"
 
-#include "gameobject.h"
-
 
 const char *GameException::s_messages[] = {
     "Unknown game object type",

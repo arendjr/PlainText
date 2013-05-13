@@ -50,7 +50,7 @@ QString Point3D::toUserString(const Point3D &point) {
 
 void Point3D::fromUserString(const QString &string, Point3D &point) {
 
-    if (!string.startsWith("(") || !string.endsWith(")")) {
+    if (!string.startsWith(QLatin1String("(")) || !string.endsWith(QLatin1String(")"))) {
         throw GameException(GameException::InvalidPoint);
     }
 

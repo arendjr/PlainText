@@ -1,10 +1,10 @@
 include(environment.pri)
 
-LIBS += -lz
-
 TARGET = PlainText
 
 TEMPLATE = app
+
+LIBS += -lz
 
 SOURCES += \
     src/main.cpp \

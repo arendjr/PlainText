@@ -87,7 +87,7 @@ QString Vector3D::toUserString(const Vector3D &vector) {
 
 void Vector3D::fromUserString(const QString &string, Vector3D &vector) {
 
-    if (!string.startsWith("[") || !string.endsWith("]")) {
+    if (!string.startsWith(QLatin1String("[")) || !string.endsWith(QLatin1String("]"))) {
         throw GameException(GameException::InvalidVector);
     }
 
