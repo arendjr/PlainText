@@ -5,15 +5,7 @@ define(["controller"], function(Controller) {
 
     var isActive = true;
 
-    var notifications;
-
     function init() {
-
-        if (window.webkitNotifications) {
-            notifications = window.webkitNotifications;
-        } else {
-            notifications = window.notifications;
-        }
 
         attachListeners();
     }
@@ -29,7 +21,7 @@ define(["controller"], function(Controller) {
         }, false);
 
         function requestPermission() {
-            notifications.requestPermission(function() {
+            Notification.requestPermission(function() {
                 Controller.removeCommandListener(requestPermission);
             });
         }
@@ -37,15 +29,18 @@ define(["controller"], function(Controller) {
         Controller.addCommandListener(requestPermission);
 
         Controller.addIncomingMessageListener(function(message) {
-            if (!isActive && notifications.checkPermission() === 0 &&
+            if (!isActive && Notification.permission === "granted" &&
                 /^\w+ (asks|says|tells|shouts)/.test(message)) {
 
-                var notification = notifications.createNotification(null, "MUD", message);
-                notification.show();
+                var notification = new Notification(document.title, {
+                    "body": message,
+                    "onshow": function() {
+                        setTimeout(function() {
+                            notification.close();
+                        }, 10000);
+                    }
+                });
 
-                setTimeout(function() {
-                    notification.cancel();
-                }, 10000);
             }
         });
     }

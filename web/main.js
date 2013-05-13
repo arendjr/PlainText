@@ -235,8 +235,7 @@ function init() {
 
     require(["controller"]);
 
-    if ((window.notifications && window.notifications.requestPermission) ||
-        (window.webkitNotifications && window.webkitNotifications.requestPermission)) {
+    if (window.Notification && window.Notification.requestPermission) {
         require(["notifications"]);
     }
 }
