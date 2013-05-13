@@ -17,8 +17,13 @@ class Class : public GameObject {
         void setStats(const CharacterStats &stats);
         Q_PROPERTY(CharacterStats stats READ stats WRITE setStats)
 
+        const CharacterStats &statsSuggestion() const { return m_statsSuggestion; }
+        void setStatsSuggestion(const CharacterStats &statsSuggestion);
+        Q_PROPERTY(CharacterStats statsSuggestion READ statsSuggestion WRITE setStatsSuggestion)
+
     private:
         CharacterStats m_stats;
+        CharacterStats m_statsSuggestion;
 };
 
 #endif // CLASS_H

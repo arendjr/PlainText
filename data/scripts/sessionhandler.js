@@ -285,6 +285,8 @@ function SessionHandler() {
                 var classStats = signUpData.characterClass.stats;
 
                 signUpData.stats = raceStats.plus(classStats);
+                signUpData.statsSuggestion = signUpData.race.statsSuggestion
+                                             .plus(signUpData.characterClass.statsSuggestion);
 
                 signUpData.height = signUpData.race.height;
                 signUpData.weight = signUpData.race.weight;
@@ -297,6 +299,9 @@ function SessionHandler() {
                 } else if (signUpData.characterClass.name === "barbarian") {
                     signUpData.stats[4] = 0;
                     signUpData.weight += 5;
+
+                    signUpData.statsSuggestion[FAITH] += signUpData.statsSuggestion[INTELLIGENCE];
+                    signUpData.statsSuggestion.splice(INTELLIGENCE, 1);
                 }
 
                 if (signUpData.gender === "male") {
@@ -331,10 +336,11 @@ function SessionHandler() {
                      "  *%1*\n".arg(isBarbarian ? "<str> <dex> <vit> <end> <fai>" :
                                                   "<str> <dex> <vit> <end> <int> <fai>") +
                      "  (Replace every part with a number, for a total of 9. " +
-                        "Example: %1)\n".arg(isBarbarian ? "2 2 2 2 1" : "2 2 2 1 1 1") +
+                        "Suggestion: %1)\n".arg(signUpData.statsSuggestion.join(" ")) +
                      "\n" +
                      "To revisit your choice of gender, type *back*. If you want more " +
-                     "information about character stats, type *info stats*.\n");
+                     "information about character stats, type *info stats*. If you just want to " +
+                     "accept the suggested stats, type *accept*.\n");
             },
             "processInput": function(input) {
                 var answer = input.toLower();
@@ -374,19 +380,27 @@ function SessionHandler() {
                 } else {
                     var isBarbarian = (signUpData.characterClass.name === "barbarian");
 
-                    var attributes = answer.split(/\s+/);
-                    if (attributes.length !== (isBarbarian ? 5 : 6)) {
-                        return;
-                    }
+                    var stats;
+                    if (answer === "accept suggestion" || answer === "accept" || answer === "a") {
+                        stats = signUpData.statsSuggestion.clone();
+                        if (isBarbarian) {
+                            stats.splice(INTELLIGENCE, 0, 0);
+                        }
+                    } else {
+                        var attributes = answer.split(/\s+/);
+                        if (attributes.length !== (isBarbarian ? 5 : 6)) {
+                            return;
+                        }
 
-                    var stats = [
-                        max(attributes[0].toInt(), 0),
-                        max(attributes[1].toInt(), 0),
-                        max(attributes[2].toInt(), 0),
-                        max(attributes[3].toInt(), 0),
-                        isBarbarian ? 0 : max(attributes[4].toInt(), 0),
-                        max(attributes[isBarbarian ? 4 : 5].toInt(), 0)
-                    ];
+                        stats = [
+                            max(attributes[0].toInt(), 0),
+                            max(attributes[1].toInt(), 0),
+                            max(attributes[2].toInt(), 0),
+                            max(attributes[3].toInt(), 0),
+                            isBarbarian ? 0 : max(attributes[4].toInt(), 0),
+                            max(attributes[isBarbarian ? 4 : 5].toInt(), 0)
+                        ];
+                    }
 
                     if (stats.total() !== 9) {
                         send("\nThe total of attributes should be 9.\n", Color.Red);

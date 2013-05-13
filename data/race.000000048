@@ -3,6 +3,7 @@
   "description": "Dwarves are short, yet tough fellows. They are relatively strong for their size, and are also technologically relatively advanced compared to the other races. They get along well with the humans, and have an alliance with their northern neighbors, the gnomes.",
   "adjective": "dwarven",
   "stats": [6, 4, 6, 6, 5, 3],
+  "statsSuggestion": [2, 0, 0, 1, 0, 0],
   "height": 130,
   "weight": 60,
   "classes": [ "class:49", "class:51", "class:53", "class:54", "class:55", "class:56" ],

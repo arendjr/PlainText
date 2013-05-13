@@ -34,6 +34,15 @@ void Race::setStats(const CharacterStats &stats) {
     }
 }
 
+void Race::setStatsSuggestion(const CharacterStats &statsSuggestion) {
+
+    if (m_statsSuggestion != statsSuggestion) {
+        m_statsSuggestion = statsSuggestion;
+
+        setModified();
+    }
+}
+
 void Race::setHeight(int height) {
 
     if (m_height != height) {

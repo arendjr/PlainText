@@ -21,3 +21,12 @@ void Class::setStats(const CharacterStats &stats) {
         setModified();
     }
 }
+
+void Class::setStatsSuggestion(const CharacterStats &statsSuggestion) {
+
+    if (m_statsSuggestion != statsSuggestion) {
+        m_statsSuggestion = statsSuggestion;
+
+        setModified();
+    }
+}

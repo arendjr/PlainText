@@ -3,6 +3,7 @@
   "description": "Goblins are inherently evil, and are therefore hated by every other race. They are even at active war with the humans. Concerning their physique, they are slightly shorter and leaner than humans, giving them extra dexterity. Their spell casting abilities are a bit better, but their magic defense is weaker.",
   "adjective": "goblin",
   "stats": [5, 6, 5, 5, 7, 2],
+  "statsSuggestion": [0, 2, 0, 0, 1, 0],
   "height": 160,
   "weight": 55,
   "classes": [ "class:50", "class:52", "class:53", "class:54", "class:56" ],

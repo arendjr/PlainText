@@ -22,6 +22,10 @@ class Race : public GameObject {
         void setStats(const CharacterStats &stats);
         Q_PROPERTY(CharacterStats stats READ stats WRITE setStats)
 
+        const CharacterStats &statsSuggestion() const { return m_statsSuggestion; }
+        void setStatsSuggestion(const CharacterStats &statsSuggestion);
+        Q_PROPERTY(CharacterStats statsSuggestion READ statsSuggestion WRITE setStatsSuggestion)
+
         int height() const { return m_height; }
         void setHeight(int height);
         Q_PROPERTY(int height READ height WRITE setHeight)
@@ -46,6 +50,7 @@ class Race : public GameObject {
         QString m_adjective;
 
         CharacterStats m_stats;
+        CharacterStats m_statsSuggestion;
         int m_height;
         int m_weight;
 

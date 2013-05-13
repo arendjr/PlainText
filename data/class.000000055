@@ -1,5 +1,6 @@
 {
   "name": "cleric",
   "description": "Clerics are well-versed in the art of magic, especially in defensive spells. They also have reasonable fighting skills, as well as their special ability to pray to the gods, giving them extra protection against his evil surroundings.",
-  "stats": [4, 5, 4, 2, 7, 8]
+  "stats": [4, 5, 4, 2, 7, 8],
+  "statsSuggestion": [0, 0, 0, 1, 2, 3]
 }
