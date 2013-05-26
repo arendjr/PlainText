@@ -1,6 +1,7 @@
 #include "getpropcommand.h"
 
 #include "conversionutil.h"
+#include "scriptengine.h"
 #include "util.h"
 
 
@@ -27,9 +28,24 @@ void GetPropCommand::execute(Character *player, const QString &command) {
         return;
     }
 
-    QString propertyName = Util::fullPropertyName(object.cast<GameObject *>(), takeWord());
+    QString propName = takeWord();
+    QString propertyName = Util::fullPropertyName(object.cast<GameObject *>(), propName);
     if (propertyName.isEmpty()) {
-        send("Usage: get-prop <object-name> [#] <property-name>");
+        if (propName.isEmpty()) {
+            send("Usage: get-prop <object-name> [#] <property-name>");
+        } else {
+            propertyName = ConversionUtil::jsString(propName);
+            ScriptEngine *scriptEngine = ScriptEngine::instance();
+            QScriptValue value = scriptEngine->evaluate(QString("$('%1:%2')[%3]")
+                                                        .arg(object->objectType().toString())
+                                                        .arg(object->id())
+                                                        .arg(propertyName));
+            if (value.isUndefined()) {
+                send(QString("Unknown property: %1").arg(propName));
+            } else {
+                send(value.toString());
+            }
+        }
         return;
     }
 
