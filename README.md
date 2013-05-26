@@ -68,6 +68,8 @@ forum is used to discuss gameplay mechanics (including code snippets).
  * The [PlainText tooling](https://groups.google.com/forum/?fromgroups#!forum/plaintext-tooling)
 forum is for discussion regarding tooling (IDEs, room building, compilers, etc.).
 
+Bugs can be reported through [GitHub's issue tracker](https://github.com/arendjr/PlainText/issues).
+
 <a id="documentation"></a>
 Documentation
 -------------
