@@ -44,7 +44,9 @@ QString DiskUtil::dataDir() {
 QStringList DiskUtil::dataDirFileList(const QString &subdirectory) {
 
     QDir dir(DiskUtil::dataDir() + subdirectory);
-    return dir.entryList(QDir::Files);
+    QStringList entries = dir.entryList(QDir::Files);
+    return entries.filter(QRegExp("^[^.].*$")); // extra filter to remove files starting
+                                                // with a dot on Windows
 }
 
 QString DiskUtil::gameObjectPath(const QString &objectType, uint id) {

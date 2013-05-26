@@ -829,12 +829,17 @@ GameObject *GameObject::createFromFile(Realm *realm, const QString &path) {
     QString fileName = fileInfo.fileName();
     QStringList components = fileName.split('.');
     if (components.length() != 2) {
-        throw GameException(GameException::InvalidGameObjectFileName);
+        throw GameException(GameException::InvalidGameObjectFileName, fileName);
     }
 
-    QString objectType = Util::capitalize(components[0]);
-    GameObject *gameObject = createByObjectType(realm, GameObjectType::fromString(objectType),
-                                                       components[1].toUInt());
+    bool validId;
+    GameObjectType objectType = GameObjectType::fromString(Util::capitalize(components[0]));
+    uint id = components[1].toUInt(&validId);
+    if (objectType == GameObjectType::Unknown || !validId) {
+        throw GameException(GameException::InvalidGameObjectFileName, fileName);
+    }
+
+    GameObject *gameObject = createByObjectType(realm, objectType, id);
     gameObject->load(path);
     return gameObject;
 }
