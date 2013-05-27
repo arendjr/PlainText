@@ -104,7 +104,7 @@ the necessary dependencies:
     $ sudo apt-get install libqt4-dev libz-dev
 
 If you are using Windows, download the Qt package for Windows that comes bundled
-with MinGW.
+with MinGW from this page: http://qt-project.org/downloads
 
 <a id="compiling"></a>
 ### Compiling ###
