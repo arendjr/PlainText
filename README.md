@@ -109,7 +109,7 @@ with MinGW.
 <a id="compiling"></a>
 ### Compiling ###
 
-If you're using Linux or Mac OS X, run the following commands from the project
+If you're using Linux or OS X, run the following commands from the project
 directory:
 
     $ qmake PlainText.pro
