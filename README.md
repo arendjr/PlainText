@@ -87,7 +87,7 @@ Running your own server
 <a id="supported-platforms"></a>
 ### Supported platforms ###
 
- * Linux (tested on Gentoo Linux, openSUSE 12.2 and Ubuntu 12.10)
+ * Linux (tested on Gentoo Linux, openSUSE 12.2 and Ubuntu 12.10 and up)
  * Mac OS X 10.7 and up (recently only tested on OS X 10.8)
  * Windows (tested on Windows 7)
 
