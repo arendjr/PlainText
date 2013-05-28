@@ -87,13 +87,9 @@ Running your own server
 <a id="supported-platforms"></a>
 ### Supported platforms ###
 
- * Linux (tested on Gentoo Linux, openSUSE 12.2 and Ubuntu 12.10)
+ * Linux (tested on Gentoo Linux, openSUSE 12.2 and Ubuntu 12.10 and up)
  * Mac OS X 10.7 and up (recently only tested on OS X 10.8)
-
-It should also be possible to run the server on Windows (probably with a
-little bit of effort), but I did not personally test this, and will not be
-able to help those who try. Patches for Windows compatibility will be
-accepted though.
+ * Windows (tested on Windows 7)
 
 <a id="dependencies"></a>
 ### Dependencies ###
@@ -107,13 +103,30 @@ the necessary dependencies:
 
     $ sudo apt-get install libqt4-dev libz-dev
 
+If you are using Windows, download the Qt package for Windows that comes bundled
+with MinGW from this page: http://qt-project.org/downloads
+
 <a id="compiling"></a>
 ### Compiling ###
 
-Run the following commands from the project directory:
+If you're using Linux or OS X, run the following commands from the project
+directory:
 
     $ qmake PlainText.pro
     $ make
+
+If you're on Windows, you need to add the MinGW/bin/ directories to your PATH
+environment variable. Assuming you installed Qt 5.0.2 under C:\Qt, these are the
+following two directories:
+
+    C:\Qt\Qt5.0.2\5.0.2\mingw47_32\bin
+    C:\Qt\Qt5.0.2\Tools\MinGW\bin
+
+After you have properly set your PATH variable, you can run the following
+commands from the project directory:
+
+    $ qmake PlainText.pro -r -spec win32-g++
+    $ mingw32-make
 
 <a id="running"></a>
 ### Running ###
