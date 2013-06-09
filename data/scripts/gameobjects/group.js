@@ -1,7 +1,21 @@
 
+/**
+ * Constructor.
+ *
+ * @note Don't instantiate this class directly, use Realm.createObject("Group") instead.
+ */
 function Group() {
 }
 
+/**
+ * Returns a possibly fuzzy description of the group, depending on the strength (clarity) with which
+ * the group is being observed.
+ *
+ * @param strength The strength with which the group is being observed. 1.0 represents a full
+ *                 clear view, while 0.0 means the group has become invisible.
+ *
+ * @return string
+ */
 Group.prototype.nameAtStrength = function(strength) {
 
     var room = this.leader.currentRoom;

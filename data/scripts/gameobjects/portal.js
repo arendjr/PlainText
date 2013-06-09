@@ -1,6 +1,19 @@
 
+/**
+ * Constructor.
+ *
+ * @note Don't instantiate this class directly, use Realm.createObject("Portal") instead.
+ */
 function Portal() {
 }
+
+/**
+ * Returns a minimal description of the portal composed of the portal's name and its destination.
+ *
+ * @param room Room from which the portal is being observed.
+ *
+ * @return string
+ */
 
 Portal.prototype.nameWithDestinationFromRoom = function(room) {
 
@@ -17,6 +30,13 @@ Portal.prototype.nameWithDestinationFromRoom = function(room) {
     }
 };
 
+/**
+ * Returns the description of the portal as seen by a specific character.
+ *
+ * @param character The character looking at the portal.
+ *
+ * @return string
+ */
 Portal.prototype.lookAtBy = function(character) {
 
     var room = character.currentRoom;

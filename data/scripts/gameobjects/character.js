@@ -1,16 +1,31 @@
 
+/**
+ * Constructor.
+ *
+ * @note Don't instantiate this class directly, use Realm.createObject("Character") instead.
+ */
 function Character() {
 
     this.currentAction = "";
     this.currentActionTimerId = 0;
 }
 
+/**
+ * This method is called whenever the stats of the character change.
+ *
+ * @param newStats Array containing the new stats.
+ */
 Character.prototype.changeStats = function(newStats) {
 
     this.maxHp = 2 * newStats[VITALITY];
     this.maxMp = newStats[INTELLIGENCE];
 };
 
+/**
+ * Closes a portal.
+ *
+ * @param portal The portal to close.
+ */
 Character.prototype.close = function(portal) {
 
     if (!portal.canOpenFromRoom(this.currentRoom)) {
@@ -35,6 +50,11 @@ Character.prototype.close = function(portal) {
     }
 };
 
+/**
+ * Makes the character die.
+ *
+ * @param attacker The character who killed this character (optional).
+ */
 Character.prototype.die = function(attacker) {
 
     if (!this.invokeTrigger("ondie", attacker)) {
@@ -95,9 +115,17 @@ Character.prototype.die = function(attacker) {
     }
 };
 
-Character.prototype.go = function(pointer) {
+/**
+ * Makes the character travel to another room.
+ *
+ * @param object A portal or room. If a portal is given, it is assumed to be reachable from the
+ *               current room. If a room is given, the portal to travel through is determined
+ *               automatically. However, if the portal cannot be determined (for example, if the
+ *               rooms aren't adjacent) the character will travel to the other room regardless).
+ */
+Character.prototype.go = function(object) {
 
-    if (!pointer) {
+    if (!object) {
         return;
     }
 
@@ -108,20 +136,20 @@ Character.prototype.go = function(pointer) {
 
     var i, length, exitName = "", destination = null, portal = null;
 
-    if (pointer.isPortal()) {
-        portal = pointer;
+    if (object.isPortal()) {
+        portal = object;
         exitName = portal.nameFromRoom(this.currentRoom);
         destination = portal.oppositeOf(this.currentRoom);
-    } else if (pointer.isRoom()) {
+    } else if (object.isRoom()) {
         for (i = 0, length = this.currentRoom.portals.length; i < length; i++) {
             var potentialPortal = this.currentRoom.portals[i];
-            if (potentialPortal.oppositeOf(this.currentRoom) === pointer) {
+            if (potentialPortal.oppositeOf(this.currentRoom) === object) {
                 portal = potentialPortal;
                 exitName = portal.nameFromRoom(this.currentRoom);
                 break;
             }
         }
-        destination = pointer;
+        destination = object;
     } else {
         return;
     }
@@ -225,7 +253,7 @@ Character.prototype.go = function(pointer) {
         if (!followers.isEmpty()) {
             soundDescription = "some people";
             for (i = 0, length = followers.length; i < length; i++) {
-                soundStrength += max(0.8 - 0.2 * i, 0.3);
+                soundStrength += Math.max(0.8 - 0.2 * i, 0.3);
             }
         }
 
@@ -246,11 +274,21 @@ Character.prototype.go = function(pointer) {
     }
 };
 
+/**
+ * Makes the character stand guard. This does not actually do anything other than applying the
+ * description when a player looks at the character.
+ */
 Character.prototype.guard = function(target) {
 
     this.setAction("guard", { "target": target });
 };
 
+/**
+ * Returns the weight of all the inventory (including those currently wielded) carried by the
+ * character.
+ *
+ * @return number
+ */
 Character.prototype.inventoryWeight = function() {
 
     var inventoryWeight = 0.0;
@@ -269,6 +307,9 @@ Character.prototype.inventoryWeight = function() {
     return inventoryWeight;
 };
 
+/**
+ * Attempts to kill another character.
+ */
 Character.prototype.kill = function(character) {
 
     if (this.secondsStunned() > 0) {
@@ -305,6 +346,9 @@ Character.prototype.kill = function(character) {
     }
 };
 
+/**
+ * Looks in the direction the character is currently facing.
+ */
 Character.prototype.lookAhead = function() {
 
     var room = this.currentRoom;
@@ -331,6 +375,13 @@ Character.prototype.lookAhead = function() {
     }
 };
 
+/**
+ * Returns the description of the character as seen by another character.
+ *
+ * @param character The character looking at this character.
+ *
+ * @return string
+ */
 Character.prototype.lookAtBy = function(character) {
 
     var pool = this.currentRoom.characters;
@@ -410,11 +461,25 @@ Character.prototype.lookAtBy = function(character) {
     return text;
 };
 
+/**
+ * Returns the maximum amount of inventory the character may carry.
+ *
+ * @return number
+ */
 Character.prototype.maxInventoryWeight = function() {
 
     return 20 + this.stats[STRENGTH] + Math.floor(this.stats[ENDURANCE] / 2);
 };
 
+/**
+ * Returns the name of the character or a more fuzzy description, depending on the strength
+ * (clarity) with which the character is being observed.
+ *
+ * @param strength The strength with which the character is being observed. 1.0 represents a full
+ *                 clear view, while 0.0 means the character has become invisible.
+ *
+ * @return string
+ */
 Character.prototype.nameAtStrength = function(strength) {
 
     if (strength >= 0.9) {
@@ -427,6 +492,11 @@ Character.prototype.nameAtStrength = function(strength) {
     }
 };
 
+/**
+ * Opens a portal.
+ *
+ * @param portal The portal to open.
+ */
 Character.prototype.open = function(portal) {
 
     if (!portal.canOpenFromRoom(this.currentRoom)) {
@@ -451,11 +521,21 @@ Character.prototype.open = function(portal) {
     }
 };
 
+/**
+ * Regenerates health of the character.
+ *
+ * This method is automatically called periodically.
+ */
 Character.prototype.regenerate = function() {
 
-    this.hp += max(Math.floor(this.stats[VITALITY] / 15), 1);
+    this.hp += Math.max(Math.floor(this.stats[VITALITY] / 15), 1);
 };
 
+/**
+ * Removes a currently wielded item.
+ *
+ * @param item
+ */
 Character.prototype.remove = function(item) {
 
     if (this.weapon === item) {
@@ -473,6 +553,11 @@ Character.prototype.remove = function(item) {
     }
 };
 
+/**
+ * Says a messages.
+ *
+ * @param message The message to say.
+ */
 Character.prototype.say = function(message) {
 
     var event = Realm.createEvent("Speech", this.currentRoom, 1.0);
@@ -483,6 +568,15 @@ Character.prototype.say = function(message) {
     this.setAction("talk", { "duration": 4000 });
 };
 
+/**
+ * Sets the current action. Changing the action affects how the character is perceived by other
+ * characters.
+ *
+ * @param action The new action.
+ * @param options Options object (optional). May contain the following properties:
+ *                - target: Target relevant to the action (e.g. the character spoken to).
+ *                - duration: Time in milliseconds after which the action will be reset.
+ */
 Character.prototype.setAction = function(action, options) {
 
     options = options || {};
@@ -509,6 +603,11 @@ Character.prototype.setAction = function(action, options) {
     }
 };
 
+/**
+ * Shouts a message.
+ *
+ * @param message The message to shout.
+ */
 Character.prototype.shout = function(message) {
 
     var event = Realm.createEvent("Speech", this.currentRoom, 5.0);
@@ -524,6 +623,11 @@ Character.prototype.shout = function(message) {
     this.setAction("shout", { "duration": 4000 });
 };
 
+/**
+ * Takes (picks up) one or more items from the current room.
+ *
+ * @param items Array containing items to take.
+ */
 Character.prototype.take = function(items) {
 
     var room = this.currentRoom;
@@ -560,6 +664,12 @@ Character.prototype.take = function(items) {
     }
 };
 
+/**
+ * Talks to another character.
+ *
+ * @param character The character to talk to.
+ * @param message The message to say.
+ */
 Character.prototype.talk = function(character, message) {
 
     var event = Realm.createEvent("Speech", this.currentRoom, 1.0);
@@ -576,9 +686,15 @@ Character.prototype.talk = function(character, message) {
         }
     }
 
-    this.setAction("talk", { "duration": 4000 });
+    this.setAction("talk", { "duration": 4000, "target": character });
 };
 
+/**
+ * Tells a message to another player who is not necessarily in the same room.
+ *
+ * @param player The player to tell the message to.
+ * @param message The message to tell.
+ */
 Character.prototype.tell = function(player, message) {
 
     if (message.isEmpty()) {
@@ -590,11 +706,21 @@ Character.prototype.tell = function(player, message) {
     this.send("You tell %1, \"%2\".".arg(player.name, message));
 };
 
+/**
+ * Returns the total weight of the character, including all carried inventory.
+ *
+ * @param return number
+ */
 Character.prototype.totalWeight = function() {
 
     return this.weight + this.inventoryWeight();
 };
 
+/**
+ * Wields an item from the inventory.
+ *
+ * @param item The item to wield.
+ */
 Character.prototype.wield = function(item) {
 
     var inventory = this.inventory;
@@ -615,7 +741,8 @@ Character.prototype.wield = function(item) {
                 if (this.weapon.name === item.name) {
                     this.send("You swap your %1 for another %2.".arg(this.weapon.name, item.name));
                 } else {
-                    this.send("You remove your %1 and wield your %2.".arg(this.weapon.name, item.name));
+                    this.send("You remove your %1 and wield your %2."
+                              .arg(this.weapon.name, item.name));
                 }
                 inventory.append(this.weapon);
                 this.weapon = item;

@@ -393,12 +393,12 @@ function SessionHandler() {
                         }
 
                         stats = [
-                            max(attributes[0].toInt(), 0),
-                            max(attributes[1].toInt(), 0),
-                            max(attributes[2].toInt(), 0),
-                            max(attributes[3].toInt(), 0),
-                            isBarbarian ? 0 : max(attributes[4].toInt(), 0),
-                            max(attributes[isBarbarian ? 4 : 5].toInt(), 0)
+                            Math.max(attributes[0].toInt(), 0),
+                            Math.max(attributes[1].toInt(), 0),
+                            Math.max(attributes[2].toInt(), 0),
+                            Math.max(attributes[3].toInt(), 0),
+                            isBarbarian ? 0 : Math.max(attributes[4].toInt(), 0),
+                            Math.max(attributes[isBarbarian ? 4 : 5].toInt(), 0)
                         ];
                     }
 

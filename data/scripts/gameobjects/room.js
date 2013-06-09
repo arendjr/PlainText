@@ -1,7 +1,17 @@
 
+/**
+ * Constructor.
+ *
+ * @note Don't instantiate this class directly, use Realm.createObject("Room") instead.
+ */
 function Room() {
 }
 
+/**
+ * Adds an amount of gold to the room.
+ *
+ * @param amount The amount of gold to add to the room.
+ */
 Room.prototype.addGold = function(amount) {
 
     var goldItem;
@@ -25,6 +35,13 @@ Room.prototype.addGold = function(amount) {
     goldItem.name = "$%1 worth of gold".arg(amount);
 };
 
+/**
+ * Returns the description of the room as seen by a specific character.
+ *
+ * @param character The character looking at the room.
+ *
+ * @return string
+ */
 Room.prototype.lookAtBy = function(character) {
 
     var text = "", self = this;
@@ -107,6 +124,11 @@ Room.prototype.lookAtBy = function(character) {
     return text;
 };
 
+/**
+ * Returns a portal that is connected to the room by its name as perceived from this room.
+ *
+ * @return object
+ */
 Room.prototype.portalNamed = function(name) {
 
     for (var i = 0, length = this.portals.length; i < length; i++) {
@@ -115,5 +137,5 @@ Room.prototype.portalNamed = function(name) {
             return portal;
         }
     }
-    return undefined;
+    return null;
 };

@@ -29,7 +29,7 @@ var Options = {
 
 Array.prototype.add = function(array) {
 
-    for (var i = 0, length = min(this.length, array.length); i < length; i++) {
+    for (var i = 0, length = Math.min(this.length, array.length); i < length; i++) {
         this[i] += array[i];
     }
     return this;
@@ -152,7 +152,7 @@ Array.prototype.mid = function(begin, end) {
 Array.prototype.minus = function(array) {
 
     var result = [];
-    for (var i = 0, length = min(this.length, array.length); i < length; i++) {
+    for (var i = 0, length = Math.min(this.length, array.length); i < length; i++) {
         result[i] = this[i] - array[i];
     }
     return result;
@@ -192,7 +192,7 @@ Array.prototype.normalized = function() {
 Array.prototype.plus = function(array) {
 
     var result = [];
-    for (var i = 0, length = min(this.length, array.length); i < length; i++) {
+    for (var i = 0, length = Math.min(this.length, array.length); i < length; i++) {
         result[i] = this[i] + array[i];
     }
     return result;
@@ -536,6 +536,14 @@ var console = (function() {
 })();
 
 
+/**
+ * Returns an object by identifier.
+ *
+ * @param identifier Identifier of the object in the form "<object-type>:<object-id>".
+ *                   E.g. "character:167".
+ *
+ * @return object
+ */
 function $(identifier) {
 
     var split = identifier.split(":");
@@ -546,6 +554,8 @@ function $(identifier) {
 /**
  * Returns true by chance. E.g. byChance(1, 7) will return true with a chance of 1/7 and false all
  * the other times.
+ *
+ * @return boolean
  */
 function byChance(n, p) {
 
@@ -554,24 +564,9 @@ function byChance(n, p) {
 
 
 /**
- * Returns the lowest of two numbers.
- */
-function min(a, b) {
-
-    return a < b ? a : b;
-}
-
-/**
- * Returns the highest of two numbers.
- */
-function max(a, b) {
-
-    return a > b ? a : b;
-}
-
-
-/**
  * Returns a random integer of at least min (inclusive) and at most max (exclusive).
+ *
+ * @return number
  */
 function randomInt(min, max) {
 
