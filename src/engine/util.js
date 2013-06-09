@@ -553,13 +553,17 @@ function $(identifier) {
 
 /**
  * Returns true by chance. E.g. byChance(1, 7) will return true with a chance of 1/7 and false all
- * the other times.
+ * the other times. It is also possible to call this method as byChance(1/7).
  *
  * @return boolean
  */
 function byChance(n, p) {
 
-    return Util.randomInt(0, p) < n;
+    if (p) {
+        return Util.randomInt(0, p) < n;
+    } else {
+        return Math.random() < n;
+    }
 }
 
 
