@@ -23,8 +23,8 @@ StatsItem.prototype.totalStats = function() {
     }
 
     if (this.inventoryWeight) {
-        totalStats[DEXTERITY] = max(totalStats[DEXTERITY] - Math.floor(this.inventoryWeight() / 5),
-                                    0);
+        var dexterity = totalStats[DEXTERITY] - Math.floor(this.inventoryWeight() / 5);
+        totalStats[DEXTERITY] = Math.max(dexterity, 0);
     }
 
     return totalStats;
