@@ -382,7 +382,7 @@ function SessionHandler() {
 
                     var stats;
                     if (answer === "accept suggestion" || answer === "accept" || answer === "a") {
-                        stats = signUpData.statsSuggestion.clone();
+                        stats = _.clone(signUpData.statsSuggestion);
                         if (isBarbarian) {
                             stats.splice(INTELLIGENCE, 0, 0);
                         }

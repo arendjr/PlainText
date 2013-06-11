@@ -36,7 +36,7 @@ var VisualUtil = (function() {
 
     function divideItemsIntoGroups(items, direction) {
 
-        var groups = groupsTemplate.clone();
+        var groups = _.clone(groupsTemplate);
         for (var i = 0, length = items.length; i < length; i++) {
             var item = items[i];
             if (item.hidden) {
@@ -76,7 +76,7 @@ var VisualUtil = (function() {
 
     function dividePortalsAndCharactersIntoGroups(character, room, strength) {
 
-        var groups = groupsTemplate.clone();
+        var groups = _.clone(groupsTemplate);
         for (var i = 0, length = room.portals.length; i < length; i++) {
             var portal = room.portals[i];
             if (portal.isHiddenFromRoom(room)) {

@@ -279,6 +279,7 @@ OTHER_FILES += \
     data/scripts/gameobjects/portal.js \
     data/scripts/gameobjects/room.js \
     data/scripts/gameobjects/statsitem.js \
+    data/scripts/lib/underscore.js \
     src/engine/util.js \
     src/engine/commands/command.js \
     src/engine/commands/admin/admincommand.js \
@@ -329,7 +330,7 @@ OTHER_FILES += \
     web/propertyeditor/propertyeditor.html \
     web/propertyeditor/propertyeditor.js \
     web/sliderwidget/slider.css \
-    web/sliderwidget/slider.js \
+    web/sliderwidget/slider.js
 
 INCLUDEPATH += \
     src/engine \

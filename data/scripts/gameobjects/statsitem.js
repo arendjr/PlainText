@@ -4,7 +4,7 @@ function StatsItem() {
 
 StatsItem.prototype.totalStats = function() {
 
-    var totalStats = this.stats.clone();
+    var totalStats = _.clone(this.stats);
 
     if (this.modifiers) {
         this.modifiers.forEach(function(modifier) {
