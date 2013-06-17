@@ -36,7 +36,7 @@ var VisualUtil = (function() {
 
     function divideItemsIntoGroups(items, direction) {
 
-        var groups = _.clone(groupsTemplate);
+        var groups = deepClone(groupsTemplate);
         for (var i = 0, length = items.length; i < length; i++) {
             var item = items[i];
             if (item.hidden) {
@@ -76,7 +76,8 @@ var VisualUtil = (function() {
 
     function dividePortalsAndCharactersIntoGroups(character, room, strength) {
 
-        var groups = _.clone(groupsTemplate);
+        var groups = deepClone(groupsTemplate);
+        var characters = [];
         for (var i = 0, length = room.portals.length; i < length; i++) {
             var portal = room.portals[i];
             if (portal.isHiddenFromRoom(room)) {
@@ -87,8 +88,8 @@ var VisualUtil = (function() {
             var angle = Util.angleBetweenXYVectors(character.direction, position);
 
             if (portal.canSeeThrough() && Math.abs(angle) < UNDER_QUART_PI) {
-                groups["characters"] = charactersVisibleThroughPortal(character, room,
-                                                                      portal, strength);
+                characters = characters.concat(charactersVisibleThroughPortal(character, room,
+                                                                              portal, strength));
             }
 
             var name = portal.nameFromRoom(room);
@@ -105,6 +106,9 @@ var VisualUtil = (function() {
             } else {
                 groups["left"].push(portal);
             }
+        }
+        if (characters.length > 0) {
+            groups["characters"] = characters;
         }
         return groups;
     }

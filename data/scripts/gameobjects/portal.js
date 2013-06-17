@@ -14,7 +14,6 @@ function Portal() {
  *
  * @return string
  */
-
 Portal.prototype.nameWithDestinationFromRoom = function(room) {
 
     var name = this.nameFromRoom(room);

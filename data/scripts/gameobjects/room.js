@@ -69,7 +69,7 @@ Room.prototype.lookAtBy = function(character) {
 
             var combinedItems = Util.combinePtrList(itemGroup);
 
-            if (hasDynamicPortals) {
+            if (hasDynamicPortals && key !== "characters") {
                 portalGroups[key].forEach(function(portal) {
                     combinedItems.append(portal.nameWithDestinationFromRoom(self));
                 });

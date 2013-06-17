@@ -545,6 +545,28 @@ function byChance(n, p) {
 
 
 /**
+ * Creates a deep clone of an object or array. This function is only safe to use with plain objects
+ * and arrays; class instances are not supported.
+ *
+ * @return object
+ */
+function deepClone(object) {
+
+    var clone = _.clone(object);
+    if (clone instanceof Array) {
+        for (var i = 0; i < clone.length; i++) {
+            clone[i] = deepClone(clone[i]);
+        }
+    } else if (clone instanceof Object) {
+        for (var key in clone) {
+            clone[key] = deepClone(clone[key]);
+        }
+    }
+    return clone;
+}
+
+
+/**
  * Returns a random integer of at least min (inclusive) and at most max (exclusive).
  *
  * @return number
