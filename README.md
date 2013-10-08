@@ -13,11 +13,9 @@ PlainText is a text-based MUD game engine.
    * [Running](#running)
  * **[Playing the game](#playing-the-game)**
    * [Connect to your own server](#connect-to-your-own-server)
-   * [Connect to the demo server](#connect-to-the-demo-server)
  * **[License](#license)**
  
 
-<a id="features"></a>
 Features
 --------
 
@@ -52,7 +50,6 @@ Features
    * All game objects are in memory
    * Changes are synced to disk in separate thread
 
-<a id="community"></a>
 Community
 ---------
 
@@ -70,7 +67,6 @@ forum is for discussion regarding tooling (IDEs, room building, compilers, etc.)
 
 Bugs can be reported through [GitHub's issue tracker](https://github.com/arendjr/PlainText/issues).
 
-<a id="documentation"></a>
 Documentation
 -------------
 
@@ -80,18 +76,15 @@ There's documentation available in the
 You may want to jump straight to the
 [Frequently Asked Questions](https://github.com/arendjr/PlainText/wiki/Frequently-Asked-Questions).
 
-<a id="running-your-own-server"></a>
 Running your own server
 -----------------------
 
-<a id="supported-platforms"></a>
 ### Supported platforms ###
 
  * Linux (tested on Gentoo Linux, openSUSE 12.2 and Ubuntu 12.10 and up)
  * Mac OS X 10.7 and up (recently only tested on OS X 10.8)
  * Windows (tested on Windows 7)
 
-<a id="dependencies"></a>
 ### Dependencies ###
 
  * Clang 3.1 or higher, or GCC 4.7 or higher
@@ -106,7 +99,6 @@ the necessary dependencies:
 If you are using Windows, download the Qt package for Windows that comes bundled
 with MinGW from this page: http://qt-project.org/downloads
 
-<a id="compiling"></a>
 ### Compiling ###
 
 If you're using Linux or OS X, run the following commands from the project
@@ -128,7 +120,6 @@ commands from the project directory:
     $ qmake PlainText.pro -r -spec win32-g++
     $ mingw32-make
 
-<a id="running"></a>
 ### Running ###
 
  * Set the PT_DATA_DIR environment variable to point to the data/ directory.
@@ -136,7 +127,6 @@ commands from the project directory:
    where you want your logs to be stored.
  * Run your compiled PlainText executable from the project directory.
 
-<a id="playing-the-game"></a>
 Playing the game
 ----------------
 
@@ -147,7 +137,6 @@ modern standards compliant browser. These are the browsers that *should* work:
  * Internet Explorer 10
  * Safari
 
-<a id="connect-to-your-own-server"></a>
 ### Connect to your own server ###
 
 If you have just compiled your own server, you can connect to it through telnet
@@ -157,15 +146,6 @@ when you start your server.
 The first character you register on your own server will automatically become an
 admin.
 
-<a id="connect-to-the-demo-server"></a>
-### Connect to the demo server ###
-
-If you do not have your own server, feel free to connect to the demo server:
-
- * Point your webbrowser to http://mud.yunocloud.com:8080/ *or*
- * Connect with telnet to mud.yunocloud.com on port 4801.
-
-<a id="license"></a>
 License
 -------
 
