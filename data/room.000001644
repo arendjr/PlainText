@@ -1,4 +1,6 @@
 {
+  "name": "",
+  "description": "",
   "type": "Room",
   "position": [ 100, -300, 8 ],
   "flags": "HasFloor",

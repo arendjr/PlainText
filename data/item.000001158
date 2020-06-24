@@ -1,8 +1,10 @@
 {
   "name": "long bread",
+  "description": "",
   "triggers": { "oneat": "function (character) {\n                        character.addEffect({\n                            'delay': 3000,\n                            'numOccurrences': 1,\n                            'hpDelta': 5,\n                            'mpDelta': 0,\n                            'message': 'Eating some bread really did you good.'\n                        });\n                        character.send('You ate the long bread.');\n                        character.stun(3000);\n                    }" },
   "plural": "long breads",
   "indefiniteArticle": "a",
+  "position": [0, 0, 0],
   "portable": false,
   "weight": 0,
   "cost": 1.5

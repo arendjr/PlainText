@@ -1,6 +1,7 @@
 {
   "name": "mechanical light",
   "plural": "mechanical lights",
+  "description": "",
   "indefiniteArticle": "a",
   "position": [ 0, 0, 0 ],
   "weight": 0,

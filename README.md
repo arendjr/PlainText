@@ -30,11 +30,6 @@ Features
  * Dynamic room descriptions
    * Reflects positions and directions for items, exits and characters
    * Complements, not replaces, hand-written descriptions
- * Scripting support using JavaScript
-   * Commands may be implemented in JavaScript
-   * Customizable combat
-   * Scriptable NPCs with triggers
-   * Game objects may be extended
  * Logging of sessions (including IPs) and player commands
  * Statistics tracking and visualization in the map editor
  * Basic MUD commands
@@ -45,8 +40,8 @@ Features
    * Player groups (follow, lose, disband, gtalk)
    * Basic combat (kill, attack, wield, remove)
  * Designed for minimal latency
-   * High-performance C++ core
-   * Multi-threaded design
+   * Written in Rust
+   * Lock-free, multi-threaded design
    * All game objects are in memory
    * Changes are synced to disk in separate thread
 
@@ -79,63 +74,13 @@ You may want to jump straight to the
 Running your own server
 -----------------------
 
-### Supported platforms ###
+Make sure you have the latest stable Rust release installed and cloned this
+repository, then from the command line, run:
 
- * Linux (tested on Gentoo Linux, openSUSE 12.2 and Ubuntu 12.10 and up)
- * Mac OS X 10.7 and up (recently only tested on OS X 10.8)
- * Windows (tested on Windows 7)
+    $ PT_DATA_DIR=data/ cargo run
 
-### Dependencies ###
-
- * Clang 3.1 or higher, or GCC 4.7 or higher
- * Qt framework 4.7 or higher, or Qt framework 5.x
- * Zlib development package
-
-If you are using Ubuntu Linux, you can use the following command to install
-the necessary dependencies:
-
-    $ sudo apt-get install libqt4-dev libz-dev
-
-If you are using Windows, download the Qt package for Windows that comes bundled
-with MinGW from this page: http://qt-project.org/downloads
-
-### Compiling ###
-
-If you're using Linux or OS X, run the following commands from the project
-directory:
-
-    $ qmake PlainText.pro
-    $ make
-
-If you're on Windows, you need to add the MinGW/bin/ directories to your PATH
-environment variable. Assuming you installed Qt 5.0.2 under C:\Qt, these are the
-following two directories:
-
-    C:\Qt\Qt5.0.2\5.0.2\mingw47_32\bin
-    C:\Qt\Qt5.0.2\Tools\MinGW\bin
-
-After you have properly set your PATH variable, you can run the following
-commands from the project directory:
-
-    $ qmake PlainText.pro -r -spec win32-g++
-    $ mingw32-make
-
-### Running ###
-
- * Set the PT_DATA_DIR environment variable to point to the data/ directory.
- * If you want to enable logging, set the PT_LOG_DIR variable to the directory
-   where you want your logs to be stored.
- * Run your compiled PlainText executable from the project directory.
-
-Playing the game
-----------------
-
-**Note**: If you want to play the game using your webbrowser, you should have a
-modern standards compliant browser. These are the browsers that *should* work:
- * Chrome
- * Firefox 4 or higher
- * Internet Explorer 10
- * Safari
+If you want to enable logging, set the PT_LOG_DIR variable to the directory
+where you want your logs to be stored.
 
 ### Connect to your own server ###
 

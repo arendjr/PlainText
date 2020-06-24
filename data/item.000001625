@@ -1,6 +1,7 @@
 {
   "name": "$5 worth of gold",
   "position": [ 0, 0, 0 ],
+  "description": "",
   "weight": 0,
   "cost": 5,
   "flags": ""

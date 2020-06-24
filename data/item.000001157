@@ -1,8 +1,10 @@
 {
   "name": "dark bread",
+  "description": "",
   "triggers": { "oneat": "function (character) {\n                        character.addEffect({\n                            'delay': 2500,\n                            'numOccurrences': 1,\n                            'hpDelta': 3,\n                            'mpDelta': 0,\n                            'message': 'Eating some bread really did you good.'\n                        });\n                        character.send('You ate the dark bread.');\n                        character.stun(2500);\n                    }" },
   "plural": "dark breads",
   "indefiniteArticle": "a",
+  "position": [0, 0, 0],
   "portable": false,
   "weight": 0,
   "cost": 1

@@ -1,6 +1,7 @@
 {
   "name": "south gate tower key",
   "plural": "south gate tower keys",
+  "description": "",
   "indefiniteArticle": "a",
   "position": [ 0, 0, 0 ],
   "weight": 0,

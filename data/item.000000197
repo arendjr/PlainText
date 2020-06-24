@@ -1,8 +1,10 @@
 {
   "name": "cup of herbal tea",
-  "triggers": { "ondrink": "(function(character) { character.addEffect({ 'delay': 45000, 'numOccurrences': 1, 'hpDelta': 2, 'mpDelta': 1, 'message': 'You feel the healing effect of the herbal tea.' }); character.send('You drank the tea.'); })" },
   "plural": "cups of herbal tea",
+  "description": "",
   "indefiniteArticle": "a",
+  "triggers": { "ondrink": "(function(character) { character.addEffect({ 'delay': 45000, 'numOccurrences': 1, 'hpDelta': 2, 'mpDelta': 1, 'message': 'You feel the healing effect of the herbal tea.' }); character.send('You drank the tea.'); })" },
+  "position": [0, 0, 0],
   "portable": false,
   "weight": 0,
   "cost": 0.5

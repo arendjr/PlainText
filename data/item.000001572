@@ -1,6 +1,7 @@
 {
   "name": "large and beautiful houses",
   "plural": "large and beautiful houseses",
+  "description": "",
   "indefiniteArticle": "a",
   "position": [ 0, 10, 0 ],
   "weight": 0,

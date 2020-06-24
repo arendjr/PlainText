@@ -80,10 +80,6 @@ AddPortalCommand.prototype.execute = function(player, command) {
     if (!destination) {
         destination = Realm.createObject("Room");
         destination.position = position;
-
-        if (this.currentRoom.area) {
-            this.currentRoom.area.addRoom(destination);
-        }
     }
 
     var portal = Realm.createObject("Portal");

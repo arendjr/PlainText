@@ -1,0 +1,12 @@
+{
+    "editor.formatOnSave": true,
+    "editor.rulers": [100],
+    "editor.tabSize": 4,
+    "files.exclude": {
+        "**/.git": true,
+        "target/": true
+    },
+    "files.insertFinalNewline": true,
+    "prettier.tabWidth": 4,
+    "prettier.arrowParens": "avoid"
+}

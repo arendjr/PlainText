@@ -1,6 +1,10 @@
 {
   "name": "mechanical light",
   "plural": "mechanical lights",
+  "description": "",
   "indefiniteArticle": "a",
-  "portable": true
+  "position": [0, 0, 0],
+  "portable": true,
+  "cost": 0,
+  "weight": 0.5
 }

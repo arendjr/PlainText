@@ -3,5 +3,8 @@
   "description": "The fence looks to have become a bit rusty over time.",
   "plural": "fences",
   "indefiniteArticle": "a",
-  "portable": false
+  "position": [0, 0, 0],
+  "portable": false,
+  "cost": 0,
+  "weight": 200
 }
