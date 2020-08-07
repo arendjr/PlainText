@@ -1,5 +1,5 @@
 use futures::{FutureExt, StreamExt};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::{env, fs, io};
 use warp::Filter;
 
@@ -7,9 +7,14 @@ mod character_stats;
 mod game_object;
 mod objects;
 mod point3d;
+mod sessions;
+mod telnet_server;
+mod transaction_writer;
 mod util;
 
-use game_object::{hydrate, GameObject, GameObjectRef, GameObjectType};
+use game_object::{hydrate, GameObject, GameObjectMap, GameObjectRef, GameObjectType};
+use sessions::SessionManager;
+use transaction_writer::TransactionWriter;
 
 #[tokio::main]
 async fn main() {
@@ -41,27 +46,35 @@ async fn main() {
     });
 
     match load_data(&data_dir) {
-        Ok((game_object_reader, mut game_object_writer)) => {
-            println!("Serving at port {}", websocket_port);
+        Ok((game_object_reader, game_object_writer)) => {
+            let session_manager = Mutex::new(SessionManager::new());
+            let transaction_writer =
+                TransactionWriter::new(game_object_reader.clone(), game_object_writer);
 
-            warp::serve(routes)
-                .run(([0, 0, 0, 0], websocket_port))
-                .await;
+            let mut handles = vec![];
+            handles.push(tokio::spawn(telnet_server::serve(
+                telnet_port,
+                game_object_reader,
+                session_manager,
+                transaction_writer,
+            )));
+
+            handles.push(tokio::spawn(
+                warp::serve(routes).run(([0, 0, 0, 0], websocket_port)),
+            ));
+            println!(
+                "Listening for WebSocket connections at port {}.",
+                websocket_port
+            );
+
+            futures::future::join_all(handles).await;
         }
         Err(error) => panic!("Failed to load data from `{}`: {}", data_dir, error),
     }
 }
 
-fn load_data(
-    data_dir: &str,
-) -> Result<
-    (
-        evmap::ReadHandle<GameObjectRef, Arc<dyn GameObject>>,
-        evmap::WriteHandle<GameObjectRef, Arc<dyn GameObject>>,
-    ),
-    io::Error,
-> {
-    let (game_object_reader, mut game_object_writer) = game_object::new_map();
+fn load_data(data_dir: &str) -> Result<GameObjectMap, io::Error> {
+    let (object_map_reader, mut object_map_writer) = game_object::new_map();
 
     let mut player_refs = vec![];
 
@@ -73,7 +86,7 @@ fn load_data(
             let content = fs::read_to_string(&path)?;
             match hydrate(object_ref, &content) {
                 Ok(object) => {
-                    game_object_writer.insert(object_ref, object);
+                    object_map_writer.set(object_ref, object);
 
                     if object_ref.get_type() == GameObjectType::Player {
                         player_refs.push(object_ref);
@@ -89,27 +102,22 @@ fn load_data(
         }
     }
 
-    game_object_writer.refresh();
+    object_map_writer.refresh();
 
     for player_ref in player_refs {
-        if let Some(player_object) = game_object_reader.get_one(&player_ref) {
-            if let Some(room_object) = player_object
-                .to_player()
-                .map(|player| player.get_current_room())
-                .and_then(|room_ref| game_object_reader.get_one(&room_ref))
-            {
-                if let Some(room) = room_object.to_room() {
-                    game_object_writer.update(
-                        room_object.get_ref(),
-                        Arc::new(room.with_characters(vec![player_ref])),
-                    );
-                    game_object_writer.refresh();
-                }
-            }
+        if let Some(room) = object_map_reader
+            .get_player(player_ref.get_id())
+            .and_then(|player| object_map_reader.get_room(player.get_current_room().get_id()))
+        {
+            object_map_writer.set(
+                room.get_ref(),
+                Arc::new(room.with_characters(vec![player_ref])),
+            );
+            object_map_writer.refresh();
         }
     }
 
-    game_object_writer.refresh();
+    object_map_writer.refresh();
 
-    Ok((game_object_reader, game_object_writer))
+    Ok((object_map_reader, object_map_writer))
 }

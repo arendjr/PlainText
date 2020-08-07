@@ -4,10 +4,11 @@ use crate::objects;
 
 use super::{GameObjectId, GameObjectRef, GameObjectType};
 
-pub trait GameObject {
+pub trait GameObject: std::marker::Sync + std::marker::Send {
     fn get_id(&self) -> GameObjectId;
     fn get_object_type(&self) -> GameObjectType;
     fn get_name(&self) -> String;
+    fn get_revision_num(&self) -> u32;
 
     fn get_definite_article(&self) -> &str {
         ""
@@ -21,23 +22,23 @@ pub trait GameObject {
         GameObjectRef(self.get_object_type(), self.get_id())
     }
 
-    fn to_item(&self) -> Option<&objects::Item> {
+    fn to_item(&self) -> Option<objects::Item> {
         None
     }
 
-    fn to_player(&self) -> Option<&objects::Player> {
+    fn to_player(&self) -> Option<objects::Player> {
         None
     }
 
-    fn to_portal(&self) -> Option<&objects::Portal> {
+    fn to_portal(&self) -> Option<objects::Portal> {
         None
     }
 
-    fn to_race(&self) -> Option<&objects::Race> {
+    fn to_race(&self) -> Option<objects::Race> {
         None
     }
 
-    fn to_room(&self) -> Option<&objects::Room> {
+    fn to_room(&self) -> Option<objects::Room> {
         None
     }
 }

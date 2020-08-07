@@ -11,43 +11,47 @@ use crate::point3d::Point3D;
 #[derive(Clone, Debug)]
 pub struct Room {
     id: GameObjectId,
-    characters: Vec<GameObjectRef>,
+    characters: Arc<Vec<GameObjectRef>>,
     description: String,
-    items: Vec<GameObjectRef>,
+    items: Arc<Vec<GameObjectRef>>,
     name: String,
-    portals: Vec<GameObjectRef>,
+    portals: Arc<Vec<GameObjectRef>>,
     position: Point3D,
+    revision_num: u32,
 }
 
 impl Room {
     pub fn hydrate(id: GameObjectId, json: &str) -> Result<Arc<dyn GameObject>, String> {
         match serde_json::from_str::<RoomDto>(json) {
-            Ok(room_dto) => Ok(Arc::new(Room {
+            Ok(room_dto) => Ok(Arc::new(Self {
                 id,
-                characters: vec![],
+                characters: Arc::new(vec![]),
                 description: room_dto.description,
-                items: match room_dto.items {
+                items: Arc::new(match room_dto.items {
                     Some(items) => items,
                     None => vec![],
-                },
+                }),
                 name: room_dto.name,
-                portals: room_dto.portals,
+                portals: Arc::new(room_dto.portals),
                 position: room_dto.position,
+                revision_num: 0,
             })),
             Err(error) => Err(format!("parse error: {}", error)),
         }
     }
 
-    pub fn with_characters(&self, characters: Vec<GameObjectRef>) -> Room {
-        Room {
-            characters: ref_union(&self.characters, &characters),
+    pub fn with_characters(&self, characters: Vec<GameObjectRef>) -> Self {
+        Self {
+            characters: Arc::new(ref_union(&self.characters, &characters)),
+            revision_num: self.revision_num + 1,
             ..self.clone()
         }
     }
 
-    pub fn without_characters(&self, characters: Vec<GameObjectRef>) -> Room {
-        Room {
-            characters: ref_difference(&self.characters, &characters),
+    pub fn without_characters(&self, characters: Vec<GameObjectRef>) -> Self {
+        Self {
+            characters: Arc::new(ref_difference(&self.characters, &characters)),
+            revision_num: self.revision_num + 1,
             ..self.clone()
         }
     }
@@ -72,8 +76,12 @@ impl GameObject for Room {
         self.name.clone()
     }
 
-    fn to_room(&self) -> Option<&Room> {
-        Some(self)
+    fn get_revision_num(&self) -> u32 {
+        self.revision_num
+    }
+
+    fn to_room(&self) -> Option<Self> {
+        Some(self.clone())
     }
 }
 

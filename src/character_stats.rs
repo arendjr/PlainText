@@ -9,7 +9,7 @@ pub const ENDURANCE: usize = 3;
 pub const INTELLIGENCE: usize = 4;
 pub const FAITH: usize = 5;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct CharacterStats(i16, i16, i16, i16, i16, i16);
 
 impl<'de> Deserialize<'de> for CharacterStats {

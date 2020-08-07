@@ -6,25 +6,27 @@ use std::sync::Arc;
 use crate::game_object::{GameObject, GameObjectId, GameObjectType};
 use crate::point3d::Point3D;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Item {
     id: GameObjectId,
     cost: f32,
     description: String,
     name: String,
     position: Point3D,
+    revision_num: u32,
     weight: f32,
 }
 
 impl Item {
     pub fn hydrate(id: GameObjectId, json: &str) -> Result<Arc<dyn GameObject>, String> {
         match serde_json::from_str::<ItemDto>(json) {
-            Ok(item_dto) => Ok(Arc::new(Item {
+            Ok(item_dto) => Ok(Arc::new(Self {
                 id,
                 cost: item_dto.cost,
                 description: item_dto.description,
                 name: item_dto.name,
                 position: item_dto.position,
+                revision_num: 0,
                 weight: item_dto.weight,
             })),
             Err(error) => Err(format!("parse error: {}", error)),
@@ -51,8 +53,12 @@ impl GameObject for Item {
         self.name.clone()
     }
 
-    fn to_item(&self) -> Option<&Item> {
-        Some(self)
+    fn get_revision_num(&self) -> u32 {
+        self.revision_num
+    }
+
+    fn to_item(&self) -> Option<Self> {
+        Some(self.clone())
     }
 }
 

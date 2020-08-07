@@ -6,7 +6,7 @@ use std::sync::Arc;
 use crate::character_stats::CharacterStats;
 use crate::game_object::{GameObject, GameObjectId, GameObjectRef, GameObjectType};
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Player {
     id: GameObjectId,
     current_room: GameObjectRef,
@@ -14,6 +14,7 @@ pub struct Player {
     height: f32,
     name: String,
     race: GameObjectRef,
+    revision_num: u32,
     stats: CharacterStats,
     weight: f32,
 }
@@ -25,13 +26,14 @@ impl Player {
 
     pub fn hydrate(id: GameObjectId, json: &str) -> Result<Arc<dyn GameObject>, String> {
         match serde_json::from_str::<PlayerDto>(json) {
-            Ok(player_dto) => Ok(Arc::new(Player {
+            Ok(player_dto) => Ok(Arc::new(Self {
                 id,
                 current_room: player_dto.currentRoom,
                 description: player_dto.description,
                 height: player_dto.height,
                 name: player_dto.name,
                 race: player_dto.race,
+                revision_num: 0,
                 stats: player_dto.stats,
                 weight: player_dto.weight,
             })),
@@ -59,8 +61,12 @@ impl GameObject for Player {
         self.name.clone()
     }
 
-    fn to_player(&self) -> Option<&Player> {
-        Some(self)
+    fn get_revision_num(&self) -> u32 {
+        self.revision_num
+    }
+
+    fn to_player(&self) -> Option<Self> {
+        Some(self.clone())
     }
 }
 

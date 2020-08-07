@@ -5,13 +5,14 @@ use std::sync::Arc;
 
 use crate::game_object::{GameObject, GameObjectId, GameObjectRef, GameObjectType};
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Portal {
     id: GameObjectId,
     description: String,
     description2: String,
     name: String,
     name2: String,
+    revision_num: u32,
     room: GameObjectRef,
     room2: GameObjectRef,
 }
@@ -19,18 +20,19 @@ pub struct Portal {
 impl Portal {
     pub fn hydrate(id: GameObjectId, json: &str) -> Result<Arc<dyn GameObject>, String> {
         match serde_json::from_str::<PortalDto>(json) {
-            Ok(portal_dto) => Ok(Arc::new(Portal {
+            Ok(portal_dto) => Ok(Arc::new(Self {
                 id,
                 description: match portal_dto.description {
                     Some(description) => description,
-                    None => "".to_owned(),
+                    None => String::from(""),
                 },
                 description2: match portal_dto.description2 {
                     Some(description) => description,
-                    None => "".to_owned(),
+                    None => String::from(""),
                 },
                 name: portal_dto.name,
                 name2: portal_dto.name2,
+                revision_num: 0,
                 room: portal_dto.room,
                 room2: portal_dto.room2,
             })),
@@ -58,8 +60,12 @@ impl GameObject for Portal {
         self.name.clone()
     }
 
-    fn to_portal(&self) -> Option<&Portal> {
-        Some(self)
+    fn get_revision_num(&self) -> u32 {
+        self.revision_num
+    }
+
+    fn to_portal(&self) -> Option<Self> {
+        Some(self.clone())
     }
 }
 
