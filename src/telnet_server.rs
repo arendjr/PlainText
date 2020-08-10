@@ -22,17 +22,18 @@ pub async fn serve(
                         match session_manager.try_lock() {
                             Ok(mut session_manager) => {
                                 let session_id = session_manager.get_next_id();
-                                session_manager.register_session(Session::new(
+                                let session = Session::new(
                                     session_id,
                                     socket,
                                     game_object_reader.clone(),
                                     transaction_writer.clone(),
-                                ));
+                                );
+                                session_manager.register_session(session);
                             }
                             Err(error) => {
                                 panic!("Could not acquire session manager: {:?}", error);
                             }
-                        }
+                        };
                     }
                     Err(error) => {
                         println!("Telnet connection error: {:?}", error);

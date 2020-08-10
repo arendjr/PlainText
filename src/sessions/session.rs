@@ -1,3 +1,4 @@
+use tokio::io::AsyncWriteExt;
 use tokio::net::TcpStream;
 
 use crate::game_object::{GameObjectId, GameObjectMapReader};
@@ -21,7 +22,7 @@ pub struct Session {
 impl Session {
     pub fn new(
         id: u64,
-        mut socket: TcpStream,
+        socket: TcpStream,
         game_object_reader: GameObjectMapReader,
         transaction_writer: TransactionWriter,
     ) -> Self {
@@ -32,6 +33,12 @@ impl Session {
             socket,
             state: SessionState::SigningIn,
             transaction_writer,
+        }
+    }
+
+    pub async fn send(&mut self, data: String) {
+        if let Err(error) = self.socket.write(data.as_bytes()).await {
+            println!("Could not send data over socket: {:?}", error);
         }
     }
 }
