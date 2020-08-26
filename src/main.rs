@@ -1,5 +1,5 @@
 use futures::{FutureExt, StreamExt};
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use std::{env, fs, io};
 use warp::Filter;
 
@@ -7,13 +7,13 @@ mod character_stats;
 mod game_object;
 mod objects;
 mod point3d;
+mod session_runner;
 mod sessions;
 mod telnet_server;
 mod transaction_writer;
 mod util;
 
 use game_object::{hydrate, GameObject, GameObjectMap, GameObjectRef, GameObjectType};
-use sessions::SessionManager;
 use transaction_writer::TransactionWriter;
 
 #[tokio::main]
@@ -47,17 +47,12 @@ async fn main() {
 
     match load_data(&data_dir) {
         Ok((game_object_reader, game_object_writer)) => {
-            let session_manager = Mutex::new(SessionManager::new());
             let transaction_writer =
                 TransactionWriter::new(game_object_reader.clone(), game_object_writer);
+            let session_tx = session_runner::process_sessions();
 
             let mut handles = vec![];
-            handles.push(tokio::spawn(telnet_server::serve(
-                telnet_port,
-                game_object_reader,
-                session_manager,
-                transaction_writer,
-            )));
+            handles.push(tokio::spawn(telnet_server::serve(telnet_port, session_tx)));
 
             handles.push(tokio::spawn(
                 warp::serve(routes).run(([0, 0, 0, 0], websocket_port)),
