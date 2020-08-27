@@ -12,6 +12,19 @@ pub const FAITH: usize = 5;
 #[derive(Clone, Debug)]
 pub struct CharacterStats(i16, i16, i16, i16, i16, i16);
 
+impl CharacterStats {
+    pub fn new() -> Self {
+        Self {
+            0: 0,
+            1: 0,
+            2: 0,
+            3: 0,
+            4: 0,
+            5: 0,
+        }
+    }
+}
+
 impl<'de> Deserialize<'de> for CharacterStats {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where

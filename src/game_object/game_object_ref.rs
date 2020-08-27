@@ -43,6 +43,7 @@ impl fmt::Display for GameObjectType {
 impl GameObjectType {
     pub fn from_str(string: &str) -> Option<GameObjectType> {
         match string {
+            "class" => Some(GameObjectType::Class),
             "item" => Some(GameObjectType::Item),
             "player" => Some(GameObjectType::Player),
             "portal" => Some(GameObjectType::Portal),

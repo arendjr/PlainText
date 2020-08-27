@@ -5,7 +5,7 @@ use std::collections::HashMap;
 
 use crate::colors::Color;
 use crate::game_object::GameObject;
-use crate::objects::{Player, Race, Realm};
+use crate::objects::{Class, Player, Race, Realm};
 use crate::sessions::SessionOutput as Output;
 use crate::text_utils::{
     capitalize, colorize, format_columns, highlight, is_letter, split_lines, FormatOptions,
@@ -31,6 +31,7 @@ impl SignInState {
         new_state(
             SignInStep::AskingUserName,
             SignInData {
+                class: None,
                 password: String::new(),
                 player: None,
                 race: None,
@@ -43,6 +44,7 @@ impl SignInState {
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 enum SignInStep {
     AskingClass,
+    AskingGender,
     AskingPassword,
     AskingRace,
     AskingSignUpPassword,
@@ -55,6 +57,7 @@ enum SignInStep {
 
 #[derive(Clone, Debug)]
 struct SignInData {
+    class: Option<Class>,
     password: String,
     player: Option<Player>,
     race: Option<Race>,
@@ -140,6 +143,17 @@ fn get_sign_in_steps() -> HashMap<SignInStep, StepImpl> {
             ),
             process_input: process_asking_race_input
         },
+
+        SignInStep::AskingClass => StepImpl {
+            enter: enter_class,
+            exit: |_| Output::None,
+            prompt: |_| Output::Str(
+                "\n\
+                Please select the class you would like to use, or type *info <class>* to \
+                get more information about a class.\n"
+            ),
+            process_input: process_asking_class_input
+        }
     }
 }
 
@@ -160,6 +174,35 @@ fn enter_race(_: &SignInData, realm: &Realm) -> Output {
             realm.race_names(),
             FormatOptions::Capitalized | FormatOptions::Highlighted
         )
+    ))
+}
+
+fn enter_class(data: &SignInData, realm: &Realm) -> Output {
+    Output::String(format!(
+        "\n\
+        Please select which class you would like your character to be specialized \
+        in.\n\
+        Your class determines additional attributes of the physique of your \
+        character, and also can influence your choice to be good or evil.\n\
+        \n\
+        Note that the available classes are dependent on your choice of race. To \
+        revisit your choice of race, type *back*.\n\
+        \n\
+        These are the classes you may choose from:\n\
+        \n\
+        {}",
+        match &data.race {
+            Some(race) => format_columns(
+                race.get_classes()
+                    .iter()
+                    .filter_map(|object_ref| realm
+                        .get(*object_ref)
+                        .and_then(|object| Some(object.get_name())))
+                    .collect(),
+                FormatOptions::Capitalized | FormatOptions::Highlighted
+            ),
+            None => "(cannot determine classes without race)".to_owned(),
+        }
     ))
 }
 
@@ -319,32 +362,87 @@ fn process_asking_race_input(
         )
     } else if answer.starts_with("info ") {
         let race_name = answer[5..].trim();
-        if let Some(race) = realm.get_race_by_name(&race_name) {
-            (
-                state.clone(),
+        (
+            state.clone(),
+            if let Some(race) = realm.get_race_by_name(&race_name) {
                 Output::String(format!(
                     "\n{}\n  {}\n",
                     highlight(&capitalize(&race_name)),
                     split_lines(&race.get_description(), 78).join("\n  ")
-                )),
-            )
-        } else if race_name.starts_with("<") && race_name.ends_with(">") {
-            (
-                state.clone(),
+                ))
+            } else if race_name.starts_with("<") && race_name.ends_with(">") {
                 Output::Str(
                     "\nSorry, you are supposed to replace <race> with the name of an \
-                actual race. For example: *info human*.\n",
-                ),
-            )
-        } else {
-            (
-                state.clone(),
+                    actual race. For example: *info human*.\n",
+                )
+            } else {
                 Output::String(format!(
                     "\nI don't know anything about the \"{}\" race.\n",
                     race_name
-                )),
-            )
-        }
+                ))
+            },
+        )
+    } else {
+        (state.clone(), Output::None)
+    }
+}
+
+fn process_asking_class_input(
+    state: &SignInState,
+    realm: &Realm,
+    input: String,
+) -> (SignInState, Output) {
+    let answer = input.to_lowercase();
+    let classes = match &state.data.race {
+        Some(race) => race
+            .get_classes()
+            .iter()
+            .filter_map(|object_ref| realm.get_class(object_ref.get_id()))
+            .collect(),
+        None => Vec::new(),
+    };
+
+    if let Some(class) = classes.iter().find(|class| class.get_name() == answer) {
+        (
+            new_state(
+                SignInStep::AskingGender,
+                SignInData {
+                    class: Some(class.clone()),
+                    ..state.data.clone()
+                },
+            ),
+            Output::String(colorize(
+                &format!("\nYou have chosen to become a {}.\n", answer),
+                Color::Green,
+            )),
+        )
+    } else if answer.starts_with("info ") {
+        let class_name = answer[5..].trim();
+        (
+            state.clone(),
+            if let Some(class) = classes.iter().find(|class| class.get_name() == class_name) {
+                Output::String(format!(
+                    "\n{}\n  {}\n",
+                    highlight(&capitalize(&class_name)),
+                    split_lines(&class.get_description(), 78).join("\n  ")
+                ))
+            } else if class_name.starts_with("<") && class_name.ends_with(">") {
+                Output::Str(
+                    "\nSorry, you are supposed to replace <class> with the name of an \
+                    actual class. For example: *info knight*.\n",
+                )
+            } else {
+                Output::String(format!(
+                    "\nI don't know anything about the \"{}\" class.\n",
+                    class_name
+                ))
+            },
+        )
+    } else if answer == "back" || answer == "b" {
+        (
+            new_state(SignInStep::AskingRace, state.data.clone()),
+            Output::None,
+        )
     } else {
         (state.clone(), Output::None)
     }

@@ -21,6 +21,10 @@ pub trait GameObject {
         GameObjectRef(self.get_object_type(), self.get_id())
     }
 
+    fn to_class(&self) -> Option<objects::Class> {
+        None
+    }
+
     fn to_item(&self) -> Option<objects::Item> {
         None
     }
@@ -48,6 +52,7 @@ pub trait GameObject {
 
 pub fn hydrate(object_ref: GameObjectRef, content: &str) -> Result<Arc<dyn GameObject>, String> {
     let hydrate = match object_ref.get_type() {
+        GameObjectType::Class => objects::Class::hydrate,
         GameObjectType::Item => objects::Item::hydrate,
         GameObjectType::Player => objects::Player::hydrate,
         GameObjectType::Portal => objects::Portal::hydrate,

@@ -10,6 +10,7 @@ use crate::game_object::{GameObject, GameObjectId, GameObjectRef, GameObjectType
 pub struct Race {
     id: GameObjectId,
     adjective: String,
+    classes: Arc<Vec<GameObjectRef>>,
     description: String,
     height: f32,
     name: String,
@@ -20,6 +21,10 @@ pub struct Race {
 }
 
 impl Race {
+    pub fn get_classes(&self) -> Arc<Vec<GameObjectRef>> {
+        self.classes.clone()
+    }
+
     pub fn get_description(&self) -> String {
         self.description.clone()
     }
@@ -29,6 +34,7 @@ impl Race {
             Ok(race_dto) => Ok(Arc::new(Self {
                 id,
                 adjective: race_dto.adjective,
+                classes: Arc::new(race_dto.classes),
                 description: race_dto.description,
                 height: race_dto.height,
                 name: race_dto.name,
@@ -70,6 +76,7 @@ impl GameObject for Race {
 #[derive(Deserialize, Serialize)]
 struct RaceDto {
     adjective: String,
+    classes: Vec<GameObjectRef>,
     description: String,
     height: f32,
     name: String,

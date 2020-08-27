@@ -41,6 +41,11 @@ impl Realm {
             .and_then(|object| Some(object.clone()))
     }
 
+    pub fn get_class(&self, id: GameObjectId) -> Option<objects::Class> {
+        self.get(GameObjectRef(GameObjectType::Class, id))
+            .and_then(|object| object.to_class())
+    }
+
     pub fn get_item(&self, id: GameObjectId) -> Option<objects::Item> {
         self.get(GameObjectRef(GameObjectType::Item, id))
             .and_then(|object| object.to_item())

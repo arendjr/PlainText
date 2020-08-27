@@ -1,3 +1,4 @@
+mod class;
 mod item;
 mod player;
 mod portal;
@@ -5,6 +6,7 @@ mod race;
 mod realm;
 mod room;
 
+pub use class::Class;
 pub use item::Item;
 pub use player::Player;
 pub use portal::Portal;
