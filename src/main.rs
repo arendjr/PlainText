@@ -1,20 +1,25 @@
 use futures::{FutureExt, StreamExt};
+use std::sync::mpsc::channel;
 use std::sync::Arc;
-use std::{env, fs, io};
+use std::{env, fs, io, thread};
 use warp::Filter;
 
 mod character_stats;
+mod colors;
+mod event_loop;
 mod game_object;
 mod objects;
 mod point3d;
 mod session_runner;
 mod sessions;
 mod telnet_server;
-mod transaction_writer;
+mod text_utils;
 mod util;
 
-use game_object::{hydrate, GameObject, GameObjectMap, GameObjectRef, GameObjectType};
-use transaction_writer::TransactionWriter;
+use event_loop::{InputEvent, SessionEvent, SessionUpdate};
+use game_object::{hydrate, GameObject, GameObjectRef, GameObjectType};
+use objects::Realm;
+use sessions::{process_input, SessionState};
 
 #[tokio::main]
 async fn main() {
@@ -46,73 +51,89 @@ async fn main() {
     });
 
     match load_data(&data_dir) {
-        Ok((game_object_reader, game_object_writer)) => {
-            let transaction_writer =
-                TransactionWriter::new(game_object_reader.clone(), game_object_writer);
-            let session_tx = session_runner::process_sessions();
+        Ok(realm) => {
+            let (input_tx, input_rx) = channel::<InputEvent>();
+            let (session_tx, session_rx) = channel::<SessionEvent>();
 
-            let mut handles = vec![];
-            handles.push(tokio::spawn(telnet_server::serve(telnet_port, session_tx)));
+            session_runner::create_sessions_handler(input_tx, session_rx);
 
-            handles.push(tokio::spawn(
-                warp::serve(routes).run(([0, 0, 0, 0], websocket_port)),
-            ));
+            let session_tx_clone = session_tx.clone();
+            thread::spawn(move || {
+                telnet_server::serve(telnet_port, session_tx_clone);
+            });
+            tokio::spawn(warp::serve(routes).run(([0, 0, 0, 0], websocket_port)));
+
             println!(
                 "Listening for WebSocket connections at port {}.",
                 websocket_port
             );
 
-            futures::future::join_all(handles).await;
+            while let Ok(input_ev) = input_rx.recv() {
+                match input_ev.session_state {
+                    SessionState::SigningIn(state) => {
+                        println!("state: {:?}, input: {:?}", state, input_ev.input);
+                        let (new_state, output) = process_input(&state, &realm, input_ev.input);
+                        if let Err(error) =
+                            session_tx.send(SessionEvent::SessionUpdate(SessionUpdate {
+                                output,
+                                session_id: input_ev.session_id,
+                                session_state: SessionState::SigningIn(new_state),
+                            }))
+                        {
+                            println!("Could not send output: {:?}", error);
+                        }
+                    }
+                    other_state => panic!("Session state not implemented: {:?}", other_state),
+                }
+            }
         }
         Err(error) => panic!("Failed to load data from `{}`: {}", data_dir, error),
     }
 }
 
-fn load_data(data_dir: &str) -> Result<GameObjectMap, io::Error> {
-    let (object_map_reader, mut object_map_writer) = game_object::new_map();
-
-    let mut player_refs = vec![];
-
-    let entries = fs::read_dir(&data_dir)?
-        .map(|entry| entry.map(|entry| (entry.file_name(), entry.path())))
-        .collect::<Result<Vec<_>, io::Error>>()?;
-    for (file_name, path) in entries {
-        if let Some(object_ref) = GameObjectRef::from_file_name(&file_name) {
-            let content = fs::read_to_string(&path)?;
-            match hydrate(object_ref, &content) {
-                Ok(object) => {
-                    object_map_writer.set(object_ref, object);
-
-                    if object_ref.get_type() == GameObjectType::Player {
-                        player_refs.push(object_ref);
+fn load_data(data_dir: &str) -> Result<Realm, io::Error> {
+    let content = fs::read_to_string(&format!("{}/realm.000000000", data_dir))?;
+    match Realm::hydrate(0, &content).and_then(|object| Ok(object.to_realm())) {
+        Ok(Some(mut realm)) => {
+            let entries = fs::read_dir(&data_dir)?
+                .map(|entry| entry.map(|entry| (entry.file_name(), entry.path())))
+                .collect::<Result<Vec<_>, io::Error>>()?;
+            for (file_name, path) in entries {
+                if let Some(object_ref) = GameObjectRef::from_file_name(&file_name) {
+                    let content = fs::read_to_string(&path)?;
+                    match hydrate(object_ref, &content) {
+                        Ok(object) => realm = realm.set(object_ref, object),
+                        Err(message) => println!(
+                            "error loading {} {}: {}",
+                            object_ref.get_type(),
+                            object_ref.get_id(),
+                            message
+                        ),
                     }
                 }
-                Err(message) => println!(
-                    "error loading {} {}: {}",
-                    object_ref.get_type(),
-                    object_ref.get_id(),
-                    message
-                ),
             }
+
+            Ok(inject_players_into_rooms(realm))
         }
+        Err(message) => panic!("Failed to load realm: {}", message),
+        _ => panic!("Unexpected error loading realm"),
     }
+}
 
-    object_map_writer.refresh();
-
-    for player_ref in player_refs {
-        if let Some(room) = object_map_reader
-            .get_player(player_ref.get_id())
-            .and_then(|player| object_map_reader.get_room(player.get_current_room().get_id()))
+// Players get injected on load, so that rooms don't need to be re-persisted every time a character
+// moves from one room to another.
+fn inject_players_into_rooms(mut realm: Realm) -> Realm {
+    for player_id in realm.player_ids() {
+        if let Some(room) = realm
+            .get_player(player_id)
+            .and_then(|player| realm.get_room(player.get_current_room().get_id()))
         {
-            object_map_writer.set(
+            let player_ref = GameObjectRef(GameObjectType::Player, player_id);
+            realm = realm.set(
                 room.get_ref(),
                 Arc::new(room.with_characters(vec![player_ref])),
             );
-            object_map_writer.refresh();
         }
     }
-
-    object_map_writer.refresh();
-
-    Ok((object_map_reader, object_map_writer))
+    realm
 }

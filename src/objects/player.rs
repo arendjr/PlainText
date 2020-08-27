@@ -14,7 +14,6 @@ pub struct Player {
     height: f32,
     name: String,
     race: GameObjectRef,
-    revision_num: u32,
     stats: CharacterStats,
     weight: f32,
 }
@@ -33,7 +32,6 @@ impl Player {
                 height: player_dto.height,
                 name: player_dto.name,
                 race: player_dto.race,
-                revision_num: 0,
                 stats: player_dto.stats,
                 weight: player_dto.weight,
             })),
@@ -59,10 +57,6 @@ impl GameObject for Player {
 
     fn get_name(&self) -> String {
         self.name.clone()
-    }
-
-    fn get_revision_num(&self) -> u32 {
-        self.revision_num
     }
 
     fn to_player(&self) -> Option<Self> {

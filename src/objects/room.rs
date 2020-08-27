@@ -17,7 +17,6 @@ pub struct Room {
     name: String,
     portals: Arc<Vec<GameObjectRef>>,
     position: Point3D,
-    revision_num: u32,
 }
 
 impl Room {
@@ -34,7 +33,6 @@ impl Room {
                 name: room_dto.name,
                 portals: Arc::new(room_dto.portals),
                 position: room_dto.position,
-                revision_num: 0,
             })),
             Err(error) => Err(format!("parse error: {}", error)),
         }
@@ -43,7 +41,6 @@ impl Room {
     pub fn with_characters(&self, characters: Vec<GameObjectRef>) -> Self {
         Self {
             characters: Arc::new(ref_union(&self.characters, &characters)),
-            revision_num: self.revision_num + 1,
             ..self.clone()
         }
     }
@@ -51,7 +48,6 @@ impl Room {
     pub fn without_characters(&self, characters: Vec<GameObjectRef>) -> Self {
         Self {
             characters: Arc::new(ref_difference(&self.characters, &characters)),
-            revision_num: self.revision_num + 1,
             ..self.clone()
         }
     }
@@ -74,10 +70,6 @@ impl GameObject for Room {
 
     fn get_name(&self) -> String {
         self.name.clone()
-    }
-
-    fn get_revision_num(&self) -> u32 {
-        self.revision_num
     }
 
     fn to_room(&self) -> Option<Self> {

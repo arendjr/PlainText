@@ -12,7 +12,6 @@ pub struct Portal {
     description2: String,
     name: String,
     name2: String,
-    revision_num: u32,
     room: GameObjectRef,
     room2: GameObjectRef,
 }
@@ -32,7 +31,6 @@ impl Portal {
                 },
                 name: portal_dto.name,
                 name2: portal_dto.name2,
-                revision_num: 0,
                 room: portal_dto.room,
                 room2: portal_dto.room2,
             })),
@@ -58,10 +56,6 @@ impl GameObject for Portal {
 
     fn get_name(&self) -> String {
         self.name.clone()
-    }
-
-    fn get_revision_num(&self) -> u32 {
-        self.revision_num
     }
 
     fn to_portal(&self) -> Option<Self> {

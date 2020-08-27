@@ -13,7 +13,6 @@ pub struct Race {
     description: String,
     height: f32,
     name: String,
-    revision_num: u32,
     starting_room: GameObjectRef,
     stats: CharacterStats,
     stats_suggestion: CharacterStats,
@@ -21,6 +20,10 @@ pub struct Race {
 }
 
 impl Race {
+    pub fn get_description(&self) -> String {
+        self.description.clone()
+    }
+
     pub fn hydrate(id: GameObjectId, json: &str) -> Result<Arc<dyn GameObject>, String> {
         match serde_json::from_str::<RaceDto>(json) {
             Ok(race_dto) => Ok(Arc::new(Self {
@@ -29,7 +32,6 @@ impl Race {
                 description: race_dto.description,
                 height: race_dto.height,
                 name: race_dto.name,
-                revision_num: 0,
                 starting_room: race_dto.startingRoom,
                 stats: race_dto.stats,
                 stats_suggestion: race_dto.statsSuggestion,
@@ -57,10 +59,6 @@ impl GameObject for Race {
 
     fn get_name(&self) -> String {
         self.name.clone()
-    }
-
-    fn get_revision_num(&self) -> u32 {
-        self.revision_num
     }
 
     fn to_race(&self) -> Option<Self> {

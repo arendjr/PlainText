@@ -5,9 +5,10 @@ authors = ["Arend van Beelen jr. <arendjr@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+bitflags = "1.2.1"
 bytes = "0.5"
-evmap = "10.0"
 futures = "0.3.5"
+im-rc = "15.0.0"
 lazy_static = "1.4.0"
 maplit = "1.0.2"
 serde = { version = "1.0", features = ["derive"] }
