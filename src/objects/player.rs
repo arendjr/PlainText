@@ -6,7 +6,7 @@ use std::sync::Arc;
 use crate::character_stats::CharacterStats;
 use crate::game_object::{GameObject, GameObjectId, GameObjectRef, GameObjectType};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Gender {
     Unspecified,
     Male,
@@ -68,8 +68,8 @@ impl GameObject for Player {
         GameObjectType::Player
     }
 
-    fn get_name(&self) -> String {
-        self.name.clone()
+    fn get_name(&self) -> &str {
+        &self.name
     }
 
     fn to_player(&self) -> Option<Self> {

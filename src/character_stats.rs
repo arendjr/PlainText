@@ -1,26 +1,84 @@
 use serde::de::{self, Deserialize, Deserializer, SeqAccess, Visitor};
 use serde::ser::{Serialize, SerializeTupleStruct, Serializer};
-use std::fmt;
+use std::borrow::Borrow;
+use std::{fmt, ops};
 
-pub const STRENGTH: usize = 0;
-pub const DEXTERITY: usize = 1;
-pub const VITALITY: usize = 2;
-pub const ENDURANCE: usize = 3;
-pub const INTELLIGENCE: usize = 4;
-pub const FAITH: usize = 5;
+pub const NUM_STATS: usize = 6;
+
+pub enum CharacterStat {
+    STRENGTH = 0,
+    DEXTERITY,
+    VITALITY,
+    ENDURANCE,
+    INTELLIGENCE,
+    FAITH,
+}
 
 #[derive(Clone, Debug)]
-pub struct CharacterStats(i16, i16, i16, i16, i16, i16);
+pub struct CharacterStats {
+    stats: [i16; NUM_STATS],
+}
 
 impl CharacterStats {
+    pub fn from_stats(
+        strength: i16,
+        dexterity: i16,
+        vitality: i16,
+        endurance: i16,
+        intelligence: i16,
+        faith: i16,
+    ) -> Self {
+        Self {
+            stats: [
+                strength,
+                dexterity,
+                vitality,
+                endurance,
+                intelligence,
+                faith,
+            ],
+        }
+    }
+
+    pub fn get(&self, stat: CharacterStat) -> i16 {
+        self.stats[stat as usize]
+    }
+
+    pub fn inc(&mut self, stat: CharacterStat) {
+        self.stats[stat as usize] += 1;
+    }
+
     pub fn new() -> Self {
         Self {
-            0: 0,
-            1: 0,
-            2: 0,
-            3: 0,
-            4: 0,
-            5: 0,
+            stats: [0, 0, 0, 0, 0, 0],
+        }
+    }
+
+    pub fn set(&mut self, stat: CharacterStat, value: i16) {
+        self.stats[stat as usize] = value;
+    }
+
+    pub fn total(&self) -> i16 {
+        (0..NUM_STATS).fold(0, |total, i| total + self.stats[i])
+    }
+}
+
+impl<T> ops::Add<T> for CharacterStats
+where
+    T: Borrow<Self>,
+{
+    type Output = Self;
+
+    fn add(self, rhs: T) -> Self::Output {
+        Self {
+            stats: [
+                self.stats[0] + rhs.borrow().stats[0],
+                self.stats[1] + rhs.borrow().stats[1],
+                self.stats[2] + rhs.borrow().stats[2],
+                self.stats[3] + rhs.borrow().stats[3],
+                self.stats[4] + rhs.borrow().stats[4],
+                self.stats[5] + rhs.borrow().stats[5],
+            ],
         }
     }
 }
@@ -36,11 +94,7 @@ impl<'de> Deserialize<'de> for CharacterStats {
 
 impl fmt::Display for CharacterStats {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "CharacterStats({}, {}, {}, {}, {}, {})",
-            self.0, self.1, self.2, self.3, self.4, self.5
-        )
+        write!(f, "CharacterStats({:?})", self.stats)
     }
 }
 
@@ -49,13 +103,10 @@ impl Serialize for CharacterStats {
     where
         S: Serializer,
     {
-        let mut state = serializer.serialize_tuple_struct("CharacterStats", 6)?;
-        state.serialize_field(&self.0)?;
-        state.serialize_field(&self.1)?;
-        state.serialize_field(&self.2)?;
-        state.serialize_field(&self.3)?;
-        state.serialize_field(&self.4)?;
-        state.serialize_field(&self.5)?;
+        let mut state = serializer.serialize_tuple_struct("CharacterStats", NUM_STATS)?;
+        for i in 0..NUM_STATS {
+            state.serialize_field(&self.stats[i])?;
+        }
         state.end()
     }
 }
@@ -91,7 +142,7 @@ impl<'de> Visitor<'de> for CharacterStatsVisitor {
         let faith = seq
             .next_element()?
             .ok_or_else(|| de::Error::invalid_length(5, &self))?;
-        Ok(CharacterStats(
+        Ok(CharacterStats::from_stats(
             strength,
             dexterity,
             vitality,

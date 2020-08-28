@@ -4,7 +4,7 @@ use std::fmt;
 use std::sync::Arc;
 
 use crate::character_stats::CharacterStats;
-use crate::game_object::{GameObject, GameObjectId, GameObjectRef, GameObjectType};
+use crate::game_object::{GameObject, GameObjectId, GameObjectType};
 
 #[derive(Clone, Debug)]
 pub struct Class {
@@ -18,6 +18,14 @@ pub struct Class {
 impl Class {
     pub fn get_description(&self) -> String {
         self.description.clone()
+    }
+
+    pub fn get_stats(&self) -> CharacterStats {
+        self.stats.clone()
+    }
+
+    pub fn get_stats_suggestion(&self) -> CharacterStats {
+        self.stats_suggestion.clone()
     }
 
     pub fn hydrate(id: GameObjectId, json: &str) -> Result<Arc<dyn GameObject>, String> {
@@ -52,8 +60,8 @@ impl GameObject for Class {
         GameObjectType::Class
     }
 
-    fn get_name(&self) -> String {
-        self.name.clone()
+    fn get_name(&self) -> &str {
+        &self.name
     }
 
     fn to_class(&self) -> Option<Self> {

@@ -7,14 +7,18 @@ use super::{GameObjectId, GameObjectRef, GameObjectType};
 pub trait GameObject {
     fn get_id(&self) -> GameObjectId;
     fn get_object_type(&self) -> GameObjectType;
-    fn get_name(&self) -> String;
+    fn get_name(&self) -> &str;
+
+    fn get_adjective(&self) -> &str {
+        ""
+    }
 
     fn get_definite_article(&self) -> &str {
         ""
     }
 
     fn get_plural(&self) -> String {
-        self.get_name()
+        self.get_name().to_owned()
     }
 
     fn get_ref(&self) -> GameObjectRef {

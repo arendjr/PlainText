@@ -29,6 +29,22 @@ impl Race {
         self.description.clone()
     }
 
+    pub fn get_height(&self) -> f32 {
+        self.height
+    }
+
+    pub fn get_stats(&self) -> CharacterStats {
+        self.stats.clone()
+    }
+
+    pub fn get_stats_suggestion(&self) -> CharacterStats {
+        self.stats_suggestion.clone()
+    }
+
+    pub fn get_weight(&self) -> f32 {
+        self.weight
+    }
+
     pub fn hydrate(id: GameObjectId, json: &str) -> Result<Arc<dyn GameObject>, String> {
         match serde_json::from_str::<RaceDto>(json) {
             Ok(race_dto) => Ok(Arc::new(Self {
@@ -55,6 +71,10 @@ impl fmt::Display for Race {
 }
 
 impl GameObject for Race {
+    fn get_adjective(&self) -> &str {
+        &self.adjective
+    }
+
     fn get_id(&self) -> GameObjectId {
         self.id
     }
@@ -63,8 +83,8 @@ impl GameObject for Race {
         GameObjectType::Race
     }
 
-    fn get_name(&self) -> String {
-        self.name.clone()
+    fn get_name(&self) -> &str {
+        &self.name
     }
 
     fn to_race(&self) -> Option<Self> {

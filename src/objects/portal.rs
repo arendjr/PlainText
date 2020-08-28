@@ -54,8 +54,8 @@ impl GameObject for Portal {
         GameObjectType::Portal
     }
 
-    fn get_name(&self) -> String {
-        self.name.clone()
+    fn get_name(&self) -> &str {
+        &self.name
     }
 
     fn to_portal(&self) -> Option<Self> {

@@ -1,4 +1,5 @@
 use bitflags::bitflags;
+use std::borrow::Borrow;
 
 use crate::colors::Color;
 
@@ -27,14 +28,17 @@ bitflags! {
     }
 }
 
-pub fn format_columns(items: Vec<String>, options: FormatOptions) -> String {
+pub fn format_columns<T>(items: Vec<T>, options: FormatOptions) -> String
+where
+    T: Borrow<str>,
+{
     let mut result = String::new();
     let len = items.len();
     let half_len = len / 2 + len % 2;
     for i in 0..half_len {
-        let mut first = items[i].clone();
+        let mut first = items[i].borrow().to_owned();
         let mut second = if i < len - half_len {
-            items[i + half_len].clone()
+            items[i + half_len].borrow().to_owned()
         } else {
             "".to_owned()
         };

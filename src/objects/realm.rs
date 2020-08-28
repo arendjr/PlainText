@@ -36,9 +36,7 @@ pub struct Realm {
 
 impl Realm {
     pub fn get(&self, object_ref: GameObjectRef) -> Option<Arc<dyn GameObject>> {
-        self.objects
-            .get(&object_ref)
-            .and_then(|object| Some(object.clone()))
+        self.objects.get(&object_ref).map(|object| object.clone())
     }
 
     pub fn get_class(&self, id: GameObjectId) -> Option<objects::Class> {
@@ -105,8 +103,8 @@ impl Realm {
         self.races_by_name.values().map(|id| *id).collect()
     }
 
-    pub fn race_names(&self) -> Vec<String> {
-        self.races_by_name.keys().map(|name| name.clone()).collect()
+    pub fn race_names(&self) -> Vec<&str> {
+        self.races_by_name.keys().map(String::as_ref).collect()
     }
 
     pub fn set(&self, object_ref: GameObjectRef, object: Arc<dyn GameObject>) -> Self {
@@ -115,12 +113,12 @@ impl Realm {
 
         let mut players_by_name = self.players_by_name.clone();
         if let Some(player) = object.to_player() {
-            players_by_name.insert(player.get_name(), player.get_id());
+            players_by_name.insert(player.get_name().to_owned(), player.get_id());
         }
 
         let mut races_by_name = self.races_by_name.clone();
         if let Some(race) = object.to_race() {
-            races_by_name.insert(race.get_name(), race.get_id());
+            races_by_name.insert(race.get_name().to_owned(), race.get_id());
         }
 
         Self {
@@ -141,10 +139,10 @@ impl Realm {
                 let name = object.get_name();
 
                 let mut players_by_name = self.players_by_name.clone();
-                players_by_name.remove(&name);
+                players_by_name.remove(name);
 
                 let mut races_by_name = self.races_by_name.clone();
-                races_by_name.remove(&name);
+                races_by_name.remove(name);
 
                 Self {
                     name: self.name.clone(),
@@ -168,8 +166,8 @@ impl GameObject for Realm {
         GameObjectType::Realm
     }
 
-    fn get_name(&self) -> String {
-        self.name.clone()
+    fn get_name(&self) -> &str {
+        &self.name
     }
 
     fn to_realm(&self) -> Option<Self> {

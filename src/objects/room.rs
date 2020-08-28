@@ -68,8 +68,8 @@ impl GameObject for Room {
         GameObjectType::Room
     }
 
-    fn get_name(&self) -> String {
-        self.name.clone()
+    fn get_name(&self) -> &str {
+        &self.name
     }
 
     fn to_room(&self) -> Option<Self> {

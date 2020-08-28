@@ -1,8 +1,11 @@
 use lazy_static::lazy_static;
 use maplit::hashmap;
 use serde_json::json;
+use std::cmp;
 use std::collections::HashMap;
+use std::str::FromStr;
 
+use crate::character_stats::{CharacterStat, CharacterStats};
 use crate::colors::Color;
 use crate::game_object::GameObject;
 use crate::objects::{Class, Gender, Player, Race, Realm};
@@ -33,10 +36,13 @@ impl SignInState {
             SignInData {
                 class: None,
                 gender: Gender::Unspecified,
+                height: 0.0,
                 password: String::new(),
                 player: None,
                 race: None,
+                stats: CharacterStats::new(),
                 user_name: String::new(),
+                weight: 0.0,
             },
         )
     }
@@ -49,6 +55,7 @@ enum SignInStep {
     AskingGender,
     AskingPassword,
     AskingRace,
+    AskingSignUpConfirmation,
     AskingSignUpPassword,
     AskingUserName,
     AskingUserNameConfirmation,
@@ -61,10 +68,13 @@ enum SignInStep {
 struct SignInData {
     class: Option<Class>,
     gender: Gender,
+    height: f32,
     password: String,
     player: Option<Player>,
     race: Option<Race>,
+    stats: CharacterStats,
     user_name: String,
+    weight: f32,
 }
 
 struct StepImpl {
@@ -173,6 +183,28 @@ fn get_sign_in_steps() -> HashMap<SignInStep, StepImpl> {
             ),
             process_input: process_asking_gender_input
         },
+
+        SignInStep::AskingExtraStats => StepImpl {
+            enter: enter_extra_stats,
+            exit: |_| Output::None,
+            prompt: |data| Output::String(format!(
+                "\n\
+                Please enter the distribution you would like to use in the following form:\n\
+                \n  *{}*\n  (Replace every part with a number, for a total of 9. Suggestion: {})\n\
+                \n\
+                To revisit your choice of gender, type *back*. If you want more \
+                information about character stats, type *info stats*. If you just want to \
+                accept the suggested stats, type *accept*.\n",
+                if data.class.as_ref().map(|class| class.get_name()) == Some("barbarian") {
+                    "<str> <dex> <vit> <end> <fai>"
+                } else {
+                    "<str> <dex> <vit> <end> <int> <fai>"
+                },
+                format_stats_string(&get_base_stats(&data).3, &data.class)
+
+            )),
+            process_input: process_asking_extra_stats_input
+        },
     }
 }
 
@@ -216,13 +248,118 @@ fn enter_class(data: &SignInData, realm: &Realm) -> Output {
                     .iter()
                     .filter_map(|object_ref| realm
                         .get(*object_ref)
-                        .and_then(|object| Some(object.get_name())))
+                        .map(|object| object.get_name().to_owned()))
                     .collect(),
                 FormatOptions::Capitalized | FormatOptions::Highlighted
             ),
             None => "(cannot determine classes without race)".to_owned(),
         }
     ))
+}
+
+fn enter_extra_stats(data: &SignInData, _: &Realm) -> Output {
+    let stats = get_base_stats(data).2;
+    Output::String(format!(
+        "\n\
+        You have selected to become a {} {} {}.\n\
+        Your base character stats are:\n\
+        \n  *STR: {}*, *DEX: {}*, *VIT: {}*, *END: {}*, *INT: {}*, *FAI: {}*.\n\
+        \n\
+        You may assign an additional 9 points freely over your various attributes.\n",
+        if data.gender == Gender::Male {
+            "male"
+        } else {
+            "female"
+        },
+        match &data.race {
+            Some(race) => race.get_adjective(),
+            None => "",
+        },
+        match &data.class {
+            Some(class) => class.get_name(),
+            None => "",
+        },
+        stats.get(CharacterStat::STRENGTH),
+        stats.get(CharacterStat::DEXTERITY),
+        stats.get(CharacterStat::VITALITY),
+        stats.get(CharacterStat::ENDURANCE),
+        stats.get(CharacterStat::INTELLIGENCE),
+        stats.get(CharacterStat::FAITH),
+    ))
+}
+
+fn format_stats_string(stats: &CharacterStats, class: &Option<Class>) -> String {
+    if class.as_ref().map(|class| class.get_name()) == Some("barbarian") {
+        format!(
+            "{} {} {} {} {}",
+            stats.get(CharacterStat::STRENGTH),
+            stats.get(CharacterStat::DEXTERITY),
+            stats.get(CharacterStat::VITALITY),
+            stats.get(CharacterStat::ENDURANCE),
+            stats.get(CharacterStat::FAITH)
+        )
+    } else {
+        format!(
+            "{} {} {} {} {} {}",
+            stats.get(CharacterStat::STRENGTH),
+            stats.get(CharacterStat::DEXTERITY),
+            stats.get(CharacterStat::VITALITY),
+            stats.get(CharacterStat::ENDURANCE),
+            stats.get(CharacterStat::INTELLIGENCE),
+            stats.get(CharacterStat::FAITH)
+        )
+    }
+}
+
+fn get_base_stats(data: &SignInData) -> (f32, f32, CharacterStats, CharacterStats) {
+    let (mut height, mut weight, race_stats, race_stats_suggestion) = match &data.race {
+        Some(race) => (
+            race.get_height(),
+            race.get_weight(),
+            race.get_stats(),
+            race.get_stats_suggestion(),
+        ),
+        None => (0.0, 0.0, CharacterStats::new(), CharacterStats::new()),
+    };
+
+    let (class_name, class_stats, class_stats_suggestion) = match &data.class {
+        Some(class) => (
+            class.get_name(),
+            class.get_stats(),
+            class.get_stats_suggestion(),
+        ),
+        None => ("", CharacterStats::new(), CharacterStats::new()),
+    };
+
+    let mut stats = race_stats + class_stats;
+    let mut stats_suggestion = race_stats_suggestion + class_stats_suggestion;
+
+    if class_name == "knight" {
+        weight += 10.0;
+    } else if class_name == "warrior" || class_name == "soldier" {
+        weight += 5.0;
+    } else if class_name == "barbarian" {
+        stats.set(CharacterStat::INTELLIGENCE, 0);
+        weight += 5.0;
+
+        stats_suggestion.set(
+            CharacterStat::FAITH,
+            stats_suggestion.get(CharacterStat::FAITH)
+                + stats_suggestion.get(CharacterStat::INTELLIGENCE),
+        );
+        stats_suggestion.set(CharacterStat::INTELLIGENCE, 0);
+    }
+
+    if data.gender == Gender::Male {
+        stats.inc(CharacterStat::STRENGTH);
+        height += 10.0;
+        weight += 10.0;
+    } else {
+        stats.inc(CharacterStat::DEXTERITY);
+        weight -= 10.0;
+    }
+
+    (height, weight, stats, stats_suggestion)
 }
 
 fn new_state(step: SignInStep, data: SignInData) -> SignInState {
@@ -469,7 +606,7 @@ fn process_asking_class_input(
 
 fn process_asking_gender_input(
     state: &SignInState,
-    realm: &Realm,
+    _: &Realm,
     input: String,
 ) -> (SignInState, Output) {
     let answer = input.to_lowercase();
@@ -502,6 +639,127 @@ fn process_asking_gender_input(
         )
     } else {
         (state.clone(), Output::None)
+    }
+}
+
+fn process_asking_extra_stats_input(
+    state: &SignInState,
+    _: &Realm,
+    input: String,
+) -> (SignInState, Output) {
+    let answer = input.to_lowercase();
+    if answer == "info stats" {
+        (
+            state.clone(),
+            Output::Str(
+                "\n\
+                Your character has several attributes, each of which will have a value assigned. \
+                Collectively, we call these your character stats. Here is an overview:\n\
+                \n\
+                *Strength* (STR)\n\
+                  Strength primarily determines the power of your physical attacks. When\n\
+                  wielding a shield, it also gives a small defense power up.\n\
+                \n\
+                *Dexterity* (DEX)\n\
+                  Dexterity determines the speed with which attacks can be dealt. It also \n\
+                  improves your chances of evading enemy attacks, and the chance of success when\n\
+                  fleeing.\n\
+                \n\
+                *Vitality* (VIT)\n\
+                  Vitality primarily determines your max. health points (HP).\n\
+                \n\
+                *Endurance* (END)\n\
+                  Endurance primarily determines your physical defense power.\n\
+                \n\
+                *Intelligence* (INT)\n\
+                  Intelligence determines your max. magic points (MP). Barbarians cannot assign \n\
+                  any points to this attribute.\n\
+                \n\
+                *Faith* (FAI)\n\
+                  Faith determines the magical defense power. It also decreases the chance that\n\
+                  a spell will fail when cast.\n",
+            ),
+        )
+    } else if answer == "back" || answer == "b" {
+        (
+            new_state(SignInStep::AskingGender, state.data.clone()),
+            Output::None,
+        )
+    } else {
+        let (mut height, mut weight, mut stats, stats_suggestion) = get_base_stats(&state.data);
+        let is_barbarian =
+            state.data.class.as_ref().map(|class| class.get_name()) == Some("barbarian");
+
+        let user_stats = if answer == "accept suggestion" || answer == "accept" || answer == "a" {
+            stats_suggestion
+        } else {
+            let expected_num_attributes = if is_barbarian { 5 } else { 6 };
+            if answer.split(' ').count() != expected_num_attributes {
+                return (state.clone(), Output::None);
+            }
+            let mut attributes = answer.split(' ');
+            CharacterStats::from_stats(
+                cmp::max(
+                    i16::from_str(attributes.next().unwrap_or_default()).unwrap_or(0),
+                    0,
+                ),
+                cmp::max(
+                    i16::from_str(attributes.next().unwrap_or_default()).unwrap_or(0),
+                    0,
+                ),
+                cmp::max(
+                    i16::from_str(attributes.next().unwrap_or_default()).unwrap_or(0),
+                    0,
+                ),
+                cmp::max(
+                    i16::from_str(attributes.next().unwrap_or_default()).unwrap_or(0),
+                    0,
+                ),
+                if is_barbarian {
+                    0
+                } else {
+                    cmp::max(
+                        i16::from_str(attributes.next().unwrap_or_default()).unwrap_or(0),
+                        0,
+                    )
+                },
+                cmp::max(
+                    i16::from_str(attributes.next().unwrap_or_default()).unwrap_or(0),
+                    0,
+                ),
+            )
+        };
+
+        if user_stats.total() != 9 {
+            return (
+                state.clone(),
+                Output::String(colorize(
+                    "\nThe total of attributes should be 9.\n",
+                    Color::Red,
+                )),
+            );
+        }
+
+        stats = stats + &user_stats;
+        height += (user_stats.get(CharacterStat::INTELLIGENCE) as f32)
+            - (user_stats.get(CharacterStat::DEXTERITY) as f32) / 2.0;
+        weight += user_stats.get(CharacterStat::STRENGTH) as f32;
+
+        (
+            new_state(
+                SignInStep::AskingSignUpConfirmation,
+                SignInData {
+                    height,
+                    weight,
+                    stats,
+                    ..state.data.clone()
+                },
+            ),
+            Output::String(colorize(
+                "\nYour character stats have been recorded.\n",
+                Color::Green,
+            )),
+        )
     }
 }
 

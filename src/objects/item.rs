@@ -47,8 +47,8 @@ impl GameObject for Item {
         GameObjectType::Item
     }
 
-    fn get_name(&self) -> String {
-        self.name.clone()
+    fn get_name(&self) -> &str {
+        &self.name
     }
 
     fn to_item(&self) -> Option<Self> {
