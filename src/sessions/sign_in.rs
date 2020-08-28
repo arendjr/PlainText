@@ -1,7 +1,6 @@
 use lazy_static::lazy_static;
 use maplit::hashmap;
 use serde_json::json;
-use std::cmp;
 use std::collections::HashMap;
 use std::str::FromStr;
 
@@ -11,17 +10,9 @@ use crate::game_object::GameObject;
 use crate::objects::{Class, Gender, Player, Race, Realm};
 use crate::sessions::SessionOutput as Output;
 use crate::text_utils::{
-    capitalize, colorize, format_columns, highlight, is_letter, split_lines, FormatOptions,
+    capitalize, colorize, format_columns, highlight, is_letter, process_highlights, split_lines,
+    FormatOptions,
 };
-
-lazy_static! {
-    static ref RESERVED_NAMES: Vec<String> = vec![
-        "Admin".to_owned(),
-        "Administrator".to_owned(),
-        "Root".to_owned()
-    ];
-    static ref SIGN_IN_STEPS: HashMap<SignInStep, StepImpl> = get_sign_in_steps();
-}
 
 #[derive(Clone, Debug)]
 pub struct SignInState {
@@ -89,22 +80,37 @@ pub fn process_input(
     realm: &Realm,
     input: String,
 ) -> (SignInState, Vec<Output>) {
+    lazy_static! {
+        static ref SIGN_IN_STEPS: HashMap<SignInStep, StepImpl> = get_sign_in_steps();
+    }
+
     match SIGN_IN_STEPS.get(&state.step) {
         Some(step) => {
             let (new_state, output) = (step.process_input)(state, realm, input);
             match SIGN_IN_STEPS.get(&new_state.step) {
                 Some(new_step) => {
                     let prompt_output = (new_step.prompt)(&new_state.data);
-                    if new_state.step == state.step {
-                        (new_state, vec![output, prompt_output])
+                    let outputs = if new_state.step == state.step {
+                        vec![output, prompt_output]
                     } else {
                         let exit_output = (step.exit)(&new_state.data);
                         let enter_output = (new_step.enter)(&new_state.data, realm);
-                        (
-                            new_state,
-                            vec![output, exit_output, enter_output, prompt_output],
-                        )
-                    }
+                        vec![output, exit_output, enter_output, prompt_output]
+                    };
+
+                    (
+                        new_state,
+                        outputs
+                            .into_iter()
+                            .map(|output| match output {
+                                Output::Str(string) => Output::String(process_highlights(string)),
+                                Output::String(string) => {
+                                    Output::String(process_highlights(&string))
+                                }
+                                other => other,
+                            })
+                            .collect(),
+                    )
                 }
                 None => (
                     new_state,
@@ -417,6 +423,13 @@ fn process_asking_user_name_input(
     realm: &Realm,
     input: String,
 ) -> (SignInState, Output) {
+    lazy_static! {
+        static ref RESERVED_NAMES: Vec<String> = vec![
+            "Admin".to_owned(),
+            "Administrator".to_owned(),
+            "Root".to_owned()
+        ];
+    }
     let user_name = validate_user_name(input.to_lowercase());
     if user_name.len() < 3 {
         (
@@ -721,7 +734,7 @@ fn process_asking_extra_stats_input(
                   Intelligence determines your max. magic points (MP). Barbarians cannot assign \n\
                   any points to this attribute.\n\
                 \n\
-                *Faith* (FAI)\n\
+                *Faith* (FTH)\n\
                   Faith determines the magical defense power. It also decreases the chance that\n\
                   a spell will fail when cast.\n",
             ),
@@ -745,34 +758,16 @@ fn process_asking_extra_stats_input(
             }
             let mut attributes = answer.split(' ');
             CharacterStats::from_stats(
-                cmp::max(
-                    i16::from_str(attributes.next().unwrap_or_default()).unwrap_or(0),
-                    0,
-                ),
-                cmp::max(
-                    i16::from_str(attributes.next().unwrap_or_default()).unwrap_or(0),
-                    0,
-                ),
-                cmp::max(
-                    i16::from_str(attributes.next().unwrap_or_default()).unwrap_or(0),
-                    0,
-                ),
-                cmp::max(
-                    i16::from_str(attributes.next().unwrap_or_default()).unwrap_or(0),
-                    0,
-                ),
+                u16::from_str(attributes.next().unwrap_or_default()).unwrap_or(0) as i16,
+                u16::from_str(attributes.next().unwrap_or_default()).unwrap_or(0) as i16,
+                u16::from_str(attributes.next().unwrap_or_default()).unwrap_or(0) as i16,
+                u16::from_str(attributes.next().unwrap_or_default()).unwrap_or(0) as i16,
                 if is_barbarian {
                     0
                 } else {
-                    cmp::max(
-                        i16::from_str(attributes.next().unwrap_or_default()).unwrap_or(0),
-                        0,
-                    )
+                    u16::from_str(attributes.next().unwrap_or_default()).unwrap_or(0) as i16
                 },
-                cmp::max(
-                    i16::from_str(attributes.next().unwrap_or_default()).unwrap_or(0),
-                    0,
-                ),
+                u16::from_str(attributes.next().unwrap_or_default()).unwrap_or(0) as i16,
             )
         };
 

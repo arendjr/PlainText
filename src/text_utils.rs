@@ -1,4 +1,6 @@
 use bitflags::bitflags;
+use lazy_static::lazy_static;
+use regex::{Captures, Regex};
 use std::borrow::Borrow;
 
 use crate::colors::Color;
@@ -63,6 +65,17 @@ pub fn highlight(string: &str) -> String {
 
 pub fn is_letter(character: char) -> bool {
     character >= 'a' && character <= 'z' || character >= 'A' && character <= 'Z'
+}
+
+pub fn process_highlights(string: &str) -> String {
+    lazy_static! {
+        static ref HIGHLIGHT_REGEX: Regex = Regex::new(r"\*([^*]+)\*").unwrap();
+    }
+
+    (*HIGHLIGHT_REGEX.replace_all(string, |captures: &Captures| {
+        highlight(captures.get(1).unwrap().as_str())
+    }))
+    .to_owned()
 }
 
 pub fn split_lines(string: &str, max_line_len: usize) -> Vec<String> {
