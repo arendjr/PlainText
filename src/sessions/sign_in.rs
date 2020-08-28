@@ -205,6 +205,24 @@ fn get_sign_in_steps() -> HashMap<SignInStep, StepImpl> {
             )),
             process_input: process_asking_extra_stats_input
         },
+
+        SignInStep::AskingSignUpConfirmation => StepImpl {
+            enter: enter_sign_up_confirmation,
+            exit: |_| Output::None,
+            prompt: |_| Output::Str("\nAre you ready to create a character with these stats?\n"),
+            process_input: process_asking_sign_up_confirmation_input
+        },
+
+        SignInStep::SignedIn => StepImpl {
+            enter: |data, realm| Output::String(format!(
+                "\nWelcome to {}, {}.\n",
+                realm.get_name(),
+                data.user_name,
+            )),
+            exit: |_| Output::None,
+            prompt: |_| Output::None,
+            process_input: |state, _, _| (state.clone(), Output::None)
+        }
     }
 }
 
@@ -263,7 +281,7 @@ fn enter_extra_stats(data: &SignInData, _: &Realm) -> Output {
         "\n\
         You have selected to become a {} {} {}.\n\
         Your base character stats are:\n\
-        \n  *STR: {}*, *DEX: {}*, *VIT: {}*, *END: {}*, *INT: {}*, *FAI: {}*.\n\
+        \n  *STR: {}*, *DEX: {}*, *VIT: {}*, *END: {}*, *INT: {}*, *FTH: {}*.\n\
         \n\
         You may assign an additional 9 points freely over your various attributes.\n",
         if data.gender == Gender::Male {
@@ -285,6 +303,34 @@ fn enter_extra_stats(data: &SignInData, _: &Realm) -> Output {
         stats.get(CharacterStat::ENDURANCE),
         stats.get(CharacterStat::INTELLIGENCE),
         stats.get(CharacterStat::FAITH),
+    ))
+}
+
+fn enter_sign_up_confirmation(data: &SignInData, _: &Realm) -> Output {
+    Output::String(format!(
+        "\n\
+        You have selected to become a {} {} {}.\n\
+        Your final character stats are: \n\
+        \n  *STR: {}*, *DEX: {}*, *VIT: {}*, *END: {}*, *INT: {}*, *FTH: {}*.\n",
+        if data.gender == Gender::Male {
+            "male"
+        } else {
+            "female"
+        },
+        data.race
+            .as_ref()
+            .map(|race| race.get_adjective())
+            .unwrap_or(""),
+        data.class
+            .as_ref()
+            .map(|class| class.get_name())
+            .unwrap_or(""),
+        data.stats.get(CharacterStat::STRENGTH),
+        data.stats.get(CharacterStat::DEXTERITY),
+        data.stats.get(CharacterStat::VITALITY),
+        data.stats.get(CharacterStat::ENDURANCE),
+        data.stats.get(CharacterStat::INTELLIGENCE),
+        data.stats.get(CharacterStat::FAITH),
     ))
 }
 
@@ -759,6 +805,57 @@ fn process_asking_extra_stats_input(
                 "\nYour character stats have been recorded.\n",
                 Color::Green,
             )),
+        )
+    }
+}
+
+fn process_asking_sign_up_confirmation_input(
+    state: &SignInState,
+    realm: &Realm,
+    input: String,
+) -> (SignInState, Output) {
+    let answer = input.to_lowercase();
+    if realm.get_player_by_name(&state.data.user_name).is_some() {
+        (
+            new_state(SignInStep::SessionClosed, state.data.clone()),
+            Output::Str(
+                "Uh-oh, it appears someone has claimed your character name while \
+                you were creating yours. I'm terribly sorry, but it appears you \
+                will have to start over.\n",
+            ),
+        )
+    } else if answer == "yes" || answer == "y" {
+        /* player = Realm.createObject("Player");
+        player.admin = Realm.players().isEmpty();
+        player.name = signUpData.userName;
+        player.race = signUpData.race;
+        player.characterClass = signUpData.characterClass;
+        player.gender = signUpData.gender;
+        player.stats = signUpData.stats;
+        player.height = signUpData.height;
+        player.weight = signUpData.weight;
+        player.currentRoom = signUpData.race.startingRoom;
+
+        player.hp = player.maxHp;
+        player.mp = player.maxMp;
+        player.gold = 100;
+
+        player.setPassword(signUpData.password);*/
+
+        // TODO: logSessionEvent(this._session.source, "Character created for player " + player.name);
+        (
+            new_state(SignInStep::SignedIn, state.data.clone()),
+            Output::None,
+        )
+    } else if answer == "no" || answer == "n" || answer == "back" || answer == "b" {
+        (
+            new_state(SignInStep::AskingExtraStats, state.data.clone()),
+            Output::None,
+        )
+    } else {
+        (
+            state.clone(),
+            Output::Str("Please answer with yes or no.\n"),
         )
     }
 }
