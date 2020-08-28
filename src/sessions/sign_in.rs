@@ -5,7 +5,7 @@ use std::collections::HashMap;
 
 use crate::colors::Color;
 use crate::game_object::GameObject;
-use crate::objects::{Class, Player, Race, Realm};
+use crate::objects::{Class, Gender, Player, Race, Realm};
 use crate::sessions::SessionOutput as Output;
 use crate::text_utils::{
     capitalize, colorize, format_columns, highlight, is_letter, split_lines, FormatOptions,
@@ -32,6 +32,7 @@ impl SignInState {
             SignInStep::AskingUserName,
             SignInData {
                 class: None,
+                gender: Gender::Unspecified,
                 password: String::new(),
                 player: None,
                 race: None,
@@ -44,6 +45,7 @@ impl SignInState {
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 enum SignInStep {
     AskingClass,
+    AskingExtraStats,
     AskingGender,
     AskingPassword,
     AskingRace,
@@ -58,6 +60,7 @@ enum SignInStep {
 #[derive(Clone, Debug)]
 struct SignInData {
     class: Option<Class>,
+    gender: Gender,
     password: String,
     player: Option<Player>,
     race: Option<Race>,
@@ -153,7 +156,23 @@ fn get_sign_in_steps() -> HashMap<SignInStep, StepImpl> {
                 get more information about a class.\n"
             ),
             process_input: process_asking_class_input
-        }
+        },
+
+        SignInStep::AskingGender => StepImpl {
+            enter: |_, _| Output::Str(
+                "\n\
+                Please select which gender you would like your character to be.\n\
+                Your gender has a minor influence on the physique of your character."
+            ),
+            exit: |_| Output::None,
+            prompt: |_| Output::Str(
+                "\n\
+                Please choose *male* or *female*.\n\
+                \n\
+                To revisit your choice of class, type *back*.\n"
+            ),
+            process_input: process_asking_gender_input
+        },
     }
 }
 
@@ -441,6 +460,44 @@ fn process_asking_class_input(
     } else if answer == "back" || answer == "b" {
         (
             new_state(SignInStep::AskingRace, state.data.clone()),
+            Output::None,
+        )
+    } else {
+        (state.clone(), Output::None)
+    }
+}
+
+fn process_asking_gender_input(
+    state: &SignInState,
+    realm: &Realm,
+    input: String,
+) -> (SignInState, Output) {
+    let answer = input.to_lowercase();
+    if answer == "male" || answer == "m" {
+        (
+            new_state(
+                SignInStep::AskingExtraStats,
+                SignInData {
+                    gender: Gender::Male,
+                    ..state.data.clone()
+                },
+            ),
+            Output::String(colorize("\nYou have chosen to be male.\n", Color::Green)),
+        )
+    } else if answer == "female" || answer == "f" {
+        (
+            new_state(
+                SignInStep::AskingExtraStats,
+                SignInData {
+                    gender: Gender::Female,
+                    ..state.data.clone()
+                },
+            ),
+            Output::String(colorize("\nYou have chosen to be female.\n", Color::Green)),
+        )
+    } else if answer == "back" || answer == "b" {
+        (
+            new_state(SignInStep::AskingClass, state.data.clone()),
             Output::None,
         )
     } else {

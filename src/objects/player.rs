@@ -7,10 +7,18 @@ use crate::character_stats::CharacterStats;
 use crate::game_object::{GameObject, GameObjectId, GameObjectRef, GameObjectType};
 
 #[derive(Clone, Debug)]
+pub enum Gender {
+    Unspecified,
+    Male,
+    Female,
+}
+
+#[derive(Clone, Debug)]
 pub struct Player {
     id: GameObjectId,
     current_room: GameObjectRef,
     description: String,
+    gender: Gender,
     height: f32,
     name: String,
     race: GameObjectRef,
@@ -29,6 +37,11 @@ impl Player {
                 id,
                 current_room: player_dto.currentRoom,
                 description: player_dto.description,
+                gender: match &player_dto.gender.as_ref().map(String::as_str) {
+                    Some("male") => Gender::Male,
+                    Some("female") => Gender::Female,
+                    _ => Gender::Unspecified,
+                },
                 height: player_dto.height,
                 name: player_dto.name,
                 race: player_dto.race,
@@ -70,6 +83,7 @@ struct PlayerDto {
     cost: f32,
     currentRoom: GameObjectRef,
     description: String,
+    gender: Option<String>,
     height: f32,
     name: String,
     race: GameObjectRef,
