@@ -33,6 +33,10 @@ impl Race {
         self.height
     }
 
+    pub fn get_starting_room(&self) -> GameObjectRef {
+        self.starting_room
+    }
+
     pub fn get_stats(&self) -> CharacterStats {
         self.stats.clone()
     }

@@ -51,7 +51,7 @@ async fn main() {
     });
 
     match load_data(&data_dir) {
-        Ok(realm) => {
+        Ok(mut realm) => {
             let (input_tx, input_rx) = channel::<InputEvent>();
             let (session_tx, session_rx) = channel::<SessionEvent>();
 
@@ -71,13 +71,27 @@ async fn main() {
             while let Ok(input_ev) = input_rx.recv() {
                 match input_ev.session_state {
                     SessionState::SigningIn(state) => {
-                        println!("state: {:?}, input: {:?}", state, input_ev.input);
+                        // println!("state: {:?}, input: {:?}", state, input_ev.input);
                         let (new_state, output) = process_input(&state, &realm, input_ev.input);
+                        let session_state = if let Some(user_name) =
+                            new_state.get_sign_in_user_name()
+                        {
+                            if let Some(sign_up_data) = new_state.get_sign_up_data() {
+                                realm = realm.create_player(sign_up_data);
+                                // TODO: logSessionEvent(this._session.source, "Character created for player " + player.name);
+                            }
+
+                            let player_id = realm.get_player_by_name(user_name).unwrap().get_id();
+                            SessionState::SignedIn(player_id)
+                        } else {
+                            SessionState::SigningIn(new_state)
+                        };
+
                         if let Err(error) =
                             session_tx.send(SessionEvent::SessionUpdate(SessionUpdate {
                                 output,
                                 session_id: input_ev.session_id,
-                                session_state: SessionState::SigningIn(new_state),
+                                session_state,
                             }))
                         {
                             println!("Could not send output: {:?}", error);

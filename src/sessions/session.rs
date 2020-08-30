@@ -17,12 +17,11 @@ const MAX_INPUT_LENGTH: usize = 1024;
 pub enum SessionState {
     SessionClosed,
     SigningIn(SignInState),
-    SignedIn,
+    SignedIn(GameObjectId),
 }
 
 pub struct Session {
     pub id: u64,
-    player_id: Option<GameObjectId>,
     socket: TcpStream,
     pub state: SessionState,
 }
@@ -35,7 +34,6 @@ impl Session {
     pub fn new(id: u64, socket: TcpStream) -> Self {
         Self {
             id,
-            player_id: None,
             socket,
             state: SessionState::SigningIn(SignInState::new()),
         }

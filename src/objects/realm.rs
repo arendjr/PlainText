@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use serde_json;
+use std::cmp;
 use std::hash::{Hash, Hasher};
 use std::sync::Arc;
 
@@ -8,6 +9,8 @@ use im_rc::HashMap;
 use crate::objects;
 
 use crate::game_object::{GameObject, GameObjectId, GameObjectRef, GameObjectType};
+use crate::objects::Player;
+use crate::sessions::SignUpData;
 
 impl Eq for dyn GameObject {}
 
@@ -29,12 +32,19 @@ pub struct Realm {
     date_time: u64,
     id: GameObjectId,
     name: String,
+    next_id: GameObjectId,
     objects: HashMap<GameObjectRef, Arc<dyn GameObject>>,
     players_by_name: HashMap<String, GameObjectId>,
     races_by_name: HashMap<String, GameObjectId>,
 }
 
 impl Realm {
+    pub fn create_player(&self, sign_up_data: &SignUpData) -> Self {
+        let player_ref = GameObjectRef(GameObjectType::Player, self.next_id);
+        let player = Player::new(player_ref.get_id(), sign_up_data);
+        self.set(player_ref, Arc::new(player))
+    }
+
     pub fn get(&self, object_ref: GameObjectRef) -> Option<Arc<dyn GameObject>> {
         self.objects.get(&object_ref).map(|object| object.clone())
     }
@@ -89,6 +99,7 @@ impl Realm {
                 objects: HashMap::new(),
                 players_by_name: HashMap::new(),
                 name: realm_dto.name,
+                next_id: id + 1,
                 races_by_name: HashMap::new(),
             })),
             Err(error) => Err(format!("parse error: {}", error)),
@@ -123,6 +134,7 @@ impl Realm {
 
         Self {
             name: self.name.clone(),
+            next_id: cmp::max(self.next_id, object_ref.get_id() + 1),
             objects,
             players_by_name,
             races_by_name,

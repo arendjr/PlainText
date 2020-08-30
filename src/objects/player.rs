@@ -5,6 +5,7 @@ use std::sync::Arc;
 
 use crate::character_stats::CharacterStats;
 use crate::game_object::{GameObject, GameObjectId, GameObjectRef, GameObjectType};
+use crate::sessions::SignUpData;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Gender {
@@ -16,6 +17,7 @@ pub enum Gender {
 #[derive(Clone, Debug)]
 pub struct Player {
     id: GameObjectId,
+    class: GameObjectRef,
     current_room: GameObjectRef,
     description: String,
     gender: Gender,
@@ -35,6 +37,7 @@ impl Player {
         match serde_json::from_str::<PlayerDto>(json) {
             Ok(player_dto) => Ok(Arc::new(Self {
                 id,
+                class: player_dto.class,
                 current_room: player_dto.currentRoom,
                 description: player_dto.description,
                 gender: match &player_dto.gender.as_ref().map(String::as_str) {
@@ -49,6 +52,23 @@ impl Player {
                 weight: player_dto.weight,
             })),
             Err(error) => Err(format!("parse error: {}", error)),
+        }
+    }
+
+    pub fn new(id: GameObjectId, sign_up_data: &SignUpData) -> Self {
+        let class = sign_up_data.class.clone().unwrap();
+        let race = sign_up_data.race.clone().unwrap();
+        Self {
+            id,
+            class: class.get_ref(),
+            current_room: race.get_starting_room(),
+            description: "".to_owned(),
+            gender: sign_up_data.gender.clone(),
+            height: sign_up_data.height,
+            name: sign_up_data.user_name.clone(),
+            race: race.get_ref(),
+            stats: sign_up_data.stats.clone(),
+            weight: sign_up_data.weight,
         }
     }
 }
@@ -80,6 +100,7 @@ impl GameObject for Player {
 #[allow(non_snake_case)]
 #[derive(Deserialize, Serialize)]
 struct PlayerDto {
+    class: GameObjectRef,
     cost: f32,
     currentRoom: GameObjectRef,
     description: String,
