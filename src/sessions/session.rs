@@ -44,8 +44,8 @@ impl Session {
     pub fn send(&mut self, output: SessionOutput) {
         match output {
             SessionOutput::JSON(_) => {}
-            SessionOutput::Str(output) => send_data(&mut self.socket, output.to_owned()),
-            SessionOutput::String(output) => send_data(&mut self.socket, output),
+            SessionOutput::Str(output) => send_data(&mut self.socket, output.as_bytes()),
+            SessionOutput::String(output) => send_data(&mut self.socket, output.as_bytes()),
             SessionOutput::Aggregate(outputs) => {
                 for output in outputs {
                     self.send(output)
@@ -56,8 +56,8 @@ impl Session {
     }
 }
 
-fn send_data(socket: &mut TcpStream, data: String) {
-    if let Err(error) = socket.write(data.as_bytes()) {
+fn send_data(socket: &mut TcpStream, data: &[u8]) {
+    if let Err(error) = socket.write(data) {
         println!("Could not send data over socket: {:?}", error);
     }
 }
