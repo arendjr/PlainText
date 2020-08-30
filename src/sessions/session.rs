@@ -5,6 +5,7 @@ use std::net::TcpStream;
 
 use crate::game_object::GameObjectId;
 
+use super::session_output::SessionOutput;
 use super::sign_in::SignInState;
 
 const LF: u8 = 10;
@@ -26,13 +27,6 @@ pub struct Session {
     pub state: SessionState,
 }
 
-pub enum SessionOutput {
-    None,
-    Str(&'static str),
-    String(String),
-    JSON(serde_json::Value),
-}
-
 impl Session {
     pub fn close(&mut self) -> io::Result<()> {
         self.socket.shutdown(Shutdown::Both)
@@ -47,9 +41,23 @@ impl Session {
         }
     }
 
-    pub fn send(&mut self, data: String) {
-        if let Err(error) = self.socket.write(data.as_bytes()) {
-            println!("Could not send data over socket: {:?}", error);
+    pub fn send(&mut self, output: SessionOutput) {
+        match output {
+            SessionOutput::JSON(_) => {}
+            SessionOutput::Str(output) => send_data(&mut self.socket, output.to_owned()),
+            SessionOutput::String(output) => send_data(&mut self.socket, output),
+            SessionOutput::Aggregate(outputs) => {
+                for output in outputs {
+                    self.send(output)
+                }
+            }
+            SessionOutput::None => {}
         }
+    }
+}
+
+fn send_data(socket: &mut TcpStream, data: String) {
+    if let Err(error) = socket.write(data.as_bytes()) {
+        println!("Could not send data over socket: {:?}", error);
     }
 }

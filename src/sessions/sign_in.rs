@@ -10,8 +10,7 @@ use crate::game_object::GameObject;
 use crate::objects::{Class, Gender, Player, Race, Realm};
 use crate::sessions::SessionOutput as Output;
 use crate::text_utils::{
-    capitalize, colorize, format_columns, highlight, is_letter, process_highlights, split_lines,
-    FormatOptions,
+    capitalize, colorize, format_columns, highlight, is_letter, split_lines, FormatOptions,
 };
 
 #[derive(Clone, Debug)]
@@ -75,11 +74,7 @@ struct StepImpl {
     process_input: fn(&SignInState, &Realm, String) -> (SignInState, Output),
 }
 
-pub fn process_input(
-    state: &SignInState,
-    realm: &Realm,
-    input: String,
-) -> (SignInState, Vec<Output>) {
+pub fn process_input(state: &SignInState, realm: &Realm, input: String) -> (SignInState, Output) {
     lazy_static! {
         static ref SIGN_IN_STEPS: HashMap<SignInStep, StepImpl> = get_sign_in_steps();
     }
@@ -98,27 +93,12 @@ pub fn process_input(
                         vec![output, exit_output, enter_output, prompt_output]
                     };
 
-                    (
-                        new_state,
-                        outputs
-                            .into_iter()
-                            .map(|output| match output {
-                                Output::Str(string) => Output::String(process_highlights(string)),
-                                Output::String(string) => {
-                                    Output::String(process_highlights(&string))
-                                }
-                                other => other,
-                            })
-                            .collect(),
-                    )
+                    (new_state, Output::combine(outputs).process_highlights())
                 }
-                None => (
-                    new_state,
-                    vec![Output::Str("New state has no implementation")],
-                ),
+                None => (new_state, Output::Str("New state has no implementation")),
             }
         }
-        None => (state.clone(), vec![]),
+        None => (state.clone(), Output::None),
     }
 }
 

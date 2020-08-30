@@ -14,7 +14,7 @@ pub enum SessionEvent {
 }
 
 pub struct SessionUpdate {
-    pub output: Vec<SessionOutput>,
+    pub output: SessionOutput,
     pub session_id: u64,
     pub session_state: SessionState,
 }

@@ -5,7 +5,7 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 
 use crate::event_loop::{InputEvent, SessionEvent};
-use crate::sessions::{Session, SessionOutput, SessionReader, SessionState};
+use crate::sessions::{Session, SessionReader, SessionState};
 
 type SessionMap = Arc<Mutex<HashMap<u64, Session>>>;
 
@@ -26,15 +26,7 @@ pub fn create_sessions_handler(input_tx: Sender<InputEvent>, session_rx: Receive
                     if let Some(mut session) =
                         session_map.lock().unwrap().get_mut(&update.session_id)
                     {
-                        for output in update.output {
-                            match output {
-                                SessionOutput::JSON(_) => {}
-                                SessionOutput::Str(output) => session.send(output.to_owned()),
-                                SessionOutput::String(output) => session.send(output),
-                                SessionOutput::None => {}
-                            }
-                        }
-
+                        session.send(update.output);
                         session.state = update.session_state;
                     }
                 }
