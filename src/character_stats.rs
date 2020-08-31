@@ -14,7 +14,7 @@ pub enum CharacterStat {
     FAITH,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct CharacterStats {
     stats: [i16; NUM_STATS],
 }

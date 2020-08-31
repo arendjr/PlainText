@@ -73,16 +73,21 @@ async fn main() {
                     SessionState::SigningIn(state) => {
                         // println!("state: {:?}, input: {:?}", state, input_ev.input);
                         let (new_state, output) = process_input(&state, &realm, input_ev.input);
-                        let session_state = if let Some(user_name) =
-                            new_state.get_sign_in_user_name()
-                        {
+                        let session_state = if new_state.is_session_closed() {
+                            SessionState::SessionClosed
+                        } else if let Some(user_name) = new_state.get_sign_in_user_name() {
                             if let Some(sign_up_data) = new_state.get_sign_up_data() {
                                 realm = realm.create_player(sign_up_data);
                                 // TODO: logSessionEvent(this._session.source, "Character created for player " + player.name);
                             }
 
-                            let player_id = realm.get_player_by_name(user_name).unwrap().get_id();
-                            SessionState::SignedIn(player_id)
+                            if let Some(player) = realm.get_player_by_name(user_name) {
+                                let player_id = player.get_id();
+                                SessionState::SignedIn(player_id)
+                            } else {
+                                println!("Could not determine ID for player \"{}\"", user_name);
+                                SessionState::SessionClosed
+                            }
                         } else {
                             SessionState::SigningIn(new_state)
                         };

@@ -6,7 +6,7 @@ use std::sync::Arc;
 use crate::character_stats::CharacterStats;
 use crate::game_object::{GameObject, GameObjectId, GameObjectRef, GameObjectType};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Race {
     id: GameObjectId,
     adjective: String,

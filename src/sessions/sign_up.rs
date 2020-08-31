@@ -17,13 +17,17 @@ lazy_static! {
     static ref SIGN_UP_STEPS: HashMap<SignUpStep, StepImpl> = get_sign_up_steps();
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct SignUpState {
     step: SignUpStep,
     pub data: SignUpData,
 }
 
 impl SignUpState {
+    pub fn is_session_closed(&self) -> bool {
+        self.step == SignUpStep::SessionClosed
+    }
+
     pub fn is_signed_up(&self) -> bool {
         self.step == SignUpStep::SignedUp
     }
@@ -50,7 +54,7 @@ enum SignUpStep {
     SignedUp,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct SignUpData {
     pub class: Option<Class>,
     pub gender: Gender,
@@ -423,7 +427,7 @@ fn process_asking_user_name_confirmation_input(
     } else if answer == "no" || answer == "n" {
         (
             new_state(SignUpStep::SessionClosed, SignUpData::new()),
-            Output::Str("Okay, bye."),
+            Output::Str("Okay, bye.\n"),
         )
     } else {
         (

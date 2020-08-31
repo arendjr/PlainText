@@ -110,10 +110,6 @@ impl Realm {
         self.players_by_name.values().map(|id| *id).collect()
     }
 
-    pub fn race_ids(&self) -> Vec<GameObjectId> {
-        self.races_by_name.values().map(|id| *id).collect()
-    }
-
     pub fn race_names(&self) -> Vec<&str> {
         self.races_by_name.keys().map(String::as_ref).collect()
     }

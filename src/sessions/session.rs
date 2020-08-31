@@ -8,11 +8,6 @@ use crate::game_object::GameObjectId;
 use super::session_output::SessionOutput;
 use super::sign_in::SignInState;
 
-const LF: u8 = 10;
-const CR: u8 = 13;
-
-const MAX_INPUT_LENGTH: usize = 1024;
-
 #[derive(Clone, Debug)]
 pub enum SessionState {
     SessionClosed,

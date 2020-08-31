@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::io::ErrorKind;
 use std::net::TcpStream;
 use std::sync::mpsc::{Receiver, Sender};
 use std::sync::{Arc, Mutex};
@@ -27,7 +28,16 @@ pub fn create_sessions_handler(input_tx: Sender<InputEvent>, session_rx: Receive
                         session_map.lock().unwrap().get_mut(&update.session_id)
                     {
                         session.send(update.output);
-                        session.state = update.session_state;
+
+                        match update.session_state {
+                            SessionState::SessionClosed => {
+                                session.state = SessionState::SessionClosed;
+                                if let Err(error) = session.close() {
+                                    println!("Could not close session: {:?}", error);
+                                }
+                            }
+                            other_state => session.state = other_state,
+                        }
                     }
                 }
             }
@@ -55,9 +65,9 @@ fn create_session_thread(
         }
 
         if let Err(error) = reader.close() {
-            println!("Error closing socket: {:?}", error);
-        } else {
-            println!("Session closed");
+            if error.kind() != ErrorKind::NotConnected {
+                println!("Error closing socket: {:?}", error);
+            }
         }
     });
 }

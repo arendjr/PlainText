@@ -1,6 +1,6 @@
 use crate::text_utils::process_highlights;
 
-#[derive(PartialEq)]
+#[derive(Debug, PartialEq)]
 pub enum SessionOutput {
     None,
     Str(&'static str),

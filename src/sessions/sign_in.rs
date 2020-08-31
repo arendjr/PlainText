@@ -2,6 +2,7 @@ use lazy_static::lazy_static;
 use maplit::hashmap;
 use std::collections::HashMap;
 
+use crate::game_object::GameObject;
 use crate::objects::{Player, Realm};
 use crate::sessions::SessionOutput as Output;
 use crate::text_utils::is_letter;
@@ -11,7 +12,7 @@ use super::sign_up::{
     SignUpState,
 };
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct SignInState {
     step: SignInStep,
     data: SignInData,
@@ -20,7 +21,13 @@ pub struct SignInState {
 impl SignInState {
     pub fn get_sign_in_user_name(&self) -> Option<&str> {
         if self.step == SignInStep::SignedIn {
-            Some(&self.data.user_name)
+            if let Some(player) = &self.data.player {
+                Some(player.get_name())
+            } else if let Some(sign_up_state) = &self.data.sign_up_state {
+                Some(&sign_up_state.data.user_name)
+            } else {
+                None
+            }
         } else {
             None
         }
@@ -34,13 +41,16 @@ impl SignInState {
         }
     }
 
+    pub fn is_session_closed(&self) -> bool {
+        self.step == SignInStep::SessionClosed
+    }
+
     pub fn new() -> Self {
         new_state(
             SignInStep::AskingUserName,
             SignInData {
                 player: None,
                 sign_up_state: None,
-                user_name: String::new(),
             },
         )
     }
@@ -55,11 +65,10 @@ enum SignInStep {
     SignedIn,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 struct SignInData {
     player: Option<Player>,
     sign_up_state: Option<SignUpState>,
-    user_name: String,
 }
 
 struct StepImpl {
@@ -79,7 +88,7 @@ pub fn process_input(state: &SignInState, realm: &Realm, input: String) -> (Sign
             let (new_state, output) = (step.process_input)(state, realm, input);
             if let Some(new_step) = SIGN_IN_STEPS.get(&new_state.step) {
                 let prompt_output = (new_step.prompt)(&new_state.data);
-                let outputs = if new_state.step == state.step {
+                let outputs = if new_state == *state {
                     vec![output, prompt_output]
                 } else {
                     let exit_output = (step.exit)(&new_state.data);
@@ -117,7 +126,9 @@ fn get_sign_in_steps() -> HashMap<SignInStep, StepImpl> {
                 );
                 (
                     new_state(
-                        if sign_up_state.is_signed_up() {
+                        if sign_up_state.is_session_closed() {
+                            SignInStep::SessionClosed
+                        } else if sign_up_state.is_signed_up() {
                             SignInStep::SignedIn
                         } else {
                             SignInStep::AskingSignUpData
