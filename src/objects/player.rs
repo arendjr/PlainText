@@ -1,3 +1,4 @@
+use pbkdf2::{pbkdf2_check, pbkdf2_simple};
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::fmt;
@@ -23,7 +24,9 @@ pub struct Player {
     gender: Gender,
     height: f32,
     name: String,
+    password: String,
     race: GameObjectRef,
+    session_id: Option<u64>,
     stats: CharacterStats,
     weight: f32,
 }
@@ -31,6 +34,10 @@ pub struct Player {
 impl Player {
     pub fn get_current_room(&self) -> GameObjectRef {
         self.current_room
+    }
+
+    pub fn get_session_id(&self) -> Option<u64> {
+        self.session_id
     }
 
     pub fn hydrate(id: GameObjectId, json: &str) -> Result<Arc<dyn GameObject>, String> {
@@ -47,7 +54,9 @@ impl Player {
                 },
                 height: player_dto.height,
                 name: player_dto.name,
+                password: player_dto.password,
                 race: player_dto.race,
+                session_id: None,
                 stats: player_dto.stats,
                 weight: player_dto.weight,
             })),
@@ -55,10 +64,17 @@ impl Player {
         }
     }
 
+    pub fn matches_password(&self, password: &str) -> bool {
+        match pbkdf2_check(password, &self.password) {
+            Ok(()) => true,
+            _ => false,
+        }
+    }
+
     pub fn new(id: GameObjectId, sign_up_data: &SignUpData) -> Self {
         let class = sign_up_data.class.clone().unwrap();
         let race = sign_up_data.race.clone().unwrap();
-        Self {
+        let mut player = Self {
             id,
             class: class.get_ref(),
             current_room: race.get_starting_room(),
@@ -66,10 +82,25 @@ impl Player {
             gender: sign_up_data.gender.clone(),
             height: sign_up_data.height,
             name: sign_up_data.user_name.clone(),
+            password: String::new(),
             race: race.get_ref(),
+            session_id: None,
             stats: sign_up_data.stats.clone(),
             weight: sign_up_data.weight,
+        };
+        player.set_password(&sign_up_data.password);
+        player
+    }
+
+    pub fn set_password(&mut self, password: &str) {
+        match pbkdf2_simple(password, 10) {
+            Ok(password) => self.password = password,
+            Err(error) => panic!("Cannot create password hash: {:?}", error),
         }
+    }
+
+    pub fn set_session_id(&mut self, session_id: Option<u64>) {
+        self.session_id = session_id
     }
 }
 
@@ -107,6 +138,7 @@ struct PlayerDto {
     gender: Option<String>,
     height: f32,
     name: String,
+    password: String,
     race: GameObjectRef,
     stats: CharacterStats,
     weight: f32,

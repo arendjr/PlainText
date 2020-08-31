@@ -10,7 +10,7 @@ use super::sign_in::SignInState;
 
 #[derive(Clone, Debug)]
 pub enum SessionState {
-    SessionClosed,
+    SessionClosed(Option<GameObjectId>),
     SigningIn(SignInState),
     SignedIn(GameObjectId),
 }

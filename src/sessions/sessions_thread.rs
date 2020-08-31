@@ -30,18 +30,23 @@ pub fn create_sessions_thread(
                     next_id += 1;
                     create_session_thread(session_map.clone(), session_id, socket, input_tx.clone())
                 }
-                SessionEvent::SessionUpdate(session_id, session_state, output) => {
-                    if let Some(mut session) = session_map.lock().unwrap().get_mut(&session_id) {
-                        session.send(output);
 
+                SessionEvent::SessionOutput(session_id, output) => {
+                    if let Some(session) = session_map.lock().unwrap().get_mut(&session_id) {
+                        session.send(output);
+                    }
+                }
+
+                SessionEvent::SessionUpdate(session_id, session_state) => {
+                    if let Some(mut session) = session_map.lock().unwrap().get_mut(&session_id) {
                         match session_state {
-                            SessionState::SessionClosed => {
+                            SessionState::SessionClosed(player_id) => {
                                 log_session_event(
                                     &log_tx,
                                     get_source(&session.socket),
                                     "Connection closed".to_owned(),
                                 );
-                                session.state = SessionState::SessionClosed;
+                                session.state = SessionState::SessionClosed(player_id);
                                 if let Err(error) = session.close() {
                                     println!("Could not close session: {:?}", error);
                                 }
@@ -93,7 +98,24 @@ fn create_session_thread(
             }
         }
 
-        session_map.lock().unwrap().remove(&session_id);
+        if let Ok(mut session_map) = session_map.lock() {
+            if let Some(session) = session_map.get(&session_id) {
+                let player_id = match session.state {
+                    SessionState::SigningIn(_) => None,
+                    SessionState::SignedIn(player_id) => Some(player_id),
+                    SessionState::SessionClosed(player_id) => player_id,
+                };
+                send_event(
+                    &input_tx,
+                    session_id,
+                    SessionState::SessionClosed(player_id),
+                    source,
+                    "".to_owned(),
+                );
+
+                session_map.remove(&session_id);
+            }
+        }
     });
 }
 

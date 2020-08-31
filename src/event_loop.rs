@@ -11,5 +11,6 @@ pub struct InputEvent {
 
 pub enum SessionEvent {
     IncomingSession(TcpStream),
-    SessionUpdate(u64, SessionState, SessionOutput),
+    SessionOutput(u64, SessionOutput),
+    SessionUpdate(u64, SessionState),
 }

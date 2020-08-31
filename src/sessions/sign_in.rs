@@ -1,8 +1,10 @@
 use lazy_static::lazy_static;
 use maplit::hashmap;
+use serde_json::json;
 use std::collections::HashMap;
 
 use crate::game_object::GameObject;
+use crate::logs::{log_session_event, LogSender};
 use crate::objects::{Player, Realm};
 use crate::sessions::SessionOutput as Output;
 use crate::text_utils::is_letter;
@@ -75,17 +77,23 @@ struct StepImpl {
     enter: fn(&SignInData, &Realm) -> Output,
     exit: fn(&SignInData) -> Output,
     prompt: fn(&SignInData) -> Output,
-    process_input: fn(&SignInState, &Realm, String) -> (SignInState, Output),
+    process_input: fn(&SignInState, &Realm, &LogSender, &String, String) -> (SignInState, Output),
 }
 
-pub fn process_input(state: &SignInState, realm: &Realm, input: String) -> (SignInState, Output) {
+pub fn process_input(
+    state: &SignInState,
+    realm: &Realm,
+    log_tx: &LogSender,
+    source: &String,
+    input: String,
+) -> (SignInState, Output) {
     lazy_static! {
         static ref SIGN_IN_STEPS: HashMap<SignInStep, StepImpl> = get_sign_in_steps();
     }
 
     match SIGN_IN_STEPS.get(&state.step) {
         Some(step) => {
-            let (new_state, output) = (step.process_input)(state, realm, input);
+            let (new_state, output) = (step.process_input)(state, realm, log_tx, source, input);
             if let Some(new_step) = SIGN_IN_STEPS.get(&new_state.step) {
                 let prompt_output = (new_step.prompt)(&new_state.data);
                 let outputs = if new_state == *state {
@@ -114,11 +122,19 @@ fn get_sign_in_steps() -> HashMap<SignInStep, StepImpl> {
             process_input: process_asking_user_name_input,
         },
 
+        SignInStep::AskingPassword => StepImpl {
+            enter: |_, _| Output::JSON(json!({ "inputType": "password" })),
+            exit: |_| Output::JSON(json!({ "inputType": "text" })),
+            prompt: |_| Output::Str("Please enter your password: "),
+            process_input: process_asking_password_input,
+        },
+
+
         SignInStep::AskingSignUpData => StepImpl {
             enter: |data, realm| enter_sign_up_step(&data.sign_up_state.as_ref().unwrap(), realm),
             exit: |data| exit_sign_up_step(&data.sign_up_state.as_ref().unwrap()),
             prompt: |data| prompt_sign_up_step(&data.sign_up_state.as_ref().unwrap()),
-            process_input: |state, realm, input| {
+            process_input: |state, realm, _, _, input| {
                 let (sign_up_state, output) = process_sign_up_input(
                     &state.data.sign_up_state.as_ref().unwrap(),
                     realm,
@@ -149,6 +165,8 @@ fn new_state(step: SignInStep, data: SignInData) -> SignInState {
 fn process_asking_user_name_input(
     state: &SignInState,
     realm: &Realm,
+    _: &LogSender,
+    _: &String,
     input: String,
 ) -> (SignInState, Output) {
     lazy_static! {
@@ -195,6 +213,53 @@ fn process_asking_user_name_input(
             ),
             Output::None,
         )
+    }
+}
+
+fn process_asking_password_input(
+    state: &SignInState,
+    _: &Realm,
+    log_tx: &LogSender,
+    source: &String,
+    input: String,
+) -> (SignInState, Output) {
+    if let Some(player) = &state.data.player {
+        let name = player.get_name();
+        if player.matches_password(&input) {
+            log_session_event(
+                log_tx,
+                source.clone(),
+                format!("Authentication success for player \"{}\"", name),
+            );
+
+            if player.get_session_id().is_some() {
+                (
+                    new_state(SignInStep::SessionClosed, state.data.clone()),
+                    Output::Str(
+                        "Cannot sign you in because you're already signed in from another \
+                        location.\n",
+                    ),
+                )
+            } else {
+                (
+                    new_state(SignInStep::SignedIn, state.data.clone()),
+                    Output::String(format!(
+                        "Welcome back, {}. Type *help* if you're feeling lost.\n",
+                        name
+                    )),
+                )
+            }
+        } else {
+            log_session_event(
+                log_tx,
+                source.clone(),
+                format!("Authentication failed for player \"{}\"", name),
+            );
+
+            (state.clone(), Output::Str("Password incorrect.\n"))
+        }
+    } else {
+        (state.clone(), Output::None)
     }
 }
 

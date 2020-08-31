@@ -20,7 +20,7 @@ use event_loop::{InputEvent, SessionEvent};
 use game_object::{hydrate, GameObject, GameObjectRef, GameObjectType};
 use logs::{log_command, log_session_event, LogMessage};
 use objects::Realm;
-use sessions::{process_input, SessionOutput, SessionState};
+use sessions::{process_input, SessionState};
 
 #[tokio::main]
 async fn main() {
@@ -82,34 +82,54 @@ async fn main() {
                 match session_state {
                     SessionState::SigningIn(state) => {
                         // println!("state: {:?}, input: {:?}", state, input_ev.input);
-                        let (new_state, output) = process_input(&state, &realm, input);
+                        let (new_state, output) =
+                            process_input(&state, &realm, &log_tx, &source, input);
+                        send_session_event(
+                            &session_tx,
+                            SessionEvent::SessionOutput(session_id, output),
+                        );
+
                         let session_state = if new_state.is_session_closed() {
-                            SessionState::SessionClosed
+                            SessionState::SessionClosed(None)
                         } else if let Some(user_name) = new_state.get_sign_in_user_name() {
                             if let Some(sign_up_data) = new_state.get_sign_up_data() {
                                 realm = realm.create_player(sign_up_data);
                                 log_session_event(
                                     &log_tx,
-                                    source,
-                                    format!(
-                                        "Character created for player {}",
-                                        sign_up_data.user_name
-                                    ),
+                                    source.clone(),
+                                    format!("Character created for player \"{}\"", user_name),
                                 );
                             }
 
-                            if let Some(player) = realm.get_player_by_name(user_name) {
+                            if let Some(mut player) = realm.get_player_by_name(user_name) {
+                                if let Some(existing_session_id) = player.get_session_id() {
+                                    send_session_event(
+                                        &session_tx,
+                                        SessionEvent::SessionUpdate(
+                                            existing_session_id,
+                                            SessionState::SessionClosed(Some(player.get_id())),
+                                        ),
+                                    );
+                                }
+
+                                let player_id = player.get_id();
+                                player.set_session_id(Some(session_id));
+                                realm = realm.set(player.get_ref(), Arc::new(player));
+
                                 log_command(
                                     &log_tx,
                                     user_name.to_owned(),
                                     "(signed in)".to_owned(),
                                 );
 
-                                let player_id = player.get_id();
                                 SessionState::SignedIn(player_id)
                             } else {
-                                println!("Could not determine ID for player \"{}\"", user_name);
-                                SessionState::SessionClosed
+                                log_session_event(
+                                    &log_tx,
+                                    source,
+                                    format!("Could not determine ID for player \"{}\"", user_name),
+                                );
+                                SessionState::SessionClosed(None)
                             }
                         } else {
                             SessionState::SigningIn(new_state)
@@ -117,25 +137,40 @@ async fn main() {
 
                         send_session_event(
                             &session_tx,
-                            SessionEvent::SessionUpdate(session_id, session_state, output),
+                            SessionEvent::SessionUpdate(session_id, session_state),
                         );
                     }
+
                     SessionState::SignedIn(player_id) => {
                         if let Some(player) = realm.get_player(player_id) {
                             log_command(&log_tx, player.get_name().to_owned(), input.clone());
                         } else {
-                            log_command(&log_tx, "(player deleted)".to_owned(), input.clone());
+                            log_session_event(
+                                &log_tx,
+                                source,
+                                format!("Player {} deleted", player_id),
+                            );
                             send_session_event(
                                 &session_tx,
                                 SessionEvent::SessionUpdate(
                                     session_id,
-                                    SessionState::SessionClosed,
-                                    SessionOutput::None,
+                                    SessionState::SessionClosed(Some(player_id)),
                                 ),
                             );
                         }
                     }
-                    SessionState::SessionClosed => {}
+
+                    SessionState::SessionClosed(player_id) => {
+                        if let Some(player_id) = player_id {
+                            if let Some(mut player) = realm.get_player(player_id) {
+                                let player_name = player.get_name().to_owned();
+                                player.set_session_id(None);
+                                realm = realm.set(player.get_ref(), Arc::new(player));
+
+                                log_command(&log_tx, player_name, "(session closed)".to_owned());
+                            }
+                        }
+                    }
                 }
             }
         }
