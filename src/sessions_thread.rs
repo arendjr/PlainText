@@ -10,7 +10,7 @@ use crate::sessions::{Session, SessionReader, SessionState};
 
 type SessionMap = Arc<Mutex<HashMap<u64, Session>>>;
 
-pub fn create_sessions_handler(input_tx: Sender<InputEvent>, session_rx: Receiver<SessionEvent>) {
+pub fn create_sessions_thread(input_tx: Sender<InputEvent>, session_rx: Receiver<SessionEvent>) {
     thread::spawn(move || {
         let session_map: SessionMap = Arc::new(Mutex::new(HashMap::new()));
 
@@ -53,14 +53,30 @@ fn create_session_thread(
 ) {
     thread::spawn(move || {
         let mut reader = SessionReader::new(socket.try_clone().unwrap());
+        let source = match socket.peer_addr() {
+            Ok(addr) => format!("{}", addr.ip()),
+            Err(_) => "(unknown source)".to_owned(),
+        };
 
         let session = Session::new(session_id, socket);
-        send_event(&input_tx, session_id, session.state.clone(), "".to_owned());
+        send_event(
+            &input_tx,
+            session_id,
+            session.state.clone(),
+            source.clone(),
+            "".to_owned(),
+        );
         session_map.lock().unwrap().insert(session_id, session);
 
         while let Some(line) = reader.read_line() {
             if let Some(session) = session_map.lock().unwrap().get_mut(&session_id) {
-                send_event(&input_tx, session_id, session.state.clone(), line);
+                send_event(
+                    &input_tx,
+                    session_id,
+                    session.state.clone(),
+                    source.clone(),
+                    line,
+                );
             }
         }
 
@@ -76,11 +92,13 @@ fn send_event(
     input_tx: &Sender<InputEvent>,
     session_id: u64,
     session_state: SessionState,
+    source: String,
     input: String,
 ) {
     if let Err(error) = input_tx.send(InputEvent {
         session_id,
         session_state,
+        source,
         input,
     }) {
         println!("Could not send event: {:?}", error);

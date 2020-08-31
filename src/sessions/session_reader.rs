@@ -1,7 +1,6 @@
 use std::io;
 use std::io::Read;
-use std::net::Shutdown;
-use std::net::TcpStream;
+use std::net::{Shutdown, SocketAddr, TcpStream};
 
 const LF: u8 = 10;
 const CR: u8 = 13;

@@ -5,6 +5,7 @@ use crate::sessions::{SessionOutput, SessionState};
 pub struct InputEvent {
     pub session_id: u64,
     pub session_state: SessionState,
+    pub source: String,
     pub input: String,
 }
 

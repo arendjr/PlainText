@@ -11,14 +11,11 @@ pub fn serve(port: u16, session_tx: Sender<SessionEvent>) {
             while let Some(socket_res) = incoming.next() {
                 match socket_res {
                     Ok(socket) => {
-                        println!("Accepted connection from {:?}", socket.peer_addr());
                         if let Err(error) = session_tx.send(SessionEvent::IncomingSession(socket)) {
                             println!("Failed to dispatch session: {:?}", error);
                         }
                     }
-                    Err(error) => {
-                        println!("Telnet connection error: {:?}", error);
-                    }
+                    Err(error) => println!("Telnet connection error: {:?}", error),
                 }
             }
         });

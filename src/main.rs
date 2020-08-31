@@ -1,5 +1,5 @@
 use futures::{FutureExt, StreamExt};
-use std::sync::mpsc::channel;
+use std::sync::mpsc::{channel, Sender};
 use std::sync::Arc;
 use std::{env, fs, io, thread};
 use warp::Filter;
@@ -8,22 +8,26 @@ mod character_stats;
 mod colors;
 mod event_loop;
 mod game_object;
+mod log_messages;
+mod log_thread;
 mod objects;
 mod point3d;
-mod session_runner;
 mod sessions;
+mod sessions_thread;
 mod telnet_server;
 mod text_utils;
 mod util;
 
 use event_loop::{InputEvent, SessionEvent, SessionUpdate};
 use game_object::{hydrate, GameObject, GameObjectRef, GameObjectType};
+use log_messages::{LogMessage, SessionLogMessage};
 use objects::Realm;
 use sessions::{process_input, SessionState};
 
 #[tokio::main]
 async fn main() {
     let data_dir = env::var("PT_DATA_DIR").unwrap_or("data/".to_owned());
+    let log_dir = env::var("PT_LOG_DIR").unwrap_or("logs/".to_owned());
 
     let telnet_port = env::var("PT_TELNET_PORT")
         .unwrap_or("".to_string())
@@ -54,8 +58,10 @@ async fn main() {
         Ok(mut realm) => {
             let (input_tx, input_rx) = channel::<InputEvent>();
             let (session_tx, session_rx) = channel::<SessionEvent>();
+            let (log_tx, log_rx) = channel::<Box<dyn LogMessage>>();
 
-            session_runner::create_sessions_handler(input_tx, session_rx);
+            log_thread::create_log_thread(log_dir, log_rx);
+            sessions_thread::create_sessions_thread(input_tx, session_rx);
 
             let session_tx_clone = session_tx.clone();
             thread::spawn(move || {
@@ -78,7 +84,14 @@ async fn main() {
                         } else if let Some(user_name) = new_state.get_sign_in_user_name() {
                             if let Some(sign_up_data) = new_state.get_sign_up_data() {
                                 realm = realm.create_player(sign_up_data);
-                                // TODO: logSessionEvent(this._session.source, "Character created for player " + player.name);
+                                log_session_event(
+                                    &log_tx,
+                                    input_ev.source,
+                                    format!(
+                                        "Character created for player {}",
+                                        sign_up_data.user_name
+                                    ),
+                                );
                             }
 
                             if let Some(player) = realm.get_player_by_name(user_name) {
@@ -155,4 +168,10 @@ fn inject_players_into_rooms(mut realm: Realm) -> Realm {
         }
     }
     realm
+}
+
+fn log_session_event(log_tx: &Sender<Box<dyn LogMessage>>, source: String, message: String) {
+    if let Err(error) = log_tx.send(Box::new(SessionLogMessage::new(source, message))) {
+        println!("Could not send log message: {:?}", error);
+    }
 }
