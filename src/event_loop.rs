@@ -11,11 +11,5 @@ pub struct InputEvent {
 
 pub enum SessionEvent {
     IncomingSession(TcpStream),
-    SessionUpdate(SessionUpdate),
-}
-
-pub struct SessionUpdate {
-    pub output: SessionOutput,
-    pub session_id: u64,
-    pub session_state: SessionState,
+    SessionUpdate(u64, SessionState, SessionOutput),
 }

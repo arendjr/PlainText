@@ -6,11 +6,18 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 
 use crate::event_loop::{InputEvent, SessionEvent};
-use crate::sessions::{Session, SessionReader, SessionState};
+use crate::logs::{log_session_event, LogMessage};
+
+use super::session::Session;
+use super::{SessionReader, SessionState};
 
 type SessionMap = Arc<Mutex<HashMap<u64, Session>>>;
 
-pub fn create_sessions_thread(input_tx: Sender<InputEvent>, session_rx: Receiver<SessionEvent>) {
+pub fn create_sessions_thread(
+    input_tx: Sender<InputEvent>,
+    log_tx: Sender<Box<dyn LogMessage>>,
+    session_rx: Receiver<SessionEvent>,
+) {
     thread::spawn(move || {
         let session_map: SessionMap = Arc::new(Mutex::new(HashMap::new()));
 
@@ -23,14 +30,17 @@ pub fn create_sessions_thread(input_tx: Sender<InputEvent>, session_rx: Receiver
                     next_id += 1;
                     create_session_thread(session_map.clone(), session_id, socket, input_tx.clone())
                 }
-                SessionEvent::SessionUpdate(update) => {
-                    if let Some(mut session) =
-                        session_map.lock().unwrap().get_mut(&update.session_id)
-                    {
-                        session.send(update.output);
+                SessionEvent::SessionUpdate(session_id, session_state, output) => {
+                    if let Some(mut session) = session_map.lock().unwrap().get_mut(&session_id) {
+                        session.send(output);
 
-                        match update.session_state {
+                        match session_state {
                             SessionState::SessionClosed => {
+                                log_session_event(
+                                    &log_tx,
+                                    get_source(&session.socket),
+                                    "Connection closed".to_owned(),
+                                );
                                 session.state = SessionState::SessionClosed;
                                 if let Err(error) = session.close() {
                                     println!("Could not close session: {:?}", error);
@@ -53,10 +63,7 @@ fn create_session_thread(
 ) {
     thread::spawn(move || {
         let mut reader = SessionReader::new(socket.try_clone().unwrap());
-        let source = match socket.peer_addr() {
-            Ok(addr) => format!("{}", addr.ip()),
-            Err(_) => "(unknown source)".to_owned(),
-        };
+        let source = get_source(&socket);
 
         let session = Session::new(session_id, socket);
         send_event(
@@ -85,7 +92,16 @@ fn create_session_thread(
                 println!("Error closing socket: {:?}", error);
             }
         }
+
+        session_map.lock().unwrap().remove(&session_id);
     });
+}
+
+fn get_source(socket: &TcpStream) -> String {
+    match socket.peer_addr() {
+        Ok(addr) => format!("{}", addr.ip()),
+        Err(_) => "(unknown source)".to_owned(),
+    }
 }
 
 fn send_event(

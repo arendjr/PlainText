@@ -17,7 +17,7 @@ pub enum SessionState {
 
 pub struct Session {
     pub id: u64,
-    socket: TcpStream,
+    pub socket: TcpStream,
     pub state: SessionState,
 }
 

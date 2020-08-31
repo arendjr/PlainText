@@ -8,21 +8,19 @@ mod character_stats;
 mod colors;
 mod event_loop;
 mod game_object;
-mod log_messages;
-mod log_thread;
+mod logs;
 mod objects;
 mod point3d;
 mod sessions;
-mod sessions_thread;
 mod telnet_server;
 mod text_utils;
 mod util;
 
-use event_loop::{InputEvent, SessionEvent, SessionUpdate};
+use event_loop::{InputEvent, SessionEvent};
 use game_object::{hydrate, GameObject, GameObjectRef, GameObjectType};
-use log_messages::{LogMessage, SessionLogMessage};
+use logs::{log_command, log_session_event, LogMessage};
 use objects::Realm;
-use sessions::{process_input, SessionState};
+use sessions::{process_input, SessionOutput, SessionState};
 
 #[tokio::main]
 async fn main() {
@@ -60,8 +58,8 @@ async fn main() {
             let (session_tx, session_rx) = channel::<SessionEvent>();
             let (log_tx, log_rx) = channel::<Box<dyn LogMessage>>();
 
-            log_thread::create_log_thread(log_dir, log_rx);
-            sessions_thread::create_sessions_thread(input_tx, session_rx);
+            logs::create_log_thread(log_dir, log_rx);
+            sessions::create_sessions_thread(input_tx, log_tx.clone(), session_rx);
 
             let session_tx_clone = session_tx.clone();
             thread::spawn(move || {
@@ -74,11 +72,17 @@ async fn main() {
                 websocket_port
             );
 
-            while let Ok(input_ev) = input_rx.recv() {
-                match input_ev.session_state {
+            while let Ok(InputEvent {
+                input,
+                session_id,
+                session_state,
+                source,
+            }) = input_rx.recv()
+            {
+                match session_state {
                     SessionState::SigningIn(state) => {
                         // println!("state: {:?}, input: {:?}", state, input_ev.input);
-                        let (new_state, output) = process_input(&state, &realm, input_ev.input);
+                        let (new_state, output) = process_input(&state, &realm, input);
                         let session_state = if new_state.is_session_closed() {
                             SessionState::SessionClosed
                         } else if let Some(user_name) = new_state.get_sign_in_user_name() {
@@ -86,7 +90,7 @@ async fn main() {
                                 realm = realm.create_player(sign_up_data);
                                 log_session_event(
                                     &log_tx,
-                                    input_ev.source,
+                                    source,
                                     format!(
                                         "Character created for player {}",
                                         sign_up_data.user_name
@@ -95,6 +99,12 @@ async fn main() {
                             }
 
                             if let Some(player) = realm.get_player_by_name(user_name) {
+                                log_command(
+                                    &log_tx,
+                                    user_name.to_owned(),
+                                    "(signed in)".to_owned(),
+                                );
+
                                 let player_id = player.get_id();
                                 SessionState::SignedIn(player_id)
                             } else {
@@ -105,17 +115,27 @@ async fn main() {
                             SessionState::SigningIn(new_state)
                         };
 
-                        if let Err(error) =
-                            session_tx.send(SessionEvent::SessionUpdate(SessionUpdate {
-                                output,
-                                session_id: input_ev.session_id,
-                                session_state,
-                            }))
-                        {
-                            println!("Could not send output: {:?}", error);
+                        send_session_event(
+                            &session_tx,
+                            SessionEvent::SessionUpdate(session_id, session_state, output),
+                        );
+                    }
+                    SessionState::SignedIn(player_id) => {
+                        if let Some(player) = realm.get_player(player_id) {
+                            log_command(&log_tx, player.get_name().to_owned(), input.clone());
+                        } else {
+                            log_command(&log_tx, "(player deleted)".to_owned(), input.clone());
+                            send_session_event(
+                                &session_tx,
+                                SessionEvent::SessionUpdate(
+                                    session_id,
+                                    SessionState::SessionClosed,
+                                    SessionOutput::None,
+                                ),
+                            );
                         }
                     }
-                    other_state => panic!("Session state not implemented: {:?}", other_state),
+                    SessionState::SessionClosed => {}
                 }
             }
         }
@@ -170,8 +190,8 @@ fn inject_players_into_rooms(mut realm: Realm) -> Realm {
     realm
 }
 
-fn log_session_event(log_tx: &Sender<Box<dyn LogMessage>>, source: String, message: String) {
-    if let Err(error) = log_tx.send(Box::new(SessionLogMessage::new(source, message))) {
-        println!("Could not send log message: {:?}", error);
+fn send_session_event(session_tx: &Sender<SessionEvent>, event: SessionEvent) {
+    if let Err(error) = session_tx.send(event) {
+        println!("Could not send session event: {:?}", error);
     }
 }
