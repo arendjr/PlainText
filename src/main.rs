@@ -17,10 +17,10 @@ mod text_utils;
 mod util;
 
 use event_loop::{InputEvent, SessionEvent};
-use game_object::{hydrate, GameObject, GameObjectRef, GameObjectType};
-use logs::{log_command, log_session_event, LogMessage};
+use game_object::{hydrate, GameObject, GameObjectId, GameObjectRef, GameObjectType};
+use logs::{log_command, log_session_event, LogMessage, LogSender};
 use objects::Realm;
-use sessions::{process_input, SessionState};
+use sessions::{process_input, SessionState, SignInState};
 
 #[tokio::main]
 async fn main() {
@@ -52,129 +52,49 @@ async fn main() {
         })
     });
 
-    match load_data(&data_dir) {
-        Ok(mut realm) => {
-            let (input_tx, input_rx) = channel::<InputEvent>();
-            let (session_tx, session_rx) = channel::<SessionEvent>();
-            let (log_tx, log_rx) = channel::<Box<dyn LogMessage>>();
+    let mut realm = match load_data(&data_dir) {
+        Ok(realm) => realm,
+        Err(error) => panic!("Failed to load data from \"{}\": {}", data_dir, error),
+    };
 
-            logs::create_log_thread(log_dir, log_rx);
-            sessions::create_sessions_thread(input_tx, log_tx.clone(), session_rx);
+    let (input_tx, input_rx) = channel::<InputEvent>();
+    let (session_tx, session_rx) = channel::<SessionEvent>();
+    let (log_tx, log_rx) = channel::<Box<dyn LogMessage>>();
 
-            let session_tx_clone = session_tx.clone();
-            thread::spawn(move || {
-                telnet_server::serve(telnet_port, session_tx_clone);
-            });
-            tokio::spawn(warp::serve(routes).run(([0, 0, 0, 0], websocket_port)));
+    logs::create_log_thread(log_dir, log_rx);
+    sessions::create_sessions_thread(input_tx, log_tx.clone(), session_rx);
 
-            println!(
-                "Listening for WebSocket connections at port {}.",
-                websocket_port
-            );
+    let session_tx_clone = session_tx.clone();
+    thread::spawn(move || {
+        telnet_server::serve(telnet_port, session_tx_clone);
+    });
+    tokio::spawn(warp::serve(routes).run(([0, 0, 0, 0], websocket_port)));
 
-            while let Ok(InputEvent {
-                input,
-                session_id,
-                session_state,
-                source,
-            }) = input_rx.recv()
-            {
-                match session_state {
-                    SessionState::SigningIn(state) => {
-                        // println!("state: {:?}, input: {:?}", state, input_ev.input);
-                        let (new_state, output) =
-                            process_input(&state, &realm, &log_tx, &source, input);
-                        send_session_event(
-                            &session_tx,
-                            SessionEvent::SessionOutput(session_id, output),
-                        );
+    println!(
+        "Listening for WebSocket connections at port {}.",
+        websocket_port
+    );
 
-                        let session_state = if new_state.is_session_closed() {
-                            SessionState::SessionClosed(None)
-                        } else if let Some(user_name) = new_state.get_sign_in_user_name() {
-                            if let Some(sign_up_data) = new_state.get_sign_up_data() {
-                                realm = realm.create_player(sign_up_data);
-                                log_session_event(
-                                    &log_tx,
-                                    source.clone(),
-                                    format!("Character created for player \"{}\"", user_name),
-                                );
-                            }
-
-                            if let Some(mut player) = realm.get_player_by_name(user_name) {
-                                if let Some(existing_session_id) = player.get_session_id() {
-                                    send_session_event(
-                                        &session_tx,
-                                        SessionEvent::SessionUpdate(
-                                            existing_session_id,
-                                            SessionState::SessionClosed(Some(player.get_id())),
-                                        ),
-                                    );
-                                }
-
-                                let player_id = player.get_id();
-                                player.set_session_id(Some(session_id));
-                                realm = realm.set(player.get_ref(), Arc::new(player));
-
-                                log_command(
-                                    &log_tx,
-                                    user_name.to_owned(),
-                                    "(signed in)".to_owned(),
-                                );
-
-                                SessionState::SignedIn(player_id)
-                            } else {
-                                log_session_event(
-                                    &log_tx,
-                                    source,
-                                    format!("Could not determine ID for player \"{}\"", user_name),
-                                );
-                                SessionState::SessionClosed(None)
-                            }
-                        } else {
-                            SessionState::SigningIn(new_state)
-                        };
-
-                        send_session_event(
-                            &session_tx,
-                            SessionEvent::SessionUpdate(session_id, session_state),
-                        );
-                    }
-
-                    SessionState::SignedIn(player_id) => {
-                        if let Some(player) = realm.get_player(player_id) {
-                            log_command(&log_tx, player.get_name().to_owned(), input.clone());
-                        } else {
-                            log_session_event(
-                                &log_tx,
-                                source,
-                                format!("Player {} deleted", player_id),
-                            );
-                            send_session_event(
-                                &session_tx,
-                                SessionEvent::SessionUpdate(
-                                    session_id,
-                                    SessionState::SessionClosed(Some(player_id)),
-                                ),
-                            );
-                        }
-                    }
-
-                    SessionState::SessionClosed(player_id) => {
-                        if let Some(player_id) = player_id {
-                            if let Some(mut player) = realm.get_player(player_id) {
-                                let player_name = player.get_name().to_owned();
-                                player.set_session_id(None);
-                                realm = realm.set(player.get_ref(), Arc::new(player));
-
-                                log_command(&log_tx, player_name, "(session closed)".to_owned());
-                            }
-                        }
-                    }
-                }
+    while let Ok(InputEvent {
+        input,
+        session_id,
+        session_state,
+        source,
+    }) = input_rx.recv()
+    {
+        match session_state {
+            SessionState::SigningIn(state) => {
+                let input_ev = (input, session_id, source, state);
+                realm = process_signing_in_input(realm, &session_tx, &log_tx, input_ev);
+            }
+            SessionState::SignedIn(player_id) => {
+                let input_ev = (input, session_id, source, player_id);
+                realm = process_signed_in_input(realm, &session_tx, &log_tx, input_ev);
+            }
+            SessionState::SessionClosed(player_id) => {
+                realm = process_session_closed(realm, &session_tx, &log_tx, player_id);
             }
         }
-        Err(error) => panic!("Failed to load data from `{}`: {}", data_dir, error),
     }
 }
 
@@ -222,6 +142,103 @@ fn inject_players_into_rooms(mut realm: Realm) -> Realm {
             );
         }
     }
+    realm
+}
+
+fn process_signing_in_input(
+    mut realm: Realm,
+    session_tx: &Sender<SessionEvent>,
+    log_tx: &LogSender,
+    (input, session_id, source, state): (String, u64, String, SignInState),
+) -> Realm {
+    let (new_state, output) = process_input(&state, &realm, &log_tx, &source, input);
+    send_session_event(session_tx, SessionEvent::SessionOutput(session_id, output));
+
+    let session_state = if new_state.is_session_closed() {
+        SessionState::SessionClosed(None)
+    } else if let Some(user_name) = new_state.get_sign_in_user_name() {
+        if let Some(sign_up_data) = new_state.get_sign_up_data() {
+            realm = realm.create_player(sign_up_data);
+            log_session_event(
+                &log_tx,
+                source.clone(),
+                format!("Character created for player \"{}\"", user_name),
+            );
+        }
+
+        if let Some(mut player) = realm.get_player_by_name(user_name) {
+            if let Some(existing_session_id) = player.get_session_id() {
+                send_session_event(
+                    &session_tx,
+                    SessionEvent::SessionUpdate(
+                        existing_session_id,
+                        SessionState::SessionClosed(Some(player.get_id())),
+                    ),
+                );
+            }
+
+            let player_id = player.get_id();
+            player.set_session_id(Some(session_id));
+            realm = realm.set(player.get_ref(), Arc::new(player));
+
+            log_command(log_tx, user_name.to_owned(), "(signed in)".to_owned());
+
+            SessionState::SignedIn(player_id)
+        } else {
+            log_session_event(
+                log_tx,
+                source,
+                format!("Could not determine ID for player \"{}\"", user_name),
+            );
+            SessionState::SessionClosed(None)
+        }
+    } else {
+        SessionState::SigningIn(new_state)
+    };
+
+    send_session_event(
+        &session_tx,
+        SessionEvent::SessionUpdate(session_id, session_state),
+    );
+
+    realm
+}
+
+fn process_signed_in_input(
+    realm: Realm,
+    session_tx: &Sender<SessionEvent>,
+    log_tx: &LogSender,
+    (input, session_id, source, player_id): (String, u64, String, GameObjectId),
+) -> Realm {
+    if let Some(player) = realm.get_player(player_id) {
+        log_command(&log_tx, player.get_name().to_owned(), input.clone());
+    } else {
+        log_session_event(&log_tx, source, format!("Player {} deleted", player_id));
+        send_session_event(
+            &session_tx,
+            SessionEvent::SessionUpdate(session_id, SessionState::SessionClosed(Some(player_id))),
+        );
+    }
+
+    realm
+}
+
+fn process_session_closed(
+    mut realm: Realm,
+    _: &Sender<SessionEvent>,
+    log_tx: &LogSender,
+    player_id: Option<GameObjectId>,
+) -> Realm {
+    if let Some(player_id) = player_id {
+        if let Some(mut player) = realm.get_player(player_id) {
+            let player_name = player.get_name().to_owned();
+            player.set_session_id(None);
+            realm = realm.set(player.get_ref(), Arc::new(player));
+
+            log_command(&log_tx, player_name, "(session closed)".to_owned());
+        }
+    }
+
     realm
 }
 
