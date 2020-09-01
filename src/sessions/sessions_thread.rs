@@ -5,16 +5,16 @@ use std::sync::mpsc::{Receiver, Sender};
 use std::sync::{Arc, Mutex};
 use std::thread;
 
-use crate::event_loop::{InputEvent, SessionEvent};
 use crate::logs::{log_session_event, LogMessage};
 
 use super::session::Session;
+use super::session_events::{SessionEvent, SessionInputEvent};
 use super::{SessionReader, SessionState};
 
 type SessionMap = Arc<Mutex<HashMap<u64, Session>>>;
 
 pub fn create_sessions_thread(
-    input_tx: Sender<InputEvent>,
+    input_tx: Sender<SessionInputEvent>,
     log_tx: Sender<Box<dyn LogMessage>>,
     session_rx: Receiver<SessionEvent>,
 ) {
@@ -64,7 +64,7 @@ fn create_session_thread(
     session_map: SessionMap,
     session_id: u64,
     socket: TcpStream,
-    input_tx: Sender<InputEvent>,
+    input_tx: Sender<SessionInputEvent>,
 ) {
     thread::spawn(move || {
         let mut reader = SessionReader::new(socket.try_clone().unwrap());
@@ -127,13 +127,13 @@ fn get_source(socket: &TcpStream) -> String {
 }
 
 fn send_event(
-    input_tx: &Sender<InputEvent>,
+    input_tx: &Sender<SessionInputEvent>,
     session_id: u64,
     session_state: SessionState,
     source: String,
     input: String,
 ) {
-    if let Err(error) = input_tx.send(InputEvent {
+    if let Err(error) = input_tx.send(SessionInputEvent {
         session_id,
         session_state,
         source,

@@ -2,7 +2,7 @@ use std::net::TcpStream;
 
 use crate::sessions::{SessionOutput, SessionState};
 
-pub struct InputEvent {
+pub struct SessionInputEvent {
     pub session_id: u64,
     pub session_state: SessionState,
     pub source: String,

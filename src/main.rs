@@ -6,7 +6,6 @@ use warp::Filter;
 
 mod character_stats;
 mod colors;
-mod event_loop;
 mod game_object;
 mod logs;
 mod objects;
@@ -16,11 +15,10 @@ mod telnet_server;
 mod text_utils;
 mod util;
 
-use event_loop::{InputEvent, SessionEvent};
 use game_object::{hydrate, GameObject, GameObjectId, GameObjectRef, GameObjectType};
 use logs::{log_command, log_session_event, LogMessage, LogSender};
 use objects::Realm;
-use sessions::{process_input, SessionState, SignInState};
+use sessions::{process_input, SessionEvent, SessionInputEvent, SessionState, SignInState};
 
 #[tokio::main]
 async fn main() {
@@ -57,7 +55,7 @@ async fn main() {
         Err(error) => panic!("Failed to load data from \"{}\": {}", data_dir, error),
     };
 
-    let (input_tx, input_rx) = channel::<InputEvent>();
+    let (input_tx, input_rx) = channel::<SessionInputEvent>();
     let (session_tx, session_rx) = channel::<SessionEvent>();
     let (log_tx, log_rx) = channel::<Box<dyn LogMessage>>();
 
@@ -75,7 +73,7 @@ async fn main() {
         websocket_port
     );
 
-    while let Ok(InputEvent {
+    while let Ok(SessionInputEvent {
         input,
         session_id,
         session_state,

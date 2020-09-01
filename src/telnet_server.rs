@@ -2,7 +2,7 @@ use std::net::TcpListener;
 use std::sync::mpsc::Sender;
 use std::thread;
 
-use crate::event_loop::SessionEvent;
+use crate::sessions::SessionEvent;
 
 pub fn serve(port: u16, session_tx: Sender<SessionEvent>) {
     if let Ok(listener) = TcpListener::bind(&format!("0.0.0.0:{}", port)) {
