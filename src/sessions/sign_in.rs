@@ -106,7 +106,7 @@ pub fn process_input(
 
                 (new_state, Output::combine(outputs).process_highlights())
             } else {
-                (new_state, output)
+                (new_state, output.process_highlights())
             }
         }
         None => (state.clone(), Output::None),
