@@ -38,6 +38,10 @@ impl Room {
         }
     }
 
+    pub fn portals(&self) -> Arc<Vec<GameObjectRef>> {
+        self.portals.clone()
+    }
+
     pub fn with_characters(&self, characters: Vec<GameObjectRef>) -> Self {
         Self {
             characters: Arc::new(ref_union(&self.characters, &characters)),

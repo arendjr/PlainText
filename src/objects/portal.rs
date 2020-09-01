@@ -17,6 +17,14 @@ pub struct Portal {
 }
 
 impl Portal {
+    pub fn get_name_from_room(&self, room: GameObjectRef) -> &str {
+        if room == self.room2 && !self.name2.is_empty() {
+            &self.name2
+        } else {
+            &self.name
+        }
+    }
+
     pub fn hydrate(id: GameObjectId, json: &str) -> Result<Arc<dyn GameObject>, String> {
         match serde_json::from_str::<PortalDto>(json) {
             Ok(portal_dto) => Ok(Arc::new(Self {
@@ -35,6 +43,14 @@ impl Portal {
                 room2: portal_dto.room2,
             })),
             Err(error) => Err(format!("parse error: {}", error)),
+        }
+    }
+
+    pub fn opposite_of(&self, room: GameObjectRef) -> GameObjectRef {
+        if room == self.room2 {
+            self.room
+        } else {
+            self.room2
         }
     }
 }

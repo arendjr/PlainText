@@ -4,20 +4,29 @@ use std::sync::Arc;
 use std::{env, fs, io, thread};
 use warp::Filter;
 
+mod actions;
 mod character_stats;
 mod colors;
+mod command_interpreter;
+mod commands;
+mod direction_utils;
 mod game_object;
 mod logs;
 mod objects;
+mod player_output;
 mod point3d;
 mod sessions;
 mod telnet_server;
 mod text_utils;
 mod util;
+mod vector3d;
 
+use command_interpreter::{interpret_command, InterpretationError};
+use commands::execute_command;
 use game_object::{hydrate, GameObject, GameObjectId, GameObjectRef, GameObjectType};
 use logs::{log_command, log_session_event, LogMessage, LogSender};
-use objects::Realm;
+use objects::{Player, Realm};
+use player_output::PlayerOutput;
 use sessions::{process_input, SessionEvent, SessionInputEvent, SessionState, SignInState};
 
 #[tokio::main]
@@ -33,10 +42,10 @@ async fn main() {
         .unwrap_or("".to_string())
         .parse()
         .unwrap_or(4802);
-    let http_port = env::var("PT_HTTP_PORT")
-        .unwrap_or("".to_string())
-        .parse()
-        .unwrap_or(8080);
+    /* TODO: let http_port = env::var("PT_HTTP_PORT")
+    .unwrap_or("".to_string())
+    .parse()
+    .unwrap_or(8080);*/
 
     let routes = warp::any().and(warp::ws()).map(|ws: warp::ws::Ws| {
         ws.on_upgrade(|websocket| {
@@ -210,15 +219,53 @@ fn process_signed_in_input(
 ) -> Realm {
     if let Some(player) = realm.get_player(player_id) {
         log_command(&log_tx, player.get_name().to_owned(), input.clone());
+        let (new_realm, player_output) = process_player_input(realm, player, log_tx, input);
+        for output in player_output {
+            if let Some(affected_player) = new_realm.get_player(output.player_id) {
+                if let Some(session_id) = affected_player.get_session_id() {
+                    send_session_event(
+                        &session_tx,
+                        SessionEvent::SessionOutput(session_id, output.output),
+                    );
+                }
+            }
+        }
+
+        new_realm
     } else {
         log_session_event(&log_tx, source, format!("Player {} deleted", player_id));
         send_session_event(
             &session_tx,
             SessionEvent::SessionUpdate(session_id, SessionState::SessionClosed(Some(player_id))),
         );
+        realm
     }
+}
 
-    realm
+fn process_player_input(
+    realm: Realm,
+    player: Player,
+    _: &LogSender,
+    input: String,
+) -> (Realm, Vec<PlayerOutput>) {
+    match interpret_command(input) {
+        Ok(command) => execute_command(realm, player, command),
+        Err(InterpretationError::AmbiguousCommand(_)) => (
+            realm,
+            vec![PlayerOutput::new_from_str(
+                player.get_id(),
+                "Command is not unique.",
+            )],
+        ),
+        Err(InterpretationError::UnknownCommand(command)) => (
+            realm,
+            vec![PlayerOutput::new_from_string(
+                player.get_id(),
+                format!("Command \"{}\" does not exist.", command),
+            )],
+        ),
+        Err(InterpretationError::NoCommand) => (realm, vec![]),
+    }
 }
 
 fn process_session_closed(

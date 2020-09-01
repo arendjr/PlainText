@@ -92,6 +92,10 @@ impl Player {
         player
     }
 
+    pub fn set_current_room(&mut self, room: GameObjectRef) {
+        self.current_room = room;
+    }
+
     pub fn set_password(&mut self, password: &str) {
         match pbkdf2_simple(password, 10) {
             Ok(password) => self.password = password,
