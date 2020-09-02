@@ -36,6 +36,10 @@ const DIRECTIONS: [Direction; 10] = [
     Direction::new("down", "up", "d", Vector3D::new(0, 0, -1)),
 ];
 
+pub fn direction_by_abbreviation(string: &str) -> Option<&'static str> {
+    index_of_direction_abbreviation(string).map(|index| DIRECTIONS[index].name)
+}
+
 fn index_of_direction(string: &str) -> Option<usize> {
     for i in 0..DIRECTIONS.len() {
         if DIRECTIONS[i].name == string {
@@ -52,10 +56,6 @@ fn index_of_direction_abbreviation(string: &str) -> Option<usize> {
         }
     }
     None
-}
-
-pub fn get_direction_by_abbreviation(string: &str) -> Option<&'static str> {
-    index_of_direction_abbreviation(string).map(|index| DIRECTIONS[index].name)
 }
 
 pub fn is_direction(string: &str) -> bool {

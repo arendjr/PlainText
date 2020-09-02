@@ -39,15 +39,19 @@ impl fmt::Display for Item {
 }
 
 impl GameObject for Item {
-    fn get_id(&self) -> GameObjectId {
+    fn description(&self) -> &str {
+        &self.description
+    }
+
+    fn id(&self) -> GameObjectId {
         self.id
     }
 
-    fn get_object_type(&self) -> GameObjectType {
+    fn object_type(&self) -> GameObjectType {
         GameObjectType::Item
     }
 
-    fn get_name(&self) -> &str {
+    fn name(&self) -> &str {
         &self.name
     }
 

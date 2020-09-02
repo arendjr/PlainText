@@ -16,18 +16,6 @@ pub struct Class {
 }
 
 impl Class {
-    pub fn get_description(&self) -> String {
-        self.description.clone()
-    }
-
-    pub fn get_stats(&self) -> CharacterStats {
-        self.stats.clone()
-    }
-
-    pub fn get_stats_suggestion(&self) -> CharacterStats {
-        self.stats_suggestion.clone()
-    }
-
     pub fn hydrate(id: GameObjectId, json: &str) -> Result<Arc<dyn GameObject>, String> {
         match serde_json::from_str::<ClassDto>(json) {
             Ok(class_dto) => Ok(Arc::new(Self {
@@ -43,6 +31,14 @@ impl Class {
             Err(error) => Err(format!("parse error: {}", error)),
         }
     }
+
+    pub fn stats(&self) -> CharacterStats {
+        self.stats.clone()
+    }
+
+    pub fn stats_suggestion(&self) -> CharacterStats {
+        self.stats_suggestion.clone()
+    }
 }
 
 impl fmt::Display for Class {
@@ -52,15 +48,19 @@ impl fmt::Display for Class {
 }
 
 impl GameObject for Class {
-    fn get_id(&self) -> GameObjectId {
+    fn description(&self) -> &str {
+        &self.description
+    }
+
+    fn id(&self) -> GameObjectId {
         self.id
     }
 
-    fn get_object_type(&self) -> GameObjectType {
+    fn object_type(&self) -> GameObjectType {
         GameObjectType::Class
     }
 
-    fn get_name(&self) -> &str {
+    fn name(&self) -> &str {
         &self.name
     }
 

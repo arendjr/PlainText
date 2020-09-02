@@ -17,7 +17,7 @@ pub struct Portal {
 }
 
 impl Portal {
-    pub fn get_name_from_room(&self, room: GameObjectRef) -> &str {
+    pub fn name_from_room(&self, room: GameObjectRef) -> &str {
         if room == self.room2 && !self.name2.is_empty() {
             &self.name2
         } else {
@@ -62,15 +62,19 @@ impl fmt::Display for Portal {
 }
 
 impl GameObject for Portal {
-    fn get_id(&self) -> GameObjectId {
+    fn description(&self) -> &str {
+        &self.description
+    }
+
+    fn id(&self) -> GameObjectId {
         self.id
     }
 
-    fn get_object_type(&self) -> GameObjectType {
+    fn object_type(&self) -> GameObjectType {
         GameObjectType::Portal
     }
 
-    fn get_name(&self) -> &str {
+    fn name(&self) -> &str {
         &self.name
     }
 

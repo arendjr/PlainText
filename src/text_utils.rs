@@ -22,6 +22,14 @@ pub fn colorize(string: &str, color: Color) -> String {
     format!("\x1B[{}m{}\x1B[0m", COLOR_MAP[color as usize], string)
 }
 
+pub fn definite_article_from_noun(noun: String) -> &'static str {
+    if noun.chars().next().map(is_vowel).unwrap_or(false) {
+        "an"
+    } else {
+        "a"
+    }
+}
+
 bitflags! {
     pub struct FormatOptions: u32 {
         const None = 0b00000000;
@@ -65,6 +73,30 @@ pub fn highlight(string: &str) -> String {
 
 pub fn is_letter(character: char) -> bool {
     character >= 'a' && character <= 'z' || character >= 'A' && character <= 'Z'
+}
+
+pub fn is_vowel(character: char) -> bool {
+    character == 'a' || character == 'e' || character == 'i' || character == 'o' || character == 'u'
+}
+
+pub fn plural_from_noun(noun: &str) -> String {
+    if noun.ends_with("y") && !noun.chars().nth_back(1).map(is_vowel).unwrap_or(true) {
+        format!("{}ies", substring(noun, 0, -1))
+    } else if noun.ends_with("f") {
+        format!("{}ves", substring(noun, 0, -1))
+    } else if noun.ends_with("fe") {
+        format!("{}ves", substring(noun, 0, -2))
+    } else if noun.ends_with("s")
+        || noun.ends_with("x")
+        || noun.ends_with("sh")
+        || noun.ends_with("ch")
+    {
+        format!("{}es", noun)
+    } else if noun.ends_with("ese") {
+        noun.to_owned()
+    } else {
+        format!("{}s", noun)
+    }
 }
 
 pub fn process_highlights(string: &str) -> String {
@@ -127,4 +159,12 @@ pub fn split_lines(string: &str, max_line_len: usize) -> Vec<String> {
     }
 
     lines
+}
+
+fn substring(string: &str, start: i32, end: i32) -> &str {
+    &string[(start as usize)..if end > 0 {
+        (end - start) as usize
+    } else {
+        ((string.len() as i32) - end - start) as usize
+    }]
 }

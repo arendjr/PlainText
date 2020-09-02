@@ -68,15 +68,15 @@ impl fmt::Display for Room {
 }
 
 impl GameObject for Room {
-    fn get_id(&self) -> GameObjectId {
+    fn id(&self) -> GameObjectId {
         self.id
     }
 
-    fn get_object_type(&self) -> GameObjectType {
+    fn object_type(&self) -> GameObjectType {
         GameObjectType::Room
     }
 
-    fn get_name(&self) -> &str {
+    fn name(&self) -> &str {
         &self.name
     }
 

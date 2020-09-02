@@ -2,7 +2,7 @@ use std::collections::VecDeque;
 use std::iter::Iterator;
 
 use crate::commands::Command;
-use crate::direction_utils::{get_direction_by_abbreviation, is_direction};
+use crate::direction_utils::{direction_by_abbreviation, is_direction};
 
 pub enum InterpretationError {
     NoCommand,
@@ -22,7 +22,7 @@ pub fn interpret_command(command: String) -> Result<Command, InterpretationError
         None => return Err(InterpretationError::NoCommand),
     };
 
-    if let Some(direction) = get_direction_by_abbreviation(&command_name) {
+    if let Some(direction) = direction_by_abbreviation(&command_name) {
         command_name = direction.to_owned();
     }
 

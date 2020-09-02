@@ -32,12 +32,8 @@ pub struct Player {
 }
 
 impl Player {
-    pub fn get_current_room(&self) -> GameObjectRef {
+    pub fn current_room(&self) -> GameObjectRef {
         self.current_room
-    }
-
-    pub fn get_session_id(&self) -> Option<u64> {
-        self.session_id
     }
 
     pub fn hydrate(id: GameObjectId, json: &str) -> Result<Arc<dyn GameObject>, String> {
@@ -76,20 +72,24 @@ impl Player {
         let race = sign_up_data.race.clone().unwrap();
         let mut player = Self {
             id,
-            class: class.get_ref(),
-            current_room: race.get_starting_room(),
+            class: class.object_ref(),
+            current_room: race.starting_room(),
             description: "".to_owned(),
             gender: sign_up_data.gender.clone(),
             height: sign_up_data.height,
             name: sign_up_data.user_name.clone(),
             password: String::new(),
-            race: race.get_ref(),
+            race: race.object_ref(),
             session_id: None,
             stats: sign_up_data.stats.clone(),
             weight: sign_up_data.weight,
         };
         player.set_password(&sign_up_data.password);
         player
+    }
+
+    pub fn session_id(&self) -> Option<u64> {
+        self.session_id
     }
 
     pub fn set_current_room(&mut self, room: GameObjectRef) {
@@ -115,15 +115,19 @@ impl fmt::Display for Player {
 }
 
 impl GameObject for Player {
-    fn get_id(&self) -> GameObjectId {
+    fn description(&self) -> &str {
+        &self.description
+    }
+
+    fn id(&self) -> GameObjectId {
         self.id
     }
 
-    fn get_object_type(&self) -> GameObjectType {
+    fn object_type(&self) -> GameObjectType {
         GameObjectType::Player
     }
 
-    fn get_name(&self) -> &str {
+    fn name(&self) -> &str {
         &self.name
     }
 

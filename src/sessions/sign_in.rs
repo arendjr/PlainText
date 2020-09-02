@@ -24,7 +24,7 @@ impl SignInState {
     pub fn get_sign_in_user_name(&self) -> Option<&str> {
         if self.step == SignInStep::SignedIn {
             if let Some(player) = &self.data.player {
-                Some(player.get_name())
+                Some(player.name())
             } else if let Some(sign_up_state) = &self.data.sign_up_state {
                 Some(&sign_up_state.data.user_name)
             } else {
@@ -224,7 +224,7 @@ fn process_asking_password_input(
     input: String,
 ) -> (SignInState, Output) {
     if let Some(player) = &state.data.player {
-        let name = player.get_name();
+        let name = player.name();
         if player.matches_password(&input) {
             log_session_event(
                 log_tx,
@@ -232,7 +232,7 @@ fn process_asking_password_input(
                 format!("Authentication success for player \"{}\"", name),
             );
 
-            if player.get_session_id().is_some() {
+            if player.session_id().is_some() {
                 (
                     new_state(SignInStep::SessionClosed, state.data.clone()),
                     Output::Str(

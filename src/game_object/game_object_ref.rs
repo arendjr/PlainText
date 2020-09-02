@@ -73,16 +73,16 @@ impl GameObjectRef {
         }
     }
 
-    pub fn get_file_name(&self) -> OsString {
-        format!("{}:{:09}", self.0, self.1).into()
-    }
-
-    pub fn get_id(&self) -> GameObjectId {
+    pub fn id(&self) -> GameObjectId {
         self.1
     }
 
-    pub fn get_type(&self) -> GameObjectType {
+    pub fn object_type(&self) -> GameObjectType {
         self.0
+    }
+
+    pub fn to_file_name(&self) -> OsString {
+        format!("{}:{:09}", self.0, self.1).into()
     }
 }
 

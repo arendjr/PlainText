@@ -5,24 +5,28 @@ use crate::objects;
 use super::{GameObjectId, GameObjectRef, GameObjectType};
 
 pub trait GameObject {
-    fn get_id(&self) -> GameObjectId;
-    fn get_object_type(&self) -> GameObjectType;
-    fn get_name(&self) -> &str;
+    fn id(&self) -> GameObjectId;
+    fn object_type(&self) -> GameObjectType;
+    fn name(&self) -> &str;
 
-    fn get_adjective(&self) -> &str {
+    fn adjective(&self) -> &str {
         ""
     }
 
-    fn get_definite_article(&self) -> &str {
+    fn definite_article(&self) -> &str {
         ""
     }
 
-    fn get_plural(&self) -> String {
-        self.get_name().to_owned()
+    fn description(&self) -> &str {
+        ""
     }
 
-    fn get_ref(&self) -> GameObjectRef {
-        GameObjectRef(self.get_object_type(), self.get_id())
+    fn object_ref(&self) -> GameObjectRef {
+        GameObjectRef(self.object_type(), self.id())
+    }
+
+    fn plural_form(&self) -> String {
+        self.name().to_owned()
     }
 
     fn to_class(&self) -> Option<objects::Class> {
@@ -55,7 +59,7 @@ pub trait GameObject {
 }
 
 pub fn hydrate(object_ref: GameObjectRef, content: &str) -> Result<Arc<dyn GameObject>, String> {
-    let hydrate = match object_ref.get_type() {
+    let hydrate = match object_ref.object_type() {
         GameObjectType::Class => objects::Class::hydrate,
         GameObjectType::Item => objects::Item::hydrate,
         GameObjectType::Player => objects::Player::hydrate,
@@ -65,5 +69,5 @@ pub fn hydrate(object_ref: GameObjectRef, content: &str) -> Result<Arc<dyn GameO
         _ => panic!("not implemented"),
     };
 
-    hydrate(object_ref.get_id(), content)
+    hydrate(object_ref.id(), content)
 }

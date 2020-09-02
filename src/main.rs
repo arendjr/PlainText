@@ -18,7 +18,6 @@ mod point3d;
 mod sessions;
 mod telnet_server;
 mod text_utils;
-mod util;
 mod vector3d;
 
 use actions::{enter, look};
@@ -120,8 +119,8 @@ fn load_data(data_dir: &str) -> Result<Realm, io::Error> {
                         Ok(object) => realm = realm.set(object_ref, object),
                         Err(message) => println!(
                             "error loading {} {}: {}",
-                            object_ref.get_type(),
-                            object_ref.get_id(),
+                            object_ref.object_type(),
+                            object_ref.id(),
                             message
                         ),
                     }
@@ -141,11 +140,11 @@ fn inject_players_into_rooms(mut realm: Realm) -> Realm {
     for player_id in realm.player_ids() {
         if let Some(room) = realm
             .get_player(player_id)
-            .and_then(|player| realm.get_room(player.get_current_room().get_id()))
+            .and_then(|player| realm.get_room(player.current_room().id()))
         {
             let player_ref = GameObjectRef(GameObjectType::Player, player_id);
             realm = realm.set(
-                room.get_ref(),
+                room.object_ref(),
                 Arc::new(room.with_characters(vec![player_ref])),
             );
         }
@@ -175,18 +174,18 @@ fn process_signing_in_input(
         }
 
         if let Some(mut player) = realm.get_player_by_name(user_name) {
-            if let Some(existing_session_id) = player.get_session_id() {
+            if let Some(existing_session_id) = player.session_id() {
                 send_session_event(
                     &session_tx,
                     SessionEvent::SessionUpdate(
                         existing_session_id,
-                        SessionState::SessionClosed(Some(player.get_id())),
+                        SessionState::SessionClosed(Some(player.id())),
                     ),
                 );
             }
 
-            let player_ref = player.get_ref();
-            let current_room = player.get_current_room();
+            let player_ref = player.object_ref();
+            let current_room = player.current_room();
             player.set_session_id(Some(session_id));
             realm = realm.set(player_ref, Arc::new(player));
 
@@ -197,7 +196,7 @@ fn process_signing_in_input(
             realm = look(realm, player_ref, current_room, &mut player_output);
             process_player_output(&realm, session_tx, player_output);
 
-            SessionState::SignedIn(player_ref.get_id())
+            SessionState::SignedIn(player_ref.id())
         } else {
             log_session_event(
                 log_tx,
@@ -225,7 +224,7 @@ fn process_signed_in_input(
     (input, session_id, source, player_id): (String, u64, String, GameObjectId),
 ) -> Realm {
     if let Some(player) = realm.get_player(player_id) {
-        log_command(&log_tx, player.get_name().to_owned(), input.clone());
+        log_command(&log_tx, player.name().to_owned(), input.clone());
         let (new_realm, player_output) = process_player_input(realm, player, log_tx, input);
         process_player_output(&new_realm, session_tx, player_output);
 
@@ -251,14 +250,14 @@ fn process_player_input(
         Err(InterpretationError::AmbiguousCommand(_)) => (
             realm,
             vec![PlayerOutput::new_from_str(
-                player.get_id(),
+                player.id(),
                 "Command is not unique.",
             )],
         ),
         Err(InterpretationError::UnknownCommand(command)) => (
             realm,
             vec![PlayerOutput::new_from_string(
-                player.get_id(),
+                player.id(),
                 format!("Command \"{}\" does not exist.", command),
             )],
         ),
@@ -273,7 +272,7 @@ fn process_player_output(
 ) {
     for output in player_output {
         if let Some(affected_player) = realm.get_player(output.player_id) {
-            if let Some(session_id) = affected_player.get_session_id() {
+            if let Some(session_id) = affected_player.session_id() {
                 send_session_event(
                     &session_tx,
                     SessionEvent::SessionOutput(session_id, output.output),
@@ -291,9 +290,9 @@ fn process_session_closed(
 ) -> Realm {
     if let Some(player_id) = player_id {
         if let Some(mut player) = realm.get_player(player_id) {
-            let player_name = player.get_name().to_owned();
+            let player_name = player.name().to_owned();
             player.set_session_id(None);
-            realm = realm.set(player.get_ref(), Arc::new(player));
+            realm = realm.set(player.object_ref(), Arc::new(player));
 
             log_command(&log_tx, player_name, "(session closed)".to_owned());
         }

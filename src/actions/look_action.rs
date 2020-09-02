@@ -10,18 +10,23 @@ use crate::text_utils::colorize;
 pub fn look(
     realm: Realm,
     player_ref: GameObjectRef,
-    object: GameObjectRef,
+    object_ref: GameObjectRef,
     output: &mut Vec<PlayerOutput>,
 ) -> Realm {
-    match realm.get(object) {
-        Some(object) => match object.get_object_type() {
+    match realm.get(object_ref) {
+        Some(object) => match object.object_type() {
             GameObjectType::Room => {
                 look_at_room(realm, player_ref, object.to_room().unwrap(), output)
             }
             _ => {
+                let description = object.description();
                 output.push(PlayerOutput::new_from_string(
-                    player_ref.get_id(),
-                    format!("There is nothing special about the {}", object.get_name()),
+                    player_ref.id(),
+                    if description.is_empty() {
+                        format!("There is nothing special about the {}.", object.name())
+                    } else {
+                        description.to_owned()
+                    },
                 ));
                 realm
             }
@@ -37,13 +42,13 @@ fn look_at_room(
     output: &mut Vec<PlayerOutput>,
 ) -> Realm {
     output.push(PlayerOutput::new_from_string(
-        player_ref.get_id(),
+        player_ref.id(),
         format!(
             "{}{}",
-            if room.get_name().is_empty() {
+            if room.name().is_empty() {
                 "".to_owned()
             } else {
-                format!("\n{}\n\n", colorize(room.get_name(), Color::Teal))
+                format!("\n{}\n\n", colorize(room.name(), Color::Teal))
             },
             room.description(),
         ),

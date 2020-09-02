@@ -16,14 +16,14 @@ impl Eq for dyn GameObject {}
 
 impl Hash for dyn GameObject {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        self.get_id().hash(state);
-        self.get_object_type().hash(state);
+        self.id().hash(state);
+        self.object_type().hash(state);
     }
 }
 
 impl PartialEq for dyn GameObject {
     fn eq(&self, other: &Self) -> bool {
-        self.get_id() == other.get_id()
+        self.id() == other.id()
     }
 }
 
@@ -41,7 +41,7 @@ pub struct Realm {
 impl Realm {
     pub fn create_player(&self, sign_up_data: &SignUpData) -> Self {
         let player_ref = GameObjectRef(GameObjectType::Player, self.next_id);
-        let player = Player::new(player_ref.get_id(), sign_up_data);
+        let player = Player::new(player_ref.id(), sign_up_data);
         self.set(player_ref, Arc::new(player))
     }
 
@@ -120,17 +120,17 @@ impl Realm {
 
         let mut players_by_name = self.players_by_name.clone();
         if let Some(player) = object.to_player() {
-            players_by_name.insert(player.get_name().to_owned(), player.get_id());
+            players_by_name.insert(player.name().to_owned(), player.id());
         }
 
         let mut races_by_name = self.races_by_name.clone();
         if let Some(race) = object.to_race() {
-            races_by_name.insert(race.get_name().to_owned(), race.get_id());
+            races_by_name.insert(race.name().to_owned(), race.id());
         }
 
         Self {
             name: self.name.clone(),
-            next_id: cmp::max(self.next_id, object_ref.get_id() + 1),
+            next_id: cmp::max(self.next_id, object_ref.id() + 1),
             objects,
             players_by_name,
             races_by_name,
@@ -144,7 +144,7 @@ impl Realm {
                 let mut objects = self.objects.clone();
                 objects.remove(&object_ref);
 
-                let name = object.get_name();
+                let name = object.name();
 
                 let mut players_by_name = self.players_by_name.clone();
                 players_by_name.remove(name);
@@ -166,15 +166,15 @@ impl Realm {
 }
 
 impl GameObject for Realm {
-    fn get_id(&self) -> GameObjectId {
+    fn id(&self) -> GameObjectId {
         self.id
     }
 
-    fn get_object_type(&self) -> GameObjectType {
+    fn object_type(&self) -> GameObjectType {
         GameObjectType::Realm
     }
 
-    fn get_name(&self) -> &str {
+    fn name(&self) -> &str {
         &self.name
     }
 

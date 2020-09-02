@@ -21,32 +21,16 @@ pub struct Race {
 }
 
 impl Race {
-    pub fn get_classes(&self) -> Arc<Vec<GameObjectRef>> {
+    pub fn classes(&self) -> Arc<Vec<GameObjectRef>> {
         self.classes.clone()
     }
 
-    pub fn get_description(&self) -> String {
+    pub fn description(&self) -> String {
         self.description.clone()
     }
 
-    pub fn get_height(&self) -> f32 {
+    pub fn height(&self) -> f32 {
         self.height
-    }
-
-    pub fn get_starting_room(&self) -> GameObjectRef {
-        self.starting_room
-    }
-
-    pub fn get_stats(&self) -> CharacterStats {
-        self.stats.clone()
-    }
-
-    pub fn get_stats_suggestion(&self) -> CharacterStats {
-        self.stats_suggestion.clone()
-    }
-
-    pub fn get_weight(&self) -> f32 {
-        self.weight
     }
 
     pub fn hydrate(id: GameObjectId, json: &str) -> Result<Arc<dyn GameObject>, String> {
@@ -66,6 +50,22 @@ impl Race {
             Err(error) => Err(format!("parse error: {}", error)),
         }
     }
+
+    pub fn starting_room(&self) -> GameObjectRef {
+        self.starting_room
+    }
+
+    pub fn stats(&self) -> CharacterStats {
+        self.stats.clone()
+    }
+
+    pub fn stats_suggestion(&self) -> CharacterStats {
+        self.stats_suggestion.clone()
+    }
+
+    pub fn weight(&self) -> f32 {
+        self.weight
+    }
 }
 
 impl fmt::Display for Race {
@@ -75,19 +75,19 @@ impl fmt::Display for Race {
 }
 
 impl GameObject for Race {
-    fn get_adjective(&self) -> &str {
+    fn adjective(&self) -> &str {
         &self.adjective
     }
 
-    fn get_id(&self) -> GameObjectId {
+    fn id(&self) -> GameObjectId {
         self.id
     }
 
-    fn get_object_type(&self) -> GameObjectType {
+    fn object_type(&self) -> GameObjectType {
         GameObjectType::Race
     }
 
-    fn get_name(&self) -> &str {
+    fn name(&self) -> &str {
         &self.name
     }
 

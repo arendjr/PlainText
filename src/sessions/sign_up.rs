@@ -196,7 +196,7 @@ fn get_sign_up_steps() -> HashMap<SignUpStep, StepImpl> {
                 To revisit your choice of gender, type *back*. If you want more \
                 information about character stats, type *info stats*. If you just want to \
                 accept the suggested stats, type *accept*.\n",
-                if data.class.as_ref().map(|class| class.get_name()) == Some("barbarian") {
+                if data.class.as_ref().map(|class| class.name()) == Some("barbarian") {
                     "<str> <dex> <vit> <end> <fai>"
                 } else {
                     "<str> <dex> <vit> <end> <int> <fai>"
@@ -227,8 +227,8 @@ fn enter_race(_: &SignUpData, realm: &Realm) -> Output {
         These are the major races in the {}:\n\
         \n\
         {}",
-        realm.get_name(),
-        realm.get_name(),
+        realm.name(),
+        realm.name(),
         format_columns(
             realm.race_names(),
             FormatOptions::Capitalized | FormatOptions::Highlighted
@@ -252,11 +252,11 @@ fn enter_class(data: &SignUpData, realm: &Realm) -> Output {
         {}",
         match &data.race {
             Some(race) => format_columns(
-                race.get_classes()
+                race.classes()
                     .iter()
                     .filter_map(|object_ref| realm
                         .get(*object_ref)
-                        .map(|object| object.get_name().to_owned()))
+                        .map(|object| object.name().to_owned()))
                     .collect(),
                 FormatOptions::Capitalized | FormatOptions::Highlighted
             ),
@@ -280,11 +280,11 @@ fn enter_extra_stats(data: &SignUpData, _: &Realm) -> Output {
             "female"
         },
         match &data.race {
-            Some(race) => race.get_adjective(),
+            Some(race) => race.adjective(),
             None => "",
         },
         match &data.class {
-            Some(class) => class.get_name(),
+            Some(class) => class.name(),
             None => "",
         },
         stats.get(CharacterStat::STRENGTH),
@@ -309,12 +309,9 @@ fn enter_sign_up_confirmation(data: &SignUpData, _: &Realm) -> Output {
         },
         data.race
             .as_ref()
-            .map(|race| race.get_adjective())
+            .map(|race| race.adjective())
             .unwrap_or(""),
-        data.class
-            .as_ref()
-            .map(|class| class.get_name())
-            .unwrap_or(""),
+        data.class.as_ref().map(|class| class.name()).unwrap_or(""),
         data.stats.get(CharacterStat::STRENGTH),
         data.stats.get(CharacterStat::DEXTERITY),
         data.stats.get(CharacterStat::VITALITY),
@@ -325,7 +322,7 @@ fn enter_sign_up_confirmation(data: &SignUpData, _: &Realm) -> Output {
 }
 
 fn format_stats_string(stats: &CharacterStats, class: &Option<Class>) -> String {
-    if class.as_ref().map(|class| class.get_name()) == Some("barbarian") {
+    if class.as_ref().map(|class| class.name()) == Some("barbarian") {
         format!(
             "{} {} {} {} {}",
             stats.get(CharacterStat::STRENGTH),
@@ -350,20 +347,16 @@ fn format_stats_string(stats: &CharacterStats, class: &Option<Class>) -> String 
 fn get_base_stats(data: &SignUpData) -> (f32, f32, CharacterStats, CharacterStats) {
     let (mut height, mut weight, race_stats, race_stats_suggestion) = match &data.race {
         Some(race) => (
-            race.get_height(),
-            race.get_weight(),
-            race.get_stats(),
-            race.get_stats_suggestion(),
+            race.height(),
+            race.weight(),
+            race.stats(),
+            race.stats_suggestion(),
         ),
         None => (0.0, 0.0, CharacterStats::new(), CharacterStats::new()),
     };
 
     let (class_name, class_stats, class_stats_suggestion) = match &data.class {
-        Some(class) => (
-            class.get_name(),
-            class.get_stats(),
-            class.get_stats_suggestion(),
-        ),
+        Some(class) => (class.name(), class.stats(), class.stats_suggestion()),
         None => ("", CharacterStats::new(), CharacterStats::new()),
     };
 
@@ -515,7 +508,7 @@ fn process_asking_race_input(
                 Output::String(format!(
                     "\n{}\n  {}\n",
                     highlight(&capitalize(&race_name)),
-                    split_lines(&race.get_description(), 78).join("\n  ")
+                    split_lines(&race.description(), 78).join("\n  ")
                 ))
             } else if race_name.starts_with("<") && race_name.ends_with(">") {
                 Output::Str(
@@ -542,14 +535,14 @@ fn process_asking_class_input(
     let answer = input.to_lowercase();
     let classes = match &state.data.race {
         Some(race) => race
-            .get_classes()
+            .classes()
             .iter()
-            .filter_map(|object_ref| realm.get_class(object_ref.get_id()))
+            .filter_map(|object_ref| realm.get_class(object_ref.id()))
             .collect(),
         None => Vec::new(),
     };
 
-    if let Some(class) = classes.iter().find(|class| class.get_name() == answer) {
+    if let Some(class) = classes.iter().find(|class| class.name() == answer) {
         (
             new_state(
                 SignUpStep::AskingGender,
@@ -567,11 +560,11 @@ fn process_asking_class_input(
         let class_name = answer[5..].trim();
         (
             state.clone(),
-            if let Some(class) = classes.iter().find(|class| class.get_name() == class_name) {
+            if let Some(class) = classes.iter().find(|class| class.name() == class_name) {
                 Output::String(format!(
                     "\n{}\n  {}\n",
                     highlight(&capitalize(&class_name)),
-                    split_lines(&class.get_description(), 78).join("\n  ")
+                    split_lines(&class.description(), 78).join("\n  ")
                 ))
             } else if class_name.starts_with("<") && class_name.ends_with(">") {
                 Output::Str(
@@ -678,8 +671,7 @@ fn process_asking_extra_stats_input(
         )
     } else {
         let (mut height, mut weight, mut stats, stats_suggestion) = get_base_stats(&state.data);
-        let is_barbarian =
-            state.data.class.as_ref().map(|class| class.get_name()) == Some("barbarian");
+        let is_barbarian = state.data.class.as_ref().map(|class| class.name()) == Some("barbarian");
 
         let user_stats = if answer == "accept suggestion" || answer == "accept" || answer == "a" {
             stats_suggestion
@@ -756,7 +748,7 @@ fn process_asking_sign_up_confirmation_input(
             new_state(SignUpStep::SignedUp, state.data.clone()),
             Output::String(format!(
                 "\nWelcome to {}, {}.\n",
-                realm.get_name(),
+                realm.name(),
                 state.data.user_name
             )),
         )
