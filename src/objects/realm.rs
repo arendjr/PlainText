@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::cmp;
+use std::collections::HashSet;
 use std::hash::{Hash, Hasher};
 
 use im_rc::HashMap;
@@ -11,6 +12,7 @@ use crate::game_object::{
     GameObject, GameObjectId, GameObjectRef, GameObjectType, SharedGameObject, SharedObject,
 };
 use crate::objects::Player;
+use crate::persistence_thread::PersistenceRequest;
 use crate::sessions::SignUpData;
 
 impl Eq for dyn GameObject {}
@@ -35,6 +37,8 @@ pub struct Realm {
     name: String,
     next_id: GameObjectId,
     objects: HashMap<GameObjectRef, SharedGameObject>,
+    objects_to_be_removed: HashSet<GameObjectRef>,
+    objects_to_be_synced: HashSet<GameObjectRef>,
     players_by_name: HashMap<String, GameObjectId>,
     races_by_name: HashMap<String, GameObjectId>,
 }
@@ -51,6 +55,8 @@ impl Realm {
                 date_time: realm_dto.dateTime,
                 id,
                 objects: HashMap::new(),
+                objects_to_be_removed: HashSet::new(),
+                objects_to_be_synced: HashSet::new(),
                 players_by_name: HashMap::new(),
                 name: realm_dto.name,
                 next_id: id + 1,
@@ -107,14 +113,22 @@ impl Realm {
             .and_then(|object| SharedObject::new(object, |object| object.as_room()))
     }
 
-    pub fn set<T: GameObject>(&self, object_ref: GameObjectRef, object: T) -> Self
+    pub fn set<T: GameObject>(
+        &self,
+        object_ref: GameObjectRef,
+        (object, should_sync): (T, bool),
+    ) -> Self
     where
         T: 'static,
     {
-        self.set_shared_object(object_ref, SharedGameObject::new(object))
+        self.set_shared_object(object_ref, (SharedGameObject::new(object), should_sync))
     }
 
-    pub fn set_shared_object(&self, object_ref: GameObjectRef, object: SharedGameObject) -> Self {
+    pub fn set_shared_object(
+        &self,
+        object_ref: GameObjectRef,
+        (object, should_sync): (SharedGameObject, bool),
+    ) -> Self {
         let mut players_by_name = self.players_by_name.clone();
         if let Some(player) = object.as_player() {
             players_by_name.insert(player.name().to_owned(), player.id());
@@ -132,10 +146,34 @@ impl Realm {
             name: self.name.clone(),
             next_id: cmp::max(self.next_id, object_ref.id() + 1),
             objects,
+            objects_to_be_removed: self.objects_to_be_removed.clone(),
+            objects_to_be_synced: if should_sync {
+                let mut new_objects = self.objects_to_be_synced.clone();
+                new_objects.insert(object_ref);
+                new_objects
+            } else {
+                self.objects_to_be_synced.clone()
+            },
             players_by_name,
             races_by_name,
             ..*self
         }
+    }
+
+    pub fn take_persistence_requests(&mut self) -> Vec<PersistenceRequest> {
+        let mut result = vec![];
+        for object_ref in self.objects_to_be_synced.clone().drain() {
+            if let Some(object) = self.object(object_ref) {
+                result.push(PersistenceRequest::PersistObject(
+                    object_ref,
+                    object.serialize(),
+                ));
+            }
+        }
+        for object_ref in self.objects_to_be_removed.drain() {
+            result.push(PersistenceRequest::RemoveObject(object_ref))
+        }
+        result
     }
 
     pub fn unset(&mut self, object_ref: GameObjectRef) -> Self {
@@ -155,6 +193,16 @@ impl Realm {
                 Self {
                     name: self.name.clone(),
                     objects,
+                    objects_to_be_removed: {
+                        let mut new_objects = self.objects_to_be_removed.clone();
+                        new_objects.insert(object_ref);
+                        new_objects
+                    },
+                    objects_to_be_synced: {
+                        let mut new_objects = self.objects_to_be_synced.clone();
+                        new_objects.remove(&object_ref);
+                        new_objects
+                    },
                     players_by_name,
                     races_by_name,
                     ..*self
@@ -185,6 +233,20 @@ impl GameObject for Realm {
 
     fn name(&self) -> &str {
         &self.name
+    }
+
+    fn serialize(&self) -> String {
+        serde_json::to_string_pretty(&RealmDto {
+            dateTime: self.date_time,
+            name: self.name.clone(),
+        })
+        .unwrap_or_else(|error| {
+            panic!(
+                "Failed to serialize object {:?}: {:?}",
+                self.object_ref(),
+                error
+            )
+        })
     }
 }
 

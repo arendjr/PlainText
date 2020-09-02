@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::fmt;
+use std::ops::Deref;
 use std::sync::Arc;
 
 use crate::game_object::{
@@ -47,18 +48,24 @@ impl Room {
         self.portals.clone()
     }
 
-    pub fn with_characters(&self, characters: Vec<GameObjectRef>) -> Self {
-        Self {
-            characters: Arc::new(ref_union(&self.characters, &characters)),
-            ..self.clone()
-        }
+    pub fn with_characters(&self, characters: Vec<GameObjectRef>) -> (Self, bool) {
+        (
+            Self {
+                characters: Arc::new(ref_union(&self.characters, &characters)),
+                ..self.clone()
+            },
+            false,
+        )
     }
 
-    pub fn without_characters(&self, characters: Vec<GameObjectRef>) -> Self {
-        Self {
-            characters: Arc::new(ref_difference(&self.characters, &characters)),
-            ..self.clone()
-        }
+    pub fn without_characters(&self, characters: Vec<GameObjectRef>) -> (Self, bool) {
+        (
+            Self {
+                characters: Arc::new(ref_difference(&self.characters, &characters)),
+                ..self.clone()
+            },
+            false,
+        )
     }
 }
 
@@ -83,6 +90,27 @@ impl GameObject for Room {
 
     fn name(&self) -> &str {
         &self.name
+    }
+
+    fn serialize(&self) -> String {
+        serde_json::to_string_pretty(&RoomDto {
+            description: self.description.clone(),
+            items: if self.items.is_empty() {
+                None
+            } else {
+                Some(self.items.deref().clone())
+            },
+            name: self.name.clone(),
+            portals: self.portals().deref().clone(),
+            position: self.position.clone(),
+        })
+        .unwrap_or_else(|error| {
+            panic!(
+                "Failed to serialize object {:?}: {:?}",
+                self.object_ref(),
+                error
+            )
+        })
     }
 }
 

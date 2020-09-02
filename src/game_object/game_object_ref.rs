@@ -81,8 +81,8 @@ impl GameObjectRef {
         self.0
     }
 
-    pub fn to_file_name(&self) -> OsString {
-        format!("{}:{:09}", self.0, self.1).into()
+    pub fn to_file_name(&self) -> String {
+        format!("{}.{:09}", self.0, self.1)
     }
 }
 

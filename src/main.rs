@@ -1,6 +1,5 @@
 use futures::{FutureExt, StreamExt};
 use std::sync::mpsc::{channel, Sender};
-use std::sync::Arc;
 use std::{env, fs, io, thread};
 use warp::Filter;
 
@@ -13,6 +12,7 @@ mod direction_utils;
 mod game_object;
 mod logs;
 mod objects;
+mod persistence_thread;
 mod player_output;
 mod point3d;
 mod sessions;
@@ -26,6 +26,7 @@ use commands::execute_command;
 use game_object::{hydrate, GameObject, GameObjectId, GameObjectRef, GameObjectType};
 use logs::{log_command, log_session_event, LogMessage, LogSender};
 use objects::{Player, Realm};
+use persistence_thread::PersistenceRequest;
 use player_output::PlayerOutput;
 use sessions::{process_input, SessionEvent, SessionInputEvent, SessionState, SignInState};
 
@@ -65,10 +66,12 @@ async fn main() {
     };
 
     let (input_tx, input_rx) = channel::<SessionInputEvent>();
+    let (persist_tx, persist_rx) = channel::<PersistenceRequest>();
     let (session_tx, session_rx) = channel::<SessionEvent>();
     let (log_tx, log_rx) = channel::<Box<dyn LogMessage>>();
 
     logs::create_log_thread(log_dir, log_rx);
+    persistence_thread::create_persistence_thread(data_dir, persist_rx);
     sessions::create_sessions_thread(input_tx, log_tx.clone(), session_rx);
 
     let session_tx_clone = session_tx.clone();
@@ -102,6 +105,13 @@ async fn main() {
                 realm = process_session_closed(realm, &session_tx, &log_tx, player_id);
             }
         }
+
+        let persistence_requests = realm.take_persistence_requests();
+        for request in persistence_requests {
+            if let Err(error) = persist_tx.send(request) {
+                panic!("Couldn't send persistence request: {:?}", error);
+            }
+        }
     }
 }
 
@@ -120,7 +130,7 @@ fn load_data(data_dir: &str) -> Result<Realm, io::Error> {
         if let Some(object_ref) = GameObjectRef::from_file_name(&file_name) {
             let content = fs::read_to_string(&path)?;
             match hydrate(object_ref, &content) {
-                Ok(object) => realm = realm.set_shared_object(object_ref, object),
+                Ok(object) => realm = realm.set_shared_object(object_ref, (object, false)),
                 Err(message) => println!(
                     "error loading {} {}: {}",
                     object_ref.object_type(),
@@ -170,7 +180,7 @@ fn process_signing_in_input(
             );
         }
 
-        if let Some(mut player) = realm.player_by_name(user_name) {
+        if let Some(player) = realm.player_by_name(user_name) {
             if let Some(existing_session_id) = player.session_id() {
                 send_session_event(
                     &session_tx,
@@ -285,7 +295,7 @@ fn process_session_closed(
     player_id: Option<GameObjectId>,
 ) -> Realm {
     if let Some(player_id) = player_id {
-        if let Some(mut player) = realm.player(player_id) {
+        if let Some(player) = realm.player(player_id) {
             let player_name = player.name().to_owned();
             realm = realm.set(player.object_ref(), player.with_session_id(None));
 

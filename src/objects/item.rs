@@ -57,6 +57,23 @@ impl GameObject for Item {
     fn name(&self) -> &str {
         &self.name
     }
+
+    fn serialize(&self) -> String {
+        serde_json::to_string_pretty(&ItemDto {
+            cost: self.cost,
+            description: self.description.clone(),
+            name: self.name.clone(),
+            position: self.position.clone(),
+            weight: self.weight,
+        })
+        .unwrap_or_else(|error| {
+            panic!(
+                "Failed to serialize object {:?}: {:?}",
+                self.object_ref(),
+                error
+            )
+        })
+    }
 }
 
 #[derive(Deserialize, Serialize)]

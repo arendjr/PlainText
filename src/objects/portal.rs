@@ -82,6 +82,28 @@ impl GameObject for Portal {
     fn name(&self) -> &str {
         &self.name
     }
+
+    fn serialize(&self) -> String {
+        serde_json::to_string_pretty(&PortalDto {
+            description: Some(self.description.clone()),
+            description2: if self.description2.is_empty() {
+                None
+            } else {
+                Some(self.description2.clone())
+            },
+            name: self.name.clone(),
+            name2: self.name2.clone(),
+            room: self.room,
+            room2: self.room2,
+        })
+        .unwrap_or_else(|error| {
+            panic!(
+                "Failed to serialize object {:?}: {:?}",
+                self.object_ref(),
+                error
+            )
+        })
+    }
 }
 
 #[derive(Deserialize, Serialize)]

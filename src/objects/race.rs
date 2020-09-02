@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::fmt;
+use std::ops::Deref;
 use std::sync::Arc;
 
 use crate::character_stats::CharacterStats;
@@ -95,6 +96,27 @@ impl GameObject for Race {
 
     fn name(&self) -> &str {
         &self.name
+    }
+
+    fn serialize(&self) -> String {
+        serde_json::to_string_pretty(&RaceDto {
+            adjective: self.adjective.clone(),
+            classes: self.classes.deref().clone(),
+            description: self.description.clone(),
+            height: self.height,
+            name: self.name.clone(),
+            startingRoom: self.starting_room,
+            stats: self.stats.clone(),
+            statsSuggestion: self.stats_suggestion.clone(),
+            weight: self.weight,
+        })
+        .unwrap_or_else(|error| {
+            panic!(
+                "Failed to serialize object {:?}: {:?}",
+                self.object_ref(),
+                error
+            )
+        })
     }
 }
 
