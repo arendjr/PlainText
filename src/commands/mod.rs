@@ -11,10 +11,10 @@ pub enum Command {
 
 pub fn execute_command(
     realm: Realm,
-    player: Player,
+    player: &Player,
     command: Command,
 ) -> (Realm, Vec<PlayerOutput>) {
     match command {
-        Command::Go(where_to) => go(realm, player, where_to),
+        Command::Go(where_to) => go(realm, &player, where_to),
     }
 }

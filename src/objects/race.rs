@@ -4,7 +4,9 @@ use std::fmt;
 use std::sync::Arc;
 
 use crate::character_stats::CharacterStats;
-use crate::game_object::{GameObject, GameObjectId, GameObjectRef, GameObjectType};
+use crate::game_object::{
+    GameObject, GameObjectId, GameObjectRef, GameObjectType, SharedGameObject,
+};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Race {
@@ -33,9 +35,9 @@ impl Race {
         self.height
     }
 
-    pub fn hydrate(id: GameObjectId, json: &str) -> Result<Arc<dyn GameObject>, String> {
+    pub fn hydrate(id: GameObjectId, json: &str) -> Result<SharedGameObject, String> {
         match serde_json::from_str::<RaceDto>(json) {
-            Ok(race_dto) => Ok(Arc::new(Self {
+            Ok(race_dto) => Ok(SharedGameObject::new(Self {
                 id,
                 adjective: race_dto.adjective,
                 classes: Arc::new(race_dto.classes),
@@ -79,6 +81,10 @@ impl GameObject for Race {
         &self.adjective
     }
 
+    fn as_race(&self) -> Option<&Self> {
+        Some(&self)
+    }
+
     fn id(&self) -> GameObjectId {
         self.id
     }
@@ -89,10 +95,6 @@ impl GameObject for Race {
 
     fn name(&self) -> &str {
         &self.name
-    }
-
-    fn to_race(&self) -> Option<Self> {
-        Some(self.clone())
     }
 }
 

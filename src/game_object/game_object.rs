@@ -1,8 +1,6 @@
-use std::sync::Arc;
-
 use crate::objects;
 
-use super::{GameObjectId, GameObjectRef, GameObjectType};
+use super::{GameObjectId, GameObjectRef, GameObjectType, SharedGameObject};
 
 pub trait GameObject {
     fn id(&self) -> GameObjectId;
@@ -11,6 +9,34 @@ pub trait GameObject {
 
     fn adjective(&self) -> &str {
         ""
+    }
+
+    fn as_class(&self) -> Option<&objects::Class> {
+        None
+    }
+
+    fn as_item(&self) -> Option<&objects::Item> {
+        None
+    }
+
+    fn as_player(&self) -> Option<&objects::Player> {
+        None
+    }
+
+    fn as_portal(&self) -> Option<&objects::Portal> {
+        None
+    }
+
+    fn as_race(&self) -> Option<&objects::Race> {
+        None
+    }
+
+    fn as_realm(&self) -> Option<&objects::Realm> {
+        None
+    }
+
+    fn as_room(&self) -> Option<&objects::Room> {
+        None
     }
 
     fn definite_article(&self) -> &str {
@@ -28,37 +54,9 @@ pub trait GameObject {
     fn plural_form(&self) -> String {
         self.name().to_owned()
     }
-
-    fn to_class(&self) -> Option<objects::Class> {
-        None
-    }
-
-    fn to_item(&self) -> Option<objects::Item> {
-        None
-    }
-
-    fn to_player(&self) -> Option<objects::Player> {
-        None
-    }
-
-    fn to_portal(&self) -> Option<objects::Portal> {
-        None
-    }
-
-    fn to_race(&self) -> Option<objects::Race> {
-        None
-    }
-
-    fn to_realm(&self) -> Option<objects::Realm> {
-        None
-    }
-
-    fn to_room(&self) -> Option<objects::Room> {
-        None
-    }
 }
 
-pub fn hydrate(object_ref: GameObjectRef, content: &str) -> Result<Arc<dyn GameObject>, String> {
+pub fn hydrate(object_ref: GameObjectRef, content: &str) -> Result<SharedGameObject, String> {
     let hydrate = match object_ref.object_type() {
         GameObjectType::Class => objects::Class::hydrate,
         GameObjectType::Item => objects::Item::hydrate,

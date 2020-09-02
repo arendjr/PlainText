@@ -1,9 +1,10 @@
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::fmt;
-use std::sync::Arc;
 
-use crate::game_object::{GameObject, GameObjectId, GameObjectRef, GameObjectType};
+use crate::game_object::{
+    GameObject, GameObjectId, GameObjectRef, GameObjectType, SharedGameObject,
+};
 
 #[derive(Clone, Debug)]
 pub struct Portal {
@@ -25,9 +26,9 @@ impl Portal {
         }
     }
 
-    pub fn hydrate(id: GameObjectId, json: &str) -> Result<Arc<dyn GameObject>, String> {
+    pub fn hydrate(id: GameObjectId, json: &str) -> Result<SharedGameObject, String> {
         match serde_json::from_str::<PortalDto>(json) {
-            Ok(portal_dto) => Ok(Arc::new(Self {
+            Ok(portal_dto) => Ok(SharedGameObject::new(Self {
                 id,
                 description: match portal_dto.description {
                     Some(description) => description,
@@ -62,6 +63,10 @@ impl fmt::Display for Portal {
 }
 
 impl GameObject for Portal {
+    fn as_portal(&self) -> Option<&Self> {
+        Some(&self)
+    }
+
     fn description(&self) -> &str {
         &self.description
     }
@@ -76,10 +81,6 @@ impl GameObject for Portal {
 
     fn name(&self) -> &str {
         &self.name
-    }
-
-    fn to_portal(&self) -> Option<Self> {
-        Some(self.clone())
     }
 }
 

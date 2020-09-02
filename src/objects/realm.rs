@@ -2,13 +2,14 @@ use serde::{Deserialize, Serialize};
 use serde_json;
 use std::cmp;
 use std::hash::{Hash, Hasher};
-use std::sync::Arc;
 
 use im_rc::HashMap;
 
 use crate::objects;
 
-use crate::game_object::{GameObject, GameObjectId, GameObjectRef, GameObjectType};
+use crate::game_object::{
+    GameObject, GameObjectId, GameObjectRef, GameObjectType, SharedGameObject, SharedObject,
+};
 use crate::objects::Player;
 use crate::sessions::SignUpData;
 
@@ -33,67 +34,20 @@ pub struct Realm {
     id: GameObjectId,
     name: String,
     next_id: GameObjectId,
-    objects: HashMap<GameObjectRef, Arc<dyn GameObject>>,
+    objects: HashMap<GameObjectRef, SharedGameObject>,
     players_by_name: HashMap<String, GameObjectId>,
     races_by_name: HashMap<String, GameObjectId>,
 }
 
 impl Realm {
-    pub fn create_player(&self, sign_up_data: &SignUpData) -> Self {
-        let player_ref = GameObjectRef(GameObjectType::Player, self.next_id);
-        let player = Player::new(player_ref.id(), sign_up_data);
-        self.set(player_ref, Arc::new(player))
+    pub fn class(&self, id: GameObjectId) -> Option<SharedObject<objects::Class>> {
+        self.object(GameObjectRef(GameObjectType::Class, id))
+            .and_then(|object| SharedObject::new(object, |object| object.as_class()))
     }
 
-    pub fn get(&self, object_ref: GameObjectRef) -> Option<Arc<dyn GameObject>> {
-        self.objects.get(&object_ref).map(|object| object.clone())
-    }
-
-    pub fn get_class(&self, id: GameObjectId) -> Option<objects::Class> {
-        self.get(GameObjectRef(GameObjectType::Class, id))
-            .and_then(|object| object.to_class())
-    }
-
-    pub fn get_item(&self, id: GameObjectId) -> Option<objects::Item> {
-        self.get(GameObjectRef(GameObjectType::Item, id))
-            .and_then(|object| object.to_item())
-    }
-
-    pub fn get_player(&self, id: GameObjectId) -> Option<objects::Player> {
-        self.get(GameObjectRef(GameObjectType::Player, id))
-            .and_then(|object| object.to_player())
-    }
-
-    pub fn get_player_by_name(&self, name: &str) -> Option<objects::Player> {
-        self.players_by_name
-            .get(name)
-            .and_then(|id| self.get_player(*id))
-    }
-
-    pub fn get_portal(&self, id: GameObjectId) -> Option<objects::Portal> {
-        self.get(GameObjectRef(GameObjectType::Portal, id))
-            .and_then(|object| object.to_portal())
-    }
-
-    pub fn get_race(&self, id: GameObjectId) -> Option<objects::Race> {
-        self.get(GameObjectRef(GameObjectType::Race, id))
-            .and_then(|object| object.to_race())
-    }
-
-    pub fn get_race_by_name(&self, name: &str) -> Option<objects::Race> {
-        self.races_by_name
-            .get(name)
-            .and_then(|id| self.get_race(*id))
-    }
-
-    pub fn get_room(&self, id: GameObjectId) -> Option<objects::Room> {
-        self.get(GameObjectRef(GameObjectType::Room, id))
-            .and_then(|object| object.to_room())
-    }
-
-    pub fn hydrate(id: GameObjectId, json: &str) -> Result<Arc<dyn GameObject>, String> {
+    pub fn hydrate(id: GameObjectId, json: &str) -> Result<SharedGameObject, String> {
         match serde_json::from_str::<RealmDto>(json) {
-            Ok(realm_dto) => Ok(Arc::new(Self {
+            Ok(realm_dto) => Ok(SharedGameObject::new(Self {
                 date_time: realm_dto.dateTime,
                 id,
                 objects: HashMap::new(),
@@ -106,27 +60,73 @@ impl Realm {
         }
     }
 
+    pub fn item(&self, id: GameObjectId) -> Option<SharedObject<objects::Item>> {
+        self.object(GameObjectRef(GameObjectType::Item, id))
+            .and_then(|object| SharedObject::new(object, |object| object.as_item()))
+    }
+
+    pub fn object(&self, object_ref: GameObjectRef) -> Option<SharedGameObject> {
+        self.objects.get(&object_ref).map(|object| object.clone())
+    }
+
+    pub fn player(&self, id: GameObjectId) -> Option<SharedObject<objects::Player>> {
+        self.object(GameObjectRef(GameObjectType::Player, id))
+            .and_then(|object| SharedObject::new(object, |object| object.as_player()))
+    }
+
+    pub fn player_by_name(&self, name: &str) -> Option<SharedObject<objects::Player>> {
+        self.players_by_name
+            .get(name)
+            .and_then(|id| self.player(*id))
+    }
+
     pub fn player_ids(&self) -> Vec<GameObjectId> {
         self.players_by_name.values().map(|id| *id).collect()
+    }
+
+    pub fn portal(&self, id: GameObjectId) -> Option<SharedObject<objects::Portal>> {
+        self.object(GameObjectRef(GameObjectType::Portal, id))
+            .and_then(|object| SharedObject::new(object, |object| object.as_portal()))
+    }
+
+    pub fn race(&self, id: GameObjectId) -> Option<SharedObject<objects::Race>> {
+        self.object(GameObjectRef(GameObjectType::Race, id))
+            .and_then(|object| SharedObject::new(object, |object| object.as_race()))
+    }
+
+    pub fn race_by_name(&self, name: &str) -> Option<SharedObject<objects::Race>> {
+        self.races_by_name.get(name).and_then(|id| self.race(*id))
     }
 
     pub fn race_names(&self) -> Vec<&str> {
         self.races_by_name.keys().map(String::as_ref).collect()
     }
 
-    pub fn set(&self, object_ref: GameObjectRef, object: Arc<dyn GameObject>) -> Self {
-        let mut objects = self.objects.clone();
-        objects.insert(object_ref, object.clone());
+    pub fn room(&self, id: GameObjectId) -> Option<SharedObject<objects::Room>> {
+        self.object(GameObjectRef(GameObjectType::Room, id))
+            .and_then(|object| SharedObject::new(object, |object| object.as_room()))
+    }
 
+    pub fn set<T: GameObject>(&self, object_ref: GameObjectRef, object: T) -> Self
+    where
+        T: 'static,
+    {
+        self.set_shared_object(object_ref, SharedGameObject::new(object))
+    }
+
+    pub fn set_shared_object(&self, object_ref: GameObjectRef, object: SharedGameObject) -> Self {
         let mut players_by_name = self.players_by_name.clone();
-        if let Some(player) = object.to_player() {
+        if let Some(player) = object.as_player() {
             players_by_name.insert(player.name().to_owned(), player.id());
         }
 
         let mut races_by_name = self.races_by_name.clone();
-        if let Some(race) = object.to_race() {
+        if let Some(race) = object.as_race() {
             races_by_name.insert(race.name().to_owned(), race.id());
         }
+
+        let mut objects = self.objects.clone();
+        objects.insert(object_ref, object);
 
         Self {
             name: self.name.clone(),
@@ -163,9 +163,18 @@ impl Realm {
             None => self.clone(),
         }
     }
+
+    pub fn with_new_player(&self, sign_up_data: &SignUpData) -> Self {
+        let player_ref = GameObjectRef(GameObjectType::Player, self.next_id);
+        self.set(player_ref, Player::new(player_ref.id(), sign_up_data))
+    }
 }
 
 impl GameObject for Realm {
+    fn as_realm(&self) -> Option<&Self> {
+        Some(&self)
+    }
+
     fn id(&self) -> GameObjectId {
         self.id
     }
@@ -176,10 +185,6 @@ impl GameObject for Realm {
 
     fn name(&self) -> &str {
         &self.name
-    }
-
-    fn to_realm(&self) -> Option<Self> {
-        Some(self.clone())
     }
 }
 

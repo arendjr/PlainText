@@ -1,10 +1,9 @@
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::fmt;
-use std::sync::Arc;
 
 use crate::character_stats::CharacterStats;
-use crate::game_object::{GameObject, GameObjectId, GameObjectType};
+use crate::game_object::{GameObject, GameObjectId, GameObjectType, SharedGameObject};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Class {
@@ -16,9 +15,9 @@ pub struct Class {
 }
 
 impl Class {
-    pub fn hydrate(id: GameObjectId, json: &str) -> Result<Arc<dyn GameObject>, String> {
+    pub fn hydrate(id: GameObjectId, json: &str) -> Result<SharedGameObject, String> {
         match serde_json::from_str::<ClassDto>(json) {
-            Ok(class_dto) => Ok(Arc::new(Self {
+            Ok(class_dto) => Ok(SharedGameObject::new(Self {
                 id,
                 description: class_dto.description,
                 name: class_dto.name,
@@ -48,6 +47,10 @@ impl fmt::Display for Class {
 }
 
 impl GameObject for Class {
+    fn as_class(&self) -> Option<&Self> {
+        Some(&self)
+    }
+
     fn description(&self) -> &str {
         &self.description
     }
@@ -62,10 +65,6 @@ impl GameObject for Class {
 
     fn name(&self) -> &str {
         &self.name
-    }
-
-    fn to_class(&self) -> Option<Self> {
-        Some(self.clone())
     }
 }
 

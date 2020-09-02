@@ -255,7 +255,7 @@ fn enter_class(data: &SignUpData, realm: &Realm) -> Output {
                 race.classes()
                     .iter()
                     .filter_map(|object_ref| realm
-                        .get(*object_ref)
+                        .object(*object_ref)
                         .map(|object| object.name().to_owned()))
                     .collect(),
                 FormatOptions::Capitalized | FormatOptions::Highlighted
@@ -486,12 +486,12 @@ fn process_asking_race_input(
     input: String,
 ) -> (SignUpState, Output) {
     let answer = input.to_lowercase();
-    if let Some(race) = realm.get_race_by_name(&answer) {
+    if let Some(race) = realm.race_by_name(&answer) {
         (
             new_state(
                 SignUpStep::AskingClass,
                 SignUpData {
-                    race: Some(race),
+                    race: Some(race.clone()),
                     ..state.data.clone()
                 },
             ),
@@ -504,7 +504,7 @@ fn process_asking_race_input(
         let race_name = answer[5..].trim();
         (
             state.clone(),
-            if let Some(race) = realm.get_race_by_name(&race_name) {
+            if let Some(race) = realm.race_by_name(&race_name) {
                 Output::String(format!(
                     "\n{}\n  {}\n",
                     highlight(&capitalize(&race_name)),
@@ -537,7 +537,7 @@ fn process_asking_class_input(
         Some(race) => race
             .classes()
             .iter()
-            .filter_map(|object_ref| realm.get_class(object_ref.id()))
+            .filter_map(|object_ref| realm.class(object_ref.id()))
             .collect(),
         None => Vec::new(),
     };
@@ -547,7 +547,7 @@ fn process_asking_class_input(
             new_state(
                 SignUpStep::AskingGender,
                 SignUpData {
-                    class: Some(class.clone()),
+                    class: Some((*class).clone()),
                     ..state.data.clone()
                 },
             ),
@@ -734,7 +734,7 @@ fn process_asking_sign_up_confirmation_input(
     input: String,
 ) -> (SignUpState, Output) {
     let answer = input.to_lowercase();
-    if realm.get_player_by_name(&state.data.user_name).is_some() {
+    if realm.player_by_name(&state.data.user_name).is_some() {
         (
             new_state(SignUpStep::SessionClosed, SignUpData::new()),
             Output::Str(

@@ -5,6 +5,7 @@ use std::sync::Arc;
 
 use crate::game_object::{
     ref_difference, ref_union, GameObject, GameObjectId, GameObjectRef, GameObjectType,
+    SharedGameObject,
 };
 use crate::point3d::Point3D;
 
@@ -24,9 +25,9 @@ impl Room {
         &self.description
     }
 
-    pub fn hydrate(id: GameObjectId, json: &str) -> Result<Arc<dyn GameObject>, String> {
+    pub fn hydrate(id: GameObjectId, json: &str) -> Result<SharedGameObject, String> {
         match serde_json::from_str::<RoomDto>(json) {
-            Ok(room_dto) => Ok(Arc::new(Self {
+            Ok(room_dto) => Ok(SharedGameObject::new(Self {
                 id,
                 characters: Arc::new(vec![]),
                 description: room_dto.description,
@@ -68,6 +69,10 @@ impl fmt::Display for Room {
 }
 
 impl GameObject for Room {
+    fn as_room(&self) -> Option<&Self> {
+        Some(&self)
+    }
+
     fn id(&self) -> GameObjectId {
         self.id
     }
@@ -78,10 +83,6 @@ impl GameObject for Room {
 
     fn name(&self) -> &str {
         &self.name
-    }
-
-    fn to_room(&self) -> Option<Self> {
-        Some(self.clone())
     }
 }
 

@@ -2,10 +2,11 @@ use pbkdf2::{pbkdf2_check, pbkdf2_simple};
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::fmt;
-use std::sync::Arc;
 
 use crate::character_stats::CharacterStats;
-use crate::game_object::{GameObject, GameObjectId, GameObjectRef, GameObjectType};
+use crate::game_object::{
+    GameObject, GameObjectId, GameObjectRef, GameObjectType, SharedGameObject,
+};
 use crate::sessions::SignUpData;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -36,9 +37,9 @@ impl Player {
         self.current_room
     }
 
-    pub fn hydrate(id: GameObjectId, json: &str) -> Result<Arc<dyn GameObject>, String> {
+    pub fn hydrate(id: GameObjectId, json: &str) -> Result<SharedGameObject, String> {
         match serde_json::from_str::<PlayerDto>(json) {
-            Ok(player_dto) => Ok(Arc::new(Self {
+            Ok(player_dto) => Ok(SharedGameObject::new(Self {
                 id,
                 class: player_dto.class,
                 current_room: player_dto.currentRoom,
@@ -70,7 +71,7 @@ impl Player {
     pub fn new(id: GameObjectId, sign_up_data: &SignUpData) -> Self {
         let class = sign_up_data.class.clone().unwrap();
         let race = sign_up_data.race.clone().unwrap();
-        let mut player = Self {
+        Self {
             id,
             class: class.object_ref(),
             current_room: race.starting_room(),
@@ -83,28 +84,36 @@ impl Player {
             session_id: None,
             stats: sign_up_data.stats.clone(),
             weight: sign_up_data.weight,
-        };
-        player.set_password(&sign_up_data.password);
-        player
+        }
+        .with_password(&sign_up_data.password)
     }
 
     pub fn session_id(&self) -> Option<u64> {
         self.session_id
     }
 
-    pub fn set_current_room(&mut self, room: GameObjectRef) {
-        self.current_room = room;
+    pub fn with_current_room(&self, room: GameObjectRef) -> Self {
+        Self {
+            current_room: room,
+            ..self.clone()
+        }
     }
 
-    pub fn set_password(&mut self, password: &str) {
+    pub fn with_password(&self, password: &str) -> Self {
         match pbkdf2_simple(password, 10) {
-            Ok(password) => self.password = password,
+            Ok(password) => Self {
+                password,
+                ..self.clone()
+            },
             Err(error) => panic!("Cannot create password hash: {:?}", error),
         }
     }
 
-    pub fn set_session_id(&mut self, session_id: Option<u64>) {
-        self.session_id = session_id
+    pub fn with_session_id(&self, session_id: Option<u64>) -> Self {
+        Self {
+            session_id,
+            ..self.clone()
+        }
     }
 }
 
@@ -115,6 +124,10 @@ impl fmt::Display for Player {
 }
 
 impl GameObject for Player {
+    fn as_player(&self) -> Option<&Self> {
+        Some(&self)
+    }
+
     fn description(&self) -> &str {
         &self.description
     }
@@ -129,10 +142,6 @@ impl GameObject for Player {
 
     fn name(&self) -> &str {
         &self.name
-    }
-
-    fn to_player(&self) -> Option<Self> {
-        Some(self.clone())
     }
 }
 

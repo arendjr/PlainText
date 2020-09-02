@@ -1,9 +1,8 @@
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::fmt;
-use std::sync::Arc;
 
-use crate::game_object::{GameObject, GameObjectId, GameObjectType};
+use crate::game_object::{GameObject, GameObjectId, GameObjectType, SharedGameObject};
 use crate::point3d::Point3D;
 
 #[derive(Clone, Debug)]
@@ -17,9 +16,9 @@ pub struct Item {
 }
 
 impl Item {
-    pub fn hydrate(id: GameObjectId, json: &str) -> Result<Arc<dyn GameObject>, String> {
+    pub fn hydrate(id: GameObjectId, json: &str) -> Result<SharedGameObject, String> {
         match serde_json::from_str::<ItemDto>(json) {
-            Ok(item_dto) => Ok(Arc::new(Self {
+            Ok(item_dto) => Ok(SharedGameObject::new(Self {
                 id,
                 cost: item_dto.cost,
                 description: item_dto.description,
@@ -39,6 +38,10 @@ impl fmt::Display for Item {
 }
 
 impl GameObject for Item {
+    fn as_item(&self) -> Option<&Self> {
+        Some(&self)
+    }
+
     fn description(&self) -> &str {
         &self.description
     }
@@ -53,10 +56,6 @@ impl GameObject for Item {
 
     fn name(&self) -> &str {
         &self.name
-    }
-
-    fn to_item(&self) -> Option<Self> {
-        Some(self.clone())
     }
 }
 

@@ -186,12 +186,12 @@ fn process_asking_user_name_input(
                 Output::Str("I'm sorry, but your name should consist of at least 3 letters.\n")
             },
         )
-    } else if let Some(player) = realm.get_player_by_name(&user_name) {
+    } else if let Some(player) = realm.player_by_name(&user_name) {
         (
             new_state(
                 SignInStep::AskingPassword,
                 SignInData {
-                    player: Some(player),
+                    player: Some(player.clone()),
                     ..state.data.clone()
                 },
             ),

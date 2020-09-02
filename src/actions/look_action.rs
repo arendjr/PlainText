@@ -13,10 +13,10 @@ pub fn look(
     object_ref: GameObjectRef,
     output: &mut Vec<PlayerOutput>,
 ) -> Realm {
-    match realm.get(object_ref) {
+    match realm.object(object_ref) {
         Some(object) => match object.object_type() {
             GameObjectType::Room => {
-                look_at_room(realm, player_ref, object.to_room().unwrap(), output)
+                look_at_room(realm, player_ref, object.as_room().unwrap(), output)
             }
             _ => {
                 let description = object.description();
@@ -38,7 +38,7 @@ pub fn look(
 fn look_at_room(
     realm: Realm,
     player_ref: GameObjectRef,
-    room: Room,
+    room: &Room,
     output: &mut Vec<PlayerOutput>,
 ) -> Realm {
     output.push(PlayerOutput::new_from_string(
