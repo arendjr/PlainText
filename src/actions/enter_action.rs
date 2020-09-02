@@ -1,18 +1,20 @@
 use std::sync::Arc;
 
 use crate::game_object::{GameObject, GameObjectRef};
-use crate::objects::{Player, Realm};
+use crate::objects::Realm;
 use crate::player_output::PlayerOutput;
 
 pub fn enter(
     mut realm: Realm,
-    mut player: Player,
+    player_ref: GameObjectRef,
     room: GameObjectRef,
-) -> (Realm, Vec<PlayerOutput>) {
-    let player_ref = player.get_ref();
-    if player.get_current_room() != room {
-        player.set_current_room(room);
-        realm = realm.set(player_ref, Arc::new(player));
+    _: &mut Vec<PlayerOutput>,
+) -> Realm {
+    if let Some(mut player) = realm.get_player(player_ref.get_id()) {
+        if player.get_current_room() != room {
+            player.set_current_room(room);
+            realm = realm.set(player_ref, Arc::new(player));
+        }
     }
 
     if let Some(room) = realm.get_room(room.get_id()) {
@@ -31,5 +33,5 @@ pub fn enter(
         }
     }*/
 
-    (realm, vec![])
+    realm
 }

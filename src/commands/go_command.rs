@@ -8,7 +8,7 @@ use crate::player_output::PlayerOutput;
 /// # Arguments
 ///
 /// * `where_to` - Name of a portal to travel through
-pub fn go(realm: Realm, player: Player, where_to: String) -> (Realm, Vec<PlayerOutput>) {
+pub fn go(mut realm: Realm, player: Player, where_to: String) -> (Realm, Vec<PlayerOutput>) {
     let current_room = match realm.get_room(player.get_current_room().get_id()) {
         Some(room) => room,
         None => return (realm, vec![]),
@@ -23,9 +23,9 @@ pub fn go(realm: Realm, player: Player, where_to: String) -> (Realm, Vec<PlayerO
         .map(|portal| portal.opposite_of(current_room.get_ref()))
         .and_then(|room| realm.get_room(room.get_id()));
 
+    let mut output = Vec::new();
     if let Some(room) = room {
-        enter(realm, player, room.get_ref())
-    } else {
-        (realm, vec![])
+        realm = enter(realm, player.get_ref(), room.get_ref(), &mut output);
     }
+    (realm, output)
 }

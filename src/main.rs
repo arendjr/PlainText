@@ -21,6 +21,7 @@ mod text_utils;
 mod util;
 mod vector3d;
 
+use actions::{enter, look};
 use command_interpreter::{interpret_command, InterpretationError};
 use commands::execute_command;
 use game_object::{hydrate, GameObject, GameObjectId, GameObjectRef, GameObjectType};
@@ -184,13 +185,19 @@ fn process_signing_in_input(
                 );
             }
 
-            let player_id = player.get_id();
+            let player_ref = player.get_ref();
+            let current_room = player.get_current_room();
             player.set_session_id(Some(session_id));
-            realm = realm.set(player.get_ref(), Arc::new(player));
+            realm = realm.set(player_ref, Arc::new(player));
 
             log_command(log_tx, user_name.to_owned(), "(signed in)".to_owned());
 
-            SessionState::SignedIn(player_id)
+            let mut player_output = Vec::new();
+            realm = enter(realm, player_ref, current_room, &mut player_output);
+            realm = look(realm, player_ref, current_room, &mut player_output);
+            process_player_output(&realm, session_tx, player_output);
+
+            SessionState::SignedIn(player_ref.get_id())
         } else {
             log_session_event(
                 log_tx,
@@ -220,16 +227,7 @@ fn process_signed_in_input(
     if let Some(player) = realm.get_player(player_id) {
         log_command(&log_tx, player.get_name().to_owned(), input.clone());
         let (new_realm, player_output) = process_player_input(realm, player, log_tx, input);
-        for output in player_output {
-            if let Some(affected_player) = new_realm.get_player(output.player_id) {
-                if let Some(session_id) = affected_player.get_session_id() {
-                    send_session_event(
-                        &session_tx,
-                        SessionEvent::SessionOutput(session_id, output.output),
-                    );
-                }
-            }
-        }
+        process_player_output(&new_realm, session_tx, player_output);
 
         new_realm
     } else {
@@ -265,6 +263,23 @@ fn process_player_input(
             )],
         ),
         Err(InterpretationError::NoCommand) => (realm, vec![]),
+    }
+}
+
+fn process_player_output(
+    realm: &Realm,
+    session_tx: &Sender<SessionEvent>,
+    player_output: Vec<PlayerOutput>,
+) {
+    for output in player_output {
+        if let Some(affected_player) = realm.get_player(output.player_id) {
+            if let Some(session_id) = affected_player.get_session_id() {
+                send_session_event(
+                    &session_tx,
+                    SessionEvent::SessionOutput(session_id, output.output),
+                );
+            }
+        }
     }
 }
 

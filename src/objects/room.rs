@@ -20,6 +20,10 @@ pub struct Room {
 }
 
 impl Room {
+    pub fn description(&self) -> &str {
+        &self.description
+    }
+
     pub fn hydrate(id: GameObjectId, json: &str) -> Result<Arc<dyn GameObject>, String> {
         match serde_json::from_str::<RoomDto>(json) {
             Ok(room_dto) => Ok(Arc::new(Self {

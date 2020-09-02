@@ -212,17 +212,6 @@ fn get_sign_up_steps() -> HashMap<SignUpStep, StepImpl> {
             exit: |_| Output::None,
             prompt: |_| Output::Str("\nAre you ready to create a character with these stats?\n"),
             process_input: process_asking_sign_up_confirmation_input
-        },
-
-        SignUpStep::SignedUp => StepImpl {
-            enter: |data, realm| Output::String(format!(
-                "\nWelcome to {}, {}.\n",
-                realm.get_name(),
-                data.user_name,
-            )),
-            exit: |_| Output::None,
-            prompt: |_| Output::None,
-            process_input: |state, _, _| (state.clone(), Output::None)
         }
     }
 }
@@ -765,7 +754,11 @@ fn process_asking_sign_up_confirmation_input(
     } else if answer == "yes" || answer == "y" {
         (
             new_state(SignUpStep::SignedUp, state.data.clone()),
-            Output::None,
+            Output::String(format!(
+                "\nWelcome to {}, {}.\n",
+                realm.get_name(),
+                state.data.user_name
+            )),
         )
     } else if answer == "no" || answer == "n" || answer == "back" || answer == "b" {
         (
