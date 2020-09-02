@@ -45,23 +45,6 @@ Features
    * All game objects are in memory
    * Changes are synced to disk in separate thread
 
-Community
----------
-
-Follow updates on the official PlainText blog: http://plaintext-mud.blogspot.com/
-
-If you have questions, or just want to discuss anything related to the PlainText
-engine, please join us at one of the following forums:
-
- * The [PlainText core](https://groups.google.com/forum/?fromgroups#!forum/plaintext-core)
-forum is meant for technical discussions regarding use of the PlainText engine.
- * The [PlainText gameplay](https://groups.google.com/forum/?fromgroups#!forum/plaintext-gameplay)
-forum is used to discuss gameplay mechanics (including code snippets).
- * The [PlainText tooling](https://groups.google.com/forum/?fromgroups#!forum/plaintext-tooling)
-forum is for discussion regarding tooling (IDEs, room building, compilers, etc.).
-
-Bugs can be reported through [GitHub's issue tracker](https://github.com/arendjr/PlainText/issues).
-
 Documentation
 -------------
 
@@ -77,10 +60,10 @@ Running your own server
 Make sure you have the latest stable Rust release installed and cloned this
 repository, then from the command line, run:
 
-    $ PT_DATA_DIR=data/ cargo run
+    $ cargo run
 
-If you want to enable logging, set the PT_LOG_DIR variable to the directory
-where you want your logs to be stored.
+You can use the PT_DATA_DIR and PT_LOG_DIR environment variables to control
+where data files are loaded from and logs are written to, respectively.
 
 ### Connect to your own server ###
 
@@ -94,6 +77,6 @@ admin.
 License
 -------
 
-This software is licensed under GPLv3.
+This software is licensed under AGPLv3.
 
-For details, see LICENSE.GPL.txt.
+For details, see LICENSE.AGPL.txt.
