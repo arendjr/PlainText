@@ -5,17 +5,10 @@ use std::fmt;
 
 use crate::character_stats::CharacterStats;
 use crate::game_object::{
-    GameObject, GameObjectId, GameObjectRef, GameObjectType, SharedGameObject,
+    Character, GameObject, GameObjectId, GameObjectRef, GameObjectType, Gender, SharedGameObject,
 };
 use crate::sessions::SignUpData;
 use crate::vector3d::Vector3D;
-
-#[derive(Clone, Debug, PartialEq)]
-pub enum Gender {
-    Unspecified,
-    Male,
-    Female,
-}
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Player {
@@ -35,14 +28,6 @@ pub struct Player {
 }
 
 impl Player {
-    pub fn current_room(&self) -> GameObjectRef {
-        self.current_room
-    }
-
-    pub fn direction(&self) -> &Vector3D {
-        &self.direction
-    }
-
     pub fn hydrate(id: GameObjectId, json: &str) -> Result<SharedGameObject, String> {
         match serde_json::from_str::<PlayerDto>(json) {
             Ok(player_dto) => Ok(SharedGameObject::new(Self {
@@ -51,11 +36,7 @@ impl Player {
                 current_room: player_dto.currentRoom,
                 description: player_dto.description,
                 direction: player_dto.direction.unwrap_or_default(),
-                gender: match &player_dto.gender.as_ref().map(String::as_str) {
-                    Some("male") => Gender::Male,
-                    Some("female") => Gender::Female,
-                    _ => Gender::Unspecified,
-                },
+                gender: Gender::hydrate(&player_dto.gender),
                 height: player_dto.height,
                 name: player_dto.name,
                 password: player_dto.password,
@@ -100,16 +81,6 @@ impl Player {
         self.session_id
     }
 
-    pub fn with_current_room(&self, room: GameObjectRef) -> (Self, bool) {
-        (
-            Self {
-                current_room: room,
-                ..self.clone()
-            },
-            true,
-        )
-    }
-
     pub fn with_password(&self, password: &str) -> (Self, bool) {
         (
             match pbkdf2_simple(password, 10) {
@@ -134,6 +105,42 @@ impl Player {
     }
 }
 
+impl Character for Player {
+    fn class(&self) -> Option<GameObjectRef> {
+        Some(self.class)
+    }
+
+    fn current_room(&self) -> GameObjectRef {
+        self.current_room
+    }
+
+    fn direction(&self) -> &Vector3D {
+        &self.direction
+    }
+
+    fn gender(&self) -> Gender {
+        self.gender
+    }
+
+    fn race(&self) -> GameObjectRef {
+        self.race
+    }
+
+    fn stats(&self) -> &CharacterStats {
+        &self.stats
+    }
+
+    fn with_current_room(&self, room: GameObjectRef) -> (SharedGameObject, bool) {
+        (
+            SharedGameObject::new(Self {
+                current_room: room,
+                ..self.clone()
+            }),
+            true,
+        )
+    }
+}
+
 impl fmt::Display for Player {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Player({}, {})", self.id, self.name)
@@ -141,6 +148,10 @@ impl fmt::Display for Player {
 }
 
 impl GameObject for Player {
+    fn as_character(&self) -> Option<&dyn Character> {
+        Some(self)
+    }
+
     fn as_player(&self) -> Option<&Self> {
         Some(&self)
     }
@@ -167,11 +178,7 @@ impl GameObject for Player {
             currentRoom: self.current_room,
             description: self.description.clone(),
             direction: Some(self.direction.clone()),
-            gender: match &self.gender {
-                Gender::Male => Some("male".to_owned()),
-                Gender::Female => Some("female".to_owned()),
-                Gender::Unspecified => None,
-            },
+            gender: self.gender.serialize(),
             height: self.height,
             name: self.name.clone(),
             password: self.password.clone(),

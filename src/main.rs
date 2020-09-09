@@ -47,9 +47,9 @@ mod visual_utils;
 use actions::{enter, look};
 use command_interpreter::{interpret_command, InterpretationError};
 use commands::execute_command;
-use game_object::{hydrate, GameObject, GameObjectId, GameObjectRef, GameObjectType};
+use game_object::{hydrate, Character, GameObject, GameObjectId, GameObjectRef, GameObjectType};
 use logs::{log_command, log_session_event, LogMessage, LogSender};
-use objects::{Player, Realm};
+use objects::Realm;
 use persistence_thread::PersistenceRequest;
 use player_output::PlayerOutput;
 use sessions::{process_input, SessionEvent, SessionInputEvent, SessionState, SignInState};
@@ -150,11 +150,18 @@ fn load_data(data_dir: &str) -> Result<Realm, io::Error> {
     let entries = fs::read_dir(&data_dir)?
         .map(|entry| entry.map(|entry| (entry.file_name(), entry.path())))
         .collect::<Result<Vec<_>, io::Error>>()?;
+    let mut character_refs = Vec::new();
     for (file_name, path) in entries {
         if let Some(object_ref) = GameObjectRef::from_file_name(&file_name) {
             let content = fs::read_to_string(&path)?;
             match hydrate(object_ref, &content) {
-                Ok(object) => realm = realm.set_shared_object(object_ref, (object, false)),
+                Ok(object) => {
+                    if let Some(character) = object.as_character() {
+                        character_refs.push(character.object_ref());
+                    }
+
+                    realm = realm.set_shared_object(object_ref, (object, false));
+                }
                 Err(message) => println!(
                     "error loading {} {}: {}",
                     object_ref.object_type(),
@@ -165,19 +172,18 @@ fn load_data(data_dir: &str) -> Result<Realm, io::Error> {
         }
     }
 
-    Ok(inject_players_into_rooms(realm))
+    Ok(inject_characters_into_rooms(realm, character_refs))
 }
 
-// Players get injected on load, so that rooms don't need to be re-persisted every time a character
-// moves from one room to another.
-fn inject_players_into_rooms(mut realm: Realm) -> Realm {
-    for player_id in realm.player_ids() {
-        let player_ref = GameObjectRef(GameObjectType::Player, player_id);
+// Characters get injected on load, so that rooms don't need to be re-persisted every time a
+// character moves from one room to another.
+fn inject_characters_into_rooms(mut realm: Realm, character_refs: Vec<GameObjectRef>) -> Realm {
+    for character_ref in character_refs {
         if let Some(room) = realm
-            .player(player_ref)
-            .and_then(|player| realm.room(player.current_room()))
+            .character(character_ref)
+            .and_then(|character| realm.room(character.current_room()))
         {
-            realm = realm.set(room.object_ref(), room.with_characters(vec![player_ref]));
+            realm = realm.set(room.object_ref(), room.with_characters(vec![character_ref]));
         }
     }
     realm
@@ -255,7 +261,8 @@ fn process_signed_in_input(
 ) -> Realm {
     if let Some(player) = realm.player_by_id(player_id) {
         log_command(&log_tx, player.name().to_owned(), input.clone());
-        let (new_realm, player_output) = process_player_input(realm, &player, log_tx, input);
+        let player_ref = player.object_ref();
+        let (new_realm, player_output) = process_player_input(realm, player_ref, log_tx, input);
         process_player_output(&new_realm, session_tx, player_output);
 
         new_realm
@@ -271,23 +278,23 @@ fn process_signed_in_input(
 
 fn process_player_input(
     realm: Realm,
-    player: &Player,
+    player_ref: GameObjectRef,
     _: &LogSender,
     input: String,
 ) -> (Realm, Vec<PlayerOutput>) {
     match interpret_command(input) {
-        Ok(command) => execute_command(realm, player, command),
+        Ok(command) => execute_command(realm, player_ref, command),
         Err(InterpretationError::AmbiguousCommand(_)) => (
             realm,
             vec![PlayerOutput::new_from_str(
-                player.id(),
+                player_ref.id(),
                 "Command is not unique.",
             )],
         ),
         Err(InterpretationError::UnknownCommand(command)) => (
             realm,
             vec![PlayerOutput::new_from_string(
-                player.id(),
+                player_ref.id(),
                 format!("Command \"{}\" does not exist.", command),
             )],
         ),

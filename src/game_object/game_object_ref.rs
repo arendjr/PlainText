@@ -7,11 +7,11 @@ pub type GameObjectId = u32;
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum GameObjectType {
-    Character,
     Class,
     Container,
     Group,
     Item,
+    Npc,
     Player,
     Portal,
     Race,
@@ -24,11 +24,11 @@ pub enum GameObjectType {
 impl fmt::Display for GameObjectType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(match self {
-            GameObjectType::Character => "character",
             GameObjectType::Class => "class",
             GameObjectType::Container => "container",
             GameObjectType::Group => "group",
             GameObjectType::Item => "item",
+            GameObjectType::Npc => "character",
             GameObjectType::Player => "player",
             GameObjectType::Portal => "portal",
             GameObjectType::Race => "race",
@@ -43,6 +43,7 @@ impl fmt::Display for GameObjectType {
 impl GameObjectType {
     pub fn from_str(string: &str) -> Option<GameObjectType> {
         match string {
+            "character" => Some(GameObjectType::Npc),
             "class" => Some(GameObjectType::Class),
             "item" => Some(GameObjectType::Item),
             "player" => Some(GameObjectType::Player),

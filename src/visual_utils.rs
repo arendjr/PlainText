@@ -5,7 +5,7 @@ use std::iter::FromIterator;
 
 use crate::direction_utils::is_direction;
 use crate::events::EventType;
-use crate::game_object::{GameObject, GameObjectRef};
+use crate::game_object::{Character, GameObject, GameObjectRef};
 use crate::objects::{ItemFlags, Player, Portal, Realm, Room, RoomFlags};
 use crate::vector3d::Vector3D;
 use crate::vector_utils::angle_between_xy_vectors;
@@ -84,7 +84,7 @@ fn characters_visible_through_portal(
     let mut characters = HashSet::from_iter(
         room.characters()
             .iter()
-            .filter_map(|character_ref| realm.player(*character_ref))
+            .filter_map(|character_ref| realm.character(*character_ref))
             .map(|character| CharacterWithStrengthAndDistance {
                 character: character.object_ref(),
                 strength: room_strength,

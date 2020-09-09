@@ -1,6 +1,6 @@
 use crate::objects;
 
-use super::{GameObjectId, GameObjectRef, GameObjectType, SharedGameObject};
+use super::{Character, GameObjectId, GameObjectRef, GameObjectType, SharedGameObject};
 
 pub trait GameObject {
     fn id(&self) -> GameObjectId;
@@ -12,11 +12,19 @@ pub trait GameObject {
         ""
     }
 
+    fn as_character(&self) -> Option<&dyn Character> {
+        None
+    }
+
     fn as_class(&self) -> Option<&objects::Class> {
         None
     }
 
     fn as_item(&self) -> Option<&objects::Item> {
+        None
+    }
+
+    fn as_npc(&self) -> Option<&objects::Npc> {
         None
     }
 
@@ -69,6 +77,7 @@ pub fn hydrate(object_ref: GameObjectRef, content: &str) -> Result<SharedGameObj
     let hydrate = match object_ref.object_type() {
         GameObjectType::Class => objects::Class::hydrate,
         GameObjectType::Item => objects::Item::hydrate,
+        GameObjectType::Npc => objects::Npc::hydrate,
         GameObjectType::Player => objects::Player::hydrate,
         GameObjectType::Portal => objects::Portal::hydrate,
         GameObjectType::Race => objects::Race::hydrate,

@@ -1,13 +1,13 @@
 use std::borrow::Borrow;
 use std::convert::AsRef;
 use std::ops::Deref;
-use std::sync::Arc;
+use std::rc::Rc;
 
 use super::GameObject;
 
 #[derive(Clone)]
 pub struct SharedGameObject {
-    object: Arc<dyn GameObject>,
+    object: Rc<dyn GameObject>,
 }
 
 impl SharedGameObject {
@@ -16,7 +16,7 @@ impl SharedGameObject {
         T: 'static,
     {
         Self {
-            object: Arc::new(object),
+            object: Rc::new(object),
         }
     }
 }
@@ -32,41 +32,5 @@ impl Deref for SharedGameObject {
 
     fn deref(&self) -> &Self::Target {
         self.object.deref()
-    }
-}
-
-type FromShared<T: GameObject + 'static> = dyn Fn(&SharedGameObject) -> Option<&T>;
-
-pub struct SharedObject<T: GameObject + 'static> {
-    cast: Box<FromShared<T>>,
-    object: SharedGameObject,
-}
-
-impl<T: GameObject + 'static> SharedObject<T> {
-    pub fn new<F>(object: SharedGameObject, cast: F) -> Option<Self>
-    where
-        F: Fn(&SharedGameObject) -> Option<&T> + 'static,
-    {
-        match cast(&object) {
-            Some(_) => Some(Self {
-                cast: Box::new(cast),
-                object,
-            }),
-            None => None,
-        }
-    }
-}
-
-impl<T: GameObject + 'static> PartialEq for SharedObject<T> {
-    fn eq(&self, other: &Self) -> bool {
-        self.object.id() == other.object.id()
-    }
-}
-
-impl<T: GameObject + 'static> Deref for SharedObject<T> {
-    type Target = T;
-
-    fn deref(&self) -> &Self::Target {
-        (self.cast)(&self.object).unwrap()
     }
 }

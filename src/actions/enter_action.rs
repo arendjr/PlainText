@@ -4,18 +4,26 @@ use crate::player_output::PlayerOutput;
 
 pub fn enter(
     mut realm: Realm,
-    player_ref: GameObjectRef,
-    room: GameObjectRef,
+    character_ref: GameObjectRef,
+    room_ref: GameObjectRef,
     _: &mut Vec<PlayerOutput>,
 ) -> Realm {
-    if let Some(player) = realm.player(player_ref) {
-        if player.current_room() != room {
-            realm = realm.set(player_ref, player.with_current_room(room));
+    if let Some(character) = realm.character(character_ref) {
+        let current_room_ref = character.current_room();
+        if current_room_ref != room_ref {
+            realm = realm.set_shared_object(character_ref, character.with_current_room(room_ref));
+        }
+
+        if let Some(current_room) = realm.room(current_room_ref) {
+            realm = realm.set(
+                current_room.object_ref(),
+                current_room.without_characters(vec![character_ref]),
+            );
         }
     }
 
-    if let Some(room) = realm.room(room) {
-        realm = realm.set(room.object_ref(), room.with_characters(vec![player_ref]));
+    if let Some(room) = realm.room(room_ref) {
+        realm = realm.set(room.object_ref(), room.with_characters(vec![character_ref]));
     }
 
     // TODO: enteredRoom();

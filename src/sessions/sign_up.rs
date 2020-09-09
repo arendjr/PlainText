@@ -6,8 +6,8 @@ use std::str::FromStr;
 
 use crate::character_stats::{CharacterStat, CharacterStats};
 use crate::colors::Color;
-use crate::game_object::GameObject;
-use crate::objects::{Class, Gender, Race, Realm};
+use crate::game_object::{GameObject, Gender};
+use crate::objects::{Class, Race, Realm};
 use crate::sessions::SessionOutput as Output;
 use crate::text_utils::{capitalize, colorize, format_columns, highlight, split_lines};
 
