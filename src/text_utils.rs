@@ -90,10 +90,7 @@ pub fn describe_items_with_definite_articles(
 }
 
 pub fn first_item_is_plural(realm: &Realm, item_refs: &Vec<GameObjectRef>) -> bool {
-    match item_refs
-        .first()
-        .and_then(|item_ref| realm.item(item_ref.id()))
-    {
+    match item_refs.first().and_then(|item_ref| realm.item(*item_ref)) {
         Some(item) => {
             if item.has_flags(ItemFlags::ImpliedPlural) {
                 true
@@ -103,7 +100,7 @@ pub fn first_item_is_plural(realm: &Realm, item_refs: &Vec<GameObjectRef>) -> bo
                 item_refs
                     .iter()
                     .skip(1)
-                    .filter_map(|item_ref| realm.item(item_ref.id()))
+                    .filter_map(|item_ref| realm.item(*item_ref))
                     .any(|other| other.name() == item.name())
             }
         }

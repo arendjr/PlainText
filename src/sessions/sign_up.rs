@@ -537,7 +537,7 @@ fn process_asking_class_input(
         Some(race) => race
             .classes()
             .iter()
-            .filter_map(|object_ref| realm.class(object_ref.id()))
+            .filter_map(|class_ref| realm.class(*class_ref))
             .collect(),
         None => Vec::new(),
     };

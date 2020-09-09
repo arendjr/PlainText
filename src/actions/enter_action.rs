@@ -8,13 +8,13 @@ pub fn enter(
     room: GameObjectRef,
     _: &mut Vec<PlayerOutput>,
 ) -> Realm {
-    if let Some(player) = realm.player(player_ref.id()) {
+    if let Some(player) = realm.player(player_ref) {
         if player.current_room() != room {
             realm = realm.set(player_ref, player.with_current_room(room));
         }
     }
 
-    if let Some(room) = realm.room(room.id()) {
+    if let Some(room) = realm.room(room) {
         realm = realm.set(room.object_ref(), room.with_characters(vec![player_ref]));
     }
 

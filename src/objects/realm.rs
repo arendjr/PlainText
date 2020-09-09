@@ -44,8 +44,8 @@ pub struct Realm {
 }
 
 impl Realm {
-    pub fn class(&self, id: GameObjectId) -> Option<SharedObject<objects::Class>> {
-        self.object(GameObjectRef(GameObjectType::Class, id))
+    pub fn class(&self, object_ref: GameObjectRef) -> Option<SharedObject<objects::Class>> {
+        self.object(object_ref)
             .and_then(|object| SharedObject::new(object, |object| object.as_class()))
     }
 
@@ -66,8 +66,8 @@ impl Realm {
         }
     }
 
-    pub fn item(&self, id: GameObjectId) -> Option<SharedObject<objects::Item>> {
-        self.object(GameObjectRef(GameObjectType::Item, id))
+    pub fn item(&self, object_ref: GameObjectRef) -> Option<SharedObject<objects::Item>> {
+        self.object(object_ref)
             .and_then(|object| SharedObject::new(object, |object| object.as_item()))
     }
 
@@ -75,41 +75,47 @@ impl Realm {
         self.objects.get(&object_ref).map(|object| object.clone())
     }
 
-    pub fn player(&self, id: GameObjectId) -> Option<SharedObject<objects::Player>> {
-        self.object(GameObjectRef(GameObjectType::Player, id))
+    pub fn player(&self, object_ref: GameObjectRef) -> Option<SharedObject<objects::Player>> {
+        self.object(object_ref)
             .and_then(|object| SharedObject::new(object, |object| object.as_player()))
+    }
+
+    pub fn player_by_id(&self, id: GameObjectId) -> Option<SharedObject<objects::Player>> {
+        self.player(GameObjectRef(GameObjectType::Player, id))
     }
 
     pub fn player_by_name(&self, name: &str) -> Option<SharedObject<objects::Player>> {
         self.players_by_name
             .get(name)
-            .and_then(|id| self.player(*id))
+            .and_then(|id| self.player_by_id(*id))
     }
 
     pub fn player_ids(&self) -> Vec<GameObjectId> {
         self.players_by_name.values().map(|id| *id).collect()
     }
 
-    pub fn portal(&self, id: GameObjectId) -> Option<SharedObject<objects::Portal>> {
-        self.object(GameObjectRef(GameObjectType::Portal, id))
+    pub fn portal(&self, object_ref: GameObjectRef) -> Option<SharedObject<objects::Portal>> {
+        self.object(object_ref)
             .and_then(|object| SharedObject::new(object, |object| object.as_portal()))
     }
 
-    pub fn race(&self, id: GameObjectId) -> Option<SharedObject<objects::Race>> {
-        self.object(GameObjectRef(GameObjectType::Race, id))
+    pub fn race(&self, object_ref: GameObjectRef) -> Option<SharedObject<objects::Race>> {
+        self.object(object_ref)
             .and_then(|object| SharedObject::new(object, |object| object.as_race()))
     }
 
     pub fn race_by_name(&self, name: &str) -> Option<SharedObject<objects::Race>> {
-        self.races_by_name.get(name).and_then(|id| self.race(*id))
+        self.races_by_name
+            .get(name)
+            .and_then(|id| self.race(GameObjectRef(GameObjectType::Race, *id)))
     }
 
     pub fn race_names(&self) -> Vec<&str> {
         self.races_by_name.keys().map(String::as_ref).collect()
     }
 
-    pub fn room(&self, id: GameObjectId) -> Option<SharedObject<objects::Room>> {
-        self.object(GameObjectRef(GameObjectType::Room, id))
+    pub fn room(&self, object_ref: GameObjectRef) -> Option<SharedObject<objects::Room>> {
+        self.object(object_ref)
             .and_then(|object| SharedObject::new(object, |object| object.as_room()))
     }
 

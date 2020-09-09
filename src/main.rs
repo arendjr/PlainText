@@ -172,11 +172,11 @@ fn load_data(data_dir: &str) -> Result<Realm, io::Error> {
 // moves from one room to another.
 fn inject_players_into_rooms(mut realm: Realm) -> Realm {
     for player_id in realm.player_ids() {
+        let player_ref = GameObjectRef(GameObjectType::Player, player_id);
         if let Some(room) = realm
-            .player(player_id)
-            .and_then(|player| realm.room(player.current_room().id()))
+            .player(player_ref)
+            .and_then(|player| realm.room(player.current_room()))
         {
-            let player_ref = GameObjectRef(GameObjectType::Player, player_id);
             realm = realm.set(room.object_ref(), room.with_characters(vec![player_ref]));
         }
     }
@@ -253,7 +253,7 @@ fn process_signed_in_input(
     log_tx: &LogSender,
     (input, session_id, source, player_id): (String, u64, String, GameObjectId),
 ) -> Realm {
-    if let Some(player) = realm.player(player_id) {
+    if let Some(player) = realm.player_by_id(player_id) {
         log_command(&log_tx, player.name().to_owned(), input.clone());
         let (new_realm, player_output) = process_player_input(realm, &player, log_tx, input);
         process_player_output(&new_realm, session_tx, player_output);
@@ -301,7 +301,7 @@ fn process_player_output(
     player_output: Vec<PlayerOutput>,
 ) {
     for output in player_output {
-        if let Some(affected_player) = realm.player(output.player_id) {
+        if let Some(affected_player) = realm.player_by_id(output.player_id) {
             if let Some(session_id) = affected_player.session_id() {
                 send_session_event(
                     &session_tx,
@@ -319,7 +319,7 @@ fn process_session_closed(
     player_id: Option<GameObjectId>,
 ) -> Realm {
     if let Some(player_id) = player_id {
-        if let Some(player) = realm.player(player_id) {
+        if let Some(player) = realm.player_by_id(player_id) {
             let player_name = player.name().to_owned();
             realm = realm.set(player.object_ref(), player.with_session_id(None));
 

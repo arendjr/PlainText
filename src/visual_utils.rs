@@ -58,7 +58,7 @@ fn characters_visible_through_portal(
     excluded_rooms: &HashSet<GameObjectRef>,
 ) -> HashSet<CharacterWithStrengthAndDistance> {
     let room = unwrap_or_return!(
-        realm.room(portal.opposite_of(source_room.object_ref()).id()),
+        realm.room(portal.opposite_of(source_room.object_ref())),
         HashSet::new()
     );
     let room_strength = if strength != 0.0 {
@@ -84,7 +84,7 @@ fn characters_visible_through_portal(
     let mut characters = HashSet::from_iter(
         room.characters()
             .iter()
-            .filter_map(|character_ref| realm.player(character_ref.id()))
+            .filter_map(|character_ref| realm.player(*character_ref))
             .map(|character| CharacterWithStrengthAndDistance {
                 character: character.object_ref(),
                 strength: room_strength,
@@ -95,14 +95,13 @@ fn characters_visible_through_portal(
     for next_portal in room
         .portals()
         .iter()
-        .filter_map(|portal_ref| realm.portal(portal_ref.id()))
+        .filter_map(|portal_ref| realm.portal(*portal_ref))
     {
         if !next_portal.can_see_through() {
             continue;
         }
 
-        let next_room =
-            unwrap_or_continue!(realm.room(next_portal.opposite_of(room.object_ref()).id()));
+        let next_room = unwrap_or_continue!(realm.room(next_portal.opposite_of(room.object_ref())));
         if next_room.id() == source_room.id() || visited_rooms.contains(&next_room.object_ref()) {
             continue;
         }
@@ -115,7 +114,7 @@ fn characters_visible_through_portal(
             }
         } else {
             // In an open area, we only verify the next room is within field of view:
-            let character_room = unwrap_or_continue!(realm.room(character.current_room().id()));
+            let character_room = unwrap_or_continue!(realm.room(character.current_room()));
             let vector3 = next_room.position() - character_room.position();
             let angle = angle_between_xy_vectors(character.direction(), &vector3);
             if angle.abs() > UNDER_QUARTER_PI {
@@ -167,11 +166,11 @@ pub fn group_items_by_position(
     room_ref: GameObjectRef,
 ) -> HashMap<Position, Vec<GameObjectRef>> {
     let mut grouped_items: HashMap<Position, Vec<GameObjectRef>> = HashMap::new();
-    let player = unwrap_or_return!(realm.player(player_ref.id()), grouped_items);
-    let room = unwrap_or_return!(realm.room(room_ref.id()), grouped_items);
+    let player = unwrap_or_return!(realm.player(player_ref), grouped_items);
+    let room = unwrap_or_return!(realm.room(room_ref), grouped_items);
 
     for item_ref in room.items() {
-        let item = unwrap_or_continue!(realm.item(item_ref.id()));
+        let item = unwrap_or_continue!(realm.item(*item_ref));
         if item.hidden() {
             continue;
         }
@@ -221,11 +220,11 @@ pub fn group_portals_by_position(
     room_ref: GameObjectRef,
 ) -> HashMap<Position, Vec<GameObjectRef>> {
     let mut grouped_items: HashMap<Position, Vec<GameObjectRef>> = HashMap::new();
-    let player = unwrap_or_return!(realm.player(player_ref.id()), grouped_items);
-    let room = unwrap_or_return!(realm.room(room_ref.id()), grouped_items);
+    let player = unwrap_or_return!(realm.player(player_ref), grouped_items);
+    let room = unwrap_or_return!(realm.room(room_ref), grouped_items);
 
     for portal_ref in room.portals() {
-        let portal = unwrap_or_continue!(realm.portal(portal_ref.id()));
+        let portal = unwrap_or_continue!(realm.portal(*portal_ref));
         if portal.is_hidden_from_room(room.object_ref()) {
             continue;
         }
@@ -262,12 +261,12 @@ pub fn visible_characters_from_position(
     player_ref: GameObjectRef,
     room_ref: GameObjectRef,
 ) -> Vec<GameObjectRef> {
-    let player = unwrap_or_return!(realm.player(player_ref.id()), vec![]);
-    let room = unwrap_or_return!(realm.room(room_ref.id()), vec![]);
+    let player = unwrap_or_return!(realm.player(player_ref), vec![]);
+    let room = unwrap_or_return!(realm.room(room_ref), vec![]);
 
     let mut characters = HashSet::new();
     for portal_ref in room.portals() {
-        let portal = unwrap_or_continue!(realm.portal(portal_ref.id()));
+        let portal = unwrap_or_continue!(realm.portal(*portal_ref));
         if !portal.can_see_through() || portal.is_hidden_from_room(room.object_ref()) {
             continue;
         }
