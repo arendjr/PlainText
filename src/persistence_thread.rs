@@ -15,14 +15,11 @@ pub fn create_persistence_thread(data_dir: String, persist_rx: Receiver<Persiste
         while let Ok(peristence_req) = persist_rx.recv() {
             match peristence_req {
                 PersistenceRequest::PersistObject(object_ref, data) => {
-                    match File::create(format!("{}/{}", data_dir, object_ref.to_file_name())) {
-                        Ok(mut file) => {
-                            file.write_all(data.as_bytes());
-                        }
-
-                        Err(error) => {
-                            println!("Cannot persist object {:?}: {:?}", object_ref, error);
-                        }
+                    let result =
+                        File::create(format!("{}/{}", data_dir, object_ref.to_file_name()))
+                            .and_then(|mut file| file.write_all(data.as_bytes()));
+                    if let Err(error) = result {
+                        println!("Cannot persist object {:?}: {:?}", object_ref, error);
                     }
                 }
 
