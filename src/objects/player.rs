@@ -18,7 +18,10 @@ pub struct Player {
     description: String,
     direction: Vector3D,
     gender: Gender,
+    gold: u32,
     height: f32,
+    hp: i16,
+    mp: i16,
     name: String,
     password: String,
     race: GameObjectRef,
@@ -37,7 +40,10 @@ impl Player {
                 description: player_dto.description,
                 direction: player_dto.direction.unwrap_or_default(),
                 gender: Gender::hydrate(&player_dto.gender),
+                gold: player_dto.gold,
                 height: player_dto.height,
+                hp: player_dto.hp,
+                mp: player_dto.mp,
                 name: player_dto.name,
                 password: player_dto.password,
                 race: player_dto.race,
@@ -66,7 +72,10 @@ impl Player {
             description: "".to_owned(),
             direction: Vector3D::new(0, 0, 0),
             gender: sign_up_data.gender.clone(),
+            gold: sign_up_data.gold,
             height: sign_up_data.height,
+            hp: sign_up_data.stats.max_hp(),
+            mp: sign_up_data.stats.max_mp(),
             name: sign_up_data.user_name.clone(),
             password: String::new(),
             race: race.object_ref(),
@@ -122,12 +131,40 @@ impl Character for Player {
         self.gender
     }
 
+    fn gold(&self) -> u32 {
+        self.gold
+    }
+
+    fn height(&self) -> f32 {
+        self.height
+    }
+
+    fn hp(&self) -> i16 {
+        self.hp
+    }
+
+    fn max_hp(&self) -> i16 {
+        self.stats.max_hp()
+    }
+
+    fn max_mp(&self) -> i16 {
+        self.stats.max_mp()
+    }
+
+    fn mp(&self) -> i16 {
+        self.mp
+    }
+
     fn race(&self) -> GameObjectRef {
         self.race
     }
 
     fn stats(&self) -> &CharacterStats {
         &self.stats
+    }
+
+    fn weight(&self) -> f32 {
+        self.weight
     }
 
     fn with_current_room(&self, room: GameObjectRef) -> (SharedGameObject, bool) {
@@ -179,7 +216,10 @@ impl GameObject for Player {
             description: self.description.clone(),
             direction: Some(self.direction.clone()),
             gender: self.gender.serialize(),
+            gold: self.gold,
             height: self.height,
+            hp: self.hp,
+            mp: self.mp,
             name: self.name.clone(),
             password: self.password.clone(),
             race: self.race,
@@ -204,7 +244,10 @@ struct PlayerDto {
     description: String,
     direction: Option<Vector3D>,
     gender: Option<String>,
+    gold: u32,
     height: f32,
+    hp: i16,
+    mp: i16,
     name: String,
     password: String,
     race: GameObjectRef,

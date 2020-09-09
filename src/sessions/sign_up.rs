@@ -56,6 +56,7 @@ enum SignUpStep {
 pub struct SignUpData {
     pub class: Option<Class>,
     pub gender: Gender,
+    pub gold: u32,
     pub height: f32,
     pub password: String,
     pub race: Option<Race>,
@@ -73,6 +74,7 @@ impl SignUpData {
         Self {
             class: None,
             gender: Gender::Unspecified,
+            gold: 0,
             height: 0.0,
             password: String::new(),
             race: None,
@@ -714,6 +716,7 @@ fn process_asking_extra_stats_input(
             new_state(
                 SignUpStep::AskingSignUpConfirmation,
                 SignUpData {
+                    gold: 100,
                     height,
                     weight,
                     stats,

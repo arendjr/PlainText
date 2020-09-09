@@ -16,7 +16,10 @@ pub struct Npc {
     description: String,
     direction: Vector3D,
     gender: Gender,
+    gold: u32,
     height: f32,
+    hp: i16,
+    mp: i16,
     name: String,
     race: GameObjectRef,
     session_id: Option<u64>,
@@ -34,7 +37,10 @@ impl Npc {
                 description: npc_dto.description.unwrap_or_default(),
                 direction: npc_dto.direction.unwrap_or_default(),
                 gender: Gender::hydrate(&npc_dto.gender),
+                gold: npc_dto.gold,
                 height: npc_dto.height,
+                hp: npc_dto.hp,
+                mp: npc_dto.mp,
                 name: npc_dto.name,
                 race: npc_dto.race,
                 session_id: None,
@@ -59,7 +65,10 @@ impl Npc {
                 description: "".to_owned(),
                 direction: Vector3D::default(),
                 gender: Gender::Unspecified,
+                gold: 0,
                 height: 0.0,
+                hp: 1,
+                mp: 0,
                 name,
                 race: race_ref,
                 session_id: None,
@@ -88,12 +97,40 @@ impl Character for Npc {
         self.gender
     }
 
+    fn gold(&self) -> u32 {
+        self.gold
+    }
+
+    fn height(&self) -> f32 {
+        self.height
+    }
+
+    fn hp(&self) -> i16 {
+        self.hp
+    }
+
+    fn max_hp(&self) -> i16 {
+        self.stats.max_hp()
+    }
+
+    fn max_mp(&self) -> i16 {
+        self.stats.max_mp()
+    }
+
+    fn mp(&self) -> i16 {
+        self.mp
+    }
+
     fn race(&self) -> GameObjectRef {
         self.race
     }
 
     fn stats(&self) -> &CharacterStats {
         &self.stats
+    }
+
+    fn weight(&self) -> f32 {
+        self.weight
     }
 
     fn with_current_room(&self, room: GameObjectRef) -> (SharedGameObject, bool) {
@@ -149,7 +186,10 @@ impl GameObject for Npc {
             },
             direction: Some(self.direction.clone()),
             gender: self.gender.serialize(),
+            gold: self.gold,
             height: self.height,
+            hp: self.hp,
+            mp: self.mp,
             name: self.name.clone(),
             race: self.race,
             stats: self.stats.clone(),
@@ -173,7 +213,10 @@ struct NpcDto {
     description: Option<String>,
     direction: Option<Vector3D>,
     gender: Option<String>,
+    gold: u32,
     height: f32,
+    hp: i16,
+    mp: i16,
     name: String,
     race: GameObjectRef,
     stats: CharacterStats,

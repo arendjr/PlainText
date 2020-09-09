@@ -32,7 +32,14 @@ pub trait Character: GameObject {
     fn current_room(&self) -> GameObjectRef;
     fn direction(&self) -> &Vector3D;
     fn gender(&self) -> Gender;
+    fn gold(&self) -> u32;
+    fn height(&self) -> f32;
+    fn hp(&self) -> i16;
+    fn max_hp(&self) -> i16;
+    fn max_mp(&self) -> i16;
+    fn mp(&self) -> i16;
     fn race(&self) -> GameObjectRef;
     fn stats(&self) -> &CharacterStats;
+    fn weight(&self) -> f32;
     fn with_current_room(&self, room: GameObjectRef) -> (SharedGameObject, bool);
 }

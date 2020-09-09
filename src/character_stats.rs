@@ -48,6 +48,14 @@ impl CharacterStats {
         self.stats[stat as usize] += 1;
     }
 
+    pub fn max_hp(&self) -> i16 {
+        2 * self.get(CharacterStat::VITALITY)
+    }
+
+    pub fn max_mp(&self) -> i16 {
+        self.get(CharacterStat::INTELLIGENCE)
+    }
+
     pub fn new() -> Self {
         Self {
             stats: [0, 0, 0, 0, 0, 0],
