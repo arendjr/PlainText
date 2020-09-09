@@ -3,6 +3,6 @@
   "description": "You are now at the foot of the light tower. The door of the tower is heavy, and made of steel. The entire building looks odd and out of place in this environment. You cannot imagine who built it, or when, yet the steel on the tower looks unaffected by the ages.\n\nWhen you're quiet you can hear the slow moving of the sea in the distance.",
   "type": "Room",
   "position": [ 0, 200, 0 ],
-  "flags": "HasFloor|HasWalls",
+  "flags": "DistantCharacterDescriptions|DynamicPortalDescriptions|HasFloor|HasWalls",
   "portals": [ "portal:1468", "portal:1473", "portal:1474" ]
 }

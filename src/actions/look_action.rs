@@ -1,8 +1,11 @@
 use crate::colors::Color;
 use crate::game_object::{GameObject, GameObjectRef, GameObjectType};
-use crate::objects::{Realm, Room};
+use crate::objects::{Realm, Room, RoomFlags};
 use crate::player_output::PlayerOutput;
-use crate::text_utils::colorize;
+use crate::text_utils::{colorize, describe_items, first_item_is_plural, join_sentence};
+use crate::visual_utils::{
+    description_for_position, group_items_by_position, group_portals_by_position,
+};
 
 /**
  * Look at the given object from the player's perspective.
@@ -41,59 +44,27 @@ fn look_at_room(
     room: &Room,
     output: &mut Vec<PlayerOutput>,
 ) -> Realm {
-    output.push(PlayerOutput::new_from_string(
-        player_ref.id(),
-        format!(
-            "{}{}",
-            if room.name().is_empty() {
-                "".to_owned()
-            } else {
-                format!("\n{}\n\n", colorize(room.name(), Color::Teal))
-            },
-            room.description(),
-        ),
-    ));
+    let mut text = format!(
+        "{}{}",
+        if room.name().is_empty() {
+            "".to_owned()
+        } else {
+            format!("\n{}\n\n", colorize(room.name(), Color::Teal))
+        },
+        room.description(),
+    );
 
-    /* TODO: var flags = this.flags.split("|");
-    var hasDynamicPortals = !flags.contains("OmitDynamicPortalsFromDescription");
-    var hasDistantCharacters = !flags.contains("OmitDistantCharactersFromDescription");
-
-    var itemGroups = VisualUtil.divideItemsIntoGroups(this.items, character.direction);
-
-    var portalGroups;
-    if (hasDynamicPortals || hasDistantCharacters) {
-        portalGroups = VisualUtil.dividePortalsAndCharactersIntoGroups(character, this);
-    }
-
-    var itemTexts = [];
-    for (var key in itemGroups) {
-        if (!itemGroups[key].isEmpty() || hasDynamicPortals && !portalGroups[key].isEmpty()) {
-            var itemGroup = itemGroups[key];
-            var plural = itemGroup.firstItemIsPlural();
-
-            var combinedItems = Util.combinePtrList(itemGroup);
-
-            if (hasDynamicPortals && key !== "characters") {
-                portalGroups[key].forEach(function(portal) {
-                    combinedItems.append(portal.nameWithDestinationFromRoom(self));
-                });
-            }
-
-            var groupDescription = VisualUtil.descriptionForGroup(key);
-            var prefix = groupDescription[0];
-            var helperVerb = groupDescription[plural ? 2 : 1];
-            itemTexts.append("%1 %2 %3.".arg(prefix, helperVerb, Util.joinFancy(combinedItems))
-                                        .replace("there is", "there's"));
+    let item_text = create_item_texts(&realm, player_ref, room);
+    if !item_text.is_empty() {
+        if !text.ends_with(" ") && !text.ends_with("\n") {
+            text.push(' ');
         }
-    }
-    if (!itemTexts.isEmpty()) {
-        if (!text.endsWith(" ") && !text.endsWith("\n")) {
-            text += " ";
-        }
-        text += itemTexts.join(" ");
+        text.push_str(&item_text);
     }
 
-    var characterText = "";
+    output.push(PlayerOutput::new_from_string(player_ref.id(), text));
+
+    /* var characterText = "";
     if (hasDistantCharacters && portalGroups.hasOwnProperty("characters")) {
         var characters = portalGroups["characters"];
         characterText = VisualUtil.describeCharactersRelativeTo(characters, character);
@@ -122,8 +93,59 @@ fn look_at_room(
     others.removeOne(character);
     if (!others.isEmpty()) {
         text += "You see %1.\n".arg(others.joinFancy());
-    }
+    };
 
     return text;*/
     realm
+}
+
+fn create_item_texts(realm: &Realm, player_ref: GameObjectRef, room: &Room) -> String {
+    let mut grouped_items = group_items_by_position(realm, player_ref, room.object_ref());
+    let has_dynamic_portals = room.has_flags(RoomFlags::DynamicPortalDescriptions);
+    if has_dynamic_portals {
+        for (position, portals) in group_portals_by_position(realm, player_ref, room.object_ref()) {
+            if let Some(items) = grouped_items.get_mut(&position) {
+                for portal in portals {
+                    items.push(portal);
+                }
+            } else {
+                grouped_items.insert(position, portals);
+            }
+        }
+    }
+
+    grouped_items
+        .iter()
+        .map(|(position, item_refs)| {
+            let (prefix, singular_verb, plural_verb) = description_for_position(*position);
+            let verb = if first_item_is_plural(realm, item_refs) {
+                plural_verb
+            } else {
+                singular_verb
+            };
+
+            let item_descriptions = describe_items(realm, item_refs);
+
+            format!(
+                "{} {} {}.",
+                prefix,
+                verb,
+                join_sentence(
+                    item_descriptions
+                        .iter()
+                        .map(|string| string.as_str())
+                        .collect()
+                )
+            )
+            .replace("there is", "there's")
+        })
+        .fold("".to_owned(), |result, string| {
+            if result.is_empty() {
+                string
+            } else if result.ends_with(" ") || result.ends_with("\n") {
+                result + &string
+            } else {
+                format!("{} {}", result, string)
+            }
+        })
 }

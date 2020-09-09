@@ -3,6 +3,6 @@
   "description": "You're standing at the top of the light tower. You now see the gigantic lamps responsible for the endless pattern of light beams. Although you cannot fathom who build these instruments, you start to realize that whoever did this is not from this time or place.\n\nAs you look outside you got a great view over the bay area and you can even see the narrow opening of the bay that provides the only way out for any ships that wish to sail out on the ocean.",
   "type": "Room",
   "position": [ 0, 200, 30 ],
-  "flags": "HasFloor|HasWalls",
+  "flags": "DistantCharacterDescriptions|DynamicPortalDescriptions|HasFloor|HasWalls",
   "portals": [ "portal:1479" ]
 }

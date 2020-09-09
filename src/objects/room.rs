@@ -1,57 +1,90 @@
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::fmt;
-use std::ops::Deref;
-use std::sync::Arc;
 
+use crate::events::{EventMultiplierMap, EventType};
 use crate::game_object::{
     ref_difference, ref_union, GameObject, GameObjectId, GameObjectRef, GameObjectType,
     SharedGameObject,
 };
 use crate::point3d::Point3D;
 
+serializable_flags! {
+    struct RoomFlags: u32 {
+        const DistantCharacterDescriptions = 0b00000001;
+        const DynamicPortalDescriptions    = 0b00000010;
+        const HasCeiling                   = 0b00000100;
+        const HasFloor                     = 0b00001000;
+        const HasWalls                     = 0b00010000;
+        const IsRoad                       = 0b00100000;
+        const IsRiver                      = 0b01000000;
+        const IsRoof                       = 0b10000000;
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct Room {
     id: GameObjectId,
-    characters: Arc<Vec<GameObjectRef>>,
+    characters: Vec<GameObjectRef>,
     description: String,
-    items: Arc<Vec<GameObjectRef>>,
+    event_multipliers: EventMultiplierMap,
+    flags: RoomFlags,
+    items: Vec<GameObjectRef>,
     name: String,
-    portals: Arc<Vec<GameObjectRef>>,
+    portals: Vec<GameObjectRef>,
     position: Point3D,
 }
 
 impl Room {
+    pub fn characters(&self) -> &Vec<GameObjectRef> {
+        &self.characters
+    }
+
     pub fn description(&self) -> &str {
         &self.description
+    }
+
+    pub fn event_multiplier(&self, event_type: EventType) -> f32 {
+        self.event_multipliers.get(event_type)
+    }
+
+    pub fn has_flags(&self, flags: RoomFlags) -> bool {
+        self.flags & flags == self.flags
     }
 
     pub fn hydrate(id: GameObjectId, json: &str) -> Result<SharedGameObject, String> {
         match serde_json::from_str::<RoomDto>(json) {
             Ok(room_dto) => Ok(SharedGameObject::new(Self {
                 id,
-                characters: Arc::new(vec![]),
+                characters: vec![],
                 description: room_dto.description,
-                items: Arc::new(match room_dto.items {
-                    Some(items) => items,
-                    None => vec![],
-                }),
+                event_multipliers: room_dto.eventMultipliers.unwrap_or_default(),
+                flags: room_dto.flags,
+                items: room_dto.items.unwrap_or_default(),
                 name: room_dto.name,
-                portals: Arc::new(room_dto.portals),
+                portals: room_dto.portals,
                 position: room_dto.position,
             })),
             Err(error) => Err(format!("parse error: {}", error)),
         }
     }
 
-    pub fn portals(&self) -> Arc<Vec<GameObjectRef>> {
-        self.portals.clone()
+    pub fn items(&self) -> &Vec<GameObjectRef> {
+        &self.items
+    }
+
+    pub fn portals(&self) -> &Vec<GameObjectRef> {
+        &self.portals
+    }
+
+    pub fn position(&self) -> &Point3D {
+        &self.position
     }
 
     pub fn with_characters(&self, characters: Vec<GameObjectRef>) -> (Self, bool) {
         (
             Self {
-                characters: Arc::new(ref_union(&self.characters, &characters)),
+                characters: ref_union(&self.characters, &characters),
                 ..self.clone()
             },
             false,
@@ -61,7 +94,7 @@ impl Room {
     pub fn without_characters(&self, characters: Vec<GameObjectRef>) -> (Self, bool) {
         (
             Self {
-                characters: Arc::new(ref_difference(&self.characters, &characters)),
+                characters: ref_difference(&self.characters, &characters),
                 ..self.clone()
             },
             false,
@@ -95,13 +128,15 @@ impl GameObject for Room {
     fn serialize(&self) -> String {
         serde_json::to_string_pretty(&RoomDto {
             description: self.description.clone(),
+            eventMultipliers: Some(self.event_multipliers.clone()),
+            flags: self.flags,
             items: if self.items.is_empty() {
                 None
             } else {
-                Some(self.items.deref().clone())
+                Some(self.items.clone())
             },
             name: self.name.clone(),
-            portals: self.portals().deref().clone(),
+            portals: self.portals().clone(),
             position: self.position.clone(),
         })
         .unwrap_or_else(|error| {
@@ -114,9 +149,12 @@ impl GameObject for Room {
     }
 }
 
+#[allow(non_snake_case)]
 #[derive(Deserialize, Serialize)]
 struct RoomDto {
     description: String,
+    eventMultipliers: Option<EventMultiplierMap>,
+    flags: RoomFlags,
     items: Option<Vec<GameObjectRef>>,
     name: String,
     portals: Vec<GameObjectRef>,

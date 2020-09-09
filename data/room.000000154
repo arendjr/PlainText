@@ -3,6 +3,6 @@
   "description": "The tent is efficiently filled with many rows of beds, each of the beds having two decks, providing sleeping spaces for as many soldiers as can fit in this tent.",
   "type": "Room",
   "position": [ 250, -550, 0 ],
-  "flags": "HasFloor|HasWalls",
+  "flags": "DistantCharacterDescriptions|DynamicPortalDescriptions|HasFloor|HasWalls",
   "portals": [ "portal:1513" ]
 }

@@ -3,6 +3,6 @@
   "description": "This path, providing a shortcut to the east side of the city, seems like it is not supposed to be used by men or women from any self-respecting class. The high walls on your north look fearsome and intimidating, while the thick vegetation of the forest on the other side would make a perfect hiding spot for some wild animal that is ready to attack you.",
   "type": "Room",
   "position": [ 0, -100, 0 ],
-  "flags": "HasFloor|HasWalls",
+  "flags": "DistantCharacterDescriptions|DynamicPortalDescriptions|HasFloor|HasWalls",
   "portals": [ "portal:1484", "portal:1486", "portal:1595" ]
 }

@@ -3,6 +3,6 @@
   "description": "The high city wall stretches from the northeast to the southwest. Putting your back towards the wall, you see nothing but a wide-stretching grasslands.",
   "type": "Room",
   "position": [ 200, -200, 0 ],
-  "flags": "HasFloor|HasWalls",
+  "flags": "DistantCharacterDescriptions|DynamicPortalDescriptions|HasFloor|HasWalls",
   "portals": [ "portal:1494", "portal:1505", "portal:1601" ]
 }

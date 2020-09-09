@@ -3,6 +3,6 @@
   "description": "You are the end of the Boatman's Street. You can see the entrance to the large shipyard that stretches out across most of the southside of the street.",
   "type": "Room",
   "position": [ -400, -300, 0 ],
-  "flags": "HasFloor|HasWalls",
+  "flags": "DistantCharacterDescriptions|DynamicPortalDescriptions|HasFloor|HasWalls",
   "portals": [ "portal:1483", "portal:1502" ]
 }

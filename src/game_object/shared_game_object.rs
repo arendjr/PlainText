@@ -48,12 +48,18 @@ impl<T: GameObject + 'static> SharedObject<T> {
         F: Fn(&SharedGameObject) -> Option<&T> + 'static,
     {
         match cast(&object) {
-            Some(down_cast) => Some(Self {
+            Some(_) => Some(Self {
                 cast: Box::new(cast),
                 object,
             }),
             None => None,
         }
+    }
+}
+
+impl<T: GameObject + 'static> PartialEq for SharedObject<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.object.id() == other.object.id()
     }
 }
 

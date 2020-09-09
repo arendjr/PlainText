@@ -1,9 +1,10 @@
-use bitflags::bitflags;
 use lazy_static::lazy_static;
 use regex::{Captures, Regex};
 use std::borrow::Borrow;
 
 use crate::colors::Color;
+use crate::game_object::{GameObject, GameObjectRef, SharedGameObject};
+use crate::objects::{ItemFlags, Realm};
 
 const COLOR_MAP: [&'static str; 16] = [
     "37;1", "37", "30;1", "30", "31;1", "31", "33;1", "33", "32;1", "32", "36;1", "36", "34;1",
@@ -22,6 +23,27 @@ pub fn colorize(string: &str, color: Color) -> String {
     format!("\x1B[{}m{}\x1B[0m", COLOR_MAP[color as usize], string)
 }
 
+fn count_objects(
+    realm: &Realm,
+    object_refs: &Vec<GameObjectRef>,
+) -> Vec<(SharedGameObject, usize)> {
+    let mut objects_with_counts = Vec::<(SharedGameObject, usize)>::new();
+    for object in object_refs
+        .iter()
+        .filter_map(|object_ref| realm.object(*object_ref))
+    {
+        if let Some(object_with_count) = objects_with_counts
+            .iter_mut()
+            .find(|(other, _)| other.name() == object.name())
+        {
+            object_with_count.1 += 1;
+        } else {
+            objects_with_counts.push((object, 1));
+        }
+    }
+    objects_with_counts
+}
+
 pub fn definite_article_from_noun(noun: String) -> &'static str {
     if noun.chars().next().map(is_vowel).unwrap_or(false) {
         "an"
@@ -30,15 +52,66 @@ pub fn definite_article_from_noun(noun: String) -> &'static str {
     }
 }
 
-bitflags! {
-    pub struct FormatOptions: u32 {
-        const None = 0b00000000;
-        const Capitalized = 0b00000001;
-        const Highlighted = 0b00000010;
+pub fn describe_items(realm: &Realm, object_refs: &Vec<GameObjectRef>) -> Vec<String> {
+    count_objects(realm, object_refs)
+        .iter()
+        .map(|(object, count)| {
+            if *count > 1 {
+                format!("{} {}", written_number(*count), object.plural_form())
+            } else if let Some(item) = object.as_item() {
+                if item.has_flags(ItemFlags::AlwaysUseDefiniteArticle) {
+                    format!("the {}", object.name())
+                } else if item.has_flags(ItemFlags::ImpliedPlural) {
+                    item.name().to_owned()
+                } else {
+                    item.indefinite_name()
+                }
+            } else {
+                object.indefinite_name()
+            }
+        })
+        .collect()
+}
+
+pub fn describe_items_with_definite_articles(
+    realm: &Realm,
+    object_refs: &Vec<GameObjectRef>,
+) -> Vec<String> {
+    count_objects(realm, object_refs)
+        .iter()
+        .map(|(object, count)| {
+            if *count > 1 {
+                format!("{} {}", written_number(*count), object.plural_form())
+            } else {
+                format!("the {}", object.name())
+            }
+        })
+        .collect()
+}
+
+pub fn first_item_is_plural(realm: &Realm, item_refs: &Vec<GameObjectRef>) -> bool {
+    match item_refs
+        .first()
+        .and_then(|item_ref| realm.item(item_ref.id()))
+    {
+        Some(item) => {
+            if item.has_flags(ItemFlags::ImpliedPlural) {
+                true
+            } else if item.has_flags(ItemFlags::AlwaysUseDefiniteArticle) {
+                item_refs.len() > 1
+            } else {
+                item_refs
+                    .iter()
+                    .skip(1)
+                    .filter_map(|item_ref| realm.item(item_ref.id()))
+                    .any(|other| other.name() == item.name())
+            }
+        }
+        None => false,
     }
 }
 
-pub fn format_columns<T>(items: Vec<T>, options: FormatOptions) -> String
+pub fn format_columns<T>(items: Vec<T>) -> String
 where
     T: Borrow<str>,
 {
@@ -46,21 +119,12 @@ where
     let len = items.len();
     let half_len = len / 2 + len % 2;
     for i in 0..half_len {
-        let mut first = items[i].borrow().to_owned();
-        let mut second = if i < len - half_len {
-            items[i + half_len].borrow().to_owned()
+        let first = items[i].borrow();
+        let second = if i < len - half_len {
+            items[i + half_len].borrow()
         } else {
-            "".to_owned()
+            ""
         };
-
-        if options & FormatOptions::Capitalized != FormatOptions::None {
-            first = capitalize(&first);
-            second = capitalize(&second);
-        }
-        if options & FormatOptions::Highlighted != FormatOptions::None {
-            first = highlight(&first);
-            second = highlight(&second);
-        }
 
         result.push_str(&format!("  {:30}  {}\n", first, second));
     }
@@ -77,6 +141,24 @@ pub fn is_letter(character: char) -> bool {
 
 pub fn is_vowel(character: char) -> bool {
     character == 'a' || character == 'e' || character == 'i' || character == 'o' || character == 'u'
+}
+
+pub fn join_fancy(list: Vec<&str>, separator: &str, last: &str) -> String {
+    let mut string = String::new();
+    let len = list.len();
+    for i in 0..len {
+        string += list[i];
+        if i < len - 2 {
+            string += separator;
+        } else if i == len - 2 {
+            string += last;
+        }
+    }
+    return string;
+}
+
+pub fn join_sentence(list: Vec<&str>) -> String {
+    join_fancy(list, ", ", " and ")
 }
 
 pub fn plural_from_noun(noun: &str) -> String {
@@ -167,4 +249,36 @@ fn substring(string: &str, start: i32, end: i32) -> &str {
     } else {
         ((string.len() as i32) - end - start) as usize
     }]
+}
+
+const NUM_WRITTEN_NUMBERS: usize = 20;
+const WRITTEN_NUMBERS: [&'static str; NUM_WRITTEN_NUMBERS] = [
+    "zero",
+    "one",
+    "two",
+    "three",
+    "four",
+    "five",
+    "six",
+    "sevens",
+    "eight",
+    "nine",
+    "ten",
+    "eleven",
+    "twelve",
+    "thirteen",
+    "fourteen",
+    "fifteen",
+    "sixteen",
+    "seventeen",
+    "eighteen",
+    "nineteen",
+];
+
+pub fn written_number(number: usize) -> String {
+    if number < NUM_WRITTEN_NUMBERS {
+        WRITTEN_NUMBERS[number].to_owned()
+    } else {
+        number.to_string()
+    }
 }

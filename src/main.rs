@@ -3,12 +3,34 @@ use std::sync::mpsc::{channel, Sender};
 use std::{env, fs, io, thread};
 use warp::Filter;
 
+#[macro_use]
+mod serializable_flags;
+
+macro_rules! unwrap_or_continue {
+    ($expr:expr) => {
+        match $expr {
+            Some(value) => value,
+            None => continue,
+        }
+    };
+}
+
+macro_rules! unwrap_or_return {
+    ($expr:expr, $ret:expr) => {
+        match $expr {
+            Some(value) => value,
+            None => return $ret,
+        }
+    };
+}
+
 mod actions;
 mod character_stats;
 mod colors;
 mod command_interpreter;
 mod commands;
 mod direction_utils;
+mod events;
 mod game_object;
 mod logs;
 mod objects;
@@ -19,6 +41,8 @@ mod sessions;
 mod telnet_server;
 mod text_utils;
 mod vector3d;
+mod vector_utils;
+mod visual_utils;
 
 use actions::{enter, look};
 use command_interpreter::{interpret_command, InterpretationError};

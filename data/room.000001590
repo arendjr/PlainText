@@ -3,6 +3,6 @@
   "description": "You are on top of the city wall. From here you have a clear view over the forest to the south, as well as over some of the buildings in the city.",
   "type": "Room",
   "position": [ 0, -125, 8 ],
-  "flags": "HasFloor",
+  "flags": "DistantCharacterDescriptions|DynamicPortalDescriptions|HasFloor",
   "portals": [ "portal:1591", "portal:1593", "portal:1595", "portal:1637", "portal:1680" ]
 }

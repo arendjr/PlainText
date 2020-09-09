@@ -8,6 +8,7 @@ use crate::game_object::{
     GameObject, GameObjectId, GameObjectRef, GameObjectType, SharedGameObject,
 };
 use crate::sessions::SignUpData;
+use crate::vector3d::Vector3D;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Gender {
@@ -22,6 +23,7 @@ pub struct Player {
     class: GameObjectRef,
     current_room: GameObjectRef,
     description: String,
+    direction: Vector3D,
     gender: Gender,
     height: f32,
     name: String,
@@ -37,6 +39,10 @@ impl Player {
         self.current_room
     }
 
+    pub fn direction(&self) -> &Vector3D {
+        &self.direction
+    }
+
     pub fn hydrate(id: GameObjectId, json: &str) -> Result<SharedGameObject, String> {
         match serde_json::from_str::<PlayerDto>(json) {
             Ok(player_dto) => Ok(SharedGameObject::new(Self {
@@ -44,6 +50,7 @@ impl Player {
                 class: player_dto.class,
                 current_room: player_dto.currentRoom,
                 description: player_dto.description,
+                direction: player_dto.direction.unwrap_or_default(),
                 gender: match &player_dto.gender.as_ref().map(String::as_str) {
                     Some("male") => Gender::Male,
                     Some("female") => Gender::Female,
@@ -76,6 +83,7 @@ impl Player {
             class: class.object_ref(),
             current_room: race.starting_room(),
             description: "".to_owned(),
+            direction: Vector3D::new(0, 0, 0),
             gender: sign_up_data.gender.clone(),
             height: sign_up_data.height,
             name: sign_up_data.user_name.clone(),
@@ -158,6 +166,7 @@ impl GameObject for Player {
             class: self.class,
             currentRoom: self.current_room,
             description: self.description.clone(),
+            direction: Some(self.direction.clone()),
             gender: match &self.gender {
                 Gender::Male => Some("male".to_owned()),
                 Gender::Female => Some("female".to_owned()),
@@ -186,6 +195,7 @@ struct PlayerDto {
     class: GameObjectRef,
     currentRoom: GameObjectRef,
     description: String,
+    direction: Option<Vector3D>,
     gender: Option<String>,
     height: f32,
     name: String,

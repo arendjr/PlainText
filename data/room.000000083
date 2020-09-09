@@ -3,6 +3,6 @@
   "description": "This stall has a little pitched roof to protect the hanging meat from direct sunlight. There are large chomps of pork and swine, cuts of lamb meat and hogget, and legs, breasts and wings of chickens, ducks and goose.",
   "type": "Room",
   "position": [ -50, -150, 0 ],
-  "flags": "HasFloor|HasWalls",
+  "flags": "DistantCharacterDescriptions|DynamicPortalDescriptions|HasFloor|HasWalls",
   "portals": [ "portal:1490" ]
 }

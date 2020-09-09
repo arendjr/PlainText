@@ -3,6 +3,6 @@
   "description": "The path extends further to the south. As you keep moving, the sound of the sea seems to be getting closer and closer.",
   "type": "Room",
   "position": [ 0, 300, 0 ],
-  "flags": "HasFloor|HasWalls",
+  "flags": "DistantCharacterDescriptions|DynamicPortalDescriptions|HasFloor|HasWalls",
   "portals": [ "portal:1480", "portal:1481" ]
 }

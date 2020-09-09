@@ -3,6 +3,6 @@
   "description": "The road is clearly dominated by the walls of Castle Black Water. Even so, you can still see the keep towering above the walls.",
   "type": "Room",
   "position": [ -400, -600, 20 ],
-  "flags": "HasFloor|HasWalls",
+  "flags": "DistantCharacterDescriptions|DynamicPortalDescriptions|HasFloor|HasWalls",
   "portals": [ "portal:1512" ]
 }

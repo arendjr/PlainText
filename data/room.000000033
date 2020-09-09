@@ -3,6 +3,6 @@
   "description": "You are standing at the coast of the bay. Not too far to the west, you can see ships entering and leaving the harbor.",
   "type": "Room",
   "position": [ 0, 350, 0 ],
-  "flags": "HasFloor|HasWalls",
+  "flags": "DistantCharacterDescriptions|DynamicPortalDescriptions|HasFloor|HasWalls",
   "portals": [ "portal:1481" ]
 }

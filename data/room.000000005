@@ -3,6 +3,6 @@
   "description": "This is the road that leads to the light tower. Ditches continue on both sides of the road, with high trees and tight vegetation rising just behind them.",
   "type": "Room",
   "position": [ -100, 100, 0 ],
-  "flags": "HasFloor|HasWalls",
+  "flags": "DistantCharacterDescriptions|DynamicPortalDescriptions|HasFloor|HasWalls",
   "portals": [ "portal:1467", "portal:1471" ]
 }

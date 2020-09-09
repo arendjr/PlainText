@@ -3,6 +3,6 @@
   "description": "The houses in this part of Main Street are simple, yet large and in good condition. Clearly, the people living here are not among the poorest folks of town.",
   "type": "Room",
   "position": [ 100, -500, 0 ],
-  "flags": "HasFloor|HasWalls",
+  "flags": "DistantCharacterDescriptions|DynamicPortalDescriptions|HasFloor|HasWalls",
   "portals": [ "portal:1504", "portal:1509" ]
 }

@@ -1,9 +1,56 @@
 use serde::de::{self, Deserialize, Deserializer, SeqAccess, Visitor};
 use serde::ser::{Serialize, SerializeTupleStruct, Serializer};
-use std::fmt;
+use std::borrow::Borrow;
+use std::{fmt, ops};
 
-#[derive(Clone, Debug)]
-pub struct Point3D(i32, i32, i32);
+use crate::vector3d::Vector3D;
+
+#[derive(Clone, Debug, Default)]
+pub struct Point3D {
+    pub x: i32,
+    pub y: i32,
+    pub z: i32,
+}
+
+impl Point3D {
+    pub fn is_default(&self) -> bool {
+        self.x == 0 && self.y == 0 && self.z == 0
+    }
+
+    pub fn to_vec(&self) -> Vector3D {
+        Vector3D::new(self.x, self.y, self.z)
+    }
+}
+
+impl<T> ops::Sub<T> for Point3D
+where
+    T: Borrow<Self>,
+{
+    type Output = Vector3D;
+
+    fn sub(self, rhs: T) -> Self::Output {
+        Vector3D::new(
+            self.x - rhs.borrow().x,
+            self.y - rhs.borrow().y,
+            self.z - rhs.borrow().z,
+        )
+    }
+}
+
+impl<T> ops::Sub<T> for &Point3D
+where
+    T: Borrow<Self>,
+{
+    type Output = Vector3D;
+
+    fn sub(self, rhs: T) -> Self::Output {
+        Vector3D::new(
+            self.x - rhs.borrow().x,
+            self.y - rhs.borrow().y,
+            self.z - rhs.borrow().z,
+        )
+    }
+}
 
 impl<'de> Deserialize<'de> for Point3D {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
@@ -16,7 +63,7 @@ impl<'de> Deserialize<'de> for Point3D {
 
 impl fmt::Display for Point3D {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Point3D({}, {}, {})", self.0, self.1, self.2)
+        write!(f, "Point3D({}, {}, {})", self.x, self.y, self.z)
     }
 }
 
@@ -26,9 +73,9 @@ impl Serialize for Point3D {
         S: Serializer,
     {
         let mut state = serializer.serialize_tuple_struct("Point3D", 3)?;
-        state.serialize_field(&self.0)?;
-        state.serialize_field(&self.1)?;
-        state.serialize_field(&self.2)?;
+        state.serialize_field(&self.x)?;
+        state.serialize_field(&self.y)?;
+        state.serialize_field(&self.z)?;
         state.end()
     }
 }
@@ -55,6 +102,6 @@ impl<'de> Visitor<'de> for Point3DVisitor {
         let z = seq
             .next_element()?
             .ok_or_else(|| de::Error::invalid_length(2, &self))?;
-        Ok(Point3D(x, y, z))
+        Ok(Point3D { x, y, z })
     }
 }

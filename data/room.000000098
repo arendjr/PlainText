@@ -3,6 +3,6 @@
   "description": "This is the beginning of the Market Street. The Market Square is at the far south end of the street.",
   "type": "Room",
   "position": [ -100, -400, 0 ],
-  "flags": "HasFloor|HasWalls",
+  "flags": "DistantCharacterDescriptions|DynamicPortalDescriptions|HasFloor|HasWalls",
   "portals": [ "portal:1495", "portal:1500", "portal:1501" ]
 }

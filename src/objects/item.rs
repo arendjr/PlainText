@@ -5,29 +5,54 @@ use std::fmt;
 use crate::game_object::{GameObject, GameObjectId, GameObjectType, SharedGameObject};
 use crate::point3d::Point3D;
 
+serializable_flags! {
+    pub struct ItemFlags: u32 {
+        const AttachedToCeiling        = 0b00000001;
+        const AttachedToWall           = 0b00000010;
+        const Hidden                   = 0b00000100;
+        const Portable                 = 0b00001000;
+        const AlwaysUseDefiniteArticle = 0b00010000;
+        const ImpliedPlural            = 0b00100000;
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct Item {
     id: GameObjectId,
     cost: f32,
     description: String,
+    flags: ItemFlags,
     name: String,
     position: Point3D,
     weight: f32,
 }
 
 impl Item {
+    pub fn has_flags(&self, flags: ItemFlags) -> bool {
+        self.flags & flags == self.flags
+    }
+
+    pub fn hidden(&self) -> bool {
+        self.has_flags(ItemFlags::Hidden)
+    }
+
     pub fn hydrate(id: GameObjectId, json: &str) -> Result<SharedGameObject, String> {
         match serde_json::from_str::<ItemDto>(json) {
             Ok(item_dto) => Ok(SharedGameObject::new(Self {
                 id,
                 cost: item_dto.cost,
                 description: item_dto.description,
+                flags: item_dto.flags.unwrap_or_default(),
                 name: item_dto.name,
                 position: item_dto.position,
                 weight: item_dto.weight,
             })),
             Err(error) => Err(format!("parse error: {}", error)),
         }
+    }
+
+    pub fn position(&self) -> &Point3D {
+        &self.position
     }
 }
 
@@ -50,6 +75,14 @@ impl GameObject for Item {
         self.id
     }
 
+    fn indefinite_name(&self) -> String {
+        if self.has_flags(ItemFlags::AlwaysUseDefiniteArticle) {
+            format!("the {}", self.name())
+        } else {
+            GameObject::indefinite_name(self)
+        }
+    }
+
     fn object_type(&self) -> GameObjectType {
         GameObjectType::Item
     }
@@ -62,6 +95,11 @@ impl GameObject for Item {
         serde_json::to_string_pretty(&ItemDto {
             cost: self.cost,
             description: self.description.clone(),
+            flags: if self.flags == ItemFlags::None {
+                None
+            } else {
+                Some(self.flags)
+            },
             name: self.name.clone(),
             position: self.position.clone(),
             weight: self.weight,
@@ -80,6 +118,7 @@ impl GameObject for Item {
 struct ItemDto {
     cost: f32,
     description: String,
+    flags: Option<ItemFlags>,
     name: String,
     position: Point3D,
     weight: f32,

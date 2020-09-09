@@ -2,22 +2,99 @@ use serde::{Deserialize, Serialize};
 use serde_json;
 use std::fmt;
 
+use crate::events::{EventMultiplierMap, EventType};
 use crate::game_object::{
     GameObject, GameObjectId, GameObjectRef, GameObjectType, SharedGameObject,
 };
+use crate::point3d::Point3D;
+
+serializable_flags! {
+    pub struct PortalFlags: u32 {
+        const IsHiddenFromSide1     = 0b0000000000000001;
+        const IsHiddenFromSide2     = 0b0000000000000010;
+        const CanOpenFromSide1      = 0b0000000000000100;
+        const CanOpenFromSide2      = 0b0000000000001000;
+        const CanSeeThrough         = 0b0000000000010000;
+        const CanHearThrough        = 0b0000000000100000;
+        const CanShootThrough       = 0b0000000001000000;
+        const CanPassThrough        = 0b0000000010000000;
+        const CanSeeThroughIfOpen   = 0b0000000100000000;
+        const CanHearThroughIfOpen  = 0b0000001000000000;
+        const CanShootThroughIfOpen = 0b0000010000000000;
+        const CanPassThroughIfOpen  = 0b0000100000000000;
+        const IsOpen                = 0b0001000000000000;
+    }
+}
 
 #[derive(Clone, Debug)]
 pub struct Portal {
     id: GameObjectId,
     description: String,
     description2: String,
+    destination: String,
+    destination2: String,
+    event_multipliers: EventMultiplierMap,
+    flags: PortalFlags,
     name: String,
     name2: String,
+    position: Point3D,
     room: GameObjectRef,
     room2: GameObjectRef,
 }
 
 impl Portal {
+    pub fn can_see_through(&self) -> bool {
+        if self.has_flags(PortalFlags::IsOpen) {
+            self.has_flags(PortalFlags::CanSeeThroughIfOpen)
+        } else {
+            self.has_flags(PortalFlags::CanSeeThrough)
+        }
+    }
+
+    pub fn destination_from_room(&self, room: GameObjectRef) -> &str {
+        if room == self.room2 {
+            &self.destination2
+        } else {
+            &self.destination
+        }
+    }
+
+    pub fn event_multiplier(&self, event_type: EventType) -> f32 {
+        self.event_multipliers.get(event_type)
+    }
+
+    pub fn has_flags(&self, flags: PortalFlags) -> bool {
+        self.flags & flags == self.flags
+    }
+
+    pub fn hydrate(id: GameObjectId, json: &str) -> Result<SharedGameObject, String> {
+        match serde_json::from_str::<PortalDto>(json) {
+            Ok(portal_dto) => Ok(SharedGameObject::new(Self {
+                id,
+                description: portal_dto.description.unwrap_or_default(),
+                description2: portal_dto.description2.unwrap_or_default(),
+                destination: portal_dto.destination.unwrap_or_default(),
+                destination2: portal_dto.destination2.unwrap_or_default(),
+                event_multipliers: portal_dto.eventMultipliers.unwrap_or_default(),
+                flags: portal_dto.flags,
+                name: portal_dto.name,
+                name2: portal_dto.name2,
+                position: portal_dto.position.unwrap_or_default(),
+                room: portal_dto.room,
+                room2: portal_dto.room2,
+            })),
+            Err(error) => Err(format!("parse error: {}", error)),
+        }
+    }
+
+    pub fn is_hidden_from_room(&self, room: GameObjectRef) -> bool {
+        self.has_flags(if room == self.room2 {
+            PortalFlags::IsHiddenFromSide2
+        } else {
+            PortalFlags::IsHiddenFromSide1
+        })
+    }
+
     pub fn name_from_room(&self, room: GameObjectRef) -> &str {
         if room == self.room2 && !self.name2.is_empty() {
             &self.name2
@@ -26,24 +103,19 @@ impl Portal {
         }
     }
 
-    pub fn hydrate(id: GameObjectId, json: &str) -> Result<SharedGameObject, String> {
-        match serde_json::from_str::<PortalDto>(json) {
-            Ok(portal_dto) => Ok(SharedGameObject::new(Self {
-                id,
-                description: match portal_dto.description {
-                    Some(description) => description,
-                    None => String::from(""),
-                },
-                description2: match portal_dto.description2 {
-                    Some(description) => description,
-                    None => String::from(""),
-                },
-                name: portal_dto.name,
-                name2: portal_dto.name2,
-                room: portal_dto.room,
-                room2: portal_dto.room2,
-            })),
-            Err(error) => Err(format!("parse error: {}", error)),
+    /// Returns a minimal description of the portal composed of the portal's name and its
+    /// destination.
+    pub fn name_with_destination_from_room(&self, room: GameObjectRef) -> String {
+        let name = self.name_from_room(room);
+        let destination = self.destination_from_room(room);
+        if destination.is_empty() {
+            if name == "door" || name == "tent" {
+                format!("a {}", name)
+            } else {
+                format!("the {}", name)
+            }
+        } else {
+            format!("the {} to {}", name, destination)
         }
     }
 
@@ -53,6 +125,10 @@ impl Portal {
         } else {
             self.room2
         }
+    }
+
+    pub fn position(&self) -> &Point3D {
+        &self.position
     }
 }
 
@@ -75,12 +151,12 @@ impl GameObject for Portal {
         self.id
     }
 
-    fn object_type(&self) -> GameObjectType {
-        GameObjectType::Portal
-    }
-
     fn name(&self) -> &str {
         &self.name
+    }
+
+    fn object_type(&self) -> GameObjectType {
+        GameObjectType::Portal
     }
 
     fn serialize(&self) -> String {
@@ -91,8 +167,25 @@ impl GameObject for Portal {
             } else {
                 Some(self.description2.clone())
             },
+            destination: if self.destination.is_empty() {
+                None
+            } else {
+                Some(self.destination.clone())
+            },
+            destination2: if self.destination2.is_empty() {
+                None
+            } else {
+                Some(self.destination2.clone())
+            },
+            eventMultipliers: Some(self.event_multipliers.clone()),
+            flags: self.flags,
             name: self.name.clone(),
             name2: self.name2.clone(),
+            position: if self.position.is_default() {
+                None
+            } else {
+                Some(self.position.clone())
+            },
             room: self.room,
             room2: self.room2,
         })
@@ -106,12 +199,18 @@ impl GameObject for Portal {
     }
 }
 
+#[allow(non_snake_case)]
 #[derive(Deserialize, Serialize)]
 struct PortalDto {
     description: Option<String>,
     description2: Option<String>,
+    destination: Option<String>,
+    destination2: Option<String>,
+    eventMultipliers: Option<EventMultiplierMap>,
+    flags: PortalFlags,
     name: String,
     name2: String,
+    position: Option<Point3D>,
     room: GameObjectRef,
     room2: GameObjectRef,
 }

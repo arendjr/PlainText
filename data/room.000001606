@@ -3,6 +3,6 @@
   "description": "You are inside the gate tower. There's a narrow stairs up.",
   "type": "Room",
   "position": [ 275, -495, 0 ],
-  "flags": "HasCeiling|HasFloor|HasWalls",
+  "flags": "DistantCharacterDescriptions|DynamicPortalDescriptions|HasCeiling|HasFloor|HasWalls",
   "portals": [ "portal:1607", "portal:1608" ]
 }

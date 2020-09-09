@@ -3,6 +3,6 @@
   "description": "",
   "type": "Room",
   "position": [ 100, -300, 8 ],
-  "flags": "HasFloor",
+  "flags": "DistantCharacterDescriptions|DynamicPortalDescriptions|HasFloor",
   "portals": [ "portal:1645", "portal:1651", "portal:1658", "portal:1659", "portal:1681", "portal:1682", "portal:1683" ]
 }

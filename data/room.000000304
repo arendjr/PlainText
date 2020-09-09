@@ -3,6 +3,6 @@
   "description": "This is the entrance to the shipyard. The shipyard belongs to Rupert Deschain, also known as \"The Boatman\".",
   "type": "Room",
   "position": [ -400, -200, -10 ],
-  "flags": "HasFloor|HasWalls",
+  "flags": "DistantCharacterDescriptions|DynamicPortalDescriptions|HasFloor|HasWalls",
   "portals": [ "portal:1483" ]
 }

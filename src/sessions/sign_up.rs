@@ -9,9 +9,7 @@ use crate::colors::Color;
 use crate::game_object::GameObject;
 use crate::objects::{Class, Gender, Race, Realm};
 use crate::sessions::SessionOutput as Output;
-use crate::text_utils::{
-    capitalize, colorize, format_columns, highlight, split_lines, FormatOptions,
-};
+use crate::text_utils::{capitalize, colorize, format_columns, highlight, split_lines};
 
 lazy_static! {
     static ref SIGN_UP_STEPS: HashMap<SignUpStep, StepImpl> = get_sign_up_steps();
@@ -230,8 +228,11 @@ fn enter_race(_: &SignUpData, realm: &Realm) -> Output {
         realm.name(),
         realm.name(),
         format_columns(
-            realm.race_names(),
-            FormatOptions::Capitalized | FormatOptions::Highlighted
+            realm
+                .race_names()
+                .iter()
+                .map(|name| highlight(&capitalize(name)))
+                .collect(),
         )
     ))
 }
@@ -256,9 +257,8 @@ fn enter_class(data: &SignUpData, realm: &Realm) -> Output {
                     .iter()
                     .filter_map(|object_ref| realm
                         .object(*object_ref)
-                        .map(|object| object.name().to_owned()))
+                        .map(|object| highlight(&capitalize(object.name()))))
                     .collect(),
-                FormatOptions::Capitalized | FormatOptions::Highlighted
             ),
             None => "(cannot determine classes without race)".to_owned(),
         }

@@ -40,12 +40,20 @@ pub trait GameObject {
         None
     }
 
-    fn definite_article(&self) -> &str {
+    fn description(&self) -> &str {
         ""
     }
 
-    fn description(&self) -> &str {
+    fn indefinite_article(&self) -> &str {
         ""
+    }
+
+    fn indefinite_name(&self) -> String {
+        if self.indefinite_article().is_empty() {
+            self.name().to_owned()
+        } else {
+            format!("{} {}", self.indefinite_article(), self.name())
+        }
     }
 
     fn object_ref(&self) -> GameObjectRef {

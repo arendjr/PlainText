@@ -3,6 +3,6 @@
   "description": "You're standing right outside the East Gate. From here, the road leads straight towards the haven that is roughly southeast of the city, as well as to the land of the goblins in the far east.\n\nThere's a small path to the south that provides a shortcut around the city.",
   "type": "Room",
   "position": [ 300, -500, 0 ],
-  "flags": "HasFloor|HasWalls",
+  "flags": "DistantCharacterDescriptions|DynamicPortalDescriptions|HasFloor|HasWalls",
   "portals": [ "portal:1506", "portal:1507", "portal:1508", "portal:1605" ]
 }

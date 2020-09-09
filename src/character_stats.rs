@@ -117,7 +117,7 @@ impl<'de> Visitor<'de> for CharacterStatsVisitor {
     type Value = CharacterStats;
 
     fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        formatter.write_str("an array with six integers")
+        write!(formatter, "an array with six integers")
     }
 
     fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
