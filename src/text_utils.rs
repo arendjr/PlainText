@@ -52,7 +52,11 @@ pub fn definite_article_from_noun(noun: String) -> &'static str {
     }
 }
 
-pub fn describe_items(realm: &Realm, object_refs: &Vec<GameObjectRef>) -> Vec<String> {
+pub fn describe_items_from_room(
+    realm: &Realm,
+    object_refs: &Vec<GameObjectRef>,
+    room_ref: GameObjectRef,
+) -> Vec<String> {
     count_objects(realm, object_refs)
         .iter()
         .map(|(object, count)| {
@@ -66,6 +70,8 @@ pub fn describe_items(realm: &Realm, object_refs: &Vec<GameObjectRef>) -> Vec<St
                 } else {
                     item.indefinite_name()
                 }
+            } else if let Some(portal) = object.as_portal() {
+                portal.name_with_destination_from_room(room_ref)
             } else {
                 object.indefinite_name()
             }
@@ -145,9 +151,9 @@ pub fn join_fancy(list: Vec<&str>, separator: &str, last: &str) -> String {
     let len = list.len();
     for i in 0..len {
         string += list[i];
-        if i < len - 2 {
+        if i + 2 < len {
             string += separator;
-        } else if i == len - 2 {
+        } else if i + 2 == len {
             string += last;
         }
     }

@@ -72,7 +72,7 @@ macro_rules! serializable_flags {
                 $(
                     if self.bits & $value == self.bits {
                         if !value.is_empty() {
-                            value += "|";
+                            value.push('|');
                         }
                         value += stringify!($Flag);
                     }

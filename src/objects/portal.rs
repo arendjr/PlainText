@@ -6,6 +6,7 @@ use crate::events::{EventMultiplierMap, EventType};
 use crate::game_object::{
     GameObject, GameObjectId, GameObjectRef, GameObjectType, SharedGameObject,
 };
+use crate::objects::Realm;
 use crate::point3d::Point3D;
 
 serializable_flags! {
@@ -37,7 +38,6 @@ pub struct Portal {
     flags: PortalFlags,
     name: String,
     name2: String,
-    position: Point3D,
     room: GameObjectRef,
     room2: GameObjectRef,
 }
@@ -64,7 +64,7 @@ impl Portal {
     }
 
     pub fn has_flags(&self, flags: PortalFlags) -> bool {
-        self.flags & flags == self.flags
+        self.flags & flags == flags
     }
 
     pub fn hydrate(id: GameObjectId, json: &str) -> Result<SharedGameObject, String> {
@@ -79,7 +79,6 @@ impl Portal {
                 flags: portal_dto.flags,
                 name: portal_dto.name,
                 name2: portal_dto.name2,
-                position: portal_dto.position.unwrap_or_default(),
                 room: portal_dto.room,
                 room2: portal_dto.room2,
             })),
@@ -127,8 +126,20 @@ impl Portal {
         }
     }
 
-    pub fn position(&self) -> &Point3D {
-        &self.position
+    pub fn position(&self, realm: &Realm) -> Point3D {
+        let position1 = unwrap_or_return!(
+            realm.room(self.room).map(|room| room.position()),
+            Point3D::default()
+        );
+        let position2 = unwrap_or_return!(
+            realm.room(self.room2).map(|room| room.position()),
+            Point3D::default()
+        );
+        Point3D {
+            x: (position1.x + position2.x) / 2,
+            y: (position1.y + position2.y) / 2,
+            z: (position1.z + position2.z) / 2,
+        }
     }
 }
 
@@ -181,11 +192,6 @@ impl GameObject for Portal {
             flags: self.flags,
             name: self.name.clone(),
             name2: self.name2.clone(),
-            position: if self.position.is_default() {
-                None
-            } else {
-                Some(self.position.clone())
-            },
             room: self.room,
             room2: self.room2,
         })
@@ -210,7 +216,6 @@ struct PortalDto {
     flags: PortalFlags,
     name: String,
     name2: String,
-    position: Option<Point3D>,
     room: GameObjectRef,
     room2: GameObjectRef,
 }

@@ -11,7 +11,7 @@ use crate::vector3d::Vector3D;
 use crate::vector_utils::angle_between_xy_vectors;
 
 const UNDER_QUARTER_PI: f64 = PI / 4.01;
-const OVER_QUARTER_PI: f64 = PI / 3.99;
+const OVER_THREE_QUARTER_PI: f64 = 3.0 * PI / 3.99;
 
 struct CharacterWithStrengthAndDistance {
     character: GameObjectRef,
@@ -51,7 +51,7 @@ pub enum Position {
 
 fn characters_visible_through_portal(
     realm: &Realm,
-    character: &Character,
+    character: &dyn Character,
     source_room: &Room,
     portal: &Portal,
     strength: f32,
@@ -148,7 +148,8 @@ pub fn describe_characters_relative_to(
     characters: Vec<GameObjectRef>,
     relative: &dyn Character,
 ) -> String {
-    /*if (!characters || characters.length === 0) {
+    /*TODO: Rustify
+    if (!characters || characters.length === 0) {
         return "";
     }
 
@@ -430,7 +431,7 @@ pub fn group_items_by_position(
         } else if item.has_flags(ItemFlags::AttachedToWall) {
             let angle = angle_between_xy_vectors(character.direction(), &item.position().to_vec());
             if item.position().x == 0 && item.position().y == 0
-                || angle.abs() > 3.0 * OVER_QUARTER_PI
+                || angle.abs() > OVER_THREE_QUARTER_PI
                 || angle.abs() < UNDER_QUARTER_PI
             {
                 Position::Wall
@@ -443,7 +444,7 @@ pub fn group_items_by_position(
             Position::Center
         } else {
             let angle = angle_between_xy_vectors(character.direction(), &item.position().to_vec());
-            if angle.abs() > 3.0 * OVER_QUARTER_PI {
+            if angle.abs() > OVER_THREE_QUARTER_PI {
                 Position::Behind
             } else if angle.abs() < UNDER_QUARTER_PI {
                 Position::Ahead
@@ -482,9 +483,9 @@ pub fn group_portals_by_position(
             continue;
         }
 
-        let vector = portal.position() - room.position();
+        let vector = portal.position(realm) - room.position();
         let angle = angle_between_xy_vectors(character.direction(), &vector);
-        let position = if angle.abs() > 3.0 * OVER_QUARTER_PI {
+        let position = if angle.abs() > OVER_THREE_QUARTER_PI {
             Position::Behind
         } else if angle.abs() < UNDER_QUARTER_PI {
             Position::Ahead
@@ -495,9 +496,9 @@ pub fn group_portals_by_position(
         };
 
         if let Some(items) = grouped_items.get_mut(&position) {
-            items.push(portal.object_ref());
+            items.push(*portal_ref);
         } else {
-            grouped_items.insert(position, vec![portal.object_ref()]);
+            grouped_items.insert(position, vec![*portal_ref]);
         }
     }
 
@@ -516,7 +517,7 @@ pub fn visible_characters_from_position(
             continue;
         }
 
-        let vector = portal.position() - room.position();
+        let vector = portal.position(realm) - room.position();
         let angle = angle_between_xy_vectors(character.direction(), &vector);
         if angle.abs() < UNDER_QUARTER_PI {
             for character_with_strength_and_distance in characters_visible_through_portal(

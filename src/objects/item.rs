@@ -29,7 +29,7 @@ pub struct Item {
 
 impl Item {
     pub fn has_flags(&self, flags: ItemFlags) -> bool {
-        self.flags & flags == self.flags
+        self.flags & flags == flags
     }
 
     pub fn hidden(&self) -> bool {

@@ -47,7 +47,7 @@ mod visual_utils;
 use actions::{enter, look};
 use command_interpreter::{interpret_command, InterpretationError};
 use commands::execute_command;
-use game_object::{hydrate, Character, GameObject, GameObjectId, GameObjectRef, GameObjectType};
+use game_object::{hydrate, Character, GameObject, GameObjectId, GameObjectRef};
 use logs::{log_command, log_session_event, LogMessage, LogSender};
 use objects::Realm;
 use persistence_thread::PersistenceRequest;

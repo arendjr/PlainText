@@ -48,8 +48,12 @@ impl Room {
         self.event_multipliers.get(event_type)
     }
 
+    pub fn flags(&self) -> RoomFlags {
+        self.flags
+    }
+
     pub fn has_flags(&self, flags: RoomFlags) -> bool {
-        self.flags & flags == self.flags
+        self.flags & flags == flags
     }
 
     pub fn hydrate(id: GameObjectId, json: &str) -> Result<SharedGameObject, String> {
