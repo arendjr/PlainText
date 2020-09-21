@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use crate::vector3d::Vector3D;
 
 struct Direction {
@@ -35,6 +37,20 @@ const DIRECTIONS: [Direction; 10] = [
     Direction::new("up", "down", "u", Vector3D::new(0, 0, 1)),
     Direction::new("down", "up", "d", Vector3D::new(0, 0, -1)),
 ];
+
+pub fn compare_exit_names(name1: &&str, name2: &&str) -> Ordering {
+    if let Some(index1) = index_of_direction(name1) {
+        if let Some(index2) = index_of_direction(name2) {
+            index1.cmp(&index2)
+        } else {
+            Ordering::Less
+        }
+    } else if is_direction(name2) {
+        Ordering::Greater
+    } else {
+        name1.to_lowercase().cmp(&name2.to_lowercase())
+    }
+}
 
 pub fn direction_by_abbreviation(string: &str) -> Option<&'static str> {
     index_of_direction_abbreviation(string).map(|index| DIRECTIONS[index].name)

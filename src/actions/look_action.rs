@@ -1,10 +1,12 @@
 use crate::colors::Color;
-use crate::game_object::{GameObject, GameObjectRef, GameObjectType};
+use crate::direction_utils::compare_exit_names;
+use crate::game_object::{Character, GameObject, GameObjectRef, GameObjectType};
 use crate::objects::{Realm, Room, RoomFlags};
 use crate::player_output::PlayerOutput;
 use crate::text_utils::{colorize, describe_items, first_item_is_plural, join_sentence};
 use crate::visual_utils::{
-    description_for_position, group_items_by_position, group_portals_by_position,
+    describe_characters_relative_to, description_for_position, group_items_by_position,
+    group_portals_by_position, visible_characters_from_position,
 };
 
 /**
@@ -44,6 +46,8 @@ fn look_at_room(
     room: &Room,
     output: &mut Vec<PlayerOutput>,
 ) -> Realm {
+    let player = unwrap_or_return!(realm.character(player_ref), realm);
+
     let mut text = format!(
         "{}{}",
         if room.name().is_empty() {
@@ -54,7 +58,7 @@ fn look_at_room(
         room.description(),
     );
 
-    let item_text = create_item_texts(&realm, player_ref, room);
+    let item_text = create_item_descriptions(&realm, player, room);
     if !item_text.is_empty() {
         if !text.ends_with(" ") && !text.ends_with("\n") {
             text.push(' ');
@@ -62,48 +66,77 @@ fn look_at_room(
         text.push_str(&item_text);
     }
 
-    output.push(PlayerOutput::new_from_string(player_ref.id(), text));
-
-    /* var characterText = "";
-    if (hasDistantCharacters && portalGroups.hasOwnProperty("characters")) {
-        var characters = portalGroups["characters"];
-        characterText = VisualUtil.describeCharactersRelativeTo(characters, character);
-    }
-
-    if (!characterText.isEmpty()) {
-        if (!text.endsWith(" ") && !text.endsWith("\n")) {
-            text += " ";
+    if let Some(character_descriptions) =
+        create_distant_character_descriptions(&realm, player, room)
+    {
+        if !text.ends_with(" ") && !text.ends_with("\n") {
+            text.push(' ');
         }
-        text += characterText;
-    }
-    text += "\n";
-
-    var exitNames = [];
-    this.portals.forEach(function(portal) {
-        if (!portal.isHiddenFromRoom(self)) {
-            exitNames.append(portal.nameFromRoom(self));
-        }
-    });
-    if (!exitNames.isEmpty()) {
-        exitNames = Util.sortExitNames(exitNames);
-        text += ("Obvious exits: " + exitNames.join(", ") + ".").colorized(Color.Green) + "\n";
+        text.push_str(&character_descriptions);
     }
 
-    var others = this.characters;
+    text.push('\n');
+
+    if let Some(exit_descriptions) = create_exit_descriptions(&realm, room) {
+        text.push_str(&exit_descriptions);
+    }
+
+    /*var others = this.characters;
     others.removeOne(character);
     if (!others.isEmpty()) {
         text += "You see %1.\n".arg(others.joinFancy());
-    };
+    };*/
 
-    return text;*/
+    output.push(PlayerOutput::new_from_string(player_ref.id(), text));
+
     realm
 }
 
-fn create_item_texts(realm: &Realm, player_ref: GameObjectRef, room: &Room) -> String {
-    let mut grouped_items = group_items_by_position(realm, player_ref, room.object_ref());
+fn create_distant_character_descriptions(
+    realm: &Realm,
+    player: &dyn Character,
+    room: &Room,
+) -> Option<String> {
+    if room.has_flags(RoomFlags::DistantCharacterDescriptions) {
+        let distant_characters = visible_characters_from_position(realm, player, room);
+        if distant_characters.is_empty() {
+            None
+        } else {
+            Some(describe_characters_relative_to(
+                realm,
+                distant_characters,
+                player,
+            ))
+        }
+    } else {
+        None
+    }
+}
+
+fn create_exit_descriptions(realm: &Realm, room: &Room) -> Option<String> {
+    let mut exit_names: Vec<&str> = room
+        .portals()
+        .iter()
+        .flat_map(|portal_ref| realm.portal(*portal_ref))
+        .filter(|portal| !portal.is_hidden_from_room(room.object_ref()))
+        .map(|portal| portal.name_from_room(room.object_ref()))
+        .collect();
+    if exit_names.is_empty() {
+        None
+    } else {
+        exit_names.sort_by(compare_exit_names);
+        Some(colorize(
+            &format!("Obvious exits: {}.\n", exit_names.join(", ")),
+            Color::Green,
+        ))
+    }
+}
+
+fn create_item_descriptions(realm: &Realm, player: &dyn Character, room: &Room) -> String {
+    let mut grouped_items = group_items_by_position(realm, player, room);
     let has_dynamic_portals = room.has_flags(RoomFlags::DynamicPortalDescriptions);
     if has_dynamic_portals {
-        for (position, portals) in group_portals_by_position(realm, player_ref, room.object_ref()) {
+        for (position, portals) in group_portals_by_position(realm, player, room) {
             if let Some(items) = grouped_items.get_mut(&position) {
                 for portal in portals {
                     items.push(portal);
