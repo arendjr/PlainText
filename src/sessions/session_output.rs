@@ -1,11 +1,18 @@
 use crate::text_utils::process_highlights;
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct SessionPromptInfo {
+    pub hp: i16,
+    pub mp: i16,
+}
+
 #[derive(Debug, PartialEq)]
 pub enum SessionOutput {
     None,
     Str(&'static str),
     String(String),
     JSON(serde_json::Value),
+    Prompt(SessionPromptInfo),
     Aggregate(Vec<SessionOutput>),
 }
 
@@ -50,6 +57,16 @@ impl SessionOutput {
                     .collect(),
             ),
             other => other,
+        }
+    }
+
+    pub fn with(self, other: Self) -> Self {
+        if self == Self::None {
+            other
+        } else if other == Self::None {
+            self
+        } else {
+            Self::Aggregate(vec![self, other])
         }
     }
 }

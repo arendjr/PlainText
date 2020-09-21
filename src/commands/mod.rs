@@ -16,6 +16,6 @@ pub fn execute_command(
     command: Command,
 ) -> (Realm, Vec<PlayerOutput>) {
     match command {
-        Command::Go(where_to) => go(realm, player_ref, where_to),
+        Command::Go(command) => go(realm, player_ref, command),
     }
 }

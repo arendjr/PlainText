@@ -30,7 +30,7 @@ pub fn interpret_command(command: String) -> Result<Command, InterpretationError
         return Ok(Command::Go(
             words
                 .into_iter()
-                .fold(String::new(), |acc, word| acc + " " + word),
+                .fold("go".to_owned(), |acc, word| acc + " " + word),
         ));
     }
 

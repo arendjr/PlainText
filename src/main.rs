@@ -52,7 +52,10 @@ use logs::{log_command, log_session_event, LogMessage, LogSender};
 use objects::Realm;
 use persistence_thread::PersistenceRequest;
 use player_output::PlayerOutput;
-use sessions::{process_input, SessionEvent, SessionInputEvent, SessionState, SignInState};
+use sessions::{
+    process_input, SessionEvent, SessionInputEvent, SessionOutput, SessionPromptInfo, SessionState,
+    SignInState,
+};
 
 #[tokio::main]
 async fn main() {
@@ -288,14 +291,14 @@ fn process_player_input(
             realm,
             vec![PlayerOutput::new_from_str(
                 player_ref.id(),
-                "Command is not unique.",
+                "Command is not unique.\n",
             )],
         ),
         Err(InterpretationError::UnknownCommand(command)) => (
             realm,
             vec![PlayerOutput::new_from_string(
                 player_ref.id(),
-                format!("Command \"{}\" does not exist.", command),
+                format!("Command \"{}\" does not exist.\n", command),
             )],
         ),
         Err(InterpretationError::NoCommand) => (realm, vec![]),
@@ -312,7 +315,13 @@ fn process_player_output(
             if let Some(session_id) = affected_player.session_id() {
                 send_session_event(
                     &session_tx,
-                    SessionEvent::SessionOutput(session_id, output.output),
+                    SessionEvent::SessionOutput(
+                        session_id,
+                        output.output.with(SessionOutput::Prompt(SessionPromptInfo {
+                            hp: affected_player.hp(),
+                            mp: affected_player.mp(),
+                        })),
+                    ),
                 );
             }
         }

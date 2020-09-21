@@ -1,3 +1,5 @@
+#![allow(non_upper_case_globals)]
+
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::fmt;
@@ -46,10 +48,6 @@ impl Room {
 
     pub fn event_multiplier(&self, event_type: EventType) -> f32 {
         self.event_multipliers.get(event_type)
-    }
-
-    pub fn flags(&self) -> RoomFlags {
-        self.flags
     }
 
     pub fn has_flags(&self, flags: RoomFlags) -> bool {

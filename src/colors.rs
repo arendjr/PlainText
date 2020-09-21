@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 pub enum Color {
     White = 0,
     Silver,

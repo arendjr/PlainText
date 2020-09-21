@@ -99,10 +99,6 @@ impl Realm {
             .and_then(|id| self.player_by_id(*id))
     }
 
-    pub fn player_ids(&self) -> Vec<GameObjectId> {
-        self.players_by_name.values().map(|id| *id).collect()
-    }
-
     pub fn portal(&self, object_ref: GameObjectRef) -> Option<&objects::Portal> {
         self.objects
             .get(&object_ref)

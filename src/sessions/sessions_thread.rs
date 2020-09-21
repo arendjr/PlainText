@@ -9,9 +9,10 @@ use crate::logs::{log_session_event, LogMessage};
 
 use super::session::Session;
 use super::session_events::{SessionEvent, SessionInputEvent};
+use super::telnet_session::TelnetSession;
 use super::{SessionReader, SessionState};
 
-type SessionMap = Arc<Mutex<HashMap<u64, Session>>>;
+type SessionMap = Arc<Mutex<HashMap<u64, Box<dyn Session>>>>;
 
 pub fn create_sessions_thread(
     input_tx: Sender<SessionInputEvent>,
@@ -38,20 +39,20 @@ pub fn create_sessions_thread(
                 }
 
                 SessionEvent::SessionUpdate(session_id, session_state) => {
-                    if let Some(mut session) = session_map.lock().unwrap().get_mut(&session_id) {
+                    if let Some(session) = session_map.lock().unwrap().get_mut(&session_id) {
                         match session_state {
                             SessionState::SessionClosed(player_id) => {
                                 log_session_event(
                                     &log_tx,
-                                    get_source(&session.socket),
+                                    session.source(),
                                     "Connection closed".to_owned(),
                                 );
-                                session.state = SessionState::SessionClosed(player_id);
+                                session.set_state(SessionState::SessionClosed(player_id));
                                 if let Err(error) = session.close() {
                                     println!("Could not close session: {:?}", error);
                                 }
                             }
-                            other_state => session.state = other_state,
+                            other_state => session.set_state(other_state),
                         }
                     }
                 }
@@ -68,25 +69,27 @@ fn create_session_thread(
 ) {
     thread::spawn(move || {
         let mut reader = SessionReader::new(socket.try_clone().unwrap());
-        let source = get_source(&socket);
 
-        let session = Session::new(session_id, socket);
+        let session = TelnetSession::new(session_id, socket);
         send_event(
             &input_tx,
             session_id,
-            session.state.clone(),
-            source.clone(),
+            session.state().clone(),
+            session.source(),
             "".to_owned(),
         );
-        session_map.lock().unwrap().insert(session_id, session);
+        session_map
+            .lock()
+            .unwrap()
+            .insert(session_id, Box::new(session));
 
         while let Some(line) = reader.read_line() {
             if let Some(session) = session_map.lock().unwrap().get_mut(&session_id) {
                 send_event(
                     &input_tx,
                     session_id,
-                    session.state.clone(),
-                    source.clone(),
+                    session.state().clone(),
+                    session.source(),
                     line,
                 );
             }
@@ -100,16 +103,16 @@ fn create_session_thread(
 
         if let Ok(mut session_map) = session_map.lock() {
             if let Some(session) = session_map.get(&session_id) {
-                let player_id = match session.state {
+                let player_id = match session.state() {
                     SessionState::SigningIn(_) => None,
-                    SessionState::SignedIn(player_id) => Some(player_id),
-                    SessionState::SessionClosed(player_id) => player_id,
+                    SessionState::SignedIn(player_id) => Some(*player_id),
+                    SessionState::SessionClosed(player_id) => *player_id,
                 };
                 send_event(
                     &input_tx,
                     session_id,
                     SessionState::SessionClosed(player_id),
-                    source,
+                    session.source(),
                     "".to_owned(),
                 );
 
@@ -117,13 +120,6 @@ fn create_session_thread(
             }
         }
     });
-}
-
-fn get_source(socket: &TcpStream) -> String {
-    match socket.peer_addr() {
-        Ok(addr) => format!("{}", addr.ip()),
-        Err(_) => "(unknown source)".to_owned(),
-    }
 }
 
 fn send_event(
