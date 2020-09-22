@@ -1,21 +1,16 @@
-use crate::game_object::GameObjectRef;
-use crate::objects::Realm;
-use crate::player_output::PlayerOutput;
-
+mod command_executor;
+mod command_interpreter;
+mod command_line_processor;
+mod command_registry;
 mod go_command;
+mod look_command;
 
-use go_command::go;
+pub use command_executor::CommandExecutor;
+use command_line_processor::CommandLineProcessor;
 
-pub enum Command {
-    Go(String),
-}
-
-pub fn execute_command(
-    realm: Realm,
-    player_ref: GameObjectRef,
-    command: Command,
-) -> (Realm, Vec<PlayerOutput>) {
-    match command {
-        Command::Go(command) => go(realm, player_ref, command),
-    }
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum CommandType {
+    Go,
+    Look,
+    Lose,
 }

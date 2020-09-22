@@ -21,6 +21,7 @@ pub struct Player {
     gold: u32,
     height: f32,
     hp: i16,
+    inventory: Vec<GameObjectRef>,
     mp: i16,
     name: String,
     password: String,
@@ -43,6 +44,7 @@ impl Player {
                 gold: player_dto.gold,
                 height: player_dto.height,
                 hp: player_dto.hp,
+                inventory: player_dto.inventory.unwrap_or_default(),
                 mp: player_dto.mp,
                 name: player_dto.name,
                 password: player_dto.password,
@@ -69,12 +71,13 @@ impl Player {
             id,
             class: class.object_ref(),
             current_room: race.starting_room(),
-            description: "".to_owned(),
+            description: String::new(),
             direction: Vector3D::new(0, 0, 0),
             gender: sign_up_data.gender.clone(),
             gold: sign_up_data.gold,
             height: sign_up_data.height,
             hp: sign_up_data.stats.max_hp(),
+            inventory: Vec::new(),
             mp: sign_up_data.stats.max_mp(),
             name: sign_up_data.user_name.clone(),
             password: String::new(),
@@ -141,6 +144,10 @@ impl Character for Player {
 
     fn hp(&self) -> i16 {
         self.hp
+    }
+
+    fn inventory(&self) -> &Vec<GameObjectRef> {
+        &self.inventory
     }
 
     fn max_hp(&self) -> i16 {
@@ -219,6 +226,11 @@ impl GameObject for Player {
             gold: self.gold,
             height: self.height,
             hp: self.hp,
+            inventory: if self.inventory.is_empty() {
+                None
+            } else {
+                Some(self.inventory.clone())
+            },
             mp: self.mp,
             name: self.name.clone(),
             password: self.password.clone(),
@@ -247,6 +259,7 @@ struct PlayerDto {
     gold: u32,
     height: f32,
     hp: i16,
+    inventory: Option<Vec<GameObjectRef>>,
     mp: i16,
     name: String,
     password: String,

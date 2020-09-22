@@ -393,7 +393,7 @@ pub fn describe_characters_relative_to(
     }
 
     return sentences.join(" ");*/
-    "".to_owned()
+    String::new()
 }
 
 pub fn description_for_position(position: Position) -> (&'static str, &'static str, &'static str) {

@@ -19,6 +19,7 @@ pub struct Npc {
     gold: u32,
     height: f32,
     hp: i16,
+    inventory: Vec<GameObjectRef>,
     mp: i16,
     name: String,
     race: GameObjectRef,
@@ -40,6 +41,7 @@ impl Npc {
                 gold: npc_dto.gold,
                 height: npc_dto.height,
                 hp: npc_dto.hp,
+                inventory: npc_dto.inventory.unwrap_or_default(),
                 mp: npc_dto.mp,
                 name: npc_dto.name,
                 race: npc_dto.race,
@@ -62,12 +64,13 @@ impl Npc {
                 id,
                 class: None,
                 current_room: room_ref,
-                description: "".to_owned(),
+                description: String::new(),
                 direction: Vector3D::default(),
                 gender: Gender::Unspecified,
                 gold: 0,
                 height: 0.0,
                 hp: 1,
+                inventory: Vec::new(),
                 mp: 0,
                 name,
                 race: race_ref,
@@ -107,6 +110,10 @@ impl Character for Npc {
 
     fn hp(&self) -> i16 {
         self.hp
+    }
+
+    fn inventory(&self) -> &Vec<GameObjectRef> {
+        &self.inventory
     }
 
     fn max_hp(&self) -> i16 {
@@ -189,6 +196,11 @@ impl GameObject for Npc {
             gold: self.gold,
             height: self.height,
             hp: self.hp,
+            inventory: if self.inventory.is_empty() {
+                None
+            } else {
+                Some(self.inventory.clone())
+            },
             mp: self.mp,
             name: self.name.clone(),
             race: self.race,
@@ -216,6 +228,7 @@ struct NpcDto {
     gold: u32,
     height: f32,
     hp: i16,
+    inventory: Option<Vec<GameObjectRef>>,
     mp: i16,
     name: String,
     race: GameObjectRef,

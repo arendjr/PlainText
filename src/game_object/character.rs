@@ -35,6 +35,7 @@ pub trait Character: GameObject {
     fn gold(&self) -> u32;
     fn height(&self) -> f32;
     fn hp(&self) -> i16;
+    fn inventory(&self) -> &Vec<GameObjectRef>;
     fn max_hp(&self) -> i16;
     fn max_mp(&self) -> i16;
     fn mp(&self) -> i16;

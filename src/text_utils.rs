@@ -4,6 +4,7 @@ use std::borrow::Borrow;
 
 use crate::colors::Color;
 use crate::game_object::{GameObject, GameObjectRef, SharedGameObject};
+use crate::number_utils::written_number;
 use crate::objects::{ItemFlags, Realm};
 
 const COLOR_MAP: [&'static str; 16] = [
@@ -23,11 +24,8 @@ pub fn colorize(string: &str, color: Color) -> String {
     format!("\x1B[{}m{}\x1B[0m", COLOR_MAP[color as usize], string)
 }
 
-fn count_objects(
-    realm: &Realm,
-    object_refs: &Vec<GameObjectRef>,
-) -> Vec<(SharedGameObject, usize)> {
-    let mut objects_with_counts = Vec::<(SharedGameObject, usize)>::new();
+fn count_objects(realm: &Realm, object_refs: &Vec<GameObjectRef>) -> Vec<(SharedGameObject, u16)> {
+    let mut objects_with_counts = Vec::<(SharedGameObject, u16)>::new();
     for object in object_refs
         .iter()
         .filter_map(|object_ref| realm.object(*object_ref))
@@ -218,7 +216,7 @@ pub fn split_lines(string: &str, max_line_len: usize) -> Vec<String> {
                 }
             }
             lines.push(current_line);
-            current_line = "".to_owned();
+            current_line = String::new();
             word = &word[index + 1..];
         }
         if word.is_empty() {
@@ -252,36 +250,4 @@ fn substring(string: &str, start: i32, end: i32) -> &str {
     } else {
         ((string.len() as i32) - end - start) as usize
     }]
-}
-
-const NUM_WRITTEN_NUMBERS: usize = 20;
-const WRITTEN_NUMBERS: [&'static str; NUM_WRITTEN_NUMBERS] = [
-    "zero",
-    "one",
-    "two",
-    "three",
-    "four",
-    "five",
-    "six",
-    "sevens",
-    "eight",
-    "nine",
-    "ten",
-    "eleven",
-    "twelve",
-    "thirteen",
-    "fourteen",
-    "fifteen",
-    "sixteen",
-    "seventeen",
-    "eighteen",
-    "nineteen",
-];
-
-pub fn written_number(number: usize) -> String {
-    if number < NUM_WRITTEN_NUMBERS {
-        WRITTEN_NUMBERS[number].to_owned()
-    } else {
-        number.to_string()
-    }
 }

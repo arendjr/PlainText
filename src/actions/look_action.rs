@@ -171,7 +171,7 @@ fn create_items_description(realm: &Realm, player: &dyn Character, room: &Room) 
             )
             .replace("there is", "there's")
         })
-        .fold("".to_owned(), |result, string| {
+        .fold(String::new(), |result, string| {
             if result.is_empty() {
                 string
             } else if result.ends_with(' ') || result.ends_with('\n') {

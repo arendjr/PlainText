@@ -67,7 +67,7 @@ pub struct SignUpData {
 
 impl SignUpData {
     fn new() -> Self {
-        Self::with_user_name("".to_owned())
+        Self::with_user_name(String::new())
     }
 
     fn with_user_name(user_name: String) -> Self {

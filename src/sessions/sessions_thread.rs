@@ -76,7 +76,7 @@ fn create_session_thread(
             session_id,
             session.state().clone(),
             session.source(),
-            "".to_owned(),
+            String::new(),
         );
         session_map
             .lock()
@@ -113,7 +113,7 @@ fn create_session_thread(
                     session_id,
                     SessionState::SessionClosed(player_id),
                     session.source(),
-                    "".to_owned(),
+                    String::new(),
                 );
 
                 session_map.remove(&session_id);

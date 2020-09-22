@@ -1,8 +1,7 @@
-use std::collections::VecDeque;
-use std::iter::Iterator;
-
-use crate::commands::Command;
 use crate::direction_utils::{direction_by_abbreviation, is_direction};
+
+use super::command_registry::{CommandRegistry, LookupError};
+use super::{CommandLineProcessor, CommandType};
 
 pub enum InterpretationError {
     NoCommand,
@@ -10,36 +9,38 @@ pub enum InterpretationError {
     UnknownCommand(String),
 }
 
-pub fn interpret_command(command: String) -> Result<Command, InterpretationError> {
-    let mut words = command
-        .split(' ')
-        .map(|word| word.trim())
-        .filter_map(|word| if word.len() > 0 { Some(word) } else { None })
-        .collect::<VecDeque<&str>>();
-
-    let mut command_name = match words.pop_front() {
-        Some(word) => word.to_lowercase(),
-        None => return Err(InterpretationError::NoCommand),
-    };
-
-    if let Some(direction) = direction_by_abbreviation(&command_name) {
-        command_name = direction.to_owned();
-    }
-
-    if is_direction(&command_name) {
-        return Ok(Command::Go(
-            words
-                .into_iter()
-                .fold("go".to_owned(), |acc, word| acc + " " + word),
-        ));
-    }
-
-    // TODO: Implement the rest
-
-    Err(InterpretationError::UnknownCommand(command_name))
+pub struct CommandInterpreter {
+    registry: CommandRegistry,
 }
 
-/*
+impl CommandInterpreter {
+    pub fn interpret_command(
+        &self,
+        processor: &mut CommandLineProcessor,
+    ) -> Result<CommandType, InterpretationError> {
+        let mut command_name =
+            unwrap_or_return!(processor.peek_word(), Err(InterpretationError::NoCommand));
+
+        if let Some(direction) = direction_by_abbreviation(&command_name) {
+            command_name = direction;
+        }
+
+        if is_direction(&command_name) {
+            processor.prepend_word("go".to_owned());
+            return Ok(CommandType::Go);
+        }
+
+        match self.registry.lookup(&command_name) {
+            Ok(command_type) => Ok(command_type),
+            Err(LookupError::NotFound) => {
+                Err(InterpretationError::UnknownCommand(command_name.to_owned()))
+            }
+            Err(LookupError::NotUnique) => Err(InterpretationError::AmbiguousCommand(
+                command_name.to_owned(),
+            )),
+        }
+
+        /*
         Room *currentRoom = character->currentRoom().cast<Room *>();
         bool matchedPortal = false;
         for (const GameObjectPtr &portalPtr : currentRoom->portals()) {
@@ -106,4 +107,17 @@ pub fn interpret_command(command: String) -> Result<Command, InterpretationError
         } else {
             character->send(QString("Command \"%1\" does not exist.").arg(words[0]));
         }
-*/
+        */
+    }
+
+    pub fn new() -> Self {
+        let mut registry = CommandRegistry::new();
+        registry.register("enter", CommandType::Go);
+        registry.register("examine", CommandType::Look);
+        registry.register("go", CommandType::Go);
+        registry.register("l", CommandType::Look);
+        registry.register("look", CommandType::Look);
+
+        Self { registry }
+    }
+}

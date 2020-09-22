@@ -27,12 +27,12 @@ macro_rules! unwrap_or_return {
 mod actions;
 mod character_stats;
 mod colors;
-mod command_interpreter;
 mod commands;
 mod direction_utils;
 mod events;
 mod game_object;
 mod logs;
+mod number_utils;
 mod objects;
 mod persistence_thread;
 mod player_output;
@@ -45,8 +45,7 @@ mod vector_utils;
 mod visual_utils;
 
 use actions::{enter, look};
-use command_interpreter::{interpret_command, InterpretationError};
-use commands::execute_command;
+use commands::CommandExecutor;
 use game_object::{hydrate, Character, GameObject, GameObjectId, GameObjectRef};
 use logs::{log_command, log_session_event, LogMessage, LogSender};
 use objects::Realm;
@@ -91,6 +90,7 @@ async fn main() {
         Ok(realm) => realm,
         Err(error) => panic!("Failed to load data from \"{}\": {}", data_dir, error),
     };
+    let command_executor = CommandExecutor::new();
 
     let (input_tx, input_rx) = channel::<SessionInputEvent>();
     let (persist_tx, persist_rx) = channel::<PersistenceRequest>();
@@ -126,7 +126,13 @@ async fn main() {
             }
             SessionState::SignedIn(player_id) => {
                 let input_ev = (input, session_id, source, player_id);
-                realm = process_signed_in_input(realm, &session_tx, &log_tx, input_ev);
+                realm = process_signed_in_input(
+                    realm,
+                    &command_executor,
+                    &session_tx,
+                    &log_tx,
+                    input_ev,
+                );
             }
             SessionState::SessionClosed(player_id) => {
                 realm = process_session_closed(realm, &session_tx, &log_tx, player_id);
@@ -258,6 +264,7 @@ fn process_signing_in_input(
 
 fn process_signed_in_input(
     realm: Realm,
+    command_executor: &CommandExecutor,
     session_tx: &Sender<SessionEvent>,
     log_tx: &LogSender,
     (input, session_id, source, player_id): (String, u64, String, GameObjectId),
@@ -265,7 +272,8 @@ fn process_signed_in_input(
     if let Some(player) = realm.player_by_id(player_id) {
         log_command(&log_tx, player.name().to_owned(), input.clone());
         let player_ref = player.object_ref();
-        let (new_realm, player_output) = process_player_input(realm, player_ref, log_tx, input);
+        let (new_realm, player_output) =
+            command_executor.execute_command(realm, player_ref, log_tx, input);
         process_player_output(&new_realm, session_tx, player_output);
 
         new_realm
@@ -276,32 +284,6 @@ fn process_signed_in_input(
             SessionEvent::SessionUpdate(session_id, SessionState::SessionClosed(Some(player_id))),
         );
         realm
-    }
-}
-
-fn process_player_input(
-    realm: Realm,
-    player_ref: GameObjectRef,
-    _: &LogSender,
-    input: String,
-) -> (Realm, Vec<PlayerOutput>) {
-    match interpret_command(input) {
-        Ok(command) => execute_command(realm, player_ref, command),
-        Err(InterpretationError::AmbiguousCommand(_)) => (
-            realm,
-            vec![PlayerOutput::new_from_str(
-                player_ref.id(),
-                "Command is not unique.\n",
-            )],
-        ),
-        Err(InterpretationError::UnknownCommand(command)) => (
-            realm,
-            vec![PlayerOutput::new_from_string(
-                player_ref.id(),
-                format!("Command \"{}\" does not exist.\n", command),
-            )],
-        ),
-        Err(InterpretationError::NoCommand) => (realm, vec![]),
     }
 }
 
