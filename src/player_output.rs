@@ -19,3 +19,23 @@ impl PlayerOutput {
         Self::new(player_id, SessionOutput::String(output))
     }
 }
+
+#[macro_export]
+macro_rules! push_output_str {
+    ($player_output:ident, $player_ref:ident, $session_output:literal) => {
+        $player_output.push(PlayerOutput::new_from_str(
+            $player_ref.id(),
+            $session_output,
+        ));
+    };
+}
+
+#[macro_export]
+macro_rules! push_output_string {
+    ($player_output:ident, $player_ref:ident, $session_output:expr) => {
+        $player_output.push(PlayerOutput::new_from_string(
+            $player_ref.id(),
+            $session_output,
+        ));
+    };
+}

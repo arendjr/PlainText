@@ -39,14 +39,11 @@ pub fn look(
     let description = match processor.take_object_description() {
         Some(description) => description,
         None => {
-            output.push(PlayerOutput::new(
-                player_ref.id(),
-                SessionOutput::Str(if alias == "examine" {
-                    "Examine what?"
-                } else {
-                    "Look at what?"
-                }),
-            ));
+            if alias == "examine" {
+                push_output_str!(output, player_ref, "Examine what?");
+            } else {
+                push_output_str!(output, player_ref, "Look at what?");
+            }
             return (realm, output);
         }
     };
@@ -57,10 +54,7 @@ pub fn look(
         {
             realm = look_action(realm, player_ref, object_ref, &mut output);
         } else {
-            output.push(PlayerOutput::new(
-                player_ref.id(),
-                SessionOutput::Str("You don't have that."),
-            ));
+            push_output_str!(output, player_ref, "You don't have that.");
         }
         return (realm, output);
     }
@@ -151,15 +145,10 @@ pub fn look(
 
     if let Some(object_ref) = maybe_object_ref {
         realm = look_action(realm, player_ref, object_ref, &mut output);
+    } else if alias == "examine" {
+        push_output_str!(output, player_ref, "Examine what?");
     } else {
-        output.push(PlayerOutput::new(
-            player_ref.id(),
-            SessionOutput::Str(if alias == "examine" {
-                "Examine what?"
-            } else {
-                "Look where?"
-            }),
-        ));
+        push_output_str!(output, player_ref, "Look where?");
     }
 
     (realm, output)

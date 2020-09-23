@@ -46,10 +46,7 @@ pub fn go(
         realm = enter(realm, player_ref, room_ref, &mut output);
         realm = look(realm, player_ref, room_ref, &mut output);
     } else {
-        output.push(PlayerOutput::new(
-            player_ref.id(),
-            SessionOutput::Str("Go where?"),
-        ));
+        push_output_str!(output, player_ref, "Go where?");
     }
 
     (realm, output)

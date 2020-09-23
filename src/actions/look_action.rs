@@ -25,14 +25,15 @@ pub fn look(
             }
             _ => {
                 let description = object.description();
-                output.push(PlayerOutput::new_from_string(
-                    player_ref.id(),
+                push_output_string!(
+                    output,
+                    player_ref,
                     if description.is_empty() {
                         format!("There is nothing special about the {}.", object.name())
                     } else {
                         description.to_owned()
-                    },
-                ));
+                    }
+                );
                 realm
             }
         },
@@ -87,7 +88,7 @@ fn look_at_room(
         text.push_str(&characters_description);
     }
 
-    output.push(PlayerOutput::new_from_string(player_ref.id(), text));
+    push_output_string!(output, player_ref, text);
 
     realm
 }

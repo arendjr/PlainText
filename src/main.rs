@@ -4,6 +4,8 @@ use std::{env, fs, io, thread};
 use warp::Filter;
 
 #[macro_use]
+mod player_output;
+#[macro_use]
 mod serializable_flags;
 
 macro_rules! unwrap_or_continue {
@@ -35,7 +37,6 @@ mod logs;
 mod number_utils;
 mod objects;
 mod persistence_thread;
-mod player_output;
 mod point3d;
 mod sessions;
 mod telnet_server;
