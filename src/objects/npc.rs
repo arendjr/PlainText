@@ -149,6 +149,16 @@ impl Character for Npc {
             true,
         )
     }
+
+    fn with_direction(&self, direction: Vector3D) -> (SharedGameObject, bool) {
+        (
+            SharedGameObject::new(Self {
+                direction,
+                ..self.clone()
+            }),
+            true,
+        )
+    }
 }
 
 impl fmt::Display for Npc {

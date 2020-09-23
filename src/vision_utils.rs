@@ -11,6 +11,7 @@ use crate::vector3d::Vector3D;
 use crate::vector_utils::angle_between_xy_vectors;
 
 const UNDER_QUARTER_PI: f64 = PI / 4.01;
+const OVER_QUARTER_PI: f64 = PI / 3.99;
 const OVER_THREE_QUARTER_PI: f64 = 3.0 * PI / 3.99;
 
 struct CharacterWithStrengthAndDistance {
@@ -51,31 +52,32 @@ pub enum Position {
 
 fn characters_visible_through_portal(
     realm: &Realm,
-    character: &dyn Character,
-    source_room: &Room,
+    looking_direction: &Vector3D,
+    from_room: &Room,
+    origin_room: &Room,
     portal: &Portal,
     strength: f32,
     excluded_rooms: &HashSet<GameObjectRef>,
 ) -> HashSet<CharacterWithStrengthAndDistance> {
     let room = unwrap_or_return!(
-        realm.room(portal.opposite_of(source_room.object_ref())),
+        realm.room(portal.opposite_of(from_room.object_ref())),
         HashSet::new()
     );
     let room_strength = if strength != 0.0 {
         strength
     } else {
-        source_room.event_multiplier(EventType::Visual)
+        from_room.event_multiplier(EventType::Visual)
     } * portal.event_multiplier(EventType::Visual)
         * room.event_multiplier(EventType::Visual);
     if room_strength < 0.1 {
         return HashSet::new();
     }
 
-    let vector1: Vector3D = room.position() - source_room.position();
+    let vector1: Vector3D = room.position() - from_room.position();
     let distance = vector1.len();
 
     let mut visited_rooms = HashSet::new();
-    visited_rooms.insert(source_room.object_ref());
+    visited_rooms.insert(from_room.object_ref());
     visited_rooms.insert(room.object_ref());
     for room_ref in excluded_rooms {
         visited_rooms.insert(*room_ref);
@@ -102,7 +104,7 @@ fn characters_visible_through_portal(
         }
 
         let next_room = unwrap_or_continue!(realm.room(next_portal.opposite_of(room.object_ref())));
-        if next_room.id() == source_room.id() || visited_rooms.contains(&next_room.object_ref()) {
+        if next_room.id() == from_room.id() || visited_rooms.contains(&next_room.object_ref()) {
             continue;
         }
 
@@ -114,9 +116,8 @@ fn characters_visible_through_portal(
             }
         } else {
             // In an open area, we only verify the next room is within field of view:
-            let character_room = unwrap_or_continue!(realm.room(character.current_room()));
-            let vector3 = next_room.position() - character_room.position();
-            let angle = angle_between_xy_vectors(character.direction(), &vector3);
+            let vector3 = next_room.position() - origin_room.position();
+            let angle = angle_between_xy_vectors(looking_direction, &vector3);
             if angle.abs() > UNDER_QUARTER_PI {
                 continue;
             }
@@ -130,8 +131,9 @@ fn characters_visible_through_portal(
 
         for character_with_strength_and_distance in characters_visible_through_portal(
             realm,
-            character,
+            looking_direction,
             &next_room,
+            origin_room,
             &next_portal,
             strength,
             &visited_rooms,
@@ -456,9 +458,9 @@ pub fn group_items_by_position(
         };
 
         if let Some(items) = grouped_items.get_mut(&position) {
-            items.push(item.object_ref());
+            items.push(*item_ref);
         } else {
-            grouped_items.insert(position, vec![item.object_ref()]);
+            grouped_items.insert(position, vec![*item_ref]);
         }
     }
 
@@ -505,10 +507,10 @@ pub fn group_portals_by_position(
     grouped_items
 }
 
-pub fn visible_characters_from_position(
+pub fn visible_characters_through_portals_from_position(
     realm: &Realm,
-    character: &dyn Character,
     room: &Room,
+    looking_direction: &Vector3D,
 ) -> Vec<GameObjectRef> {
     let mut characters = HashSet::new();
     for portal_ref in room.portals() {
@@ -518,11 +520,12 @@ pub fn visible_characters_from_position(
         }
 
         let vector = portal.position(realm) - room.position();
-        let angle = angle_between_xy_vectors(character.direction(), &vector);
+        let angle = angle_between_xy_vectors(looking_direction, &vector);
         if angle.abs() < UNDER_QUARTER_PI {
             for character_with_strength_and_distance in characters_visible_through_portal(
                 realm,
-                character,
+                looking_direction,
+                &room,
                 &room,
                 &portal,
                 room.event_multiplier(EventType::Visual),
@@ -533,4 +536,53 @@ pub fn visible_characters_from_position(
         }
     }
     characters.into_iter().collect()
+}
+
+pub fn visible_items_from_position(
+    realm: &Realm,
+    room: &Room,
+    looking_direction: &Vector3D,
+) -> Vec<GameObjectRef> {
+    room.items()
+        .iter()
+        .map(|item_ref| *item_ref)
+        .filter(|item_ref| {
+            let item = unwrap_or_return!(realm.item(*item_ref), false);
+            if item.hidden() {
+                return false;
+            }
+
+            let is_visible = (item.position().x == 0 && item.position().y == 0)
+                || angle_between_xy_vectors(looking_direction, &item.position().to_vec()).abs()
+                    < OVER_QUARTER_PI;
+            is_visible
+        })
+        .collect()
+}
+
+pub fn visible_portals_from_position(
+    realm: &Realm,
+    room: &Room,
+    looking_direction: &Vector3D,
+) -> Vec<GameObjectRef> {
+    room.portals()
+        .iter()
+        .map(|portal_ref| *portal_ref)
+        .filter(|portal_ref| {
+            let portal = unwrap_or_return!(realm.portal(*portal_ref), false);
+            if portal.is_hidden_from_room(room.object_ref()) {
+                return false;
+            }
+
+            let name = portal.name_from_room(room.object_ref());
+            if is_direction(name) || name == "out" {
+                return false;
+            }
+
+            let vector = portal.position(realm) - room.position();
+            let is_visible =
+                angle_between_xy_vectors(looking_direction, &vector).abs() < OVER_QUARTER_PI;
+            is_visible
+        })
+        .collect()
 }

@@ -38,14 +38,15 @@ mod number_utils;
 mod objects;
 mod persistence_thread;
 mod point3d;
+mod relative_direction;
 mod sessions;
 mod telnet_server;
 mod text_utils;
 mod vector3d;
 mod vector_utils;
-mod visual_utils;
+mod vision_utils;
 
-use actions::{enter, look};
+use actions::{enter_room, look_at_object};
 use commands::CommandExecutor;
 use game_object::{hydrate, Character, GameObject, GameObjectId, GameObjectRef};
 use logs::{log_command, log_session_event, LogMessage, LogSender};
@@ -238,8 +239,8 @@ fn process_signing_in_input(
             log_command(log_tx, user_name.to_owned(), "(signed in)".to_owned());
 
             let mut player_output = Vec::new();
-            realm = enter(realm, player_ref, current_room, &mut player_output);
-            realm = look(realm, player_ref, current_room, &mut player_output);
+            realm = enter_room(realm, player_ref, current_room, &mut player_output);
+            look_at_object(&realm, player_ref, current_room, &mut player_output);
             process_player_output(&realm, session_tx, player_output);
 
             SessionState::SignedIn(player_ref.id())

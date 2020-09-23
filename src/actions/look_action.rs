@@ -4,50 +4,86 @@ use crate::game_object::{Character, GameObject, GameObjectRef, GameObjectType};
 use crate::objects::{Realm, Room, RoomFlags};
 use crate::player_output::PlayerOutput;
 use crate::text_utils::{colorize, describe_items_from_room, first_item_is_plural, join_sentence};
-use crate::visual_utils::{
+use crate::vector3d::Vector3D;
+use crate::vision_utils::{
     describe_characters_relative_to, description_for_position, group_items_by_position,
-    group_portals_by_position, visible_characters_from_position,
+    group_portals_by_position, visible_characters_through_portals_from_position,
+    visible_items_from_position, visible_portals_from_position,
 };
 
-/**
- * Look at the given object from the player's perspective.
- */
-pub fn look(
-    realm: Realm,
+/// Looks in a direction from the player's perspective.
+pub fn look_in_direction(
+    realm: &Realm,
     player_ref: GameObjectRef,
-    object_ref: GameObjectRef,
+    direction: &Vector3D,
     output: &mut Vec<PlayerOutput>,
-) -> Realm {
-    match realm.object(object_ref) {
-        Some(object) => match object.object_type() {
-            GameObjectType::Room => {
-                look_at_room(realm, player_ref, object.as_room().unwrap(), output)
-            }
-            _ => {
-                let description = object.description();
-                push_output_string!(
-                    output,
-                    player_ref,
-                    if description.is_empty() {
-                        format!("There is nothing special about the {}.", object.name())
-                    } else {
-                        description.to_owned()
-                    }
-                );
-                realm
-            }
-        },
-        None => realm,
+) {
+    let player = unwrap_or_return!(realm.character(player_ref), ());
+    let room = unwrap_or_return!(realm.room(player.current_room()), ());
+
+    /*TODO: binoculars are fun!
+    let strength = room.event_multiplier(EventType::Visual);
+    if (this.weapon && this.weapon.name === "binocular") {
+        strength *= 4;
+    }*/
+
+    let items = visible_items_from_position(realm, room, &direction);
+    let portals = visible_portals_from_position(realm, room, &direction);
+    let descriptions = describe_items_from_room(
+        realm,
+        &[&items[..], &portals[..]].concat(),
+        room.object_ref(),
+    );
+    if !descriptions.is_empty() {
+        let sentence = join_sentence(descriptions.iter().map(String::as_ref).collect());
+        push_output_string!(output, player_ref, format!("You see {}.\n", sentence));
+    }
+
+    let characters = visible_characters_through_portals_from_position(realm, &room, &direction);
+    if !characters.is_empty() {
+        push_output_string!(
+            output,
+            player_ref,
+            describe_characters_relative_to(realm, characters, player)
+        );
     }
 }
 
+/// Looks at the given object from the player's perspective.
+pub fn look_at_object(
+    realm: &Realm,
+    player_ref: GameObjectRef,
+    object_ref: GameObjectRef,
+    output: &mut Vec<PlayerOutput>,
+) {
+    let object = unwrap_or_return!(realm.object(object_ref), ());
+    match object.object_type() {
+        GameObjectType::Room => look_at_room(realm, player_ref, object.as_room().unwrap(), output),
+        _ => {
+            let description = object.description();
+            push_output_string!(
+                output,
+                player_ref,
+                if description.is_empty() {
+                    format!("There is nothing special about the {}.\n", object.name())
+                } else {
+                    format!("{}\n", description)
+                }
+            );
+        }
+    }
+}
+
+/// Looks at the room from the player's perspective.
+///
+/// Assumes the player is currently in the room.
 fn look_at_room(
-    realm: Realm,
+    realm: &Realm,
     player_ref: GameObjectRef,
     room: &Room,
     output: &mut Vec<PlayerOutput>,
-) -> Realm {
-    let player = unwrap_or_return!(realm.character(player_ref), realm);
+) {
+    let player = unwrap_or_return!(realm.character(player_ref), ());
 
     let mut text = if room.name().is_empty() {
         room.description().to_owned()
@@ -89,8 +125,6 @@ fn look_at_room(
     }
 
     push_output_string!(output, player_ref, text);
-
-    realm
 }
 
 fn create_distant_characters_description(
@@ -99,7 +133,8 @@ fn create_distant_characters_description(
     room: &Room,
 ) -> Option<String> {
     if room.has_flags(RoomFlags::DistantCharacterDescriptions) {
-        let distant_characters = visible_characters_from_position(realm, player, room);
+        let distant_characters =
+            visible_characters_through_portals_from_position(realm, room, player.direction());
         if distant_characters.is_empty() {
             None
         } else {

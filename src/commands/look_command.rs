@@ -1,8 +1,9 @@
-use crate::actions::look as look_action;
+use crate::actions::{look_at_object, look_in_direction};
+use crate::direction_utils::{direction_by_abbreviation, is_direction, vector_for_direction};
 use crate::game_object::{Character, GameObjectRef};
 use crate::objects::Realm;
 use crate::player_output::PlayerOutput;
-use crate::sessions::SessionOutput;
+use crate::relative_direction::RelativeDirection;
 
 use super::CommandLineProcessor;
 
@@ -10,7 +11,7 @@ use super::CommandLineProcessor;
 ///
 /// Examples: `look`, `look at door`, `look earl`, `examine sign`, `look at key in inventory`
 pub fn look(
-    mut realm: Realm,
+    realm: Realm,
     player_ref: GameObjectRef,
     mut processor: CommandLineProcessor,
 ) -> (Realm, Vec<PlayerOutput>) {
@@ -22,8 +23,7 @@ pub fn look(
 
     if alias.starts_with('l') {
         if !processor.has_words_left() {
-            let room_ref = player.current_room();
-            realm = look_action(realm, player_ref, room_ref, &mut output);
+            look_at_object(&realm, player_ref, player.current_room(), &mut output);
             return (realm, output);
         }
 
@@ -40,9 +40,9 @@ pub fn look(
         Some(description) => description,
         None => {
             if alias == "examine" {
-                push_output_str!(output, player_ref, "Examine what?");
+                push_output_str!(output, player_ref, "Examine what?\n");
             } else {
-                push_output_str!(output, player_ref, "Look at what?");
+                push_output_str!(output, player_ref, "Look at what?\n");
             }
             return (realm, output);
         }
@@ -52,9 +52,9 @@ pub fn look(
         if let Some(object_ref) =
             processor.object_by_description(&realm, player.inventory(), description)
         {
-            realm = look_action(realm, player_ref, object_ref, &mut output);
+            look_at_object(&realm, player_ref, object_ref, &mut output);
         } else {
-            push_output_str!(output, player_ref, "You don't have that.");
+            push_output_str!(output, player_ref, "You don't have that.\n");
         }
         return (realm, output);
     }
@@ -67,38 +67,52 @@ pub fn look(
     ]
     .concat();
 
-    let maybe_object_ref = processor.object_by_description(&realm, &pool, description);
+    let maybe_object = processor
+        .object_by_description(&realm, &pool, description.clone())
+        .and_then(|object_ref| realm.object(object_ref));
+    let object = match maybe_object {
+        Some(object) => object,
+        None => {
+            let mut target = description.name.as_ref();
+            if let Some(direction) = direction_by_abbreviation(target) {
+                target = direction;
+            }
+            let direction = if is_direction(target) {
+                push_output_string!(output, player_ref, format!("You look {}.\n", target));
+                vector_for_direction(target)
+            } else if target == "left" {
+                push_output_str!(output, player_ref, "You look to the left.\n");
+                RelativeDirection::Left.from(player.direction())
+            } else if target == "right" {
+                push_output_str!(output, player_ref, "You look to the right.\n");
+                RelativeDirection::Right.from(player.direction())
+            } else if target == "back" || target == "behind" {
+                push_output_str!(output, player_ref, "You look behind you.\n");
+                RelativeDirection::Behind.from(player.direction())
+            } else if target == "up" {
+                push_output_str!(output, player_ref, "You look up.\n");
+                RelativeDirection::Up.from(player.direction())
+            } else if target == "down" {
+                push_output_str!(output, player_ref, "You look down.\n");
+                RelativeDirection::Down.from(player.direction())
+            } else {
+                if alias == "examine" {
+                    push_output_str!(output, player_ref, "Examine what?\n");
+                } else {
+                    push_output_str!(output, player_ref, "Look where?\n");
+                }
+                return (realm, output);
+            };
+
+            look_in_direction(&realm, player_ref, &direction, &mut output);
+            return (realm, output);
+        }
+    };
+
+    look_at_object(&realm, player_ref, object.object_ref(), &mut output);
 
     /*
     TODO: There is more...
-    if (!object) {
-        if (Util.isDirectionAbbreviation(description.name)) {
-            description.name = Util.direction(description.name);
-        }
-        if (Util.isDirection(description.name)) {
-            player.send("You look %1.".arg(description.name));
-            player.direction = Util.vectorForDirection(description.name);
-            player.lookAhead();
-        } else if (description.name === "left") {
-            player.send("You look to the left.");
-            player.direction = [player.direction[1], -player.direction[0], player.direction[2]];
-            player.lookAhead();
-        } else if (description.name === "right") {
-            player.send("You look to the right.");
-            player.direction = [-player.direction[1], player.direction[0], player.direction[2]];
-            player.lookAhead();
-        } else if (description.name === "back" || description.name === "behind") {
-            player.send("You look behind you.");
-            player.direction = [-player.direction[0], -player.direction[1], -player.direction[2]];
-            player.lookAhead();
-        } else {
-            player.send("Look where?");
-        }
-        return;
-    }
-
-    player.send(object.lookAtBy(player));
-
     function describeNearbyObject(nearbyObject, vector, position) {
         if (vector.angle(position) < Math.PI / 8) {
             var angle = Util.angleBetweenXYVectors(vector, position);
@@ -142,14 +156,6 @@ pub fn look(
         }
     }
     */
-
-    if let Some(object_ref) = maybe_object_ref {
-        realm = look_action(realm, player_ref, object_ref, &mut output);
-    } else if alias == "examine" {
-        push_output_str!(output, player_ref, "Examine what?");
-    } else {
-        push_output_str!(output, player_ref, "Look where?");
-    }
 
     (realm, output)
 }

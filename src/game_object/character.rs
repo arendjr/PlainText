@@ -43,4 +43,5 @@ pub trait Character: GameObject {
     fn stats(&self) -> &CharacterStats;
     fn weight(&self) -> f32;
     fn with_current_room(&self, room: GameObjectRef) -> (SharedGameObject, bool);
+    fn with_direction(&self, direction: Vector3D) -> (SharedGameObject, bool);
 }

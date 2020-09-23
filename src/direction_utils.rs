@@ -56,18 +56,18 @@ pub fn direction_by_abbreviation(string: &str) -> Option<&'static str> {
     index_of_direction_abbreviation(string).map(|index| DIRECTIONS[index].name)
 }
 
-fn index_of_direction(string: &str) -> Option<usize> {
+fn index_of_direction(direction: &str) -> Option<usize> {
     for i in 0..DIRECTIONS.len() {
-        if DIRECTIONS[i].name == string {
+        if DIRECTIONS[i].name == direction {
             return Some(i);
         }
     }
     None
 }
 
-fn index_of_direction_abbreviation(string: &str) -> Option<usize> {
+fn index_of_direction_abbreviation(direction_abbreviation: &str) -> Option<usize> {
     for i in 0..DIRECTIONS.len() {
-        if DIRECTIONS[i].abbreviation == string {
+        if DIRECTIONS[i].abbreviation == direction_abbreviation {
             return Some(i);
         }
     }
@@ -80,4 +80,12 @@ pub fn is_direction(string: &str) -> bool {
 
 pub fn is_direction_abbreviation(string: &str) -> bool {
     index_of_direction_abbreviation(string).is_some()
+}
+
+pub fn vector_for_direction(direction: &str) -> Vector3D {
+    if let Some(index) = index_of_direction(direction) {
+        DIRECTIONS[index].vector.clone()
+    } else {
+        Vector3D::default()
+    }
 }

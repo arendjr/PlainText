@@ -4,10 +4,11 @@ use crate::game_object::{Character, GameObjectRef};
 use crate::number_utils::numeric_position;
 use crate::objects::Realm;
 
+#[derive(Clone, Debug)]
 pub struct ObjectDescription {
-    name: String,
-    position: u16,
-    container: Option<Box<ObjectDescription>>,
+    pub name: String,
+    pub position: u16,
+    pub container: Option<Box<ObjectDescription>>,
 }
 
 impl ObjectDescription {
