@@ -39,7 +39,9 @@ pub fn go(
     if let Some(portal_ref) = maybe_portal_ref {
         let current_room_ref = current_room.object_ref();
         realm = enter_portal(realm, player_ref, portal_ref, current_room_ref, &mut output);
-        look_at_object(&realm, player_ref, current_room_ref, &mut output);
+        if let Some(player) = realm.player(player_ref) {
+            look_at_object(&realm, player_ref, player.current_room(), &mut output);
+        }
     } else {
         push_output_str!(output, player_ref, "Go where?\n");
     }
