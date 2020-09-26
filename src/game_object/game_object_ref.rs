@@ -5,7 +5,7 @@ use std::fmt;
 
 pub type GameObjectId = u32;
 
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum GameObjectType {
     Class,
     Container,
@@ -55,7 +55,7 @@ impl GameObjectType {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct GameObjectRef(pub GameObjectType, pub GameObjectId);
 
 impl GameObjectRef {

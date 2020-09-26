@@ -1,4 +1,5 @@
-use std::collections::{HashMap, HashSet};
+use std::cmp::Ordering;
+use std::collections::{BTreeMap, BTreeSet, HashSet};
 use std::f64::consts::PI;
 use std::hash::{Hash, Hasher};
 use std::iter::FromIterator;
@@ -14,6 +15,7 @@ const UNDER_QUARTER_PI: f64 = PI / 4.01;
 const OVER_QUARTER_PI: f64 = PI / 3.99;
 const OVER_THREE_QUARTER_PI: f64 = 3.0 * PI / 3.99;
 
+#[derive(Debug)]
 struct CharacterWithStrengthAndDistance {
     character: GameObjectRef,
     strength: f32,
@@ -28,13 +30,31 @@ impl Hash for CharacterWithStrengthAndDistance {
     }
 }
 
+impl Ord for CharacterWithStrengthAndDistance {
+    fn cmp(&self, other: &Self) -> Ordering {
+        if self.distance < other.distance {
+            Ordering::Less
+        } else if self.distance > other.distance {
+            Ordering::Greater
+        } else {
+            self.character.cmp(&other.character)
+        }
+    }
+}
+
 impl PartialEq for CharacterWithStrengthAndDistance {
     fn eq(&self, other: &Self) -> bool {
         self.character == other.character
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+impl PartialOrd for CharacterWithStrengthAndDistance {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum Position {
     Left,
     Right,
@@ -58,10 +78,10 @@ fn characters_visible_through_portal(
     portal: &Portal,
     strength: f32,
     excluded_rooms: &HashSet<GameObjectRef>,
-) -> HashSet<CharacterWithStrengthAndDistance> {
+) -> BTreeSet<CharacterWithStrengthAndDistance> {
     let room = unwrap_or_return!(
         realm.room(portal.opposite_of(from_room.object_ref())),
-        HashSet::new()
+        BTreeSet::new()
     );
     let room_strength = if strength != 0.0 {
         strength
@@ -70,7 +90,7 @@ fn characters_visible_through_portal(
     } * portal.event_multiplier(EventType::Visual)
         * room.event_multiplier(EventType::Visual);
     if room_strength < 0.1 {
-        return HashSet::new();
+        return BTreeSet::new();
     }
 
     let vector1: Vector3D = room.position() - from_room.position();
@@ -83,7 +103,7 @@ fn characters_visible_through_portal(
         visited_rooms.insert(*room_ref);
     }
 
-    let mut characters = HashSet::from_iter(
+    let mut characters = BTreeSet::from_iter(
         room.characters()
             .iter()
             .filter_map(|character_ref| realm.character(*character_ref))
@@ -419,8 +439,8 @@ pub fn group_items_by_position(
     realm: &Realm,
     character: &dyn Character,
     room: &Room,
-) -> HashMap<Position, Vec<GameObjectRef>> {
-    let mut grouped_items: HashMap<Position, Vec<GameObjectRef>> = HashMap::new();
+) -> BTreeMap<Position, Vec<GameObjectRef>> {
+    let mut grouped_items: BTreeMap<Position, Vec<GameObjectRef>> = BTreeMap::new();
 
     for item_ref in room.items() {
         let item = unwrap_or_continue!(realm.item(*item_ref));
@@ -471,8 +491,8 @@ pub fn group_portals_by_position(
     realm: &Realm,
     character: &dyn Character,
     room: &Room,
-) -> HashMap<Position, Vec<GameObjectRef>> {
-    let mut grouped_items: HashMap<Position, Vec<GameObjectRef>> = HashMap::new();
+) -> BTreeMap<Position, Vec<GameObjectRef>> {
+    let mut grouped_items: BTreeMap<Position, Vec<GameObjectRef>> = BTreeMap::new();
 
     for portal_ref in room.portals() {
         let portal = unwrap_or_continue!(realm.portal(*portal_ref));
