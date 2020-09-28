@@ -65,8 +65,22 @@ impl SessionOutput {
             other
         } else if other == Self::None {
             self
+        } else if let Self::Aggregate(mut outputs) = self {
+            if let Self::Aggregate(others) = other {
+                for other in others.into_iter() {
+                    outputs.push(other);
+                }
+            } else {
+                outputs.push(other);
+            }
+            Self::Aggregate(outputs)
+        } else if let Self::Aggregate(others) = other {
+            let mut outputs = vec![self];
+            for other in others.into_iter() {
+                outputs.push(other);
+            }
+            Self::Aggregate(outputs)
         } else {
-            // FIXME: Prevent nested aggregates where possible
             Self::Aggregate(vec![self, other])
         }
     }
