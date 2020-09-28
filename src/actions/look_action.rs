@@ -1,12 +1,15 @@
+use std::f64::consts::PI;
+
 use crate::colors::Color;
 use crate::direction_utils::compare_exit_names;
 use crate::game_object::{Character, GameObject, GameObjectRef, GameObjectType};
-use crate::objects::{Realm, Room, RoomFlags};
+use crate::objects::{Item, Portal, Realm, Room, RoomFlags};
 use crate::player_output::PlayerOutput;
 use crate::text_utils::{
     colorize, describe_objects_from_room, first_item_is_plural, join_sentence,
 };
 use crate::vector3d::Vector3D;
+use crate::vector_utils::angle_between_xy_vectors;
 use crate::vision_utils::{
     describe_characters_relative_to, description_for_position, group_items_by_position,
     group_portals_by_position, visible_characters_through_portals_from_position,
@@ -60,6 +63,10 @@ pub fn look_at_object(
 ) {
     let object = unwrap_or_return!(realm.object(object_ref), ());
     match object.object_type() {
+        GameObjectType::Item => look_at_item(realm, player_ref, object.as_item().unwrap(), output),
+        GameObjectType::Portal => {
+            look_at_portal(realm, player_ref, object.as_portal().unwrap(), output)
+        }
         GameObjectType::Room => look_at_room(realm, player_ref, object.as_room().unwrap(), output),
         _ => {
             let description = object.description();
@@ -72,6 +79,129 @@ pub fn look_at_object(
                     format!("{}\n", description)
                 }
             );
+        }
+    }
+}
+
+/// Looks at the item from the player's perspective.
+///
+/// Assumes the player is currently in the same room.
+fn look_at_item(
+    realm: &Realm,
+    player_ref: GameObjectRef,
+    item: &Item,
+    output: &mut Vec<PlayerOutput>,
+) {
+    let player = unwrap_or_return!(realm.player(player_ref), ());
+    let current_room = unwrap_or_return!(realm.room(player.current_room()), ());
+
+    let description = item.description();
+    push_output_string!(
+        output,
+        player_ref,
+        if description.is_empty() {
+            format!("There is nothing special about the {}.\n", item.name())
+        } else {
+            format!("{}\n", description)
+        }
+    );
+
+    let looking_direction = item.position().to_vec();
+
+    let show_nearby_objects = !item.position().is_default();
+    if show_nearby_objects {
+        current_room
+            .items()
+            .iter()
+            .filter(|&&item_ref| item_ref != item.object_ref())
+            .filter_map(|&item_ref| realm.item(item_ref))
+            .filter(|item| looking_direction.angle(&item.position().to_vec()) < PI / 8.0)
+            .for_each(|item| {
+                let angle = angle_between_xy_vectors(&looking_direction, &item.position().to_vec());
+                let side = if angle > 0.0 { "right" } else { "left" };
+                push_output_string!(
+                    output,
+                    player_ref,
+                    format!("On its {} there's {}.", side, item.indefinite_name())
+                );
+            });
+        current_room
+            .portals()
+            .iter()
+            .filter_map(|&portal_ref| realm.portal(portal_ref))
+            .map(|portal| (portal, (portal.position(&realm) - current_room.position())))
+            .filter(|(_, vector)| looking_direction.angle(&vector) < PI / 8.0)
+            .for_each(|(portal, vector)| {
+                let angle = angle_between_xy_vectors(&looking_direction, &vector);
+                let side = if angle > 0.0 { "right" } else { "left" };
+                let name = portal.name_with_destination_from_room(current_room.object_ref());
+                push_output_string!(output, player_ref, format!("On its {} is {}.", side, name));
+            });
+    }
+}
+
+/// Looks at the portal from the player's perspective.
+///
+/// Assumes the player is currently in one of the adjacent rooms.
+fn look_at_portal(
+    realm: &Realm,
+    player_ref: GameObjectRef,
+    portal: &Portal,
+    output: &mut Vec<PlayerOutput>,
+) {
+    let player = unwrap_or_return!(realm.player(player_ref), ());
+    let current_room = unwrap_or_return!(realm.room(player.current_room()), ());
+
+    let description = portal.description();
+    push_output_string!(
+        output,
+        player_ref,
+        if description.is_empty() {
+            format!("There is nothing special about the {}.\n", portal.name())
+        } else {
+            format!("{}\n", description)
+        }
+    );
+
+    let looking_direction = portal.position(&realm) - current_room.position();
+
+    current_room
+        .items()
+        .iter()
+        .filter_map(|&item_ref| realm.item(item_ref))
+        .filter(|item| looking_direction.angle(&item.position().to_vec()) < PI / 8.0)
+        .for_each(|item| {
+            let angle = angle_between_xy_vectors(&looking_direction, &item.position().to_vec());
+            let side = if angle > 0.0 { "right" } else { "left" };
+            push_output_string!(
+                output,
+                player_ref,
+                format!("On its {} there's {}.", side, item.indefinite_name())
+            );
+        });
+    current_room
+        .portals()
+        .iter()
+        .filter(|&&portal_ref| portal_ref != portal.object_ref())
+        .filter_map(|&portal_ref| realm.portal(portal_ref))
+        .map(|portal| (portal, (portal.position(&realm) - current_room.position())))
+        .filter(|(_, vector)| looking_direction.angle(&vector) < PI / 8.0)
+        .for_each(|(portal, vector)| {
+            let angle = angle_between_xy_vectors(&looking_direction, &vector);
+            let side = if angle > 0.0 { "right" } else { "left" };
+            let name = portal.name_with_destination_from_room(current_room.object_ref());
+            push_output_string!(output, player_ref, format!("On its {} is {}.", side, name));
+        });
+
+    if portal.can_see_through() {
+        let characters = visible_characters_through_portals_from_position(
+            &realm,
+            current_room,
+            &looking_direction,
+        );
+        let characters_description = describe_characters_relative_to(&realm, characters, player);
+        if !characters_description.is_empty() {
+            push_output_string!(output, player_ref, characters_description);
         }
     }
 }

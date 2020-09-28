@@ -113,51 +113,5 @@ pub fn look(
 
     look_at_object(&realm, player_ref, object.object_ref(), &mut output);
 
-    /*
-    TODO: There is more...
-    function describeNearbyObject(nearbyObject, vector, position) {
-        if (vector.angle(position) < Math.PI / 8) {
-            var angle = Util.angleBetweenXYVectors(vector, position);
-
-            if (nearbyObject.isPortal()) {
-                player.send("On its %1 is %2.".arg(angle > 0 ? "right" : "left",
-                                                   nearbyObject.nameWithDestinationFromRoom(room)));
-            } else {
-                player.send("On its %1 there's %2.".arg(angle > 0 ? "right" : "left",
-                                                        nearbyObject.indefiniteName()));
-            }
-        }
-    }
-
-    var showNearbyObjects = (object.isItem() && !object.position.equals([0, 0, 0])) ||
-                            object.isPortal();
-    if (showNearbyObjects) {
-        var vector = (object.isPortal() ? object.position.minus(room.position) : object.position);
-        room.items.forEach(function(item) {
-            if (item !== object) {
-                describeNearbyObject(item, vector, item.position);
-            }
-        });
-        room.portals.forEach(function(portal) {
-            if (portal !== object) {
-                describeNearbyObject(portal, vector, portal.position.minus(room.position));
-            }
-        });
-    }
-
-    if (object.isPortal() && object.canSeeThrough()) {
-        var strength = room.eventMultiplier("Visual");
-        if (player.weapon && player.weapon.name === "binocular") {
-            strength *= 4;
-        }
-
-        var characters = VisualUtil.charactersVisibleThroughPortal(player, room, object, strength);
-        var characterText = VisualUtil.describeCharactersRelativeTo(characters, player);
-        if (characterText !== "") {
-            player.send(characterText);
-        }
-    }
-    */
-
     (realm, output)
 }
