@@ -3,7 +3,7 @@ use crate::game_object::{Character, GameObject, GameObjectRef};
 use crate::objects::Realm;
 use crate::player_output::PlayerOutput;
 use crate::relative_direction::RelativeDirection;
-use crate::text_utils::{describe_items_from_room, join_sentence};
+use crate::text_utils::{describe_objects_from_room, join_sentence};
 use crate::vision_utils::visible_portals_from_position;
 
 use super::CommandLineProcessor;
@@ -60,30 +60,25 @@ pub fn go_in_direction(
     let current_room_ref = current_room.object_ref();
 
     let direction = &relative_direction.from(player.direction());
-    let portals = visible_portals_from_position(&realm, current_room, direction);
-    if portals.is_empty() {
+    let portal_refs = visible_portals_from_position(&realm, current_room, direction);
+    if portal_refs.is_empty() {
         push_output_string!(
             output,
             player_ref,
             format!("There's no way {}.\n", direction)
         );
-    } else if portals.len() == 1 {
-        let portal_ref = *portals.first().unwrap();
+    } else if let Some(portal_ref) = GameObjectRef::only(&portal_refs) {
         realm = enter_portal(realm, player_ref, portal_ref, current_room_ref, output);
     } else {
-        let destination_descriptions = describe_items_from_room(&realm, &portals, current_room_ref);
+        let destination_descriptions =
+            describe_objects_from_room(&realm, &portal_refs, current_room_ref);
         push_output_string!(
             output,
             player_ref,
             format!(
                 "There are multiple ways {}, to the {}.\n",
                 direction,
-                join_sentence(
-                    destination_descriptions
-                        .iter()
-                        .map(String::as_ref)
-                        .collect()
-                )
+                join_sentence(destination_descriptions)
             )
         );
     }

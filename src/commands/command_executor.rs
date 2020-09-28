@@ -6,6 +6,7 @@ use crate::LogSender;
 use super::command_interpreter::{CommandInterpreter, InterpretationError};
 use super::command_line_processor::CommandLineProcessor;
 use super::go_command::go;
+use super::inventory_command::inventory;
 use super::look_command::look;
 use super::CommandType;
 
@@ -26,6 +27,7 @@ impl CommandExecutor {
             Ok(command_type) => {
                 let command_fn = match command_type {
                     CommandType::Go => go,
+                    CommandType::Inventory => inventory,
                     CommandType::Look => look,
                     CommandType::Lose => panic!("Not implemented"),
                 };

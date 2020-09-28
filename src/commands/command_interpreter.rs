@@ -115,6 +115,7 @@ impl CommandInterpreter {
         registry.register("enter", CommandType::Go);
         registry.register("examine", CommandType::Look);
         registry.register("go", CommandType::Go);
+        registry.register("inventory", CommandType::Inventory);
         registry.register("l", CommandType::Look);
         registry.register("look", CommandType::Look);
 

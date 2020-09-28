@@ -56,6 +56,10 @@ impl Item {
     pub fn position(&self) -> &Point3D {
         &self.position
     }
+
+    pub fn weight(&self) -> f32 {
+        self.weight
+    }
 }
 
 impl fmt::Display for Item {

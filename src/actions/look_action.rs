@@ -3,7 +3,9 @@ use crate::direction_utils::compare_exit_names;
 use crate::game_object::{Character, GameObject, GameObjectRef, GameObjectType};
 use crate::objects::{Realm, Room, RoomFlags};
 use crate::player_output::PlayerOutput;
-use crate::text_utils::{colorize, describe_items_from_room, first_item_is_plural, join_sentence};
+use crate::text_utils::{
+    colorize, describe_objects_from_room, first_item_is_plural, join_sentence,
+};
 use crate::vector3d::Vector3D;
 use crate::vision_utils::{
     describe_characters_relative_to, description_for_position, group_items_by_position,
@@ -29,13 +31,13 @@ pub fn look_in_direction(
 
     let items = visible_items_from_position(realm, room, &direction);
     let portals = visible_portals_from_position(realm, room, &direction);
-    let descriptions = describe_items_from_room(
+    let descriptions = describe_objects_from_room(
         realm,
         &[&items[..], &portals[..]].concat(),
         room.object_ref(),
     );
     if !descriptions.is_empty() {
-        let sentence = join_sentence(descriptions.iter().map(String::as_ref).collect());
+        let sentence = join_sentence(descriptions);
         push_output_string!(output, player_ref, format!("You see {}.\n", sentence));
     }
 
@@ -169,43 +171,34 @@ fn create_exits_description(realm: &Realm, room: &Room) -> Option<String> {
 }
 
 fn create_items_description(realm: &Realm, player: &dyn Character, room: &Room) -> String {
-    let mut grouped_items = group_items_by_position(realm, player, room);
+    let mut grouped_objects = group_items_by_position(realm, player, room);
     if room.has_flags(RoomFlags::DynamicPortalDescriptions) {
         for (position, portal_refs) in group_portals_by_position(realm, player, room) {
-            if let Some(items) = grouped_items.get_mut(&position) {
+            if let Some(items) = grouped_objects.get_mut(&position) {
                 for portal_ref in portal_refs {
                     items.push(portal_ref);
                 }
             } else {
-                grouped_items.insert(position, portal_refs);
+                grouped_objects.insert(position, portal_refs);
             }
         }
     }
 
-    grouped_items
+    grouped_objects
         .iter()
-        .map(|(position, item_refs)| {
+        .map(|(position, object_refs)| {
             let (prefix, singular_verb, plural_verb) = description_for_position(*position);
-            let verb = if first_item_is_plural(realm, item_refs) {
+            let verb = if first_item_is_plural(realm, object_refs) {
                 plural_verb
             } else {
                 singular_verb
             };
 
-            let item_descriptions = describe_items_from_room(realm, item_refs, room.object_ref());
+            let item_descriptions =
+                describe_objects_from_room(realm, object_refs, room.object_ref());
 
-            format!(
-                "{} {} {}.",
-                prefix,
-                verb,
-                join_sentence(
-                    item_descriptions
-                        .iter()
-                        .map(|string| string.as_str())
-                        .collect()
-                )
-            )
-            .replace("there is", "there's")
+            format!("{} {} {}.", prefix, verb, join_sentence(item_descriptions))
+                .replace("there is", "there's")
         })
         .fold(String::new(), |result, string| {
             if result.is_empty() {

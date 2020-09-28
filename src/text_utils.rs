@@ -50,7 +50,20 @@ pub fn definite_article_from_noun(noun: String) -> &'static str {
     }
 }
 
-pub fn describe_items_from_room(
+pub fn describe_items(realm: &Realm, item_refs: &Vec<GameObjectRef>) -> Vec<String> {
+    count_objects(realm, item_refs)
+        .iter()
+        .map(|(item, count)| {
+            if *count > 1 {
+                format!("{} {}", written_number(*count), item.plural_form())
+            } else {
+                item.indefinite_name()
+            }
+        })
+        .collect()
+}
+
+pub fn describe_objects_from_room(
     realm: &Realm,
     object_refs: &Vec<GameObjectRef>,
     room_ref: GameObjectRef,
@@ -60,14 +73,6 @@ pub fn describe_items_from_room(
         .map(|(object, count)| {
             if *count > 1 {
                 format!("{} {}", written_number(*count), object.plural_form())
-            } else if let Some(item) = object.as_item() {
-                if item.has_flags(ItemFlags::AlwaysUseDefiniteArticle) {
-                    format!("the {}", object.name())
-                } else if item.has_flags(ItemFlags::ImpliedPlural) {
-                    item.name().to_owned()
-                } else {
-                    item.indefinite_name()
-                }
             } else if let Some(portal) = object.as_portal() {
                 portal.name_with_destination_from_room(room_ref)
             } else {
@@ -77,7 +82,7 @@ pub fn describe_items_from_room(
         .collect()
 }
 
-pub fn describe_items_with_definite_articles(
+pub fn describe_objects_with_definite_articles(
     realm: &Realm,
     object_refs: &Vec<GameObjectRef>,
 ) -> Vec<String> {
@@ -132,6 +137,10 @@ where
     result
 }
 
+pub fn format_weight(weight: f32) -> String {
+    format!("{}kg", weight.round())
+}
+
 pub fn highlight(string: &str) -> String {
     colorize(string, Color::White)
 }
@@ -144,11 +153,14 @@ pub fn is_vowel(character: char) -> bool {
     character == 'a' || character == 'e' || character == 'i' || character == 'o' || character == 'u'
 }
 
-pub fn join_fancy(list: Vec<&str>, separator: &str, last: &str) -> String {
+pub fn join_fancy<T>(list: Vec<T>, separator: &str, last: &str) -> String
+where
+    T: Borrow<str>,
+{
     let mut string = String::new();
     let len = list.len();
     for i in 0..len {
-        string += list[i];
+        string += list[i].borrow();
         if i + 2 < len {
             string += separator;
         } else if i + 2 == len {
@@ -158,7 +170,10 @@ pub fn join_fancy(list: Vec<&str>, separator: &str, last: &str) -> String {
     return string;
 }
 
-pub fn join_sentence(list: Vec<&str>) -> String {
+pub fn join_sentence<T>(list: Vec<T>) -> String
+where
+    T: Borrow<str>,
+{
     join_fancy(list, ", ", " and ")
 }
 

@@ -5,6 +5,7 @@ use crate::objects::Realm;
 use crate::player_output::PlayerOutput;
 use crate::relative_direction::RelativeDirection;
 
+use super::inventory_command::inventory;
 use super::CommandLineProcessor;
 
 /// Makes the character look at *something*.
@@ -31,9 +32,11 @@ pub fn look(
     }
 
     if processor.peek_rest() == "inventory" || processor.peek_rest() == "in inventory" {
-        /* TODO: execute inventory action
-        player.execute("inventory");
-        return;*/
+        return inventory(
+            realm,
+            player_ref,
+            CommandLineProcessor::new(player_ref, "inventory"),
+        );
     }
 
     let description = match processor.take_object_description() {
@@ -80,21 +83,20 @@ pub fn look(
             let direction = if is_direction(target) {
                 push_output_string!(output, player_ref, format!("You look {}.\n", target));
                 vector_for_direction(target)
-            } else if target == "left" {
-                push_output_str!(output, player_ref, "You look to the left.\n");
-                RelativeDirection::Left.from(player.direction())
-            } else if target == "right" {
-                push_output_str!(output, player_ref, "You look to the right.\n");
-                RelativeDirection::Right.from(player.direction())
-            } else if target == "back" || target == "behind" {
-                push_output_str!(output, player_ref, "You look behind you.\n");
-                RelativeDirection::Behind.from(player.direction())
-            } else if target == "up" {
-                push_output_str!(output, player_ref, "You look up.\n");
-                RelativeDirection::Up.from(player.direction())
-            } else if target == "down" {
-                push_output_str!(output, player_ref, "You look down.\n");
-                RelativeDirection::Down.from(player.direction())
+            } else if let Some(relative_direction) = RelativeDirection::from_string(target) {
+                push_output_str!(
+                    output,
+                    player_ref,
+                    match relative_direction {
+                        RelativeDirection::Ahead => "You look ahead.\n",
+                        RelativeDirection::Left => "You look to the left.\n",
+                        RelativeDirection::Right => "You look to the right.\n",
+                        RelativeDirection::Behind => "You look behind you.\n",
+                        RelativeDirection::Up => "You look up.\n",
+                        RelativeDirection::Down => "You look down.\n",
+                    }
+                );
+                relative_direction.from(player.direction())
             } else {
                 if alias == "examine" {
                     push_output_str!(output, player_ref, "Examine what?\n");

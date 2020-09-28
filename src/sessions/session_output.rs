@@ -66,6 +66,7 @@ impl SessionOutput {
         } else if other == Self::None {
             self
         } else {
+            // FIXME: Prevent nested aggregates where possible
             Self::Aggregate(vec![self, other])
         }
     }

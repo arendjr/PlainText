@@ -82,6 +82,15 @@ impl GameObjectRef {
         self.0
     }
 
+    /// Returns the only object ref from a vector, if the vector only has a single item.
+    pub fn only(vec: &Vec<GameObjectRef>) -> Option<GameObjectRef> {
+        if vec.len() == 1 {
+            vec.first().map(|&object_ref| object_ref)
+        } else {
+            None
+        }
+    }
+
     pub fn to_file_name(&self) -> String {
         format!("{}.{:09}", self.0, self.1)
     }
