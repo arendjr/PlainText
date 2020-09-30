@@ -93,7 +93,7 @@ fn characters_visible_through_portal(
         return BTreeSet::new();
     }
 
-    let vector1: Vector3D = room.position() - from_room.position();
+    let vector1 = room.position() - from_room.position();
     let distance = vector1.len();
 
     let mut visited_rooms = HashSet::new();
