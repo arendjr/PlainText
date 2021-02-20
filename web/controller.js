@@ -66,7 +66,7 @@ define(["lib/zepto"], function($) {
 
         commandInput = $(".command-input");
 
-        socket = new WebSocket("ws://" + document.location.hostname);
+        socket = new WebSocket("ws://" + document.location.host);
 
         correctScrollbars();
 

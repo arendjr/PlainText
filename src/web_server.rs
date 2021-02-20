@@ -16,13 +16,13 @@ pub fn serve(realm_name: String, port: u16) {
             })
         })
     });
-    let index = warp::path::end().map(move || {
+    let index = warp::get().and(warp::path::end()).map(move || {
         Response::builder()
             .header("Content-type", "text/html")
             .body(index_html.replace("{{title}}", &realm_name))
     });
-    let statics = warp::fs::dir("./web/");
-    let routes = warp::get().and(ws_upgrade.or(index).or(statics));
+    let statics = warp::get().and(warp::fs::dir("./web/"));
+    let routes = warp::any().and(ws_upgrade.or(index).or(statics));
     tokio::spawn(warp::serve(routes).run(([0, 0, 0, 0], port)));
 
     println!("Listening for HTTP connections at port {}.", port);
