@@ -1,7 +1,5 @@
-use futures::{FutureExt, StreamExt};
 use std::sync::mpsc::{channel, Sender};
 use std::{env, fs, io, thread};
-use warp::Filter;
 
 #[macro_use]
 mod player_output;
@@ -45,6 +43,7 @@ mod text_utils;
 mod vector3d;
 mod vector_utils;
 mod vision_utils;
+mod web_server;
 
 use actions::{enter_room, look_at_object};
 use commands::CommandExecutor;
@@ -67,32 +66,15 @@ async fn main() {
         .unwrap_or("".to_string())
         .parse()
         .unwrap_or(4801);
-    let websocket_port = env::var("PT_WEBSOCKET_PORT")
+    let http_port = env::var("PT_HTTP_PORT")
         .unwrap_or("".to_string())
         .parse()
-        .unwrap_or(4802);
-    /* TODO: let http_port = env::var("PT_HTTP_PORT")
-    .unwrap_or("".to_string())
-    .parse()
-    .unwrap_or(8080);*/
-
-    let routes = warp::any().and(warp::ws()).map(|ws: warp::ws::Ws| {
-        ws.on_upgrade(|websocket| {
-            // Just echo all messages back...
-            let (tx, rx) = websocket.split();
-            rx.forward(tx).map(|result| {
-                if let Err(e) = result {
-                    eprintln!("websocket error: {:?}", e);
-                }
-            })
-        })
-    });
+        .unwrap_or(8080);
 
     let mut realm = match load_data(&data_dir) {
         Ok(realm) => realm,
         Err(error) => panic!("Failed to load data from \"{}\": {}", data_dir, error),
     };
-    let command_executor = CommandExecutor::new();
 
     let (input_tx, input_rx) = channel::<SessionInputEvent>();
     let (persist_tx, persist_rx) = channel::<PersistenceRequest>();
@@ -107,13 +89,10 @@ async fn main() {
     thread::spawn(move || {
         telnet_server::serve(telnet_port, session_tx_clone);
     });
-    tokio::spawn(warp::serve(routes).run(([0, 0, 0, 0], websocket_port)));
 
-    println!(
-        "Listening for WebSocket connections at port {}.",
-        websocket_port
-    );
+    web_server::serve(realm.name().to_owned(), http_port);
 
+    let command_executor = CommandExecutor::new();
     while let Ok(SessionInputEvent {
         input,
         session_id,

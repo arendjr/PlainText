@@ -1,4 +1,4 @@
-/*global define:false, require:false, PT_WEBSOCKET_PORT:false*/
+/*global define:false, require:false*/
 define(["lib/zepto"], function($) {
 
     "use strict";
@@ -66,7 +66,7 @@ define(["lib/zepto"], function($) {
 
         commandInput = $(".command-input");
 
-        socket = new WebSocket("ws://" + document.location.hostname + ":" + PT_WEBSOCKET_PORT);
+        socket = new WebSocket("ws://" + document.location.hostname);
 
         correctScrollbars();
 

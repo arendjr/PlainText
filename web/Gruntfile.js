@@ -45,12 +45,12 @@ module.exports = function(grunt) {
             {
               name: "admin",
               include: [
-                "fabric",
                 "mapeditor/mapeditor",
                 "lib/codemirror/codemirror",
                 "lib/codemirror/javascript",
                 "lib/codemirror/util/simple-hint",
-                "lib/codemirror/util/javascript-hint"
+                "lib/codemirror/util/javascript-hint",
+                "lib/fabric",
               ],
               exclude: [
                 "controller",
