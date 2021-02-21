@@ -1,6 +1,5 @@
-use std::io;
-use std::io::Read;
-use std::net::{Shutdown, TcpStream};
+use tokio::io::AsyncReadExt;
+use tokio::net::tcp::OwnedReadHalf;
 
 const LF: u8 = 10;
 const CR: u8 = 13;
@@ -10,24 +9,20 @@ const MAX_INPUT_LENGTH: usize = 1024;
 pub struct SessionReader {
     input: [u8; 1024],
     input_length: usize,
-    socket: TcpStream,
+    reader: OwnedReadHalf,
 }
 
 impl SessionReader {
-    pub fn close(&mut self) -> io::Result<()> {
-        self.socket.shutdown(Shutdown::Both)
-    }
-
-    pub fn new(socket: TcpStream) -> Self {
+    pub fn new(reader: OwnedReadHalf) -> Self {
         Self {
             input: [0; MAX_INPUT_LENGTH],
             input_length: 0,
-            socket,
+            reader,
         }
     }
 
-    pub fn read_line(&mut self) -> Option<String> {
-        while let Ok(num_bytes) = self.socket.read(&mut self.input[self.input_length..]) {
+    pub async fn read_line(&mut self) -> Option<String> {
+        while let Ok(num_bytes) = self.reader.read(&mut self.input[self.input_length..]).await {
             if num_bytes == 0 {
                 return None; // Must've reached EOL or someone is exceeding the buffer length.
             }

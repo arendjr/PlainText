@@ -1,45 +1,50 @@
 use async_trait::async_trait;
+use futures::{stream::SplitSink, FutureExt, SinkExt};
 use std::net::SocketAddr;
-use tokio::io::{AsyncWriteExt, Result};
-use tokio::net::tcp::OwnedWriteHalf;
+use tokio::io::Result;
+use warp::ws::{Message, WebSocket};
 
 use super::session::Session;
 use super::{SessionOutput, SessionState, SignInState};
 
 #[derive(Debug)]
-pub struct TelnetSession {
+pub struct WebSocketSession {
     pub id: u64,
     addr: SocketAddr,
-    writer: OwnedWriteHalf,
+    tx: SplitSink<WebSocket, Message>,
     state: SessionState,
 }
 
-impl TelnetSession {
-    pub fn new(id: u64, writer: OwnedWriteHalf, addr: SocketAddr) -> Self {
+impl WebSocketSession {
+    pub fn new(id: u64, tx: SplitSink<WebSocket, Message>, addr: SocketAddr) -> Self {
         Self {
             id,
             addr,
-            writer,
+            tx,
             state: SessionState::SigningIn(SignInState::new()),
         }
     }
 }
 
 #[async_trait]
-impl Session for TelnetSession {
+impl Session for WebSocketSession {
     async fn close(&mut self) -> Result<()> {
-        self.writer.shutdown().await
+        self.tx.close().map(|_| Ok(())).await
     }
 
     async fn send(&mut self, output: SessionOutput) {
         match output {
             SessionOutput::JSON(_) => {}
-            SessionOutput::Str(output) => send_data(&mut self.writer, output.as_bytes()).await,
-            SessionOutput::String(output) => send_data(&mut self.writer, output.as_bytes()).await,
+            SessionOutput::Str(output) => {
+                send_message(&mut self.tx, Message::text(output.to_owned())).await
+            }
+            SessionOutput::String(output) => {
+                send_message(&mut self.tx, Message::text(output.to_owned())).await
+            }
             SessionOutput::Prompt(info) => {
-                send_data(
-                    &mut self.writer,
-                    format!("({}H {}M) ", info.hp, info.mp).as_bytes(),
+                send_message(
+                    &mut self.tx,
+                    Message::text(format!("({}H {}M) ", info.hp, info.mp)),
                 )
                 .await
             }
@@ -65,8 +70,8 @@ impl Session for TelnetSession {
     }
 }
 
-async fn send_data(writer: &mut OwnedWriteHalf, data: &[u8]) {
-    if let Err(error) = writer.write(data).await {
+async fn send_message(tx: &mut SplitSink<WebSocket, Message>, message: Message) {
+    if let Err(error) = tx.send(message).await {
         println!("Could not send data over socket: {:?}", error);
     }
 }

@@ -5,6 +5,7 @@ authors = ["Arend van Beelen jr. <arendjr@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+async-trait = "0.1.42"
 bitflags = "1.2.1"
 bytes = "0.5"
 chrono = "0.4"

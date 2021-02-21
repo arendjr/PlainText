@@ -1,4 +1,6 @@
-use std::io;
+use async_trait::async_trait;
+use core::fmt::Debug;
+use tokio::io::Result;
 
 use crate::game_object::GameObjectId;
 
@@ -12,9 +14,10 @@ pub enum SessionState {
     SignedIn(GameObjectId),
 }
 
-pub trait Session: Send + Sync {
-    fn close(&mut self) -> io::Result<()>;
-    fn send(&mut self, output: SessionOutput);
+#[async_trait]
+pub trait Session: Debug + Send + Sync {
+    async fn close(&mut self) -> Result<()>;
+    async fn send(&mut self, output: SessionOutput);
     fn set_state(&mut self, state: SessionState);
     fn source(&self) -> String;
     fn state(&self) -> &SessionState;

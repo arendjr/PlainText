@@ -4,7 +4,6 @@ use serde_json::json;
 use std::collections::HashMap;
 
 use crate::game_object::GameObject;
-use crate::logs::{log_session_event, LogSender};
 use crate::objects::{Player, Realm};
 use crate::sessions::SessionOutput as Output;
 use crate::text_utils::is_letter;
@@ -77,23 +76,23 @@ struct StepImpl {
     enter: fn(&SignInData, &Realm) -> Output,
     exit: fn(&SignInData) -> Output,
     prompt: fn(&SignInData) -> Output,
-    process_input: fn(&SignInState, &Realm, &LogSender, &String, String) -> (SignInState, Output),
+    process_input: fn(&SignInState, &Realm, &String, String) -> (SignInState, Output, Vec<String>),
 }
 
 pub fn process_input(
     state: &SignInState,
     realm: &Realm,
-    log_tx: &LogSender,
     source: &String,
     input: String,
-) -> (SignInState, Output) {
+) -> (SignInState, Output, Vec<String>) {
     lazy_static! {
         static ref SIGN_IN_STEPS: HashMap<SignInStep, StepImpl> = get_sign_in_steps();
     }
 
     match SIGN_IN_STEPS.get(&state.step) {
         Some(step) => {
-            let (new_state, output) = (step.process_input)(state, realm, log_tx, source, input);
+            let (new_state, output, log_messages) =
+                (step.process_input)(state, realm, source, input);
             if let Some(new_step) = SIGN_IN_STEPS.get(&new_state.step) {
                 let prompt_output = (new_step.prompt)(&new_state.data);
                 let outputs = if new_state == *state {
@@ -104,12 +103,16 @@ pub fn process_input(
                     vec![output, exit_output, enter_output, prompt_output]
                 };
 
-                (new_state, Output::combine(outputs).process_highlights())
+                (
+                    new_state,
+                    Output::combine(outputs).process_highlights(),
+                    log_messages,
+                )
             } else {
-                (new_state, output.process_highlights())
+                (new_state, output.process_highlights(), log_messages)
             }
         }
-        None => (state.clone(), Output::None),
+        None => (state.clone(), Output::None, vec![]),
     }
 }
 
@@ -129,13 +132,12 @@ fn get_sign_in_steps() -> HashMap<SignInStep, StepImpl> {
             process_input: process_asking_password_input,
         },
 
-
         SignInStep::AskingSignUpData => StepImpl {
             enter: |data, realm| enter_sign_up_step(&data.sign_up_state.as_ref().unwrap(), realm),
             exit: |data| exit_sign_up_step(&data.sign_up_state.as_ref().unwrap()),
             prompt: |data| prompt_sign_up_step(&data.sign_up_state.as_ref().unwrap()),
-            process_input: |state, realm, _, _, input| {
-                let (sign_up_state, output) = process_sign_up_input(
+            process_input: |state, realm, _, input| {
+                let (sign_up_state, output, log_messages) = process_sign_up_input(
                     &state.data.sign_up_state.as_ref().unwrap(),
                     realm,
                     input
@@ -151,7 +153,8 @@ fn get_sign_in_steps() -> HashMap<SignInStep, StepImpl> {
                         },
                         SignInData { sign_up_state: Some(sign_up_state), ..state.data.clone() }
                     ),
-                    output
+                    output,
+                    log_messages
                 )
             }
         }
@@ -165,10 +168,9 @@ fn new_state(step: SignInStep, data: SignInData) -> SignInState {
 fn process_asking_user_name_input(
     state: &SignInState,
     realm: &Realm,
-    _: &LogSender,
     _: &String,
     input: String,
-) -> (SignInState, Output) {
+) -> (SignInState, Output, Vec<String>) {
     lazy_static! {
         static ref RESERVED_NAMES: Vec<String> = vec![
             "Admin".to_owned(),
@@ -185,6 +187,7 @@ fn process_asking_user_name_input(
             } else {
                 Output::Str("I'm sorry, but your name should consist of at least 3 letters.\n")
             },
+            vec![],
         )
     } else if let Some(player) = realm.player_by_name(&user_name) {
         (
@@ -196,11 +199,13 @@ fn process_asking_user_name_input(
                 },
             ),
             Output::None,
+            vec![],
         )
     } else if RESERVED_NAMES.contains(&user_name) {
         (
             state.clone(),
             Output::Str("Yeah right, like I believe that...\n"),
+            vec![],
         )
     } else {
         (
@@ -212,6 +217,7 @@ fn process_asking_user_name_input(
                 },
             ),
             Output::None,
+            vec![],
         )
     }
 }
@@ -219,18 +225,13 @@ fn process_asking_user_name_input(
 fn process_asking_password_input(
     state: &SignInState,
     _: &Realm,
-    log_tx: &LogSender,
     source: &String,
     input: String,
-) -> (SignInState, Output) {
+) -> (SignInState, Output, Vec<String>) {
     if let Some(player) = &state.data.player {
         let name = player.name();
         if player.matches_password(&input) {
-            log_session_event(
-                log_tx,
-                source.clone(),
-                format!("Authentication success for player \"{}\"", name),
-            );
+            let log_messages = vec![format!("Authentication success for player \"{}\"", name)];
 
             if player.session_id().is_some() {
                 (
@@ -239,6 +240,7 @@ fn process_asking_password_input(
                         "Cannot sign you in because you're already signed in from another \
                         location.\n",
                     ),
+                    log_messages,
                 )
             } else {
                 (
@@ -247,19 +249,18 @@ fn process_asking_password_input(
                         "Welcome back, {}. Type *help* if you're feeling lost.\n",
                         name
                     )),
+                    log_messages,
                 )
             }
         } else {
-            log_session_event(
-                log_tx,
-                source.clone(),
-                format!("Authentication failed for player \"{}\"", name),
-            );
-
-            (state.clone(), Output::Str("Password incorrect.\n"))
+            (
+                state.clone(),
+                Output::Str("Password incorrect.\n"),
+                vec![format!("Authentication failed for player \"{}\"", name)],
+            )
         }
     } else {
-        (state.clone(), Output::None)
+        (state.clone(), Output::None, vec![])
     }
 }
 

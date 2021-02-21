@@ -1,5 +1,5 @@
-use std::sync::mpsc::{channel, Sender};
-use std::{env, fs, io, thread};
+use std::{env, fs, io};
+use tokio::sync::mpsc::{channel, Sender};
 
 #[macro_use]
 mod player_output;
@@ -34,7 +34,7 @@ mod game_object;
 mod logs;
 mod number_utils;
 mod objects;
-mod persistence_thread;
+mod persistence_handler;
 mod point3d;
 mod relative_direction;
 mod sessions;
@@ -50,7 +50,7 @@ use commands::CommandExecutor;
 use game_object::{hydrate, Character, GameObject, GameObjectId, GameObjectRef};
 use logs::{log_command, log_session_event, LogMessage, LogSender};
 use objects::Realm;
-use persistence_thread::PersistenceRequest;
+use persistence_handler::PersistenceRequest;
 use player_output::PlayerOutput;
 use sessions::{
     process_input, SessionEvent, SessionInputEvent, SessionOutput, SessionPromptInfo, SessionState,
@@ -76,34 +76,30 @@ async fn main() {
         Err(error) => panic!("Failed to load data from \"{}\": {}", data_dir, error),
     };
 
-    let (input_tx, input_rx) = channel::<SessionInputEvent>();
-    let (persist_tx, persist_rx) = channel::<PersistenceRequest>();
-    let (session_tx, session_rx) = channel::<SessionEvent>();
-    let (log_tx, log_rx) = channel::<Box<dyn LogMessage>>();
+    let (input_tx, mut input_rx) = channel::<SessionInputEvent>(64);
+    let (persist_tx, persist_rx) = channel::<PersistenceRequest>(64);
+    let (session_tx, session_rx) = channel::<SessionEvent>(64);
+    let (log_tx, log_rx) = channel::<Box<dyn LogMessage>>(64);
 
-    logs::create_log_thread(log_dir, log_rx);
-    persistence_thread::create_persistence_thread(data_dir, persist_rx);
-    sessions::create_sessions_thread(input_tx, log_tx.clone(), session_rx);
+    logs::create_log_handler(log_dir, log_rx);
+    persistence_handler::create_persistence_handler(data_dir, persist_rx);
+    sessions::create_sessions_handler(input_tx, log_tx.clone(), session_rx);
 
-    let session_tx_clone = session_tx.clone();
-    thread::spawn(move || {
-        telnet_server::serve(telnet_port, session_tx_clone);
-    });
-
-    web_server::serve(realm.name().to_owned(), http_port);
+    telnet_server::serve(telnet_port, session_tx.clone());
+    web_server::serve(realm.name().to_owned(), http_port, session_tx.clone());
 
     let command_executor = CommandExecutor::new();
-    while let Ok(SessionInputEvent {
+    while let Some(SessionInputEvent {
         input,
         session_id,
         session_state,
         source,
-    }) = input_rx.recv()
+    }) = input_rx.recv().await
     {
         match session_state {
             SessionState::SigningIn(state) => {
                 let input_ev = (input, session_id, source, state);
-                realm = process_signing_in_input(realm, &session_tx, &log_tx, input_ev);
+                realm = process_signing_in_input(realm, &session_tx, &log_tx, input_ev).await;
             }
             SessionState::SignedIn(player_id) => {
                 let input_ev = (input, session_id, source, player_id);
@@ -113,16 +109,17 @@ async fn main() {
                     &session_tx,
                     &log_tx,
                     input_ev,
-                );
+                )
+                .await;
             }
             SessionState::SessionClosed(player_id) => {
-                realm = process_session_closed(realm, &session_tx, &log_tx, player_id);
+                realm = process_session_closed(realm, &session_tx, &log_tx, player_id).await;
             }
         }
 
         let persistence_requests = realm.take_persistence_requests();
         for request in persistence_requests {
-            if let Err(error) = persist_tx.send(request) {
+            if let Err(error) = persist_tx.send(request).await {
                 panic!("Couldn't send persistence request: {:?}", error);
             }
         }
@@ -179,14 +176,18 @@ fn inject_characters_into_rooms(mut realm: Realm, character_refs: Vec<GameObject
     realm
 }
 
-fn process_signing_in_input(
+async fn process_signing_in_input(
     mut realm: Realm,
     session_tx: &Sender<SessionEvent>,
     log_tx: &LogSender,
     (input, session_id, source, state): (String, u64, String, SignInState),
 ) -> Realm {
-    let (new_state, output) = process_input(&state, &realm, &log_tx, &source, input);
-    send_session_event(session_tx, SessionEvent::SessionOutput(session_id, output));
+    let (new_state, output, log_messages) = process_input(&state, &realm, &source, input);
+
+    send_session_event(session_tx, SessionEvent::SessionOutput(session_id, output)).await;
+    for message in log_messages {
+        log_session_event(log_tx, source.clone(), message).await;
+    }
 
     let session_state = if new_state.is_session_closed() {
         SessionState::SessionClosed(None)
@@ -197,7 +198,8 @@ fn process_signing_in_input(
                 &log_tx,
                 source.clone(),
                 format!("Character created for player \"{}\"", user_name),
-            );
+            )
+            .await;
         }
 
         if let Some(player) = realm.player_by_name(user_name) {
@@ -208,19 +210,20 @@ fn process_signing_in_input(
                         existing_session_id,
                         SessionState::SessionClosed(Some(player.id())),
                     ),
-                );
+                )
+                .await;
             }
 
             let player_ref = player.object_ref();
             let current_room = player.current_room();
             realm = realm.set(player_ref, player.with_session_id(Some(session_id)));
 
-            log_command(log_tx, user_name.to_owned(), "(signed in)".to_owned());
+            log_command(log_tx, user_name.to_owned(), "(signed in)".to_owned()).await;
 
             let mut player_output = Vec::new();
             realm = enter_room(realm, player_ref, current_room, &mut player_output);
             look_at_object(&realm, player_ref, current_room, &mut player_output);
-            process_player_output(&realm, session_tx, player_output);
+            process_player_output(&realm, session_tx, player_output).await;
 
             SessionState::SignedIn(player_ref.id())
         } else {
@@ -228,7 +231,8 @@ fn process_signing_in_input(
                 log_tx,
                 source,
                 format!("Could not determine ID for player \"{}\"", user_name),
-            );
+            )
+            .await;
             SessionState::SessionClosed(None)
         }
     } else {
@@ -238,12 +242,13 @@ fn process_signing_in_input(
     send_session_event(
         &session_tx,
         SessionEvent::SessionUpdate(session_id, session_state),
-    );
+    )
+    .await;
 
     realm
 }
 
-fn process_signed_in_input(
+async fn process_signed_in_input(
     realm: Realm,
     command_executor: &CommandExecutor,
     session_tx: &Sender<SessionEvent>,
@@ -251,24 +256,25 @@ fn process_signed_in_input(
     (input, session_id, source, player_id): (String, u64, String, GameObjectId),
 ) -> Realm {
     if let Some(player) = realm.player_by_id(player_id) {
-        log_command(&log_tx, player.name().to_owned(), input.clone());
+        log_command(&log_tx, player.name().to_owned(), input.clone()).await;
         let player_ref = player.object_ref();
         let (new_realm, player_output) =
             command_executor.execute_command(realm, player_ref, log_tx, input);
-        process_player_output(&new_realm, session_tx, player_output);
+        process_player_output(&new_realm, session_tx, player_output).await;
 
         new_realm
     } else {
-        log_session_event(&log_tx, source, format!("Player {} deleted", player_id));
+        log_session_event(&log_tx, source, format!("Player {} deleted", player_id)).await;
         send_session_event(
             &session_tx,
             SessionEvent::SessionUpdate(session_id, SessionState::SessionClosed(Some(player_id))),
-        );
+        )
+        .await;
         realm
     }
 }
 
-fn process_player_output(
+async fn process_player_output(
     realm: &Realm,
     session_tx: &Sender<SessionEvent>,
     player_output: Vec<PlayerOutput>,
@@ -285,13 +291,14 @@ fn process_player_output(
                             mp: affected_player.mp(),
                         })),
                     ),
-                );
+                )
+                .await;
             }
         }
     }
 }
 
-fn process_session_closed(
+async fn process_session_closed(
     mut realm: Realm,
     _: &Sender<SessionEvent>,
     log_tx: &LogSender,
@@ -302,15 +309,15 @@ fn process_session_closed(
             let player_name = player.name().to_owned();
             realm = realm.set(player.object_ref(), player.with_session_id(None));
 
-            log_command(&log_tx, player_name, "(session closed)".to_owned());
+            log_command(&log_tx, player_name, "(session closed)".to_owned()).await;
         }
     }
 
     realm
 }
 
-fn send_session_event(session_tx: &Sender<SessionEvent>, event: SessionEvent) {
-    if let Err(error) = session_tx.send(event) {
+async fn send_session_event(session_tx: &Sender<SessionEvent>, event: SessionEvent) {
+    if let Err(error) = session_tx.send(event).await {
         println!("Could not send session event: {:?}", error);
     }
 }

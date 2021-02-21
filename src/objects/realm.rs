@@ -12,7 +12,7 @@ use crate::game_object::{
     Character, GameObject, GameObjectId, GameObjectRef, GameObjectType, SharedGameObject,
 };
 use crate::objects::Player;
-use crate::persistence_thread::PersistenceRequest;
+use crate::persistence_handler::PersistenceRequest;
 use crate::sessions::SignUpData;
 
 impl Eq for dyn GameObject {}

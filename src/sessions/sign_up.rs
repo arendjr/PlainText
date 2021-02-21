@@ -89,7 +89,7 @@ struct StepImpl {
     enter: fn(&SignUpData, &Realm) -> Output,
     exit: fn(&SignUpData) -> Output,
     prompt: fn(&SignUpData) -> Output,
-    process_input: fn(&SignUpState, &Realm, String) -> (SignUpState, Output),
+    process_input: fn(&SignUpState, &Realm, String) -> (SignUpState, Output, Vec<String>),
 }
 
 pub fn enter_sign_up_step(state: &SignUpState, realm: &Realm) -> Output {
@@ -117,10 +117,10 @@ pub fn process_sign_up_input(
     state: &SignUpState,
     realm: &Realm,
     input: String,
-) -> (SignUpState, Output) {
+) -> (SignUpState, Output, Vec<String>) {
     match SIGN_UP_STEPS.get(&state.step) {
         Some(step) => (step.process_input)(state, realm, input),
-        None => (state.clone(), Output::None),
+        None => (state.clone(), Output::None, vec![]),
     }
 }
 
@@ -401,22 +401,25 @@ fn process_asking_user_name_confirmation_input(
     state: &SignUpState,
     _: &Realm,
     input: String,
-) -> (SignUpState, Output) {
+) -> (SignUpState, Output, Vec<String>) {
     let answer = input.to_lowercase();
     if answer == "yes" || answer == "y" {
         (
             new_state(SignUpStep::AskingPassword, state.data.clone()),
             Output::None,
+            vec![],
         )
     } else if answer == "no" || answer == "n" {
         (
             new_state(SignUpStep::SessionClosed, SignUpData::new()),
             Output::Str("Okay, bye.\n"),
+            vec![],
         )
     } else {
         (
             state.clone(),
             Output::Str("Please answer with yes or no.\n"),
+            vec![],
         )
     }
 }
@@ -425,7 +428,7 @@ fn process_asking_sign_up_password_input(
     state: &SignUpState,
     _: &Realm,
     input: String,
-) -> (SignUpState, Output) {
+) -> (SignUpState, Output, Vec<String>) {
     if input.len() < 6 {
         (
             state.clone(),
@@ -433,6 +436,7 @@ fn process_asking_sign_up_password_input(
                 "Please choose a password of at least 6 characters.\n",
                 Color::Red,
             )),
+            vec![],
         )
     } else if input.to_lowercase() == state.data.user_name.to_lowercase() {
         (
@@ -441,6 +445,7 @@ fn process_asking_sign_up_password_input(
                 "Your password and your username may not be the same.\n",
                 Color::Red,
             )),
+            vec![],
         )
     } else if input == "123456" || input == "654321" {
         (
@@ -449,6 +454,7 @@ fn process_asking_sign_up_password_input(
                 "Sorry, that password is too simple.\n",
                 Color::Red,
             )),
+            vec![],
         )
     } else {
         (
@@ -460,6 +466,7 @@ fn process_asking_sign_up_password_input(
                 },
             ),
             Output::None,
+            vec![],
         )
     }
 }
@@ -468,16 +475,18 @@ fn process_asking_sign_up_password_confirmation_input(
     state: &SignUpState,
     _: &Realm,
     input: String,
-) -> (SignUpState, Output) {
+) -> (SignUpState, Output, Vec<String>) {
     if state.data.password == input {
         (
             new_state(SignUpStep::AskingRace, state.data.clone()),
             Output::String(colorize("Password confirmed.\n", Color::Green)),
+            vec![],
         )
     } else {
         (
             new_state(SignUpStep::AskingPassword, state.data.clone()),
             Output::String(colorize("Passwords don't match.\n", Color::Red)),
+            vec![],
         )
     }
 }
@@ -486,7 +495,7 @@ fn process_asking_race_input(
     state: &SignUpState,
     realm: &Realm,
     input: String,
-) -> (SignUpState, Output) {
+) -> (SignUpState, Output, Vec<String>) {
     let answer = input.to_lowercase();
     if let Some(race) = realm.race_by_name(&answer) {
         (
@@ -501,6 +510,7 @@ fn process_asking_race_input(
                 &format!("\nYou have chosen to become a {}.\n", answer),
                 Color::Green,
             )),
+            vec![],
         )
     } else if answer.starts_with("info ") {
         let race_name = answer[5..].trim();
@@ -523,9 +533,10 @@ fn process_asking_race_input(
                     race_name
                 ))
             },
+            vec![],
         )
     } else {
-        (state.clone(), Output::None)
+        (state.clone(), Output::None, vec![])
     }
 }
 
@@ -533,7 +544,7 @@ fn process_asking_class_input(
     state: &SignUpState,
     realm: &Realm,
     input: String,
-) -> (SignUpState, Output) {
+) -> (SignUpState, Output, Vec<String>) {
     let answer = input.to_lowercase();
     let classes = match &state.data.race {
         Some(race) => race
@@ -557,6 +568,7 @@ fn process_asking_class_input(
                 &format!("\nYou have chosen to become a {}.\n", answer),
                 Color::Green,
             )),
+            vec![],
         )
     } else if answer.starts_with("info ") {
         let class_name = answer[5..].trim();
@@ -579,14 +591,16 @@ fn process_asking_class_input(
                     class_name
                 ))
             },
+            vec![],
         )
     } else if answer == "back" || answer == "b" {
         (
             new_state(SignUpStep::AskingRace, state.data.clone()),
             Output::None,
+            vec![],
         )
     } else {
-        (state.clone(), Output::None)
+        (state.clone(), Output::None, vec![])
     }
 }
 
@@ -594,7 +608,7 @@ fn process_asking_gender_input(
     state: &SignUpState,
     _: &Realm,
     input: String,
-) -> (SignUpState, Output) {
+) -> (SignUpState, Output, Vec<String>) {
     let answer = input.to_lowercase();
     if answer == "male" || answer == "m" {
         (
@@ -606,6 +620,7 @@ fn process_asking_gender_input(
                 },
             ),
             Output::String(colorize("\nYou have chosen to be male.\n", Color::Green)),
+            vec![],
         )
     } else if answer == "female" || answer == "f" {
         (
@@ -617,14 +632,16 @@ fn process_asking_gender_input(
                 },
             ),
             Output::String(colorize("\nYou have chosen to be female.\n", Color::Green)),
+            vec![],
         )
     } else if answer == "back" || answer == "b" {
         (
             new_state(SignUpStep::AskingClass, state.data.clone()),
             Output::None,
+            vec![],
         )
     } else {
-        (state.clone(), Output::None)
+        (state.clone(), Output::None, vec![])
     }
 }
 
@@ -632,7 +649,7 @@ fn process_asking_extra_stats_input(
     state: &SignUpState,
     _: &Realm,
     input: String,
-) -> (SignUpState, Output) {
+) -> (SignUpState, Output, Vec<String>) {
     let answer = input.to_lowercase();
     if answer == "info stats" {
         (
@@ -665,11 +682,13 @@ fn process_asking_extra_stats_input(
                   Faith determines the magical defense power. It also decreases the chance that\n\
                   a spell will fail when cast.\n",
             ),
+            vec![],
         )
     } else if answer == "back" || answer == "b" {
         (
             new_state(SignUpStep::AskingGender, state.data.clone()),
             Output::None,
+            vec![],
         )
     } else {
         let (mut height, mut weight, mut stats, stats_suggestion) = get_base_stats(&state.data);
@@ -680,7 +699,7 @@ fn process_asking_extra_stats_input(
         } else {
             let expected_num_attributes = if is_barbarian { 5 } else { 6 };
             if answer.split(' ').count() != expected_num_attributes {
-                return (state.clone(), Output::None);
+                return (state.clone(), Output::None, vec![]);
             }
             let mut attributes = answer.split(' ');
             CharacterStats::from_stats(
@@ -704,6 +723,7 @@ fn process_asking_extra_stats_input(
                     "\nThe total of attributes should be 9.\n",
                     Color::Red,
                 )),
+                vec![],
             );
         }
 
@@ -727,6 +747,7 @@ fn process_asking_extra_stats_input(
                 "\nYour character stats have been recorded.\n",
                 Color::Green,
             )),
+            vec![],
         )
     }
 }
@@ -735,7 +756,7 @@ fn process_asking_sign_up_confirmation_input(
     state: &SignUpState,
     realm: &Realm,
     input: String,
-) -> (SignUpState, Output) {
+) -> (SignUpState, Output, Vec<String>) {
     let answer = input.to_lowercase();
     if realm.player_by_name(&state.data.user_name).is_some() {
         (
@@ -745,6 +766,7 @@ fn process_asking_sign_up_confirmation_input(
                 you were creating yours. I'm terribly sorry, but it appears you \
                 will have to start over.\n",
             ),
+            vec![],
         )
     } else if answer == "yes" || answer == "y" {
         (
@@ -754,16 +776,19 @@ fn process_asking_sign_up_confirmation_input(
                 realm.name(),
                 state.data.user_name
             )),
+            vec![],
         )
     } else if answer == "no" || answer == "n" || answer == "back" || answer == "b" {
         (
             new_state(SignUpStep::AskingExtraStats, state.data.clone()),
             Output::None,
+            vec![],
         )
     } else {
         (
             state.clone(),
             Output::Str("Please answer with yes or no.\n"),
+            vec![],
         )
     }
 }

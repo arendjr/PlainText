@@ -1,7 +1,10 @@
-use std::net::TcpStream;
+use std::net::SocketAddr;
+use tokio::net::TcpStream;
+use warp::ws::WebSocket;
 
 use crate::sessions::{SessionOutput, SessionState};
 
+#[derive(Debug)]
 pub struct SessionInputEvent {
     pub session_id: u64,
     pub session_state: SessionState,
@@ -9,8 +12,10 @@ pub struct SessionInputEvent {
     pub input: String,
 }
 
+#[derive(Debug)]
 pub enum SessionEvent {
-    IncomingSession(TcpStream),
+    IncomingTelnetSession(TcpStream, SocketAddr),
+    IncomingWebsocketSession(WebSocket, SocketAddr),
     SessionOutput(u64, SessionOutput),
     SessionUpdate(u64, SessionState),
 }

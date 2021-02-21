@@ -1,21 +1,26 @@
-use futures::{FutureExt, StreamExt};
+use std::convert::Infallible;
 use std::fs;
-use warp::{http::Response, Filter};
+use std::net::{IpAddr, Ipv4Addr, SocketAddr};
+use tokio::sync::mpsc::Sender;
+use warp::{http::Response, ws::WebSocket, Filter};
 
-pub fn serve(realm_name: String, port: u16) {
+use crate::sessions::SessionEvent;
+
+pub fn serve(realm_name: String, port: u16, session_tx: Sender<SessionEvent>) {
     let index_html = fs::read_to_string("web/index.html").unwrap();
 
-    let ws_upgrade = warp::ws().map(|ws: warp::ws::Ws| {
-        ws.on_upgrade(|websocket| {
-            // Just echo all messages back...
-            let (tx, rx) = websocket.split();
-            rx.forward(tx).map(|result| {
-                if let Err(e) = result {
-                    eprintln!("websocket error: {:?}", e);
-                }
-            })
-        })
-    });
+    let ws_upgrade = warp::ws()
+        .and(warp::addr::remote())
+        .and(with_session_tx(session_tx))
+        .map(
+            |ws: warp::ws::Ws, maybe_addr: Option<SocketAddr>, session_tx: Sender<SessionEvent>| {
+                ws.on_upgrade(move |websocket| {
+                    let addr = maybe_addr
+                        .unwrap_or(SocketAddr::new(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), 0));
+                    send_incoming_session(session_tx, websocket, addr)
+                })
+            },
+        );
     let index = warp::get().and(warp::path::end()).map(move || {
         Response::builder()
             .header("Content-type", "text/html")
@@ -26,4 +31,23 @@ pub fn serve(realm_name: String, port: u16) {
     tokio::spawn(warp::serve(routes).run(([0, 0, 0, 0], port)));
 
     println!("Listening for HTTP connections at port {}.", port);
+}
+
+async fn send_incoming_session(
+    session_tx: Sender<SessionEvent>,
+    websocket: WebSocket,
+    addr: SocketAddr,
+) {
+    if let Err(error) = session_tx
+        .send(SessionEvent::IncomingWebsocketSession(websocket, addr))
+        .await
+    {
+        println!("Failed to dispatch session: {:?}", error);
+    }
+}
+
+fn with_session_tx(
+    session_tx: Sender<SessionEvent>,
+) -> impl Filter<Extract = (Sender<SessionEvent>,), Error = Infallible> + Clone {
+    warp::any().map(move || session_tx.clone())
 }
