@@ -46,7 +46,7 @@ impl Player {
                 height: player_dto.height,
                 hp: player_dto.hp,
                 inventory: player_dto.inventory.unwrap_or_default(),
-                is_admin: player_dto.is_admin.unwrap_or(false),
+                is_admin: player_dto.isAdmin.unwrap_or(false),
                 mp: player_dto.mp,
                 name: player_dto.name,
                 password: player_dto.password,
@@ -258,7 +258,7 @@ impl GameObject for Player {
             } else {
                 Some(self.inventory.clone())
             },
-            is_admin: Some(self.is_admin),
+            isAdmin: Some(self.is_admin),
             mp: self.mp,
             name: self.name.clone(),
             password: self.password.clone(),
@@ -288,7 +288,7 @@ struct PlayerDto {
     height: f32,
     hp: i16,
     inventory: Option<Vec<GameObjectRef>>,
-    is_admin: Option<bool>,
+    isAdmin: Option<bool>,
     mp: i16,
     name: String,
     password: String,
