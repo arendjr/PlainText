@@ -202,7 +202,6 @@ fn get_sign_up_steps() -> HashMap<SignUpStep, StepImpl> {
                     "<str> <dex> <vit> <end> <int> <fai>"
                 },
                 format_stats_string(&get_base_stats(&data).3, &data.class)
-
             )),
             process_input: process_asking_extra_stats_input
         },

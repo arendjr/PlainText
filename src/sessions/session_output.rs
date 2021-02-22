@@ -1,9 +1,16 @@
+use serde::Serialize;
+
 use crate::text_utils::process_highlights;
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SessionPromptInfo {
+    pub name: String,
+    pub is_admin: bool,
     pub hp: i16,
+    pub max_hp: i16,
     pub mp: i16,
+    pub max_mp: i16,
 }
 
 #[derive(Debug, PartialEq)]

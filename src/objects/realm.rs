@@ -228,7 +228,12 @@ impl Realm {
 
     pub fn with_new_player(&self, sign_up_data: &SignUpData) -> Self {
         let player_ref = GameObjectRef(GameObjectType::Player, self.next_id);
-        self.set(player_ref, Player::new(player_ref.id(), sign_up_data))
+        let mut player = Player::new(player_ref.id(), sign_up_data);
+        // First player automatically becomes admin:
+        if self.players_by_name.len() == 0 {
+            player = player.0.with_admin(true);
+        }
+        self.set(player_ref, player)
     }
 }
 

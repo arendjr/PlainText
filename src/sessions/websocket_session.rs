@@ -1,11 +1,17 @@
 use async_trait::async_trait;
 use futures::{stream::SplitSink, FutureExt, SinkExt};
+use serde::Serialize;
 use std::net::SocketAddr;
 use tokio::io::Result;
 use warp::ws::{Message, WebSocket};
 
 use super::session::Session;
-use super::{SessionOutput, SessionState, SignInState};
+use super::{SessionOutput, SessionPromptInfo, SessionState, SignInState};
+
+#[derive(Serialize)]
+struct Prompt {
+    player: SessionPromptInfo,
+}
 
 #[derive(Debug)]
 pub struct WebSocketSession {
@@ -34,7 +40,9 @@ impl Session for WebSocketSession {
 
     async fn send(&mut self, output: SessionOutput) {
         match output {
-            SessionOutput::JSON(_) => {}
+            SessionOutput::JSON(data) => {
+                send_message(&mut self.tx, Message::text(data.to_string())).await
+            }
             SessionOutput::Str(output) => {
                 send_message(&mut self.tx, Message::text(output.to_owned())).await
             }
@@ -42,9 +50,10 @@ impl Session for WebSocketSession {
                 send_message(&mut self.tx, Message::text(output.to_owned())).await
             }
             SessionOutput::Prompt(info) => {
+                let prompt = Prompt { player: info };
                 send_message(
                     &mut self.tx,
-                    Message::text(format!("({}H {}M) ", info.hp, info.mp)),
+                    Message::text(serde_json::to_string(&prompt).unwrap()),
                 )
                 .await
             }

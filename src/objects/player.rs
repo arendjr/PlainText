@@ -22,6 +22,7 @@ pub struct Player {
     height: f32,
     hp: i16,
     inventory: Vec<GameObjectRef>,
+    is_admin: bool,
     mp: i16,
     name: String,
     password: String,
@@ -45,6 +46,7 @@ impl Player {
                 height: player_dto.height,
                 hp: player_dto.hp,
                 inventory: player_dto.inventory.unwrap_or_default(),
+                is_admin: player_dto.is_admin.unwrap_or(false),
                 mp: player_dto.mp,
                 name: player_dto.name,
                 password: player_dto.password,
@@ -55,6 +57,10 @@ impl Player {
             })),
             Err(error) => Err(format!("parse error: {}", error)),
         }
+    }
+
+    pub fn is_admin(&self) -> bool {
+        self.is_admin
     }
 
     pub fn matches_password(&self, password: &str) -> bool {
@@ -78,6 +84,7 @@ impl Player {
             height: sign_up_data.height,
             hp: sign_up_data.stats.max_hp(),
             inventory: Vec::new(),
+            is_admin: false,
             mp: sign_up_data.stats.max_mp(),
             name: sign_up_data.user_name.clone(),
             password: String::new(),
@@ -91,6 +98,16 @@ impl Player {
 
     pub fn session_id(&self) -> Option<u64> {
         self.session_id
+    }
+
+    pub fn with_admin(&self, admin: bool) -> (Self, bool) {
+        (
+            Self {
+                is_admin: admin,
+                ..self.clone()
+            },
+            true,
+        )
     }
 
     pub fn with_password(&self, password: &str) -> (Self, bool) {
@@ -241,6 +258,7 @@ impl GameObject for Player {
             } else {
                 Some(self.inventory.clone())
             },
+            is_admin: Some(self.is_admin),
             mp: self.mp,
             name: self.name.clone(),
             password: self.password.clone(),
@@ -270,6 +288,7 @@ struct PlayerDto {
     height: f32,
     hp: i16,
     inventory: Option<Vec<GameObjectRef>>,
+    is_admin: Option<bool>,
     mp: i16,
     name: String,
     password: String,

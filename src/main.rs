@@ -287,8 +287,12 @@ async fn process_player_output(
                     SessionEvent::SessionOutput(
                         session_id,
                         output.output.with(SessionOutput::Prompt(SessionPromptInfo {
+                            name: affected_player.name().to_owned(),
+                            is_admin: affected_player.is_admin(),
                             hp: affected_player.hp(),
+                            max_hp: affected_player.max_hp(),
                             mp: affected_player.mp(),
+                            max_mp: affected_player.max_mp(),
                         })),
                     ),
                 )
