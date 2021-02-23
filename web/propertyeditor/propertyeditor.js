@@ -73,7 +73,7 @@ define(["controller", "lib/codemirror/codemirror", "lib/hogan", "lib/zepto",
 
         this.element.show();
 
-        this.editor.setValue(value !== undefined ? value.trimmed() : "");
+        this.editor.setValue(value?.trim() ?? "");
 
         this.editor.focus();
     };

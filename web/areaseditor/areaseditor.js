@@ -47,8 +47,8 @@ define(["controller", "util", "lib/hogan", "lib/laces.tie", "lib/zepto",
 
             self.model.map.areas.save({ "id": "new", "name": name });
         });
-        this.element.on("click", ".remove.icon", function() {
-            var areaId = $(event.target).data("area-id").toInt();
+        this.element.on("click", ".remove.icon", function(event) {
+            var areaId = parseInt($(event.target).data("area-id"));
             self.model.map.areas.remove(areaId);
         });
 

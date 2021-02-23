@@ -24,7 +24,7 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
 
         this.bind("change", function(event) {
             var propertyName = event.key;
-            if (this.constructor.savedProperties.contains(propertyName)) {
+            if (this.constructor.savedProperties.hasOwnProperty(propertyName)) {
                 this.saveProperty(propertyName);
             }
         });
@@ -81,10 +81,7 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
         if (options.type === "pointer") {
             value = (value === null ? "0" : value.toPointer());
         } else if (options.type === "pointerlist") {
-            var pointerList = [];
-            value.forEach(function(object) {
-                pointerList.append(object.toPointer());
-            });
+            var pointerList = value.map(object => object.toPointer());
             value = "[" + pointerList.join(",") + "]";
         } else if (options.type === "point") {
             value = "(" + value[0] + "," + value[1] + "," + value[2] + ")";
@@ -105,11 +102,7 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
                 if (options.type === "pointer") {
                     value = (value === null ? "0" : value.toPointer());
                 } else if (options.type === "pointerlist") {
-                    var pointerList = [];
-                    value.forEach(function(object) {
-                        pointerList.append(object.toPointer());
-                    });
-                    value = pointerList;
+                    value = value.map(object => object.toPointer());
                 } else if (options.type === "point") {
                     value = [value[0], value[1], value[2]];
                 }
@@ -122,7 +115,7 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
 
     GameObject.prototype.toPointer = function() {
 
-        return this.constructor.name.toLower() + ":" + this.id;
+        return this.constructor.name.toLowerCase() + ":" + this.id;
     };
 
 
@@ -183,15 +176,15 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
         this.set("position", function() { return [this.x, this.y, this.z]; });
 
         var flags = room.flags.split("|");
-        this.set("dynamicPortalDescriptions", !flags.contains("OmitDynamicPortalsFromDescription"));
+        this.set("dynamicPortalDescriptions", !flags.includes("OmitDynamicPortalsFromDescription"));
         this.set("distantCharacterDescriptions",
-                 !flags.contains("OmitDistantCharactersFromDescription"));
-        this.set("hasWalls", flags.contains("HasWalls"));
-        this.set("hasCeiling", flags.contains("HasCeiling"));
-        this.set("hasFloor", flags.contains("HasFloor"));
-        this.set("isRoad", flags.contains("IsRoad"));
-        this.set("isRiver", flags.contains("IsRiver"));
-        this.set("isRoof", flags.contains("IsRoof"));
+                 !flags.includes("OmitDistantCharactersFromDescription"));
+        this.set("hasWalls", flags.includes("HasWalls"));
+        this.set("hasCeiling", flags.includes("HasCeiling"));
+        this.set("hasFloor", flags.includes("HasFloor"));
+        this.set("isRoad", flags.includes("IsRoad"));
+        this.set("isRiver", flags.includes("IsRiver"));
+        this.set("isRoof", flags.includes("IsRoof"));
         this.set("flags", function() {
             var array = [];
             if (!this.dynamicPortalDescriptions) {
@@ -307,7 +300,10 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
             for (var roomId in self.rooms) {
                 if (self.rooms.hasOwnProperty(roomId)) {
                     var room = self.rooms[roomId];
-                    room.portals.removeOne(portal);
+                    const index = room.portals.indexOf(portal);
+                    if (index > -1) {
+                        room.portals.splice(index, 1);
+                    }
                 }
             }
 
@@ -325,7 +321,7 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
                     var portal = new Portal(self, data["portal"]);
                     self.portals.set(portal.id, portal);
 
-                    if (data.contains("room")) {
+                    if (data.hasOwnProperty("room")) {
                         var room = new Room(self, data["room"]);
                         self.rooms.set(room.id, room);
                         room.resolvePointers(["portals"]);
@@ -334,7 +330,7 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
                         });
                     }
 
-                    if (data.contains("room2")) {
+                    if (data.hasOwnProperty("room2")) {
                         var room2 = new Room(self, data["room2"]);
                         self.rooms.set(room2.id, room2);
                         room2.resolvePointers(["portals"]);
@@ -343,7 +339,7 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
                         });
                     }
 
-                    if (data.contains("area")) {
+                    if (data.hasOwnProperty("area")) {
                         var area = new Area(self, data["area"]);
                         self.areas.set(area.id, area);
                         area.resolvePointers(["rooms"]);

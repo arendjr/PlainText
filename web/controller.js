@@ -40,8 +40,8 @@ define(["lib/zepto"], function($) {
 
     var commandInput;
 
-    var commandListeners = [];
-    var incomingMessageListeners = [];
+    var commandListeners = new Set();
+    var incomingMessageListeners = new Set();
 
     var history = [];
     var historyIndex = 0;
@@ -154,7 +154,7 @@ define(["lib/zepto"], function($) {
 
         screen.on("click", "a.go", function(event) {
             var exitName = event.target.text();
-            sendCommand("go \"%1\"".arg(exitName));
+            sendCommand(`go "${exitName}"`);
         });
 
         socket.addEventListener("open", function(message) {
@@ -229,7 +229,7 @@ define(["lib/zepto"], function($) {
             fileName += ".css";
         }
 
-        if ($("link[href='%1']".arg(fileName), document.head).length === 0) {
+        if ($(`link[href='${fileName}']`, document.head).length === 0) {
             $("<link>", {
                 "rel": "stylesheet",
                 "href": fileName
@@ -239,45 +239,45 @@ define(["lib/zepto"], function($) {
 
     function addCommandListener(listener) {
 
-        commandListeners.insert(listener);
+        commandListeners.add(listener);
     }
 
     function removeCommandListener(listener) {
 
-        commandListeners.removeAll(listener);
+        commandListeners.delete(listener);
     }
 
     function notifyCommandListeners(command) {
 
-        commandListeners.forEach(function(listener) {
+        for (const listener of commandListeners) {
             var result = listener(command);
             if (result !== undefined) {
                 command = result;
             }
-        });
+        }
         return command;
     }
 
     function addIncomingMessageListener(listener) {
 
-        incomingMessageListeners.insert(listener);
+        incomingMessageListeners.add(listener);
     }
 
     function removeIncomingMessageListener(listener) {
 
-        incomingMessageListeners.removeAll(listener);
+        incomingMessageListeners.delete(listener);
     }
 
     function notifyIncomingMessageListeners(message) {
 
-        incomingMessageListeners.forEach(function(listener) {
+        for (const listener of incomingMessageListeners) {
             listener(message);
-        });
+        }
     }
 
     function writeToScreen(message) {
 
-        if (message.trimmed().length === 0) {
+        if (message.trim().length === 0) {
             return;
         }
 

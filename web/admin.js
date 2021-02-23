@@ -74,9 +74,9 @@ define(["controller", "mapeditor/mapeditor", "propertyeditor/propertyeditor", "l
                 if (triggers.hasOwnProperty(triggerName)) {
                     Controller.sendApiCall("trigger-get " + rest, function(data) {
                         var triggerSource = data.triggerSource;
-                        if (!triggerSource || triggerSource.isEmpty()) {
+                        if (!triggerSource) {
                             var trigger = triggers[triggerName];
-                            if (trigger.contains("(")) {
+                            if (trigger.includes("(")) {
                                 var argsString = trigger.substring(trigger.indexOf("(") + 1,
                                                                    trigger.indexOf(")"));
                                 var args = [];
@@ -126,7 +126,7 @@ define(["controller", "mapeditor/mapeditor", "propertyeditor/propertyeditor", "l
             }
 
             if (command.startsWith("@")) {
-                if (command.contains(" ")) {
+                if (command.includes(" ")) {
                     return "set-prop room " + command.substr(1);
                 } else {
                     return "get-prop room " + command.substr(1);
@@ -148,7 +148,7 @@ define(["controller", "mapeditor/mapeditor", "propertyeditor/propertyeditor", "l
         Controller.sendApiCall("triggers-list", function(data) {
             data.forEach(function(trigger) {
                 var triggerName;
-                if (trigger.contains("(")) {
+                if (trigger.includes("(")) {
                     triggerName = trigger.substr(0, trigger.indexOf("("));
                 } else {
                     triggerName = trigger.substr(0, trigger.indexOf(" : "));

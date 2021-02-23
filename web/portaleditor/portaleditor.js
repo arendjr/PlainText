@@ -10,7 +10,7 @@ define(["controller", "util", "lib/laces", "lib/zepto", "text!portaleditor/porta
 
         this.mapModel = null;
         this.mapView = null;
-        this.originalSelectionListeners = [];
+        this.originalSelectionListeners = new Set();
 
         this.portal = new Laces.Model();
         this.portal.set("room2", {});
@@ -232,7 +232,7 @@ define(["controller", "util", "lib/laces", "lib/zepto", "text!portaleditor/porta
 
     PortalEditor.prototype.save = function() {
 
-        var portal = this.portal.id ? this.portal.clone() : { "id": "new" };
+        var portal = this.portal.id ? { ...this.portal } : { "id": "new" };
 
         portal.name = this.portal.name || "";
         portal.name2 = this.portal.name2 || "";
@@ -249,7 +249,7 @@ define(["controller", "util", "lib/laces", "lib/zepto", "text!portaleditor/porta
             portal.room2 = "new";
 
             if (Util.isDirection(this.portal.direction)) {
-                var distance = $("input.distance", this.element).val().toInt();
+                var distance = parseInt($("input.distance", this.element).val());
                 if (distance === 0) {
                     $(".distance.label", this.element).css("color", "red");
                     return;
@@ -275,8 +275,8 @@ define(["controller", "util", "lib/laces", "lib/zepto", "text!portaleditor/porta
         portal.flags = flags.join("|");
 
         portal.eventMultipliers = {
-            "Visual": $(".visualEventMultiplier", this.element).val().toDouble() / 100,
-            "Sound": $(".soundEventMultiplier", this.element).val().toDouble() / 100
+            "Visual": parseFloat($(".visualEventMultiplier", this.element).val()) / 100,
+            "Sound": parseFloat($(".soundEventMultiplier", this.element).val()) / 100
         };
 
         this.mapModel.portals.save(portal);

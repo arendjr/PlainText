@@ -40,15 +40,8 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
         this.model.set("map", new MapModel());
         this.model.set("selectedRoom", null);
         this.model.set("areasArray", function() {
-            var areas = [];
-            for (var id in this.map.areas) {
-                if (this.map.areas.hasOwnProperty(id)) {
-                    var area = this.map.areas[id].clone();
-                    area.visible = self.view.isAreaVisible(area);
-                    areas.append(area);
-                }
-            }
-            return areas;
+            return Object.values(this.map.areas)
+                .map(area => ({ ...area, visible: self.view.isAreaVisible(area) }));
         });
 
         Controller.addStyle("mapeditor/mapeditor");
@@ -185,10 +178,17 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
                 self.areaSelectionDialog.show({
                     "onselect": function(area) {
                         if (room.area) {
-                            room.area.rooms.removeOne(room);
+                            const index = room.area.rooms.indexOf(room);
+                            if (index > -1) {
+                                room.area.rooms.splice(index, 1);
+                            }
                         }
-                        area.rooms.removeOne(room); // could use insert() instead of remove and
-                        area.rooms.append(room);    // append, but I want to force an update
+                        // Always remove and push, because I want to force an update:
+                        const index = area.rooms.indexOf(room);
+                        if (index > -1) {
+                            area.rooms.splice(index, 1);
+                        }
+                        area.rooms.push(room);
                         self.areaSelectionDialog.close();
                     }
                 });
@@ -213,14 +213,12 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
             var portal = self.model.map.portals[event.target.getAttribute("data-portal-id")];
             self.portalEditor.edit(portal, {
                 "ondelete": function(portalId) {
-                    if (portal.room.portals.contains(portal) &&
-                        portal.room2.portals.contains(portal)) {
+                    if (portal.room.portals.includes(portal) &&
+                        portal.room2.portals.includes(portal)) {
                         self.portalDeleteDialog.show({
                             "ondeleteone": function() {
                                 var sourceRoom = self.model.map.rooms[self.selectedRoom.id];
-                                var portals = sourceRoom.portals.clone();
-                                portals.removeOne(portal);
-                                sourceRoom.portals = portals;
+                                sourceRoom.portals = sourceRoom.portals.filter(p => p !== portal);
                                 self.portalDeleteDialog.close();
                                 self.portalEditor.close();
                             },

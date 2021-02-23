@@ -14,12 +14,12 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
 
         this.canvas = null;
 
-        this.hiddenAreas = [];
+        this.hiddenAreas = new Set();
         this.zRestriction = null;
 
         this.selectedRoomId = 0;
 
-        this.selectionListeners = [];
+        this.selectionListeners = new Set();
 
         this.center = { "x": 0, "y": 0 };
         this.zoom = 1.0;
@@ -64,7 +64,7 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
         var self = this;
         this.model.bind("change", function() {
             if (self.selectedRoomId !== 0) {
-                if (!self.model.rooms.contains(self.selectedRoomId)) {
+                if (!self.model.rooms.hasOwnProperty(self.selectedRoomId)) {
                     self.selectedRoomId = 0;
                     self.notifySelectionListeners();
                 }
@@ -128,40 +128,31 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
 
         var hiddenAreas = this.hiddenAreas;
         var zRestriction = this.zRestriction;
-        var isVisible;
 
-        var portals = this.model.portals;
-        var portalIds = [];
-        for (var portalId in portals) {
-            if (portals.hasOwnProperty(portalId)) {
-                var portal = portals[portalId];
+        const { portals } = this.model;
+        const portalIds = Object.values(portals)
+            .map(portal => {
                 if (!portal.room || !portal.room2) {
-                    continue;
+                    return false;
                 }
 
-                isVisible = (zoom >= 2 &&
-                             (!portal.room.area || !hiddenAreas.contains(portal.room.area)) &&
-                             (!portal.room2.area || !hiddenAreas.contains(portal.room2.area)) &&
-                             (zRestriction === null || portal.room.z === zRestriction ||
-                                                       portal.room2.z === zRestriction));
-                if (isVisible) {
-                    portalIds.append(portalId);
-                }
-            }
-        }
+                const isVisible = (zoom >= 2 &&
+                                (!portal.room.area || !hiddenAreas.includes(portal.room.area)) &&
+                                (!portal.room2.area || !hiddenAreas.includes(portal.room2.area)) &&
+                                (zRestriction === null || portal.room.z === zRestriction ||
+                                                        portal.room2.z === zRestriction));
+                return isVisible;
+            })
+            .map(portal => portal.id);
 
-        var rooms = this.model.rooms;
-        var roomIds = [];
-        for (var roomId in rooms) {
-            if (rooms.hasOwnProperty(roomId)) {
-                var room = rooms[roomId];
-                isVisible = ((!room.area || !hiddenAreas.contains(room.area)) &&
+        const { rooms } = this.model;
+        const roomIds = Object.values(rooms)
+            .filter(room => {
+                const isVisible = ((!room.area || !hiddenAreas.includes(room.area)) &&
                              (zRestriction === null || room.z === zRestriction));
-                if (isVisible) {
-                    roomIds.append(roomId);
-                }
-            }
-        }
+                return isVisible;
+            })
+            .map(room => room.id);
 
         this.canvas.clear();
 
@@ -179,8 +170,8 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
 
             if (isWithinCanvas(x1, y1) || isWithinCanvas(x2, y2)) {
                 var flags = portal.flags.split("|");
-                var isPassable = flags.contains("CanPassThrough") ||
-                                 flags.contains("CanPassThroughIfOpen");
+                var isPassable = flags.includes("CanPassThrough") ||
+                                 flags.includes("CanPassThroughIfOpen");
                 var color = isPassable ? "blue" : "green";
                 var opacity = isPassable ? 1.0 : 0.4;
                 var shape = new Fabric.Line([ x1, y1, x2, y2 ], {
@@ -200,7 +191,7 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
             var y = offsetY + (room.y - center.y - z) * zoom;
 
             if (isWithinCanvas(x, y)) {
-                var fill = self.roomFills.contains(room.id) ? self.roomFills[room.id] : "grey";
+                var fill = self.roomFills[room.id] ?? "grey";
                 var shape = new Fabric.Rect({
                     "id": room.id,
                     "left": x,
@@ -292,7 +283,7 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
         var rooms = this.model.rooms;
 
         for (id in rooms) {
-            value = data.contains(id) ? data[id] : 0;
+            value = data[id] ?? 0;
 
             var red = 0, green = 0, blue = 0;
             if (lowest === 0) {
@@ -328,17 +319,17 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
 
     MapView.prototype.addSelectionListener = function(listener) {
 
-        this.selectionListeners.insert(listener);
+        this.selectionListeners.add(listener);
     };
 
     MapView.prototype.getSelectionListeners = function() {
 
-        return this.selectionListeners.slice(0);
+        return new Set(this.selectionListeners.values());
     };
 
     MapView.prototype.removeSelectionListener = function(listener) {
 
-        this.selectionListeners.removeAll(listener);
+        this.selectionListeners.delete(listener);
     };
 
     MapView.prototype.removeSelectionListeners = function() {
@@ -353,24 +344,25 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
 
     MapView.prototype.notifySelectionListeners = function() {
 
-        var self = this;
-
-        this.selectionListeners.forEach(function(listener) {
-            listener(self.selectedRoomId);
-        });
+        for (const listener of this.selectionListeners) {
+            listener(this.selectedRoomId);
+        }
     };
 
     MapView.prototype.isAreaVisible = function(area) {
 
-        return !this.hiddenAreas.contains(area);
+        return !this.hiddenAreas.includes(area);
     };
 
     MapView.prototype.setAreaVisible = function(area, visible) {
 
         if (visible) {
-            this.hiddenAreas.removeOne(area);
-        } else {
-            this.hiddenAreas.insert(area);
+            const index = this.hiddenAreas.indexOf(area);
+            if (index > -1) {
+                this.hiddenAreas.splice(index, 1);
+            }
+        } else if (!this.hiddenAreas.includes(area)) {
+            this.hiddenAreas.push(area);
         }
 
         this.draw();
