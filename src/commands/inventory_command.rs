@@ -3,7 +3,7 @@ use crate::objects::Realm;
 use crate::player_output::PlayerOutput;
 use crate::text_utils::{describe_items, format_weight, join_sentence};
 
-use super::CommandLineProcessor;
+use super::CommandHelpers;
 
 /// Makes the character inspect their inventory.
 ///
@@ -11,11 +11,12 @@ use super::CommandLineProcessor;
 pub fn inventory(
     realm: Realm,
     player_ref: GameObjectRef,
-    mut processor: CommandLineProcessor,
+    helpers: CommandHelpers,
 ) -> (Realm, Vec<PlayerOutput>) {
+    let processor = helpers.command_line_processor;
+
     let mut output = Vec::new();
     let player = unwrap_or_return!(realm.player(player_ref), (realm, output));
-    let current_room = unwrap_or_return!(realm.room(player.current_room()), (realm, output));
 
     processor.skip_word(); // alias
 

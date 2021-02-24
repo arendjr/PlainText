@@ -40,6 +40,7 @@ mod relative_direction;
 mod sessions;
 mod telnet_server;
 mod text_utils;
+mod trigger_registry;
 mod vector3d;
 mod vector_utils;
 mod vision_utils;
@@ -56,6 +57,7 @@ use sessions::{
     process_input, SessionEvent, SessionInputEvent, SessionOutput, SessionPromptInfo, SessionState,
     SignInState,
 };
+use trigger_registry::TriggerRegistry;
 
 #[tokio::main]
 async fn main() {
@@ -75,6 +77,8 @@ async fn main() {
         Ok(realm) => realm,
         Err(error) => panic!("Failed to load data from \"{}\": {}", data_dir, error),
     };
+
+    let trigger_registry = TriggerRegistry::new();
 
     let (input_tx, mut input_rx) = channel::<SessionInputEvent>(64);
     let (persist_tx, persist_rx) = channel::<PersistenceRequest>(64);
@@ -107,6 +111,7 @@ async fn main() {
                     realm,
                     &command_executor,
                     &session_tx,
+                    &trigger_registry,
                     &log_tx,
                     input_ev,
                 )
@@ -252,6 +257,7 @@ async fn process_signed_in_input(
     realm: Realm,
     command_executor: &CommandExecutor,
     session_tx: &Sender<SessionEvent>,
+    trigger_registry: &TriggerRegistry,
     log_tx: &LogSender,
     (input, session_id, source, player_id): (String, u64, String, GameObjectId),
 ) -> Realm {
@@ -259,7 +265,7 @@ async fn process_signed_in_input(
         log_command(&log_tx, player.name().to_owned(), input.clone()).await;
         let player_ref = player.object_ref();
         let (new_realm, player_output) =
-            command_executor.execute_command(realm, player_ref, log_tx, input);
+            command_executor.execute_command(realm, trigger_registry, player_ref, log_tx, input);
         process_player_output(&new_realm, session_tx, player_output).await;
 
         new_realm

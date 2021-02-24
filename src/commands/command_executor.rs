@@ -1,8 +1,11 @@
 use crate::game_object::GameObjectRef;
 use crate::objects::Realm;
 use crate::player_output::PlayerOutput;
+use crate::trigger_registry::TriggerRegistry;
 use crate::LogSender;
 
+use super::api::triggers_list;
+use super::command_helpers::CommandHelpers;
 use super::command_interpreter::{CommandInterpreter, InterpretationError};
 use super::command_line_processor::CommandLineProcessor;
 use super::go_command::go;
@@ -18,6 +21,7 @@ impl CommandExecutor {
     pub fn execute_command(
         &self,
         realm: Realm,
+        trigger_registry: &TriggerRegistry,
         player_ref: GameObjectRef,
         _: &LogSender,
         command_line: String,
@@ -25,13 +29,18 @@ impl CommandExecutor {
         let mut processor = CommandLineProcessor::new(player_ref, &command_line);
         match self.interpreter.interpret_command(&mut processor) {
             Ok(command_type) => {
+                let command_helpers = CommandHelpers {
+                    command_line_processor: &mut processor,
+                    trigger_registry,
+                };
                 let command_fn = match command_type {
+                    CommandType::ApiTriggersList => triggers_list,
                     CommandType::Go => go,
                     CommandType::Inventory => inventory,
                     CommandType::Look => look,
                     CommandType::Lose => panic!("Not implemented"),
                 };
-                command_fn(realm, player_ref, processor)
+                command_fn(realm, player_ref, command_helpers)
             }
             Err(InterpretationError::AmbiguousCommand(_)) => (
                 realm,

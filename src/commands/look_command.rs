@@ -6,7 +6,7 @@ use crate::player_output::PlayerOutput;
 use crate::relative_direction::RelativeDirection;
 
 use super::inventory_command::inventory;
-use super::CommandLineProcessor;
+use super::{CommandHelpers, CommandLineProcessor};
 
 /// Makes the character look at *something*.
 ///
@@ -14,8 +14,10 @@ use super::CommandLineProcessor;
 pub fn look(
     realm: Realm,
     player_ref: GameObjectRef,
-    mut processor: CommandLineProcessor,
+    helpers: CommandHelpers,
 ) -> (Realm, Vec<PlayerOutput>) {
+    let processor = helpers.command_line_processor;
+
     let mut output = Vec::new();
     let player = unwrap_or_return!(realm.player(player_ref), (realm, output));
     let current_room = unwrap_or_return!(realm.room(player.current_room()), (realm, output));
@@ -35,7 +37,10 @@ pub fn look(
         return inventory(
             realm,
             player_ref,
-            CommandLineProcessor::new(player_ref, "inventory"),
+            CommandHelpers {
+                command_line_processor: &mut CommandLineProcessor::new(player_ref, "inventory"),
+                ..helpers
+            },
         );
     }
 

@@ -6,7 +6,7 @@ use crate::relative_direction::RelativeDirection;
 use crate::text_utils::{describe_objects_from_room, join_sentence};
 use crate::vision_utils::visible_portals_from_position;
 
-use super::CommandLineProcessor;
+use super::CommandHelpers;
 
 /// Makes the character travel to another room.
 ///
@@ -14,8 +14,10 @@ use super::CommandLineProcessor;
 pub fn go(
     mut realm: Realm,
     player_ref: GameObjectRef,
-    mut processor: CommandLineProcessor,
+    helpers: CommandHelpers,
 ) -> (Realm, Vec<PlayerOutput>) {
+    let processor = helpers.command_line_processor;
+
     let mut output = Vec::new();
 
     let alias = processor.take_word().unwrap();
