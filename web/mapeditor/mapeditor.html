@@ -13,10 +13,6 @@
                 </div>
             </div>
         </div>
-        <div class="areas label menu">Areas
-            <div class="areas menu-content">
-            </div>
-        </div>
         <div class="label menu">Options
             <div class="menu-content">
                 <div class="menu-item">
@@ -51,8 +47,9 @@
             <h2 data-laces="{ property: selectedRoom.name, editable: true, default: Unnamed Room }"></h2>
             <p>
                 <span class="label">Room #<span data-laces-property="selectedRoom.id"></span></span>
-                <button class="enter-room-button" title="Enter this room with your in-game character, regardless of where you currently are.">Enter</button>
-                </p>
+                <button class="enter-room-button"
+                    title="Enter this room with your in-game character, regardless of where you currently are.">Enter</button>
+            </p>
             <p>
                 <input type="number" class="x" data-laces-property="selectedRoom.x">,
                 <input type="number" class="y" data-laces-property="selectedRoom.y">,
@@ -64,7 +61,8 @@
             </p>
             <p>
                 <span class="label">Description</span>
-                <a href="javascript:void(0)" data-laces-visible="!selectedRoom.description" class="add description"></a><br>
+                <a href="javascript:void(0)" data-laces-visible="!selectedRoom.description"
+                    class="add description"></a><br>
                 <span class="description" data-laces-property="selectedRoom.description"></span>
             </p>
             <p>
@@ -77,13 +75,16 @@
             </p>
             <p class="option">
                 <span title="If checked, dynamic room descriptions include information about portals.">
-                    <input id="omitDynamicPortals" type="checkbox" data-laces-property="selectedRoom.dynamicPortalDescriptions">
+                    <input id="omitDynamicPortals" type="checkbox"
+                        data-laces-property="selectedRoom.dynamicPortalDescriptions">
                     <label for="omitDynamicPortals">Dynamic portals descriptions</label>
                 </span>
             </p>
             <p class="option">
-                <span title="If checked, dynamic room descriptions include information about characters in the distance.">
-                    <input id="omitDistantCharacters" type="checkbox" data-laces-property="selectedRoom.distantCharacterDescriptions">
+                <span
+                    title="If checked, dynamic room descriptions include information about characters in the distance.">
+                    <input id="omitDistantCharacters" type="checkbox"
+                        data-laces-property="selectedRoom.distantCharacterDescriptions">
                     <label for="omitDistantCharacters">Distant character descriptions</label>
                 </span>
             </p>

@@ -1,14 +1,14 @@
 /*global define:false, require:false*/
 define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapview",
-        "mapeditor/areaselectiondialog", "areaseditor/areaseditor", "portaleditor/portaleditor",
+        "portaleditor/portaleditor",
         "portaleditor/portaldeletedialog", "propertyeditor/propertyeditor", "sliderwidget/slider",
-        "util", "lib/hogan", "lib/laces.tie", "lib/zepto",
-        "text!mapeditor/mapeditor.html", "text!mapeditor/areasmenu.html"],
+        "util", "lib/laces.tie", "lib/zepto",
+        "text!mapeditor/mapeditor.html"],
        function(Controller, Loading, MapModel, MapView,
-                AreaSelectionDialog, AreasEditor, PortalEditor,
+                PortalEditor,
                 PortalDeleteDialog, PropertyEditor, SliderWidget,
-                Util, Hogan, Laces, $,
-                mapEditorHtml, areasMenuHtml) {
+                Util, Laces, $,
+                mapEditorHtml) {
 
     "use strict";
 
@@ -19,8 +19,6 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
         this.model = null;
         this.view = null;
 
-        this.areaSelectionDialog = null;
-        this.areasEditor = null;
         this.portalEditor = null;
         this.portalDeleteDialog = null;
         this.propertyEditor = null;
@@ -39,18 +37,12 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
         this.model = new Laces.Model();
         this.model.set("map", new MapModel());
         this.model.set("selectedRoom", null);
-        this.model.set("areasArray", function() {
-            return Object.values(this.map.areas)
-                .map(area => ({ ...area, visible: self.view.isAreaVisible(area) }));
-        });
 
         Controller.addStyle("mapeditor/mapeditor");
 
         var tie = new Laces.Tie(this.model, mapEditorHtml);
         document.body.appendChild(tie.render());
         this.element = $(".map-editor");
-
-        this.areasMenuTie = new Laces.Tie(this.model, Hogan.compile(areasMenuHtml));
 
         this.view = new MapView($(".map-canvas", this.element));
         this.view.setModel(this.model.map);
@@ -59,12 +51,6 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
         // these are for debugging only
         window.model = this.model;
         window.view = this.view;
-
-        this.areaSelectionDialog = new AreaSelectionDialog();
-        this.areaSelectionDialog.setModel(this.model);
-
-        this.areasEditor = new AreasEditor();
-        this.areasEditor.setModel(this.model);
 
         this.portalEditor = new PortalEditor();
         this.portalEditor.setMapModel(this.model.map);
@@ -110,12 +96,6 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
             }
         });
 
-        this.model.bind("change:areasArray", function() {
-            var menuContent = $(".areas.menu-content", this.element)[0];
-            menuContent.innerHTML = "";
-            menuContent.appendChild(self.areasMenuTie.render());
-        }, { "initialFire": true });
-
         this.view.addSelectionListener(function(selectedRoomId) {
             self.model.selectedRoom = self.model.map.rooms[selectedRoomId];
         });
@@ -126,17 +106,6 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
 
         $(".print", this.element).on("click", function() {
             self.view.print();
-        });
-
-        $(".areas.menu", this.element).on("change", "input", function(event) {
-            var areaId = $(event.target).data("area-id");
-            if (areaId) {
-                self.view.setAreaVisible(self.model.map.areas[areaId], event.target.checked);
-            }
-        });
-
-        $(".areas.menu", this.element).on("click", ".edit.areas", function(event) {
-            self.areasEditor.show();
         });
 
         $(".plot.altitude", this.element).on("click", function() {
@@ -169,29 +138,6 @@ define(["controller", "loadingwidget/loading", "mapmodel/model", "mapeditor/mapv
             if (self.model.selectedRoom) {
                 Controller.sendCommand("enter-room #" + self.model.selectedRoom.id);
                 self.close();
-            }
-        });
-
-        $(".area", this.element).on("dblclick", function() {
-            var room = self.model.selectedRoom;
-            if (room) {
-                self.areaSelectionDialog.show({
-                    "onselect": function(area) {
-                        if (room.area) {
-                            const index = room.area.rooms.indexOf(room);
-                            if (index > -1) {
-                                room.area.rooms.splice(index, 1);
-                            }
-                        }
-                        // Always remove and push, because I want to force an update:
-                        const index = area.rooms.indexOf(room);
-                        if (index > -1) {
-                            area.rooms.splice(index, 1);
-                        }
-                        area.rooms.push(room);
-                        self.areaSelectionDialog.close();
-                    }
-                });
             }
         });
 

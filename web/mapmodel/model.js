@@ -5,7 +5,6 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
 
 
     var pointerTypes = {
-        "area:": "areas",
         "room:": "rooms",
         "portal:": "portals"
     };
@@ -119,57 +118,13 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
     };
 
 
-    function Area(model, jsonString) {
-
-        var area = JSON.parse(jsonString);
-        area.rooms = area.rooms || [];
-        GameObject.call(this, model, area);
-
-        var self = this;
-        this.rooms.bind("add", function(event) {
-            event.elements.forEach(function(room) {
-                if (room !== null) {
-                    room.area = self;
-                }
-            });
-        });
-        this.rooms.bind("remove", function(event) {
-            event.elements.forEach(function(room) {
-                if (room !== null && room.area === self) {
-                    room.area = null;
-                }
-            });
-        });
-    }
-
-    Area.savedProperties = {
-        "description": { "type": "string" },
-        "name": { "type": "string" },
-        "rooms": { "type": "pointerlist" }
-    };
-
-    Area.prototype = new GameObject();
-    Area.prototype.constructor = Area;
-
-    Area.prototype.resolvePointers = function(propertyNames) {
-
-        GameObject.prototype.resolvePointers.call(this, propertyNames);
-
-        for (var i = 0, length = this.rooms.length; i < length; i++) {
-            this.rooms[i].area = this;
-        }
-    };
-
-
     function Room(model, jsonString) {
 
         var room = JSON.parse(jsonString);
-        room.area = room.area || null;
         room.portals = room.portals || [];
         room.position = room.position || [0, 0, 0];
         GameObject.call(this, model, room);
 
-        this.set("areaName", function() { return this.area ? this.area.name : "(none)"; });
         this.set("x", room.position[0], { "type": "integer" });
         this.set("y", room.position[1], { "type": "integer" });
         this.set("z", room.position[2], { "type": "integer" });
@@ -255,43 +210,11 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
     function MapModel() {
 
         Laces.Model.call(this, {
-            "areas": {},
             "portals": {},
             "rooms": {}
         });
 
         var self = this;
-        this.areas.bind("remove", function(event) {
-            self.holdEvents();
-
-            var areaId = event.key;
-            var area = event.oldValue;
-            for (var roomId in self.rooms) {
-                if (self.rooms.hasOwnProperty(roomId)) {
-                    var room = self.rooms[roomId];
-                    if (room.area === area) {
-                        room.area = null;
-                    }
-                }
-            }
-
-            Controller.sendApiCall("object-delete " + areaId);
-            self.fireHeldEvents();
-        });
-
-        Object.defineProperty(this.areas, "save", {
-            "value": function(area) {
-                var areaJson = area.stringify ? area.stringify() : JSON.stringify(area);
-                var command = "object-set Area " + area.id + " " + areaJson;
-
-                Controller.sendApiCall(command, function(data) {
-                    var area = new Area(self, data["object"]);
-                    area.resolvePointers(["rooms"]);
-                    self.areas.set(area.id, area);
-                });
-            }
-        });
-
         this.portals.bind("remove", function(event) {
             self.holdEvents();
 
@@ -339,12 +262,6 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
                         });
                     }
 
-                    if (data.hasOwnProperty("area")) {
-                        var area = new Area(self, data["area"]);
-                        self.areas.set(area.id, area);
-                        area.resolvePointers(["rooms"]);
-                    }
-
                     self.fireHeldEvents();
                 });
             }
@@ -358,14 +275,12 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
 
         Laces.Model.prototype.holdEvents.call(this);
 
-        this.areas.holdEvents();
         this.rooms.holdEvents();
         this.portals.holdEvents();
     };
 
     MapModel.prototype.fireHeldEvents = function() {
 
-        this.areas.fireHeldEvents();
         this.rooms.fireHeldEvents();
         this.portals.fireHeldEvents();
 
@@ -377,48 +292,35 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
         this.holdEvents();
 
         var self = this;
-        Controller.sendApiCall("objects-list area", function(data) {
-            console.log("Got areas");
+        Controller.sendApiCall("objects-list room", function(data) {
+            console.log("Got rooms");
             for (var i = 0; i < data.length; i++) {
-                var area = new Area(self, data[i]);
-                self.areas.set(area.id, area);
+                var room = new Room(self, data[i]);
+                self.rooms.set(room.id, room);
             }
 
-            Controller.sendApiCall("objects-list room", function(data) {
-                console.log("Got rooms");
+            Controller.sendApiCall("objects-list portal", function(data) {
+                console.log("Got portals");
                 for (var i = 0; i < data.length; i++) {
-                    var room = new Room(self, data[i]);
-                    self.rooms.set(room.id, room);
+                    var portal = new Portal(self, data[i]);
+                    self.portals.set(portal.id, portal);
                 }
 
-                Controller.sendApiCall("objects-list portal", function(data) {
-                    console.log("Got portals");
-                    for (var i = 0; i < data.length; i++) {
-                        var portal = new Portal(self, data[i]);
-                        self.portals.set(portal.id, portal);
+                console.log("Resolving pointers");
+                for (var id in self.rooms) {
+                    if (self.rooms.hasOwnProperty(id)) {
+                        self.rooms[id].resolvePointers(["portals"]);
                     }
+                }
+                for (id in self.portals) {
+                    if (self.portals.hasOwnProperty(id)) {
+                        self.portals[id].resolvePointers(["room", "room2"]);
+                    }
+                }
 
-                    console.log("Resolving pointers");
-                    for (var id in self.rooms) {
-                        if (self.rooms.hasOwnProperty(id)) {
-                            self.rooms[id].resolvePointers(["portals"]);
-                        }
-                    }
-                    for (id in self.portals) {
-                        if (self.portals.hasOwnProperty(id)) {
-                            self.portals[id].resolvePointers(["room", "room2"]);
-                        }
-                    }
-                    for (id in self.areas) {
-                        if (self.areas.hasOwnProperty(id)) {
-                            self.areas[id].resolvePointers(["rooms"]);
-                        }
-                    }
-
-                    console.log("Firing held events");
-                    self.fireHeldEvents();
-                    console.log("Done");
-                });
+                console.log("Firing held events");
+                self.fireHeldEvents();
+                console.log("Done");
             });
         });
     };

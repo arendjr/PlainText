@@ -14,7 +14,6 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
 
         this.canvas = null;
 
-        this.hiddenAreas = new Set();
         this.zRestriction = null;
 
         this.selectedRoomId = 0;
@@ -126,7 +125,6 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
             return x >= minX && x <= maxX && y >= minY && y <= maxY;
         };
 
-        var hiddenAreas = this.hiddenAreas;
         var zRestriction = this.zRestriction;
 
         const { portals } = this.model;
@@ -137,8 +135,6 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
                 }
 
                 const isVisible = (zoom >= 2 &&
-                                (!portal.room.area || !hiddenAreas.includes(portal.room.area)) &&
-                                (!portal.room2.area || !hiddenAreas.includes(portal.room2.area)) &&
                                 (zRestriction === null || portal.room.z === zRestriction ||
                                                         portal.room2.z === zRestriction));
                 return isVisible;
@@ -148,8 +144,7 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
         const { rooms } = this.model;
         const roomIds = Object.values(rooms)
             .filter(room => {
-                const isVisible = ((!room.area || !hiddenAreas.includes(room.area)) &&
-                             (zRestriction === null || room.z === zRestriction));
+                const isVisible = (zRestriction === null || room.z === zRestriction);
                 return isVisible;
             })
             .map(room => room.id);
@@ -347,25 +342,6 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
         for (const listener of this.selectionListeners) {
             listener(this.selectedRoomId);
         }
-    };
-
-    MapView.prototype.isAreaVisible = function(area) {
-
-        return !this.hiddenAreas.includes(area);
-    };
-
-    MapView.prototype.setAreaVisible = function(area, visible) {
-
-        if (visible) {
-            const index = this.hiddenAreas.indexOf(area);
-            if (index > -1) {
-                this.hiddenAreas.splice(index, 1);
-            }
-        } else if (!this.hiddenAreas.includes(area)) {
-            this.hiddenAreas.push(area);
-        }
-
-        this.draw();
     };
 
     MapView.prototype.setZRestriction = function(zRestriction) {
