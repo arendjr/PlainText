@@ -1,7 +1,7 @@
 {
   "name": "door",
   "description": "The heavy steel door seems to be in a pristine condition, though the building appears to be much older.",
-  "triggers": { "oninit": "(function() {\n    this.open = false;    \n})", "onopen": "(function() {\n    this.setTimeout(function() {\n        this.open = false;\n    }, 30000);\n})" },
+  "triggers": { "onInit": "(function() {\n    this.open = false;    \n})", "onOpen": "(function() {\n    this.setTimeout(function() {\n        this.open = false;\n    }, 30000);\n})" },
   "name2": "door",
   "room": "room:14",
   "room2": "room:17",

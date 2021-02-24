@@ -54,7 +54,7 @@ pub fn enter_room(
     /* TODO:
     for (const GameObjectPtr &character : room->characters()) {
         if (character != this) {
-            character->invokeTrigger("oncharacterentered", this);
+            character->invokeTrigger("onCharacterEntered", this);
         }
     }*/
 

@@ -1,6 +1,6 @@
 {
   "name": "door",
-  "triggers": { "oninit": "(function() {\n    this.open = false;    \n})", "onopen": "(function(activator) {\n    if (this.open) {\n        activator.send(\"The door is already open.\");\n        return;\n    }\n    \n    if (activator.inventory.named(\"south gate tower key\")) {\n        activator.send(\"You use the key to the south gate tower and open the door.\");\n        this.open = true;\n    } else {\n        activator.send(\"The door is locked.\");\n    }\n    \n    this.setTimeout(function() {\n        this.open = false;\n    }, 30000);\n    return false;\n})" },
+  "triggers": { "onInit": "(function() {\n    this.open = false;    \n})", "onOpen": "(function(activator) {\n    if (this.open) {\n        activator.send(\"The door is already open.\");\n        return;\n    }\n    \n    if (activator.inventory.named(\"south gate tower key\")) {\n        activator.send(\"You use the key to the south gate tower and open the door.\");\n        this.open = true;\n    } else {\n        activator.send(\"The door is locked.\");\n    }\n    \n    this.setTimeout(function() {\n        this.open = false;\n    }, 30000);\n    return false;\n})" },
   "name2": "door",
   "destination": "the gate tower",
   "room": "room:65",
