@@ -1,0 +1,21 @@
+.area-selection {
+    top: 160px;
+    left: -webkit-calc(50% - 200px);
+    left: -moz-calc(50% - 200px);
+    left: calc(50% - 200px);
+    right: -webkit-calc(50% - 200px);
+    right: -moz-calc(50% - 200px);
+    right: calc(50% - 200px);
+}
+    .area-selection .areas-container {
+        margin: 1em;
+        border: 1px solid grey;
+        height: 18em;
+        overflow: auto;
+    }
+    .area-selection p {
+        cursor: default;
+    }
+    .area-selection p:nth-child(even) {
+        background-color: #f8f8f8;
+    }

@@ -4,7 +4,7 @@ use crate::player_output::PlayerOutput;
 use crate::trigger_registry::TriggerRegistry;
 use crate::LogSender;
 
-use super::api::triggers_list;
+use super::api::{objects_list, triggers_list};
 use super::command_helpers::CommandHelpers;
 use super::command_interpreter::{CommandInterpreter, InterpretationError};
 use super::command_line_processor::CommandLineProcessor;
@@ -34,6 +34,7 @@ impl CommandExecutor {
                     trigger_registry,
                 };
                 let command_fn = match command_type {
+                    CommandType::ApiObjectsList => objects_list,
                     CommandType::ApiTriggersList => triggers_list,
                     CommandType::Go => go,
                     CommandType::Inventory => inventory,

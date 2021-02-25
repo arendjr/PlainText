@@ -1,16 +1,14 @@
+use im_rc::HashMap;
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::cmp;
 use std::collections::HashSet;
 use std::hash::{Hash, Hasher};
 
-use im_rc::HashMap;
-
-use crate::objects;
-
 use crate::game_object::{
     Character, GameObject, GameObjectId, GameObjectRef, GameObjectType, SharedGameObject,
 };
+use crate::objects;
 use crate::objects::Player;
 use crate::persistence_handler::PersistenceRequest;
 use crate::sessions::SignUpData;
@@ -81,6 +79,16 @@ impl Realm {
 
     pub fn object(&self, object_ref: GameObjectRef) -> Option<SharedGameObject> {
         self.objects.get(&object_ref).map(|object| object.clone())
+    }
+
+    pub fn objects_of_type(
+        &self,
+        object_type: GameObjectType,
+    ) -> impl Iterator<Item = &SharedGameObject> + '_ {
+        self.objects
+            .iter()
+            .filter(move |(object_ref, _)| object_ref.object_type() == object_type)
+            .map(|(_, object)| object)
     }
 
     pub fn player(&self, object_ref: GameObjectRef) -> Option<&objects::Player> {
@@ -180,7 +188,7 @@ impl Realm {
             if let Some(object) = self.object(object_ref) {
                 result.push(PersistenceRequest::PersistObject(
                     object_ref,
-                    object.serialize(),
+                    object.dehydrate().to_string(),
                 ));
             }
         }
@@ -242,20 +250,8 @@ impl GameObject for Realm {
         Some(&self)
     }
 
-    fn id(&self) -> GameObjectId {
-        self.id
-    }
-
-    fn object_type(&self) -> GameObjectType {
-        GameObjectType::Realm
-    }
-
-    fn name(&self) -> &str {
-        &self.name
-    }
-
-    fn serialize(&self) -> String {
-        serde_json::to_string_pretty(&RealmDto {
+    fn dehydrate(&self) -> serde_json::Value {
+        serde_json::to_value(RealmDto {
             dateTime: self.date_time,
             name: self.name.clone(),
         })
@@ -266,6 +262,18 @@ impl GameObject for Realm {
                 error
             )
         })
+    }
+
+    fn id(&self) -> GameObjectId {
+        self.id
+    }
+
+    fn object_type(&self) -> GameObjectType {
+        GameObjectType::Realm
+    }
+
+    fn name(&self) -> &str {
+        &self.name
     }
 }
 

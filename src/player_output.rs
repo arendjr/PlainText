@@ -38,7 +38,7 @@ macro_rules! push_output_string {
 
 #[macro_export]
 macro_rules! push_session_output {
-    ($player_output_vec:ident, $player_ref:ident, $session_output:expr) => {
+    ($player_output_vec:expr, $player_ref:expr, $session_output:expr) => {
         let player_id = $player_ref.id();
         if let Some(player_output) = $player_output_vec
             .iter_mut()

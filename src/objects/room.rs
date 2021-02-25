@@ -115,20 +115,8 @@ impl GameObject for Room {
         Some(&self)
     }
 
-    fn id(&self) -> GameObjectId {
-        self.id
-    }
-
-    fn object_type(&self) -> GameObjectType {
-        GameObjectType::Room
-    }
-
-    fn name(&self) -> &str {
-        &self.name
-    }
-
-    fn serialize(&self) -> String {
-        serde_json::to_string_pretty(&RoomDto {
+    fn dehydrate(&self) -> serde_json::Value {
+        serde_json::to_value(RoomDto {
             description: self.description.clone(),
             eventMultipliers: Some(self.event_multipliers.clone()),
             flags: self.flags,
@@ -148,6 +136,18 @@ impl GameObject for Room {
                 error
             )
         })
+    }
+
+    fn id(&self) -> GameObjectId {
+        self.id
+    }
+
+    fn object_type(&self) -> GameObjectType {
+        GameObjectType::Room
+    }
+
+    fn name(&self) -> &str {
+        &self.name
     }
 }
 

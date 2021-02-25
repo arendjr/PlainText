@@ -14,6 +14,7 @@ use command_line_processor::CommandLineProcessor;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum CommandType {
+    ApiObjectsList,
     ApiTriggersList,
     Go,
     Inventory,

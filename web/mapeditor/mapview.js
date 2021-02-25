@@ -129,7 +129,7 @@ define(["lib/fabric", "loadingwidget/loading"], function(Fabric, Loading) {
 
         const { portals } = this.model;
         const portalIds = Object.values(portals)
-            .map(portal => {
+            .filter(portal => {
                 if (!portal.room || !portal.room2) {
                     return false;
                 }

@@ -176,24 +176,8 @@ impl GameObject for Npc {
         Some(&self)
     }
 
-    fn description(&self) -> &str {
-        &self.description
-    }
-
-    fn id(&self) -> GameObjectId {
-        self.id
-    }
-
-    fn object_type(&self) -> GameObjectType {
-        GameObjectType::Player
-    }
-
-    fn name(&self) -> &str {
-        &self.name
-    }
-
-    fn serialize(&self) -> String {
-        serde_json::to_string_pretty(&NpcDto {
+    fn dehydrate(&self) -> serde_json::Value {
+        serde_json::to_value(NpcDto {
             class: self.class,
             currentRoom: self.current_room,
             description: if self.description.is_empty() {
@@ -224,6 +208,22 @@ impl GameObject for Npc {
                 error
             )
         })
+    }
+
+    fn description(&self) -> &str {
+        &self.description
+    }
+
+    fn id(&self) -> GameObjectId {
+        self.id
+    }
+
+    fn object_type(&self) -> GameObjectType {
+        GameObjectType::Player
+    }
+
+    fn name(&self) -> &str {
+        &self.name
     }
 }
 

@@ -6,7 +6,7 @@ pub trait GameObject {
     fn id(&self) -> GameObjectId;
     fn object_type(&self) -> GameObjectType;
     fn name(&self) -> &str;
-    fn serialize(&self) -> String;
+    fn dehydrate(&self) -> serde_json::Value;
 
     fn adjective(&self) -> &str {
         ""

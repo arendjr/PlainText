@@ -156,24 +156,8 @@ impl GameObject for Portal {
         Some(&self)
     }
 
-    fn description(&self) -> &str {
-        &self.description
-    }
-
-    fn id(&self) -> GameObjectId {
-        self.id
-    }
-
-    fn name(&self) -> &str {
-        &self.name
-    }
-
-    fn object_type(&self) -> GameObjectType {
-        GameObjectType::Portal
-    }
-
-    fn serialize(&self) -> String {
-        serde_json::to_string_pretty(&PortalDto {
+    fn dehydrate(&self) -> serde_json::Value {
+        serde_json::to_value(PortalDto {
             description: Some(self.description.clone()),
             description2: if self.description2.is_empty() {
                 None
@@ -204,6 +188,22 @@ impl GameObject for Portal {
                 error
             )
         })
+    }
+
+    fn description(&self) -> &str {
+        &self.description
+    }
+
+    fn id(&self) -> GameObjectId {
+        self.id
+    }
+
+    fn name(&self) -> &str {
+        &self.name
+    }
+
+    fn object_type(&self) -> GameObjectType {
+        GameObjectType::Portal
     }
 }
 

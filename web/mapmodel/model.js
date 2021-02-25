@@ -118,9 +118,9 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
     };
 
 
-    function Room(model, jsonString) {
+    function Room(model, data) {
 
-        var room = JSON.parse(jsonString);
+        var room = data;
         room.portals = room.portals || [];
         room.position = room.position || [0, 0, 0];
         GameObject.call(this, model, room);
@@ -182,10 +182,9 @@ define(["controller", "lib/laces"], function(Controller, Laces) {
     Room.prototype.constructor = Room;
 
 
-    function Portal(model, jsonString) {
+    function Portal(model, data) {
 
-        var portal = JSON.parse(jsonString);
-        GameObject.call(this, model, portal);
+        GameObject.call(this, model, data);
     }
 
     Portal.savedProperties = {

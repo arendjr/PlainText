@@ -73,6 +73,28 @@ impl GameObject for Item {
         Some(&self)
     }
 
+    fn dehydrate(&self) -> serde_json::Value {
+        serde_json::to_value(ItemDto {
+            cost: self.cost,
+            description: self.description.clone(),
+            flags: if self.flags == ItemFlags::None {
+                None
+            } else {
+                Some(self.flags)
+            },
+            name: self.name.clone(),
+            position: self.position.clone(),
+            weight: self.weight,
+        })
+        .unwrap_or_else(|error| {
+            panic!(
+                "Failed to serialize object {:?}: {:?}",
+                self.object_ref(),
+                error
+            )
+        })
+    }
+
     fn description(&self) -> &str {
         &self.description
     }
@@ -97,28 +119,6 @@ impl GameObject for Item {
 
     fn name(&self) -> &str {
         &self.name
-    }
-
-    fn serialize(&self) -> String {
-        serde_json::to_string_pretty(&ItemDto {
-            cost: self.cost,
-            description: self.description.clone(),
-            flags: if self.flags == ItemFlags::None {
-                None
-            } else {
-                Some(self.flags)
-            },
-            name: self.name.clone(),
-            position: self.position.clone(),
-            weight: self.weight,
-        })
-        .unwrap_or_else(|error| {
-            panic!(
-                "Failed to serialize object {:?}: {:?}",
-                self.object_ref(),
-                error
-            )
-        })
     }
 }
 

@@ -86,20 +86,8 @@ impl GameObject for Race {
         Some(&self)
     }
 
-    fn id(&self) -> GameObjectId {
-        self.id
-    }
-
-    fn object_type(&self) -> GameObjectType {
-        GameObjectType::Race
-    }
-
-    fn name(&self) -> &str {
-        &self.name
-    }
-
-    fn serialize(&self) -> String {
-        serde_json::to_string_pretty(&RaceDto {
+    fn dehydrate(&self) -> serde_json::Value {
+        serde_json::to_value(RaceDto {
             adjective: self.adjective.clone(),
             classes: self.classes.deref().clone(),
             description: self.description.clone(),
@@ -117,6 +105,18 @@ impl GameObject for Race {
                 error
             )
         })
+    }
+
+    fn id(&self) -> GameObjectId {
+        self.id
+    }
+
+    fn object_type(&self) -> GameObjectType {
+        GameObjectType::Race
+    }
+
+    fn name(&self) -> &str {
+        &self.name
     }
 }
 

@@ -227,24 +227,8 @@ impl GameObject for Player {
         Some(&self)
     }
 
-    fn description(&self) -> &str {
-        &self.description
-    }
-
-    fn id(&self) -> GameObjectId {
-        self.id
-    }
-
-    fn object_type(&self) -> GameObjectType {
-        GameObjectType::Player
-    }
-
-    fn name(&self) -> &str {
-        &self.name
-    }
-
-    fn serialize(&self) -> String {
-        serde_json::to_string_pretty(&PlayerDto {
+    fn dehydrate(&self) -> serde_json::Value {
+        serde_json::to_value(PlayerDto {
             class: self.class,
             currentRoom: self.current_room,
             description: self.description.clone(),
@@ -273,6 +257,22 @@ impl GameObject for Player {
                 error
             )
         })
+    }
+
+    fn description(&self) -> &str {
+        &self.description
+    }
+
+    fn id(&self) -> GameObjectId {
+        self.id
+    }
+
+    fn object_type(&self) -> GameObjectType {
+        GameObjectType::Player
+    }
+
+    fn name(&self) -> &str {
+        &self.name
     }
 }
 
