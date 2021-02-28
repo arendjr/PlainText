@@ -1,6 +1,6 @@
 /*global define:false, require:false*/
-define(["controller", "lib/hogan", "lib/zepto", "text!loadingwidget/loading.html"],
-       function(Controller, Hogan, $, loadingHtml) {
+define(["controller", "lib/zepto"],
+       function(Controller, $) {
 
     "use strict";
 
@@ -10,8 +10,9 @@ define(["controller", "lib/hogan", "lib/zepto", "text!loadingwidget/loading.html
 
         Controller.addStyle("loadingwidget/loading");
 
-        var template = Hogan.compile(loadingHtml);
-        loadingEl = $(template.render()).appendTo(document.body);
+        loadingEl = $(`<div class="loading dialog" style="display: none">
+            <p>Loading...</p>
+        </div>`).appendTo(document.body);
     }
 
     function showLoader() {

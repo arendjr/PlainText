@@ -1,7 +1,6 @@
 /*global define:false, require:false*/
-define(["controller", "lib/codemirror/codemirror", "lib/hogan", "lib/zepto",
-        "text!propertyeditor/propertyeditor.html"],
-       function(Controller, CodeMirror, Hogan, $, propertyEditorHtml) {
+define(["controller", "lib/codemirror/codemirror", "lib/zepto"],
+       function(Controller, CodeMirror, $) {
 
     "use strict";
 
@@ -30,8 +29,13 @@ define(["controller", "lib/codemirror/codemirror", "lib/hogan", "lib/zepto",
         Controller.addStyle("dialog/dialog");
         Controller.addStyle("propertyeditor/propertyeditor");
 
-        var propertyEditorTemplate = Hogan.compile(propertyEditorHtml);
-        this.element = $(propertyEditorTemplate.render()).appendTo(document.body);
+        this.element = $(`<div class="property-editor dialog" style="display: none">
+            <textarea></textarea>
+            <div class="button-list">
+                <button class="cancel-button">Cancel</button>
+                <button class="submit-button">Submit</button>
+            </div>
+        </div>`).appendTo(document.body);
 
         this.attachListeners();
     };

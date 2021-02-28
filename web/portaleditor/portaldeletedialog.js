@@ -1,6 +1,5 @@
 /*global define:false, require:false*/
-define(["lib/hogan", "lib/zepto", "text!portaleditor/portaldeletedialog.html"],
-       function(Hogan, $, portalDeleteDialogHtml) {
+define(["lib/zepto"], function($) {
 
     "use strict";
 
@@ -13,8 +12,17 @@ define(["lib/hogan", "lib/zepto", "text!portaleditor/portaldeletedialog.html"],
 
     PortalDeleteDialog.prototype.init = function() {
 
-        var portalDeleteDialogTemplate = Hogan.compile(portalDeleteDialogHtml);
-        this.element = $(portalDeleteDialogTemplate.render()).appendTo(document.body);
+        this.element = $(`<div class="portal-delete dialog" style="display: none">
+            <div>
+                <p>Do you want to delete access to the portal from the current room, or delete the
+                    entire portal from both directions?</p>
+            </div>
+            <div class="button-list">
+                <button class="delete-one-button">Delete Access</button>
+                <button class="delete-both-button">Delete Entire Portal</button>
+                <button class="cancel-button">Cancel</button>
+            </div>
+        </div>`).appendTo(document.body);
 
         this.attachListeners();
     };
