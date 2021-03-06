@@ -1,33 +1,19 @@
-/*global define:false, require:false*/
-define(["controller", "lib/codemirror/codemirror", "lib/zepto"],
-       function(Controller, CodeMirror, $) {
+import CodeMirror from "../lib/codemirror/codemirror.js";
+import "../lib/codemirror/javascript.js";
+import "../lib/codemirror/util/simple-hint.js";
+import "../lib/codemirror/util/javascript-hint.js";
+import { addStyle } from "../main.js";
 
-    "use strict";
+addStyle("lib/codemirror/codemirror");
+addStyle("lib/codemirror/util/simple-hint");
+addStyle("dialog/dialog");
+addStyle("propertyeditor/propertyeditor");
 
-    Controller.addStyle("lib/codemirror/codemirror");
-    Controller.addStyle("lib/codemirror/util/simple-hint");
-
-    require([
-        "lib/codemirror/javascript",
-        "lib/codemirror/util/simple-hint",
-        "lib/codemirror/util/javascript-hint"
-    ]);
-
-    function PropertyEditor() {
-
-        this.element = null;
-
+export default class PropertyEditor {
+    constructor() {
         this.editor = null;
 
         this.options = {};
-
-        this.init();
-    }
-
-    PropertyEditor.prototype.init = function() {
-
-        Controller.addStyle("dialog/dialog");
-        Controller.addStyle("propertyeditor/propertyeditor");
 
         this.element = $(`<div class="property-editor dialog" style="display: none">
             <textarea></textarea>
@@ -38,29 +24,27 @@ define(["controller", "lib/codemirror/codemirror", "lib/zepto"],
         </div>`).appendTo(document.body);
 
         this.attachListeners();
-    };
+    }
 
-    PropertyEditor.prototype.attachListeners = function() {
-
+    attachListeners() {
         var self = this;
 
-        $(".cancel-button", this.element).on("click", function() {
+        $(".cancel-button", this.element).on("click", function () {
             self.close();
         });
 
-        $(".submit-button", this.element).on("click", function() {
+        $(".submit-button", this.element).on("click", function () {
             self.save();
         });
-    };
+    }
 
-    PropertyEditor.prototype.edit = function(value, options) {
-
+    edit(value, options) {
         this.editor = CodeMirror.fromTextArea($("textarea", this.element)[0], {
-            "lineNumbers": true,
-            "matchBrackets": true,
-            "tabSize": 4,
-            "indentUnit": 4,
-            "indentWithTabs": false
+            lineNumbers: true,
+            matchBrackets: true,
+            tabSize: 4,
+            indentUnit: 4,
+            indentWithTabs: false,
         });
 
         this.options = options || {};
@@ -73,17 +57,18 @@ define(["controller", "lib/codemirror/codemirror", "lib/zepto"],
             this.editor.setOption("lineWrapping", true);
         }
 
-        $(".submit-button", this.element).text(options.submitButtonLabel || "Save");
+        $(".submit-button", this.element).text(
+            options.submitButtonLabel || "Save"
+        );
 
         this.element.show();
 
         this.editor.setValue(value?.trim() ?? "");
 
         this.editor.focus();
-    };
+    }
 
-    PropertyEditor.prototype.save = function() {
-
+    save() {
         if (this.editor === null) {
             return;
         }
@@ -95,10 +80,9 @@ define(["controller", "lib/codemirror/codemirror", "lib/zepto"],
         } else {
             this.close();
         }
-    };
+    }
 
-    PropertyEditor.prototype.close = function() {
-
+    close() {
         if (this.options.onclose) {
             this.options.onclose();
         }
@@ -109,7 +93,5 @@ define(["controller", "lib/codemirror/codemirror", "lib/zepto"],
         }
 
         this.element.hide();
-    };
-
-    return PropertyEditor;
-});
+    }
+}

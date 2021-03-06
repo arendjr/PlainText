@@ -1,34 +1,15 @@
-/*global define:false, require:false*/
-define(["controller", "lib/zepto"],
-       function(Controller, $) {
+import { addStyle } from "../main.js";
 
-    "use strict";
+addStyle("loadingwidget/loading");
 
-    var loadingEl = null;
+const loadingEl = $(`<div class="loading dialog" style="display: none">
+    <p>Loading...</p>
+</div>`).appendTo(document.body);
 
-    function init() {
+export function showLoader() {
+    loadingEl.show();
+}
 
-        Controller.addStyle("loadingwidget/loading");
-
-        loadingEl = $(`<div class="loading dialog" style="display: none">
-            <p>Loading...</p>
-        </div>`).appendTo(document.body);
-    }
-
-    function showLoader() {
-
-        loadingEl.show();
-    }
-
-    function hideLoader() {
-
-        loadingEl.hide();
-    }
-
-    init();
-
-    return {
-        "showLoader": showLoader,
-        "hideLoader": hideLoader
-    };
-});
+export function hideLoader() {
+    loadingEl.hide();
+}

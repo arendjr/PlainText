@@ -1,7 +1,3 @@
-(function(window) {
-
-"use strict";
-
 // Laces Object constructor.
 //
 // This is the base class for the other laces object types. You should not
@@ -683,16 +679,8 @@ LacesArray.prototype.unshift = function() {
 };
 
 
-if (typeof define === 'function' && define.amd) {
-    define({
-        "Model": LacesModel,
-        "Map": LacesMap,
-        "Array": LacesArray
-    });
-} else {
-    window.LacesModel = LacesModel;
-    window.LacesMap = LacesMap;
-    window.LacesArray = LacesArray;
-}
-
-})(this);
+export default {
+    "Model": LacesModel,
+    "Map": LacesMap,
+    "Array": LacesArray
+};

@@ -3236,6 +3236,4 @@ window.CodeMirror = (function() {
   return CodeMirror;
 })();
 
-if (typeof define === "function" && define.amd) {
-  define("lib/codemirror/codemirror", [], function () { return CodeMirror; });
-}
+export default CodeMirror;

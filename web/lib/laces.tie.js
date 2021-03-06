@@ -1,8 +1,4 @@
-(function(window, document, undefined) {
-
-"use strict";
-
-function init(Laces) {
+import Laces from "./laces.js";
 
 // Laces Tie constructor.
 //
@@ -261,18 +257,4 @@ function LacesTie(model, template, options) {
 
 Laces.Tie = LacesTie;
 
-}
-
-if (typeof define === "function" && define.amd) {
-    define(function(require) {
-        var Laces = require("lib/laces");
-        init(Laces);
-        return Laces;
-    });
-} else {
-    var Laces = { Model: window.LacesModel, Map: window.LacesMap, Array: window.LacesArray };
-    init(Laces);
-    window.LacesTie = Laces.Tie;
-}
-
-})(this, document);
+export default Laces;
