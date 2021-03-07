@@ -103,6 +103,7 @@ impl Realm {
     }
 
     pub fn object_mut(&mut self, object_ref: GameObjectRef) -> Option<&mut dyn GameObject> {
+        self.request_persistence(object_ref);
         self.objects
             .get_mut(&object_ref)
             .and_then(|object| object.as_object_mut())

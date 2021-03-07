@@ -15,7 +15,10 @@ pub struct Point3D {
 impl Point3D {
     pub fn from_str(point_str: &str) -> Result<Self, String> {
         if !point_str.starts_with('(') || !point_str.ends_with(')') {
-            return Err("Invalid point -- use parenthesis to denote points".to_owned());
+            return Err(format!(
+                "Invalid point -- use parenthesis to denote points (received: {})",
+                point_str
+            ));
         }
 
         let parts: Vec<&str> = point_str[1..point_str.len() - 1].split(',').collect();

@@ -210,9 +210,13 @@ impl CommandLineProcessor {
     }
 
     pub fn take_rest(&mut self) -> String {
-        self.words
-            .drain(0..)
-            .fold("".to_owned(), |rest, word| format!("{} {}", rest, word))
+        self.words.drain(0..).fold("".to_owned(), |rest, word| {
+            if rest.is_empty() {
+                word
+            } else {
+                format!("{} {}", rest, word)
+            }
+        })
     }
 
     pub fn take_word(&mut self) -> Option<String> {
