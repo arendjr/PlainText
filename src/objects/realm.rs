@@ -1,14 +1,11 @@
-use im_rc::HashMap;
+use lazy_static::__Deref;
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::cmp;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::hash::{Hash, Hasher};
 
-use crate::game_object::{
-    Character, GameObject, GameObjectId, GameObjectPersistence, GameObjectRef, GameObjectType,
-    SharedGameObject,
-};
+use crate::game_object::{Character, GameObject, GameObjectId, GameObjectRef, GameObjectType};
 use crate::objects;
 use crate::objects::Player;
 use crate::persistence_handler::PersistenceRequest;
@@ -29,14 +26,14 @@ impl PartialEq for dyn GameObject {
     }
 }
 
-#[derive(Clone)]
 pub struct Realm {
     date_time: u64,
     description: String,
     id: GameObjectId,
     name: String,
+    needs_sync: bool,
     next_id: GameObjectId,
-    objects: HashMap<GameObjectRef, SharedGameObject>,
+    objects: HashMap<GameObjectRef, Box<dyn GameObject>>,
     objects_to_be_removed: HashSet<GameObjectRef>,
     objects_to_be_synced: HashSet<GameObjectRef>,
     players_by_name: HashMap<String, GameObjectId>,
@@ -46,16 +43,15 @@ pub struct Realm {
 impl Realm {
     game_object_copy_prop!(pub, date_time, set_date_time, u64);
 
-    pub fn add_player(&self, sign_up_data: &SignUpData) -> Self {
+    pub fn add_player(&mut self, sign_up_data: &SignUpData) {
         let player_ref = GameObjectRef(GameObjectType::Player, self.next_id);
-        let player = Player::new(player_ref.id(), sign_up_data);
-        let realm = self.set(player_ref, player, GameObjectPersistence::Sync);
-        if self.players_by_name.len() == 1 {
+        let mut player = Player::new(player_ref.id(), sign_up_data);
+        if self.players_by_name.len() == 0 {
             // First player automatically becomes admin:
-            player.set_is_admin(realm, true)
-        } else {
-            realm
+            player.set_is_admin(true)
         }
+
+        self.set(player_ref, Box::new(player));
     }
 
     pub fn character(&self, object_ref: GameObjectRef) -> Option<&dyn Character> {
@@ -64,15 +60,22 @@ impl Realm {
             .and_then(|object| object.as_character())
     }
 
+    pub fn character_mut(&mut self, object_ref: GameObjectRef) -> Option<&mut dyn Character> {
+        self.request_persistence(object_ref);
+        self.objects
+            .get_mut(&object_ref)
+            .and_then(|object| object.as_character_mut())
+    }
+
     pub fn class(&self, object_ref: GameObjectRef) -> Option<&objects::Class> {
         self.objects
             .get(&object_ref)
             .and_then(|object| object.as_class())
     }
 
-    pub fn hydrate(id: GameObjectId, json: &str) -> Result<SharedGameObject, String> {
+    pub fn hydrate(id: GameObjectId, json: &str) -> Result<Realm, String> {
         match serde_json::from_str::<RealmDto>(json) {
-            Ok(realm_dto) => Ok(SharedGameObject::new(Self {
+            Ok(realm_dto) => Ok(Self {
                 date_time: realm_dto.dateTime,
                 description: realm_dto.description.unwrap_or_default(),
                 id,
@@ -81,9 +84,10 @@ impl Realm {
                 objects_to_be_synced: HashSet::new(),
                 players_by_name: HashMap::new(),
                 name: realm_dto.name,
+                needs_sync: false,
                 next_id: id + 1,
                 races_by_name: HashMap::new(),
-            })),
+            }),
             Err(error) => Err(format!("parse error: {}", error)),
         }
     }
@@ -94,18 +98,24 @@ impl Realm {
             .and_then(|object| object.as_item())
     }
 
-    pub fn object(&self, object_ref: GameObjectRef) -> Option<SharedGameObject> {
-        self.objects.get(&object_ref).map(|object| object.clone())
+    pub fn object(&self, object_ref: GameObjectRef) -> Option<&dyn GameObject> {
+        self.objects.get(&object_ref).map(|object| object.deref())
+    }
+
+    pub fn object_mut(&mut self, object_ref: GameObjectRef) -> Option<&mut dyn GameObject> {
+        self.objects
+            .get_mut(&object_ref)
+            .and_then(|object| object.as_object_mut())
     }
 
     pub fn objects_of_type(
         &self,
         object_type: GameObjectType,
-    ) -> impl Iterator<Item = &SharedGameObject> + '_ {
+    ) -> impl Iterator<Item = &dyn GameObject> + '_ {
         self.objects
             .iter()
             .filter(move |(object_ref, _)| object_ref.object_type() == object_type)
-            .map(|(_, object)| object)
+            .map(|(_, object)| object.deref())
     }
 
     pub fn player(&self, object_ref: GameObjectRef) -> Option<&objects::Player> {
@@ -114,14 +124,32 @@ impl Realm {
             .and_then(|object| object.as_player())
     }
 
+    pub fn player_mut(&mut self, object_ref: GameObjectRef) -> Option<&mut objects::Player> {
+        self.request_persistence(object_ref);
+        self.objects
+            .get_mut(&object_ref)
+            .and_then(|object| object.as_player_mut())
+    }
+
     pub fn player_by_id(&self, id: GameObjectId) -> Option<&objects::Player> {
         self.player(GameObjectRef(GameObjectType::Player, id))
+    }
+
+    pub fn player_by_id_mut(&mut self, id: GameObjectId) -> Option<&mut objects::Player> {
+        self.player_mut(GameObjectRef(GameObjectType::Player, id))
     }
 
     pub fn player_by_name(&self, name: &str) -> Option<&objects::Player> {
         self.players_by_name
             .get(name)
             .and_then(|id| self.player_by_id(*id))
+    }
+
+    pub fn player_by_name_mut(&mut self, name: &str) -> Option<&mut objects::Player> {
+        self.players_by_name
+            .get(name)
+            .map(|id| *id)
+            .and_then(move |id| self.player_by_id_mut(id))
     }
 
     pub fn portal(&self, object_ref: GameObjectRef) -> Option<&objects::Portal> {
@@ -146,69 +174,53 @@ impl Realm {
         self.races_by_name.keys().map(String::as_ref).collect()
     }
 
+    pub fn request_persistence(&mut self, object_ref: GameObjectRef) {
+        self.objects_to_be_synced.insert(object_ref);
+    }
+
     pub fn room(&self, object_ref: GameObjectRef) -> Option<&objects::Room> {
         self.objects
             .get(&object_ref)
             .and_then(|object| object.as_room())
     }
 
-    pub fn set<T: GameObject>(
-        &self,
-        object_ref: GameObjectRef,
-        object: T,
-        persistence: GameObjectPersistence,
-    ) -> Self
-    where
-        T: 'static,
-    {
-        self.set_shared_object(object_ref, SharedGameObject::new(object), persistence)
+    pub fn room_mut(&mut self, object_ref: GameObjectRef) -> Option<&mut objects::Room> {
+        self.request_persistence(object_ref);
+        self.objects
+            .get_mut(&object_ref)
+            .and_then(|object| object.as_room_mut())
     }
 
-    pub fn set_shared_object(
-        &self,
-        object_ref: GameObjectRef,
-        object: SharedGameObject,
-        persistence: GameObjectPersistence,
-    ) -> Self {
-        let mut players_by_name = self.players_by_name.clone();
+    pub fn set(&mut self, object_ref: GameObjectRef, object: Box<dyn GameObject>) {
         if let Some(player) = object.as_player() {
-            players_by_name.insert(player.name().to_owned(), player.id());
+            self.players_by_name
+                .insert(player.name().to_owned(), player.id());
         }
 
-        let mut races_by_name = self.races_by_name.clone();
         if let Some(race) = object.as_race() {
-            races_by_name.insert(race.name().to_owned(), race.id());
+            self.races_by_name.insert(race.name().to_owned(), race.id());
         }
 
-        let mut objects = self.objects.clone();
-        objects.insert(object_ref, object);
-
-        Self {
-            name: self.name.clone(),
-            next_id: cmp::max(self.next_id, object_ref.id() + 1),
-            objects,
-            objects_to_be_removed: self.objects_to_be_removed.clone(),
-            objects_to_be_synced: if persistence == GameObjectPersistence::Sync {
-                let mut new_objects = self.objects_to_be_synced.clone();
-                new_objects.insert(object_ref);
-                new_objects
-            } else {
-                self.objects_to_be_synced.clone()
-            },
-            players_by_name,
-            races_by_name,
-            ..*self
+        if object.needs_sync() {
+            self.request_persistence(object_ref);
         }
+
+        self.objects.insert(object_ref, object);
+
+        self.next_id = cmp::max(self.next_id, object_ref.id() + 1);
     }
 
     pub fn take_persistence_requests(&mut self) -> Vec<PersistenceRequest> {
         let mut result = vec![];
         for object_ref in self.objects_to_be_synced.clone().drain() {
-            if let Some(object) = self.object(object_ref) {
-                result.push(PersistenceRequest::PersistObject(
-                    object_ref,
-                    object.dehydrate().to_string(),
-                ));
+            if let Some(object) = self.object_mut(object_ref) {
+                if object.needs_sync() {
+                    result.push(PersistenceRequest::PersistObject(
+                        object_ref,
+                        object.dehydrate().to_string(),
+                    ));
+                    object.set_needs_sync(false);
+                }
             }
         }
         for object_ref in self.objects_to_be_removed.drain() {
@@ -217,39 +229,16 @@ impl Realm {
         result
     }
 
-    pub fn unset(&mut self, object_ref: GameObjectRef) -> Self {
-        match self.objects.get(&object_ref) {
-            Some(object) => {
-                let mut objects = self.objects.clone();
-                objects.remove(&object_ref);
+    pub fn unset(&mut self, object_ref: GameObjectRef) {
+        if let Some(object) = self.objects.get(&object_ref) {
+            let name = object.name();
+            self.players_by_name.remove(name);
+            self.races_by_name.remove(name);
 
-                let name = object.name();
+            self.objects.remove(&object_ref);
 
-                let mut players_by_name = self.players_by_name.clone();
-                players_by_name.remove(name);
-
-                let mut races_by_name = self.races_by_name.clone();
-                races_by_name.remove(name);
-
-                Self {
-                    name: self.name.clone(),
-                    objects,
-                    objects_to_be_removed: {
-                        let mut new_objects = self.objects_to_be_removed.clone();
-                        new_objects.insert(object_ref);
-                        new_objects
-                    },
-                    objects_to_be_synced: {
-                        let mut new_objects = self.objects_to_be_synced.clone();
-                        new_objects.remove(&object_ref);
-                        new_objects
-                    },
-                    players_by_name,
-                    races_by_name,
-                    ..*self
-                }
-            }
-            None => self.clone(),
+            self.objects_to_be_removed.insert(object_ref);
+            self.objects_to_be_synced.remove(&object_ref);
         }
     }
 }
@@ -257,6 +246,14 @@ impl Realm {
 impl GameObject for Realm {
     game_object_string_prop!(name, set_name);
     game_object_string_prop!(description, set_description);
+
+    fn as_object(&self) -> Option<&dyn GameObject> {
+        Some(self)
+    }
+
+    fn as_object_mut(&mut self) -> Option<&mut dyn GameObject> {
+        Some(self)
+    }
 
     fn as_realm(&self) -> Option<&Self> {
         Some(&self)
@@ -268,7 +265,7 @@ impl GameObject for Realm {
             description: if self.description.is_empty() {
                 None
             } else {
-                Some(self.description)
+                Some(self.description.clone())
             },
             name: self.name.clone(),
         })
@@ -285,18 +282,25 @@ impl GameObject for Realm {
         self.id
     }
 
+    fn needs_sync(&self) -> bool {
+        self.needs_sync
+    }
+
     fn object_type(&self) -> GameObjectType {
         GameObjectType::Realm
     }
 
-    fn set_property(&self, realm: Realm, prop_name: &str, value: &str) -> Result<Realm, String> {
+    fn set_needs_sync(&mut self, needs_sync: bool) {
+        self.needs_sync = needs_sync;
+    }
+
+    fn set_property(&mut self, prop_name: &str, value: &str) -> Result<(), String> {
         match prop_name {
-            "date_time" => Ok(self.set_date_time(
-                realm,
-                value.parse().map_err(|error| format!("{:?}", error))?,
-            )),
-            "description" => Ok(self.set_description(realm, value.to_owned())),
-            "name" => Ok(self.set_name(realm, value.to_owned())),
+            "date_time" => {
+                Ok(self.set_date_time(value.parse().map_err(|error| format!("{:?}", error))?))
+            }
+            "description" => Ok(self.set_description(value.to_owned())),
+            "name" => Ok(self.set_name(value.to_owned())),
             _ => Err(format!("No property named \"{}\"", prop_name))?,
         }
     }

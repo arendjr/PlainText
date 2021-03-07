@@ -1,10 +1,14 @@
+use core::panic;
+
 use crate::objects;
 
-use super::{Character, GameObjectId, GameObjectRef, GameObjectType, SharedGameObject};
+use super::{Character, GameObjectId, GameObjectRef, GameObjectType};
 
 pub trait GameObject {
     fn id(&self) -> GameObjectId;
+    fn needs_sync(&self) -> bool;
     fn object_type(&self) -> GameObjectType;
+    fn set_needs_sync(&mut self, needs_sync: bool);
 
     fn adjective(&self) -> &str {
         ""
@@ -14,7 +18,15 @@ pub trait GameObject {
         None
     }
 
+    fn as_character_mut(&mut self) -> Option<&mut dyn Character> {
+        None
+    }
+
     fn as_class(&self) -> Option<&objects::Class> {
+        None
+    }
+
+    fn as_class_mut(&mut self) -> Option<&mut objects::Class> {
         None
     }
 
@@ -22,7 +34,23 @@ pub trait GameObject {
         None
     }
 
+    fn as_item_mut(&mut self) -> Option<&mut objects::Item> {
+        None
+    }
+
     fn as_npc(&self) -> Option<&objects::Npc> {
+        None
+    }
+
+    fn as_npc_mut(&mut self) -> Option<&mut objects::Npc> {
+        None
+    }
+
+    fn as_object(&self) -> Option<&dyn GameObject> {
+        None
+    }
+
+    fn as_object_mut(&mut self) -> Option<&mut dyn GameObject> {
         None
     }
 
@@ -30,11 +58,23 @@ pub trait GameObject {
         None
     }
 
+    fn as_player_mut(&mut self) -> Option<&mut objects::Player> {
+        None
+    }
+
     fn as_portal(&self) -> Option<&objects::Portal> {
         None
     }
 
+    fn as_portal_mut(&mut self) -> Option<&mut objects::Portal> {
+        None
+    }
+
     fn as_race(&self) -> Option<&objects::Race> {
+        None
+    }
+
+    fn as_race_mut(&mut self) -> Option<&mut objects::Race> {
         None
     }
 
@@ -46,14 +86,14 @@ pub trait GameObject {
         None
     }
 
+    fn as_room_mut(&mut self) -> Option<&mut objects::Room> {
+        None
+    }
+
     fn dehydrate(&self) -> serde_json::Value;
 
     fn description(&self) -> &str;
-    fn set_description(
-        &self,
-        realm: crate::objects::Realm,
-        description: String,
-    ) -> crate::objects::Realm;
+    fn set_description(&mut self, description: String);
 
     fn indefinite_article(&self) -> &str {
         ""
@@ -68,7 +108,7 @@ pub trait GameObject {
     }
 
     fn name(&self) -> &str;
-    fn set_name(&self, realm: crate::objects::Realm, name: String) -> crate::objects::Realm;
+    fn set_name(&mut self, name: String);
 
     fn object_ref(&self) -> GameObjectRef {
         GameObjectRef(self.object_type(), self.id())
@@ -78,15 +118,10 @@ pub trait GameObject {
         self.name().to_owned()
     }
 
-    fn set_property(
-        &self,
-        realm: objects::Realm,
-        prop_name: &str,
-        value: &str,
-    ) -> Result<objects::Realm, String>;
+    fn set_property(&mut self, prop_name: &str, value: &str) -> Result<(), String>;
 }
 
-pub fn hydrate(object_ref: GameObjectRef, content: &str) -> Result<SharedGameObject, String> {
+pub fn hydrate(object_ref: GameObjectRef, content: &str) -> Result<Box<dyn GameObject>, String> {
     let hydrate = match object_ref.object_type() {
         GameObjectType::Class => objects::Class::hydrate,
         GameObjectType::Item => objects::Item::hydrate,
@@ -94,7 +129,7 @@ pub fn hydrate(object_ref: GameObjectRef, content: &str) -> Result<SharedGameObj
         GameObjectType::Player => objects::Player::hydrate,
         GameObjectType::Portal => objects::Portal::hydrate,
         GameObjectType::Race => objects::Race::hydrate,
-        GameObjectType::Realm => objects::Realm::hydrate,
+        GameObjectType::Realm => panic!("Only one realm can be loaded"),
         GameObjectType::Room => objects::Room::hydrate,
     };
 
@@ -122,12 +157,12 @@ macro_rules! game_object_copy_prop {
             self.$name
         }
 
-        $vis fn $setter(&self, realm: crate::objects::Realm, $name: $type) -> crate::objects::Realm {
-            realm.set_shared_object(
-                self.object_ref(),
-                SharedGameObject::new(Self { $name, ..self.clone() }),
-                $persistence
-            )
+        $vis fn $setter(&mut self, $name: $type) {
+            self.$name = $name;
+
+            if ($persistence == crate::game_object::GameObjectPersistence::Sync) {
+                self.set_needs_sync(true);
+            }
         }
     };
 }
@@ -147,12 +182,12 @@ macro_rules! game_object_ref_prop {
             &self.$name
         }
 
-        $vis fn $setter(&self, realm: crate::objects::Realm, $name: $type) -> crate::objects::Realm {
-            realm.set_shared_object(
-                self.object_ref(),
-                SharedGameObject::new(Self { $name, ..self.clone() }),
-                $persistence
-            )
+        $vis fn $setter(&mut self, $name: $type) {
+            self.$name = $name;
+
+            if ($persistence == crate::game_object::GameObjectPersistence::Sync) {
+                self.set_needs_sync(true);
+            }
         }
     };
 }
@@ -172,12 +207,12 @@ macro_rules! game_object_string_prop {
             &self.$name
         }
 
-        $vis fn $setter(&self, realm: crate::objects::Realm, $name: String) -> crate::objects::Realm {
-            realm.set_shared_object(
-                self.object_ref(),
-                SharedGameObject::new(Self { $name, ..self.clone() }),
-                $persistence
-            )
+        $vis fn $setter(&mut self, $name: String) {
+            self.$name = $name;
+
+            if ($persistence == crate::game_object::GameObjectPersistence::Sync) {
+                self.set_needs_sync(true);
+            }
         }
     };
 }

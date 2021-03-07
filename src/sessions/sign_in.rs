@@ -225,7 +225,7 @@ fn process_asking_user_name_input(
 fn process_asking_password_input(
     state: &SignInState,
     _: &Realm,
-    source: &String,
+    _: &String,
     input: String,
 ) -> (SignInState, Output, Vec<String>) {
     if let Some(player) = &state.data.player {

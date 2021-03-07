@@ -20,12 +20,12 @@ pub struct CommandExecutor {
 impl CommandExecutor {
     pub fn execute_command(
         &self,
-        realm: Realm,
+        realm: &mut Realm,
         trigger_registry: &TriggerRegistry,
         player_ref: GameObjectRef,
         _: &LogSender,
         command_line: String,
-    ) -> (Realm, Vec<PlayerOutput>) {
+    ) -> Vec<PlayerOutput> {
         let mut processor = CommandLineProcessor::new(player_ref, &command_line);
         match self.interpreter.interpret_command(&mut processor) {
             Ok(command_type) => {
@@ -44,21 +44,17 @@ impl CommandExecutor {
                 };
                 command_fn(realm, player_ref, command_helpers)
             }
-            Err(InterpretationError::AmbiguousCommand(_)) => (
-                realm,
-                vec![PlayerOutput::new_from_str(
-                    player_ref.id(),
-                    "Command is not unique.\n",
-                )],
-            ),
-            Err(InterpretationError::UnknownCommand(command)) => (
-                realm,
+            Err(InterpretationError::AmbiguousCommand(_)) => vec![PlayerOutput::new_from_str(
+                player_ref.id(),
+                "Command is not unique.\n",
+            )],
+            Err(InterpretationError::UnknownCommand(command)) => {
                 vec![PlayerOutput::new_from_string(
                     player_ref.id(),
                     format!("Command \"{}\" does not exist.\n", command),
-                )],
-            ),
-            Err(InterpretationError::NoCommand) => (realm, vec![]),
+                )]
+            }
+            Err(InterpretationError::NoCommand) => vec![],
         }
     }
 

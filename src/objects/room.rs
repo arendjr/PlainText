@@ -7,11 +7,9 @@ use std::fmt;
 use crate::events::{EventMultiplierMap, EventType};
 use crate::game_object::{
     ref_difference, ref_union, GameObject, GameObjectId, GameObjectPersistence, GameObjectRef,
-    GameObjectType, SharedGameObject,
+    GameObjectType,
 };
 use crate::point3d::Point3D;
-
-use super::Realm;
 
 serializable_flags! {
     struct RoomFlags: u32 {
@@ -35,6 +33,7 @@ pub struct Room {
     flags: RoomFlags,
     items: Vec<GameObjectRef>,
     name: String,
+    needs_sync: bool,
     portals: Vec<GameObjectRef>,
     position: Point3D,
 }
@@ -58,8 +57,8 @@ impl Room {
     game_object_ref_prop!(pub, portals, set_portals, Vec<GameObjectRef>);
     game_object_ref_prop!(pub, position, set_position, Point3D);
 
-    pub fn add_characters(&self, realm: Realm, characters: Vec<GameObjectRef>) -> Realm {
-        self.set_characters(realm, ref_union(&self.characters, &characters))
+    pub fn add_characters(&mut self, characters: Vec<GameObjectRef>) {
+        self.set_characters(ref_union(&self.characters, &characters))
     }
 
     pub fn event_multiplier(&self, event_type: EventType) -> f32 {
@@ -70,9 +69,9 @@ impl Room {
         self.flags & flags == flags
     }
 
-    pub fn hydrate(id: GameObjectId, json: &str) -> Result<SharedGameObject, String> {
+    pub fn hydrate(id: GameObjectId, json: &str) -> Result<Box<dyn GameObject>, String> {
         match serde_json::from_str::<RoomDto>(json) {
-            Ok(room_dto) => Ok(SharedGameObject::new(Self {
+            Ok(room_dto) => Ok(Box::new(Self {
                 id,
                 characters: vec![],
                 description: room_dto.description,
@@ -80,6 +79,7 @@ impl Room {
                 flags: room_dto.flags,
                 items: room_dto.items.unwrap_or_default(),
                 name: room_dto.name,
+                needs_sync: false,
                 portals: room_dto.portals,
                 position: room_dto.position,
             })),
@@ -87,8 +87,8 @@ impl Room {
         }
     }
 
-    pub fn remove_characters(&self, realm: Realm, characters: Vec<GameObjectRef>) -> Realm {
-        self.set_characters(realm, ref_difference(&self.characters, &characters))
+    pub fn remove_characters(&mut self, characters: Vec<GameObjectRef>) {
+        self.set_characters(ref_difference(&self.characters, &characters))
     }
 }
 
@@ -102,8 +102,20 @@ impl GameObject for Room {
     game_object_string_prop!(name, set_name);
     game_object_string_prop!(description, set_description);
 
+    fn as_object(&self) -> Option<&dyn GameObject> {
+        Some(self)
+    }
+
+    fn as_object_mut(&mut self) -> Option<&mut dyn GameObject> {
+        Some(self)
+    }
+
     fn as_room(&self) -> Option<&Self> {
-        Some(&self)
+        Some(self)
+    }
+
+    fn as_room_mut(&mut self) -> Option<&mut Self> {
+        Some(self)
     }
 
     fn dehydrate(&self) -> serde_json::Value {
@@ -133,19 +145,27 @@ impl GameObject for Room {
         self.id
     }
 
+    fn needs_sync(&self) -> bool {
+        self.needs_sync
+    }
+
     fn object_type(&self) -> GameObjectType {
         GameObjectType::Room
     }
 
-    fn set_property(&self, realm: Realm, prop_name: &str, value: &str) -> Result<Realm, String> {
+    fn set_needs_sync(&mut self, needs_sync: bool) {
+        self.needs_sync = needs_sync;
+    }
+
+    fn set_property(&mut self, prop_name: &str, value: &str) -> Result<(), String> {
         match prop_name {
-            "characters" => Ok(self.set_characters(realm, GameObjectRef::vec_from_str(value)?)),
-            "description" => Ok(self.set_description(realm, value.to_owned())),
-            "flags" => Ok(self.set_flags(realm, RoomFlags::from_str(value)?)),
-            "items" => Ok(self.set_items(realm, GameObjectRef::vec_from_str(value)?)),
-            "name" => Ok(self.set_name(realm, value.to_owned())),
-            "portals" => Ok(self.set_portals(realm, GameObjectRef::vec_from_str(value)?)),
-            "position" => Ok(self.set_position(realm, Point3D::from_str(value)?)),
+            "characters" => Ok(self.set_characters(GameObjectRef::vec_from_str(value)?)),
+            "description" => Ok(self.set_description(value.to_owned())),
+            "flags" => Ok(self.set_flags(RoomFlags::from_str(value)?)),
+            "items" => Ok(self.set_items(GameObjectRef::vec_from_str(value)?)),
+            "name" => Ok(self.set_name(value.to_owned())),
+            "portals" => Ok(self.set_portals(GameObjectRef::vec_from_str(value)?)),
+            "position" => Ok(self.set_position(Point3D::from_str(value)?)),
             _ => Err(format!("No property named \"{}\"", prop_name))?,
         }
     }

@@ -12,22 +12,22 @@ use super::{CommandHelpers, CommandLineProcessor};
 ///
 /// Examples: `look`, `look at door`, `look earl`, `examine sign`, `look at key in inventory`
 pub fn look(
-    realm: Realm,
+    realm: &mut Realm,
     player_ref: GameObjectRef,
     helpers: CommandHelpers,
-) -> (Realm, Vec<PlayerOutput>) {
+) -> Vec<PlayerOutput> {
     let processor = helpers.command_line_processor;
 
     let mut output = Vec::new();
-    let player = unwrap_or_return!(realm.player(player_ref), (realm, output));
-    let current_room = unwrap_or_return!(realm.room(player.current_room()), (realm, output));
+    let player = unwrap_or_return!(realm.player(player_ref), output);
+    let current_room = unwrap_or_return!(realm.room(player.current_room()), output);
 
     let alias = processor.take_word().unwrap();
 
     if alias.starts_with('l') {
         if !processor.has_words_left() {
             look_at_object(&realm, player_ref, player.current_room(), &mut output);
-            return (realm, output);
+            return output;
         }
 
         processor.skip_connecting_word("at");
@@ -52,7 +52,7 @@ pub fn look(
             } else {
                 push_output_str!(output, player_ref, "Look at what?\n");
             }
-            return (realm, output);
+            return output;
         }
     };
 
@@ -64,7 +64,7 @@ pub fn look(
         } else {
             push_output_str!(output, player_ref, "You don't have that.\n");
         }
-        return (realm, output);
+        return output;
     }
 
     let pool = [
@@ -108,15 +108,15 @@ pub fn look(
                 } else {
                     push_output_str!(output, player_ref, "Look where?\n");
                 }
-                return (realm, output);
+                return output;
             };
 
-            look_in_direction(&realm, player_ref, &direction, &mut output);
-            return (realm, output);
+            look_in_direction(realm, player_ref, &direction, &mut output);
+            return output;
         }
     };
 
-    look_at_object(&realm, player_ref, object.object_ref(), &mut output);
+    look_at_object(realm, player_ref, object.object_ref(), &mut output);
 
-    (realm, output)
+    output
 }

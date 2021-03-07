@@ -5,9 +5,7 @@ use serde_json;
 use std::fmt;
 
 use crate::events::{EventMultiplierMap, EventType};
-use crate::game_object::{
-    GameObject, GameObjectId, GameObjectRef, GameObjectType, SharedGameObject,
-};
+use crate::game_object::{GameObject, GameObjectId, GameObjectRef, GameObjectType};
 use crate::objects::Realm;
 use crate::point3d::Point3D;
 
@@ -40,6 +38,7 @@ pub struct Portal {
     flags: PortalFlags,
     name: String,
     name2: String,
+    needs_sync: bool,
     room: GameObjectRef,
     room2: GameObjectRef,
 }
@@ -77,9 +76,9 @@ impl Portal {
         self.flags & flags == flags
     }
 
-    pub fn hydrate(id: GameObjectId, json: &str) -> Result<SharedGameObject, String> {
+    pub fn hydrate(id: GameObjectId, json: &str) -> Result<Box<dyn GameObject>, String> {
         match serde_json::from_str::<PortalDto>(json) {
-            Ok(portal_dto) => Ok(SharedGameObject::new(Self {
+            Ok(portal_dto) => Ok(Box::new(Self {
                 id,
                 description: portal_dto.description.unwrap_or_default(),
                 description2: portal_dto.description2.unwrap_or_default(),
@@ -89,6 +88,7 @@ impl Portal {
                 flags: portal_dto.flags,
                 name: portal_dto.name,
                 name2: portal_dto.name2,
+                needs_sync: false,
                 room: portal_dto.room,
                 room2: portal_dto.room2,
             })),
@@ -163,8 +163,20 @@ impl GameObject for Portal {
     game_object_string_prop!(name, set_name);
     game_object_string_prop!(description, set_description);
 
+    fn as_object(&self) -> Option<&dyn GameObject> {
+        Some(self)
+    }
+
+    fn as_object_mut(&mut self) -> Option<&mut dyn GameObject> {
+        Some(self)
+    }
+
     fn as_portal(&self) -> Option<&Self> {
         Some(&self)
+    }
+
+    fn as_portal_mut(&mut self) -> Option<&mut Self> {
+        Some(self)
     }
 
     fn dehydrate(&self) -> serde_json::Value {
@@ -205,21 +217,29 @@ impl GameObject for Portal {
         self.id
     }
 
+    fn needs_sync(&self) -> bool {
+        self.needs_sync
+    }
+
     fn object_type(&self) -> GameObjectType {
         GameObjectType::Portal
     }
 
-    fn set_property(&self, realm: Realm, prop_name: &str, value: &str) -> Result<Realm, String> {
+    fn set_needs_sync(&mut self, needs_sync: bool) {
+        self.needs_sync = needs_sync;
+    }
+
+    fn set_property(&mut self, prop_name: &str, value: &str) -> Result<(), String> {
         match prop_name {
-            "description" => Ok(self.set_description(realm, value.to_owned())),
-            "description2" => Ok(self.set_description2(realm, value.to_owned())),
-            "destination" => Ok(self.set_destination(realm, value.to_owned())),
-            "destination2" => Ok(self.set_destination2(realm, value.to_owned())),
-            "flags" => Ok(self.set_flags(realm, PortalFlags::from_str(value)?)),
-            "name" => Ok(self.set_name(realm, value.to_owned())),
-            "name2" => Ok(self.set_name2(realm, value.to_owned())),
-            "room" => Ok(self.set_room(realm, GameObjectRef::from_str(value)?)),
-            "room2" => Ok(self.set_room2(realm, GameObjectRef::from_str(value)?)),
+            "description" => Ok(self.set_description(value.to_owned())),
+            "description2" => Ok(self.set_description2(value.to_owned())),
+            "destination" => Ok(self.set_destination(value.to_owned())),
+            "destination2" => Ok(self.set_destination2(value.to_owned())),
+            "flags" => Ok(self.set_flags(PortalFlags::from_str(value)?)),
+            "name" => Ok(self.set_name(value.to_owned())),
+            "name2" => Ok(self.set_name2(value.to_owned())),
+            "room" => Ok(self.set_room(GameObjectRef::from_str(value)?)),
+            "room2" => Ok(self.set_room2(GameObjectRef::from_str(value)?)),
             _ => Err(format!("No property named \"{}\"", prop_name))?,
         }
     }

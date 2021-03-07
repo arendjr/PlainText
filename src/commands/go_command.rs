@@ -12,10 +12,10 @@ use super::CommandHelpers;
 ///
 /// Examples: `go north`, `go to tower`, `enter door`, `go forward`
 pub fn go(
-    mut realm: Realm,
+    realm: &mut Realm,
     player_ref: GameObjectRef,
     helpers: CommandHelpers,
-) -> (Realm, Vec<PlayerOutput>) {
+) -> Vec<PlayerOutput> {
     let processor = helpers.command_line_processor;
 
     let mut output = Vec::new();
@@ -27,38 +27,38 @@ pub fn go(
             .peek_word()
             .and_then(RelativeDirection::from_string)
         {
-            realm = go_in_direction(realm, player_ref, relative_direction, &mut output);
-            return (realm, output);
+            go_in_direction(realm, player_ref, relative_direction, &mut output);
+            return output;
         }
 
         processor.skip_connecting_word("to");
     }
 
-    let player = unwrap_or_return!(realm.player(player_ref), (realm, output));
-    let current_room = unwrap_or_return!(realm.room(player.current_room()), (realm, output));
-    let maybe_portal_ref = processor.take_object(&realm, current_room.portals());
+    let player = unwrap_or_return!(realm.player(player_ref), output);
+    let current_room = unwrap_or_return!(realm.room(player.current_room()), output);
+    let maybe_portal_ref = processor.take_object(realm, current_room.portals());
 
     if let Some(portal_ref) = maybe_portal_ref {
         let current_room_ref = current_room.object_ref();
-        realm = enter_portal(realm, player_ref, portal_ref, current_room_ref, &mut output);
+        enter_portal(realm, player_ref, portal_ref, current_room_ref, &mut output);
         if let Some(player) = realm.player(player_ref) {
-            look_at_object(&realm, player_ref, player.current_room(), &mut output);
+            look_at_object(realm, player_ref, player.current_room(), &mut output);
         }
     } else {
         push_output_str!(output, player_ref, "Go where?\n");
     }
 
-    (realm, output)
+    output
 }
 
 pub fn go_in_direction(
-    mut realm: Realm,
+    realm: &mut Realm,
     player_ref: GameObjectRef,
     relative_direction: RelativeDirection,
     output: &mut Vec<PlayerOutput>,
-) -> Realm {
-    let player = unwrap_or_return!(realm.player(player_ref), realm);
-    let current_room = unwrap_or_return!(realm.room(player.current_room()), realm);
+) {
+    let player = unwrap_or_return!(realm.player(player_ref), ());
+    let current_room = unwrap_or_return!(realm.room(player.current_room()), ());
     let current_room_ref = current_room.object_ref();
 
     let direction = &relative_direction.from(player.direction());
@@ -70,10 +70,10 @@ pub fn go_in_direction(
             format!("There's no way {}.\n", direction)
         );
     } else if let Some(portal_ref) = GameObjectRef::only(&portal_refs) {
-        realm = enter_portal(realm, player_ref, portal_ref, current_room_ref, output);
+        enter_portal(realm, player_ref, portal_ref, current_room_ref, output);
     } else {
         let destination_descriptions =
-            describe_objects_from_room(&realm, &portal_refs, current_room_ref);
+            describe_objects_from_room(realm, &portal_refs, current_room_ref);
         push_output_string!(
             output,
             player_ref,
@@ -84,5 +84,4 @@ pub fn go_in_direction(
             )
         );
     }
-    realm
 }

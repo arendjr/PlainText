@@ -9,14 +9,14 @@ use super::CommandHelpers;
 ///
 /// Examples: `inventory`, `look in inventory`.
 pub fn inventory(
-    realm: Realm,
+    realm: &mut Realm,
     player_ref: GameObjectRef,
     helpers: CommandHelpers,
-) -> (Realm, Vec<PlayerOutput>) {
+) -> Vec<PlayerOutput> {
     let processor = helpers.command_line_processor;
 
     let mut output = Vec::new();
-    let player = unwrap_or_return!(realm.player(player_ref), (realm, output));
+    let player = unwrap_or_return!(realm.player(player_ref), output);
 
     processor.skip_word(); // alias
 
@@ -64,5 +64,5 @@ pub fn inventory(
         carried_inventory_description + &carried_gold_string
     );
 
-    (realm, output)
+    output
 }

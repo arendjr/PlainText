@@ -18,10 +18,10 @@ struct ApiReply {
 
 /// Lists all the triggers.
 pub fn triggers_list(
-    realm: Realm,
+    _: &mut Realm,
     player_ref: GameObjectRef,
     mut helpers: CommandHelpers,
-) -> (Realm, Vec<PlayerOutput>) {
+) -> Vec<PlayerOutput> {
     let mut output: Vec<PlayerOutput> = Vec::new();
 
     let signatures = helpers.trigger_registry.signatures();
@@ -30,5 +30,5 @@ pub fn triggers_list(
         processor.send_reply(signatures);
     }
 
-    (realm, output)
+    output
 }

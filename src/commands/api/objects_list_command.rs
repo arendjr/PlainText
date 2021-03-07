@@ -9,27 +9,27 @@ use super::api_request_processor::ApiRequestProcessor;
 
 /// Lists all the objects of a given type.
 pub fn objects_list(
-    realm: Realm,
+    realm: &mut Realm,
     player_ref: GameObjectRef,
     mut helpers: CommandHelpers,
-) -> (Realm, Vec<PlayerOutput>) {
+) -> Vec<PlayerOutput> {
     let mut output: Vec<PlayerOutput> = Vec::new();
 
     let mut processor = unwrap_or_return!(
         ApiRequestProcessor::try_new(&mut output, player_ref, &mut helpers),
-        (realm, output)
+        output
     );
 
     let object_type_string = unwrap_or_return!(processor.take_word(), {
         processor.send_error(400, "Please specify an object type".to_owned());
-        (realm, output)
+        output
     });
 
     let object_type = match GameObjectType::from_str(&object_type_string) {
         Ok(object_type) => object_type,
         Err(error) => {
             processor.send_error(400, error);
-            return (realm, output);
+            return output;
         }
     };
 
@@ -45,5 +45,5 @@ pub fn objects_list(
         .collect();
 
     processor.send_reply(objects);
-    (realm, output)
+    output
 }

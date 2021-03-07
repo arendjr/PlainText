@@ -3,11 +3,7 @@ use serde_json;
 use std::fmt;
 
 use crate::character_stats::CharacterStats;
-use crate::game_object::{
-    GameObject, GameObjectId, GameObjectRef, GameObjectType, SharedGameObject,
-};
-
-use super::Realm;
+use crate::game_object::{GameObject, GameObjectId, GameObjectRef, GameObjectType};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Race {
@@ -17,6 +13,7 @@ pub struct Race {
     description: String,
     height: f32,
     name: String,
+    needs_sync: bool,
     starting_room: GameObjectRef,
     stats: CharacterStats,
     stats_suggestion: CharacterStats,
@@ -32,15 +29,16 @@ impl Race {
     game_object_ref_prop!(pub, stats_suggestion, set_stats_suggestion, CharacterStats);
     game_object_copy_prop!(pub, weight, set_weight, f32);
 
-    pub fn hydrate(id: GameObjectId, json: &str) -> Result<SharedGameObject, String> {
+    pub fn hydrate(id: GameObjectId, json: &str) -> Result<Box<dyn GameObject>, String> {
         match serde_json::from_str::<RaceDto>(json) {
-            Ok(race_dto) => Ok(SharedGameObject::new(Self {
+            Ok(race_dto) => Ok(Box::new(Self {
                 id,
                 adjective: race_dto.adjective,
                 classes: race_dto.classes,
                 description: race_dto.description,
                 height: race_dto.height,
                 name: race_dto.name,
+                needs_sync: false,
                 starting_room: race_dto.startingRoom,
                 stats: race_dto.stats,
                 stats_suggestion: race_dto.statsSuggestion,
@@ -66,7 +64,19 @@ impl GameObject for Race {
     }
 
     fn as_race(&self) -> Option<&Self> {
-        Some(&self)
+        Some(self)
+    }
+
+    fn as_race_mut(&mut self) -> Option<&mut Self> {
+        Some(self)
+    }
+
+    fn as_object(&self) -> Option<&dyn GameObject> {
+        Some(self)
+    }
+
+    fn as_object_mut(&mut self) -> Option<&mut dyn GameObject> {
+        Some(self)
     }
 
     fn dehydrate(&self) -> serde_json::Value {
@@ -94,29 +104,29 @@ impl GameObject for Race {
         self.id
     }
 
+    fn needs_sync(&self) -> bool {
+        self.needs_sync
+    }
+
     fn object_type(&self) -> GameObjectType {
         GameObjectType::Race
     }
 
-    fn set_property(&self, realm: Realm, prop_name: &str, value: &str) -> Result<Realm, String> {
+    fn set_needs_sync(&mut self, needs_sync: bool) {
+        self.needs_sync = needs_sync;
+    }
+
+    fn set_property(&mut self, prop_name: &str, value: &str) -> Result<(), String> {
         match prop_name {
-            "adjective" => Ok(self.set_adjective(realm, value.to_owned())),
-            "classes" => Ok(self.set_classes(realm, GameObjectRef::vec_from_str(value)?)),
-            "description" => Ok(self.set_description(realm, value.to_owned())),
-            "height" => Ok(self.set_height(
-                realm,
-                value.parse().map_err(|error| format!("{:?}", error))?,
-            )),
-            "name" => Ok(self.set_name(realm, value.to_owned())),
-            "startingRoom" => Ok(self.set_starting_room(realm, GameObjectRef::from_str(value)?)),
-            "stats" => Ok(self.set_stats(realm, CharacterStats::from_str(value)?)),
-            "statsSuggestion" => {
-                Ok(self.set_stats_suggestion(realm, CharacterStats::from_str(value)?))
-            }
-            "weight" => Ok(self.set_weight(
-                realm,
-                value.parse().map_err(|error| format!("{:?}", error))?,
-            )),
+            "adjective" => Ok(self.set_adjective(value.to_owned())),
+            "classes" => Ok(self.set_classes(GameObjectRef::vec_from_str(value)?)),
+            "description" => Ok(self.set_description(value.to_owned())),
+            "height" => Ok(self.set_height(value.parse().map_err(|error| format!("{:?}", error))?)),
+            "name" => Ok(self.set_name(value.to_owned())),
+            "startingRoom" => Ok(self.set_starting_room(GameObjectRef::from_str(value)?)),
+            "stats" => Ok(self.set_stats(CharacterStats::from_str(value)?)),
+            "statsSuggestion" => Ok(self.set_stats_suggestion(CharacterStats::from_str(value)?)),
+            "weight" => Ok(self.set_weight(value.parse().map_err(|error| format!("{:?}", error))?)),
             _ => Err(format!("No property named \"{}\"", prop_name))?,
         }
     }

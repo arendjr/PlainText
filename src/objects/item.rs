@@ -4,10 +4,8 @@ use serde::{Deserialize, Serialize};
 use serde_json;
 use std::fmt;
 
-use crate::game_object::{GameObject, GameObjectId, GameObjectType, SharedGameObject};
+use crate::game_object::{GameObject, GameObjectId, GameObjectType};
 use crate::point3d::Point3D;
-
-use super::Realm;
 
 serializable_flags! {
     pub struct ItemFlags: u32 {
@@ -27,6 +25,7 @@ pub struct Item {
     description: String,
     flags: ItemFlags,
     name: String,
+    needs_sync: bool,
     position: Point3D,
     weight: f32,
 }
@@ -45,14 +44,15 @@ impl Item {
         self.has_flags(ItemFlags::Hidden)
     }
 
-    pub fn hydrate(id: GameObjectId, json: &str) -> Result<SharedGameObject, String> {
+    pub fn hydrate(id: GameObjectId, json: &str) -> Result<Box<dyn GameObject>, String> {
         match serde_json::from_str::<ItemDto>(json) {
-            Ok(item_dto) => Ok(SharedGameObject::new(Self {
+            Ok(item_dto) => Ok(Box::new(Self {
                 id,
                 cost: item_dto.cost,
                 description: item_dto.description,
                 flags: item_dto.flags.unwrap_or_default(),
                 name: item_dto.name,
+                needs_sync: false,
                 position: item_dto.position,
                 weight: item_dto.weight,
             })),
@@ -73,6 +73,18 @@ impl GameObject for Item {
 
     fn as_item(&self) -> Option<&Self> {
         Some(&self)
+    }
+
+    fn as_item_mut(&mut self) -> Option<&mut Self> {
+        Some(self)
+    }
+
+    fn as_object(&self) -> Option<&dyn GameObject> {
+        Some(self)
+    }
+
+    fn as_object_mut(&mut self) -> Option<&mut dyn GameObject> {
+        Some(self)
     }
 
     fn dehydrate(&self) -> serde_json::Value {
@@ -111,24 +123,26 @@ impl GameObject for Item {
         }
     }
 
+    fn needs_sync(&self) -> bool {
+        self.needs_sync
+    }
+
     fn object_type(&self) -> GameObjectType {
         GameObjectType::Item
     }
 
-    fn set_property(&self, realm: Realm, prop_name: &str, value: &str) -> Result<Realm, String> {
+    fn set_needs_sync(&mut self, needs_sync: bool) {
+        self.needs_sync = needs_sync;
+    }
+
+    fn set_property(&mut self, prop_name: &str, value: &str) -> Result<(), String> {
         match prop_name {
-            "cost" => Ok(self.set_cost(
-                realm,
-                value.parse().map_err(|error| format!("{:?}", error))?,
-            )),
-            "description" => Ok(self.set_description(realm, value.to_owned())),
-            "flags" => Ok(self.set_flags(realm, ItemFlags::from_str(value)?)),
-            "name" => Ok(self.set_name(realm, value.to_owned())),
-            "position" => Ok(self.set_position(realm, Point3D::from_str(value)?)),
-            "weight" => Ok(self.set_weight(
-                realm,
-                value.parse().map_err(|error| format!("{:?}", error))?,
-            )),
+            "cost" => Ok(self.set_cost(value.parse().map_err(|error| format!("{:?}", error))?)),
+            "description" => Ok(self.set_description(value.to_owned())),
+            "flags" => Ok(self.set_flags(ItemFlags::from_str(value)?)),
+            "name" => Ok(self.set_name(value.to_owned())),
+            "position" => Ok(self.set_position(Point3D::from_str(value)?)),
+            "weight" => Ok(self.set_weight(value.parse().map_err(|error| format!("{:?}", error))?)),
             _ => Err(format!("No property named \"{}\"", prop_name))?,
         }
     }

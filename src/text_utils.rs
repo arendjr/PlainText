@@ -3,7 +3,7 @@ use regex::{Captures, Regex};
 use std::borrow::Borrow;
 
 use crate::colors::Color;
-use crate::game_object::{GameObject, GameObjectRef, SharedGameObject};
+use crate::game_object::{GameObject, GameObjectRef};
 use crate::number_utils::written_number;
 use crate::objects::{ItemFlags, Realm};
 
@@ -24,8 +24,11 @@ pub fn colorize(string: &str, color: Color) -> String {
     format!("\x1B[{}m{}\x1B[0m", COLOR_MAP[color as usize], string)
 }
 
-fn count_objects(realm: &Realm, object_refs: &Vec<GameObjectRef>) -> Vec<(SharedGameObject, u16)> {
-    let mut objects_with_counts = Vec::<(SharedGameObject, u16)>::new();
+fn count_objects<'a>(
+    realm: &'a Realm,
+    object_refs: &Vec<GameObjectRef>,
+) -> Vec<(&'a dyn GameObject, u16)> {
+    let mut objects_with_counts = Vec::<(&dyn GameObject, u16)>::new();
     for object in object_refs
         .iter()
         .filter_map(|object_ref| realm.object(*object_ref))

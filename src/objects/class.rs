@@ -3,15 +3,14 @@ use serde_json;
 use std::fmt;
 
 use crate::character_stats::CharacterStats;
-use crate::game_object::{GameObject, GameObjectId, GameObjectType, SharedGameObject};
-
-use super::Realm;
+use crate::game_object::{GameObject, GameObjectId, GameObjectType};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Class {
     id: GameObjectId,
     description: String,
     name: String,
+    needs_sync: bool,
     stats: CharacterStats,
     stats_suggestion: CharacterStats,
 }
@@ -20,12 +19,13 @@ impl Class {
     game_object_ref_prop!(pub, stats, set_stats, CharacterStats);
     game_object_ref_prop!(pub, stats_suggestion, set_stats_suggestion, CharacterStats);
 
-    pub fn hydrate(id: GameObjectId, json: &str) -> Result<SharedGameObject, String> {
+    pub fn hydrate(id: GameObjectId, json: &str) -> Result<Box<dyn GameObject>, String> {
         match serde_json::from_str::<ClassDto>(json) {
-            Ok(class_dto) => Ok(SharedGameObject::new(Self {
+            Ok(class_dto) => Ok(Box::new(Self {
                 id,
                 description: class_dto.description,
                 name: class_dto.name,
+                needs_sync: false,
                 stats: class_dto.stats,
                 stats_suggestion: match class_dto.statsSuggestion {
                     Some(stats_suggestion) => stats_suggestion,
@@ -48,7 +48,19 @@ impl GameObject for Class {
     game_object_string_prop!(description, set_description);
 
     fn as_class(&self) -> Option<&Self> {
-        Some(&self)
+        Some(self)
+    }
+
+    fn as_class_mut(&mut self) -> Option<&mut Self> {
+        Some(self)
+    }
+
+    fn as_object(&self) -> Option<&dyn GameObject> {
+        Some(self)
+    }
+
+    fn as_object_mut(&mut self) -> Option<&mut dyn GameObject> {
+        Some(self)
     }
 
     fn dehydrate(&self) -> serde_json::Value {
@@ -75,14 +87,20 @@ impl GameObject for Class {
         GameObjectType::Class
     }
 
-    fn set_property(&self, realm: Realm, prop_name: &str, value: &str) -> Result<Realm, String> {
+    fn needs_sync(&self) -> bool {
+        self.needs_sync
+    }
+
+    fn set_needs_sync(&mut self, needs_sync: bool) {
+        self.needs_sync = needs_sync;
+    }
+
+    fn set_property(&mut self, prop_name: &str, value: &str) -> Result<(), String> {
         match prop_name {
-            "description" => Ok(self.set_description(realm, value.to_owned())),
-            "name" => Ok(self.set_name(realm, value.to_owned())),
-            "stats" => Ok(self.set_stats(realm, CharacterStats::from_str(value)?)),
-            "statsSuggestion" => {
-                Ok(self.set_stats_suggestion(realm, CharacterStats::from_str(value)?))
-            }
+            "description" => Ok(self.set_description(value.to_owned())),
+            "name" => Ok(self.set_name(value.to_owned())),
+            "stats" => Ok(self.set_stats(CharacterStats::from_str(value)?)),
+            "statsSuggestion" => Ok(self.set_stats_suggestion(CharacterStats::from_str(value)?)),
             _ => Err(format!("No property named \"{}\"", prop_name))?,
         }
     }

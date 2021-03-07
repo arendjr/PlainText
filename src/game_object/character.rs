@@ -1,6 +1,5 @@
 use crate::character_stats::CharacterStats;
 use crate::game_object::{GameObject, GameObjectRef};
-use crate::objects::Realm;
 use crate::vector3d::Vector3D;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -39,38 +38,38 @@ impl Gender {
 
 pub trait Character: GameObject {
     fn class(&self) -> Option<GameObjectRef>;
-    fn set_class(&self, realm: Realm, class: Option<GameObjectRef>) -> Realm;
+    fn set_class(&mut self, class: Option<GameObjectRef>);
 
     fn current_room(&self) -> GameObjectRef;
-    fn set_current_room(&self, realm: Realm, room: GameObjectRef) -> Realm;
+    fn set_current_room(&mut self, room: GameObjectRef);
 
     fn direction(&self) -> &Vector3D;
-    fn set_direction(&self, realm: Realm, direction: Vector3D) -> Realm;
+    fn set_direction(&mut self, direction: Vector3D);
 
     fn gender(&self) -> Gender;
-    fn set_gender(&self, realm: Realm, gender: Gender) -> Realm;
+    fn set_gender(&mut self, gender: Gender);
 
     fn gold(&self) -> u32;
-    fn set_gold(&self, realm: Realm, gold: u32) -> Realm;
+    fn set_gold(&mut self, gold: u32);
 
     fn height(&self) -> f32;
-    fn set_height(&self, realm: Realm, height: f32) -> Realm;
+    fn set_height(&mut self, height: f32);
 
     fn hp(&self) -> i16;
-    fn set_hp(&self, realm: Realm, hp: i16) -> Realm;
+    fn set_hp(&mut self, hp: i16);
 
     fn inventory(&self) -> &Vec<GameObjectRef>;
-    fn set_inventory(&self, realm: Realm, inventory: Vec<GameObjectRef>) -> Realm;
+    fn set_inventory(&mut self, inventory: Vec<GameObjectRef>);
 
     fn mp(&self) -> i16;
-    fn set_mp(&self, realm: Realm, mp: i16) -> Realm;
+    fn set_mp(&mut self, mp: i16);
 
     fn race(&self) -> GameObjectRef;
-    fn set_race(&self, realm: Realm, race: GameObjectRef) -> Realm;
+    fn set_race(&mut self, race: GameObjectRef);
 
     fn stats(&self) -> &CharacterStats;
-    fn set_stats(&self, realm: Realm, stats: CharacterStats) -> Realm;
+    fn set_stats(&mut self, stats: CharacterStats);
 
     fn weight(&self) -> f32;
-    fn set_weight(&self, realm: Realm, weight: f32) -> Realm;
+    fn set_weight(&mut self, weight: f32);
 }
