@@ -13,6 +13,29 @@ pub struct Point3D {
 }
 
 impl Point3D {
+    pub fn from_str(point_str: &str) -> Result<Self, String> {
+        if !point_str.starts_with('(') || !point_str.ends_with(')') {
+            return Err("Invalid point -- use parenthesis to denote points".to_owned());
+        }
+
+        let parts: Vec<&str> = point_str[1..point_str.len() - 1].split(',').collect();
+        if parts.len() != 3 {
+            return Err("Invalid point -- must contain 3 comma-separated coordinates".to_owned());
+        }
+
+        Ok(Self {
+            x: parts[0]
+                .parse()
+                .map_err(|err| format!("Could not parse x coordinate: {:?}", err))?,
+            y: parts[1]
+                .parse()
+                .map_err(|err| format!("Could not parse y coordinate: {:?}", err))?,
+            z: parts[2]
+                .parse()
+                .map_err(|err| format!("Could not parse z coordinate: {:?}", err))?,
+        })
+    }
+
     pub fn is_default(&self) -> bool {
         self.x == 0 && self.y == 0 && self.z == 0
     }

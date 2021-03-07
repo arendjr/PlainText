@@ -15,29 +15,35 @@ pub fn objects_list(
 ) -> (Realm, Vec<PlayerOutput>) {
     let mut output: Vec<PlayerOutput> = Vec::new();
 
-    if let Some(mut processor) = ApiRequestProcessor::try_new(&mut output, player_ref, &mut helpers)
-    {
-        if let Some(object_type_string) = processor.take_word() {
-            if let Some(object_type) = GameObjectType::from_str(&object_type_string) {
-                let objects: Vec<serde_json::Value> = realm
-                    .objects_of_type(object_type)
-                    .map(|object| {
-                        let mut hydrated_object = object.dehydrate();
-                        if let Some(json_object) = hydrated_object.as_object_mut() {
-                            json_object.insert("id".to_owned(), json!(object.id()));
-                        }
-                        hydrated_object
-                    })
-                    .collect();
+    let mut processor = unwrap_or_return!(
+        ApiRequestProcessor::try_new(&mut output, player_ref, &mut helpers),
+        (realm, output)
+    );
 
-                processor.send_reply(objects);
-            } else {
-                processor.send_error(400, format!("Unknown object type: {}", object_type_string));
-            }
-        } else {
-            processor.send_error(400, "Please specify an object type".to_owned());
+    let object_type_string = unwrap_or_return!(processor.take_word(), {
+        processor.send_error(400, "Please specify an object type".to_owned());
+        (realm, output)
+    });
+
+    let object_type = match GameObjectType::from_str(&object_type_string) {
+        Ok(object_type) => object_type,
+        Err(error) => {
+            processor.send_error(400, error);
+            return (realm, output);
         }
-    }
+    };
 
+    let objects: Vec<serde_json::Value> = realm
+        .objects_of_type(object_type)
+        .map(|object| {
+            let mut hydrated_object = object.dehydrate();
+            if let Some(json_object) = hydrated_object.as_object_mut() {
+                json_object.insert("id".to_owned(), json!(object.id()));
+            }
+            hydrated_object
+        })
+        .collect();
+
+    processor.send_reply(objects);
     (realm, output)
 }

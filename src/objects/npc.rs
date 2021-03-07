@@ -8,6 +8,8 @@ use crate::game_object::{
 };
 use crate::vector3d::Vector3D;
 
+use super::Realm;
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct Npc {
     id: GameObjectId,
@@ -23,7 +25,6 @@ pub struct Npc {
     mp: i16,
     name: String,
     race: GameObjectRef,
-    session_id: Option<u64>,
     stats: CharacterStats,
     weight: f32,
 }
@@ -45,7 +46,6 @@ impl Npc {
                 mp: npc_dto.mp,
                 name: npc_dto.name,
                 race: npc_dto.race,
-                session_id: None,
                 stats: npc_dto.stats,
                 weight: npc_dto.weight,
             })),
@@ -74,7 +74,6 @@ impl Npc {
                 mp: 0,
                 name,
                 race: race_ref,
-                session_id: None,
                 stats: CharacterStats::new(),
                 weight: 0.0,
             },
@@ -84,81 +83,18 @@ impl Npc {
 }
 
 impl Character for Npc {
-    fn class(&self) -> Option<GameObjectRef> {
-        self.class
-    }
-
-    fn current_room(&self) -> GameObjectRef {
-        self.current_room
-    }
-
-    fn direction(&self) -> &Vector3D {
-        &self.direction
-    }
-
-    fn gender(&self) -> Gender {
-        self.gender
-    }
-
-    fn gold(&self) -> u32 {
-        self.gold
-    }
-
-    fn height(&self) -> f32 {
-        self.height
-    }
-
-    fn hp(&self) -> i16 {
-        self.hp
-    }
-
-    fn inventory(&self) -> &Vec<GameObjectRef> {
-        &self.inventory
-    }
-
-    fn max_hp(&self) -> i16 {
-        self.stats.max_hp()
-    }
-
-    fn max_mp(&self) -> i16 {
-        self.stats.max_mp()
-    }
-
-    fn mp(&self) -> i16 {
-        self.mp
-    }
-
-    fn race(&self) -> GameObjectRef {
-        self.race
-    }
-
-    fn stats(&self) -> &CharacterStats {
-        &self.stats
-    }
-
-    fn weight(&self) -> f32 {
-        self.weight
-    }
-
-    fn with_current_room(&self, room: GameObjectRef) -> (SharedGameObject, bool) {
-        (
-            SharedGameObject::new(Self {
-                current_room: room,
-                ..self.clone()
-            }),
-            true,
-        )
-    }
-
-    fn with_direction(&self, direction: Vector3D) -> (SharedGameObject, bool) {
-        (
-            SharedGameObject::new(Self {
-                direction,
-                ..self.clone()
-            }),
-            true,
-        )
-    }
+    game_object_copy_prop!(class, set_class, Option<GameObjectRef>);
+    game_object_copy_prop!(current_room, set_current_room, GameObjectRef);
+    game_object_ref_prop!(direction, set_direction, Vector3D);
+    game_object_copy_prop!(gender, set_gender, Gender);
+    game_object_copy_prop!(gold, set_gold, u32);
+    game_object_copy_prop!(height, set_height, f32);
+    game_object_copy_prop!(hp, set_hp, i16);
+    game_object_ref_prop!(inventory, set_inventory, Vec<GameObjectRef>);
+    game_object_copy_prop!(mp, set_mp, i16);
+    game_object_copy_prop!(race, set_race, GameObjectRef);
+    game_object_ref_prop!(stats, set_stats, CharacterStats);
+    game_object_copy_prop!(weight, set_weight, f32);
 }
 
 impl fmt::Display for Npc {
@@ -168,6 +104,9 @@ impl fmt::Display for Npc {
 }
 
 impl GameObject for Npc {
+    game_object_string_prop!(name, set_name);
+    game_object_string_prop!(description, set_description);
+
     fn as_character(&self) -> Option<&dyn Character> {
         Some(self)
     }
@@ -210,10 +149,6 @@ impl GameObject for Npc {
         })
     }
 
-    fn description(&self) -> &str {
-        &self.description
-    }
-
     fn id(&self) -> GameObjectId {
         self.id
     }
@@ -222,8 +157,39 @@ impl GameObject for Npc {
         GameObjectType::Player
     }
 
-    fn name(&self) -> &str {
-        &self.name
+    fn set_property(&self, realm: Realm, prop_name: &str, value: &str) -> Result<Realm, String> {
+        match prop_name {
+            "class" => Ok(self.set_class(realm, Some(GameObjectRef::from_str(value)?))),
+            "current_room" => Ok(self.set_current_room(realm, GameObjectRef::from_str(value)?)),
+            "description" => Ok(self.set_description(realm, value.to_owned())),
+            "direction" => Ok(self.set_direction(realm, Vector3D::from_str(value)?)),
+            "gender" => Ok(self.set_gender(realm, Gender::from_str(value)?)),
+            "gold" => Ok(self.set_gold(
+                realm,
+                value.parse().map_err(|error| format!("{:?}", error))?,
+            )),
+            "height" => Ok(self.set_height(
+                realm,
+                value.parse().map_err(|error| format!("{:?}", error))?,
+            )),
+            "hp" => Ok(self.set_hp(
+                realm,
+                value.parse().map_err(|error| format!("{:?}", error))?,
+            )),
+            "inventory" => Ok(self.set_inventory(realm, GameObjectRef::vec_from_str(value)?)),
+            "mp" => Ok(self.set_mp(
+                realm,
+                value.parse().map_err(|error| format!("{:?}", error))?,
+            )),
+            "name" => Ok(self.set_name(realm, value.to_owned())),
+            "race" => Ok(self.set_race(realm, GameObjectRef::from_str(value)?)),
+            "stats" => Ok(self.set_stats(realm, CharacterStats::from_str(value)?)),
+            "weight" => Ok(self.set_weight(
+                realm,
+                value.parse().map_err(|error| format!("{:?}", error))?,
+            )),
+            _ => Err(format!("No property named \"{}\"", prop_name))?,
+        }
     }
 }
 

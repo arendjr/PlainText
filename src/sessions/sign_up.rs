@@ -350,14 +350,18 @@ fn get_base_stats(data: &SignUpData) -> (f32, f32, CharacterStats, CharacterStat
         Some(race) => (
             race.height(),
             race.weight(),
-            race.stats(),
-            race.stats_suggestion(),
+            race.stats().clone(),
+            race.stats_suggestion().clone(),
         ),
         None => (0.0, 0.0, CharacterStats::new(), CharacterStats::new()),
     };
 
     let (class_name, class_stats, class_stats_suggestion) = match &data.class {
-        Some(class) => (class.name(), class.stats(), class.stats_suggestion()),
+        Some(class) => (
+            class.name(),
+            class.stats().clone(),
+            class.stats_suggestion().clone(),
+        ),
         None => ("", CharacterStats::new(), CharacterStats::new()),
     };
 

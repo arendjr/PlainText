@@ -1,4 +1,5 @@
 use serde::Serialize;
+use serde_json::json;
 
 use crate::{
     commands::command_helpers::CommandHelpers, game_object::GameObjectRef,
@@ -47,6 +48,20 @@ impl<'a, 'b> ApiRequestProcessor<'a, 'b> {
         .unwrap();
 
         push_session_output!(self.output, self.player_ref, SessionOutput::JSON(reply));
+    }
+
+    pub fn send_success_reply(&mut self) {
+        self.send_reply(json!({"success": true}));
+    }
+
+    pub fn take_object_ref(&mut self) -> Result<GameObjectRef, String> {
+        self.take_word()
+            .ok_or_else(|| "No object ref given".to_owned())
+            .and_then(|word| GameObjectRef::from_str(&word))
+    }
+
+    pub fn take_rest(&mut self) -> String {
+        self.helpers.command_line_processor.take_rest()
     }
 
     pub fn take_word(&mut self) -> Option<String> {

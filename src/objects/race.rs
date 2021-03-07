@@ -1,19 +1,19 @@
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::fmt;
-use std::ops::Deref;
-use std::sync::Arc;
 
 use crate::character_stats::CharacterStats;
 use crate::game_object::{
     GameObject, GameObjectId, GameObjectRef, GameObjectType, SharedGameObject,
 };
 
+use super::Realm;
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct Race {
     id: GameObjectId,
     adjective: String,
-    classes: Arc<Vec<GameObjectRef>>,
+    classes: Vec<GameObjectRef>,
     description: String,
     height: f32,
     name: String,
@@ -24,24 +24,20 @@ pub struct Race {
 }
 
 impl Race {
-    pub fn classes(&self) -> Arc<Vec<GameObjectRef>> {
-        self.classes.clone()
-    }
-
-    pub fn description(&self) -> String {
-        self.description.clone()
-    }
-
-    pub fn height(&self) -> f32 {
-        self.height
-    }
+    game_object_string_prop!(pub, adjective, set_adjective);
+    game_object_ref_prop!(pub, classes, set_classes, Vec<GameObjectRef>);
+    game_object_copy_prop!(pub, height, set_height, f32);
+    game_object_copy_prop!(pub, starting_room, set_starting_room, GameObjectRef);
+    game_object_ref_prop!(pub, stats, set_stats, CharacterStats);
+    game_object_ref_prop!(pub, stats_suggestion, set_stats_suggestion, CharacterStats);
+    game_object_copy_prop!(pub, weight, set_weight, f32);
 
     pub fn hydrate(id: GameObjectId, json: &str) -> Result<SharedGameObject, String> {
         match serde_json::from_str::<RaceDto>(json) {
             Ok(race_dto) => Ok(SharedGameObject::new(Self {
                 id,
                 adjective: race_dto.adjective,
-                classes: Arc::new(race_dto.classes),
+                classes: race_dto.classes,
                 description: race_dto.description,
                 height: race_dto.height,
                 name: race_dto.name,
@@ -53,22 +49,6 @@ impl Race {
             Err(error) => Err(format!("parse error: {}", error)),
         }
     }
-
-    pub fn starting_room(&self) -> GameObjectRef {
-        self.starting_room
-    }
-
-    pub fn stats(&self) -> CharacterStats {
-        self.stats.clone()
-    }
-
-    pub fn stats_suggestion(&self) -> CharacterStats {
-        self.stats_suggestion.clone()
-    }
-
-    pub fn weight(&self) -> f32 {
-        self.weight
-    }
 }
 
 impl fmt::Display for Race {
@@ -78,6 +58,9 @@ impl fmt::Display for Race {
 }
 
 impl GameObject for Race {
+    game_object_string_prop!(,name, set_name);
+    game_object_string_prop!(,description, set_description);
+
     fn adjective(&self) -> &str {
         &self.adjective
     }
@@ -89,7 +72,7 @@ impl GameObject for Race {
     fn dehydrate(&self) -> serde_json::Value {
         serde_json::to_value(RaceDto {
             adjective: self.adjective.clone(),
-            classes: self.classes.deref().clone(),
+            classes: self.classes.clone(),
             description: self.description.clone(),
             height: self.height,
             name: self.name.clone(),
@@ -115,8 +98,27 @@ impl GameObject for Race {
         GameObjectType::Race
     }
 
-    fn name(&self) -> &str {
-        &self.name
+    fn set_property(&self, realm: Realm, prop_name: &str, value: &str) -> Result<Realm, String> {
+        match prop_name {
+            "adjective" => Ok(self.set_adjective(realm, value.to_owned())),
+            "classes" => Ok(self.set_classes(realm, GameObjectRef::vec_from_str(value)?)),
+            "description" => Ok(self.set_description(realm, value.to_owned())),
+            "height" => Ok(self.set_height(
+                realm,
+                value.parse().map_err(|error| format!("{:?}", error))?,
+            )),
+            "name" => Ok(self.set_name(realm, value.to_owned())),
+            "startingRoom" => Ok(self.set_starting_room(realm, GameObjectRef::from_str(value)?)),
+            "stats" => Ok(self.set_stats(realm, CharacterStats::from_str(value)?)),
+            "statsSuggestion" => {
+                Ok(self.set_stats_suggestion(realm, CharacterStats::from_str(value)?))
+            }
+            "weight" => Ok(self.set_weight(
+                realm,
+                value.parse().map_err(|error| format!("{:?}", error))?,
+            )),
+            _ => Err(format!("No property named \"{}\"", prop_name))?,
+        }
     }
 }
 

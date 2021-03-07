@@ -45,6 +45,14 @@ pub struct Portal {
 }
 
 impl Portal {
+    game_object_string_prop!(pub, description2, set_description2);
+    game_object_string_prop!(pub, destination, set_destination);
+    game_object_string_prop!(pub, destination2, set_destination2);
+    game_object_copy_prop!(pub, flags, set_flags, PortalFlags);
+    game_object_string_prop!(pub, name2, set_name2);
+    game_object_copy_prop!(pub, room, set_room, GameObjectRef);
+    game_object_copy_prop!(pub, room2, set_room2, GameObjectRef);
+
     pub fn can_see_through(&self) -> bool {
         if self.has_flags(PortalFlags::IsOpen) {
             self.has_flags(PortalFlags::CanSeeThroughIfOpen)
@@ -152,6 +160,9 @@ impl fmt::Display for Portal {
 }
 
 impl GameObject for Portal {
+    game_object_string_prop!(name, set_name);
+    game_object_string_prop!(description, set_description);
+
     fn as_portal(&self) -> Option<&Self> {
         Some(&self)
     }
@@ -190,20 +201,27 @@ impl GameObject for Portal {
         })
     }
 
-    fn description(&self) -> &str {
-        &self.description
-    }
-
     fn id(&self) -> GameObjectId {
         self.id
     }
 
-    fn name(&self) -> &str {
-        &self.name
-    }
-
     fn object_type(&self) -> GameObjectType {
         GameObjectType::Portal
+    }
+
+    fn set_property(&self, realm: Realm, prop_name: &str, value: &str) -> Result<Realm, String> {
+        match prop_name {
+            "description" => Ok(self.set_description(realm, value.to_owned())),
+            "description2" => Ok(self.set_description2(realm, value.to_owned())),
+            "destination" => Ok(self.set_destination(realm, value.to_owned())),
+            "destination2" => Ok(self.set_destination2(realm, value.to_owned())),
+            "flags" => Ok(self.set_flags(realm, PortalFlags::from_str(value)?)),
+            "name" => Ok(self.set_name(realm, value.to_owned())),
+            "name2" => Ok(self.set_name2(realm, value.to_owned())),
+            "room" => Ok(self.set_room(realm, GameObjectRef::from_str(value)?)),
+            "room2" => Ok(self.set_room2(realm, GameObjectRef::from_str(value)?)),
+            _ => Err(format!("No property named \"{}\"", prop_name))?,
+        }
     }
 }
 

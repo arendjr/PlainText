@@ -6,10 +6,12 @@ use std::fmt;
 
 use crate::events::{EventMultiplierMap, EventType};
 use crate::game_object::{
-    ref_difference, ref_union, GameObject, GameObjectId, GameObjectRef, GameObjectType,
-    SharedGameObject,
+    ref_difference, ref_union, GameObject, GameObjectId, GameObjectPersistence, GameObjectRef,
+    GameObjectType, SharedGameObject,
 };
 use crate::point3d::Point3D;
+
+use super::Realm;
 
 serializable_flags! {
     struct RoomFlags: u32 {
@@ -38,12 +40,26 @@ pub struct Room {
 }
 
 impl Room {
-    pub fn characters(&self) -> &Vec<GameObjectRef> {
-        &self.characters
-    }
+    game_object_ref_prop!(
+        pub,
+        characters,
+        set_characters,
+        Vec<GameObjectRef>,
+        GameObjectPersistence::DontSync
+    );
+    game_object_ref_prop!(
+        pub,
+        event_multipliers,
+        set_event_multipliers,
+        EventMultiplierMap
+    );
+    game_object_copy_prop!(pub, flags, set_flags, RoomFlags);
+    game_object_ref_prop!(pub, items, set_items, Vec<GameObjectRef>);
+    game_object_ref_prop!(pub, portals, set_portals, Vec<GameObjectRef>);
+    game_object_ref_prop!(pub, position, set_position, Point3D);
 
-    pub fn description(&self) -> &str {
-        &self.description
+    pub fn add_characters(&self, realm: Realm, characters: Vec<GameObjectRef>) -> Realm {
+        self.set_characters(realm, ref_union(&self.characters, &characters))
     }
 
     pub fn event_multiplier(&self, event_type: EventType) -> f32 {
@@ -71,36 +87,8 @@ impl Room {
         }
     }
 
-    pub fn items(&self) -> &Vec<GameObjectRef> {
-        &self.items
-    }
-
-    pub fn portals(&self) -> &Vec<GameObjectRef> {
-        &self.portals
-    }
-
-    pub fn position(&self) -> &Point3D {
-        &self.position
-    }
-
-    pub fn with_characters(&self, characters: Vec<GameObjectRef>) -> (Self, bool) {
-        (
-            Self {
-                characters: ref_union(&self.characters, &characters),
-                ..self.clone()
-            },
-            false,
-        )
-    }
-
-    pub fn without_characters(&self, characters: Vec<GameObjectRef>) -> (Self, bool) {
-        (
-            Self {
-                characters: ref_difference(&self.characters, &characters),
-                ..self.clone()
-            },
-            false,
-        )
+    pub fn remove_characters(&self, realm: Realm, characters: Vec<GameObjectRef>) -> Realm {
+        self.set_characters(realm, ref_difference(&self.characters, &characters))
     }
 }
 
@@ -111,6 +99,9 @@ impl fmt::Display for Room {
 }
 
 impl GameObject for Room {
+    game_object_string_prop!(name, set_name);
+    game_object_string_prop!(description, set_description);
+
     fn as_room(&self) -> Option<&Self> {
         Some(&self)
     }
@@ -146,8 +137,17 @@ impl GameObject for Room {
         GameObjectType::Room
     }
 
-    fn name(&self) -> &str {
-        &self.name
+    fn set_property(&self, realm: Realm, prop_name: &str, value: &str) -> Result<Realm, String> {
+        match prop_name {
+            "characters" => Ok(self.set_characters(realm, GameObjectRef::vec_from_str(value)?)),
+            "description" => Ok(self.set_description(realm, value.to_owned())),
+            "flags" => Ok(self.set_flags(realm, RoomFlags::from_str(value)?)),
+            "items" => Ok(self.set_items(realm, GameObjectRef::vec_from_str(value)?)),
+            "name" => Ok(self.set_name(realm, value.to_owned())),
+            "portals" => Ok(self.set_portals(realm, GameObjectRef::vec_from_str(value)?)),
+            "position" => Ok(self.set_position(realm, Point3D::from_str(value)?)),
+            _ => Err(format!("No property named \"{}\"", prop_name))?,
+        }
     }
 }
 

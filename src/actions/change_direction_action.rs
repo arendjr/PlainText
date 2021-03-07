@@ -12,5 +12,5 @@ pub fn change_direction(
 ) -> Realm {
     let character = unwrap_or_return!(realm.character(character_ref), realm);
 
-    realm.set_shared_object(character_ref, character.with_direction(direction))
+    character.set_direction(realm, direction)
 }

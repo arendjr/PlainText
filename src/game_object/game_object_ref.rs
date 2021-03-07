@@ -8,8 +8,8 @@ pub type GameObjectId = u32;
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum GameObjectType {
     Class,
-    Container,
-    Group,
+    //Container,
+    //Group,
     Item,
     Npc,
     Player,
@@ -17,16 +17,16 @@ pub enum GameObjectType {
     Race,
     Realm,
     Room,
-    Shield,
-    Weapon,
+    //Shield,
+    //Weapon,
 }
 
 impl fmt::Display for GameObjectType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(match self {
             GameObjectType::Class => "class",
-            GameObjectType::Container => "container",
-            GameObjectType::Group => "group",
+            //GameObjectType::Container => "container",
+            //GameObjectType::Group => "group",
             GameObjectType::Item => "item",
             GameObjectType::Npc => "character",
             GameObjectType::Player => "player",
@@ -34,23 +34,23 @@ impl fmt::Display for GameObjectType {
             GameObjectType::Race => "race",
             GameObjectType::Realm => "realm",
             GameObjectType::Room => "room",
-            GameObjectType::Shield => "shield",
-            GameObjectType::Weapon => "weapon",
+            //GameObjectType::Shield => "shield",
+            //GameObjectType::Weapon => "weapon",
         })
     }
 }
 
 impl GameObjectType {
-    pub fn from_str(string: &str) -> Option<GameObjectType> {
-        match string {
-            "character" => Some(GameObjectType::Npc),
-            "class" => Some(GameObjectType::Class),
-            "item" => Some(GameObjectType::Item),
-            "player" => Some(GameObjectType::Player),
-            "portal" => Some(GameObjectType::Portal),
-            "race" => Some(GameObjectType::Race),
-            "room" => Some(GameObjectType::Room),
-            _ => None,
+    pub fn from_str(object_type_str: &str) -> Result<GameObjectType, String> {
+        match object_type_str {
+            "character" => Ok(GameObjectType::Npc),
+            "class" => Ok(GameObjectType::Class),
+            "item" => Ok(GameObjectType::Item),
+            "player" => Ok(GameObjectType::Player),
+            "portal" => Ok(GameObjectType::Portal),
+            "race" => Ok(GameObjectType::Race),
+            "room" => Ok(GameObjectType::Room),
+            _ => Err(format!("Unknown game object type: \"{}\"", object_type_str)),
         }
     }
 }
@@ -59,18 +59,32 @@ impl GameObjectType {
 pub struct GameObjectRef(pub GameObjectType, pub GameObjectId);
 
 impl GameObjectRef {
-    pub fn from_file_name(file_name: &OsString) -> Option<GameObjectRef> {
+    pub fn from_file_name(file_name: &OsString) -> Option<Self> {
         let file_name = file_name.to_str()?;
         let split = file_name.split('.').collect::<Vec<&str>>();
         if split.len() != 2 {
             return None;
         }
 
+        let object_type = GameObjectType::from_str(split[0]).ok()?;
+        let id = split[1].parse::<GameObjectId>();
+        match id {
+            Ok(id) => Some(Self(object_type, id)),
+            Err(_) => None,
+        }
+    }
+
+    pub fn from_str(ref_str: &str) -> Result<Self, String> {
+        let split = ref_str.split(':').collect::<Vec<&str>>();
+        if split.len() != 2 {
+            return Err("Invalid game object ref".to_owned());
+        }
+
         let object_type = GameObjectType::from_str(split[0])?;
         let id = split[1].parse::<GameObjectId>();
         match id {
-            Ok(id) => Some(GameObjectRef(object_type, id)),
-            Err(_) => None,
+            Ok(id) => Ok(Self(object_type, id)),
+            Err(_) => Err("Invalid game object ref".to_owned()),
         }
     }
 
@@ -93,6 +107,17 @@ impl GameObjectRef {
 
     pub fn to_file_name(&self) -> String {
         format!("{}.{:09}", self.0, self.1)
+    }
+
+    pub fn vec_from_str(list_str: &str) -> Result<Vec<Self>, String> {
+        if !list_str.starts_with('[') || !list_str.ends_with(']') {
+            return Err("Invalid stats -- use square brackets to denote stats".to_owned());
+        }
+
+        list_str[1..list_str.len() - 1]
+            .split(',')
+            .map(|ref_str| GameObjectRef::from_str(ref_str))
+            .collect()
     }
 }
 
@@ -143,7 +168,7 @@ impl<'de> Visitor<'de> for GameObjectRefVisitor {
         let object_type = GameObjectType::from_str(split[0]);
         let id = split[1].parse::<GameObjectId>();
         match (object_type, id) {
-            (Some(object_type), Ok(id)) => Ok(GameObjectRef(object_type, id)),
+            (Ok(object_type), Ok(id)) => Ok(GameObjectRef(object_type, id)),
             _ => Err(E::custom(format!("invalid ref: {}", value))),
         }
     }

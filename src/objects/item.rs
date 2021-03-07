@@ -7,6 +7,8 @@ use std::fmt;
 use crate::game_object::{GameObject, GameObjectId, GameObjectType, SharedGameObject};
 use crate::point3d::Point3D;
 
+use super::Realm;
+
 serializable_flags! {
     pub struct ItemFlags: u32 {
         const AttachedToCeiling        = 0b00000001;
@@ -30,6 +32,11 @@ pub struct Item {
 }
 
 impl Item {
+    game_object_copy_prop!(pub, cost, set_cost, f32);
+    game_object_copy_prop!(pub, flags, set_flags, ItemFlags);
+    game_object_ref_prop!(pub, position, set_position, Point3D);
+    game_object_copy_prop!(pub, weight, set_weight, f32);
+
     pub fn has_flags(&self, flags: ItemFlags) -> bool {
         self.flags & flags == flags
     }
@@ -52,14 +59,6 @@ impl Item {
             Err(error) => Err(format!("parse error: {}", error)),
         }
     }
-
-    pub fn position(&self) -> &Point3D {
-        &self.position
-    }
-
-    pub fn weight(&self) -> f32 {
-        self.weight
-    }
 }
 
 impl fmt::Display for Item {
@@ -69,6 +68,9 @@ impl fmt::Display for Item {
 }
 
 impl GameObject for Item {
+    game_object_string_prop!(name, set_name);
+    game_object_string_prop!(description, set_description);
+
     fn as_item(&self) -> Option<&Self> {
         Some(&self)
     }
@@ -95,10 +97,6 @@ impl GameObject for Item {
         })
     }
 
-    fn description(&self) -> &str {
-        &self.description
-    }
-
     fn id(&self) -> GameObjectId {
         self.id
     }
@@ -117,8 +115,22 @@ impl GameObject for Item {
         GameObjectType::Item
     }
 
-    fn name(&self) -> &str {
-        &self.name
+    fn set_property(&self, realm: Realm, prop_name: &str, value: &str) -> Result<Realm, String> {
+        match prop_name {
+            "cost" => Ok(self.set_cost(
+                realm,
+                value.parse().map_err(|error| format!("{:?}", error))?,
+            )),
+            "description" => Ok(self.set_description(realm, value.to_owned())),
+            "flags" => Ok(self.set_flags(realm, ItemFlags::from_str(value)?)),
+            "name" => Ok(self.set_name(realm, value.to_owned())),
+            "position" => Ok(self.set_position(realm, Point3D::from_str(value)?)),
+            "weight" => Ok(self.set_weight(
+                realm,
+                value.parse().map_err(|error| format!("{:?}", error))?,
+            )),
+            _ => Err(format!("No property named \"{}\"", prop_name))?,
+        }
     }
 }
 

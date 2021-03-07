@@ -40,6 +40,41 @@ impl CharacterStats {
         }
     }
 
+    pub fn from_str(stats_str: &str) -> Result<Self, String> {
+        if !stats_str.starts_with('[') || !stats_str.ends_with(']') {
+            return Err("Invalid stats -- use square brackets to denote stats".to_owned());
+        }
+
+        let parts: Vec<&str> = stats_str[1..stats_str.len() - 1].split(',').collect();
+        if parts.len() != NUM_STATS {
+            return Err(format!(
+                "Invalid stats -- must contain {:?} comma-separated stats",
+                NUM_STATS
+            ));
+        }
+
+        Ok(Self::from_stats(
+            parts[0]
+                .parse()
+                .map_err(|err| format!("Could not parse STR: {:?}", err))?,
+            parts[1]
+                .parse()
+                .map_err(|err| format!("Could not parse DEX: {:?}", err))?,
+            parts[2]
+                .parse()
+                .map_err(|err| format!("Could not parse VIT: {:?}", err))?,
+            parts[3]
+                .parse()
+                .map_err(|err| format!("Could not parse END: {:?}", err))?,
+            parts[4]
+                .parse()
+                .map_err(|err| format!("Could not parse INT: {:?}", err))?,
+            parts[5]
+                .parse()
+                .map_err(|err| format!("Could not parse FTH: {:?}", err))?,
+        ))
+    }
+
     pub fn get(&self, stat: CharacterStat) -> i16 {
         self.stats[stat as usize]
     }

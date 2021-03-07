@@ -29,6 +29,23 @@ macro_rules! serializable_flags {
             }
         }
 
+        impl $BitFlags {
+            pub fn from_str(flags_str: &str) -> Result<Self, String> {
+                let mut bits = 0;
+                for flag in flags_str.split('|') {
+                    if !flag.is_empty() {
+                        match flag {
+                            $(
+                                stringify!($Flag) => bits |= $value,
+                            )+
+                            unknown_flag => return Err(format!("Dropped unknown flag: \"{}\"", unknown_flag))
+                        }
+                    }
+                }
+                Ok($BitFlags { bits })
+            }
+        }
+
         impl<'de> serde::de::Visitor<'de> for $BitFlags {
             type Value = Self;
 
@@ -40,18 +57,7 @@ macro_rules! serializable_flags {
             where
                 E: serde::de::Error,
             {
-                let mut bits = 0;
-                for flag in value.split('|') {
-                    if !flag.is_empty() {
-                        match flag {
-                            $(
-                                stringify!($Flag) => bits |= $value,
-                            )+
-                            unknown_flag => println!("Dropped unknown flag: \"{}\"", unknown_flag)
-                        }
-                    }
-                }
-                Ok($BitFlags { bits })
+                Self::from_str(value).map_err(|err| serde::de::Error::custom(err))
             }
         }
 

@@ -5,15 +5,18 @@ use std::fmt;
 
 use crate::character_stats::CharacterStats;
 use crate::game_object::{
-    Character, GameObject, GameObjectId, GameObjectRef, GameObjectType, Gender, SharedGameObject,
+    Character, GameObject, GameObjectId, GameObjectPersistence, GameObjectRef, GameObjectType,
+    Gender, SharedGameObject,
 };
 use crate::sessions::SignUpData;
 use crate::vector3d::Vector3D;
 
+use super::Realm;
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct Player {
     id: GameObjectId,
-    class: GameObjectRef,
+    class: Option<GameObjectRef>,
     current_room: GameObjectRef,
     description: String,
     direction: Vector3D,
@@ -33,6 +36,15 @@ pub struct Player {
 }
 
 impl Player {
+    game_object_copy_prop!(pub, is_admin, set_is_admin, bool);
+    game_object_copy_prop!(
+        pub,
+        session_id,
+        set_session_id,
+        Option<u64>,
+        GameObjectPersistence::DontSync
+    );
+
     pub fn hydrate(id: GameObjectId, json: &str) -> Result<SharedGameObject, String> {
         match serde_json::from_str::<PlayerDto>(json) {
             Ok(player_dto) => Ok(SharedGameObject::new(Self {
@@ -59,10 +71,6 @@ impl Player {
         }
     }
 
-    pub fn is_admin(&self) -> bool {
-        self.is_admin
-    }
-
     pub fn matches_password(&self, password: &str) -> bool {
         match pbkdf2_check(password, &self.password) {
             Ok(()) => true,
@@ -70,12 +78,12 @@ impl Player {
         }
     }
 
-    pub fn new(id: GameObjectId, sign_up_data: &SignUpData) -> (Self, bool) {
+    pub fn new(id: GameObjectId, sign_up_data: &SignUpData) -> Self {
         let class = sign_up_data.class.clone().unwrap();
         let race = sign_up_data.race.clone().unwrap();
         Self {
             id,
-            class: class.object_ref(),
+            class: Some(class.object_ref()),
             current_room: race.starting_room(),
             description: String::new(),
             direction: Vector3D::new(0, 0, 0),
@@ -87,129 +95,45 @@ impl Player {
             is_admin: false,
             mp: sign_up_data.stats.max_mp(),
             name: sign_up_data.user_name.clone(),
-            password: String::new(),
+            password: match pbkdf2_simple(&sign_up_data.password, 10) {
+                Ok(password) => password,
+                Err(error) => panic!("Cannot create password hash: {:?}", error),
+            },
             race: race.object_ref(),
             session_id: None,
             stats: sign_up_data.stats.clone(),
             weight: sign_up_data.weight,
         }
-        .with_password(&sign_up_data.password)
     }
 
-    pub fn session_id(&self) -> Option<u64> {
-        self.session_id
-    }
-
-    pub fn with_admin(&self, admin: bool) -> (Self, bool) {
-        (
-            Self {
-                is_admin: admin,
-                ..self.clone()
-            },
-            true,
-        )
-    }
-
-    pub fn with_password(&self, password: &str) -> (Self, bool) {
-        (
-            match pbkdf2_simple(password, 10) {
-                Ok(password) => Self {
+    pub fn set_password(&self, realm: Realm, password: &str) -> Realm {
+        match pbkdf2_simple(password, 10) {
+            Ok(password) => realm.set_shared_object(
+                self.object_ref(),
+                SharedGameObject::new(Self {
                     password,
                     ..self.clone()
-                },
-                Err(error) => panic!("Cannot create password hash: {:?}", error),
-            },
-            true,
-        )
-    }
-
-    pub fn with_session_id(&self, session_id: Option<u64>) -> (Self, bool) {
-        (
-            Self {
-                session_id,
-                ..self.clone()
-            },
-            false,
-        )
+                }),
+                GameObjectPersistence::Sync,
+            ),
+            Err(error) => panic!("Cannot create password hash: {:?}", error),
+        }
     }
 }
 
 impl Character for Player {
-    fn class(&self) -> Option<GameObjectRef> {
-        Some(self.class)
-    }
-
-    fn current_room(&self) -> GameObjectRef {
-        self.current_room
-    }
-
-    fn direction(&self) -> &Vector3D {
-        &self.direction
-    }
-
-    fn gender(&self) -> Gender {
-        self.gender
-    }
-
-    fn gold(&self) -> u32 {
-        self.gold
-    }
-
-    fn height(&self) -> f32 {
-        self.height
-    }
-
-    fn hp(&self) -> i16 {
-        self.hp
-    }
-
-    fn inventory(&self) -> &Vec<GameObjectRef> {
-        &self.inventory
-    }
-
-    fn max_hp(&self) -> i16 {
-        self.stats.max_hp()
-    }
-
-    fn max_mp(&self) -> i16 {
-        self.stats.max_mp()
-    }
-
-    fn mp(&self) -> i16 {
-        self.mp
-    }
-
-    fn race(&self) -> GameObjectRef {
-        self.race
-    }
-
-    fn stats(&self) -> &CharacterStats {
-        &self.stats
-    }
-
-    fn weight(&self) -> f32 {
-        self.weight
-    }
-
-    fn with_current_room(&self, room: GameObjectRef) -> (SharedGameObject, bool) {
-        (
-            SharedGameObject::new(Self {
-                current_room: room,
-                ..self.clone()
-            }),
-            true,
-        )
-    }
-
-    fn with_direction(&self, direction: Vector3D) -> (SharedGameObject, bool) {
-        (
-            SharedGameObject::new(Self {
-                direction,
-                ..self.clone()
-            }),
-            true,
-        )
-    }
+    game_object_copy_prop!(class, set_class, Option<GameObjectRef>);
+    game_object_copy_prop!(current_room, set_current_room, GameObjectRef);
+    game_object_ref_prop!(direction, set_direction, Vector3D);
+    game_object_copy_prop!(gender, set_gender, Gender);
+    game_object_copy_prop!(gold, set_gold, u32);
+    game_object_copy_prop!(height, set_height, f32);
+    game_object_copy_prop!(hp, set_hp, i16);
+    game_object_ref_prop!(inventory, set_inventory, Vec<GameObjectRef>);
+    game_object_copy_prop!(mp, set_mp, i16);
+    game_object_copy_prop!(race, set_race, GameObjectRef);
+    game_object_ref_prop!(stats, set_stats, CharacterStats);
+    game_object_copy_prop!(weight, set_weight, f32);
 }
 
 impl fmt::Display for Player {
@@ -219,6 +143,9 @@ impl fmt::Display for Player {
 }
 
 impl GameObject for Player {
+    game_object_string_prop!(name, set_name);
+    game_object_string_prop!(description, set_description);
+
     fn as_character(&self) -> Option<&dyn Character> {
         Some(self)
     }
@@ -259,10 +186,6 @@ impl GameObject for Player {
         })
     }
 
-    fn description(&self) -> &str {
-        &self.description
-    }
-
     fn id(&self) -> GameObjectId {
         self.id
     }
@@ -271,15 +194,48 @@ impl GameObject for Player {
         GameObjectType::Player
     }
 
-    fn name(&self) -> &str {
-        &self.name
+    fn set_property(&self, realm: Realm, prop_name: &str, value: &str) -> Result<Realm, String> {
+        match prop_name {
+            "class" => Ok(self.set_class(realm, Some(GameObjectRef::from_str(value)?))),
+            "current_room" => Ok(self.set_current_room(realm, GameObjectRef::from_str(value)?)),
+            "description" => Ok(self.set_description(realm, value.to_owned())),
+            "direction" => Ok(self.set_direction(realm, Vector3D::from_str(value)?)),
+            "gender" => Ok(self.set_gender(realm, Gender::from_str(value)?)),
+            "gold" => Ok(self.set_gold(
+                realm,
+                value.parse().map_err(|error| format!("{:?}", error))?,
+            )),
+            "height" => Ok(self.set_height(
+                realm,
+                value.parse().map_err(|error| format!("{:?}", error))?,
+            )),
+            "hp" => Ok(self.set_hp(
+                realm,
+                value.parse().map_err(|error| format!("{:?}", error))?,
+            )),
+            "inventory" => Ok(self.set_inventory(realm, GameObjectRef::vec_from_str(value)?)),
+            "isAdmin" => Ok(self.set_is_admin(realm, value == "true")),
+            "mp" => Ok(self.set_mp(
+                realm,
+                value.parse().map_err(|error| format!("{:?}", error))?,
+            )),
+            "name" => Ok(self.set_name(realm, value.to_owned())),
+            "password" => Ok(self.set_password(realm, value)),
+            "race" => Ok(self.set_race(realm, GameObjectRef::from_str(value)?)),
+            "stats" => Ok(self.set_stats(realm, CharacterStats::from_str(value)?)),
+            "weight" => Ok(self.set_weight(
+                realm,
+                value.parse().map_err(|error| format!("{:?}", error))?,
+            )),
+            _ => Err(format!("No property named \"{}\"", prop_name))?,
+        }
     }
 }
 
 #[allow(non_snake_case)]
 #[derive(Deserialize, Serialize)]
 struct PlayerDto {
-    class: GameObjectRef,
+    class: Option<GameObjectRef>,
     currentRoom: GameObjectRef,
     description: String,
     direction: Option<Vector3D>,

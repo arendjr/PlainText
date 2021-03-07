@@ -209,6 +209,12 @@ impl CommandLineProcessor {
         }
     }
 
+    pub fn take_rest(&mut self) -> String {
+        self.words
+            .drain(0..)
+            .fold("".to_owned(), |rest, word| format!("{} {}", rest, word))
+    }
+
     pub fn take_word(&mut self) -> Option<String> {
         self.words.pop_front()
     }

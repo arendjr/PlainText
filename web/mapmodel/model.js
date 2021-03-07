@@ -76,14 +76,12 @@ class GameObject extends Laces.Model {
             value = value === null ? "0" : value.toPointer();
         } else if (options.type === "pointerlist") {
             var pointerList = value.map(object => object.toPointer());
-            value = "[" + pointerList.join(",") + "]";
+            value = `[${pointerList.join(",")}]`;
         } else if (options.type === "point") {
-            value = "(" + value[0] + "," + value[1] + "," + value[2] + ")";
+            value = `(${value[0]},${value[1]},${value[2]})`;
         }
 
-        sendApiCall(
-            "property-set " + this.id + " " + propertyName + " " + value
-        );
+        sendApiCall(`property-set ${this.id} ${propertyName} ${value}`);
     }
 
     stringify() {
@@ -120,6 +118,7 @@ class Room extends GameObject {
         room.portals = room.portals || [];
         room.position = room.position || [0, 0, 0];
         super(model, room);
+        this.type = "room";
 
         this.set("x", room.position[0], { type: "integer" });
         this.set("y", room.position[1], { type: "integer" });
@@ -183,6 +182,11 @@ class Room extends GameObject {
 }
 
 class Portal extends GameObject {
+    constructor(model, data) {
+        super(model, data);
+        this.type = "portal";
+    }
+
     static savedProperties = {
         description: { type: "string" },
         description2: { type: "string" },

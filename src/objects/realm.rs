@@ -6,7 +6,8 @@ use std::collections::HashSet;
 use std::hash::{Hash, Hasher};
 
 use crate::game_object::{
-    Character, GameObject, GameObjectId, GameObjectRef, GameObjectType, SharedGameObject,
+    Character, GameObject, GameObjectId, GameObjectPersistence, GameObjectRef, GameObjectType,
+    SharedGameObject,
 };
 use crate::objects;
 use crate::objects::Player;
@@ -31,6 +32,7 @@ impl PartialEq for dyn GameObject {
 #[derive(Clone)]
 pub struct Realm {
     date_time: u64,
+    description: String,
     id: GameObjectId,
     name: String,
     next_id: GameObjectId,
@@ -42,6 +44,20 @@ pub struct Realm {
 }
 
 impl Realm {
+    game_object_copy_prop!(pub, date_time, set_date_time, u64);
+
+    pub fn add_player(&self, sign_up_data: &SignUpData) -> Self {
+        let player_ref = GameObjectRef(GameObjectType::Player, self.next_id);
+        let player = Player::new(player_ref.id(), sign_up_data);
+        let realm = self.set(player_ref, player, GameObjectPersistence::Sync);
+        if self.players_by_name.len() == 1 {
+            // First player automatically becomes admin:
+            player.set_is_admin(realm, true)
+        } else {
+            realm
+        }
+    }
+
     pub fn character(&self, object_ref: GameObjectRef) -> Option<&dyn Character> {
         self.objects
             .get(&object_ref)
@@ -58,6 +74,7 @@ impl Realm {
         match serde_json::from_str::<RealmDto>(json) {
             Ok(realm_dto) => Ok(SharedGameObject::new(Self {
                 date_time: realm_dto.dateTime,
+                description: realm_dto.description.unwrap_or_default(),
                 id,
                 objects: HashMap::new(),
                 objects_to_be_removed: HashSet::new(),
@@ -138,18 +155,20 @@ impl Realm {
     pub fn set<T: GameObject>(
         &self,
         object_ref: GameObjectRef,
-        (object, should_sync): (T, bool),
+        object: T,
+        persistence: GameObjectPersistence,
     ) -> Self
     where
         T: 'static,
     {
-        self.set_shared_object(object_ref, (SharedGameObject::new(object), should_sync))
+        self.set_shared_object(object_ref, SharedGameObject::new(object), persistence)
     }
 
     pub fn set_shared_object(
         &self,
         object_ref: GameObjectRef,
-        (object, should_sync): (SharedGameObject, bool),
+        object: SharedGameObject,
+        persistence: GameObjectPersistence,
     ) -> Self {
         let mut players_by_name = self.players_by_name.clone();
         if let Some(player) = object.as_player() {
@@ -169,7 +188,7 @@ impl Realm {
             next_id: cmp::max(self.next_id, object_ref.id() + 1),
             objects,
             objects_to_be_removed: self.objects_to_be_removed.clone(),
-            objects_to_be_synced: if should_sync {
+            objects_to_be_synced: if persistence == GameObjectPersistence::Sync {
                 let mut new_objects = self.objects_to_be_synced.clone();
                 new_objects.insert(object_ref);
                 new_objects
@@ -233,19 +252,12 @@ impl Realm {
             None => self.clone(),
         }
     }
-
-    pub fn with_new_player(&self, sign_up_data: &SignUpData) -> Self {
-        let player_ref = GameObjectRef(GameObjectType::Player, self.next_id);
-        let mut player = Player::new(player_ref.id(), sign_up_data);
-        // First player automatically becomes admin:
-        if self.players_by_name.len() == 0 {
-            player = player.0.with_admin(true);
-        }
-        self.set(player_ref, player)
-    }
 }
 
 impl GameObject for Realm {
+    game_object_string_prop!(name, set_name);
+    game_object_string_prop!(description, set_description);
+
     fn as_realm(&self) -> Option<&Self> {
         Some(&self)
     }
@@ -253,6 +265,11 @@ impl GameObject for Realm {
     fn dehydrate(&self) -> serde_json::Value {
         serde_json::to_value(RealmDto {
             dateTime: self.date_time,
+            description: if self.description.is_empty() {
+                None
+            } else {
+                Some(self.description)
+            },
             name: self.name.clone(),
         })
         .unwrap_or_else(|error| {
@@ -272,8 +289,16 @@ impl GameObject for Realm {
         GameObjectType::Realm
     }
 
-    fn name(&self) -> &str {
-        &self.name
+    fn set_property(&self, realm: Realm, prop_name: &str, value: &str) -> Result<Realm, String> {
+        match prop_name {
+            "date_time" => Ok(self.set_date_time(
+                realm,
+                value.parse().map_err(|error| format!("{:?}", error))?,
+            )),
+            "description" => Ok(self.set_description(realm, value.to_owned())),
+            "name" => Ok(self.set_name(realm, value.to_owned())),
+            _ => Err(format!("No property named \"{}\"", prop_name))?,
+        }
     }
 }
 
@@ -281,5 +306,6 @@ impl GameObject for Realm {
 #[derive(Deserialize, Serialize)]
 struct RealmDto {
     dateTime: u64,
+    description: Option<String>,
     name: String,
 }

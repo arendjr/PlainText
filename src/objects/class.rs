@@ -5,6 +5,8 @@ use std::fmt;
 use crate::character_stats::CharacterStats;
 use crate::game_object::{GameObject, GameObjectId, GameObjectType, SharedGameObject};
 
+use super::Realm;
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct Class {
     id: GameObjectId,
@@ -15,6 +17,9 @@ pub struct Class {
 }
 
 impl Class {
+    game_object_ref_prop!(pub, stats, set_stats, CharacterStats);
+    game_object_ref_prop!(pub, stats_suggestion, set_stats_suggestion, CharacterStats);
+
     pub fn hydrate(id: GameObjectId, json: &str) -> Result<SharedGameObject, String> {
         match serde_json::from_str::<ClassDto>(json) {
             Ok(class_dto) => Ok(SharedGameObject::new(Self {
@@ -30,14 +35,6 @@ impl Class {
             Err(error) => Err(format!("parse error: {}", error)),
         }
     }
-
-    pub fn stats(&self) -> CharacterStats {
-        self.stats.clone()
-    }
-
-    pub fn stats_suggestion(&self) -> CharacterStats {
-        self.stats_suggestion.clone()
-    }
 }
 
 impl fmt::Display for Class {
@@ -47,6 +44,9 @@ impl fmt::Display for Class {
 }
 
 impl GameObject for Class {
+    game_object_string_prop!(name, set_name);
+    game_object_string_prop!(description, set_description);
+
     fn as_class(&self) -> Option<&Self> {
         Some(&self)
     }
@@ -67,10 +67,6 @@ impl GameObject for Class {
         })
     }
 
-    fn description(&self) -> &str {
-        &self.description
-    }
-
     fn id(&self) -> GameObjectId {
         self.id
     }
@@ -79,8 +75,16 @@ impl GameObject for Class {
         GameObjectType::Class
     }
 
-    fn name(&self) -> &str {
-        &self.name
+    fn set_property(&self, realm: Realm, prop_name: &str, value: &str) -> Result<Realm, String> {
+        match prop_name {
+            "description" => Ok(self.set_description(realm, value.to_owned())),
+            "name" => Ok(self.set_name(realm, value.to_owned())),
+            "stats" => Ok(self.set_stats(realm, CharacterStats::from_str(value)?)),
+            "statsSuggestion" => {
+                Ok(self.set_stats_suggestion(realm, CharacterStats::from_str(value)?))
+            }
+            _ => Err(format!("No property named \"{}\"", prop_name))?,
+        }
     }
 }
 

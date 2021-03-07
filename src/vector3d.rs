@@ -26,6 +26,29 @@ impl Vector3D {
         ((x * other_x + y * other_y + z * other_z) as f64 / total_len).acos()
     }
 
+    pub fn from_str(vector_str: &str) -> Result<Self, String> {
+        if !vector_str.starts_with('[') || !vector_str.ends_with(']') {
+            return Err("Invalid point -- use square brackets to denote vectors".to_owned());
+        }
+
+        let parts: Vec<&str> = vector_str[1..vector_str.len() - 1].split(',').collect();
+        if parts.len() != 3 {
+            return Err("Invalid vector -- must contain 3 comma-separated dimensions".to_owned());
+        }
+
+        Ok(Self {
+            x: parts[0]
+                .parse()
+                .map_err(|err| format!("Could not parse x dimension: {:?}", err))?,
+            y: parts[1]
+                .parse()
+                .map_err(|err| format!("Could not parse y dimension: {:?}", err))?,
+            z: parts[2]
+                .parse()
+                .map_err(|err| format!("Could not parse z dimension: {:?}", err))?,
+        })
+    }
+
     pub fn is_default(&self) -> bool {
         self.x == 0 && self.y == 0 && self.z == 0
     }

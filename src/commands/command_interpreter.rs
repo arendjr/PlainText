@@ -113,6 +113,7 @@ impl CommandInterpreter {
     pub fn new() -> Self {
         let mut registry = CommandRegistry::new();
         registry.register("api-objects-list", CommandType::ApiObjectsList);
+        registry.register("api-property-set", CommandType::ApiPropertySet);
         registry.register("api-triggers-list", CommandType::ApiTriggersList);
         registry.register("enter", CommandType::Go);
         registry.register("examine", CommandType::Look);

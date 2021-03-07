@@ -5,6 +5,8 @@ use tokio::sync::mpsc::{channel, Sender};
 mod player_output;
 #[macro_use]
 mod serializable_flags;
+#[macro_use]
+mod game_object;
 
 macro_rules! unwrap_or_continue {
     ($expr:expr) => {
@@ -30,7 +32,6 @@ mod colors;
 mod commands;
 mod direction_utils;
 mod events;
-mod game_object;
 mod logs;
 mod number_utils;
 mod objects;
@@ -48,7 +49,9 @@ mod web_server;
 
 use actions::{enter_room, look_at_object};
 use commands::CommandExecutor;
-use game_object::{hydrate, Character, GameObject, GameObjectId, GameObjectRef};
+use game_object::{
+    hydrate, Character, GameObject, GameObjectId, GameObjectPersistence, GameObjectRef,
+};
 use logs::{log_command, log_session_event, LogMessage, LogSender};
 use objects::Realm;
 use persistence_handler::PersistenceRequest;
@@ -152,7 +155,11 @@ fn load_data(data_dir: &str) -> Result<Realm, io::Error> {
                         character_refs.push(character.object_ref());
                     }
 
-                    realm = realm.set_shared_object(object_ref, (object, false));
+                    realm = realm.set_shared_object(
+                        object_ref,
+                        object,
+                        GameObjectPersistence::DontSync,
+                    );
                 }
                 Err(message) => println!(
                     "error loading {} {}: {}",
@@ -174,8 +181,9 @@ fn inject_characters_into_rooms(mut realm: Realm, character_refs: Vec<GameObject
         if let Some(room) = realm
             .character(character_ref)
             .and_then(|character| realm.room(character.current_room()))
+            .map(|room| room.clone())
         {
-            realm = realm.set(room.object_ref(), room.with_characters(vec![character_ref]));
+            realm = room.add_characters(realm, vec![character_ref]);
         }
     }
     realm
@@ -198,7 +206,7 @@ async fn process_signing_in_input(
         SessionState::SessionClosed(None)
     } else if let Some(user_name) = new_state.get_sign_in_user_name() {
         if let Some(sign_up_data) = new_state.get_sign_up_data() {
-            realm = realm.with_new_player(sign_up_data);
+            realm = realm.add_player(sign_up_data);
             log_session_event(
                 &log_tx,
                 source.clone(),
@@ -207,7 +215,7 @@ async fn process_signing_in_input(
             .await;
         }
 
-        if let Some(player) = realm.player_by_name(user_name) {
+        if let Some(player) = realm.player_by_name(user_name).map(|player| player.clone()) {
             if let Some(existing_session_id) = player.session_id() {
                 send_session_event(
                     &session_tx,
@@ -221,7 +229,7 @@ async fn process_signing_in_input(
 
             let player_ref = player.object_ref();
             let current_room = player.current_room();
-            realm = realm.set(player_ref, player.with_session_id(Some(session_id)));
+            realm = player.set_session_id(realm, Some(session_id));
 
             log_command(log_tx, user_name.to_owned(), "(signed in)".to_owned()).await;
 
@@ -298,9 +306,9 @@ async fn process_player_output(
                                 name: affected_player.name().to_owned(),
                                 is_admin: affected_player.is_admin(),
                                 hp: affected_player.hp(),
-                                max_hp: affected_player.max_hp(),
+                                max_hp: affected_player.stats().max_hp(),
                                 mp: affected_player.mp(),
-                                max_mp: affected_player.max_mp(),
+                                max_mp: affected_player.stats().max_mp(),
                             })),
                         },
                     ),
@@ -318,10 +326,10 @@ async fn process_session_closed(
     player_id: Option<GameObjectId>,
 ) -> Realm {
     if let Some(player_id) = player_id {
-        if let Some(player) = realm.player_by_id(player_id) {
-            let player_name = player.name().to_owned();
-            realm = realm.set(player.object_ref(), player.with_session_id(None));
+        if let Some(player) = realm.player_by_id(player_id).map(|player| player.clone()) {
+            realm = player.set_session_id(realm, None);
 
+            let player_name = player.name().to_owned();
             log_command(&log_tx, player_name, "(session closed)".to_owned()).await;
         }
     }

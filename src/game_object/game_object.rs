@@ -5,8 +5,6 @@ use super::{Character, GameObjectId, GameObjectRef, GameObjectType, SharedGameOb
 pub trait GameObject {
     fn id(&self) -> GameObjectId;
     fn object_type(&self) -> GameObjectType;
-    fn name(&self) -> &str;
-    fn dehydrate(&self) -> serde_json::Value;
 
     fn adjective(&self) -> &str {
         ""
@@ -48,9 +46,14 @@ pub trait GameObject {
         None
     }
 
-    fn description(&self) -> &str {
-        ""
-    }
+    fn dehydrate(&self) -> serde_json::Value;
+
+    fn description(&self) -> &str;
+    fn set_description(
+        &self,
+        realm: crate::objects::Realm,
+        description: String,
+    ) -> crate::objects::Realm;
 
     fn indefinite_article(&self) -> &str {
         ""
@@ -64,6 +67,9 @@ pub trait GameObject {
         }
     }
 
+    fn name(&self) -> &str;
+    fn set_name(&self, realm: crate::objects::Realm, name: String) -> crate::objects::Realm;
+
     fn object_ref(&self) -> GameObjectRef {
         GameObjectRef(self.object_type(), self.id())
     }
@@ -71,6 +77,13 @@ pub trait GameObject {
     fn plural_form(&self) -> String {
         self.name().to_owned()
     }
+
+    fn set_property(
+        &self,
+        realm: objects::Realm,
+        prop_name: &str,
+        value: &str,
+    ) -> Result<objects::Realm, String>;
 }
 
 pub fn hydrate(object_ref: GameObjectRef, content: &str) -> Result<SharedGameObject, String> {
@@ -81,9 +94,90 @@ pub fn hydrate(object_ref: GameObjectRef, content: &str) -> Result<SharedGameObj
         GameObjectType::Player => objects::Player::hydrate,
         GameObjectType::Portal => objects::Portal::hydrate,
         GameObjectType::Race => objects::Race::hydrate,
+        GameObjectType::Realm => objects::Realm::hydrate,
         GameObjectType::Room => objects::Room::hydrate,
-        _ => panic!("not implemented"),
     };
 
     hydrate(object_ref.id(), content)
+}
+
+#[derive(PartialEq)]
+pub enum GameObjectPersistence {
+    Sync,
+    DontSync,
+}
+
+#[macro_export]
+macro_rules! game_object_copy_prop {
+    ($name:ident, $setter:ident, $type:ty) => {
+        game_object_copy_prop!(, $name, $setter, $type, crate::game_object::GameObjectPersistence::Sync);
+    };
+
+    ($vis:vis, $name:ident, $setter:ident, $type:ty) => {
+        game_object_copy_prop!($vis, $name, $setter, $type, crate::game_object::GameObjectPersistence::Sync);
+    };
+
+    ($vis:vis, $name:ident, $setter:ident, $type:ty, $persistence:expr) => {
+        $vis fn $name(&self) -> $type {
+            self.$name
+        }
+
+        $vis fn $setter(&self, realm: crate::objects::Realm, $name: $type) -> crate::objects::Realm {
+            realm.set_shared_object(
+                self.object_ref(),
+                SharedGameObject::new(Self { $name, ..self.clone() }),
+                $persistence
+            )
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! game_object_ref_prop {
+    ($name:ident, $setter:ident, $type:ty) => {
+        game_object_ref_prop!(, $name, $setter, $type, crate::game_object::GameObjectPersistence::Sync);
+    };
+
+    ($vis:vis, $name:ident, $setter:ident, $type:ty) => {
+        game_object_ref_prop!($vis, $name, $setter, $type, crate::game_object::GameObjectPersistence::Sync);
+    };
+
+    ($vis:vis, $name:ident, $setter:ident, $type:ty, $persistence:expr) => {
+        $vis fn $name(&self) -> &$type {
+            &self.$name
+        }
+
+        $vis fn $setter(&self, realm: crate::objects::Realm, $name: $type) -> crate::objects::Realm {
+            realm.set_shared_object(
+                self.object_ref(),
+                SharedGameObject::new(Self { $name, ..self.clone() }),
+                $persistence
+            )
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! game_object_string_prop {
+    ($name:ident, $setter:ident) => {
+        game_object_string_prop!(, $name, $setter, crate::game_object::GameObjectPersistence::Sync);
+    };
+
+    ($vis:vis, $name:ident, $setter:ident) => {
+        game_object_string_prop!($vis, $name, $setter, crate::game_object::GameObjectPersistence::Sync);
+    };
+
+    ($vis:vis, $name:ident, $setter:ident, $persistence:expr) => {
+        $vis fn $name(&self) -> &str {
+            &self.$name
+        }
+
+        $vis fn $setter(&self, realm: crate::objects::Realm, $name: String) -> crate::objects::Realm {
+            realm.set_shared_object(
+                self.object_ref(),
+                SharedGameObject::new(Self { $name, ..self.clone() }),
+                $persistence
+            )
+        }
+    };
 }
