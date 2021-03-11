@@ -1,7 +1,6 @@
 #![allow(non_upper_case_globals)]
 
 use serde::{Deserialize, Serialize};
-use serde_json;
 use std::fmt;
 
 use crate::events::{EventMultiplierMap, EventType};
@@ -159,15 +158,16 @@ impl GameObject for Room {
 
     fn set_property(&mut self, prop_name: &str, value: &str) -> Result<(), String> {
         match prop_name {
-            "characters" => Ok(self.set_characters(GameObjectRef::vec_from_str(value)?)),
-            "description" => Ok(self.set_description(value.to_owned())),
-            "flags" => Ok(self.set_flags(RoomFlags::from_str(value)?)),
-            "items" => Ok(self.set_items(GameObjectRef::vec_from_str(value)?)),
-            "name" => Ok(self.set_name(value.to_owned())),
-            "portals" => Ok(self.set_portals(GameObjectRef::vec_from_str(value)?)),
-            "position" => Ok(self.set_position(Point3D::from_str(value)?)),
-            _ => Err(format!("No property named \"{}\"", prop_name))?,
+            "characters" => self.set_characters(GameObjectRef::vec_from_str(value)?),
+            "description" => self.set_description(value.to_owned()),
+            "flags" => self.set_flags(RoomFlags::from_str(value)?),
+            "items" => self.set_items(GameObjectRef::vec_from_str(value)?),
+            "name" => self.set_name(value.to_owned()),
+            "portals" => self.set_portals(GameObjectRef::vec_from_str(value)?),
+            "position" => self.set_position(Point3D::from_str(value)?),
+            _ => return Err(format!("No property named \"{}\"", prop_name)),
         }
+        Ok(())
     }
 }
 

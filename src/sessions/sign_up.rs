@@ -515,8 +515,7 @@ fn process_asking_race_input(
             )),
             vec![],
         )
-    } else if answer.starts_with("info ") {
-        let race_name = answer[5..].trim();
+    } else if let Some(race_name) = answer.strip_prefix("info ") {
         (
             state.clone(),
             if let Some(race) = realm.race_by_name(&race_name) {
@@ -525,7 +524,7 @@ fn process_asking_race_input(
                     highlight(&capitalize(&race_name)),
                     split_lines(&race.description(), 78).join("\n  ")
                 ))
-            } else if race_name.starts_with("<") && race_name.ends_with(">") {
+            } else if race_name.starts_with('<') && race_name.ends_with('>') {
                 Output::Str(
                     "\nSorry, you are supposed to replace <race> with the name of an \
                     actual race. For example: *info human*.\n",
@@ -573,8 +572,7 @@ fn process_asking_class_input(
             )),
             vec![],
         )
-    } else if answer.starts_with("info ") {
-        let class_name = answer[5..].trim();
+    } else if let Some(class_name) = answer.strip_prefix("info ") {
         (
             state.clone(),
             if let Some(class) = classes.iter().find(|class| class.name() == class_name) {

@@ -1,6 +1,5 @@
 use pbkdf2::{pbkdf2_check, pbkdf2_simple};
 use serde::{Deserialize, Serialize};
-use serde_json;
 use std::fmt;
 
 use crate::character_stats::CharacterStats;
@@ -72,10 +71,7 @@ impl Player {
     }
 
     pub fn matches_password(&self, password: &str) -> bool {
-        match pbkdf2_check(password, &self.password) {
-            Ok(()) => true,
-            _ => false,
-        }
+        matches!(pbkdf2_check(password, &self.password), Ok(()))
     }
 
     pub fn new(id: GameObjectId, sign_up_data: &SignUpData) -> Self {
@@ -87,7 +83,7 @@ impl Player {
             current_room: race.starting_room(),
             description: String::new(),
             direction: Vector3D::new(0, 0, 0),
-            gender: sign_up_data.gender.clone(),
+            gender: sign_up_data.gender,
             gold: sign_up_data.gold,
             height: sign_up_data.height,
             hp: sign_up_data.stats.max_hp(),
@@ -217,24 +213,25 @@ impl GameObject for Player {
 
     fn set_property(&mut self, prop_name: &str, value: &str) -> Result<(), String> {
         match prop_name {
-            "class" => Ok(self.set_class(Some(GameObjectRef::from_str(value)?))),
-            "current_room" => Ok(self.set_current_room(GameObjectRef::from_str(value)?)),
-            "description" => Ok(self.set_description(value.to_owned())),
-            "direction" => Ok(self.set_direction(Vector3D::from_str(value)?)),
-            "gender" => Ok(self.set_gender(Gender::from_str(value)?)),
-            "gold" => Ok(self.set_gold(value.parse().map_err(|error| format!("{:?}", error))?)),
-            "height" => Ok(self.set_height(value.parse().map_err(|error| format!("{:?}", error))?)),
-            "hp" => Ok(self.set_hp(value.parse().map_err(|error| format!("{:?}", error))?)),
-            "inventory" => Ok(self.set_inventory(GameObjectRef::vec_from_str(value)?)),
-            "isAdmin" => Ok(self.set_is_admin(value == "true")),
-            "mp" => Ok(self.set_mp(value.parse().map_err(|error| format!("{:?}", error))?)),
-            "name" => Ok(self.set_name(value.to_owned())),
-            "password" => Ok(self.set_password(value)),
-            "race" => Ok(self.set_race(GameObjectRef::from_str(value)?)),
-            "stats" => Ok(self.set_stats(CharacterStats::from_str(value)?)),
-            "weight" => Ok(self.set_weight(value.parse().map_err(|error| format!("{:?}", error))?)),
-            _ => Err(format!("No property named \"{}\"", prop_name))?,
+            "class" => self.set_class(Some(GameObjectRef::from_str(value)?)),
+            "current_room" => self.set_current_room(GameObjectRef::from_str(value)?),
+            "description" => self.set_description(value.to_owned()),
+            "direction" => self.set_direction(Vector3D::from_str(value)?),
+            "gender" => self.set_gender(Gender::from_str(value)?),
+            "gold" => self.set_gold(value.parse().map_err(|error| format!("{:?}", error))?),
+            "height" => self.set_height(value.parse().map_err(|error| format!("{:?}", error))?),
+            "hp" => self.set_hp(value.parse().map_err(|error| format!("{:?}", error))?),
+            "inventory" => self.set_inventory(GameObjectRef::vec_from_str(value)?),
+            "isAdmin" => self.set_is_admin(value == "true"),
+            "mp" => self.set_mp(value.parse().map_err(|error| format!("{:?}", error))?),
+            "name" => self.set_name(value.to_owned()),
+            "password" => self.set_password(value),
+            "race" => self.set_race(GameObjectRef::from_str(value)?),
+            "stats" => self.set_stats(CharacterStats::from_str(value)?),
+            "weight" => self.set_weight(value.parse().map_err(|error| format!("{:?}", error))?),
+            _ => return Err(format!("No property named \"{}\"", prop_name)),
         }
+        Ok(())
     }
 }
 

@@ -1,7 +1,6 @@
 #![allow(non_upper_case_globals)]
 
 use serde::{Deserialize, Serialize};
-use serde_json;
 use std::fmt;
 
 use crate::game_object::{GameObject, GameObjectId, GameObjectType};
@@ -137,14 +136,15 @@ impl GameObject for Item {
 
     fn set_property(&mut self, prop_name: &str, value: &str) -> Result<(), String> {
         match prop_name {
-            "cost" => Ok(self.set_cost(value.parse().map_err(|error| format!("{:?}", error))?)),
-            "description" => Ok(self.set_description(value.to_owned())),
-            "flags" => Ok(self.set_flags(ItemFlags::from_str(value)?)),
-            "name" => Ok(self.set_name(value.to_owned())),
-            "position" => Ok(self.set_position(Point3D::from_str(value)?)),
-            "weight" => Ok(self.set_weight(value.parse().map_err(|error| format!("{:?}", error))?)),
-            _ => Err(format!("No property named \"{}\"", prop_name))?,
+            "cost" => self.set_cost(value.parse().map_err(|error| format!("{:?}", error))?),
+            "description" => self.set_description(value.to_owned()),
+            "flags" => self.set_flags(ItemFlags::from_str(value)?),
+            "name" => self.set_name(value.to_owned()),
+            "position" => self.set_position(Point3D::from_str(value)?),
+            "weight" => self.set_weight(value.parse().map_err(|error| format!("{:?}", error))?),
+            _ => return Err(format!("No property named \"{}\"", prop_name)),
         }
+        Ok(())
     }
 }
 

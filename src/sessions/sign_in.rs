@@ -76,13 +76,13 @@ struct StepImpl {
     enter: fn(&SignInData, &Realm) -> Output,
     exit: fn(&SignInData) -> Output,
     prompt: fn(&SignInData) -> Output,
-    process_input: fn(&SignInState, &Realm, &String, String) -> (SignInState, Output, Vec<String>),
+    process_input: fn(&SignInState, &Realm, &str, String) -> (SignInState, Output, Vec<String>),
 }
 
 pub fn process_input(
     state: &SignInState,
     realm: &Realm,
-    source: &String,
+    source: &str,
     input: String,
 ) -> (SignInState, Output, Vec<String>) {
     lazy_static! {
@@ -173,7 +173,7 @@ fn new_state(step: SignInStep, data: SignInData) -> SignInState {
 fn process_asking_user_name_input(
     state: &SignInState,
     realm: &Realm,
-    _: &String,
+    _: &str,
     input: String,
 ) -> (SignInState, Output, Vec<String>) {
     lazy_static! {
@@ -187,7 +187,7 @@ fn process_asking_user_name_input(
     if user_name.len() < 3 {
         (
             state.clone(),
-            if user_name.len() == 0 {
+            if user_name.is_empty() {
                 Output::None
             } else {
                 Output::Str("I'm sorry, but your name should consist of at least 3 letters.\n")
@@ -230,7 +230,7 @@ fn process_asking_user_name_input(
 fn process_asking_password_input(
     state: &SignInState,
     _: &Realm,
-    _: &String,
+    _: &str,
     input: String,
 ) -> (SignInState, Output, Vec<String>) {
     if let Some(player) = &state.data.player {
@@ -274,12 +274,12 @@ fn validate_user_name(input: String) -> String {
     let mut num_special_chars = 0;
     for character in input.chars() {
         if is_letter(character) {
-            user_name.push(if user_name.len() == 0 {
+            user_name.push(if user_name.is_empty() {
                 character.to_ascii_uppercase()
             } else {
                 character
             });
-        } else if user_name.len() > 0
+        } else if !user_name.is_empty()
             && num_special_chars == 0
             && (character == '\'' || character == '-')
         {

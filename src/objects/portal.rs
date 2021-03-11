@@ -1,7 +1,6 @@
 #![allow(non_upper_case_globals)]
 
 use serde::{Deserialize, Serialize};
-use serde_json;
 use std::fmt;
 
 use crate::events::{EventMultiplierMap, EventType};
@@ -231,17 +230,18 @@ impl GameObject for Portal {
 
     fn set_property(&mut self, prop_name: &str, value: &str) -> Result<(), String> {
         match prop_name {
-            "description" => Ok(self.set_description(value.to_owned())),
-            "description2" => Ok(self.set_description2(value.to_owned())),
-            "destination" => Ok(self.set_destination(value.to_owned())),
-            "destination2" => Ok(self.set_destination2(value.to_owned())),
-            "flags" => Ok(self.set_flags(PortalFlags::from_str(value)?)),
-            "name" => Ok(self.set_name(value.to_owned())),
-            "name2" => Ok(self.set_name2(value.to_owned())),
-            "room" => Ok(self.set_room(GameObjectRef::from_str(value)?)),
-            "room2" => Ok(self.set_room2(GameObjectRef::from_str(value)?)),
-            _ => Err(format!("No property named \"{}\"", prop_name))?,
+            "description" => self.set_description(value.to_owned()),
+            "description2" => self.set_description2(value.to_owned()),
+            "destination" => self.set_destination(value.to_owned()),
+            "destination2" => self.set_destination2(value.to_owned()),
+            "flags" => self.set_flags(PortalFlags::from_str(value)?),
+            "name" => self.set_name(value.to_owned()),
+            "name2" => self.set_name2(value.to_owned()),
+            "room" => self.set_room(GameObjectRef::from_str(value)?),
+            "room2" => self.set_room2(GameObjectRef::from_str(value)?),
+            _ => return Err(format!("No property named \"{}\"", prop_name)),
         }
+        Ok(())
     }
 }
 
