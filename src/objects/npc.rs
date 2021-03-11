@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-use serde_json;
 use std::fmt;
 
 use crate::character_stats::CharacterStats;
@@ -19,10 +18,12 @@ pub struct Npc {
     gold: u32,
     height: f32,
     hp: i16,
+    indefinite_article: String,
     inventory: Vec<GameObjectRef>,
     mp: i16,
     name: String,
     needs_sync: bool,
+    plural_form: String,
     race: GameObjectRef,
     stats: CharacterStats,
     weight: f32,
@@ -41,10 +42,12 @@ impl Npc {
                 gold: npc_dto.gold,
                 height: npc_dto.height,
                 hp: npc_dto.hp,
+                indefinite_article: npc_dto.indefiniteArticle.unwrap_or_default(),
                 inventory: npc_dto.inventory.unwrap_or_default(),
                 mp: npc_dto.mp,
                 name: npc_dto.name,
                 needs_sync: false,
+                plural_form: npc_dto.plural.unwrap_or_default(),
                 race: npc_dto.race,
                 stats: npc_dto.stats,
                 weight: npc_dto.weight,
@@ -69,14 +72,24 @@ impl Npc {
             gold: 0,
             height: 0.0,
             hp: 1,
+            indefinite_article: String::new(),
             inventory: Vec::new(),
             mp: 0,
             name,
             needs_sync: true,
+            plural_form: String::new(),
             race: race_ref,
             stats: CharacterStats::new(),
             weight: 0.0,
         }
+    }
+
+    pub fn set_indefinite_article(&mut self, indefinite_article: String) {
+        self.indefinite_article = indefinite_article;
+    }
+
+    pub fn set_plural_form(&mut self, plural_form: String) {
+        self.plural_form = plural_form;
     }
 }
 
@@ -143,6 +156,11 @@ impl GameObject for Npc {
             gold: self.gold,
             height: self.height,
             hp: self.hp,
+            indefiniteArticle: if self.indefinite_article.is_empty() {
+                None
+            } else {
+                Some(self.indefinite_article.clone())
+            },
             inventory: if self.inventory.is_empty() {
                 None
             } else {
@@ -150,6 +168,11 @@ impl GameObject for Npc {
             },
             mp: self.mp,
             name: self.name.clone(),
+            plural: if self.plural_form.is_empty() {
+                None
+            } else {
+                Some(self.plural_form.clone())
+            },
             race: self.race,
             stats: self.stats.clone(),
             weight: self.weight,
@@ -167,12 +190,20 @@ impl GameObject for Npc {
         self.id
     }
 
+    fn indefinite_article(&self) -> &str {
+        &self.indefinite_article
+    }
+
     fn needs_sync(&self) -> bool {
         self.needs_sync
     }
 
     fn object_type(&self) -> GameObjectType {
         GameObjectType::Player
+    }
+
+    fn plural_form(&self) -> &str {
+        &self.plural_form
     }
 
     fn set_needs_sync(&mut self, needs_sync: bool) {
@@ -182,16 +213,18 @@ impl GameObject for Npc {
     fn set_property(&mut self, prop_name: &str, value: &str) -> Result<(), String> {
         match prop_name {
             "class" => Ok(self.set_class(Some(GameObjectRef::from_str(value)?))),
-            "current_room" => Ok(self.set_current_room(GameObjectRef::from_str(value)?)),
+            "currentRoom" => Ok(self.set_current_room(GameObjectRef::from_str(value)?)),
             "description" => Ok(self.set_description(value.to_owned())),
             "direction" => Ok(self.set_direction(Vector3D::from_str(value)?)),
             "gender" => Ok(self.set_gender(Gender::from_str(value)?)),
             "gold" => Ok(self.set_gold(value.parse().map_err(|error| format!("{:?}", error))?)),
             "height" => Ok(self.set_height(value.parse().map_err(|error| format!("{:?}", error))?)),
             "hp" => Ok(self.set_hp(value.parse().map_err(|error| format!("{:?}", error))?)),
+            "indefiniteArticle" => Ok(self.set_indefinite_article(value.to_owned())),
             "inventory" => Ok(self.set_inventory(GameObjectRef::vec_from_str(value)?)),
             "mp" => Ok(self.set_mp(value.parse().map_err(|error| format!("{:?}", error))?)),
             "name" => Ok(self.set_name(value.to_owned())),
+            "pluralForm" => Ok(self.set_plural_form(value.to_owned())),
             "race" => Ok(self.set_race(GameObjectRef::from_str(value)?)),
             "stats" => Ok(self.set_stats(CharacterStats::from_str(value)?)),
             "weight" => Ok(self.set_weight(value.parse().map_err(|error| format!("{:?}", error))?)),
@@ -211,9 +244,11 @@ struct NpcDto {
     gold: u32,
     height: f32,
     hp: i16,
+    indefiniteArticle: Option<String>,
     inventory: Option<Vec<GameObjectRef>>,
     mp: i16,
     name: String,
+    plural: Option<String>,
     race: GameObjectRef,
     stats: CharacterStats,
     weight: f32,

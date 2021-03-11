@@ -1,13 +1,13 @@
 use lazy_static::lazy_static;
 use regex::{Captures, Regex};
-use std::borrow::Borrow;
+use std::{borrow::Borrow, cmp::Ordering};
 
 use crate::colors::Color;
 use crate::game_object::{GameObject, GameObjectRef};
 use crate::number_utils::written_number;
 use crate::objects::{ItemFlags, Realm};
 
-const COLOR_MAP: [&'static str; 16] = [
+const COLOR_MAP: [&str; 16] = [
     "37;1", "37", "30;1", "30", "31;1", "31", "33;1", "33", "32;1", "32", "36;1", "36", "34;1",
     "34", "35;1", "35",
 ];
@@ -26,7 +26,7 @@ pub fn colorize(string: &str, color: Color) -> String {
 
 fn count_objects<'a>(
     realm: &'a Realm,
-    object_refs: &Vec<GameObjectRef>,
+    object_refs: &[GameObjectRef],
 ) -> Vec<(&'a dyn GameObject, u16)> {
     let mut objects_with_counts = Vec::<(&dyn GameObject, u16)>::new();
     for object in object_refs
@@ -53,7 +53,7 @@ pub fn definite_article_from_noun(noun: String) -> &'static str {
     }
 }
 
-pub fn describe_items(realm: &Realm, item_refs: &Vec<GameObjectRef>) -> Vec<String> {
+pub fn describe_items(realm: &Realm, item_refs: &[GameObjectRef]) -> Vec<String> {
     count_objects(realm, item_refs)
         .iter()
         .map(|(item, count)| {
@@ -87,7 +87,7 @@ pub fn describe_objects_from_room(
 
 pub fn describe_objects_with_definite_articles(
     realm: &Realm,
-    object_refs: &Vec<GameObjectRef>,
+    object_refs: &[GameObjectRef],
 ) -> Vec<String> {
     count_objects(realm, object_refs)
         .iter()
@@ -101,7 +101,7 @@ pub fn describe_objects_with_definite_articles(
         .collect()
 }
 
-pub fn first_item_is_plural(realm: &Realm, item_refs: &Vec<GameObjectRef>) -> bool {
+pub fn first_item_is_plural(realm: &Realm, item_refs: &[GameObjectRef]) -> bool {
     match item_refs.first().and_then(|item_ref| realm.item(*item_ref)) {
         Some(item) => {
             if item.has_flags(ItemFlags::ImpliedPlural) {
@@ -162,15 +162,15 @@ where
 {
     let mut string = String::new();
     let len = list.len();
-    for i in 0..len {
-        string += list[i].borrow();
-        if i + 2 < len {
-            string += separator;
-        } else if i + 2 == len {
-            string += last;
+    for (i, item) in list.iter().enumerate() {
+        string += item.borrow();
+        match (i + 2).cmp(&len) {
+            Ordering::Less => string += separator,
+            Ordering::Equal => string += last,
+            Ordering::Greater => {}
         }
     }
-    return string;
+    string
 }
 
 pub fn join_sentence<T>(list: Vec<T>) -> String
@@ -181,14 +181,14 @@ where
 }
 
 pub fn plural_from_noun(noun: &str) -> String {
-    if noun.ends_with("y") && !noun.chars().nth_back(1).map(is_vowel).unwrap_or(true) {
+    if noun.ends_with('y') && !noun.chars().nth_back(1).map(is_vowel).unwrap_or(true) {
         format!("{}ies", substring(noun, 0, -1))
-    } else if noun.ends_with("f") {
+    } else if noun.ends_with('f') {
         format!("{}ves", substring(noun, 0, -1))
     } else if noun.ends_with("fe") {
         format!("{}ves", substring(noun, 0, -2))
-    } else if noun.ends_with("s")
-        || noun.ends_with("x")
+    } else if noun.ends_with('s')
+        || noun.ends_with('x')
         || noun.ends_with("sh")
         || noun.ends_with("ch")
     {

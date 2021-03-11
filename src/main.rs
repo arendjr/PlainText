@@ -62,15 +62,15 @@ use trigger_registry::TriggerRegistry;
 
 #[tokio::main]
 async fn main() {
-    let data_dir = env::var("PT_DATA_DIR").unwrap_or("data/".to_owned());
-    let log_dir = env::var("PT_LOG_DIR").unwrap_or("logs/".to_owned());
+    let data_dir = env::var("PT_DATA_DIR").unwrap_or_else(|_| "data/".to_owned());
+    let log_dir = env::var("PT_LOG_DIR").unwrap_or_else(|_| "logs/".to_owned());
 
     let telnet_port = env::var("PT_TELNET_PORT")
-        .unwrap_or("".to_string())
+        .unwrap_or_else(|_| "".to_string())
         .parse()
         .unwrap_or(4801);
     let http_port = env::var("PT_HTTP_PORT")
-        .unwrap_or("".to_string())
+        .unwrap_or_else(|_| "".to_string())
         .parse()
         .unwrap_or(8080);
 
@@ -146,8 +146,8 @@ fn load_data(data_dir: &str) -> Result<Realm, io::Error> {
             let content = fs::read_to_string(&path)?;
             match hydrate(object_ref, &content) {
                 Ok(object) => {
-                    if let Some(character) = object.as_character() {
-                        character_refs.push(character.object_ref());
+                    if object.as_character().is_some() {
+                        character_refs.push(object_ref);
                     }
 
                     realm.set(object_ref, object);
@@ -175,6 +175,11 @@ fn inject_characters_into_rooms(realm: &mut Realm, character_refs: Vec<GameObjec
             .map(|character| character.current_room());
         if let Some(room) = maybe_current_room.and_then(|room_ref| realm.room_mut(room_ref)) {
             room.add_characters(vec![character_ref]);
+        } else {
+            println!(
+                "Character {:?} has no room {:?}",
+                character_ref, maybe_current_room
+            );
         }
     }
 }

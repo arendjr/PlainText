@@ -6,7 +6,7 @@ use crate::game_object::{Character, GameObject, GameObjectRef, GameObjectType};
 use crate::objects::{Item, Portal, Realm, Room, RoomFlags};
 use crate::player_output::PlayerOutput;
 use crate::text_utils::{
-    colorize, describe_objects_from_room, first_item_is_plural, join_sentence,
+    colorize, describe_items, describe_objects_from_room, first_item_is_plural, join_sentence,
 };
 use crate::vector3d::Vector3D;
 use crate::vector_utils::angle_between_xy_vectors;
@@ -346,19 +346,18 @@ fn create_other_characters_description(
     player_ref: GameObjectRef,
     room: &Room,
 ) -> Option<String> {
-    let other_character_names: Vec<&str> = room
+    let other_character_names: Vec<GameObjectRef> = room
         .characters()
         .iter()
         .filter(|character_ref| **character_ref != player_ref)
-        .filter_map(|character_ref| realm.character(*character_ref))
-        .map(|character| character.name())
+        .cloned()
         .collect();
     if other_character_names.is_empty() {
         None
     } else {
         Some(format!(
             "You see {}.\n",
-            join_sentence(other_character_names)
+            join_sentence(describe_items(realm, &other_character_names))
         ))
     }
 }

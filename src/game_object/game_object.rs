@@ -114,8 +114,8 @@ pub trait GameObject {
         GameObjectRef(self.object_type(), self.id())
     }
 
-    fn plural_form(&self) -> String {
-        self.name().to_owned()
+    fn plural_form(&self) -> &str {
+        self.name()
     }
 
     fn set_property(&mut self, prop_name: &str, value: &str) -> Result<(), String>;
