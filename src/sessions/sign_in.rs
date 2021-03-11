@@ -109,7 +109,12 @@ pub fn process_input(
                     log_messages,
                 )
             } else {
-                (new_state, output.process_highlights(), log_messages)
+                let exit_output = (step.exit)(&new_state.data);
+                (
+                    new_state,
+                    Output::combine(vec![output, exit_output]).process_highlights(),
+                    log_messages,
+                )
             }
         }
         None => (state.clone(), Output::None, vec![]),
