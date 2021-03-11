@@ -23,6 +23,7 @@ pub struct Item {
     cost: f32,
     description: String,
     flags: ItemFlags,
+    indefinite_article: String,
     name: String,
     needs_sync: bool,
     position: Point3D,
@@ -50,6 +51,7 @@ impl Item {
                 cost: item_dto.cost,
                 description: item_dto.description,
                 flags: item_dto.flags.unwrap_or_default(),
+                indefinite_article: item_dto.indefiniteArticle.unwrap_or_default(),
                 name: item_dto.name,
                 needs_sync: false,
                 position: item_dto.position,
@@ -57,6 +59,10 @@ impl Item {
             })),
             Err(error) => Err(format!("parse error: {}", error)),
         }
+    }
+
+    pub fn set_indefinite_article(&mut self, indefinite_article: String) {
+        self.indefinite_article = indefinite_article;
     }
 }
 
@@ -95,6 +101,11 @@ impl GameObject for Item {
             } else {
                 Some(self.flags)
             },
+            indefiniteArticle: if self.indefinite_article.is_empty() {
+                None
+            } else {
+                Some(self.indefinite_article.clone())
+            },
             name: self.name.clone(),
             position: self.position.clone(),
             weight: self.weight,
@@ -110,6 +121,10 @@ impl GameObject for Item {
 
     fn id(&self) -> GameObjectId {
         self.id
+    }
+
+    fn indefinite_article(&self) -> &str {
+        &self.indefinite_article
     }
 
     fn indefinite_name(&self) -> String {
@@ -139,6 +154,7 @@ impl GameObject for Item {
             "cost" => self.set_cost(value.parse().map_err(|error| format!("{:?}", error))?),
             "description" => self.set_description(value.to_owned()),
             "flags" => self.set_flags(ItemFlags::from_str(value)?),
+            "indefiniteArticle" => self.set_indefinite_article(value.to_owned()),
             "name" => self.set_name(value.to_owned()),
             "position" => self.set_position(Point3D::from_str(value)?),
             "weight" => self.set_weight(value.parse().map_err(|error| format!("{:?}", error))?),
@@ -152,7 +168,10 @@ impl GameObject for Item {
 struct ItemDto {
     cost: f32,
     description: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     flags: Option<ItemFlags>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    indefiniteArticle: Option<String>,
     name: String,
     position: Point3D,
     weight: f32,

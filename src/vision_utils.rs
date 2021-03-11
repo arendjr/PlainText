@@ -56,18 +56,18 @@ impl PartialOrd for CharacterWithStrengthAndDistance {
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum Position {
+    Ahead,
     Left,
     Right,
-    Ahead,
-    Behind,
-    Center,
     Above,
+    Wall,
     LeftWall,
     RightWall,
-    Wall,
     Ceiling,
-    Distance,
     Roof,
+    Center,
+    Distance,
+    Behind,
 }
 
 fn characters_visible_through_portal(
@@ -431,7 +431,7 @@ pub fn description_for_position(position: Position) -> (&'static str, &'static s
         Position::Ceiling => ("From the ceiling", "hangs", "hang"),
         Position::Distance => ("In the distance", "you see", "you see"),
         Position::Roof => ("On the roof", "you see", "you see"),
-        _ => ("There", "is", "are"),
+        _ => ("You", "see", "see"),
     }
 }
 
@@ -442,8 +442,8 @@ pub fn group_items_by_position(
 ) -> BTreeMap<Position, Vec<GameObjectRef>> {
     let mut grouped_items: BTreeMap<Position, Vec<GameObjectRef>> = BTreeMap::new();
 
-    for item_ref in room.items() {
-        let item = unwrap_or_continue!(realm.item(*item_ref));
+    for &item_ref in room.items() {
+        let item = unwrap_or_continue!(realm.item(item_ref));
         if item.hidden() {
             continue;
         }
@@ -478,9 +478,9 @@ pub fn group_items_by_position(
         };
 
         if let Some(items) = grouped_items.get_mut(&position) {
-            items.push(*item_ref);
+            items.push(item_ref);
         } else {
-            grouped_items.insert(position, vec![*item_ref]);
+            grouped_items.insert(position, vec![item_ref]);
         }
     }
 

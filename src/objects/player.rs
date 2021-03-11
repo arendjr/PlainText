@@ -238,15 +238,20 @@ impl GameObject for Player {
 #[allow(non_snake_case)]
 #[derive(Deserialize, Serialize)]
 struct PlayerDto {
+    #[serde(skip_serializing_if = "Option::is_none")]
     class: Option<GameObjectRef>,
     currentRoom: GameObjectRef,
     description: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     direction: Option<Vector3D>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     gender: Option<String>,
     gold: u32,
     height: f32,
     hp: i16,
+    #[serde(skip_serializing_if = "Option::is_none")]
     inventory: Option<Vec<GameObjectRef>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     isAdmin: Option<bool>,
     mp: i16,
     name: String,

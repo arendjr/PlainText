@@ -1,4 +1,4 @@
-use std::f64::consts::PI;
+use std::{f64::consts::PI, iter::FromIterator};
 
 use crate::colors::Color;
 use crate::direction_utils::compare_exit_names;
@@ -302,6 +302,7 @@ fn create_exits_description(realm: &Realm, room: &Room) -> Option<String> {
 
 fn create_items_description(realm: &Realm, player: &dyn Character, room: &Room) -> String {
     let mut grouped_objects = group_items_by_position(realm, player, room);
+
     if room.has_flags(RoomFlags::DynamicPortalDescriptions) {
         for (position, portal_refs) in group_portals_by_position(realm, player, room) {
             if let Some(items) = grouped_objects.get_mut(&position) {
@@ -314,7 +315,9 @@ fn create_items_description(realm: &Realm, player: &dyn Character, room: &Room) 
         }
     }
 
-    grouped_objects
+    let mut sorted_objects = Vec::from_iter(grouped_objects);
+    sorted_objects.sort_by(|a, b| a.cmp(b));
+    sorted_objects
         .iter()
         .map(|(position, object_refs)| {
             let (prefix, singular_verb, plural_verb) = description_for_position(*position);
@@ -329,6 +332,7 @@ fn create_items_description(realm: &Realm, player: &dyn Character, room: &Room) 
 
             format!("{} {} {}.", prefix, verb, join_sentence(item_descriptions))
                 .replace("there is", "there's")
+                .replace(". You ", " and you ")
         })
         .fold(String::new(), |result, string| {
             if result.is_empty() {
