@@ -56,9 +56,9 @@ pub fn direction_by_abbreviation(string: &str) -> Option<&'static str> {
     index_of_direction_abbreviation(string).map(|index| DIRECTIONS[index].name)
 }
 
-fn index_of_direction(direction: &str) -> Option<usize> {
-    for i in 0..DIRECTIONS.len() {
-        if DIRECTIONS[i].name == direction {
+fn index_of_direction(direction_str: &str) -> Option<usize> {
+    for (i, direction) in DIRECTIONS.iter().enumerate() {
+        if direction.name == direction_str {
             return Some(i);
         }
     }
@@ -66,8 +66,8 @@ fn index_of_direction(direction: &str) -> Option<usize> {
 }
 
 fn index_of_direction_abbreviation(direction_abbreviation: &str) -> Option<usize> {
-    for i in 0..DIRECTIONS.len() {
-        if DIRECTIONS[i].abbreviation == direction_abbreviation {
+    for (i, direction) in DIRECTIONS.iter().enumerate() {
+        if direction.abbreviation == direction_abbreviation {
             return Some(i);
         }
     }
