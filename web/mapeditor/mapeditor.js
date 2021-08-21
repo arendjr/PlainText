@@ -190,7 +190,7 @@ export default class MapEditor {
             if (room) {
                 const portalsSpan = $(".portals", this.element);
                 portalsSpan.empty();
-                room.portals.forEach(portal => {
+                for (const portal of room.portals.filter(Boolean)) {
                     if (portalsSpan.children().length) {
                         portalsSpan.append(", ");
                     }
@@ -202,7 +202,7 @@ export default class MapEditor {
                         href: ["java", "script:void(0)"].join(""),
                     });
                     portalsSpan.append(portalSpan);
-                });
+                }
             }
         });
 

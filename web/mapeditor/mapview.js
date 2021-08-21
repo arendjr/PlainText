@@ -11,8 +11,6 @@ export default class MapView {
 
         this.model = null;
 
-        this.canvas = null;
-
         this.zRestriction = null;
 
         this.selectedRoomId = 0;
