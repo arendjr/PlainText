@@ -1,7 +1,7 @@
 import { Keys } from "../util.js";
 import Laces from "../lib/laces.tie.js";
 import MapModel from "../mapmodel/model.js";
-import MapView from "./mapview.js";
+import MapView, { SVG_URI } from "./mapview.js";
 import PortalEditor from "../portaleditor/portaleditor.js";
 import PortalDeleteDialog from "../portaleditor/portaldeletedialog.js";
 import PropertyEditor from "../propertyeditor/propertyeditor.js";
@@ -22,9 +22,9 @@ export default class MapEditor {
         const tie = new Laces.Tie(
             this.model,
             `<div class="map-editor" style="display: none">
-                <div class="map-canvas">
-                    <canvas></canvas>
-                </div>
+                <svg class="map-canvas" viewBox="0 0 100 100" xmlns="${SVG_URI}">
+                    <line x1="116" y1="1026" x2="116" y2="746" stroke="green" stroke-width="2" opacity="0.4"></line>
+                </svg>
                 <div class="toolbar">
                     <div class="label menu">Map
                         <div class="menu-content">
@@ -160,7 +160,7 @@ export default class MapEditor {
         document.body.appendChild(tie.render());
         this.element = $(".map-editor");
 
-        this.view = new MapView($(".map-canvas", this.element));
+        this.view = new MapView(this.element[0].querySelector(".map-canvas"));
         this.view.setModel(this.model.map);
         this.view.setZoom(initialZoom);
 
@@ -211,7 +211,10 @@ export default class MapEditor {
         });
 
         $(".export-as-svg", this.element).on("click", () => {
-            this.view.exportSvg();
+            const target = window.open("", "_blank");
+            this.view.exportSvg().then(data => {
+                target.document.write(data);
+            });
         });
 
         $(".print", this.element).on("click", () => {
@@ -273,9 +276,10 @@ export default class MapEditor {
         $(".add.description", this.element).on("click", editDescription);
 
         this.element.on("click", ".edit.portal", event => {
-            const portal = this.model.map.portals[
-                event.target.getAttribute("data-portal-id")
-            ];
+            const portal =
+                this.model.map.portals[
+                    event.target.getAttribute("data-portal-id")
+                ];
             this.portalEditor.edit(portal, {
                 ondelete: portalId => {
                     if (
@@ -284,9 +288,8 @@ export default class MapEditor {
                     ) {
                         this.portalDeleteDialog.show({
                             ondeleteone: () => {
-                                const sourceRoom = this.model.map.rooms[
-                                    this.selectedRoom.id
-                                ];
+                                const sourceRoom =
+                                    this.model.map.rooms[this.selectedRoom.id];
                                 sourceRoom.portals = sourceRoom.portals.filter(
                                     p => p !== portal
                                 );

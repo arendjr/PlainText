@@ -1,7 +1,9 @@
 import { hideLoader, showLoader } from "../loadingwidget/loading.js";
 
-var ROOM_SIZE = 30;
-var ROOM_BORDER_WIDTH = 2;
+const ROOM_SIZE = 30;
+const ROOM_BORDER_WIDTH = 2;
+
+export const SVG_URI = "http://www.w3.org/2000/svg";
 
 export default class MapView {
     constructor(container) {
@@ -24,42 +26,30 @@ export default class MapView {
 
         this.roomFills = {};
 
-        this.canvas = new fabric.Canvas(this.container.children().first()[0]);
-        this.canvas.selection = false;
-        this.canvas.renderOnAddition = false;
-        this.canvas.hoverCursor = "pointer";
-
         this.attachListeners();
     }
 
     attachListeners() {
-        var self = this;
+        this.container.addEventListener("click", event => {
+            const el = event.target;
+            this.selectedRoomId = Number.parseInt(el.dataset.roomId ?? 0);
 
-        this.canvas.on("object:selected", function (event) {
-            var shape = event.target;
-            if (shape.get("id")) {
-                self.selectedRoomId = shape.get("id");
-            } else {
-                self.selectedRoomId = 0;
-            }
-
-            self.notifySelectionListeners();
+            this.notifySelectionListeners();
         });
     }
 
     setModel(model) {
         this.model = model;
 
-        var self = this;
-        this.model.bind("change", function () {
-            if (self.selectedRoomId !== 0) {
-                if (!self.model.rooms.hasOwnProperty(self.selectedRoomId)) {
-                    self.selectedRoomId = 0;
-                    self.notifySelectionListeners();
+        this.model.bind("change", () => {
+            if (this.selectedRoomId !== 0) {
+                if (!this.model.rooms.hasOwnProperty(this.selectedRoomId)) {
+                    this.selectedRoomId = 0;
+                    this.notifySelectionListeners();
                 }
             }
 
-            self.draw();
+            this.draw();
 
             hideLoader();
         });
@@ -90,190 +80,150 @@ export default class MapView {
         }
     }
 
-    draw(options) {
-        options = options || {};
+    draw(options = {}) {
+        const canvasWidth = options.width ?? this.container.clientWidth;
+        const canvasHeight = options.height ?? this.container.clientHeight;
 
-        var canvasWidth = options.width || this.container.width();
-        var canvasHeight = options.height || this.container.height();
+        this.container.setAttribute(
+            "viewBox",
+            `0 0 ${canvasWidth} ${canvasHeight}`
+        );
 
-        this.canvas.setWidth(canvasWidth);
-        this.canvas.setHeight(canvasHeight);
+        const center = options.center ?? this.center;
+        const offsetX = options.offsetX ?? Math.floor(canvasWidth / 2);
+        const offsetY = options.offsetY ?? Math.floor(canvasHeight / 2);
 
-        var center = options.center || this.center;
-        var offsetX =
-            options.offsetX === undefined
-                ? Math.floor(canvasWidth / 2)
-                : options.offsetX;
-        var offsetY =
-            options.offsetY === undefined
-                ? Math.floor(canvasHeight / 2)
-                : options.offsetY;
+        const zoom = 10 * this.zoom;
 
-        var zoom = 10 * this.zoom;
+        const minX = -ROOM_SIZE;
+        const maxX = canvasWidth + ROOM_SIZE;
+        const minY = -ROOM_SIZE;
+        const maxY = canvasHeight + ROOM_SIZE;
 
-        var minX = -ROOM_SIZE,
-            maxX = canvasWidth + ROOM_SIZE,
-            minY = -ROOM_SIZE,
-            maxY = canvasHeight + ROOM_SIZE;
-        var isWithinCanvas =
-            options.isWithinCanvas ||
-            function (x, y) {
-                return x >= minX && x <= maxX && y >= minY && y <= maxY;
-            };
+        const isWithinCanvas =
+            options.isWithinCanvas ??
+            ((x, y) => x >= minX && x <= maxX && y >= minY && y <= maxY);
 
-        var zRestriction = this.zRestriction;
+        const zRestriction = this.zRestriction;
 
-        const { portals } = this.model;
-        const portalIds = Object.values(portals)
-            .filter(portal => {
-                if (!portal.room || !portal.room2) {
-                    return false;
-                }
+        const portals = Object.values(this.model.portals).filter(portal => {
+            if (!portal.room || !portal.room2) {
+                return false;
+            }
 
-                const isVisible =
-                    zoom >= 2 &&
-                    (zRestriction === null ||
-                        portal.room.z === zRestriction ||
-                        portal.room2.z === zRestriction);
-                return isVisible;
-            })
-            .map(portal => portal.id);
+            const isVisible =
+                zoom >= 2 &&
+                (zRestriction === null ||
+                    portal.room.z === zRestriction ||
+                    portal.room2.z === zRestriction);
+            return isVisible;
+        });
 
-        const { rooms } = this.model;
-        const roomIds = Object.values(rooms)
-            .filter(room => {
-                const isVisible =
-                    zRestriction === null || room.z === zRestriction;
-                return isVisible;
-            })
-            .map(room => room.id);
+        // FIXME: We should retain what we can between draw calls:
+        this.container.innerHTML = "";
 
-        this.canvas.clear();
-
-        var self = this;
-        portalIds.forEach(function (id) {
-            var portal = portals[id];
-            var room = portal.room;
-            var room2 = portal.room2;
-            var z1 = self.perspective * room.z;
-            var x1 = offsetX + (room.x - center.x + z1) * zoom;
-            var y1 = offsetY + (room.y - center.y - z1) * zoom;
-            var z2 = self.perspective * room2.z;
-            var x2 = offsetX + (room2.x - center.x + z2) * zoom;
-            var y2 = offsetY + (room2.y - center.y - z2) * zoom;
+        for (const portal of portals) {
+            const { room, room2 } = portal;
+            const z1 = this.perspective * room.z;
+            const x1 = offsetX + (room.x - center.x + z1) * zoom;
+            const y1 = offsetY + (room.y - center.y - z1) * zoom;
+            const z2 = this.perspective * room2.z;
+            const x2 = offsetX + (room2.x - center.x + z2) * zoom;
+            const y2 = offsetY + (room2.y - center.y - z2) * zoom;
 
             if (isWithinCanvas(x1, y1) || isWithinCanvas(x2, y2)) {
-                var flags = portal.flags.split("|");
-                var isPassable =
+                const flags = portal.flags.split("|");
+                const isPassable =
                     flags.includes("CanPassThrough") ||
                     flags.includes("CanPassThroughIfOpen");
-                var color = isPassable ? "blue" : "green";
-                var opacity = isPassable ? 1.0 : 0.4;
-                var shape = new fabric.Line([x1, y1, x2, y2], {
-                    stroke: color,
-                    strokeWidth: ROOM_BORDER_WIDTH,
-                    selectable: false,
-                    opacity: opacity,
-                });
-                self.canvas.add(shape);
+
+                const line = document.createElementNS(SVG_URI, "line");
+                line.setAttribute("x1", x1);
+                line.setAttribute("y1", y1);
+                line.setAttribute("x2", x2);
+                line.setAttribute("y2", y2);
+                line.setAttribute("stroke", isPassable ? "blue" : "green");
+                line.setAttribute("stroke-width", ROOM_BORDER_WIDTH);
+                line.setAttribute("opacity", isPassable ? 1.0 : 0.4);
+                this.container.appendChild(line);
             }
+        }
+
+        const rooms = Object.values(this.model.rooms).filter(room => {
+            const isVisible = zRestriction === null || room.z === zRestriction;
+            return isVisible;
         });
 
-        roomIds.forEach(function (id) {
-            var room = rooms[id];
-            var z = self.perspective * room.z;
-            var x = offsetX + (room.x - center.x + z) * zoom;
-            var y = offsetY + (room.y - center.y - z) * zoom;
+        for (const room of rooms) {
+            const z = this.perspective * room.z;
+            const x = offsetX + (room.x - center.x + z) * zoom;
+            const y = offsetY + (room.y - center.y - z) * zoom;
 
             if (isWithinCanvas(x, y)) {
-                var fill = self.roomFills[room.id] ?? "grey";
-                var shape = new fabric.Rect({
-                    id: room.id,
-                    left: x,
-                    top: y,
-                    fill: fill,
-                    width: ROOM_SIZE,
-                    height: ROOM_SIZE,
-                    stroke: "black",
-                    strokeWidth: ROOM_BORDER_WIDTH,
-                    selectable: true,
-                    lockMovementX: true,
-                    lockMovementY: true,
-                    lockScalingX: true,
-                    lockScalingY: true,
-                    lockRotation: true,
-                    hasControls: false,
-                });
-                self.canvas.add(shape);
+                const rect = document.createElementNS(SVG_URI, "rect");
+                rect.setAttribute("data-room-id", room.id);
+                rect.setAttribute("x", x - ROOM_SIZE / 2);
+                rect.setAttribute("y", y - ROOM_SIZE / 2);
+                rect.setAttribute("width", ROOM_SIZE);
+                rect.setAttribute("height", ROOM_SIZE);
+                rect.setAttribute("fill", this.roomFills[room.id] ?? "grey");
+                rect.setAttribute("stroke", "black");
+                rect.setAttribute("stroke-width", ROOM_BORDER_WIDTH);
+                rect.style.cursor = "pointer";
+                this.container.appendChild(rect);
 
-                if (self.displayRoomNames) {
-                    var textShape = new fabric.Text(room.name || "", {
-                        left: x,
-                        top: y - ROOM_SIZE,
-                        fontSize: 14,
-                        selectable: false,
-                    });
-                    self.canvas.add(textShape);
+                if (this.displayRoomNames) {
+                    const text = document.createElementNS(SVG_URI, "text");
+                    text.textContent = room.name ?? "";
+                    text.setAttribute("x", x);
+                    text.setAttribute("y", y - ROOM_SIZE);
+                    text.style.fontSize = 14;
+                    this.container.appendChild(text);
                 }
             }
-        });
-
-        this.canvas.renderAll();
+        }
     }
 
-    exportSvg(options) {
-        options = options || {};
-
+    exportSvg() {
         showLoader();
 
-        var target = window.open("", "_blank");
-
-        var self = this;
-        setTimeout(function () {
-            var dimensions = self.getMapDimensions();
-            self.draw({
+        return Promise.resolve().then(() => {
+            const dimensions = this.getMapDimensions();
+            this.draw({
                 width:
                     dimensions.width +
-                    (self.displayRoomNames ? 4 : 2) * ROOM_SIZE,
+                    (this.displayRoomNames ? 4 : 2) * ROOM_SIZE,
                 height:
                     dimensions.height +
-                    (self.displayRoomNames ? 4 : 2) * ROOM_SIZE,
+                    (this.displayRoomNames ? 4 : 2) * ROOM_SIZE,
                 offsetX: ROOM_SIZE + (self.displayRoomNames ? ROOM_SIZE : 0),
                 offsetY: ROOM_SIZE + (self.displayRoomNames ? ROOM_SIZE : 0),
                 center: dimensions.topLeft,
-                isWithinStage: function (x, y) {
-                    return true;
-                },
+                isWithinStage: () => true,
             });
 
-            if (options.callback) {
-                options.callback(target, self.canvas.toSVG());
-            } else {
-                target.document.location =
-                    "data:image/svg+xml;utf8," + self.canvas.toSVG();
-            }
-
-            self.draw();
+            const svg = this.container.outerHTML;
 
             hideLoader();
-        }, 1);
+            this.draw();
+
+            return svg;
+        });
     }
 
     print() {
-        this.exportSvg({
-            callback: function (target, data) {
-                target.document.write(data);
-                target.window.print();
-            },
+        const target = window.open("", "_blank");
+        this.exportSvg().then(data => {
+            target.document.write(data);
+            target.window.print();
         });
     }
 
     plotData(data) {
-        var lowest = 0;
-        var highest = 0;
-        var value;
-        for (var id in data) {
-            value = data[id];
+        let lowest = 0;
+        let highest = 0;
+        for (const id in data) {
+            const value = data[id];
             if (value > highest) {
                 highest = value;
             } else if (value < lowest) {
@@ -281,14 +231,13 @@ export default class MapView {
             }
         }
 
-        var rooms = this.model.rooms;
+        const { rooms } = this.model;
+        for (const id in rooms) {
+            const value = data[id] ?? 0;
 
-        for (id in rooms) {
-            value = data[id] ?? 0;
-
-            var red = 0,
-                green = 0,
-                blue = 0;
+            let red = 0;
+            let green = 0;
+            let blue = 0;
             if (lowest === 0) {
                 if (highest === 0) {
                     blue = 255;
@@ -308,10 +257,10 @@ export default class MapView {
                 }
             }
 
-            var fill = "rgb(" + red + ", " + green + ", " + blue + ")";
+            const fill = `rgb(${red}, ${green}, ${blue})`;
             this.roomFills[id] = fill;
 
-            var shape = rooms[id].shape;
+            const { shape } = rooms[id];
             if (shape) {
                 shape.set("fill", fill);
             }
@@ -347,11 +296,8 @@ export default class MapView {
     }
 
     setZRestriction(zRestriction) {
-        if (zRestriction === undefined || zRestriction === null) {
-            this.zRestriction = null;
-        } else {
-            this.zRestriction = parseInt(zRestriction, 10);
-        }
+        this.zRestriction =
+            zRestriction == null ? null : Number.parseInt(zRestriction);
 
         this.draw();
     }
@@ -365,15 +311,14 @@ export default class MapView {
     }
 
     getMapDimensions() {
-        var minX = 0,
-            minY = 0,
-            maxX = 0,
-            maxY = 0;
-        for (var id in this.model.rooms) {
-            var room = this.model.rooms[id];
-            var z = this.perspective * room.z;
-            var x = room.x + z;
-            var y = room.y + z;
+        let minX = 0;
+        let minY = 0;
+        let maxX = 0;
+        let maxY = 0;
+        for (const room of Object.values(this.model.rooms)) {
+            const z = this.perspective * room.z;
+            const x = room.x + z;
+            const y = room.y + z;
             if (x < minX) {
                 minX = x;
             } else if (x > maxX) {

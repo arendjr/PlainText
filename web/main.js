@@ -167,9 +167,6 @@ function attachListeners() {
                 delete pendingRequests[requestId];
             } else if (data.player) {
                 if (!player.isAdmin && data.player.isAdmin) {
-                    const script = document.createElement("script");
-                    script.setAttribute("src", "lib/fabric.js");
-                    document.head.appendChild(script);
                     import("./admin.js");
                 }
 
