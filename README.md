@@ -6,7 +6,7 @@ PlainText is a text-based MUD game engine.
  * **[Features](#features)**
  * **[Documentation](#documentation)**
  * **[Running your own server](#running-your-own-server)**
- * **[Connect to your own server](#connect-to-your-own-server)
+ * **[Connect to your own server](#connect-to-your-own-server)**
  * **[License](#license)**
  
 
