@@ -6,7 +6,7 @@ PlainText is a text-based MUD game engine.
  * **[Features](#features)**
  * **[Documentation](#documentation)**
  * **[Running your own server](#running-your-own-server)**
- * **[Connect to your own server](#connect-to-your-own-server)**
+   * [Connecting](#connecting)
  * **[License](#license)**
  
 
@@ -62,9 +62,9 @@ repository, then from the command line, run:
 You can use the PT_DATA_DIR and PT_LOG_DIR environment variables to control
 where data files are loaded from and logs are written to, respectively.
 
-### Connect to your own server ###
+### Connecting ###
 
-If you have just compiled your own server, you can connect to it through telnet
+Once your own server is running, you can connect to it through telnet
 or using your webbrowser. The ports to connect to are displayed on the console
 when you start your server.
 
