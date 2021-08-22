@@ -4,20 +4,17 @@ PlainText
 PlainText is a text-based MUD game engine.
 
  * **[Features](#features)**
- * **[Community](#community)**
  * **[Documentation](#documentation)**
  * **[Running your own server](#running-your-own-server)**
-   * [Supported platforms](#supported-platforms)
-   * [Dependencies](#dependencies)
-   * [Compiling](#compiling)
-   * [Running](#running)
- * **[Playing the game](#playing-the-game)**
-   * [Connect to your own server](#connect-to-your-own-server)
+ * **[Connect to your own server](#connect-to-your-own-server)
  * **[License](#license)**
  
 
 Features
 --------
+
+**Disclaimer:** Some of these are only available in the `legacy` branch. My
+intention is to get everything below reimplemented in the current Rust port.
 
  * Support for both telnet (including ANSI colors, MCCP, MSDP and MSSP
    extensions) and HTML5 (WebSockets) 
