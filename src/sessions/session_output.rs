@@ -18,14 +18,14 @@ pub enum SessionOutput {
     None,
     Str(&'static str),
     String(String),
-    JSON(serde_json::Value),
+    Json(serde_json::Value),
     Prompt(SessionPromptInfo),
     Aggregate(Vec<SessionOutput>),
 }
 
 impl SessionOutput {
     pub fn combine(mut outputs: Vec<Self>) -> Self {
-        if outputs.len() == 0 {
+        if outputs.is_empty() {
             Self::None
         } else if outputs.len() == 1 {
             outputs.remove(0)
@@ -43,7 +43,7 @@ impl SessionOutput {
                 .filter(|output| *output != Self::None)
                 .collect::<Vec<Self>>();
 
-            if filtered_outputs.len() == 0 {
+            if filtered_outputs.is_empty() {
                 Self::None
             } else if filtered_outputs.len() == 1 {
                 filtered_outputs.remove(0)

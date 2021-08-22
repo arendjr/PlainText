@@ -57,7 +57,7 @@ macro_rules! serializable_flags {
             where
                 E: serde::de::Error,
             {
-                Self::from_str(value).map_err(|err| serde::de::Error::custom(err))
+                Self::from_str(value).map_err(serde::de::Error::custom)
             }
         }
 

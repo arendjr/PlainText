@@ -134,7 +134,7 @@ fn get_sign_up_steps() -> HashMap<SignUpStep, StepImpl> {
         },
 
         SignUpStep::AskingPassword => StepImpl {
-            enter: |_, _| Output::JSON(json!({ "inputType": "password" })),
+            enter: |_, _| Output::Json(json!({ "inputType": "password" })),
             exit: |_| Output::None,
             prompt: |_| Output::Str("Please choose a password: "),
             process_input: process_asking_sign_up_password_input,
@@ -142,7 +142,7 @@ fn get_sign_up_steps() -> HashMap<SignUpStep, StepImpl> {
 
         SignUpStep::AskingPasswordConfirmation => StepImpl {
             enter: |_, _| Output::None,
-            exit: |_| Output::JSON(json!({ "inputType": "text" })),
+            exit: |_| Output::Json(json!({ "inputType": "text" })),
             prompt: |_| Output::Str("Please confirm a password: "),
             process_input: process_asking_sign_up_password_confirmation_input,
         },
@@ -201,7 +201,7 @@ fn get_sign_up_steps() -> HashMap<SignUpStep, StepImpl> {
                 } else {
                     "<str> <dex> <vit> <end> <int> <fai>"
                 },
-                format_stats_string(&get_base_stats(&data).3, &data.class)
+                format_stats_string(&get_base_stats(data).3, &data.class)
             )),
             process_input: process_asking_extra_stats_input
         },
@@ -288,12 +288,12 @@ fn enter_extra_stats(data: &SignUpData, _: &Realm) -> Output {
             Some(class) => class.name(),
             None => "",
         },
-        stats.get(CharacterStat::STRENGTH),
-        stats.get(CharacterStat::DEXTERITY),
-        stats.get(CharacterStat::VITALITY),
-        stats.get(CharacterStat::ENDURANCE),
-        stats.get(CharacterStat::INTELLIGENCE),
-        stats.get(CharacterStat::FAITH),
+        stats.get(CharacterStat::Strength),
+        stats.get(CharacterStat::Dexterity),
+        stats.get(CharacterStat::Vitality),
+        stats.get(CharacterStat::Endurance),
+        stats.get(CharacterStat::Intelligence),
+        stats.get(CharacterStat::Faith),
     ))
 }
 
@@ -313,12 +313,12 @@ fn enter_sign_up_confirmation(data: &SignUpData, _: &Realm) -> Output {
             .map(|race| race.adjective())
             .unwrap_or(""),
         data.class.as_ref().map(|class| class.name()).unwrap_or(""),
-        data.stats.get(CharacterStat::STRENGTH),
-        data.stats.get(CharacterStat::DEXTERITY),
-        data.stats.get(CharacterStat::VITALITY),
-        data.stats.get(CharacterStat::ENDURANCE),
-        data.stats.get(CharacterStat::INTELLIGENCE),
-        data.stats.get(CharacterStat::FAITH),
+        data.stats.get(CharacterStat::Strength),
+        data.stats.get(CharacterStat::Dexterity),
+        data.stats.get(CharacterStat::Vitality),
+        data.stats.get(CharacterStat::Endurance),
+        data.stats.get(CharacterStat::Intelligence),
+        data.stats.get(CharacterStat::Faith),
     ))
 }
 
@@ -326,21 +326,21 @@ fn format_stats_string(stats: &CharacterStats, class: &Option<Class>) -> String 
     if class.as_ref().map(|class| class.name()) == Some("barbarian") {
         format!(
             "{} {} {} {} {}",
-            stats.get(CharacterStat::STRENGTH),
-            stats.get(CharacterStat::DEXTERITY),
-            stats.get(CharacterStat::VITALITY),
-            stats.get(CharacterStat::ENDURANCE),
-            stats.get(CharacterStat::FAITH)
+            stats.get(CharacterStat::Strength),
+            stats.get(CharacterStat::Dexterity),
+            stats.get(CharacterStat::Vitality),
+            stats.get(CharacterStat::Endurance),
+            stats.get(CharacterStat::Faith)
         )
     } else {
         format!(
             "{} {} {} {} {} {}",
-            stats.get(CharacterStat::STRENGTH),
-            stats.get(CharacterStat::DEXTERITY),
-            stats.get(CharacterStat::VITALITY),
-            stats.get(CharacterStat::ENDURANCE),
-            stats.get(CharacterStat::INTELLIGENCE),
-            stats.get(CharacterStat::FAITH)
+            stats.get(CharacterStat::Strength),
+            stats.get(CharacterStat::Dexterity),
+            stats.get(CharacterStat::Vitality),
+            stats.get(CharacterStat::Endurance),
+            stats.get(CharacterStat::Intelligence),
+            stats.get(CharacterStat::Faith)
         )
     }
 }
@@ -373,23 +373,23 @@ fn get_base_stats(data: &SignUpData) -> (f32, f32, CharacterStats, CharacterStat
     } else if class_name == "warrior" || class_name == "soldier" {
         weight += 5.0;
     } else if class_name == "barbarian" {
-        stats.set(CharacterStat::INTELLIGENCE, 0);
+        stats.set(CharacterStat::Intelligence, 0);
         weight += 5.0;
 
         stats_suggestion.set(
-            CharacterStat::FAITH,
-            stats_suggestion.get(CharacterStat::FAITH)
-                + stats_suggestion.get(CharacterStat::INTELLIGENCE),
+            CharacterStat::Faith,
+            stats_suggestion.get(CharacterStat::Faith)
+                + stats_suggestion.get(CharacterStat::Intelligence),
         );
-        stats_suggestion.set(CharacterStat::INTELLIGENCE, 0);
+        stats_suggestion.set(CharacterStat::Intelligence, 0);
     }
 
     if data.gender == Gender::Male {
-        stats.inc(CharacterStat::STRENGTH);
+        stats.inc(CharacterStat::Strength);
         height += 10.0;
         weight += 10.0;
     } else {
-        stats.inc(CharacterStat::DEXTERITY);
+        stats.inc(CharacterStat::Dexterity);
         weight -= 10.0;
     }
 
@@ -518,11 +518,11 @@ fn process_asking_race_input(
     } else if let Some(race_name) = answer.strip_prefix("info ") {
         (
             state.clone(),
-            if let Some(race) = realm.race_by_name(&race_name) {
+            if let Some(race) = realm.race_by_name(race_name) {
                 Output::String(format!(
                     "\n{}\n  {}\n",
-                    highlight(&capitalize(&race_name)),
-                    split_lines(&race.description(), 78).join("\n  ")
+                    highlight(&capitalize(race_name)),
+                    split_lines(race.description(), 78).join("\n  ")
                 ))
             } else if race_name.starts_with('<') && race_name.ends_with('>') {
                 Output::Str(
@@ -578,10 +578,10 @@ fn process_asking_class_input(
             if let Some(class) = classes.iter().find(|class| class.name() == class_name) {
                 Output::String(format!(
                     "\n{}\n  {}\n",
-                    highlight(&capitalize(&class_name)),
-                    split_lines(&class.description(), 78).join("\n  ")
+                    highlight(&capitalize(class_name)),
+                    split_lines(class.description(), 78).join("\n  ")
                 ))
-            } else if class_name.starts_with("<") && class_name.ends_with(">") {
+            } else if class_name.starts_with('<') && class_name.ends_with('>') {
                 Output::Str(
                     "\nSorry, you are supposed to replace <class> with the name of an \
                     actual class. For example: *info knight*.\n",
@@ -729,9 +729,9 @@ fn process_asking_extra_stats_input(
         }
 
         stats = stats + &user_stats;
-        height += (user_stats.get(CharacterStat::INTELLIGENCE) as f32)
-            - (user_stats.get(CharacterStat::DEXTERITY) as f32) / 2.0;
-        weight += user_stats.get(CharacterStat::STRENGTH) as f32;
+        height += (user_stats.get(CharacterStat::Intelligence) as f32)
+            - (user_stats.get(CharacterStat::Dexterity) as f32) / 2.0;
+        weight += user_stats.get(CharacterStat::Strength) as f32;
 
         (
             new_state(

@@ -1,5 +1,5 @@
 const NUM_WRITTEN_NUMBERS: u16 = 20;
-const WRITTEN_NUMBERS: [&'static str; NUM_WRITTEN_NUMBERS as usize] = [
+const WRITTEN_NUMBERS: [&str; NUM_WRITTEN_NUMBERS as usize] = [
     "zero",
     "one",
     "two",
@@ -23,7 +23,7 @@ const WRITTEN_NUMBERS: [&'static str; NUM_WRITTEN_NUMBERS as usize] = [
 ];
 
 const NUM_WRITTEN_POSITIONS: u16 = 20;
-const WRITTEN_POSITIONS: [&'static str; NUM_WRITTEN_POSITIONS as usize] = [
+const WRITTEN_POSITIONS: [&str; NUM_WRITTEN_POSITIONS as usize] = [
     "zeroth",
     "first",
     "second",
@@ -86,6 +86,6 @@ pub fn written_position(position: u16) -> String {
         } else {
             "th"
         };
-        return position.to_string() + suffix;
+        position.to_string() + suffix
     }
 }

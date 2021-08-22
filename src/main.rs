@@ -18,6 +18,15 @@ macro_rules! unwrap_or_continue {
 }
 
 macro_rules! unwrap_or_return {
+    ($expr:expr) => {
+        match $expr {
+            Some(value) => value,
+            None => return,
+        }
+    };
+}
+
+macro_rules! unwrap_or_return_value {
     ($expr:expr, $ret:expr) => {
         match $expr {
             Some(value) => value,
@@ -203,7 +212,7 @@ async fn process_signing_in_input(
         if let Some(sign_up_data) = new_state.get_sign_up_data() {
             realm.add_player(sign_up_data);
             log_session_event(
-                &log_tx,
+                log_tx,
                 source.clone(),
                 format!("Character created for player \"{}\"", user_name),
             )
@@ -213,7 +222,7 @@ async fn process_signing_in_input(
         if let Some(player) = realm.player_by_name_mut(user_name) {
             if let Some(existing_session_id) = player.session_id() {
                 send_session_event(
-                    &session_tx,
+                    session_tx,
                     SessionEvent::SessionUpdate(
                         existing_session_id,
                         SessionState::SessionClosed(Some(player.id())),
@@ -248,7 +257,7 @@ async fn process_signing_in_input(
     };
 
     send_session_event(
-        &session_tx,
+        session_tx,
         SessionEvent::SessionUpdate(session_id, session_state),
     )
     .await;
@@ -263,15 +272,15 @@ async fn process_signed_in_input(
     (input, session_id, source, player_id): (String, u64, String, GameObjectId),
 ) {
     if let Some(player) = realm.player_by_id(player_id) {
-        log_command(&log_tx, player.name().to_owned(), input.clone()).await;
+        log_command(log_tx, player.name().to_owned(), input.clone()).await;
         let player_ref = player.object_ref();
         let player_output =
             command_executor.execute_command(realm, trigger_registry, player_ref, log_tx, input);
         process_player_output(realm, session_tx, player_output).await;
     } else {
-        log_session_event(&log_tx, source, format!("Player {} deleted", player_id)).await;
+        log_session_event(log_tx, source, format!("Player {} deleted", player_id)).await;
         send_session_event(
-            &session_tx,
+            session_tx,
             SessionEvent::SessionUpdate(session_id, SessionState::SessionClosed(Some(player_id))),
         )
         .await;
@@ -287,11 +296,11 @@ async fn process_player_output(
         if let Some(affected_player) = realm.player_by_id(output.player_id) {
             if let Some(session_id) = affected_player.session_id() {
                 send_session_event(
-                    &session_tx,
+                    session_tx,
                     SessionEvent::SessionOutput(
                         session_id,
                         match output.output {
-                            SessionOutput::JSON(json) => SessionOutput::JSON(json),
+                            SessionOutput::Json(json) => SessionOutput::Json(json),
                             output => output.with(SessionOutput::Prompt(SessionPromptInfo {
                                 name: affected_player.name().to_owned(),
                                 is_admin: affected_player.is_admin(),
@@ -319,7 +328,7 @@ async fn process_session_closed(
             player.set_session_id(None);
 
             let player_name = player.name().to_owned();
-            log_command(&log_tx, player_name, "(session closed)".to_owned()).await;
+            log_command(log_tx, player_name, "(session closed)".to_owned()).await;
         }
     }
 }

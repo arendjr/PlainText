@@ -131,19 +131,19 @@ fn get_sign_in_steps() -> HashMap<SignInStep, StepImpl> {
         },
 
         SignInStep::AskingPassword => StepImpl {
-            enter: |_, _| Output::JSON(json!({ "inputType": "password" })),
-            exit: |_| Output::JSON(json!({ "inputType": "text" })),
+            enter: |_, _| Output::Json(json!({ "inputType": "password" })),
+            exit: |_| Output::Json(json!({ "inputType": "text" })),
             prompt: |_| Output::Str("Please enter your password: "),
             process_input: process_asking_password_input,
         },
 
         SignInStep::AskingSignUpData => StepImpl {
-            enter: |data, realm| enter_sign_up_step(&data.sign_up_state.as_ref().unwrap(), realm),
-            exit: |data| exit_sign_up_step(&data.sign_up_state.as_ref().unwrap()),
-            prompt: |data| prompt_sign_up_step(&data.sign_up_state.as_ref().unwrap()),
+            enter: |data, realm| enter_sign_up_step(data.sign_up_state.as_ref().unwrap(), realm),
+            exit: |data| exit_sign_up_step(data.sign_up_state.as_ref().unwrap()),
+            prompt: |data| prompt_sign_up_step(data.sign_up_state.as_ref().unwrap()),
             process_input: |state, realm, _, input| {
                 let (sign_up_state, output, log_messages) = process_sign_up_input(
-                    &state.data.sign_up_state.as_ref().unwrap(),
+                    state.data.sign_up_state.as_ref().unwrap(),
                     realm,
                     input
                 );

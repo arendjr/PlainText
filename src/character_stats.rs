@@ -6,12 +6,12 @@ use std::{fmt, ops};
 pub const NUM_STATS: usize = 6;
 
 pub enum CharacterStat {
-    STRENGTH = 0,
-    DEXTERITY,
-    VITALITY,
-    ENDURANCE,
-    INTELLIGENCE,
-    FAITH,
+    Strength = 0,
+    Dexterity,
+    Vitality,
+    Endurance,
+    Intelligence,
+    Faith,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -84,11 +84,11 @@ impl CharacterStats {
     }
 
     pub fn max_hp(&self) -> i16 {
-        2 * self.get(CharacterStat::VITALITY)
+        2 * self.get(CharacterStat::Vitality)
     }
 
     pub fn max_mp(&self) -> i16 {
-        self.get(CharacterStat::INTELLIGENCE)
+        self.get(CharacterStat::Intelligence)
     }
 
     pub fn new() -> Self {

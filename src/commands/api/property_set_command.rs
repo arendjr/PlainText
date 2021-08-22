@@ -13,10 +13,10 @@ pub fn property_set(
 ) -> Vec<PlayerOutput> {
     let mut output: Vec<PlayerOutput> = Vec::new();
 
-    let mut processor = unwrap_or_return!(
-        ApiRequestProcessor::try_new(&mut output, player_ref, &mut helpers),
-        output
-    );
+    let mut processor = match ApiRequestProcessor::try_new(&mut output, player_ref, &mut helpers) {
+        Some(processor) => processor,
+        None => return output,
+    };
 
     let object_ref = match processor.take_object_ref() {
         Ok(object_ref) => object_ref,

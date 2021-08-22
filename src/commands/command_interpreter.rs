@@ -18,19 +18,20 @@ impl CommandInterpreter {
         &self,
         processor: &mut CommandLineProcessor,
     ) -> Result<CommandType, InterpretationError> {
-        let mut command_name =
-            unwrap_or_return!(processor.peek_word(), Err(InterpretationError::NoCommand));
+        let mut command_name = processor
+            .peek_word()
+            .ok_or(InterpretationError::NoCommand)?;
 
-        if let Some(direction) = direction_by_abbreviation(&command_name) {
+        if let Some(direction) = direction_by_abbreviation(command_name) {
             command_name = direction;
         }
 
-        if is_direction(&command_name) {
+        if is_direction(command_name) {
             processor.prepend_word("go".to_owned());
             return Ok(CommandType::Go);
         }
 
-        match self.registry.lookup(&command_name) {
+        match self.registry.lookup(command_name) {
             Ok(command_type) => Ok(command_type),
             Err(LookupError::NotFound) => {
                 Err(InterpretationError::UnknownCommand(command_name.to_owned()))

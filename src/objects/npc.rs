@@ -127,7 +127,7 @@ impl GameObject for Npc {
     }
 
     fn as_npc(&self) -> Option<&Self> {
-        Some(&self)
+        Some(self)
     }
 
     fn as_npc_mut(&mut self) -> Option<&mut Self> {

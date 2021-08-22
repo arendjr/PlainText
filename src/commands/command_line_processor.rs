@@ -31,11 +31,11 @@ impl CommandLineProcessor {
         &self,
         realm: &'a Realm,
         description: ObjectDescription,
-    ) -> Box<dyn Fn(&GameObjectRef) -> bool + 'a> {
-        let player = unwrap_or_return!(realm.player(self.player_ref), Box::new(|_| false));
+    ) -> Box<dyn FnMut(&&GameObjectRef) -> bool + 'a> {
+        let player = unwrap_or_return_value!(realm.player(self.player_ref), Box::new(|_| false));
 
         Box::new(move |object_ref| {
-            let object = unwrap_or_return!(realm.object(*object_ref), false);
+            let object = unwrap_or_return_value!(realm.object(**object_ref), false);
             let name = if let Some(portal) = object.as_portal() {
                 portal.name_from_room(player.current_room())
             } else {
@@ -91,35 +91,35 @@ impl CommandLineProcessor {
     pub fn object_by_description(
         &self,
         realm: &Realm,
-        pool: &Vec<GameObjectRef>,
+        pool: &[GameObjectRef],
         description: ObjectDescription,
     ) -> Option<GameObjectRef> {
         if description.position > 0 {
             let index = description.position as usize - 1;
             pool.iter()
-                .map(|object_ref| *object_ref)
                 .filter(self.description_predicate(realm, description))
                 .nth(index)
+                .copied()
         } else {
             pool.iter()
-                .map(|object_ref| *object_ref)
                 .find(self.description_predicate(realm, description))
+                .copied()
         }
     }
 
     pub fn objects_by_description(
         &self,
         realm: &Realm,
-        pool: &Vec<GameObjectRef>,
+        pool: &[GameObjectRef],
         description: ObjectDescription,
     ) -> Vec<GameObjectRef> {
         let position = description.position;
-        let objects = if position == 0 && description.name == "all" {
-            pool.clone()
+        let objects: Vec<GameObjectRef> = if position == 0 && description.name == "all" {
+            pool.iter().copied().collect()
         } else {
             pool.iter()
-                .map(|object_ref| *object_ref)
                 .filter(self.description_predicate(realm, description))
+                .copied()
                 .collect()
         };
 
@@ -167,7 +167,7 @@ impl CommandLineProcessor {
     pub fn take_object_description(&mut self) -> Option<ObjectDescription> {
         self.skip_connecting_word("the");
 
-        let mut name = unwrap_or_return!(self.take_word(), None).to_lowercase();
+        let mut name = self.take_word()?.to_lowercase();
         let mut position = 0;
 
         if let Some(dot_index) = name.chars().position(|c| c == '.') {
@@ -189,11 +189,7 @@ impl CommandLineProcessor {
         Some(ObjectDescription::new(position, name))
     }
 
-    pub fn take_object(
-        &mut self,
-        realm: &Realm,
-        pool: &Vec<GameObjectRef>,
-    ) -> Option<GameObjectRef> {
+    pub fn take_object(&mut self, realm: &Realm, pool: &[GameObjectRef]) -> Option<GameObjectRef> {
         if let Some(description) = self.take_object_description() {
             self.object_by_description(realm, pool, description)
         } else {
@@ -201,7 +197,7 @@ impl CommandLineProcessor {
         }
     }
 
-    pub fn take_objects(&mut self, realm: &Realm, pool: &Vec<GameObjectRef>) -> Vec<GameObjectRef> {
+    pub fn take_objects(&mut self, realm: &Realm, pool: &[GameObjectRef]) -> Vec<GameObjectRef> {
         if let Some(description) = self.take_object_description() {
             self.objects_by_description(realm, pool, description)
         } else {

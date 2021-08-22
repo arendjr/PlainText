@@ -23,8 +23,14 @@ pub fn look_in_direction(
     direction: &Vector3D,
     output: &mut Vec<PlayerOutput>,
 ) {
-    let player = unwrap_or_return!(realm.character(player_ref), ());
-    let room = unwrap_or_return!(realm.room(player.current_room()), ());
+    let player = match realm.character(player_ref) {
+        Some(player) => player,
+        None => return,
+    };
+    let room = match realm.room(player.current_room()) {
+        Some(room) => room,
+        None => return,
+    };
 
     /*TODO: binoculars are fun!
     let strength = room.event_multiplier(EventType::Visual);
@@ -32,8 +38,8 @@ pub fn look_in_direction(
         strength *= 4;
     }*/
 
-    let items = visible_items_from_position(realm, room, &direction);
-    let portals = visible_portals_from_position(realm, room, &direction);
+    let items = visible_items_from_position(realm, room, direction);
+    let portals = visible_portals_from_position(realm, room, direction);
     let descriptions = describe_objects_from_room(
         realm,
         &[&items[..], &portals[..]].concat(),
@@ -44,7 +50,7 @@ pub fn look_in_direction(
         push_output_string!(output, player_ref, format!("You see {}.\n", sentence));
     }
 
-    let characters = visible_characters_through_portals_from_position(realm, &room, &direction);
+    let characters = visible_characters_through_portals_from_position(realm, room, direction);
     if !characters.is_empty() {
         push_output_string!(
             output,
@@ -61,7 +67,11 @@ pub fn look_at_object(
     object_ref: GameObjectRef,
     output: &mut Vec<PlayerOutput>,
 ) {
-    let object = unwrap_or_return!(realm.object(object_ref), ());
+    let object = match realm.object(object_ref) {
+        Some(object) => object,
+        None => return,
+    };
+
     match object.object_type() {
         GameObjectType::Item => look_at_item(realm, player_ref, object.as_item().unwrap(), output),
         GameObjectType::Portal => {
@@ -92,8 +102,14 @@ fn look_at_item(
     item: &Item,
     output: &mut Vec<PlayerOutput>,
 ) {
-    let player = unwrap_or_return!(realm.player(player_ref), ());
-    let current_room = unwrap_or_return!(realm.room(player.current_room()), ());
+    let player = match realm.character(player_ref) {
+        Some(player) => player,
+        None => return,
+    };
+    let current_room = match realm.room(player.current_room()) {
+        Some(room) => room,
+        None => return,
+    };
 
     let description = item.description();
     push_output_string!(
@@ -129,8 +145,8 @@ fn look_at_item(
             .portals()
             .iter()
             .filter_map(|&portal_ref| realm.portal(portal_ref))
-            .map(|portal| (portal, (portal.position(&realm) - current_room.position())))
-            .filter(|(_, vector)| looking_direction.angle(&vector) < PI / 8.0)
+            .map(|portal| (portal, (portal.position(realm) - current_room.position())))
+            .filter(|(_, vector)| looking_direction.angle(vector) < PI / 8.0)
             .for_each(|(portal, vector)| {
                 let angle = angle_between_xy_vectors(&looking_direction, &vector);
                 let side = if angle > 0.0 { "right" } else { "left" };
@@ -149,8 +165,14 @@ fn look_at_portal(
     portal: &Portal,
     output: &mut Vec<PlayerOutput>,
 ) {
-    let player = unwrap_or_return!(realm.player(player_ref), ());
-    let current_room = unwrap_or_return!(realm.room(player.current_room()), ());
+    let player = match realm.character(player_ref) {
+        Some(player) => player,
+        None => return,
+    };
+    let current_room = match realm.room(player.current_room()) {
+        Some(room) => room,
+        None => return,
+    };
 
     let description = portal.description();
     push_output_string!(
@@ -163,7 +185,7 @@ fn look_at_portal(
         }
     );
 
-    let looking_direction = portal.position(&realm) - current_room.position();
+    let looking_direction = portal.position(realm) - current_room.position();
 
     current_room
         .items()
@@ -184,8 +206,8 @@ fn look_at_portal(
         .iter()
         .filter(|&&portal_ref| portal_ref != portal.object_ref())
         .filter_map(|&portal_ref| realm.portal(portal_ref))
-        .map(|portal| (portal, (portal.position(&realm) - current_room.position())))
-        .filter(|(_, vector)| looking_direction.angle(&vector) < PI / 8.0)
+        .map(|portal| (portal, (portal.position(realm) - current_room.position())))
+        .filter(|(_, vector)| looking_direction.angle(vector) < PI / 8.0)
         .for_each(|(portal, vector)| {
             let angle = angle_between_xy_vectors(&looking_direction, &vector);
             let side = if angle > 0.0 { "right" } else { "left" };
@@ -195,11 +217,11 @@ fn look_at_portal(
 
     if portal.can_see_through() {
         let characters = visible_characters_through_portals_from_position(
-            &realm,
+            realm,
             current_room,
             &looking_direction,
         );
-        let characters_description = describe_characters_relative_to(&realm, characters, player);
+        let characters_description = describe_characters_relative_to(realm, characters, player);
         if !characters_description.is_empty() {
             push_output_string!(output, player_ref, characters_description);
         }
@@ -215,7 +237,10 @@ fn look_at_room(
     room: &Room,
     output: &mut Vec<PlayerOutput>,
 ) {
-    let player = unwrap_or_return!(realm.character(player_ref), ());
+    let player = match realm.character(player_ref) {
+        Some(player) => player,
+        None => return,
+    };
 
     let mut text = if room.name().is_empty() {
         room.description().to_owned()
@@ -227,7 +252,7 @@ fn look_at_room(
         )
     };
 
-    let items_description = create_items_description(&realm, player, room);
+    let items_description = create_items_description(realm, player, room);
     if !items_description.is_empty() {
         if !text.ends_with(' ') && !text.ends_with('\n') {
             text.push(' ');
@@ -235,8 +260,7 @@ fn look_at_room(
         text.push_str(&items_description);
     }
 
-    if let Some(characters_description) =
-        create_distant_characters_description(&realm, player, room)
+    if let Some(characters_description) = create_distant_characters_description(realm, player, room)
     {
         if !text.ends_with(' ') && !text.ends_with('\n') {
             text.push(' ');
@@ -246,12 +270,12 @@ fn look_at_room(
 
     text.push('\n');
 
-    if let Some(exits_description) = create_exits_description(&realm, room) {
+    if let Some(exits_description) = create_exits_description(realm, room) {
         text.push_str(&exits_description);
     }
 
     if let Some(characters_description) =
-        create_other_characters_description(&realm, player_ref, room)
+        create_other_characters_description(realm, player_ref, room)
     {
         text.push_str(&characters_description);
     }
@@ -316,7 +340,7 @@ fn create_items_description(realm: &Realm, player: &dyn Character, room: &Room) 
     }
 
     let mut sorted_objects = Vec::from_iter(grouped_objects);
-    sorted_objects.sort_by(|a, b| a.cmp(b));
+    sorted_objects.sort();
     sorted_objects
         .iter()
         .map(|(position, object_refs)| {

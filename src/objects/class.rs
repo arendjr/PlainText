@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-use serde_json;
 use std::fmt;
 
 use crate::character_stats::CharacterStats;
@@ -97,11 +96,23 @@ impl GameObject for Class {
 
     fn set_property(&mut self, prop_name: &str, value: &str) -> Result<(), String> {
         match prop_name {
-            "description" => Ok(self.set_description(value.to_owned())),
-            "name" => Ok(self.set_name(value.to_owned())),
-            "stats" => Ok(self.set_stats(CharacterStats::from_str(value)?)),
-            "statsSuggestion" => Ok(self.set_stats_suggestion(CharacterStats::from_str(value)?)),
-            _ => Err(format!("No property named \"{}\"", prop_name))?,
+            "description" => {
+                self.set_description(value.to_owned());
+                Ok(())
+            }
+            "name" => {
+                self.set_name(value.to_owned());
+                Ok(())
+            }
+            "stats" => {
+                self.set_stats(CharacterStats::from_str(value)?);
+                Ok(())
+            }
+            "statsSuggestion" => {
+                self.set_stats_suggestion(CharacterStats::from_str(value)?);
+                Ok(())
+            }
+            _ => Err(format!("No property named \"{}\"", prop_name)),
         }
     }
 }

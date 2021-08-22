@@ -61,7 +61,7 @@ pub fn create_log_handler(log_dir: String, mut log_rx: Receiver<Box<dyn LogMessa
     });
 }
 
-fn create_log_file(log_dir: &String, log: &String, day: &NaiveDate) -> io::Result<File> {
+fn create_log_file(log_dir: &str, log: &str, day: &NaiveDate) -> io::Result<File> {
     let dir_path = format!("{}/{}", log_dir, day.format("%Y%m%d"));
     create_dir_all(Path::new(&dir_path))?;
 

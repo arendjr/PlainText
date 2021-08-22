@@ -51,7 +51,7 @@ impl Item {
                 cost: item_dto.cost,
                 description: item_dto.description,
                 flags: item_dto.flags.unwrap_or_default(),
-                indefinite_article: item_dto.indefiniteArticle.unwrap_or_default(),
+                indefinite_article: item_dto.indefinite_article.unwrap_or_default(),
                 name: item_dto.name,
                 needs_sync: false,
                 position: item_dto.position,
@@ -77,7 +77,7 @@ impl GameObject for Item {
     game_object_string_prop!(description, set_description);
 
     fn as_item(&self) -> Option<&Self> {
-        Some(&self)
+        Some(self)
     }
 
     fn as_item_mut(&mut self) -> Option<&mut Self> {
@@ -101,7 +101,7 @@ impl GameObject for Item {
             } else {
                 Some(self.flags)
             },
-            indefiniteArticle: if self.indefinite_article.is_empty() {
+            indefinite_article: if self.indefinite_article.is_empty() {
                 None
             } else {
                 Some(self.indefinite_article.clone())
@@ -165,13 +165,14 @@ impl GameObject for Item {
 }
 
 #[derive(Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 struct ItemDto {
     cost: f32,
     description: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     flags: Option<ItemFlags>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    indefiniteArticle: Option<String>,
+    indefinite_article: Option<String>,
     name: String,
     position: Point3D,
     weight: f32,

@@ -28,79 +28,79 @@ enum ItemOrAmount {
 
 #[derive(Debug, EnumDiscriminants)]
 enum Trigger {
-    OnActive,
-    OnAttack {
+    Active,
+    Attack {
         attacker_ref: GameObjectRef,
     },
-    OnBuy {
+    Buy {
         buyer_ref: GameObjectRef,
         bought_item: Option<GameObjectRef>,
     },
-    OnCharacterAttacked {
+    CharacterAttacked {
         attacker: GameObjectRef,
         defendant: GameObjectRef,
     },
-    OnCharacterDied {
+    CharacterDied {
         defendant: GameObjectRef,
         attacker: Option<GameObjectRef>,
     },
-    OnCharacterEntered {
+    CharacterEntered {
         activator: GameObjectRef,
     },
-    OnCharacterExit {
+    CharacterExit {
         activator: GameObjectRef,
         exit_name: String,
     },
-    OnClose {
+    Close {
         activator: GameObjectRef,
     },
-    OnCombat {
+    Combat {
         attacker: GameObjectRef,
         defendant: GameObjectRef,
         observers: Vec<GameObjectRef>,
         damage: i16,
     },
-    OnDie {
+    Die {
         attacker: Option<GameObjectRef>,
     },
-    OnDrink {
+    Drink {
         activator: GameObjectRef,
     },
-    OnEat {
+    Eat {
         activator: GameObjectRef,
     },
-    OnEnter {
+    Enter {
         activator: GameObjectRef,
     },
-    OnEntered,
-    OnInit,
-    OnItemDropped {
+    Entered,
+    Init,
+    ItemDropped {
         item: GameObjectRef,
         owner: Option<GameObjectRef>,
     },
-    OnOpen {
+    Open {
         activator: GameObjectRef,
     },
-    OnReceive {
+    Receive {
         giver: GameObjectRef,
         item: ItemOrAmount,
     },
-    OnShout {
+    Shout {
         activator: GameObjectRef,
         message: String,
     },
-    OnSound {
+    Sound {
         message: String,
     },
-    OnSpawn,
-    OnTalk {
+    Spawn,
+    Talk {
         speaker: GameObjectRef,
         message: String,
     },
-    OnUse {
+    Use {
         activator: GameObjectRef,
     },
-    OnVisual {
+    Visual {
         message: String,
     },
 }

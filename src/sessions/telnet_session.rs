@@ -33,7 +33,7 @@ impl Session for TelnetSession {
 
     async fn send(&mut self, output: SessionOutput) {
         match output {
-            SessionOutput::JSON(_) => {}
+            SessionOutput::Json(_) => {}
             SessionOutput::Str(output) => send_data(&mut self.writer, output.as_bytes()).await,
             SessionOutput::String(output) => send_data(&mut self.writer, output.as_bytes()).await,
             SessionOutput::Prompt(info) => {

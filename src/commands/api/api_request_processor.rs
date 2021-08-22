@@ -32,7 +32,7 @@ impl<'a, 'b> ApiRequestProcessor<'a, 'b> {
         })
         .unwrap();
 
-        push_session_output!(self.output, self.player_ref, SessionOutput::JSON(reply));
+        push_session_output!(self.output, self.player_ref, SessionOutput::Json(reply));
     }
 
     pub fn send_reply<T>(&mut self, data: T)
@@ -47,7 +47,7 @@ impl<'a, 'b> ApiRequestProcessor<'a, 'b> {
         })
         .unwrap();
 
-        push_session_output!(self.output, self.player_ref, SessionOutput::JSON(reply));
+        push_session_output!(self.output, self.player_ref, SessionOutput::Json(reply));
     }
 
     pub fn send_success_reply(&mut self) {
@@ -93,7 +93,7 @@ impl<'a, 'b> ApiRequestProcessor<'a, 'b> {
                 })
                 .unwrap();
 
-                push_session_output!(output, player_ref, SessionOutput::JSON(reply));
+                push_session_output!(output, player_ref, SessionOutput::Json(reply));
 
                 None
             }

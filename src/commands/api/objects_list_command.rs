@@ -15,15 +15,18 @@ pub fn objects_list(
 ) -> Vec<PlayerOutput> {
     let mut output: Vec<PlayerOutput> = Vec::new();
 
-    let mut processor = unwrap_or_return!(
-        ApiRequestProcessor::try_new(&mut output, player_ref, &mut helpers),
-        output
-    );
+    let mut processor = match ApiRequestProcessor::try_new(&mut output, player_ref, &mut helpers) {
+        Some(processor) => processor,
+        None => return output,
+    };
 
-    let object_type_string = unwrap_or_return!(processor.take_word(), {
-        processor.send_error(400, "Please specify an object type".to_owned());
-        output
-    });
+    let object_type_string = match processor.take_word() {
+        Some(word) => word,
+        None => {
+            processor.send_error(400, "Please specify an object type".to_owned());
+            return output;
+        }
+    };
 
     let object_type = match GameObjectType::from_str(&object_type_string) {
         Ok(object_type) => object_type,

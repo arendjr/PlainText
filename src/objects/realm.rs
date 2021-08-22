@@ -1,6 +1,5 @@
 use lazy_static::__Deref;
 use serde::{Deserialize, Serialize};
-use serde_json;
 use std::cmp;
 use std::collections::{HashMap, HashSet};
 use std::hash::{Hash, Hasher};
@@ -46,7 +45,7 @@ impl Realm {
     pub fn add_player(&mut self, sign_up_data: &SignUpData) {
         let player_ref = GameObjectRef(GameObjectType::Player, self.next_id);
         let mut player = Player::new(player_ref.id(), sign_up_data);
-        if self.players_by_name.len() == 0 {
+        if self.players_by_name.is_empty() {
             // First player automatically becomes admin:
             player.set_is_admin(true)
         }
@@ -149,7 +148,7 @@ impl Realm {
     pub fn player_by_name_mut(&mut self, name: &str) -> Option<&mut objects::Player> {
         self.players_by_name
             .get(name)
-            .map(|id| *id)
+            .copied()
             .and_then(move |id| self.player_by_id_mut(id))
     }
 
@@ -257,7 +256,7 @@ impl GameObject for Realm {
     }
 
     fn as_realm(&self) -> Option<&Self> {
-        Some(&self)
+        Some(self)
     }
 
     fn dehydrate(&self) -> serde_json::Value {
@@ -298,12 +297,13 @@ impl GameObject for Realm {
     fn set_property(&mut self, prop_name: &str, value: &str) -> Result<(), String> {
         match prop_name {
             "date_time" => {
-                Ok(self.set_date_time(value.parse().map_err(|error| format!("{:?}", error))?))
+                self.set_date_time(value.parse().map_err(|error| format!("{:?}", error))?)
             }
-            "description" => Ok(self.set_description(value.to_owned())),
-            "name" => Ok(self.set_name(value.to_owned())),
-            _ => Err(format!("No property named \"{}\"", prop_name))?,
+            "description" => self.set_description(value.to_owned()),
+            "name" => self.set_name(value.to_owned()),
+            _ => return Err(format!("No property named \"{}\"", prop_name)),
         }
+        Ok(())
     }
 }
 

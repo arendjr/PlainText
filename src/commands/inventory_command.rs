@@ -16,7 +16,7 @@ pub fn inventory(
     let processor = helpers.command_line_processor;
 
     let mut output = Vec::new();
-    let player = unwrap_or_return!(realm.player(player_ref), output);
+    let player = unwrap_or_return_value!(realm.player(player_ref), output);
 
     processor.skip_word(); // alias
 
@@ -34,7 +34,7 @@ pub fn inventory(
     } else if weight.round() == 0.0 {
         format!(
             "You carry {}.\n",
-            join_sentence(describe_items(&realm, inventory))
+            join_sentence(describe_items(realm, inventory))
         )
     } else if let Some(item) =
         GameObjectRef::only(inventory).and_then(|item_ref| realm.item(item_ref))
@@ -47,7 +47,7 @@ pub fn inventory(
     } else {
         format!(
             "You carry {}, weighing a total of {}.\n",
-            join_sentence(describe_items(&realm, inventory)),
+            join_sentence(describe_items(realm, inventory)),
             format_weight(weight)
         )
     };

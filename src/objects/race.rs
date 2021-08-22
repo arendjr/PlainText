@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-use serde_json;
 use std::fmt;
 
 use crate::character_stats::CharacterStats;
@@ -118,17 +117,18 @@ impl GameObject for Race {
 
     fn set_property(&mut self, prop_name: &str, value: &str) -> Result<(), String> {
         match prop_name {
-            "adjective" => Ok(self.set_adjective(value.to_owned())),
-            "classes" => Ok(self.set_classes(GameObjectRef::vec_from_str(value)?)),
-            "description" => Ok(self.set_description(value.to_owned())),
-            "height" => Ok(self.set_height(value.parse().map_err(|error| format!("{:?}", error))?)),
-            "name" => Ok(self.set_name(value.to_owned())),
-            "startingRoom" => Ok(self.set_starting_room(GameObjectRef::from_str(value)?)),
-            "stats" => Ok(self.set_stats(CharacterStats::from_str(value)?)),
-            "statsSuggestion" => Ok(self.set_stats_suggestion(CharacterStats::from_str(value)?)),
-            "weight" => Ok(self.set_weight(value.parse().map_err(|error| format!("{:?}", error))?)),
-            _ => Err(format!("No property named \"{}\"", prop_name))?,
+            "adjective" => self.set_adjective(value.to_owned()),
+            "classes" => self.set_classes(GameObjectRef::vec_from_str(value)?),
+            "description" => self.set_description(value.to_owned()),
+            "height" => self.set_height(value.parse().map_err(|error| format!("{:?}", error))?),
+            "name" => self.set_name(value.to_owned()),
+            "startingRoom" => self.set_starting_room(GameObjectRef::from_str(value)?),
+            "stats" => self.set_stats(CharacterStats::from_str(value)?),
+            "statsSuggestion" => self.set_stats_suggestion(CharacterStats::from_str(value)?),
+            "weight" => self.set_weight(value.parse().map_err(|error| format!("{:?}", error))?),
+            _ => return Err(format!("No property named \"{}\"", prop_name)),
         }
+        Ok(())
     }
 }
 

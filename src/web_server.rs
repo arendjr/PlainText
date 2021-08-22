@@ -15,8 +15,9 @@ pub fn serve(realm_name: String, port: u16, session_tx: Sender<SessionEvent>) {
         .map(
             |ws: warp::ws::Ws, maybe_addr: Option<SocketAddr>, session_tx: Sender<SessionEvent>| {
                 ws.on_upgrade(move |websocket| {
-                    let addr = maybe_addr
-                        .unwrap_or(SocketAddr::new(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), 0));
+                    let addr = maybe_addr.unwrap_or_else(|| {
+                        SocketAddr::new(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), 0)
+                    });
                     send_incoming_session(session_tx, websocket, addr)
                 })
             },

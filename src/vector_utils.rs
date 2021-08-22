@@ -11,5 +11,5 @@ pub fn angle_between_xy_vectors(v1: &Vector3D, v2: &Vector3D) -> f64 {
     } else if angle > PI {
         angle -= TAU;
     }
-    return angle;
+    angle
 }

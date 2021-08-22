@@ -29,8 +29,7 @@ impl SessionReader {
 
             if let Some(newline_index) = find_newline(self.input, self.input_length, num_bytes) {
                 let result = String::from_utf8(self.input[0..newline_index].to_vec())
-                    .ok()
-                    .and_then(|string| Some(string.trim().to_owned()));
+                    .map(|string| string.trim().to_owned());
 
                 // Rewind the input buffer for the next call:
                 let input_length = self.input_length + num_bytes;
@@ -40,7 +39,7 @@ impl SessionReader {
                 }
                 self.input_length = 0;
 
-                return result;
+                return result.ok();
             } else {
                 self.input_length += num_bytes;
             }
@@ -50,10 +49,11 @@ impl SessionReader {
 }
 
 fn find_newline(input: [u8; MAX_INPUT_LENGTH], start: usize, end: usize) -> Option<usize> {
-    for i in start..end {
-        if input[i] == LF || input[i] == CR {
-            return Some(i);
-        }
-    }
-    None
+    input
+        .iter()
+        .enumerate()
+        .take(end)
+        .skip(start)
+        .find(|(_, &char)| char == LF || char == CR)
+        .map(|(i, _)| i)
 }

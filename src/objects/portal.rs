@@ -136,14 +136,14 @@ impl Portal {
     }
 
     pub fn position(&self, realm: &Realm) -> Point3D {
-        let position1 = unwrap_or_return!(
-            realm.room(self.room).map(|room| room.position()),
-            Point3D::default()
-        );
-        let position2 = unwrap_or_return!(
-            realm.room(self.room2).map(|room| room.position()),
-            Point3D::default()
-        );
+        let position1 = match realm.room(self.room) {
+            Some(room) => room.position(),
+            None => return Point3D::default(),
+        };
+        let position2 = match realm.room(self.room2) {
+            Some(room) => room.position(),
+            None => return Point3D::default(),
+        };
         Point3D {
             x: (position1.x + position2.x) / 2,
             y: (position1.y + position2.y) / 2,
@@ -171,7 +171,7 @@ impl GameObject for Portal {
     }
 
     fn as_portal(&self) -> Option<&Self> {
-        Some(&self)
+        Some(self)
     }
 
     fn as_portal_mut(&mut self) -> Option<&mut Self> {

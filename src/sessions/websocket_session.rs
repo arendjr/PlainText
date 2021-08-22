@@ -40,7 +40,7 @@ impl Session for WebSocketSession {
 
     async fn send(&mut self, output: SessionOutput) {
         match output {
-            SessionOutput::JSON(data) => {
+            SessionOutput::Json(data) => {
                 send_message(&mut self.tx, Message::text(data.to_string())).await
             }
             SessionOutput::Str(output) => {

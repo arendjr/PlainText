@@ -2,7 +2,6 @@ use std::cmp::Ordering;
 use std::collections::{BTreeMap, BTreeSet, HashSet};
 use std::f64::consts::PI;
 use std::hash::{Hash, Hasher};
-use std::iter::FromIterator;
 
 use crate::direction_utils::is_direction;
 use crate::events::EventType;
@@ -32,12 +31,10 @@ impl Hash for CharacterWithStrengthAndDistance {
 
 impl Ord for CharacterWithStrengthAndDistance {
     fn cmp(&self, other: &Self) -> Ordering {
-        if self.distance < other.distance {
-            Ordering::Less
-        } else if self.distance > other.distance {
-            Ordering::Greater
-        } else {
-            self.character.cmp(&other.character)
+        match self.distance.cmp(&other.distance) {
+            Ordering::Less => Ordering::Less,
+            Ordering::Greater => Ordering::Greater,
+            Ordering::Equal => self.character.cmp(&other.character),
         }
     }
 }
@@ -78,11 +75,8 @@ fn characters_visible_through_portal(
     portal: &Portal,
     strength: f32,
     excluded_rooms: &HashSet<GameObjectRef>,
-) -> BTreeSet<CharacterWithStrengthAndDistance> {
-    let room = unwrap_or_return!(
-        realm.room(portal.opposite_of(from_room.object_ref())),
-        BTreeSet::new()
-    );
+) -> Option<BTreeSet<CharacterWithStrengthAndDistance>> {
+    let room = realm.room(portal.opposite_of(from_room.object_ref()))?;
     let room_strength = if strength != 0.0 {
         strength
     } else {
@@ -90,7 +84,7 @@ fn characters_visible_through_portal(
     } * portal.event_multiplier(EventType::Visual)
         * room.event_multiplier(EventType::Visual);
     if room_strength < 0.1 {
-        return BTreeSet::new();
+        return None;
     }
 
     let vector1 = room.position() - from_room.position();
@@ -103,16 +97,16 @@ fn characters_visible_through_portal(
         visited_rooms.insert(*room_ref);
     }
 
-    let mut characters = BTreeSet::from_iter(
-        room.characters()
-            .iter()
-            .filter_map(|character_ref| realm.character(*character_ref))
-            .map(|character| CharacterWithStrengthAndDistance {
-                character: character.object_ref(),
-                strength: room_strength,
-                distance,
-            }),
-    );
+    let mut characters: BTreeSet<_> = room
+        .characters()
+        .iter()
+        .filter_map(|character_ref| realm.character(*character_ref))
+        .map(|character| CharacterWithStrengthAndDistance {
+            character: character.object_ref(),
+            strength: room_strength,
+            distance,
+        })
+        .collect();
 
     for next_portal in room
         .portals()
@@ -149,26 +143,28 @@ fn characters_visible_through_portal(
             continue;
         }
 
-        for character_with_strength_and_distance in characters_visible_through_portal(
+        if let Some(characters_with_strength_and_distance) = characters_visible_through_portal(
             realm,
             looking_direction,
-            &next_room,
+            next_room,
             origin_room,
-            &next_portal,
+            next_portal,
             strength,
             &visited_rooms,
         ) {
-            characters.insert(character_with_strength_and_distance);
+            for character in characters_with_strength_and_distance {
+                characters.insert(character);
+            }
         }
     }
 
-    characters
+    Some(characters)
 }
 
 pub fn describe_characters_relative_to(
-    realm: &Realm,
-    characters: Vec<GameObjectRef>,
-    relative: &dyn Character,
+    _realm: &Realm,
+    _characters: Vec<GameObjectRef>,
+    _relative: &dyn Character,
 ) -> String {
     /*TODO: Rustify
     if (!characters || characters.length === 0) {
@@ -542,16 +538,18 @@ pub fn visible_characters_through_portals_from_position(
         let vector = portal.position(realm) - room.position();
         let angle = angle_between_xy_vectors(looking_direction, &vector);
         if angle.abs() < UNDER_QUARTER_PI {
-            for character_with_strength_and_distance in characters_visible_through_portal(
+            if let Some(characters_with_strength_and_distance) = characters_visible_through_portal(
                 realm,
                 looking_direction,
-                &room,
-                &room,
-                &portal,
+                room,
+                room,
+                portal,
                 room.event_multiplier(EventType::Visual),
                 &HashSet::new(),
             ) {
-                characters.insert(character_with_strength_and_distance.character);
+                for character in characters_with_strength_and_distance {
+                    characters.insert(character.character);
+                }
             }
         }
     }
@@ -565,12 +563,12 @@ pub fn visible_items_from_position(
 ) -> Vec<GameObjectRef> {
     room.items()
         .iter()
-        .map(|item_ref| *item_ref)
+        .copied()
         .filter(|item_ref| {
-            let item = unwrap_or_return!(realm.item(*item_ref), false);
-            if item.hidden() {
-                return false;
-            }
+            let item = match realm.item(*item_ref) {
+                Some(item) if !item.hidden() => item,
+                _ => return false,
+            };
 
             let is_visible = (item.position().x == 0 && item.position().y == 0)
                 || angle_between_xy_vectors(looking_direction, &item.position().to_vec()).abs()
@@ -587,12 +585,12 @@ pub fn visible_portals_from_position(
 ) -> Vec<GameObjectRef> {
     room.portals()
         .iter()
-        .map(|portal_ref| *portal_ref)
+        .copied()
         .filter(|portal_ref| {
-            let portal = unwrap_or_return!(realm.portal(*portal_ref), false);
-            if portal.is_hidden_from_room(room.object_ref()) {
-                return false;
-            }
+            let portal = match realm.portal(*portal_ref) {
+                Some(portal) if !portal.is_hidden_from_room(room.object_ref()) => portal,
+                _ => return false,
+            };
 
             let name = portal.name_from_room(room.object_ref());
             if is_direction(name) || name == "out" {
@@ -600,9 +598,7 @@ pub fn visible_portals_from_position(
             }
 
             let vector = portal.position(realm) - room.position();
-            let is_visible =
-                angle_between_xy_vectors(looking_direction, &vector).abs() < OVER_QUARTER_PI;
-            is_visible
+            angle_between_xy_vectors(looking_direction, &vector).abs() < OVER_QUARTER_PI
         })
         .collect()
 }

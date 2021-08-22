@@ -68,7 +68,7 @@ pub fn describe_items(realm: &Realm, item_refs: &[GameObjectRef]) -> Vec<String>
 
 pub fn describe_objects_from_room(
     realm: &Realm,
-    object_refs: &Vec<GameObjectRef>,
+    object_refs: &[GameObjectRef],
     room_ref: GameObjectRef,
 ) -> Vec<String> {
     count_objects(realm, object_refs)
@@ -149,7 +149,7 @@ pub fn highlight(string: &str) -> String {
 }
 
 pub fn is_letter(character: char) -> bool {
-    character >= 'a' && character <= 'z' || character >= 'A' && character <= 'Z'
+    ('a'..='z').contains(&character) || ('A'..='Z').contains(&character)
 }
 
 pub fn is_vowel(character: char) -> bool {

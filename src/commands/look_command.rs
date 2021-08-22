@@ -19,14 +19,14 @@ pub fn look(
     let processor = helpers.command_line_processor;
 
     let mut output = Vec::new();
-    let player = unwrap_or_return!(realm.player(player_ref), output);
-    let current_room = unwrap_or_return!(realm.room(player.current_room()), output);
+    let player = unwrap_or_return_value!(realm.player(player_ref), output);
+    let current_room = unwrap_or_return_value!(realm.room(player.current_room()), output);
 
     let alias = processor.take_word().unwrap();
 
     if alias.starts_with('l') {
         if !processor.has_words_left() {
-            look_at_object(&realm, player_ref, player.current_room(), &mut output);
+            look_at_object(realm, player_ref, player.current_room(), &mut output);
             return output;
         }
 
@@ -58,9 +58,9 @@ pub fn look(
 
     if processor.peek_rest() == "in inventory" {
         if let Some(object_ref) =
-            processor.object_by_description(&realm, player.inventory(), description)
+            processor.object_by_description(realm, player.inventory(), description)
         {
-            look_at_object(&realm, player_ref, object_ref, &mut output);
+            look_at_object(realm, player_ref, object_ref, &mut output);
         } else {
             push_output_str!(output, player_ref, "You don't have that.\n");
         }
@@ -76,7 +76,7 @@ pub fn look(
     .concat();
 
     let maybe_object = processor
-        .object_by_description(&realm, &pool, description.clone())
+        .object_by_description(realm, &pool, description.clone())
         .and_then(|object_ref| realm.object(object_ref));
     let object = match maybe_object {
         Some(object) => object,
