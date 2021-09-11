@@ -1,3 +1,4 @@
+use crate::commands::api::{object_create, object_delete, object_set, wrap_api_request};
 use crate::game_object::GameObjectRef;
 use crate::objects::Realm;
 use crate::player_output::PlayerOutput;
@@ -34,12 +35,15 @@ impl CommandExecutor {
                     trigger_registry,
                 };
                 let command_fn = match command_type {
-                    CommandType::ApiObjectsList => objects_list,
-                    CommandType::ApiPropertySet => property_set,
-                    CommandType::ApiTriggersList => triggers_list,
-                    CommandType::Go => go,
-                    CommandType::Inventory => inventory,
-                    CommandType::Look => look,
+                    CommandType::ApiObjectCreate => wrap_api_request(object_create),
+                    CommandType::ApiObjectDelete => wrap_api_request(object_delete),
+                    CommandType::ApiObjectSet => wrap_api_request(object_set),
+                    CommandType::ApiObjectsList => wrap_api_request(objects_list),
+                    CommandType::ApiPropertySet => wrap_api_request(property_set),
+                    CommandType::ApiTriggersList => wrap_api_request(triggers_list),
+                    CommandType::Go => wrap_command(go),
+                    CommandType::Inventory => wrap_command(inventory),
+                    CommandType::Look => wrap_command(look),
                     CommandType::Lose => panic!("Not implemented"),
                 };
                 command_fn(realm, player_ref, command_helpers)
@@ -63,4 +67,13 @@ impl CommandExecutor {
             interpreter: CommandInterpreter::new(),
         }
     }
+}
+
+pub fn wrap_command<F>(
+    f: F,
+) -> Box<dyn Fn(&mut Realm, GameObjectRef, CommandHelpers) -> Vec<PlayerOutput>>
+where
+    F: Fn(&mut Realm, GameObjectRef, CommandHelpers) -> Vec<PlayerOutput> + 'static,
+{
+    Box::new(f)
 }

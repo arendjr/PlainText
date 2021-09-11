@@ -120,7 +120,11 @@ impl GameObject for Room {
     fn dehydrate(&self) -> serde_json::Value {
         serde_json::to_value(RoomDto {
             description: self.description.clone(),
-            eventMultipliers: Some(self.event_multipliers.clone()),
+            eventMultipliers: if self.event_multipliers == EventMultiplierMap::default() {
+                None
+            } else {
+                Some(self.event_multipliers.clone())
+            },
             flags: self.flags,
             items: if self.items.is_empty() {
                 None
@@ -175,8 +179,10 @@ impl GameObject for Room {
 #[derive(Deserialize, Serialize)]
 struct RoomDto {
     description: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     eventMultipliers: Option<EventMultiplierMap>,
     flags: RoomFlags,
+    #[serde(skip_serializing_if = "Option::is_none")]
     items: Option<Vec<GameObjectRef>>,
     name: String,
     portals: Vec<GameObjectRef>,

@@ -14,6 +14,9 @@ use command_line_processor::CommandLineProcessor;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum CommandType {
+    ApiObjectCreate,
+    ApiObjectDelete,
+    ApiObjectSet,
     ApiObjectsList,
     ApiPropertySet,
     ApiTriggersList,

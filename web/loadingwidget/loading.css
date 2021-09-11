@@ -1,9 +1,0 @@
-.loading {
-    top: 250px;
-    left: calc(50% - 100px);
-    right: calc(50% - 100px);
-}
-    .loading p {
-        font-weight: bold;
-        text-align: center;
-    }

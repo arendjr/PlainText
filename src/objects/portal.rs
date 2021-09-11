@@ -196,7 +196,11 @@ impl GameObject for Portal {
             } else {
                 Some(self.destination2.clone())
             },
-            eventMultipliers: Some(self.event_multipliers.clone()),
+            eventMultipliers: if self.event_multipliers == EventMultiplierMap::default() {
+                None
+            } else {
+                Some(self.event_multipliers.clone())
+            },
             flags: self.flags,
             name: self.name.clone(),
             name2: self.name2.clone(),
@@ -248,10 +252,15 @@ impl GameObject for Portal {
 #[allow(non_snake_case)]
 #[derive(Deserialize, Serialize)]
 struct PortalDto {
+    #[serde(skip_serializing_if = "Option::is_none")]
     description: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     description2: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     destination: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     destination2: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     eventMultipliers: Option<EventMultiplierMap>,
     flags: PortalFlags,
     name: String,

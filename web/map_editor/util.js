@@ -1,11 +1,3 @@
-export const Keys = {
-    RETURN: 13,
-    LEFT_ARROW: 37,
-    UP_ARROW: 38,
-    RIGHT_ARROW: 39,
-    DOWN_ARROW: 40,
-};
-
 const directions = [
     { name: "north", opposite: "south", vector: [0, -1, 0] },
     { name: "northeast", opposite: "southwest", vector: [1, -1, 0] },
@@ -29,22 +21,8 @@ function indexOfDirection(direction) {
     return -1;
 }
 
-export function isDirection(string) {
-    return indexOfDirection(string) > -1;
-}
-
-export function opposingDirection(direction) {
-    const directionObject = directions[indexOfDirection(direction)];
-    return directionObject ? directionObject.opposite : "";
-}
-
-export function vectorForDirection(direction) {
-    const directionObject = directions[indexOfDirection(direction)];
-    return directionObject ? directionObject.vector : [0, 0, 0];
-}
-
 export function directionForVector(vector) {
-    if (vector instanceof Array) {
+    if (Array.isArray(vector)) {
         vector = { x: vector[0], y: vector[1], z: vector[2] };
     }
 
@@ -52,11 +30,7 @@ export function directionForVector(vector) {
         Math.abs(vector.z) >
         Math.sqrt(Math.pow(vector.x, 2) + Math.pow(vector.y, 2))
     ) {
-        if (vector.z > 0) {
-            return "down";
-        } else {
-            return "up";
-        }
+        return vector.z > 0 ? "down" : "up";
     } else {
         const degrees = (Math.atan2(vector.y, vector.x) * 180.0) / Math.PI;
         if (degrees < -157.5 || degrees > 157.5) {
@@ -77,4 +51,38 @@ export function directionForVector(vector) {
             return "southwest";
         }
     }
+}
+
+export function formatRef(parsedRef) {
+    return `${parsedRef[0]}:${parsedRef[1]}`;
+}
+
+export function getId(ref) {
+    return ref ? parseRef(ref)[1] : undefined;
+}
+
+export function isDirection(string) {
+    return indexOfDirection(string) > -1;
+}
+
+export function noop() {}
+
+export function opposingDirection(direction) {
+    const directionObject = directions[indexOfDirection(direction)];
+    return directionObject ? directionObject.opposite : "";
+}
+
+export function parseRef(ref) {
+    const [type, id] = ref.split(":", 2);
+    return [type, Number.parseInt(id)];
+}
+
+export function portalNameFromRoom(portal, room) {
+    const [type, id] = parseRef(portal.room);
+    return type === "room" && id === room.id ? portal.name : portal.name2;
+}
+
+export function vectorForDirection(direction) {
+    const directionObject = directions[indexOfDirection(direction)];
+    return directionObject ? directionObject.vector : [0, 0, 0];
 }

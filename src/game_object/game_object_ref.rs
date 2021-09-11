@@ -59,6 +59,10 @@ impl GameObjectType {
 pub struct GameObjectRef(pub GameObjectType, pub GameObjectId);
 
 impl GameObjectRef {
+    pub fn new(object_type: GameObjectType, id: GameObjectId) -> Self {
+        Self(object_type, id)
+    }
+
     pub fn from_file_name(file_name: &OsString) -> Option<Self> {
         let file_name = file_name.to_str()?;
         let split = file_name.split('.').collect::<Vec<&str>>();
@@ -97,15 +101,15 @@ impl GameObjectRef {
     }
 
     /// Returns the only object ref from a vector, if the vector only has a single item.
-    pub fn only(vec: &Vec<GameObjectRef>) -> Option<GameObjectRef> {
+    pub fn only(vec: &[GameObjectRef]) -> Option<GameObjectRef> {
         if vec.len() == 1 {
-            vec.first().map(|&object_ref| object_ref)
+            vec.first().copied()
         } else {
             None
         }
     }
 
-    pub fn to_file_name(&self) -> String {
+    pub fn to_file_name(self) -> String {
         format!("{}.{:09}", self.0, self.1)
     }
 

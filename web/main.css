@@ -2,18 +2,25 @@ body {
     margin: 0;
     padding: 0;
 
-    height: -webkit-calc(492px + 7em);
-    height: -moz-calc(492px + 7em);
     height: calc(492px + 7em);
 
-    -webkit-user-select: none;
+    user-select: none;
 }
 
-body,input {
+body,
+input {
     font-size: 10pt;
 }
 
-.status-header,.screen,.command-input {
+a {
+    color: blue;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.status-header,
+.screen,
+.command-input {
     padding: 0.5em;
     width: 640px;
 }
@@ -24,14 +31,15 @@ body,input {
     margin: 2em 2em 0;
     border: 2px solid #000;
 }
-    .stats {
-        float: right;
-    }
-        .mp {
-            margin-left: 20px;
-        }
+.stats {
+    float: right;
+}
+.mp {
+    margin-left: 20px;
+}
 
-.screen,.command-input {
+.screen,
+.command-input {
     display: block;
 
     font-family: "Courier", monospace;
@@ -42,7 +50,7 @@ body,input {
     border: 2px inset #777;
     background: #000;
 
-    -webkit-user-select: text;
+    user-select: text;
 }
 
 .screen {
@@ -50,33 +58,31 @@ body,input {
     height: 480px;
     overflow: auto;
 }
-    .screen a {
-        color: inherit;
-        text-decoration: none;
-    }
+.screen a {
+    color: inherit;
+    text-decoration: none;
+}
 
 .command-input {
     margin: 0 2em 2em;
     border-radius: 0;
 }
 
-
 @media screen and (max-width: 660px) {
     body {
-        height: -webkit-calc(322px + 3.2em);
-        height: -moz-calc(322px + 3.2em);
         height: calc(322px + 3.2em);
     }
 
-    body,input {
+    body,
+    input {
         font-size: 9pt;
     }
 
-    .status-header,.screen,.command-input {
+    .status-header,
+    .screen,
+    .command-input {
         padding: 0.1em;
         width: 100%;
-        width: -webkit-calc(100% - 0.2em);
-        width: -moz-calc(100% - 0.2em);
         width: calc(100% - 0.2em);
     }
 
@@ -85,7 +91,8 @@ body,input {
         border: 0;
     }
 
-    .screen,.command-input {
+    .screen,
+    .command-input {
         border: 0;
     }
 
@@ -94,9 +101,6 @@ body,input {
         height: 320px;
         border-bottom: 1px solid #777;
     }
-        .screen a {
-            text-decoration: underline;
-        }
 
     .command-input {
         margin: 0;

@@ -97,6 +97,12 @@ impl Realm {
             .and_then(|object| object.as_item())
     }
 
+    pub fn next_id(&mut self) -> GameObjectId {
+        let id = self.next_id;
+        self.next_id += 1;
+        id
+    }
+
     pub fn object(&self, object_ref: GameObjectRef) -> Option<&dyn GameObject> {
         self.objects.get(&object_ref).map(|object| object.deref())
     }

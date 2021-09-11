@@ -3,6 +3,7 @@ use crate::direction_utils::{direction_by_abbreviation, is_direction};
 use super::command_registry::{CommandRegistry, LookupError};
 use super::{CommandLineProcessor, CommandType};
 
+#[allow(clippy::enum_variant_names)]
 pub enum InterpretationError {
     NoCommand,
     AmbiguousCommand(String),
@@ -113,6 +114,9 @@ impl CommandInterpreter {
 
     pub fn new() -> Self {
         let mut registry = CommandRegistry::new();
+        registry.register("api-object-create", CommandType::ApiObjectCreate);
+        registry.register("api-object-delete", CommandType::ApiObjectDelete);
+        registry.register("api-object-set", CommandType::ApiObjectSet);
         registry.register("api-objects-list", CommandType::ApiObjectsList);
         registry.register("api-property-set", CommandType::ApiPropertySet);
         registry.register("api-triggers-list", CommandType::ApiTriggersList);

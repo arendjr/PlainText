@@ -1,0 +1,322 @@
+.dialog {
+    position: absolute;
+    z-index: 3;
+
+    border: 1px solid black;
+    background-color: white;
+    box-shadow: 0 3px 15px 0px black;
+
+    font-family: "Helvetica", "Arial", sans-serif;
+
+    user-select: text;
+}
+.dialog p {
+    margin: 0;
+    padding: 1em;
+}
+.dialog .button-list {
+    position: relative;
+
+    padding: 5px 10px 5px;
+    background-color: #ccc;
+
+    text-align: right;
+}
+
+.loading {
+    top: 250px;
+    left: calc(50% - 100px);
+    right: calc(50% - 100px);
+}
+.loading p {
+    font-weight: bold;
+    text-align: center;
+}
+
+.map-editor {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+
+    display: grid;
+    grid-template-columns: 75% 25%;
+    grid-template-rows: 34px auto;
+    grid-template-areas:
+        "toolbar toolbar"
+        "map-view sidebar";
+}
+.map-editor .map-view {
+    grid-area: map-view;
+    width: 100%;
+    height: 100%;
+
+    background-color: white;
+}
+.map-editor .toolbar {
+    grid-area: toolbar;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    z-index: 3;
+
+    border-bottom: 1px solid black;
+    padding: 5px;
+    background-color: white;
+    background-image: linear-gradient(top, #fff, #ccc);
+    box-shadow: -15px 3px 15px 0 black;
+
+    font-family: "Helvetica", "Arial", sans-serif;
+}
+.map-editor .toolbar .label {
+    display: inline-block;
+
+    padding: 10px 4px;
+
+    vertical-align: top;
+}
+.map-editor .toolbar .menu {
+    cursor: pointer;
+}
+.map-editor .toolbar .menu .menu-content {
+    display: none;
+    position: absolute;
+    z-index: 4;
+
+    margin: 9px 0 0 -10px;
+    border: 1px solid #ccc;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+    padding: 4px;
+    background: rgba(250, 250, 250, 0.95);
+    box-shadow: 0 3px 15px 0 #888;
+}
+.map-editor .toolbar .menu:hover .menu-content {
+    display: block;
+}
+.map-editor .toolbar .menu .menu-item {
+    padding: 5px;
+}
+.map-editor .toolbar .z-restriction {
+    width: 5em;
+}
+.map-editor .sidebar {
+    grid-area: sidebar;
+
+    border-left: 2px solid #000;
+    padding: 5px;
+    background-color: white;
+
+    font-family: "Helvetica", "Arial", sans-serif;
+}
+.map-editor .sidebar .label {
+    display: inline-block;
+    width: 35%;
+    color: #669;
+}
+.map-editor .sidebar .x,
+.map-editor .sidebar .y,
+.map-editor .sidebar .z {
+    width: 5em;
+}
+.map-editor .sidebar .add {
+    display: inline-block;
+    padding: 2px;
+    width: 12px;
+    height: 12px;
+
+    background-image: url(/img/create.png);
+    background-position: 2px 2px;
+    background-repeat: no-repeat;
+    background-size: 12px 12px;
+
+    vertical-align: middle;
+}
+.map-editor .sidebar .description {
+    white-space: pre-line;
+}
+.map-editor .sidebar .option {
+    margin-top: -0.5em;
+}
+.map-editor .sidebar .help {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 16px;
+    height: 16px;
+
+    background-image: url(/img/help.png);
+    background-size: 16px 16px;
+
+    cursor: help;
+}
+.map-editor .close {
+    width: 16px;
+    height: 16px;
+    margin: 8px;
+
+    background-image: url(/img/close.png);
+    background-size: 16px 16px;
+
+    cursor: pointer;
+}
+
+.map-view .room {
+    cursor: pointer;
+}
+.map-view .room-name {
+    font-size: 14px;
+}
+
+.pad {
+    position: absolute;
+    top: 54px;
+    left: 20px;
+    z-index: 2;
+}
+.pad .arrow {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+
+    background-color: rgba(255, 255, 255, 0.4);
+    background-size: 32px 32px;
+
+    cursor: pointer;
+}
+.pad .up {
+    top: 0px;
+    left: 32px;
+
+    background-image: url(/img/arrow_up.png);
+}
+.pad .right {
+    top: 32px;
+    left: 64px;
+
+    background-image: url(/img/arrow_right.png);
+}
+.pad .down {
+    top: 64px;
+    left: 32px;
+
+    background-image: url(/img/arrow_down.png);
+}
+.pad .left {
+    top: 32px;
+    left: 0px;
+
+    background-image: url(/img/arrow_left.png);
+}
+
+.portal-editor {
+    top: 100px;
+    left: calc(50% - 330px);
+    right: calc(50% - 330px);
+}
+.portal-editor p {
+    padding: 0;
+    margin: 1em 0;
+}
+.portal-editor hr {
+    margin: 0;
+    border: 0;
+    border-top: 1px solid black;
+    padding: 0;
+}
+.portal-editor .column {
+    display: inline-block;
+    width: 49%;
+    vertical-align: top;
+}
+.portal-editor .label {
+    display: inline-block;
+    margin: 4px;
+    width: 80px;
+    font-weight: bold;
+    text-align: right;
+    vertical-align: top;
+}
+.portal-editor .end-label {
+    display: inline-block;
+    margin: 5px 1px;
+    max-height: 1em;
+    vertical-align: top;
+}
+.portal-editor .end-label input {
+    margin-top: -5px;
+}
+.portal-editor .options {
+    margin-top: -0.5em;
+}
+.portal-editor .x,
+.portal-editor .y,
+.portal-editor .z {
+    width: 5em;
+}
+.portal-editor .help {
+    position: absolute;
+    margin-top: 8px;
+    right: 8px;
+    width: 16px;
+    height: 16px;
+
+    background-image: url(/img/help.png);
+    background-size: 16px 16px;
+
+    cursor: help;
+}
+.portal-editor .delete-button {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+
+    background-color: red;
+    color: white;
+    font-weight: bold;
+}
+
+.portal-delete {
+    top: 200px;
+    left: calc(50% - 200px);
+    right: calc(50% - 200px);
+}
+
+.property-editor {
+    top: 150px;
+    left: 150px;
+    right: 150px;
+}
+
+.property-value {
+    box-sizing: border-box;
+    width: 100%;
+    height: 100px;
+}
+
+.slider {
+    display: inline-block;
+    height: 8px;
+
+    margin: 6px 5px;
+    border: 1px solid gray;
+    border-radius: 2px;
+    background-color: #f0f0f0;
+}
+.slider .handle {
+    position: relative;
+    top: -5px;
+    width: 16px;
+    height: 16px;
+
+    border: 1px solid black;
+    background-color: gray;
+
+    cursor: pointer;
+}
+
+.spacer {
+    flex: 1;
+}

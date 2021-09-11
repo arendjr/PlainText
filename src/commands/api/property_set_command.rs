@@ -1,53 +1,22 @@
 use crate::commands::CommandHelpers;
-use crate::game_object::GameObjectRef;
 use crate::objects::Realm;
-use crate::player_output::PlayerOutput;
 
-use super::api_request_processor::ApiRequestProcessor;
+use super::api_request_processor::{ApiReply, ApiRequestProcessor};
 
 /// Lists all the objects of a given type.
-pub fn property_set(
-    realm: &mut Realm,
-    player_ref: GameObjectRef,
-    mut helpers: CommandHelpers,
-) -> Vec<PlayerOutput> {
-    let mut output: Vec<PlayerOutput> = Vec::new();
+pub fn property_set(realm: &mut Realm, mut helpers: CommandHelpers) -> Result<ApiReply, ApiReply> {
+    let mut processor = ApiRequestProcessor::try_new(&mut helpers)?;
 
-    let mut processor = match ApiRequestProcessor::try_new(&mut output, player_ref, &mut helpers) {
-        Some(processor) => processor,
-        None => return output,
-    };
+    let object_ref = processor.take_object_ref()?;
+    let object = realm
+        .object_mut(object_ref)
+        .ok_or_else(|| processor.error_reply(404, &format!("Unknown object: {}", object_ref)))?;
 
-    let object_ref = match processor.take_object_ref() {
-        Ok(object_ref) => object_ref,
-        Err(error) => {
-            processor.send_error(400, error);
-            return output;
-        }
-    };
-
-    let object = match realm.object_mut(object_ref) {
-        Some(object) => object,
-        None => {
-            processor.send_error(404, format!("Unknown object: {}", object_ref));
-            return output;
-        }
-    };
-
-    let prop_name = match processor.take_word() {
-        Some(prop_name) => prop_name,
-        None => {
-            processor.send_error(400, "No property name given".to_owned());
-            return output;
-        }
-    };
-
+    let prop_name = processor.take_word("No property name given")?;
     let value = processor.take_rest();
 
     match object.set_property(&prop_name, &value) {
-        Ok(()) => processor.send_success_reply(),
-        Err(error) => processor.send_error(400, error),
+        Ok(()) => Ok(processor.success_reply()),
+        Err(error) => Err(processor.error_reply(400, &error)),
     }
-
-    output
 }

@@ -76,7 +76,7 @@ macro_rules! serializable_flags {
             {
                 let mut value = String::new();
                 $(
-                    if self.bits & $value == self.bits {
+                    if self.bits & $value != 0 {
                         if !value.is_empty() {
                             value.push('|');
                         }

@@ -1,5 +1,3 @@
-import MapEditor from "./mapeditor/mapeditor.js";
-import PropertyEditor from "./propertyeditor/propertyeditor.js";
 import {
     addCommandListener,
     sendApiCall,
@@ -7,37 +5,28 @@ import {
     setFocus,
     writeToScreen,
 } from "./main.js";
+import { openMapEditor } from "./map_editor/mod.js";
 
 const triggers = new Map();
 
-const mapEditor = new MapEditor();
+const statusHeader = document.querySelector(".status-header");
+statusHeader.innerHTML += ' <a class="edit-map">Edit Map</a>';
 
-const propertyEditor = new PropertyEditor();
+const editMapLink = statusHeader.querySelector(".edit-map");
+editMapLink.addEventListener("click", openMapEditor);
 
-const editMapLink = $("<a />", {
-    text: "Edit Map",
-    href: ["javas", "cript:void(0)"].join(""),
-});
-editMapLink.on("click", function () {
-    mapEditor.open();
-});
-
-const statusHeader = $(".status-header");
-statusHeader.append(" ");
-statusHeader.append(editMapLink);
-
-$(".command-input").removeAttr("maxlength");
+document.querySelector(".command-input").removeAttribute("maxlength");
 
 function attachListeners() {
     addCommandListener(command => {
         const [commandName] = command.split(" ");
-        const rest = command.substr(commandName.length + 1);
+        const rest = command.slice(commandName.length + 1);
 
         if (
             commandName.startsWith("edit-p") &&
             "edit-property".startsWith(commandName)
         ) {
-            sendApiCall("property-get " + rest, data => {
+            sendApiCall("property-get " + rest).then(data => {
                 const { propertyName } = data;
                 if (data.readOnly) {
                     writeToScreen(`Property ${propertyName} is read-only.`);
@@ -71,17 +60,17 @@ function attachListeners() {
 
             const trigger = triggers.get(triggerName);
             if (trigger) {
-                sendApiCall("trigger-get " + rest, data => {
+                sendApiCall("trigger-get " + rest).then(data => {
                     const { triggerSource } = data;
                     if (!triggerSource) {
                         if (trigger.includes("(")) {
-                            const argsString = trigger.substring(
+                            const argsString = trigger.slice(
                                 trigger.indexOf("(") + 1,
                                 trigger.indexOf(")")
                             );
                             const args = argsString
                                 .split(", ")
-                                .map(arg => arg.substr(0, arg.indexOf(" : ")));
+                                .map(arg => arg.slice(0, arg.indexOf(" : ")));
                             triggerSource = `(function(${args.join(
                                 ", "
                             )}) {\n    \n})`;
@@ -94,9 +83,8 @@ function attachListeners() {
                         mode: "javascript",
                         onsave: value => {
                             sendApiCall(
-                                `trigger-set ${data.id} ${triggerName} ${value}`,
-                                () => propertyEditor.close()
-                            );
+                                `trigger-set ${data.id} ${triggerName} ${value}`
+                            ).then(() => propertyEditor.close());
                         },
                         onclose: setFocus,
                     });
@@ -124,14 +112,14 @@ function attachListeners() {
 
         if (command.startsWith("@")) {
             if (command.includes(" ")) {
-                return "set-prop room " + command.substr(1);
+                return "set-prop room " + command.slice(1);
             } else {
-                return "get-prop room " + command.substr(1);
+                return "get-prop room " + command.slice(1);
             }
         }
 
         if (command.startsWith("api-")) {
-            sendApiCall(command.substr(4), data => {
+            sendApiCall(command.slice(4)).then(data => {
                 writeToScreen(JSON.stringify(data, null, 2));
             });
 
@@ -141,9 +129,9 @@ function attachListeners() {
 }
 
 function fetchTriggers() {
-    sendApiCall("triggers-list", data => {
+    sendApiCall("triggers-list").then(data => {
         for (const trigger of data) {
-            const triggerName = trigger.substr(
+            const triggerName = trigger.slice(
                 0,
                 trigger.includes("(")
                     ? trigger.indexOf("(")

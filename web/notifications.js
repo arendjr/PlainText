@@ -26,11 +26,7 @@ function attachListeners() {
         ) {
             const notification = new Notification(document.title, {
                 body: message,
-                onshow: function () {
-                    setTimeout(function () {
-                        notification.close();
-                    }, 10000);
-                },
+                onshow: () => setTimeout(() => notification.close(), 10000),
             });
         }
     });

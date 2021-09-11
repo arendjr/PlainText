@@ -14,9 +14,11 @@ pub struct Point3D {
 
 impl Point3D {
     pub fn from_str(point_str: &str) -> Result<Self, String> {
-        if !point_str.starts_with('(') || !point_str.ends_with(')') {
+        let is_parenthesized = point_str.starts_with('(') && point_str.ends_with(')');
+        let is_square_bracketed = point_str.starts_with('[') && point_str.ends_with(']');
+        if !is_parenthesized && !is_square_bracketed {
             return Err(format!(
-                "Invalid point -- use parenthesis to denote points (received: {})",
+                "Invalid point -- use parenthesis or square brackets to denote points (received: {})",
                 point_str
             ));
         }

@@ -1,15 +1,27 @@
-import { Keys } from "../util.js";
-import Laces from "../lib/laces.tie.js";
-import MapModel from "../mapmodel/model.js";
-import MapView, { SVG_URI } from "./mapview.js";
-import PortalEditor from "../portaleditor/portaleditor.js";
-import PortalDeleteDialog from "../portaleditor/portaldeletedialog.js";
-import PropertyEditor from "../propertyeditor/propertyeditor.js";
-import SliderWidget from "../sliderwidget/slider.js";
-import { addStyle, sendApiCall, sendCommand, setFocus } from "../main.js";
-import { showLoader } from "../loadingwidget/loading.js";
+import { Keys, addStyle, sendApiCall, sendCommand, setFocus } from "../main.js";
+import { MapEditor } from "./components/map_editor.js";
+import { html, render } from "./lib.js";
 
-export default class MapEditor {
+addStyle("map_editor/mod.css");
+
+let root = null;
+
+export function openMapEditor() {
+    root = document.createElement("div");
+    root.setAttribute("class", "map-editor");
+    document.body.appendChild(root);
+
+    render(html`<${MapEditor} />`, root);
+}
+
+export function closeMapEditor() {
+    root.remove();
+    root = null;
+
+    setFocus();
+}
+
+/*export default class MapEditor {
     constructor() {
         const initialZoom = 0.2;
 
@@ -17,53 +29,9 @@ export default class MapEditor {
         this.model.set("map", new MapModel());
         this.model.set("selectedRoom", null);
 
-        addStyle("mapeditor/mapeditor");
-
         const tie = new Laces.Tie(
             this.model,
             `<div class="map-editor" style="display: none">
-                <svg class="map-canvas" viewBox="0 0 100 100" xmlns="${SVG_URI}">
-                    <line x1="116" y1="1026" x2="116" y2="746" stroke="green" stroke-width="2" opacity="0.4"></line>
-                </svg>
-                <div class="toolbar">
-                    <div class="label menu">Map
-                        <div class="menu-content">
-                            <div class="menu-item">
-                                <a href="javascript:void(0)" class="export-as-svg">Export as SVG</a>
-                            </div>
-                            <div class="menu-item">
-                                <a href="javascript:void(0)" class="print">Print...</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="label menu">Options
-                        <div class="menu-content">
-                            <div class="menu-item">
-                                <a href="javascript:void(0)" class="plot altitude">Plot altitude</a>
-                            </div>
-                            <div class="menu-item">
-                                <a href="javascript:void(0)" class="plot roomvisit">Plot room visits</a>
-                            </div>
-                            <div class="menu-item">
-                                <a href="javascript:void(0)" class="plot playerdeath">Plot player deaths</a>
-                            </div>
-                            <div class="menu-item">
-                                <input id="toggle-room-names" type="checkbox">
-                                <label for="toggle-room-names"> Show room names</label>
-                            </div>
-                            <div class="menu-item">
-                                <input id="toggle-z-restriction" type="checkbox">
-                                <label for="toggle-z-restriction"> Restrict Z-level to: </label>
-                                <input class="z-restriction" type="number" value="0">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="label">Zoom: </div>
-                    <div class="zoom slider"></div>
-                    <div class="label">Perspective: </div>
-                    <div class="perspective slider"></div>
-                    <div class="close"></div>
-                </div>
                 <div class="sidebar">
                     <div class="selected-room" data-laces-visible="selectedRoom">
                         <div class="help" title="Double-click any property to edit"></div>
@@ -149,20 +117,10 @@ export default class MapEditor {
                         </p>
                     </div>
                 </div>
-                <div class="pad">
-                    <div class="up arrow"></div>
-                    <div class="right arrow"></div>
-                    <div class="down arrow"></div>
-                    <div class="left arrow"></div>
-                </div>
             </div>`
         );
         document.body.appendChild(tie.render());
         this.element = $(".map-editor");
-
-        this.view = new MapView(this.element[0].querySelector(".map-canvas"));
-        this.view.setModel(this.model.map);
-        this.view.setZoom(initialZoom);
 
         this.portalEditor = new PortalEditor();
         this.portalEditor.setMapModel(this.model.map);
@@ -171,15 +129,6 @@ export default class MapEditor {
         this.portalDeleteDialog = new PortalDeleteDialog();
 
         this.propertyEditor = new PropertyEditor();
-
-        this.zoomSlider = new SliderWidget($(".zoom.slider", this.element)[0], {
-            width: 200,
-            initialValue: initialZoom,
-        });
-        this.perspectiveSlider = new SliderWidget(
-            $(".perspective.slider", this.element)[0],
-            { width: 300 }
-        );
 
         this.attachListeners();
     }
@@ -232,27 +181,6 @@ export default class MapEditor {
         $(".plot.playerdeath", this.element).on("click", () => {
             this.plotStats("playerdeath");
         });
-
-        $("#toggle-room-names", this.element).on("change", () => {
-            const isChecked = $("#toggle-room-names", this.element).prop(
-                "checked"
-            );
-            this.view.setDisplayRoomNames(isChecked);
-        });
-
-        $("#toggle-z-restriction,.z-restriction", this.element).on(
-            "change",
-            () => {
-                const isChecked = $("#toggle-z-restriction", this.element).prop(
-                    "checked"
-                );
-                this.view.setZRestriction(
-                    isChecked ? $(".z-restriction").val() : null
-                );
-            }
-        );
-
-        $(".close", this.element).on("click", () => this.close());
 
         $(".enter-room-button", this.element).on("click", () => {
             if (this.model.selectedRoom) {
@@ -313,19 +241,6 @@ export default class MapEditor {
             this.portalEditor.add(this.model.selectedRoom)
         );
 
-        $(".up.arrow", this.element).on("click", () => {
-            this.view.move(0, -1);
-        });
-        $(".right.arrow", this.element).on("click", () => {
-            this.view.move(1, 0);
-        });
-        $(".down.arrow", this.element).on("click", () => {
-            this.view.move(0, 1);
-        });
-        $(".left.arrow", this.element).on("click", () => {
-            this.view.move(-1, 0);
-        });
-
         $(document.body).on("keydown", event => {
             if (
                 event.target.tagName === "INPUT" ||
@@ -344,34 +259,12 @@ export default class MapEditor {
                 this.view.move(0, 1);
             }
         });
-
-        this.zoomSlider.element.addEventListener("change", event =>
-            this.view.setZoom(event.detail.value)
-        );
-
-        this.perspectiveSlider.element.addEventListener("change", event =>
-            this.view.setPerspective(event.detail.value)
-        );
-    }
-
-    open() {
-        showLoader();
-
-        this.element.show();
-
-        this.model.map.load();
-    }
-
-    close() {
-        this.element.hide();
-
-        setFocus();
     }
 
     plotStats(type) {
-        sendApiCall("log-retrieve stats " + type + " 100", data => {
+        sendApiCall(`log-retrieve stats ${type} 100`).then(data => {
             for (let key in data) {
-                const id = key.substr(5);
+                const id = key.slsubstrsubstrsubstrice(5);
                 data[id] = data[key];
                 delete data[key];
             }
@@ -388,4 +281,4 @@ export default class MapEditor {
         }
         this.view.plotData(data);
     }
-}
+}*/

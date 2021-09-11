@@ -1,3 +1,11 @@
+export const Keys = {
+    RETURN: 13,
+    LEFT_ARROW: 37,
+    UP_ARROW: 38,
+    RIGHT_ARROW: 39,
+    DOWN_ARROW: 40,
+};
+
 const colorMap = {
     "37;1": "#ffffff",
     37: "#c0c0c0",
@@ -17,24 +25,6 @@ const colorMap = {
     35: "#800080",
 };
 
-const keys = {
-    KEY_BACKSPACE: 8,
-    KEY_TAB: 9,
-    KEY_RETURN: 13,
-    KEY_ESC: 27,
-    KEY_SPACE: 32,
-    KEY_LEFT: 37,
-    KEY_UP: 38,
-    KEY_RIGHT: 39,
-    KEY_DOWN: 40,
-    KEY_DELETE: 46,
-    KEY_HOME: 36,
-    KEY_END: 35,
-    KEY_PAGEUP: 33,
-    KEY_PAGEDOWN: 34,
-    KEY_INSERT: 45,
-};
-
 let player = {};
 
 const commandListeners = new Set();
@@ -44,19 +34,19 @@ const history = [];
 let historyIndex = 0;
 let currentCommand = "";
 
-const pendingRequests = {};
+const pendingRequests = new Map();
 let requestId = 1;
 
-const screen = $(".screen");
+const screen = document.querySelector(".screen");
 writeToScreen("Connecting...");
 
 const statusHeader = {
-    name: $(".status-header .name"),
-    hp: $(".status-header .hp"),
-    mp: $(".status-header .mp"),
+    name: document.querySelector(".status-header .name"),
+    hp: document.querySelector(".status-header .hp"),
+    mp: document.querySelector(".status-header .mp"),
 };
 
-const commandInput = $(".command-input");
+const commandInput = document.querySelector(".command-input");
 
 const socket = new WebSocket("ws://" + document.location.host);
 
@@ -88,13 +78,13 @@ function correctScrollbars() {
         cssRule.style.width = 640 + scrollbarWidth + "px";
     }
 
-    screen.css("overflow-y", "scroll");
+    screen.style.overflowY = "scroll";
 }
 
 function attachListeners() {
-    commandInput.on("keypress", event => {
-        if (event.keyCode === keys.KEY_RETURN) {
-            var command = commandInput.val();
+    commandInput.addEventListener("keypress", event => {
+        if (event.keyCode === Keys.RETURN) {
+            var command = commandInput.value;
 
             if (player.name) {
                 if (history[history.length - 1] !== command) {
@@ -108,38 +98,39 @@ function attachListeners() {
                 sendCommand(command);
             }
 
-            commandInput.val("");
+            commandInput.value = "";
         }
     });
 
-    commandInput.on("keydown", event => {
-        if (event.keyCode === keys.KEY_UP) {
+    commandInput.addEventListener("keydown", event => {
+        if (event.keyCode === Keys.UP_ARROW) {
             if (historyIndex === 0) {
-                currentCommand = commandInput.val();
+                currentCommand = commandInput.value;
             }
             historyIndex++;
             if (historyIndex > history.length) {
                 historyIndex = history.length;
             } else {
-                commandInput.val(history[history.length - historyIndex]);
+                commandInput.value = history[history.length - historyIndex];
             }
-        } else if (event.keyCode === keys.KEY_DOWN) {
+        } else if (event.keyCode === Keys.DOWN_ARROW) {
             historyIndex--;
             if (historyIndex < 0) {
                 historyIndex = 0;
+            } else if (historyIndex === 0) {
+                commandInput.value = currentCommand;
             } else {
-                if (historyIndex === 0) {
-                    commandInput.val(currentCommand);
-                } else {
-                    commandInput.val(history[history.length - historyIndex]);
-                }
+                commandInput.value = history[history.length - historyIndex];
             }
         }
     });
 
-    screen.on("click", "a.go", event => {
-        const exitName = event.target.text();
-        sendCommand(`go "${exitName}"`);
+    screen.addEventListener("click", event => {
+        const { target } = event;
+        if (target.tagName === "A" && target.classList.contains("go")) {
+            const exitName = target.textContent;
+            sendCommand(`go "${exitName}"`);
+        }
     });
 
     socket.addEventListener("open", () => writeToScreen("Connected."));
@@ -154,17 +145,16 @@ function attachListeners() {
 
             const { requestId } = data;
 
-            if (pendingRequests.hasOwnProperty(requestId)) {
+            const resolveRequest = pendingRequests.get(requestId);
+            if (resolveRequest) {
                 if (data.errorCode === 0) {
-                    pendingRequests[requestId].success(data.data);
+                    resolveRequest(data.data);
                 } else {
-                    if (pendingRequests[requestId].error) {
-                        pendingRequests[requestId].error();
-                    }
+                    resolveRequest(Promise.reject(data.errorCode));
                     writeToScreen("Error: " + data.errorMessage);
                 }
 
-                delete pendingRequests[requestId];
+                pendingRequests.delete(requestId);
             } else if (data.player) {
                 if (!player.isAdmin && data.player.isAdmin) {
                     import("./admin.js");
@@ -172,23 +162,17 @@ function attachListeners() {
 
                 player = data.player;
 
-                statusHeader.name.text(player.name);
+                statusHeader.name.textContent = player.name;
 
-                statusHeader.hp.text(player.hp + "HP");
-                if (player.hp < player.maxHp / 4) {
-                    statusHeader.hp.css("color", "#f00");
-                } else {
-                    statusHeader.hp.css("color", "");
-                }
+                statusHeader.hp.textContent = player.hp + "HP";
+                const healthIsCritical = player.hp < player.maxHp / 4;
+                statusHeader.hp.style.color = healthIsCritical ? "#f00" : "";
 
-                statusHeader.mp.text(player.mp + "MP");
-                if (player.mp < player.maxMp / 4) {
-                    statusHeader.mp.css("color", "#f00");
-                } else {
-                    statusHeader.mp.css("color", "");
-                }
+                statusHeader.mp.textContent = player.mp + "MP";
+                const mpIsLow = player.mp < player.maxMp / 4;
+                statusHeader.mp.style.color = mpIsLow ? "#f00" : "";
             } else if (data.inputType) {
-                commandInput.attr("type", data.inputType);
+                commandInput.setAttribute("type", data.inputType);
             }
         } else {
             notifyIncomingMessageListeners(message.data);
@@ -202,15 +186,11 @@ function attachListeners() {
 }
 
 export function addStyle(fileName) {
-    if (!fileName.endsWith(".css")) {
-        fileName += ".css";
-    }
-
-    if ($(`link[href='${fileName}']`, document.head).length === 0) {
-        $("<link>", {
-            rel: "stylesheet",
-            href: fileName,
-        }).appendTo(document.head);
+    if (!document.head.querySelector(`link[href='${fileName}']`)) {
+        const link = document.createElement("link");
+        link.setAttribute("rel", "stylesheet");
+        link.setAttribute("href", fileName);
+        document.head.appendChild(link);
     }
 }
 
@@ -259,57 +239,56 @@ export function writeToScreen(message) {
         const endIndex = message.indexOf("\x1B[0m", mIndex);
 
         if (index > 0) {
-            div.appendChild(document.createTextNode(message.substr(0, index)));
+            div.appendChild(document.createTextNode(message.slice(0, index)));
         }
 
-        const color = message.substring(index + 2, mIndex);
+        const color = message.slice(index + 2, mIndex);
 
         const span = document.createElement("span");
         span.appendChild(
-            document.createTextNode(message.substring(mIndex + 1, endIndex))
+            document.createTextNode(message.slice(mIndex + 1, endIndex))
         );
         span.style.color = colorMap[color];
         div.appendChild(span);
 
-        message = message.substr(endIndex + 4);
+        message = message.slice(endIndex + 4);
     }
     if (message.length > 0) {
         div.appendChild(document.createTextNode(message));
     }
 
-    if (screen.children().length >= 500) {
-        screen.children().first().remove();
+    if (screen.children.length >= 500) {
+        screen.firstChild.remove();
     }
 
-    screen.append(div);
+    screen.appendChild(div);
 
-    screen[0].scrollTop = screen[0].scrollHeight;
+    screen.scrollTop = screen.scrollHeight;
 }
 
 export function sendCommand(command) {
     socket.send(command);
 }
 
-export function sendApiCall(command, callback, errorCallback) {
+export function sendApiCall(command) {
     const id = "request" + requestId;
-    if (callback) {
-        pendingRequests[id] = {
-            success: callback,
-            error: errorCallback,
-        };
-    }
+    const promise = new Promise(resolve => pendingRequests.set(id, resolve));
 
     const parts = command.split(" ");
     parts.splice(1, 0, id);
     socket.send("api-" + parts.join(" "));
 
     requestId++;
+
+    return promise;
 }
 
 export function setFocus() {
-    commandInput[0].focus();
+    commandInput.focus();
 }
 
-correctScrollbars();
-attachListeners();
-setFocus();
+window.addEventListener("DOMContentLoaded", () => {
+    correctScrollbars();
+    attachListeners();
+    setFocus();
+});
