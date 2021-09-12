@@ -121,6 +121,7 @@ impl CommandInterpreter {
         registry.register("api-property-set", CommandType::ApiPropertySet);
         registry.register("api-triggers-list", CommandType::ApiTriggersList);
         registry.register("enter", CommandType::Go);
+        registry.register("enter-room", CommandType::EnterRoom);
         registry.register("examine", CommandType::Look);
         registry.register("go", CommandType::Go);
         registry.register("inventory", CommandType::Inventory);

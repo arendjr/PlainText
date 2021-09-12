@@ -12,6 +12,7 @@ import { usePortals } from "../stores/portals.js";
 import { useRooms } from "../stores/rooms.js";
 import { useViewSettings } from "../stores/view_settings.js";
 import { DeletePortalDialog } from "./delete_portal_dialog.js";
+import { closeMapEditor } from "../mod.js";
 
 const newPortal = {
     name: "",
@@ -156,7 +157,10 @@ export function MapEditor() {
         setEditingPortal(null);
     };
 
-    const enterRoom = () => sendCommand(`enter-room #${selectedRoom.id}`);
+    const enterRoom = () => {
+        sendCommand(`enter-room #${selectedRoom.id}`);
+        closeMapEditor();
+    };
 
     const exportAsSvg = () => {
         const svg = viewRef.current.exportSvg();

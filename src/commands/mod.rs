@@ -1,3 +1,4 @@
+mod admin;
 mod api;
 mod command_executor;
 mod command_helpers;
@@ -20,6 +21,7 @@ pub enum CommandType {
     ApiObjectsList,
     ApiPropertySet,
     ApiTriggersList,
+    EnterRoom,
     Go,
     Inventory,
     Look,

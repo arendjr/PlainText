@@ -1,3 +1,4 @@
+use crate::commands::admin::wrap_admin_command;
 use crate::commands::api::{object_create, object_delete, object_set, wrap_api_request};
 use crate::game_object::GameObjectRef;
 use crate::objects::Realm;
@@ -5,6 +6,7 @@ use crate::player_output::PlayerOutput;
 use crate::trigger_registry::TriggerRegistry;
 use crate::LogSender;
 
+use super::admin::enter_room;
 use super::api::{objects_list, property_set, triggers_list};
 use super::command_helpers::CommandHelpers;
 use super::command_interpreter::{CommandInterpreter, InterpretationError};
@@ -41,6 +43,7 @@ impl CommandExecutor {
                     CommandType::ApiObjectsList => wrap_api_request(objects_list),
                     CommandType::ApiPropertySet => wrap_api_request(property_set),
                     CommandType::ApiTriggersList => wrap_api_request(triggers_list),
+                    CommandType::EnterRoom => wrap_admin_command(enter_room),
                     CommandType::Go => wrap_command(go),
                     CommandType::Inventory => wrap_command(inventory),
                     CommandType::Look => wrap_command(look),

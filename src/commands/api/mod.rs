@@ -28,10 +28,14 @@ where
     F: Fn(&mut Realm, CommandHelpers) -> Result<ApiReply, ApiReply> + 'static,
 {
     Box::new(move |realm, player_ref, helpers| {
-        let reply = match f(realm, helpers) {
-            Ok(reply) => serde_json::to_value(reply).unwrap(),
-            Err(error) => serde_json::to_value(error).unwrap(),
+        let reply = match realm.player(player_ref) {
+            Some(player) if player.is_admin() => match f(realm, helpers) {
+                Ok(reply) => reply,
+                Err(error) => error,
+            },
+            _ => ApiReply::new_error("", 403, "Forbidden"),
         };
+        let reply = serde_json::to_value(reply).unwrap();
 
         let mut output: Vec<PlayerOutput> = Vec::new();
         push_session_output!(output, player_ref, SessionOutput::Json(reply));
