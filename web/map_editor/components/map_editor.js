@@ -207,6 +207,7 @@ export function MapEditor() {
             await sendApiCall(
                 `object-set portal:${portal.id} ${JSON.stringify(portal)}`
             );
+            updatePortal(portal);
         } else {
             await createPortal(portal);
         }

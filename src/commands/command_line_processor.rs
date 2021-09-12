@@ -72,6 +72,8 @@ impl CommandLineProcessor {
             } else if character == '"' {
                 if is_quoted || current_word.is_empty() {
                     is_quoted = !is_quoted;
+                } else {
+                    current_word.push('"');
                 }
             } else {
                 current_word.push(character);
