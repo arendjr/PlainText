@@ -21,22 +21,16 @@ pub fn look_in_direction(
     realm: &Realm,
     player_ref: GameObjectRef,
     direction: &Vector3D,
-    output: &mut Vec<PlayerOutput>,
-) {
-    let player = match realm.character(player_ref) {
-        Some(player) => player,
-        None => return,
-    };
-    let room = match realm.room(player.current_room()) {
-        Some(room) => room,
-        None => return,
-    };
+) -> Result<Vec<PlayerOutput>, String> {
+    let (player, room) = realm.player_and_room_res(player_ref)?;
 
     /*TODO: binoculars are fun!
     let strength = room.event_multiplier(EventType::Visual);
     if (this.weapon && this.weapon.name === "binocular") {
         strength *= 4;
     }*/
+
+    let mut lines = vec![];
 
     let items = visible_items_from_position(realm, room, direction);
     let portals = visible_portals_from_position(realm, room, direction);
@@ -47,17 +41,21 @@ pub fn look_in_direction(
     );
     if !descriptions.is_empty() {
         let sentence = join_sentence(descriptions);
-        push_output_string!(output, player_ref, format!("You see {}.\n", sentence));
+        lines.push(format!("You see {}.", sentence));
     }
 
     let characters = visible_characters_through_portals_from_position(realm, room, direction);
     if !characters.is_empty() {
-        push_output_string!(
-            output,
-            player_ref,
-            describe_characters_relative_to(realm, characters, player)
-        );
+        lines.push(describe_characters_relative_to(realm, characters, player));
     }
+
+    if lines.is_empty() {
+        lines.push("There's nothing to see in that direction.".to_owned());
+    }
+
+    let mut text = lines.join("\n");
+    text.push('\n');
+    Ok(vec![PlayerOutput::new_from_string(player.id(), text)])
 }
 
 /// Looks at the given object from the player's perspective.
@@ -65,95 +63,83 @@ pub fn look_at_object(
     realm: &Realm,
     player_ref: GameObjectRef,
     object_ref: GameObjectRef,
-    output: &mut Vec<PlayerOutput>,
-) {
-    let object = match realm.object(object_ref) {
-        Some(object) => object,
-        None => return,
-    };
+) -> Result<Vec<PlayerOutput>, String> {
+    let object = realm
+        .object(object_ref)
+        .ok_or("That object doesn't exist.")?;
 
-    match object.object_type() {
-        GameObjectType::Item => look_at_item(realm, player_ref, object.as_item().unwrap(), output),
-        GameObjectType::Portal => {
-            look_at_portal(realm, player_ref, object.as_portal().unwrap(), output)
-        }
-        GameObjectType::Room => look_at_room(realm, player_ref, object.as_room().unwrap(), output),
+    let mut text = match object.object_type() {
+        GameObjectType::Item => look_at_item(realm, player_ref, object.as_item().unwrap())?,
+        GameObjectType::Portal => look_at_portal(realm, player_ref, object.as_portal().unwrap())?,
+        GameObjectType::Room => look_at_room(realm, player_ref, object.as_room().unwrap())?,
         _ => {
             let description = object.description();
-            push_output_string!(
-                output,
-                player_ref,
-                if description.is_empty() {
-                    format!("There is nothing special about the {}.\n", object.name())
-                } else {
-                    format!("{}\n", description)
-                }
-            );
+            if description.is_empty() {
+                format!("There is nothing special about the {}.", object.name())
+            } else {
+                description.to_owned()
+            }
         }
+    };
+
+    if !text.ends_with('\n') {
+        text.push('\n');
     }
+
+    Ok(vec![PlayerOutput::new_from_string(player_ref.id(), text)])
 }
 
 /// Looks at the item from the player's perspective.
 ///
 /// Assumes the player is currently in the same room.
-fn look_at_item(
-    realm: &Realm,
-    player_ref: GameObjectRef,
-    item: &Item,
-    output: &mut Vec<PlayerOutput>,
-) {
-    let player = match realm.character(player_ref) {
-        Some(player) => player,
-        None => return,
-    };
-    let current_room = match realm.room(player.current_room()) {
-        Some(room) => room,
-        None => return,
-    };
+fn look_at_item(realm: &Realm, player_ref: GameObjectRef, item: &Item) -> Result<String, String> {
+    let (_, room) = realm.player_and_room_res(player_ref)?;
+
+    let mut lines = Vec::new();
 
     let description = item.description();
-    push_output_string!(
-        output,
-        player_ref,
-        if description.is_empty() {
-            format!("There is nothing special about the {}.\n", item.name())
-        } else {
-            format!("{}\n", description)
-        }
-    );
+    if !description.is_empty() {
+        lines.push(description.to_owned());
+    }
 
     let looking_direction = item.position().to_vec();
 
     let show_nearby_objects = !item.position().is_default();
     if show_nearby_objects {
-        current_room
-            .items()
+        room.items()
             .iter()
             .filter(|&&item_ref| item_ref != item.object_ref())
             .filter_map(|&item_ref| realm.item(item_ref))
             .filter(|item| looking_direction.angle(&item.position().to_vec()) < PI / 8.0)
             .for_each(|item| {
                 let angle = angle_between_xy_vectors(&looking_direction, &item.position().to_vec());
-                let side = if angle > 0.0 { "right" } else { "left" };
-                push_output_string!(
-                    output,
-                    player_ref,
-                    format!("On its {} there's {}.", side, item.indefinite_name())
-                );
+                lines.push(format!(
+                    "On its {} there's {}.",
+                    if angle > 0.0 { "right" } else { "left" },
+                    item.indefinite_name()
+                ));
             });
-        current_room
-            .portals()
+        room.portals()
             .iter()
             .filter_map(|&portal_ref| realm.portal(portal_ref))
-            .map(|portal| (portal, (portal.position(realm) - current_room.position())))
+            .map(|portal| (portal, (portal.position(realm) - room.position())))
             .filter(|(_, vector)| looking_direction.angle(vector) < PI / 8.0)
             .for_each(|(portal, vector)| {
                 let angle = angle_between_xy_vectors(&looking_direction, &vector);
                 let side = if angle > 0.0 { "right" } else { "left" };
-                let name = portal.name_with_destination_from_room(current_room.object_ref());
-                push_output_string!(output, player_ref, format!("On its {} is {}.", side, name));
+                let name = portal.name_with_destination_from_room(room.object_ref());
+                lines.push(format!("On its {} is {}.", side, name));
             });
     }
+
+    if lines.is_empty() {
+        lines.push(format!(
+            "There is nothing special about the {}.",
+            item.name()
+        ));
+    }
+
+    Ok(lines.join(" "))
 }
 
 /// Looks at the portal from the player's perspective.
@@ -163,84 +149,67 @@ fn look_at_portal(
     realm: &Realm,
     player_ref: GameObjectRef,
     portal: &Portal,
-    output: &mut Vec<PlayerOutput>,
-) {
-    let player = match realm.character(player_ref) {
-        Some(player) => player,
-        None => return,
-    };
-    let current_room = match realm.room(player.current_room()) {
-        Some(room) => room,
-        None => return,
-    };
+) -> Result<String, String> {
+    let (player, room) = realm.player_and_room_res(player_ref)?;
+
+    let mut lines = Vec::new();
 
     let description = portal.description();
-    push_output_string!(
-        output,
-        player_ref,
-        if description.is_empty() {
-            format!("There is nothing special about the {}.\n", portal.name())
-        } else {
-            format!("{}\n", description)
-        }
-    );
+    if !description.is_empty() {
+        lines.push(description.to_owned());
+    }
 
-    let looking_direction = portal.position(realm) - current_room.position();
+    let looking_direction = portal.position(realm) - room.position();
 
-    current_room
-        .items()
+    room.items()
         .iter()
         .filter_map(|&item_ref| realm.item(item_ref))
         .filter(|item| looking_direction.angle(&item.position().to_vec()) < PI / 8.0)
         .for_each(|item| {
             let angle = angle_between_xy_vectors(&looking_direction, &item.position().to_vec());
-            let side = if angle > 0.0 { "right" } else { "left" };
-            push_output_string!(
-                output,
-                player_ref,
-                format!("On its {} there's {}.", side, item.indefinite_name())
-            );
+            lines.push(format!(
+                "On its {} there's {}.",
+                if angle > 0.0 { "right" } else { "left" },
+                item.indefinite_name()
+            ));
         });
-    current_room
-        .portals()
+    room.portals()
         .iter()
         .filter(|&&portal_ref| portal_ref != portal.object_ref())
         .filter_map(|&portal_ref| realm.portal(portal_ref))
-        .map(|portal| (portal, (portal.position(realm) - current_room.position())))
+        .map(|portal| (portal, (portal.position(realm) - room.position())))
         .filter(|(_, vector)| looking_direction.angle(vector) < PI / 8.0)
         .for_each(|(portal, vector)| {
             let angle = angle_between_xy_vectors(&looking_direction, &vector);
             let side = if angle > 0.0 { "right" } else { "left" };
-            let name = portal.name_with_destination_from_room(current_room.object_ref());
-            push_output_string!(output, player_ref, format!("On its {} is {}.", side, name));
+            let name = portal.name_with_destination_from_room(room.object_ref());
+            lines.push(format!("On its {} is {}.", side, name));
         });
 
     if portal.can_see_through() {
-        let characters = visible_characters_through_portals_from_position(
-            realm,
-            current_room,
-            &looking_direction,
-        );
+        let characters =
+            visible_characters_through_portals_from_position(realm, room, &looking_direction);
         let characters_description = describe_characters_relative_to(realm, characters, player);
         if !characters_description.is_empty() {
-            push_output_string!(output, player_ref, characters_description);
+            lines.push(characters_description);
         }
     }
+
+    if lines.is_empty() {
+        lines.push(format!(
+            "There is nothing special about the {}.",
+            portal.name_from_room(room.object_ref())
+        ));
+    }
+
+    Ok(lines.join(" "))
 }
 
 /// Looks at the room from the player's perspective.
 ///
 /// Assumes the player is currently in the room.
-fn look_at_room(
-    realm: &Realm,
-    player_ref: GameObjectRef,
-    room: &Room,
-    output: &mut Vec<PlayerOutput>,
-) {
-    let player = match realm.character(player_ref) {
-        Some(player) => player,
-        None => return,
-    };
+fn look_at_room(realm: &Realm, player_ref: GameObjectRef, room: &Room) -> Result<String, String> {
+    let player = realm.player_res(player_ref)?;
 
     let mut text = if room.name().is_empty() {
         room.description().to_owned()
@@ -280,7 +249,7 @@ fn look_at_room(
         text.push_str(&characters_description);
     }
 
-    push_output_string!(output, player_ref, text);
+    Ok(text)
 }
 
 fn create_distant_characters_description(

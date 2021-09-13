@@ -158,6 +158,22 @@ impl Realm {
             .and_then(move |id| self.player_by_id_mut(id))
     }
 
+    pub fn player_res(&self, object_ref: GameObjectRef) -> Result<&objects::Player, String> {
+        self.player(object_ref)
+            .ok_or_else(|| "Your account has been deactivated.".to_owned())
+    }
+
+    pub fn player_and_room_res(
+        &self,
+        object_ref: GameObjectRef,
+    ) -> Result<(&objects::Player, &objects::Room), String> {
+        let player = self.player_res(object_ref)?;
+        let room = self
+            .room(player.current_room())
+            .ok_or_else(|| "You have slipped between dimensions.".to_owned())?;
+        Ok((player, room))
+    }
+
     pub fn portal(&self, object_ref: GameObjectRef) -> Option<&objects::Portal> {
         self.objects
             .get(&object_ref)

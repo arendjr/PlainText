@@ -1,6 +1,6 @@
 use crate::actions::{look_at_object, look_in_direction};
 use crate::direction_utils::{direction_by_abbreviation, is_direction, vector_for_direction};
-use crate::game_object::{Character, GameObjectRef};
+use crate::game_object::{Character, GameObject, GameObjectRef};
 use crate::objects::Realm;
 use crate::player_output::PlayerOutput;
 use crate::relative_direction::RelativeDirection;
@@ -15,19 +15,15 @@ pub fn look(
     realm: &mut Realm,
     player_ref: GameObjectRef,
     helpers: CommandHelpers,
-) -> Vec<PlayerOutput> {
+) -> Result<Vec<PlayerOutput>, String> {
+    let (player, room) = realm.player_and_room_res(player_ref)?;
+
     let processor = helpers.command_line_processor;
 
-    let mut output = Vec::new();
-    let player = unwrap_or_return_value!(realm.player(player_ref), output);
-    let current_room = unwrap_or_return_value!(realm.room(player.current_room()), output);
-
     let alias = processor.take_word().unwrap();
-
     if alias.starts_with('l') {
         if !processor.has_words_left() {
-            look_at_object(realm, player_ref, player.current_room(), &mut output);
-            return output;
+            return look_at_object(realm, player_ref, player.current_room());
         }
 
         processor.skip_connecting_word("at");
@@ -44,33 +40,25 @@ pub fn look(
         );
     }
 
-    let description = match processor.take_object_description() {
-        Some(description) => description,
-        None => {
-            if alias == "examine" {
-                push_output_str!(output, player_ref, "Examine what?\n");
-            } else {
-                push_output_str!(output, player_ref, "Look at what?\n");
-            }
-            return output;
+    let description = processor.take_object_description().ok_or_else(|| {
+        if alias == "examine" {
+            "Examine what?".to_owned()
+        } else {
+            "Look at what?".to_owned()
         }
-    };
+    })?;
 
     if processor.peek_rest() == "in inventory" {
-        if let Some(object_ref) =
-            processor.object_by_description(realm, player.inventory(), description)
-        {
-            look_at_object(realm, player_ref, object_ref, &mut output);
-        } else {
-            push_output_str!(output, player_ref, "You don't have that.\n");
-        }
-        return output;
+        let object_ref = processor
+            .object_by_description(realm, player.inventory(), description)
+            .ok_or("You don't have that.")?;
+        return look_at_object(realm, player_ref, object_ref);
     }
 
     let pool = [
-        &current_room.characters()[..],
-        &current_room.items()[..],
-        &current_room.portals()[..],
+        &room.characters()[..],
+        &room.items()[..],
+        &room.portals()[..],
         &player.inventory()[..],
     ]
     .concat();
@@ -78,20 +66,20 @@ pub fn look(
     let maybe_object = processor
         .object_by_description(realm, &pool, description.clone())
         .and_then(|object_ref| realm.object(object_ref));
-    let object = match maybe_object {
-        Some(object) => object,
+    match maybe_object {
+        Some(object) => look_at_object(realm, player_ref, object.object_ref()),
         None => {
             let mut target = description.name.as_ref();
             if let Some(direction) = direction_by_abbreviation(target) {
                 target = direction;
             }
-            let direction = if is_direction(target) {
-                push_output_string!(output, player_ref, format!("You look {}.\n", target));
-                vector_for_direction(target)
+            let (output, direction) = if is_direction(target) {
+                (
+                    format!("You look {}.\n", target),
+                    vector_for_direction(target),
+                )
             } else if let Some(relative_direction) = RelativeDirection::from_string(target) {
-                push_output_str!(
-                    output,
-                    player_ref,
+                (
                     match relative_direction {
                         RelativeDirection::Ahead => "You look ahead.\n",
                         RelativeDirection::Left => "You look to the left.\n",
@@ -100,23 +88,20 @@ pub fn look(
                         RelativeDirection::Up => "You look up.\n",
                         RelativeDirection::Down => "You look down.\n",
                     }
-                );
-                relative_direction.from(player.direction())
+                    .to_owned(),
+                    relative_direction.from(player.direction()),
+                )
             } else {
-                if alias == "examine" {
-                    push_output_str!(output, player_ref, "Examine what?\n");
+                return Err(if alias == "examine" {
+                    "Examine what?".to_owned()
                 } else {
-                    push_output_str!(output, player_ref, "Look where?\n");
-                }
-                return output;
+                    "Look where?".to_owned()
+                });
             };
 
-            look_in_direction(realm, player_ref, &direction, &mut output);
-            return output;
+            let mut output = vec![PlayerOutput::new_from_string(player.id(), output)];
+            output.append(&mut look_in_direction(realm, player_ref, &direction)?);
+            Ok(output)
         }
-    };
-
-    look_at_object(realm, player_ref, object.object_ref(), &mut output);
-
-    output
+    }
 }

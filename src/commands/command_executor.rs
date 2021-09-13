@@ -76,7 +76,17 @@ pub fn wrap_command<F>(
     f: F,
 ) -> Box<dyn Fn(&mut Realm, GameObjectRef, CommandHelpers) -> Vec<PlayerOutput>>
 where
-    F: Fn(&mut Realm, GameObjectRef, CommandHelpers) -> Vec<PlayerOutput> + 'static,
+    F: Fn(&mut Realm, GameObjectRef, CommandHelpers) -> Result<Vec<PlayerOutput>, String> + 'static,
 {
-    Box::new(f)
+    Box::new(
+        move |realm, player_ref, helpers| match f(realm, player_ref, helpers) {
+            Ok(output) => output,
+            Err(mut message) => {
+                message.push('\n');
+                let mut output: Vec<PlayerOutput> = Vec::new();
+                push_output_string!(output, player_ref, message);
+                output
+            }
+        },
+    )
 }

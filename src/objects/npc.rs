@@ -199,7 +199,7 @@ impl GameObject for Npc {
     }
 
     fn object_type(&self) -> GameObjectType {
-        GameObjectType::Player
+        GameObjectType::Npc
     }
 
     fn plural_form(&self) -> &str {

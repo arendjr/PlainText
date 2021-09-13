@@ -5,17 +5,21 @@ use crate::text_utils::{describe_items, format_weight, join_sentence};
 
 use super::CommandHelpers;
 
-/// Makes the character inspect their inventory.
+/// Remove yourself or someone else from a group. If you are a group
+/// leader, you can remove anyone from your group by using *lose <name>*.
+/// You can always remove yourself from a group using simply *lose*.
 ///
-/// Examples: `inventory`, `look in inventory`.
-pub fn inventory(
+/// Examples: `lose mia`, `lose`
+pub fn lose(
     realm: &mut Realm,
     player_ref: GameObjectRef,
     helpers: CommandHelpers,
 ) -> Result<Vec<PlayerOutput>, String> {
-    let player = realm.player_res(player_ref)?;
-
     let processor = helpers.command_line_processor;
+
+    let mut output = Vec::new();
+    let player = unwrap_or_return_value!(realm.player(player_ref), output);
+
     processor.skip_word(); // alias
 
     let inventory = player.inventory();
@@ -56,8 +60,11 @@ pub fn inventory(
         format!("You've got ${} worth of gold.\n", player.gold())
     };
 
-    Ok(vec![PlayerOutput::new_from_string(
-        player.id(),
-        carried_inventory_description + &carried_gold_string,
-    )])
+    push_output_string!(
+        output,
+        player_ref,
+        carried_inventory_description + &carried_gold_string
+    );
+
+    output
 }

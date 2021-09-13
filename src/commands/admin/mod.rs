@@ -11,16 +11,16 @@ pub fn wrap_admin_command<F>(
     f: F,
 ) -> Box<dyn Fn(&mut Realm, GameObjectRef, CommandHelpers) -> Vec<PlayerOutput>>
 where
-    F: Fn(&mut Realm, GameObjectRef, CommandHelpers) -> Result<Vec<PlayerOutput>, &'static str>
-        + 'static,
+    F: Fn(&mut Realm, GameObjectRef, CommandHelpers) -> Result<Vec<PlayerOutput>, String> + 'static,
 {
     Box::new(
         move |realm, player_ref, helpers| match realm.player(player_ref) {
             Some(player) if player.is_admin() => match f(realm, player_ref, helpers) {
                 Ok(output) => output,
-                Err(message) => {
+                Err(mut message) => {
+                    message.push('\n');
                     let mut output: Vec<PlayerOutput> = Vec::new();
-                    push_output_str!(output, player_ref, message);
+                    push_output_string!(output, player_ref, message);
                     output
                 }
             },

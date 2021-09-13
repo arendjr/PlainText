@@ -15,10 +15,8 @@ pub fn go(
     realm: &mut Realm,
     player_ref: GameObjectRef,
     helpers: CommandHelpers,
-) -> Vec<PlayerOutput> {
+) -> Result<Vec<PlayerOutput>, String> {
     let processor = helpers.command_line_processor;
-
-    let mut output = Vec::new();
 
     let alias = processor.take_word().unwrap();
 
@@ -27,61 +25,51 @@ pub fn go(
             .peek_word()
             .and_then(RelativeDirection::from_string)
         {
-            go_in_direction(realm, player_ref, relative_direction, &mut output);
-            return output;
+            return go_in_direction(realm, player_ref, relative_direction);
         }
 
         processor.skip_connecting_word("to");
     }
 
-    let player = unwrap_or_return_value!(realm.player(player_ref), output);
-    let current_room = unwrap_or_return_value!(realm.room(player.current_room()), output);
-    let maybe_portal_ref = processor.take_object(realm, current_room.portals());
+    let (_, room) = realm.player_and_room_res(player_ref)?;
 
-    if let Some(portal_ref) = maybe_portal_ref {
-        let current_room_ref = current_room.object_ref();
-        enter_portal(realm, player_ref, portal_ref, current_room_ref, &mut output);
-        if let Some(player) = realm.player(player_ref) {
-            look_at_object(realm, player_ref, player.current_room(), &mut output);
-        }
-    } else {
-        push_output_str!(output, player_ref, "Go where?\n");
+    let portal_ref = processor
+        .take_object(realm, room.portals())
+        .ok_or("Go where?")?;
+
+    let room_ref = room.object_ref();
+    let mut output = enter_portal(realm, player_ref, portal_ref, room_ref)?;
+    if let Some(player) = realm.player(player_ref) {
+        output.append(&mut look_at_object(
+            realm,
+            player_ref,
+            player.current_room(),
+        )?);
     }
-
-    output
+    Ok(output)
 }
 
 pub fn go_in_direction(
     realm: &mut Realm,
     player_ref: GameObjectRef,
     relative_direction: RelativeDirection,
-    output: &mut Vec<PlayerOutput>,
-) {
-    let player = unwrap_or_return!(realm.player(player_ref));
-    let current_room = unwrap_or_return!(realm.room(player.current_room()));
-    let current_room_ref = current_room.object_ref();
+) -> Result<Vec<PlayerOutput>, String> {
+    let (player, room) = realm.player_and_room_res(player_ref)?;
 
     let direction = &relative_direction.from(player.direction());
-    let portal_refs = visible_portals_from_position(realm, current_room, direction);
+    let portal_refs = visible_portals_from_position(realm, room, direction);
     if portal_refs.is_empty() {
-        push_output_string!(
-            output,
-            player_ref,
-            format!("There's no way {}.\n", direction)
-        );
+        Err(format!("There's no way {}.", direction))
     } else if let Some(portal_ref) = GameObjectRef::only(&portal_refs) {
-        enter_portal(realm, player_ref, portal_ref, current_room_ref, output);
+        let room_ref = room.object_ref();
+        enter_portal(realm, player_ref, portal_ref, room_ref)
     } else {
         let destination_descriptions =
-            describe_objects_from_room(realm, &portal_refs, current_room_ref);
-        push_output_string!(
-            output,
-            player_ref,
-            format!(
-                "There are multiple ways {}, to the {}.\n",
-                direction,
-                join_sentence(destination_descriptions)
-            )
-        );
+            describe_objects_from_room(realm, &portal_refs, room.object_ref());
+        Err(format!(
+            "There are multiple ways {}, to the {}.",
+            direction,
+            join_sentence(destination_descriptions)
+        ))
     }
 }

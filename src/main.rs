@@ -17,15 +17,6 @@ macro_rules! unwrap_or_continue {
     };
 }
 
-macro_rules! unwrap_or_return {
-    ($expr:expr) => {
-        match $expr {
-            Some(value) => value,
-            None => return,
-        }
-    };
-}
-
 macro_rules! unwrap_or_return_value {
     ($expr:expr, $ret:expr) => {
         match $expr {
@@ -237,10 +228,16 @@ async fn process_signing_in_input(
 
             log_command(log_tx, user_name.to_owned(), "(signed in)".to_owned()).await;
 
-            let mut player_output = Vec::new();
-            enter_room(realm, player_ref, current_room, &mut player_output);
-            look_at_object(realm, player_ref, current_room, &mut player_output);
-            process_player_output(realm, session_tx, player_output).await;
+            let output = match enter_room(realm, player_ref, current_room) {
+                Ok(mut output) => {
+                    if let Ok(mut more) = look_at_object(realm, player_ref, current_room) {
+                        output.append(&mut more);
+                    }
+                    output
+                }
+                Err(message) => vec![PlayerOutput::new_from_string(player_ref.id(), message)],
+            };
+            process_player_output(realm, session_tx, output).await;
 
             SessionState::SignedIn(player_ref.id())
         } else {
@@ -293,8 +290,8 @@ async fn process_player_output(
     player_output: Vec<PlayerOutput>,
 ) {
     for output in player_output {
-        if let Some(affected_player) = realm.player_by_id(output.player_id) {
-            if let Some(session_id) = affected_player.session_id() {
+        if let Some(player) = realm.player_by_id(output.player_id) {
+            if let Some(session_id) = player.session_id() {
                 send_session_event(
                     session_tx,
                     SessionEvent::SessionOutput(
@@ -302,12 +299,12 @@ async fn process_player_output(
                         match output.output {
                             SessionOutput::Json(json) => SessionOutput::Json(json),
                             output => output.with(SessionOutput::Prompt(SessionPromptInfo {
-                                name: affected_player.name().to_owned(),
-                                is_admin: affected_player.is_admin(),
-                                hp: affected_player.hp(),
-                                max_hp: affected_player.stats().max_hp(),
-                                mp: affected_player.mp(),
-                                max_mp: affected_player.stats().max_mp(),
+                                name: player.name().to_owned(),
+                                is_admin: player.is_admin(),
+                                hp: player.hp(),
+                                max_hp: player.stats().max_hp(),
+                                mp: player.mp(),
+                                max_mp: player.stats().max_mp(),
                             })),
                         },
                     ),
