@@ -3,7 +3,7 @@ use regex::{Captures, Regex};
 use std::{borrow::Borrow, cmp::Ordering};
 
 use crate::colors::Color;
-use crate::game_object::{GameObject, GameObjectRef};
+use crate::game_object::{GameObject, GameObjectRef, GameObjectType};
 use crate::number_utils::written_number;
 use crate::objects::{ItemFlags, Realm};
 
@@ -42,6 +42,31 @@ fn count_objects<'a>(
             objects_with_counts.push((object, 1));
         }
     }
+
+    objects_with_counts
+}
+
+fn count_and_sort_objects<'a>(
+    realm: &'a Realm,
+    object_refs: &[GameObjectRef],
+) -> Vec<(&'a dyn GameObject, u16)> {
+    let mut objects_with_counts = count_objects(realm, object_refs);
+
+    // Players go before everything else, but after that we sort by count:
+    objects_with_counts.sort_by(|(object1, count1), (object2, count2)| {
+        if object1.object_type() == GameObjectType::Player {
+            if object2.object_type() == GameObjectType::Player {
+                count1.cmp(count2)
+            } else {
+                Ordering::Less
+            }
+        } else if object2.object_type() == GameObjectType::Player {
+            Ordering::Greater
+        } else {
+            count1.cmp(count2)
+        }
+    });
+
     objects_with_counts
 }
 
@@ -54,7 +79,7 @@ pub fn definite_article_from_noun(noun: String) -> &'static str {
 }
 
 pub fn describe_items(realm: &Realm, item_refs: &[GameObjectRef]) -> Vec<String> {
-    count_objects(realm, item_refs)
+    count_and_sort_objects(realm, item_refs)
         .iter()
         .map(|(item, count)| {
             if *count > 1 {
@@ -71,7 +96,7 @@ pub fn describe_objects_from_room(
     object_refs: &[GameObjectRef],
     room_ref: GameObjectRef,
 ) -> Vec<String> {
-    count_objects(realm, object_refs)
+    count_and_sort_objects(realm, object_refs)
         .iter()
         .map(|(object, count)| {
             if *count > 1 {
@@ -89,7 +114,7 @@ pub fn describe_objects_with_definite_articles(
     realm: &Realm,
     object_refs: &[GameObjectRef],
 ) -> Vec<String> {
-    count_objects(realm, object_refs)
+    count_and_sort_objects(realm, object_refs)
         .iter()
         .map(|(object, count)| {
             if *count > 1 {
