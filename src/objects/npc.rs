@@ -7,6 +7,12 @@ use crate::game_object::{
 };
 use crate::vector3d::Vector3D;
 
+serializable_flags! {
+    pub struct NpcFlags: u32 {
+        const AlwaysUseDefiniteArticle = 0b00000001;
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct Npc {
     id: GameObjectId,
@@ -14,6 +20,7 @@ pub struct Npc {
     current_room: GameObjectRef,
     description: String,
     direction: Vector3D,
+    flags: NpcFlags,
     gender: Gender,
     gold: u32,
     height: f32,
@@ -30,6 +37,12 @@ pub struct Npc {
 }
 
 impl Npc {
+    game_object_copy_prop!(pub, flags, set_flags, NpcFlags);
+
+    pub fn has_flags(&self, flags: NpcFlags) -> bool {
+        self.flags & flags == flags
+    }
+
     pub fn hydrate(id: GameObjectId, json: &str) -> Result<Box<dyn GameObject>, String> {
         match serde_json::from_str::<NpcDto>(json) {
             Ok(npc_dto) => Ok(Box::new(Self {
@@ -38,6 +51,7 @@ impl Npc {
                 current_room: npc_dto.currentRoom,
                 description: npc_dto.description.unwrap_or_default(),
                 direction: npc_dto.direction.unwrap_or_default(),
+                flags: npc_dto.flags.unwrap_or_default(),
                 gender: Gender::hydrate(&npc_dto.gender),
                 gold: npc_dto.gold,
                 height: npc_dto.height,
@@ -68,6 +82,7 @@ impl Npc {
             current_room: room_ref,
             description: String::new(),
             direction: Vector3D::default(),
+            flags: NpcFlags::None,
             gender: Gender::Unspecified,
             gold: 0,
             height: 0.0,
@@ -152,6 +167,11 @@ impl GameObject for Npc {
                 Some(self.description.clone())
             },
             direction: Some(self.direction.clone()),
+            flags: if self.flags == NpcFlags::None {
+                None
+            } else {
+                Some(self.flags)
+            },
             gender: self.gender.serialize(),
             gold: self.gold,
             height: self.height,
@@ -194,6 +214,25 @@ impl GameObject for Npc {
         &self.indefinite_article
     }
 
+    fn name_at_strength(&self, strength: f32) -> String {
+        if strength >= 0.9 {
+            if self.has_flags(NpcFlags::AlwaysUseDefiniteArticle) {
+                format!("the {}", self.name())
+            } else {
+                self.indefinite_name()
+            }
+        } else if strength >= 0.8 {
+            match self.gender {
+                Gender::Male => "a man",
+                Gender::Female => "a woman",
+                Gender::Unspecified => "someone",
+            }
+            .to_owned()
+        } else {
+            "someone".to_owned()
+        }
+    }
+
     fn needs_sync(&self) -> bool {
         self.needs_sync
     }
@@ -216,6 +255,7 @@ impl GameObject for Npc {
             "currentRoom" => self.set_current_room(GameObjectRef::from_str(value)?),
             "description" => self.set_description(value.to_owned()),
             "direction" => self.set_direction(Vector3D::from_str(value)?),
+            "flags" => self.set_flags(NpcFlags::from_str(value)?),
             "gender" => self.set_gender(Gender::from_str(value)?),
             "gold" => self.set_gold(value.parse().map_err(|error| format!("{:?}", error))?),
             "height" => self.set_height(value.parse().map_err(|error| format!("{:?}", error))?),
@@ -244,6 +284,8 @@ struct NpcDto {
     description: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     direction: Option<Vector3D>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    flags: Option<NpcFlags>,
     #[serde(skip_serializing_if = "Option::is_none")]
     gender: Option<String>,
     gold: u32,

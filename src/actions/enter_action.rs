@@ -1,6 +1,8 @@
+use crate::events::VisualMovementEvent;
 use crate::game_object::GameObjectRef;
 use crate::objects::Realm;
 use crate::player_output::PlayerOutput;
+use crate::vector3d::Vector3D;
 
 use super::change_direction;
 
@@ -30,16 +32,20 @@ pub fn enter_room(
         .ok_or("The character doesn't exist.")?;
 
     let current_room_ref = character.current_room();
-    if current_room_ref != room_ref {
-        character.set_current_room(room_ref);
-
-        if let (Some(current_room), Some(new_room)) =
-            (realm.room(current_room_ref), realm.room(room_ref))
-        {
-            let direction = new_room.position() - current_room.position();
-            change_direction(realm, character_ref, direction);
-        }
+    if current_room_ref == room_ref {
+        return Ok(vec![]); // Nothing to do.
     }
+
+    character.set_current_room(room_ref);
+
+    let direction = match (realm.room(current_room_ref), realm.room(room_ref)) {
+        (Some(current_room), Some(new_room)) => {
+            let direction = (new_room.position() - current_room.position()).normalized();
+            change_direction(realm, character_ref, direction.clone());
+            direction
+        }
+        (_, _) => Vector3D::default(),
+    };
 
     if let Some(current_room) = realm.room_mut(current_room_ref) {
         current_room.remove_characters(vec![character_ref]);
@@ -49,14 +55,11 @@ pub fn enter_room(
         room.add_characters(vec![character_ref]);
     }
 
-    // TODO: enteredRoom();
-
-    /* TODO:
-    for (const GameObjectPtr &character : room->characters()) {
-        if (character != this) {
-            character->invokeTrigger("onCharacterEntered", this);
-        }
-    }*/
-
-    Ok(vec![])
+    let mut visual_event = VisualMovementEvent::new(character_ref, current_room_ref, room_ref);
+    visual_event.direction = direction;
+    visual_event.set_verb("walks", "is walking");
+    visual_event.excluded_characters = vec![character_ref];
+    visual_event
+        .fire(realm, 1.0)
+        .ok_or_else(|| "You walked, but nobody saw you.".to_owned())
 }

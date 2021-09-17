@@ -199,6 +199,21 @@ impl GameObject for Player {
         self.id
     }
 
+    fn name_at_strength(&self, strength: f32) -> String {
+        if strength >= 0.9 {
+            self.name().to_owned()
+        } else if strength >= 0.8 {
+            match self.gender {
+                Gender::Male => "a man",
+                Gender::Female => "a woman",
+                Gender::Unspecified => "someone",
+            }
+            .to_owned()
+        } else {
+            "someone".to_owned()
+        }
+    }
+
     fn needs_sync(&self) -> bool {
         self.needs_sync
     }

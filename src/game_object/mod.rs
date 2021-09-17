@@ -116,6 +116,19 @@ pub trait GameObject {
     fn name(&self) -> &str;
     fn set_name(&mut self, name: String);
 
+    /// Returns the name of the object or a more fuzzy description, depending on the strength
+    /// (clarity) with which the object is being observed.
+    ///
+    /// The clarity with which the object is being observed is indicated through the strength,
+    /// where 1.0 represents a full clear view, while 0.0 means the object has become invisible.
+    fn name_at_strength(&self, strength: f32) -> String {
+        if strength >= 1.0 {
+            self.name().to_owned()
+        } else {
+            "something".to_owned()
+        }
+    }
+
     fn object_ref(&self) -> GameObjectRef {
         GameObjectRef(self.object_type(), self.id())
     }

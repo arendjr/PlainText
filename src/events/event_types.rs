@@ -33,10 +33,6 @@ macro_rules! event_types {
 }
 
 event_types! {
-    Flood = 0,
-    MovementSound,
-    MovementVisual,
-    Sound,
-    Speech,
+    Sound = 0,
     Visual
 }

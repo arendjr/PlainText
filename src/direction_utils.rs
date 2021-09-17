@@ -1,4 +1,4 @@
-use std::cmp::Ordering;
+use std::{cmp::Ordering, f64::consts::TAU};
 
 use crate::vector3d::Vector3D;
 
@@ -54,6 +54,35 @@ pub fn compare_exit_names(name1: &&str, name2: &&str) -> Ordering {
 
 pub fn direction_by_abbreviation(string: &str) -> Option<&'static str> {
     index_of_direction_abbreviation(string).map(|index| DIRECTIONS[index].name)
+}
+
+pub fn direction_for_vector(vector: &Vector3D) -> &'static str {
+    if vector.z.abs() as f64 > ((vector.x * vector.x + vector.y * vector.y) as f64).sqrt() {
+        if vector.z > 0 {
+            DIRECTIONS[9].name
+        } else {
+            DIRECTIONS[8].name
+        }
+    } else {
+        let degrees = (vector.y as f64).atan2(vector.x as f64) * 360.0 / TAU;
+        if degrees < -157.5 || degrees > 157.5 {
+            DIRECTIONS[6].name
+        } else if degrees >= -157.5 && degrees < -112.5 {
+            DIRECTIONS[7].name
+        } else if degrees >= -112.5 && degrees < -67.5 {
+            DIRECTIONS[0].name
+        } else if degrees >= -67.5 && degrees < -22.5 {
+            DIRECTIONS[1].name
+        } else if degrees >= -22.5 && degrees < 22.5 {
+            DIRECTIONS[2].name
+        } else if degrees >= 22.5 && degrees < 67.5 {
+            DIRECTIONS[3].name
+        } else if degrees >= 67.5 && degrees < 112.5 {
+            DIRECTIONS[4].name
+        } else {
+            DIRECTIONS[5].name
+        }
+    }
 }
 
 fn index_of_direction(direction_str: &str) -> Option<usize> {
