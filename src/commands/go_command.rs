@@ -9,8 +9,6 @@ use crate::vision_utils::visible_portals_from_position;
 use super::CommandHelpers;
 
 /// Makes the character travel to another room.
-///
-/// Examples: `go north`, `go to tower`, `enter door`, `go forward`
 pub fn go(
     realm: &mut Realm,
     player_ref: GameObjectRef,

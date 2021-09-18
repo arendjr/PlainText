@@ -5,9 +5,7 @@ use crate::player_output::PlayerOutput;
 
 use super::CommandHelpers;
 
-/// Enter a room without the need for there to be an exit to the room.
-///
-/// Example: `enter-room #1234`
+/// Enters a room without the need for there to be an exit to the room.
 pub fn enter_room(
     realm: &mut Realm,
     player_ref: GameObjectRef,

@@ -9,15 +9,18 @@ use crate::LogSender;
 use super::admin::enter_room;
 use super::api::{objects_list, property_set, triggers_list};
 use super::command_helpers::CommandHelpers;
-use super::command_interpreter::{CommandInterpreter, InterpretationError};
+use super::command_interpreter::{interpret_command, InterpretationError};
 use super::command_line_processor::CommandLineProcessor;
+use super::command_registry::CommandRegistry;
 use super::go_command::go;
+use super::help_command::help;
 use super::inventory_command::inventory;
 use super::look_command::look;
 use super::CommandType;
 
 pub struct CommandExecutor {
-    interpreter: CommandInterpreter,
+    admin_command_registry: CommandRegistry,
+    command_registry: CommandRegistry,
 }
 
 impl CommandExecutor {
@@ -30,10 +33,19 @@ impl CommandExecutor {
         command_line: String,
     ) -> Vec<PlayerOutput> {
         let mut processor = CommandLineProcessor::new(player_ref, &command_line);
-        match self.interpreter.interpret_command(&mut processor) {
+        match interpret_command(&self.command_registry, &mut processor).or_else(|err| {
+            match realm.player(player_ref) {
+                Some(player) if player.is_admin() => {
+                    interpret_command(&self.admin_command_registry, &mut processor)
+                }
+                _ => Err(err),
+            }
+        }) {
             Ok(command_type) => {
                 let command_helpers = CommandHelpers {
+                    admin_command_registry: &self.admin_command_registry,
                     command_line_processor: &mut processor,
+                    command_registry: &self.command_registry,
                     trigger_registry,
                 };
                 let command_fn = match command_type {
@@ -43,11 +55,12 @@ impl CommandExecutor {
                     CommandType::ApiObjectsList => wrap_api_request(objects_list),
                     CommandType::ApiPropertySet => wrap_api_request(property_set),
                     CommandType::ApiTriggersList => wrap_api_request(triggers_list),
-                    CommandType::EnterRoom => wrap_admin_command(enter_room),
-                    CommandType::Go => wrap_command(go),
-                    CommandType::Inventory => wrap_command(inventory),
-                    CommandType::Look => wrap_command(look),
-                    CommandType::Lose => panic!("Not implemented"),
+                    CommandType::EnterRoom(_) => wrap_admin_command(enter_room),
+                    CommandType::Go(_) => wrap_command(go),
+                    CommandType::Help(_) => wrap_command(help),
+                    CommandType::Inventory(_) => wrap_command(inventory),
+                    CommandType::Look(_) => wrap_command(look),
+                    CommandType::Lose(_) => panic!("Not implemented"),
                 };
                 command_fn(realm, player_ref, command_helpers)
             }
@@ -66,8 +79,86 @@ impl CommandExecutor {
     }
 
     pub fn new() -> Self {
+        let mut registry = CommandRegistry::new();
+        registry.register("api-object-create", CommandType::ApiObjectCreate);
+        registry.register("api-object-delete", CommandType::ApiObjectDelete);
+        registry.register("api-object-set", CommandType::ApiObjectSet);
+        registry.register("api-objects-list", CommandType::ApiObjectsList);
+        registry.register("api-property-set", CommandType::ApiPropertySet);
+        registry.register("api-triggers-list", CommandType::ApiTriggersList);
+        registry.register(
+            "enter",
+            CommandType::Go(
+                "Enter another room.\n\
+                \n\
+                Example: *enter door*",
+            ),
+        );
+        registry.register(
+            "examine",
+            CommandType::Look(
+                "Examine an object.\n\
+                \n\
+                Examples: *examine sign*, *examine key in inventory*",
+            ),
+        );
+        registry.register(
+            "go",
+            CommandType::Go(
+                "Go to another room.\n\
+                \n\
+                Examples: *go north*, *go to tower*, *go forward*",
+            ),
+        );
+        registry.register(
+            "help",
+            CommandType::Help(
+                "Shows in-game help, like the one you are now reading.\n\
+                \n\
+                Examples: *help*, *help buy*",
+            ),
+        );
+        registry.register(
+            "inventory",
+            CommandType::Inventory(
+                "Inspect your inventory.\n\
+                \n\
+                Examples: *inventory*, *look in inventory*.",
+            ),
+        );
+        registry.register(
+            "l",
+            CommandType::Look(
+                "Examine an object.\n\
+                \n\
+                Examples: *look north*, *look at sign*, *look at key in inventory*",
+            ),
+        );
+        registry.register(
+            "look",
+            CommandType::Look(
+                "Examine an object.\n\
+                \n\
+                Examples: *look north*, *look at sign*, *look at key in inventory*",
+            ),
+        );
+
+        let admin_registry = {
+            let mut registry = CommandRegistry::new();
+            registry.register(
+                "enter-room",
+                CommandType::EnterRoom(
+                    "Enter a room without the need for there to be an exit to the room.\n\
+                    \n\
+                    Example: *enter-room #1234*",
+                ),
+            );
+            registry
+        };
+
         Self {
-            interpreter: CommandInterpreter::new(),
+            admin_command_registry: admin_registry,
+            command_registry: registry,
         }
     }
 }

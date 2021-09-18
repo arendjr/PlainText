@@ -6,6 +6,7 @@ mod command_interpreter;
 mod command_line_processor;
 mod command_registry;
 mod go_command;
+mod help_command;
 mod inventory_command;
 mod look_command;
 
@@ -21,9 +22,30 @@ pub enum CommandType {
     ApiObjectsList,
     ApiPropertySet,
     ApiTriggersList,
-    EnterRoom,
-    Go,
-    Inventory,
-    Look,
-    Lose,
+    EnterRoom(&'static str),
+    Go(&'static str),
+    Help(&'static str),
+    Inventory(&'static str),
+    Look(&'static str),
+    Lose(&'static str),
+}
+
+impl CommandType {
+    pub fn description(&self) -> &'static str {
+        use CommandType::*;
+        match self {
+            ApiObjectCreate => "",
+            ApiObjectDelete => "",
+            ApiObjectSet => "",
+            ApiObjectsList => "",
+            ApiPropertySet => "",
+            ApiTriggersList => "",
+            EnterRoom(description) => description,
+            Go(description) => description,
+            Help(description) => description,
+            Inventory(description) => description,
+            Look(description) => description,
+            Lose(description) => description,
+        }
+    }
 }

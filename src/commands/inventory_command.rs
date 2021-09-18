@@ -5,9 +5,7 @@ use crate::text_utils::{describe_items, format_weight, join_sentence};
 
 use super::CommandHelpers;
 
-/// Makes the character inspect their inventory.
-///
-/// Examples: `inventory`, `look in inventory`.
+/// Inspects the character's inventory.
 pub fn inventory(
     realm: &mut Realm,
     player_ref: GameObjectRef,

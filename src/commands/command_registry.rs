@@ -25,6 +25,21 @@ pub struct CommandRegistry {
 }
 
 impl CommandRegistry {
+    pub fn command_names(&self) -> Vec<String> {
+        fn collect_names(node: &TrieNode, prefix: String) -> Vec<String> {
+            let mut names = Vec::new();
+            if node.command_type.is_some() && prefix.len() > 1 {
+                names.push(prefix.clone());
+            }
+            for (character, node) in &node.children {
+                names.append(&mut collect_names(node, format!("{}{}", prefix, character)));
+            }
+            names
+        }
+
+        collect_names(&self.root, "".to_owned())
+    }
+
     pub fn lookup(&self, alias: &str) -> Result<CommandType, LookupError> {
         let mut node = &self.root;
         for character in alias.chars() {
@@ -76,21 +91,27 @@ impl CommandRegistry {
 #[test]
 fn single_command() {
     let mut registry = CommandRegistry::new();
-    registry.register("go", CommandType::Go);
-    assert_eq!(registry.lookup("g"), Ok(CommandType::Go));
-    assert_eq!(registry.lookup("go"), Ok(CommandType::Go));
+    registry.register("go", CommandType::Go(""));
+    assert_eq!(registry.lookup("g"), Ok(CommandType::Go("")));
+    assert_eq!(registry.lookup("go"), Ok(CommandType::Go("")));
     assert_eq!(registry.lookup("got"), Err(LookupError::NotFound));
 }
 
 #[test]
 fn multiple_commands() {
     let mut registry = CommandRegistry::new();
-    registry.register("l", CommandType::Look);
-    registry.register("look", CommandType::Look);
-    registry.register("lose", CommandType::Lose);
-    assert_eq!(registry.lookup("l"), Ok(CommandType::Look));
+    registry.register("l", CommandType::Look(""));
+    registry.register("look", CommandType::Look(""));
+    registry.register("lose", CommandType::Lose(""));
+    assert_eq!(registry.lookup("l"), Ok(CommandType::Look("")));
     assert_eq!(registry.lookup("lo"), Err(LookupError::NotUnique));
-    assert_eq!(registry.lookup("loo"), Ok(CommandType::Look));
-    assert_eq!(registry.lookup("los"), Ok(CommandType::Lose));
+    assert_eq!(registry.lookup("loo"), Ok(CommandType::Look("")));
+    assert_eq!(registry.lookup("los"), Ok(CommandType::Lose("")));
     assert_eq!(registry.lookup("lov"), Err(LookupError::NotFound));
+
+    // Single-character aliases are omitted from command names:
+    assert_eq!(
+        registry.command_names(),
+        vec!["look".to_owned(), "lose".to_owned()]
+    );
 }

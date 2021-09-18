@@ -245,7 +245,7 @@ pub fn split_lines(string: &str, max_line_len: usize) -> Vec<String> {
         while let Some(index) = word.find('\n') {
             let left = &word[0..index];
             if !left.is_empty() {
-                if current_line_len + left.len() + 1 > max_line_len {
+                if current_line_len + left.len() >= max_line_len {
                     lines.push(current_line);
                     current_line = left.to_owned();
                     current_line_len = left.len();
@@ -260,6 +260,7 @@ pub fn split_lines(string: &str, max_line_len: usize) -> Vec<String> {
             }
             lines.push(current_line);
             current_line = String::new();
+            current_line_len = 0;
             word = &word[index + 1..];
         }
         if word.is_empty() {
@@ -267,7 +268,7 @@ pub fn split_lines(string: &str, max_line_len: usize) -> Vec<String> {
         }
 
         let word_len = word.len() - 4 * word.matches("\x1B[").count();
-        if current_line_len + word_len + 1 > max_line_len {
+        if current_line_len + word_len >= max_line_len {
             lines.push(current_line);
             current_line = word.to_owned();
             current_line_len = word_len;

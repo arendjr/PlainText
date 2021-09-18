@@ -9,8 +9,6 @@ use super::inventory_command::inventory;
 use super::{CommandHelpers, CommandLineProcessor};
 
 /// Makes the character look at *something*.
-///
-/// Examples: `look`, `look at door`, `look earl`, `examine sign`, `look at key in inventory`
 pub fn look(
     realm: &mut Realm,
     player_ref: GameObjectRef,
