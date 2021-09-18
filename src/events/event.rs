@@ -3,8 +3,6 @@ use crate::{
     objects::{Realm, Room},
 };
 
-use super::EventType;
-
 pub trait Event {
     fn description_for_strength_and_character_in_room(
         &self,
@@ -13,8 +11,6 @@ pub trait Event {
         character: GameObjectRef,
         room: GameObjectRef,
     ) -> Option<String>;
-
-    fn event_type(&self) -> EventType;
 
     fn excluded_characters(&self) -> &[GameObjectRef];
 

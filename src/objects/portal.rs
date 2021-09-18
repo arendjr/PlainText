@@ -51,6 +51,14 @@ impl Portal {
     game_object_copy_prop!(pub, room, set_room, GameObjectRef);
     game_object_copy_prop!(pub, room2, set_room2, GameObjectRef);
 
+    pub fn can_hear_through(&self) -> bool {
+        if self.has_flags(PortalFlags::IsOpen) {
+            self.has_flags(PortalFlags::CanHearThroughIfOpen)
+        } else {
+            self.has_flags(PortalFlags::CanHearThrough)
+        }
+    }
+
     pub fn can_open_from_room(&self, room: GameObjectRef) -> bool {
         if room == self.room2 {
             self.has_flags(PortalFlags::CanOpenFromSide2)

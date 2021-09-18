@@ -1,23 +1,17 @@
-use std::f64::consts::TAU;
-
 use crate::{
-    game_object::GameObject,
+    game_object::{GameObject, GameObjectType},
     objects::{Realm, Room},
     player_output::PlayerOutput,
 };
 
-use super::{event::VisualEvent, EventType};
+use super::{event::Event, EventType};
 
-pub fn visit_rooms(
-    realm: &Realm,
-    event: &dyn VisualEvent,
-    strength: f32,
-) -> Option<Vec<PlayerOutput>> {
+pub fn visit_rooms(realm: &Realm, event: &dyn Event, strength: f32) -> Option<Vec<PlayerOutput>> {
     let mut rooms_to_visit = vec![(realm.room(event.origin())?, strength)];
     let mut room_visit_index = 0;
     loop {
         let (room, strength) = rooms_to_visit[room_visit_index];
-        if let Some(next_rooms) = visit_room(realm, room, event, strength) {
+        if let Some(next_rooms) = visit_room(realm, room, strength) {
             for (room, strength) in next_rooms {
                 if let Some(entry) = rooms_to_visit.iter_mut().find(|(r, _)| r.id() == room.id()) {
                     if entry.1 < strength {
@@ -46,13 +40,8 @@ pub fn visit_rooms(
     Some(output)
 }
 
-fn visit_room<'a>(
-    realm: &'a Realm,
-    room: &Room,
-    event: &dyn VisualEvent,
-    strength: f32,
-) -> Option<Vec<(&'a Room, f32)>> {
-    let strength = strength * room.event_multiplier(EventType::Visual);
+fn visit_room<'a>(realm: &'a Realm, room: &Room, strength: f32) -> Option<Vec<(&'a Room, f32)>> {
+    let strength = strength * room.event_multiplier(EventType::Sound);
     if strength < 0.1 {
         return None; // Too weak to continue.
     }
@@ -61,7 +50,7 @@ fn visit_room<'a>(
 
     for portal in room.portals() {
         let portal = match realm.portal(*portal) {
-            Some(portal) if portal.can_see_through() => portal,
+            Some(portal) if portal.can_hear_through() => portal,
             _ => continue,
         };
 
@@ -72,11 +61,13 @@ fn visit_room<'a>(
             } else {
                 room1
             };
-            if event.is_within_sight(realm, opposite_room, room) {
-                let propagated_strength = strength * portal.event_multiplier(EventType::Visual);
-                if propagated_strength >= 0.1 {
-                    next_rooms.push((opposite_room, propagated_strength));
-                }
+
+            let distance = (opposite_room.position() - room.position()).len();
+            let distance_multiplier = 1.0 / (distance as f32 / 10.0);
+            let propagated_strength =
+                strength * distance_multiplier * portal.event_multiplier(EventType::Sound);
+            if propagated_strength >= 0.1 {
+                next_rooms.push((opposite_room, propagated_strength));
             }
         }
     }
@@ -87,39 +78,30 @@ fn visit_room<'a>(
 fn notify_characters(
     realm: &Realm,
     room: &Room,
-    event: &dyn VisualEvent,
+    event: &dyn Event,
     strength: f32,
 ) -> Option<Vec<PlayerOutput>> {
-    let strength = strength * room.event_multiplier(EventType::Visual);
+    let strength = strength * room.event_multiplier(EventType::Sound);
     if strength < 0.1 {
         return None;
     }
 
     let mut output = vec![];
-    let origin = realm.room(event.origin())?;
 
     for character in room.characters() {
         if event.excluded_characters().contains(character) {
             continue;
         }
 
-        // Make sure the character is actually looking in the direction of the event:
-        let character = realm.character(*character)?;
-        let event_direction = origin.position() - room.position();
-        let angle = character.direction().angle(&event_direction);
-        if angle > TAU / 8.0 {
-            continue;
-        }
-
         let mut message = event.description_for_strength_and_character_in_room(
             realm,
             strength,
-            character.object_ref(),
+            *character,
             room.object_ref(),
         )?;
-        if let Some(player) = character.as_player() {
+        if character.object_type() == GameObjectType::Player {
             message.push('\n');
-            output.push(PlayerOutput::new_from_string(player.id(), message));
+            output.push(PlayerOutput::new_from_string(character.id(), message));
         }
     }
 

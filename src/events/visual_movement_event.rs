@@ -9,9 +9,9 @@ use crate::{
     vector3d::Vector3D,
 };
 
-use super::{event::Event, event::VisualEvent, visible_room_visitor, EventType};
+use super::{event::Event, event::VisualEvent, visible_room_visitor};
 
-/// An event that gets triggered when someone or something moves to another room.
+/// A visual event that gets triggered when someone or something moves to another room.
 pub struct VisualMovementEvent {
     /// Who are what is moving?
     subject: GameObjectRef,
@@ -166,10 +166,6 @@ impl Event for VisualMovementEvent {
             "{} {} {}{} {}.",
             prefix, subject, helper_verb, self.continuous, direction
         ))
-    }
-
-    fn event_type(&self) -> EventType {
-        EventType::Visual
     }
 
     fn excluded_characters(&self) -> &[GameObjectRef] {

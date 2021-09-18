@@ -1,6 +1,6 @@
-use crate::actions::{look_at_object, look_in_direction};
+use crate::actions;
 use crate::direction_utils::{direction_by_abbreviation, is_direction, vector_for_direction};
-use crate::game_object::{Character, GameObject, GameObjectRef};
+use crate::game_object::{Character, GameObjectRef};
 use crate::objects::Realm;
 use crate::player_output::PlayerOutput;
 use crate::relative_direction::RelativeDirection;
@@ -23,7 +23,7 @@ pub fn look(
     let alias = processor.take_word().unwrap();
     if alias.starts_with('l') {
         if !processor.has_words_left() {
-            return look_at_object(realm, player_ref, player.current_room());
+            return actions::look_at_object(realm, player_ref, player.current_room());
         }
 
         processor.skip_connecting_word("at");
@@ -52,7 +52,7 @@ pub fn look(
         let object_ref = processor
             .object_by_description(realm, player.inventory(), description)
             .ok_or("You don't have that.")?;
-        return look_at_object(realm, player_ref, object_ref);
+        return actions::look_at_object(realm, player_ref, object_ref);
     }
 
     let pool = [
@@ -67,7 +67,7 @@ pub fn look(
         .object_by_description(realm, &pool, description.clone())
         .and_then(|object_ref| realm.object(object_ref));
     match maybe_object {
-        Some(object) => look_at_object(realm, player_ref, object.object_ref()),
+        Some(object) => actions::look_at_object(realm, player_ref, object.object_ref()),
         None => {
             let mut target = description.name.as_ref();
             if let Some(direction) = direction_by_abbreviation(target) {
@@ -99,8 +99,12 @@ pub fn look(
                 });
             };
 
-            let mut output = vec![PlayerOutput::new_from_string(player.id(), output)];
-            output.append(&mut look_in_direction(realm, player_ref, &direction)?);
+            actions::change_direction(realm, player_ref, direction.clone());
+
+            let mut output = vec![PlayerOutput::new_from_string(player_ref.id(), output)];
+            output.append(&mut actions::look_in_direction(
+                realm, player_ref, &direction,
+            )?);
             Ok(output)
         }
     }
