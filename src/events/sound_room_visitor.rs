@@ -7,7 +7,11 @@ use crate::{
 use super::{event::Event, EventType};
 
 pub fn visit_rooms(realm: &Realm, event: &dyn Event, strength: f32) -> Option<Vec<PlayerOutput>> {
-    let mut rooms_to_visit = vec![(realm.room(event.origin())?, strength)];
+    let mut rooms_to_visit = event
+        .origins()
+        .into_iter()
+        .filter_map(|room| realm.room(room).map(|room| (room, strength)))
+        .collect::<Vec<_>>();
     let mut room_visit_index = 0;
     loop {
         let (room, strength) = rooms_to_visit[room_visit_index];
@@ -54,16 +58,9 @@ fn visit_room<'a>(realm: &'a Realm, room: &Room, strength: f32) -> Option<Vec<(&
             _ => continue,
         };
 
-        if let (Some(room1), Some(room2)) = (realm.room(portal.room()), realm.room(portal.room2()))
-        {
-            let opposite_room = if room.id() == room1.id() {
-                room2
-            } else {
-                room1
-            };
-
+        if let Some(opposite_room) = realm.room(portal.opposite_of(room.object_ref())) {
             let distance = (opposite_room.position() - room.position()).len();
-            let distance_multiplier = 1.0 / (distance as f32 / 10.0);
+            let distance_multiplier = 1.0 / (distance as f32 / 3.0);
             let propagated_strength =
                 strength * distance_multiplier * portal.event_multiplier(EventType::Sound);
             if propagated_strength >= 0.1 {

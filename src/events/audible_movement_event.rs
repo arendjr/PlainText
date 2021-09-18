@@ -156,7 +156,7 @@ impl Event for AudibleMovementEvent {
         &self.excluded_characters
     }
 
-    fn origin(&self) -> GameObjectRef {
-        self.origin
+    fn origins(&self) -> Vec<GameObjectRef> {
+        vec![self.origin, self.destination]
     }
 }

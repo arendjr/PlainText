@@ -63,21 +63,31 @@ pub fn look(
     ]
     .concat();
 
+    let target = description.name.as_ref();
     let maybe_object = processor
         .object_by_description(realm, &pool, description.clone())
         .and_then(|object_ref| realm.object(object_ref));
-    match maybe_object {
-        Some(object) => actions::look_at_object(realm, player_ref, object.object_ref()),
-        None => {
-            let mut target = description.name.as_ref();
-            if let Some(direction) = direction_by_abbreviation(target) {
-                target = direction;
+    let output = match maybe_object {
+        Some(object) => {
+            let mut output = Vec::<PlayerOutput>::new();
+            if is_direction(target) {
+                push_output_string!(output, player_ref, format!("You look {}.\n", target));
+            } else if let Some(direction) = direction_by_abbreviation(target) {
+                push_output_string!(output, player_ref, format!("You look {}.\n", direction));
             }
-            let (output, direction) = if is_direction(target) {
-                (
-                    format!("You look {}.\n", target),
-                    vector_for_direction(target),
-                )
+            output.append(&mut actions::look_at_object(
+                realm,
+                player_ref,
+                object.object_ref(),
+            )?);
+            output
+        }
+        None => {
+            let (output, direction) = if let Some(direction) = direction_by_abbreviation(target) {
+                let vector = vector_for_direction(direction).unwrap();
+                (format!("You look {}.\n", direction), vector)
+            } else if let Some(direction) = vector_for_direction(target) {
+                (format!("You look {}.\n", target), direction)
             } else if let Some(relative_direction) = RelativeDirection::from_string(target) {
                 (
                     match relative_direction {
@@ -99,13 +109,17 @@ pub fn look(
                 });
             };
 
-            actions::change_direction(realm, player_ref, direction.clone());
-
             let mut output = vec![PlayerOutput::new_from_string(player_ref.id(), output)];
             output.append(&mut actions::look_in_direction(
                 realm, player_ref, &direction,
             )?);
-            Ok(output)
+            output
         }
+    };
+
+    if let Some(direction) = vector_for_direction(target) {
+        actions::change_direction(realm, player_ref, direction);
     }
+
+    Ok(output)
 }

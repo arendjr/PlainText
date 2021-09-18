@@ -3,13 +3,13 @@ use std::f64::consts::TAU;
 use crate::{
     direction_utils::{direction_for_vector, is_direction},
     game_object::{GameObject, GameObjectRef},
-    objects::{Realm, Room, RoomFlags},
+    objects::Realm,
     player_output::PlayerOutput,
     text_utils::capitalize,
     vector3d::Vector3D,
 };
 
-use super::{event::Event, event::VisualEvent, visible_room_visitor};
+use super::{event::Event, visible_room_visitor};
 
 /// A visual event that gets triggered when someone or something moves to another room.
 pub struct VisualMovementEvent {
@@ -172,49 +172,7 @@ impl Event for VisualMovementEvent {
         &self.excluded_characters
     }
 
-    fn origin(&self) -> GameObjectRef {
-        self.origin
+    fn origins(&self) -> Vec<GameObjectRef> {
+        vec![self.origin, self.destination]
     }
-}
-
-impl VisualEvent for VisualMovementEvent {
-    fn is_within_sight(&self, realm: &Realm, target_room: &Room, source_room: &Room) -> bool {
-        if source_room.object_ref() == self.origin || source_room.object_ref() == self.destination {
-            return true;
-        }
-
-        let origin = match realm.room(self.origin) {
-            Some(origin) => origin,
-            None => return false,
-        };
-
-        let target_vector = (target_room.position() - source_room.position()).normalized();
-
-        if is_visible_from(origin, source_room, &target_vector) {
-            return true;
-        }
-
-        match realm.room(self.destination) {
-            Some(destination) => is_visible_from(destination, source_room, &target_vector),
-            None => false,
-        }
-    }
-}
-
-fn is_visible_from(room: &Room, source_room: &Room, target_vector: &Vector3D) -> bool {
-    let source_vector = (source_room.position() - room.position()).normalized();
-    if &source_vector == target_vector {
-        return true;
-    }
-
-    if source_room.has_flags(RoomFlags::HasWalls) {
-        if target_vector.x != source_vector.x || target_vector.y != source_vector.y {
-            return false;
-        }
-    } else if target_vector.z == source_vector.z {
-        return true;
-    }
-
-    (!source_room.has_flags(RoomFlags::HasCeiling) && target_vector.z >= source_vector.z)
-        || (!source_room.has_flags(RoomFlags::HasFloor) && target_vector.z <= source_vector.z)
 }

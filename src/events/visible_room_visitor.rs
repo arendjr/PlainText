@@ -2,18 +2,19 @@ use std::f64::consts::TAU;
 
 use crate::{
     game_object::GameObject,
-    objects::{Realm, Room},
+    objects::{Realm, Room, RoomFlags},
     player_output::PlayerOutput,
+    vector3d::Vector3D,
 };
 
-use super::{event::VisualEvent, EventType};
+use super::{event::Event, EventType};
 
-pub fn visit_rooms(
-    realm: &Realm,
-    event: &dyn VisualEvent,
-    strength: f32,
-) -> Option<Vec<PlayerOutput>> {
-    let mut rooms_to_visit = vec![(realm.room(event.origin())?, strength)];
+pub fn visit_rooms(realm: &Realm, event: &dyn Event, strength: f32) -> Option<Vec<PlayerOutput>> {
+    let mut rooms_to_visit = event
+        .origins()
+        .into_iter()
+        .filter_map(|room| realm.room(room).map(|room| (room, strength)))
+        .collect::<Vec<_>>();
     let mut room_visit_index = 0;
     loop {
         let (room, strength) = rooms_to_visit[room_visit_index];
@@ -49,7 +50,7 @@ pub fn visit_rooms(
 fn visit_room<'a>(
     realm: &'a Realm,
     room: &Room,
-    event: &dyn VisualEvent,
+    event: &dyn Event,
     strength: f32,
 ) -> Option<Vec<(&'a Room, f32)>> {
     let strength = strength * room.event_multiplier(EventType::Visual);
@@ -65,14 +66,8 @@ fn visit_room<'a>(
             _ => continue,
         };
 
-        if let (Some(room1), Some(room2)) = (realm.room(portal.room()), realm.room(portal.room2()))
-        {
-            let opposite_room = if room.id() == room1.id() {
-                room2
-            } else {
-                room1
-            };
-            if event.is_within_sight(realm, opposite_room, room) {
+        if let Some(opposite_room) = realm.room(portal.opposite_of(room.object_ref())) {
+            if is_within_sight(realm, event, room, opposite_room) {
                 let propagated_strength = strength * portal.event_multiplier(EventType::Visual);
                 if propagated_strength >= 0.1 {
                     next_rooms.push((opposite_room, propagated_strength));
@@ -84,10 +79,55 @@ fn visit_room<'a>(
     Some(next_rooms)
 }
 
+fn is_within_sight(
+    realm: &Realm,
+    event: &dyn Event,
+    source_room: &Room,
+    target_room: &Room,
+) -> bool {
+    let origins = event.origins();
+    if origins.contains(&source_room.object_ref()) {
+        return true;
+    }
+
+    let target_vector = (target_room.position() - source_room.position()).normalized();
+
+    for origin in origins {
+        let origin = match realm.room(origin) {
+            Some(room) => room,
+            None => continue,
+        };
+
+        if is_visible_from(origin, source_room, &target_vector) {
+            return true;
+        }
+    }
+
+    false
+}
+
+fn is_visible_from(room: &Room, source_room: &Room, target_vector: &Vector3D) -> bool {
+    let source_vector = (source_room.position() - room.position()).normalized();
+    if &source_vector == target_vector {
+        return true;
+    }
+
+    if source_room.has_flags(RoomFlags::HasWalls) {
+        if target_vector.x != source_vector.x || target_vector.y != source_vector.y {
+            return false;
+        }
+    } else if target_vector.z == source_vector.z {
+        return true;
+    }
+
+    (!source_room.has_flags(RoomFlags::HasCeiling) && target_vector.z >= source_vector.z)
+        || (!source_room.has_flags(RoomFlags::HasFloor) && target_vector.z <= source_vector.z)
+}
+
 fn notify_characters(
     realm: &Realm,
     room: &Room,
-    event: &dyn VisualEvent,
+    event: &dyn Event,
     strength: f32,
 ) -> Option<Vec<PlayerOutput>> {
     let strength = strength * room.event_multiplier(EventType::Visual);
@@ -96,7 +136,6 @@ fn notify_characters(
     }
 
     let mut output = vec![];
-    let origin = realm.room(event.origin())?;
 
     for character in room.characters() {
         if event.excluded_characters().contains(character) {
@@ -105,9 +144,16 @@ fn notify_characters(
 
         // Make sure the character is actually looking in the direction of the event:
         let character = realm.character(*character)?;
-        let event_direction = origin.position() - room.position();
-        let angle = character.direction().angle(&event_direction);
-        if angle > TAU / 8.0 {
+        if !event
+            .origins()
+            .into_iter()
+            .filter_map(|origin| realm.room(origin))
+            .any(|origin| {
+                let event_direction = origin.position() - room.position();
+                let angle = character.direction().angle(&event_direction);
+                angle <= TAU / 8.0
+            })
+        {
             continue;
         }
 

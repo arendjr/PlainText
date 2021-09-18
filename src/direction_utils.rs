@@ -65,22 +65,22 @@ pub fn direction_for_vector(vector: &Vector3D) -> &'static str {
         }
     } else {
         let degrees = (vector.y as f64).atan2(vector.x as f64) * 360.0 / TAU;
-        if degrees < -157.5 || degrees > 157.5 {
-            DIRECTIONS[6].name
-        } else if degrees >= -157.5 && degrees < -112.5 {
-            DIRECTIONS[7].name
-        } else if degrees >= -112.5 && degrees < -67.5 {
+        if (-112.5..-67.5).contains(&degrees) {
             DIRECTIONS[0].name
-        } else if degrees >= -67.5 && degrees < -22.5 {
+        } else if (-67.5..-22.5).contains(&degrees) {
             DIRECTIONS[1].name
-        } else if degrees >= -22.5 && degrees < 22.5 {
+        } else if (-22.5..22.5).contains(&degrees) {
             DIRECTIONS[2].name
-        } else if degrees >= 22.5 && degrees < 67.5 {
+        } else if (22.5..67.5).contains(&degrees) {
             DIRECTIONS[3].name
-        } else if degrees >= 67.5 && degrees < 112.5 {
+        } else if (67.5..112.5).contains(&degrees) {
             DIRECTIONS[4].name
-        } else {
+        } else if (112.5..157.5).contains(&degrees) {
             DIRECTIONS[5].name
+        } else if !(-157.5..=157.5).contains(&degrees) {
+            DIRECTIONS[6].name
+        } else {
+            DIRECTIONS[7].name
         }
     }
 }
@@ -107,14 +107,10 @@ pub fn is_direction(string: &str) -> bool {
     index_of_direction(string).is_some()
 }
 
-pub fn is_direction_abbreviation(string: &str) -> bool {
-    index_of_direction_abbreviation(string).is_some()
-}
-
-pub fn vector_for_direction(direction: &str) -> Vector3D {
+pub fn vector_for_direction(direction: &str) -> Option<Vector3D> {
     if let Some(index) = index_of_direction(direction) {
-        DIRECTIONS[index].vector.clone()
+        Some(DIRECTIONS[index].vector.clone())
     } else {
-        Vector3D::default()
+        index_of_direction_abbreviation(direction).map(|index| DIRECTIONS[index].vector.clone())
     }
 }
