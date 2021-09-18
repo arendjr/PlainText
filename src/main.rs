@@ -1,4 +1,4 @@
-use std::{env, fs, io};
+use std::{collections::BTreeMap, env, fs, io};
 use tokio::sync::mpsc::{channel, Sender};
 
 #[macro_use]
@@ -289,28 +289,40 @@ async fn process_player_output(
     session_tx: &Sender<SessionEvent>,
     player_output: Vec<PlayerOutput>,
 ) {
-    for output in player_output {
-        if let Some(player) = realm.player_by_id(output.player_id) {
-            if let Some(session_id) = player.session_id() {
-                send_session_event(
-                    session_tx,
-                    SessionEvent::SessionOutput(
-                        session_id,
-                        match output.output {
-                            SessionOutput::Json(json) => SessionOutput::Json(json),
-                            output => output.with(SessionOutput::Prompt(SessionPromptInfo {
-                                name: player.name().to_owned(),
-                                is_admin: player.is_admin(),
-                                hp: player.hp(),
-                                max_hp: player.stats().max_hp(),
-                                mp: player.mp(),
-                                max_mp: player.stats().max_mp(),
-                            })),
-                        },
-                    ),
-                )
-                .await;
-            }
+    let mut aggregated_output = BTreeMap::<u32, SessionOutput>::new();
+    for PlayerOutput { player_id, output } in player_output {
+        if let Some(existing_output) = aggregated_output.remove(&player_id) {
+            aggregated_output.insert(player_id, existing_output.with(output));
+        } else {
+            aggregated_output.insert(player_id, output);
+        }
+    }
+
+    for (player_id, output) in aggregated_output {
+        let player = match realm.player_by_id(player_id) {
+            Some(player) => player,
+            None => continue,
+        };
+
+        if let Some(session_id) = player.session_id() {
+            send_session_event(
+                session_tx,
+                SessionEvent::SessionOutput(
+                    session_id,
+                    match output {
+                        SessionOutput::Json(json) => SessionOutput::Json(json),
+                        output => output.with(SessionOutput::Prompt(SessionPromptInfo {
+                            name: player.name().to_owned(),
+                            is_admin: player.is_admin(),
+                            hp: player.hp(),
+                            max_hp: player.stats().max_hp(),
+                            mp: player.mp(),
+                            max_mp: player.stats().max_mp(),
+                        })),
+                    },
+                ),
+            )
+            .await;
         }
     }
 }
