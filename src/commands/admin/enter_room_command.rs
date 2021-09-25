@@ -21,7 +21,5 @@ pub fn enter_room(
         .ok_or("Provide a room ID preceded by #.")?;
     let room_ref = GameObjectRef::new(GameObjectType::Room, room_id);
 
-    let mut output = actions::enter_room(realm, player_ref, room_ref)?;
-    output.append(&mut actions::look_at_object(realm, player_ref, room_ref)?);
-    Ok(output)
+    actions::enter_room(realm, player_ref, room_ref)
 }

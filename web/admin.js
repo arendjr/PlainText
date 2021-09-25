@@ -7,8 +7,6 @@ import {
 } from "./main.js";
 import { openMapEditor } from "./map_editor/mod.js";
 
-const triggers = new Map();
-
 const statusHeader = document.querySelector(".status-header");
 statusHeader.innerHTML += ' <a class="edit-map">Edit Map</a>';
 
@@ -49,53 +47,6 @@ function attachListeners() {
             return false;
         }
 
-        if (
-            commandName.startsWith("edit-t") &&
-            "edit-trigger".startsWith(commandName)
-        ) {
-            const triggerName = command.split(/\s+/)[2];
-            if (parseInt(triggerName, 10) > 0) {
-                triggerName = command.split(/\s+/)[3];
-            }
-
-            const trigger = triggers.get(triggerName);
-            if (trigger) {
-                sendApiCall("trigger-get " + rest).then(data => {
-                    const { triggerSource } = data;
-                    if (!triggerSource) {
-                        if (trigger.includes("(")) {
-                            const argsString = trigger.slice(
-                                trigger.indexOf("(") + 1,
-                                trigger.indexOf(")")
-                            );
-                            const args = argsString
-                                .split(", ")
-                                .map(arg => arg.slice(0, arg.indexOf(" : ")));
-                            triggerSource = `(function(${args.join(
-                                ", "
-                            )}) {\n    \n})`;
-                        } else {
-                            triggerSource = "(function() {\n    \n})";
-                        }
-                    }
-
-                    propertyEditor.edit(triggerSource, {
-                        mode: "javascript",
-                        onsave: value => {
-                            sendApiCall(
-                                `trigger-set ${data.id} ${triggerName} ${value}`
-                            ).then(() => propertyEditor.close());
-                        },
-                        onclose: setFocus,
-                    });
-                });
-            } else {
-                writeToScreen(`There is no trigger named ${triggerName}.`);
-            }
-
-            return false;
-        }
-
         if (command === "exec-script") {
             propertyEditor.edit("", {
                 mode: "javascript",
@@ -128,20 +79,4 @@ function attachListeners() {
     });
 }
 
-function fetchTriggers() {
-    sendApiCall("triggers-list").then(data => {
-        for (const trigger of data) {
-            const triggerName = trigger.slice(
-                0,
-                trigger.includes("(")
-                    ? trigger.indexOf("(")
-                    : trigger.indexOf(" : ")
-            );
-            triggers.set(triggerName, trigger);
-        }
-    });
-}
-
 attachListeners();
-
-fetchTriggers();

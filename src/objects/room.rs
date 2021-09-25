@@ -1,14 +1,15 @@
 #![allow(non_upper_case_globals)]
 
+use crate::{
+    events::{EventMultiplierMap, EventType},
+    game_object::{
+        ref_difference, ref_union, GameObject, GameObjectId, GameObjectPersistence, GameObjectRef,
+        GameObjectType,
+    },
+    point3d::Point3D,
+};
 use serde::{Deserialize, Serialize};
 use std::fmt;
-
-use crate::events::{EventMultiplierMap, EventType};
-use crate::game_object::{
-    ref_difference, ref_union, GameObject, GameObjectId, GameObjectPersistence, GameObjectRef,
-    GameObjectType,
-};
-use crate::point3d::Point3D;
 
 serializable_flags! {
     struct RoomFlags: u32 {
@@ -56,8 +57,8 @@ impl Room {
     game_object_ref_prop!(pub, portals, set_portals, Vec<GameObjectRef>);
     game_object_ref_prop!(pub, position, set_position, Point3D);
 
-    pub fn add_characters(&mut self, characters: Vec<GameObjectRef>) {
-        self.set_characters(ref_union(&self.characters, &characters))
+    pub fn add_characters(&mut self, characters: &[GameObjectRef]) {
+        self.set_characters(ref_union(&self.characters, characters))
     }
 
     pub fn event_multiplier(&self, event_type: EventType) -> f32 {
@@ -86,8 +87,8 @@ impl Room {
         }
     }
 
-    pub fn remove_characters(&mut self, characters: Vec<GameObjectRef>) {
-        self.set_characters(ref_difference(&self.characters, &characters))
+    pub fn remove_characters(&mut self, characters: &[GameObjectRef]) {
+        self.set_characters(ref_difference(&self.characters, characters))
     }
 }
 

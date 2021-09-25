@@ -40,7 +40,7 @@ pub fn look_in_direction(
         room.object_ref(),
     );
     if !descriptions.is_empty() {
-        let sentence = join_sentence(descriptions);
+        let sentence = join_sentence(&descriptions);
         lines.push(format!("You see {}.", sentence));
     }
 
@@ -323,7 +323,7 @@ fn create_items_description(realm: &Realm, player: &dyn Character, room: &Room) 
             let item_descriptions =
                 describe_objects_from_room(realm, object_refs, room.object_ref());
 
-            format!("{} {} {}.", prefix, verb, join_sentence(item_descriptions))
+            format!("{} {} {}.", prefix, verb, join_sentence(&item_descriptions))
                 .replace("there is", "there's")
                 .replace(". You ", " and you ")
         })
@@ -354,7 +354,7 @@ fn create_other_characters_description(
     } else {
         Some(format!(
             "You see {}.\n",
-            join_sentence(describe_items(realm, &other_character_names))
+            join_sentence(&describe_items(realm, &other_character_names))
         ))
     }
 }

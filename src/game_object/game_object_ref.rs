@@ -9,7 +9,7 @@ pub type GameObjectId = u32;
 pub enum GameObjectType {
     Class,
     //Container,
-    //Group,
+    Group,
     Item,
     Npc,
     Player,
@@ -26,7 +26,7 @@ impl fmt::Display for GameObjectType {
         f.write_str(match self {
             GameObjectType::Class => "class",
             //GameObjectType::Container => "container",
-            //GameObjectType::Group => "group",
+            GameObjectType::Group => "group",
             GameObjectType::Item => "item",
             GameObjectType::Npc => "character",
             GameObjectType::Player => "player",
@@ -45,6 +45,7 @@ impl GameObjectType {
         match object_type_str {
             "character" => Ok(GameObjectType::Npc),
             "class" => Ok(GameObjectType::Class),
+            "group" => Ok(GameObjectType::Group),
             "item" => Ok(GameObjectType::Item),
             "player" => Ok(GameObjectType::Player),
             "portal" => Ok(GameObjectType::Portal),

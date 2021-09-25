@@ -1,14 +1,16 @@
+use super::Realm;
+use crate::{
+    character_stats::CharacterStats,
+    game_object::{
+        Character, GameObject, GameObjectId, GameObjectPersistence, GameObjectRef, GameObjectType,
+        Gender,
+    },
+    sessions::SignUpData,
+    vector3d::Vector3D,
+};
 use pbkdf2::{pbkdf2_check, pbkdf2_simple};
 use serde::{Deserialize, Serialize};
 use std::fmt;
-
-use crate::character_stats::CharacterStats;
-use crate::game_object::{
-    Character, GameObject, GameObjectId, GameObjectPersistence, GameObjectRef, GameObjectType,
-    Gender,
-};
-use crate::sessions::SignUpData;
-use crate::vector3d::Vector3D;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Player {
@@ -19,6 +21,7 @@ pub struct Player {
     direction: Vector3D,
     gender: Gender,
     gold: u32,
+    group: Option<GameObjectRef>,
     height: f32,
     hp: i16,
     inventory: Vec<GameObjectRef>,
@@ -53,6 +56,7 @@ impl Player {
                 direction: player_dto.direction.unwrap_or_default(),
                 gender: Gender::hydrate(&player_dto.gender),
                 gold: player_dto.gold,
+                group: None,
                 height: player_dto.height,
                 hp: player_dto.hp,
                 inventory: player_dto.inventory.unwrap_or_default(),
@@ -85,6 +89,7 @@ impl Player {
             direction: Vector3D::new(0, 0, 0),
             gender: sign_up_data.gender,
             gold: sign_up_data.gold,
+            group: None,
             height: sign_up_data.height,
             hp: sign_up_data.stats.max_hp(),
             inventory: Vec::new(),
@@ -127,6 +132,18 @@ impl Character for Player {
     game_object_copy_prop!(race, set_race, GameObjectRef);
     game_object_ref_prop!(stats, set_stats, CharacterStats);
     game_object_copy_prop!(weight, set_weight, f32);
+
+    fn group(&self) -> Option<GameObjectRef> {
+        self.group
+    }
+
+    fn set_group(&mut self, group: GameObjectRef) {
+        self.group = Some(group);
+    }
+
+    fn unset_group(&mut self) {
+        self.group = None;
+    }
 }
 
 impl fmt::Display for Player {
@@ -199,7 +216,7 @@ impl GameObject for Player {
         self.id
     }
 
-    fn name_at_strength(&self, strength: f32) -> String {
+    fn name_at_strength(&self, _: &Realm, strength: f32) -> String {
         if strength >= 0.9 {
             self.name().to_owned()
         } else if strength >= 0.8 {
@@ -234,6 +251,7 @@ impl GameObject for Player {
             "direction" => self.set_direction(Vector3D::from_str(value)?),
             "gender" => self.set_gender(Gender::from_str(value)?),
             "gold" => self.set_gold(value.parse().map_err(|error| format!("{:?}", error))?),
+            "group" => self.set_group(GameObjectRef::from_str(value)?),
             "height" => self.set_height(value.parse().map_err(|error| format!("{:?}", error))?),
             "hp" => self.set_hp(value.parse().map_err(|error| format!("{:?}", error))?),
             "inventory" => self.set_inventory(GameObjectRef::vec_from_str(value)?),

@@ -4,7 +4,7 @@ use std::{borrow::Borrow, cmp::Ordering};
 
 use crate::colors::Color;
 use crate::game_object::{GameObject, GameObjectRef, GameObjectType};
-use crate::number_utils::written_number;
+use crate::number_utils::{written_number, written_position};
 use crate::objects::{ItemFlags, Realm};
 
 const COLOR_MAP: [&str; 16] = [
@@ -75,6 +75,36 @@ pub fn definite_article_from_noun(noun: String) -> &'static str {
         "an"
     } else {
         "a"
+    }
+}
+
+pub fn definite_name(
+    realm: &Realm,
+    subject: GameObjectRef,
+    pool: &[GameObjectRef],
+) -> Result<String, &'static str> {
+    let subject = realm.object_res(subject)?;
+    if subject.indefinite_article().is_empty() {
+        Ok(subject.name().to_owned())
+    } else {
+        let mut position = 0;
+        let mut total = 0;
+        for other in pool {
+            let other = realm.object_res(*other)?;
+            if other.name() == subject.name() {
+                total += 1;
+
+                if other.id() == subject.id() {
+                    position = total;
+                }
+            }
+        }
+
+        Ok(if total > 1 {
+            format!("the {} {}", written_position(position), subject.name())
+        } else {
+            format!("the {}", subject.name())
+        })
     }
 }
 
@@ -181,7 +211,7 @@ pub fn is_vowel(character: char) -> bool {
     character == 'a' || character == 'e' || character == 'i' || character == 'o' || character == 'u'
 }
 
-pub fn join_fancy<T>(list: Vec<T>, separator: &str, last: &str) -> String
+pub fn join_fancy<T>(list: &[T], separator: &str, last: &str) -> String
 where
     T: Borrow<str>,
 {
@@ -198,7 +228,7 @@ where
     string
 }
 
-pub fn join_sentence<T>(list: Vec<T>) -> String
+pub fn join_sentence<T>(list: &[T]) -> String
 where
     T: Borrow<str>,
 {
@@ -248,14 +278,11 @@ pub fn split_lines(string: &str, max_line_len: usize) -> Vec<String> {
                 if current_line_len + left.len() >= max_line_len {
                     lines.push(current_line);
                     current_line = left.to_owned();
-                    current_line_len = left.len();
                 } else {
                     if !current_line.is_empty() {
                         current_line += " ";
-                        current_line_len += 1;
                     }
                     current_line += left;
-                    current_line_len += left.len();
                 }
             }
             lines.push(current_line);

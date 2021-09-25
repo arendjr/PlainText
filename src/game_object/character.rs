@@ -1,5 +1,7 @@
 use crate::character_stats::CharacterStats;
 use crate::game_object::{GameObject, GameObjectRef};
+use crate::objects::Realm;
+use crate::text_utils::definite_name;
 use crate::vector3d::Vector3D;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -43,6 +45,11 @@ pub trait Character: GameObject {
     fn current_room(&self) -> GameObjectRef;
     fn set_current_room(&mut self, room: GameObjectRef);
 
+    fn definite_name(&self, realm: &Realm) -> Result<String, &'static str> {
+        let room = realm.room_res(self.current_room())?;
+        definite_name(realm, self.object_ref(), room.characters())
+    }
+
     fn direction(&self) -> &Vector3D;
     fn set_direction(&mut self, direction: Vector3D);
 
@@ -52,6 +59,10 @@ pub trait Character: GameObject {
     fn gold(&self) -> u32;
     fn set_gold(&mut self, gold: u32);
 
+    fn group(&self) -> Option<GameObjectRef>;
+    fn set_group(&mut self, group: GameObjectRef);
+    fn unset_group(&mut self);
+
     fn height(&self) -> f32;
     fn set_height(&mut self, height: f32);
 
@@ -60,6 +71,10 @@ pub trait Character: GameObject {
 
     fn inventory(&self) -> &Vec<GameObjectRef>;
     fn set_inventory(&mut self, inventory: Vec<GameObjectRef>);
+
+    fn is_player(&self) -> bool {
+        self.as_player().is_some()
+    }
 
     fn mp(&self) -> i16;
     fn set_mp(&mut self, mp: i16);

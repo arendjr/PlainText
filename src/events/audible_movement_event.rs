@@ -12,9 +12,6 @@ const THREE_EIGHT_TAU: f64 = 3.0 * ONE_EIGHT_TAU;
 
 /// An audible event that gets triggered when someone or something moves to another room.
 pub struct AudibleMovementEvent {
-    /// Who are what is moving?
-    subject: GameObjectRef,
-
     /// Where are they moving from?
     origin: GameObjectRef,
     /// Where are they moving to?
@@ -46,9 +43,8 @@ impl AudibleMovementEvent {
         sound_room_visitor::visit_rooms(realm, self, strength)
     }
 
-    pub fn new(subject: GameObjectRef, origin: GameObjectRef, destination: GameObjectRef) -> Self {
+    pub fn new(origin: GameObjectRef, destination: GameObjectRef) -> Self {
         Self {
-            subject,
             origin,
             destination,
             direction: Vector3D::default(),
@@ -58,7 +54,7 @@ impl AudibleMovementEvent {
             description: String::new(),
             distant_description: String::new(),
             very_distant_description: String::new(),
-            excluded_characters: vec![subject],
+            excluded_characters: vec![],
         }
     }
 

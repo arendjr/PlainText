@@ -13,7 +13,7 @@ pub struct SessionPromptInfo {
     pub max_mp: i16,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum SessionOutput {
     None,
     Str(&'static str),

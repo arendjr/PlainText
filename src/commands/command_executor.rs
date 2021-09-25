@@ -1,22 +1,26 @@
-use crate::commands::admin::wrap_admin_command;
-use crate::commands::api::{object_create, object_delete, object_set, wrap_api_request};
-use crate::game_object::GameObjectRef;
-use crate::objects::Realm;
-use crate::player_output::PlayerOutput;
-use crate::trigger_registry::TriggerRegistry;
-use crate::LogSender;
-
-use super::admin::enter_room;
-use super::api::{objects_list, property_set, triggers_list};
-use super::command_helpers::CommandHelpers;
-use super::command_interpreter::{interpret_command, InterpretationError};
-use super::command_line_processor::CommandLineProcessor;
-use super::command_registry::CommandRegistry;
-use super::go_command::go;
-use super::help_command::help;
-use super::inventory_command::inventory;
-use super::look_command::look;
-use super::CommandType;
+use super::{
+    admin::enter_room,
+    api::{objects_list, property_set},
+    command_helpers::CommandHelpers,
+    command_interpreter::{interpret_command, InterpretationError},
+    command_line_processor::CommandLineProcessor,
+    command_registry::CommandRegistry,
+    follow_command::follow,
+    go_command::go,
+    help_command::help,
+    inventory_command::inventory,
+    look_command::look,
+    lose_command::lose,
+    CommandType,
+};
+use crate::{
+    commands::admin::wrap_admin_command,
+    commands::api::{object_create, object_delete, object_set, wrap_api_request},
+    game_object::GameObjectRef,
+    objects::Realm,
+    player_output::PlayerOutput,
+    LogSender,
+};
 
 pub struct CommandExecutor {
     admin_command_registry: CommandRegistry,
@@ -27,7 +31,6 @@ impl CommandExecutor {
     pub fn execute_command(
         &self,
         realm: &mut Realm,
-        trigger_registry: &TriggerRegistry,
         player_ref: GameObjectRef,
         _: &LogSender,
         command_line: String,
@@ -46,7 +49,6 @@ impl CommandExecutor {
                     admin_command_registry: &self.admin_command_registry,
                     command_line_processor: &mut processor,
                     command_registry: &self.command_registry,
-                    trigger_registry,
                 };
                 let command_fn = match command_type {
                     CommandType::ApiObjectCreate => wrap_api_request(object_create),
@@ -54,13 +56,13 @@ impl CommandExecutor {
                     CommandType::ApiObjectSet => wrap_api_request(object_set),
                     CommandType::ApiObjectsList => wrap_api_request(objects_list),
                     CommandType::ApiPropertySet => wrap_api_request(property_set),
-                    CommandType::ApiTriggersList => wrap_api_request(triggers_list),
                     CommandType::EnterRoom(_) => wrap_admin_command(enter_room),
+                    CommandType::Follow(_) => wrap_command(follow),
                     CommandType::Go(_) => wrap_command(go),
                     CommandType::Help(_) => wrap_command(help),
                     CommandType::Inventory(_) => wrap_command(inventory),
                     CommandType::Look(_) => wrap_command(look),
-                    CommandType::Lose(_) => panic!("Not implemented"),
+                    CommandType::Lose(_) => wrap_command(lose),
                 };
                 command_fn(realm, player_ref, command_helpers)
             }
@@ -85,7 +87,6 @@ impl CommandExecutor {
         registry.register("api-object-set", CommandType::ApiObjectSet);
         registry.register("api-objects-list", CommandType::ApiObjectsList);
         registry.register("api-property-set", CommandType::ApiPropertySet);
-        registry.register("api-triggers-list", CommandType::ApiTriggersList);
         registry.register(
             "enter",
             CommandType::Go(
@@ -100,6 +101,15 @@ impl CommandExecutor {
                 "Examine an object.\n\
                 \n\
                 Examples: *examine sign*, *examine key in inventory*",
+            ),
+        );
+        registry.register(
+            "follow",
+            CommandType::Follow(
+                "Form or join a group by following another player. The first person \
+                being followed automatically becomes the group leader.\n\
+                \n\
+                Example: *follow mia*",
             ),
         );
         registry.register(
@@ -140,6 +150,16 @@ impl CommandExecutor {
                 "Examine an object.\n\
                 \n\
                 Examples: *look north*, *look at sign*, *look at key in inventory*",
+            ),
+        );
+        registry.register(
+            "lose",
+            CommandType::Lose(
+                "Remove yourself or someone else from a group. If you are a group \
+                leader, you can remove anyone from your group by using *lose <name>*. \
+                You can always remove yourself from a group using simply *lose*.\n\
+                \n\
+                Examples: *lose mia*, *lose*",
             ),
         );
 

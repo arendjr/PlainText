@@ -1,11 +1,11 @@
+use super::Realm;
+use crate::{
+    character_stats::CharacterStats,
+    game_object::{Character, GameObject, GameObjectId, GameObjectRef, GameObjectType, Gender},
+    vector3d::Vector3D,
+};
 use serde::{Deserialize, Serialize};
 use std::fmt;
-
-use crate::character_stats::CharacterStats;
-use crate::game_object::{
-    Character, GameObject, GameObjectId, GameObjectRef, GameObjectType, Gender,
-};
-use crate::vector3d::Vector3D;
 
 serializable_flags! {
     pub struct NpcFlags: u32 {
@@ -23,6 +23,7 @@ pub struct Npc {
     flags: NpcFlags,
     gender: Gender,
     gold: u32,
+    group: Option<GameObjectRef>,
     height: f32,
     hp: i16,
     indefinite_article: String,
@@ -54,6 +55,7 @@ impl Npc {
                 flags: npc_dto.flags.unwrap_or_default(),
                 gender: Gender::hydrate(&npc_dto.gender),
                 gold: npc_dto.gold,
+                group: None,
                 height: npc_dto.height,
                 hp: npc_dto.hp,
                 indefinite_article: npc_dto.indefiniteArticle.unwrap_or_default(),
@@ -85,6 +87,7 @@ impl Npc {
             flags: NpcFlags::None,
             gender: Gender::Unspecified,
             gold: 0,
+            group: None,
             height: 0.0,
             hp: 1,
             indefinite_article: String::new(),
@@ -121,6 +124,18 @@ impl Character for Npc {
     game_object_copy_prop!(race, set_race, GameObjectRef);
     game_object_ref_prop!(stats, set_stats, CharacterStats);
     game_object_copy_prop!(weight, set_weight, f32);
+
+    fn group(&self) -> Option<GameObjectRef> {
+        self.group
+    }
+
+    fn set_group(&mut self, group: GameObjectRef) {
+        self.group = Some(group);
+    }
+
+    fn unset_group(&mut self) {
+        self.group = None;
+    }
 }
 
 impl fmt::Display for Npc {
@@ -214,7 +229,7 @@ impl GameObject for Npc {
         &self.indefinite_article
     }
 
-    fn name_at_strength(&self, strength: f32) -> String {
+    fn name_at_strength(&self, _: &Realm, strength: f32) -> String {
         if strength >= 0.9 {
             if self.has_flags(NpcFlags::AlwaysUseDefiniteArticle) {
                 format!("the {}", self.name())
@@ -258,6 +273,7 @@ impl GameObject for Npc {
             "flags" => self.set_flags(NpcFlags::from_str(value)?),
             "gender" => self.set_gender(Gender::from_str(value)?),
             "gold" => self.set_gold(value.parse().map_err(|error| format!("{:?}", error))?),
+            "group" => self.set_group(GameObjectRef::from_str(value)?),
             "height" => self.set_height(value.parse().map_err(|error| format!("{:?}", error))?),
             "hp" => self.set_hp(value.parse().map_err(|error| format!("{:?}", error))?),
             "indefiniteArticle" => self.set_indefinite_article(value.to_owned()),

@@ -8,7 +8,7 @@ pub use game_object_util::{ref_difference, ref_union};
 
 use core::panic;
 
-use crate::objects;
+use crate::objects::{self, Realm};
 
 pub trait GameObject {
     fn id(&self) -> GameObjectId;
@@ -33,6 +33,14 @@ pub trait GameObject {
     }
 
     fn as_class_mut(&mut self) -> Option<&mut objects::Class> {
+        None
+    }
+
+    fn as_group(&self) -> Option<&objects::Group> {
+        None
+    }
+
+    fn as_group_mut(&mut self) -> Option<&mut objects::Group> {
         None
     }
 
@@ -121,7 +129,7 @@ pub trait GameObject {
     ///
     /// The clarity with which the object is being observed is indicated through the strength,
     /// where 1.0 represents a full clear view, while 0.0 means the object has become invisible.
-    fn name_at_strength(&self, strength: f32) -> String {
+    fn name_at_strength(&self, realm: &Realm, strength: f32) -> String {
         if strength >= 1.0 {
             self.name().to_owned()
         } else {
@@ -143,6 +151,7 @@ pub trait GameObject {
 pub fn hydrate(object_ref: GameObjectRef, content: &str) -> Result<Box<dyn GameObject>, String> {
     let hydrate = match object_ref.object_type() {
         GameObjectType::Class => objects::Class::hydrate,
+        GameObjectType::Group => panic!("Groups cannot be hydrated"),
         GameObjectType::Item => objects::Item::hydrate,
         GameObjectType::Npc => objects::Npc::hydrate,
         GameObjectType::Player => objects::Player::hydrate,

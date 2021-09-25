@@ -1,12 +1,13 @@
-use std::collections::BTreeSet;
-
-use crate::events::{AudibleMovementEvent, VisualMovementEvent};
-use crate::game_object::{GameObjectRef, GameObjectType};
-use crate::objects::Realm;
-use crate::player_output::PlayerOutput;
-use crate::vector3d::Vector3D;
-
 use super::change_direction;
+use crate::{
+    actions,
+    events::{AudibleMovementEvent, VisualMovementEvent},
+    game_object::{GameObjectRef, GameObjectType},
+    objects::Realm,
+    player_output::PlayerOutput,
+    vector3d::Vector3D,
+};
+use std::collections::BTreeSet;
 
 /// Makes the character enter the given portal.
 pub fn enter_portal(
@@ -17,7 +18,16 @@ pub fn enter_portal(
 ) -> Result<Vec<PlayerOutput>, String> {
     let portal = realm
         .portal(portal_ref)
-        .ok_or_else(|| "That portal doesn't exist.".to_owned())?;
+        .ok_or("That portal doesn't exist.")?;
+
+    if portal.can_open() && !portal.is_open() {
+        return Err(format!(
+            "The {} is closed.",
+            portal.name_from_room(from_room_ref)
+        ));
+    } else if !portal.can_pass_through() {
+        return Err("You cannot go there.".into());
+    }
 
     let target_room_ref = portal.opposite_of(from_room_ref);
     enter_room(realm, character_ref, target_room_ref)
@@ -30,7 +40,7 @@ pub fn enter_room(
     room_ref: GameObjectRef,
 ) -> Result<Vec<PlayerOutput>, String> {
     let character = realm
-        .character_mut(character_ref)
+        .character(character_ref)
         .ok_or("The character doesn't exist.")?;
 
     let current_room_ref = character.current_room();
@@ -38,30 +48,68 @@ pub fn enter_room(
         return Ok(vec![]); // Nothing to do.
     }
 
-    character.set_current_room(room_ref);
+    let party = character
+        .group()
+        .and_then(|group| realm.group(group))
+        .and_then(|group| match group.leader() == character_ref {
+            true => Some(group.followers()),
+            false => None,
+        })
+        .map(|followers| {
+            let mut party = vec![character_ref];
+            for follower in followers {
+                let is_in_same_room = realm
+                    .character(*follower)
+                    .map(|follower| follower.current_room() == current_room_ref)
+                    .unwrap_or(false);
+                if is_in_same_room {
+                    party.push(*follower);
+                }
+            }
+            party
+        })
+        .unwrap_or_else(|| vec![character_ref]);
+    let visual_subject = if party.len() > 1 {
+        character.group().unwrap()
+    } else {
+        character_ref
+    };
+
     let character_name = character.name().to_owned();
+
+    for character in party.iter() {
+        if let Some(character) = realm.character_mut(*character) {
+            character.set_current_room(room_ref);
+        }
+    }
 
     let direction = match (realm.room(current_room_ref), realm.room(room_ref)) {
         (Some(current_room), Some(new_room)) => {
             let direction = (new_room.position() - current_room.position()).normalized();
-            change_direction(realm, character_ref, direction.clone());
+            for character in party.iter() {
+                change_direction(realm, *character, direction.clone());
+            }
             direction
         }
         (_, _) => Vector3D::default(),
     };
 
     if let Some(current_room) = realm.room_mut(current_room_ref) {
-        current_room.remove_characters(vec![character_ref]);
+        current_room.remove_characters(&party);
     }
 
     if let Some(room) = realm.room_mut(room_ref) {
-        room.add_characters(vec![character_ref]);
+        room.add_characters(&party);
     }
 
-    let mut visual_event = VisualMovementEvent::new(character_ref, current_room_ref, room_ref);
+    let mut visual_event = VisualMovementEvent::new(visual_subject, current_room_ref, room_ref);
     visual_event.direction = direction.clone();
-    visual_event.set_verb("walks", "is walking");
-    visual_event.excluded_characters = vec![character_ref];
+    if party.len() == 1 {
+        visual_event.set_verb("walks", "is walking");
+    } else {
+        visual_event.set_verb("walk", "are walking");
+    }
+    visual_event.excluded_characters = party.clone();
     let visual_output = visual_event
         .fire(realm, 1.0)
         .ok_or_else(|| "You walked, but nobody saw you.".to_owned())?;
@@ -71,18 +119,46 @@ pub fn enter_room(
         .map(|output| GameObjectRef(GameObjectType::Player, output.player_id))
         .collect::<BTreeSet<_>>();
 
-    let mut sound_event = AudibleMovementEvent::new(character_ref, current_room_ref, room_ref);
+    let mut sound_event = AudibleMovementEvent::new(current_room_ref, room_ref);
     sound_event.direction = direction;
-    sound_event.set_verb("walks", "is walking");
-    sound_event.set_description(&character_name, "someone", "someone");
+    if party.len() == 1 {
+        sound_event.set_verb("walks", "is walking");
+        sound_event.set_description(&character_name, "someone", "someone");
+    } else {
+        sound_event.set_verb("walk", "are walking");
+        sound_event.set_description("some people", "people", "people");
+    }
+    sound_event.excluded_characters = party.clone();
     sound_event
         .excluded_characters
         .append(&mut visual_witnesses.into_iter().collect::<Vec<_>>());
     let mut sound_output = sound_event
-        .fire(realm, 1.0)
+        .fire(realm, sound_strength_for_party(&party))
         .ok_or_else(|| "You walked, but nobody heard you.".to_owned())?;
 
     let mut output = visual_output;
     output.append(&mut sound_output);
+    for character in party {
+        if character != character_ref {
+            output.push(PlayerOutput::new_from_string(
+                character.id(),
+                format!("You follow {}.\n", character_name),
+            ));
+        }
+
+        output.append(&mut actions::look_at_object(realm, character, room_ref)?);
+    }
     Ok(output)
+}
+
+fn sound_strength_for_party(party: &[GameObjectRef]) -> f32 {
+    let mut strength = 0.0;
+    for (i, _) in party.iter().enumerate() {
+        let mut added_strength = 1.0 - 0.2 * i as f32;
+        if added_strength < 0.3 {
+            added_strength = 0.3;
+        }
+        strength += added_strength;
+    }
+    strength
 }

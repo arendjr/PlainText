@@ -10,6 +10,8 @@ use crate::objects::Player;
 use crate::persistence_handler::PersistenceRequest;
 use crate::sessions::SignUpData;
 
+use super::Group;
+
 impl Eq for dyn GameObject {}
 
 impl Hash for dyn GameObject {
@@ -66,10 +68,39 @@ impl Realm {
             .and_then(|object| object.as_character_mut())
     }
 
+    pub fn character_res(&self, object_ref: GameObjectRef) -> Result<&dyn Character, &'static str> {
+        self.character(object_ref)
+            .ok_or("That character is no longer there.")
+    }
+
     pub fn class(&self, object_ref: GameObjectRef) -> Option<&objects::Class> {
         self.objects
             .get(&object_ref)
             .and_then(|object| object.as_class())
+    }
+
+    pub fn create_group(&mut self, leader: GameObjectRef) -> GameObjectRef {
+        let group_ref = GameObjectRef(GameObjectType::Group, self.next_id);
+        let group = Group::new(group_ref.id(), leader);
+        if let Some(leader) = self.character_mut(leader) {
+            leader.set_group(group_ref);
+        }
+
+        self.set(group_ref, Box::new(group));
+
+        group_ref
+    }
+
+    pub fn group(&self, object_ref: GameObjectRef) -> Option<&objects::Group> {
+        self.objects
+            .get(&object_ref)
+            .and_then(|object| object.as_group())
+    }
+
+    pub fn group_mut(&mut self, object_ref: GameObjectRef) -> Option<&mut objects::Group> {
+        self.objects
+            .get_mut(&object_ref)
+            .and_then(|object| object.as_group_mut())
     }
 
     pub fn hydrate(id: GameObjectId, json: &str) -> Result<Realm, String> {
@@ -112,6 +143,13 @@ impl Realm {
         self.objects
             .get_mut(&object_ref)
             .and_then(|object| object.as_object_mut())
+    }
+
+    pub fn object_res(&self, object_ref: GameObjectRef) -> Result<&dyn GameObject, &'static str> {
+        self.objects
+            .get(&object_ref)
+            .map(|object| object.deref())
+            .ok_or("Unknown object.")
     }
 
     pub fn objects_of_type(
@@ -158,19 +196,19 @@ impl Realm {
             .and_then(move |id| self.player_by_id_mut(id))
     }
 
-    pub fn player_res(&self, object_ref: GameObjectRef) -> Result<&objects::Player, String> {
+    pub fn player_res(&self, object_ref: GameObjectRef) -> Result<&objects::Player, &'static str> {
         self.player(object_ref)
-            .ok_or_else(|| "Your account has been deactivated.".to_owned())
+            .ok_or("Your account has been deactivated.")
     }
 
     pub fn player_and_room_res(
         &self,
         object_ref: GameObjectRef,
-    ) -> Result<(&objects::Player, &objects::Room), String> {
+    ) -> Result<(&objects::Player, &objects::Room), &'static str> {
         let player = self.player_res(object_ref)?;
         let room = self
             .room(player.current_room())
-            .ok_or_else(|| "You have slipped between dimensions.".to_owned())?;
+            .ok_or("You have slipped between dimensions.")?;
         Ok((player, room))
     }
 
@@ -211,6 +249,11 @@ impl Realm {
         self.objects
             .get_mut(&object_ref)
             .and_then(|object| object.as_room_mut())
+    }
+
+    pub fn room_res(&self, object_ref: GameObjectRef) -> Result<&objects::Room, &'static str> {
+        self.room(object_ref)
+            .ok_or("The room was sucked into the void.")
     }
 
     pub fn set(&mut self, object_ref: GameObjectRef, object: Box<dyn GameObject>) {
@@ -254,8 +297,11 @@ impl Realm {
     pub fn unset(&mut self, object_ref: GameObjectRef) {
         if let Some(object) = self.objects.get(&object_ref) {
             let name = object.name();
-            self.players_by_name.remove(name);
-            self.races_by_name.remove(name);
+            if object.as_player().is_some() {
+                self.players_by_name.remove(name);
+            } else if object.as_race().is_some() {
+                self.races_by_name.remove(name);
+            }
 
             self.objects.remove(&object_ref);
 

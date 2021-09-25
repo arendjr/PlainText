@@ -142,11 +142,10 @@ fn show_admin_help(command_name: &str, admin_registry: &CommandRegistry) -> Opti
             *@id* to get the ID of the current room. Or, to set the description: *@description \
             As you stand just outside the South Gate, ...*\n\
             \n\
-            Not listed in the admin commands overview, but very useful: *edit-prop* and \
-            *edit-trigger* are available for more convenient editing of properties and \
-            triggers. The usage is the same as for *get-prop* and *get-trigger*, but they will \
-            pop up interactive dialogs for editing the property/trigger. Do note that these \
-            commands are only available if you use the web interface (they're not supported when \
+            Not listed in the admin commands overview, but very useful: *edit-prop* is available \
+            for more convenient editing of properties. Its usage is the same as for *get-prop*, \
+            but it will pop up an interactive dialog for editing the property. Do note that
+            this command is only available if you use the web interface (it's not supported when \
             using telnet).\n",
         )),
         _ => None,

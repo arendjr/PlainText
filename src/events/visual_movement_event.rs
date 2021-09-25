@@ -49,7 +49,7 @@ impl VisualMovementEvent {
             simple_present: String::new(),
             helper_verb: String::new(),
             continuous: String::new(),
-            excluded_characters: vec![subject],
+            excluded_characters: vec![],
         }
     }
 
@@ -72,7 +72,9 @@ impl Event for VisualMovementEvent {
         _: GameObjectRef,
         room: GameObjectRef,
     ) -> Option<String> {
-        let subject = realm.object(self.subject)?.name_at_strength(strength);
+        let subject = realm
+            .object(self.subject)?
+            .name_at_strength(realm, strength);
 
         if room == self.origin {
             let room = realm.room(room)?;

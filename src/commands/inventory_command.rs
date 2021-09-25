@@ -30,7 +30,7 @@ pub fn inventory(
     } else if weight.round() == 0.0 {
         format!(
             "You carry {}.\n",
-            join_sentence(describe_items(realm, inventory))
+            join_sentence(&describe_items(realm, inventory))
         )
     } else if let Some(item) =
         GameObjectRef::only(inventory).and_then(|item_ref| realm.item(item_ref))
@@ -43,7 +43,7 @@ pub fn inventory(
     } else {
         format!(
             "You carry {}, weighing a total of {}.\n",
-            join_sentence(describe_items(realm, inventory)),
+            join_sentence(&describe_items(realm, inventory)),
             format_weight(weight)
         )
     };

@@ -1,9 +1,10 @@
-use crate::game_object::{Character, GameObject, GameObjectRef};
-use crate::objects::Realm;
-use crate::player_output::PlayerOutput;
-use crate::text_utils::{describe_items, format_weight, join_sentence};
-
 use super::CommandHelpers;
+use crate::{
+    actions,
+    game_object::{Character, GameObject, GameObjectRef},
+    objects::Realm,
+    player_output::PlayerOutput,
+};
 
 /// Remove yourself or someone else from a group. If you are a group
 /// leader, you can remove anyone from your group by using *lose <name>*.
@@ -17,54 +18,31 @@ pub fn lose(
 ) -> Result<Vec<PlayerOutput>, String> {
     let processor = helpers.command_line_processor;
 
-    let mut output = Vec::new();
-    let player = unwrap_or_return_value!(realm.player(player_ref), output);
+    let _ = processor.take_word().unwrap(); // alias
 
-    processor.skip_word(); // alias
+    let (player, room) = realm.player_and_room_res(player_ref)?;
+    let group = player
+        .group()
+        .and_then(|group| realm.group(group))
+        .ok_or("You're not in any group.")?;
+    let group_ref = group.object_ref();
 
-    let inventory = player.inventory();
-    let weight = inventory.iter().fold(0.0, |weight, &item_ref| {
-        weight
-            + if let Some(item) = realm.item(item_ref) {
-                item.weight()
-            } else {
-                0.0
-            }
-    });
-    let carried_inventory_description = if inventory.is_empty() {
-        "You don't carry anything.\n".to_owned()
-    } else if weight.round() == 0.0 {
-        format!(
-            "You carry {}.\n",
-            join_sentence(describe_items(realm, inventory))
-        )
-    } else if let Some(item) =
-        GameObjectRef::only(inventory).and_then(|item_ref| realm.item(item_ref))
-    {
-        format!(
-            "You carry {}, weighing {}.\n",
-            item.indefinite_name(),
-            format_weight(weight)
-        )
+    if processor.has_words_left() {
+        if player_ref != group.leader() {
+            return Err("Only the group leader can lose people from the group.".into());
+        }
+
+        if processor.peek_word() == Some("all") {
+            return actions::disband(realm, group_ref);
+        }
+
+        match processor.take_object(realm, room.characters()) {
+            Some(character) => actions::lose(realm, character),
+            None => Err("Lose whom?".into()),
+        }
+    } else if player_ref == group.leader() {
+        actions::disband(realm, group_ref)
     } else {
-        format!(
-            "You carry {}, weighing a total of {}.\n",
-            join_sentence(describe_items(realm, inventory)),
-            format_weight(weight)
-        )
-    };
-
-    let carried_gold_string = if player.gold() == 0 {
-        "You don't have any gold.\n".to_owned()
-    } else {
-        format!("You've got ${} worth of gold.\n", player.gold())
-    };
-
-    push_output_string!(
-        output,
-        player_ref,
-        carried_inventory_description + &carried_gold_string
-    );
-
-    output
+        actions::unfollow(realm, player_ref)
+    }
 }
