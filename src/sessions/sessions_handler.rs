@@ -127,7 +127,7 @@ fn create_telnet_session_handler(
 fn create_websocket_session_handler(
     session_map: SessionMap,
     session_id: u64,
-    websocket: WebSocket,
+    websocket: Box<WebSocket>,
     addr: SocketAddr,
     input_tx: Sender<SessionInputEvent>,
 ) {

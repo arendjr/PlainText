@@ -20,7 +20,7 @@ impl TelnetSession {
             id,
             addr,
             writer,
-            state: SessionState::SigningIn(SignInState::new()),
+            state: SessionState::SigningIn(Box::new(SignInState::new())),
         }
     }
 }

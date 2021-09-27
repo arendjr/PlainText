@@ -13,5 +13,5 @@ pub use session_events::{SessionEvent, SessionInputEvent};
 pub use session_output::{SessionOutput, SessionPromptInfo};
 pub use session_reader::SessionReader;
 pub use sessions_handler::create_sessions_handler;
-pub use sign_in::{process_input, SignInState};
-pub use sign_up::SignUpData;
+pub use sign_in::{process_input, ProcessInputResult as ProcessSignInInputResult, SignInState};
+pub use sign_up::{ProcessInputResult as ProcessSignUpInputResult, SignUpData};

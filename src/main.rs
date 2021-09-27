@@ -50,14 +50,14 @@ mod web_server;
 
 use actions::{enter_room, look_at_object};
 use commands::CommandExecutor;
-use game_object::{hydrate, Character, GameObject, GameObjectId, GameObjectRef};
+use game_object::{hydrate, Character, GameObject, GameObjectId, GameObjectRef, GameObjectType};
 use logs::{log_command, log_session_event, LogMessage, LogSender};
 use objects::Realm;
 use persistence_handler::PersistenceRequest;
 use player_output::PlayerOutput;
 use sessions::{
-    process_input, SessionEvent, SessionInputEvent, SessionOutput, SessionPromptInfo, SessionState,
-    SignInState,
+    process_input, ProcessSignInInputResult, SessionEvent, SessionInputEvent, SessionOutput,
+    SessionPromptInfo, SessionState, SignInState,
 };
 
 #[tokio::main]
@@ -101,7 +101,7 @@ async fn main() {
     {
         match session_state {
             SessionState::SigningIn(state) => {
-                let input_ev = (input, session_id, source, state);
+                let input_ev = (input, session_id, source, state.as_ref());
                 process_signing_in_input(&mut realm, &session_tx, &log_tx, input_ev).await;
             }
             SessionState::SignedIn(player_id) => {
@@ -116,7 +116,7 @@ async fn main() {
                 .await;
             }
             SessionState::SessionClosed(player_id) => {
-                process_session_closed(&mut realm, &log_tx, player_id).await;
+                process_session_closed(&mut realm, &session_tx, &log_tx, player_id).await;
             }
         }
 
@@ -143,7 +143,7 @@ fn load_data(data_dir: &str) -> Result<Realm, io::Error> {
             let content = fs::read_to_string(&path)?;
             match hydrate(object_ref, &content) {
                 Ok(object) => {
-                    if object.as_character().is_some() {
+                    if object.as_npc().is_some() {
                         character_refs.push(object_ref);
                     }
 
@@ -171,7 +171,7 @@ fn inject_characters_into_rooms(realm: &mut Realm, character_refs: Vec<GameObjec
             .character(character_ref)
             .map(|character| character.current_room());
         if let Some(room) = maybe_current_room.and_then(|room_ref| realm.room_mut(room_ref)) {
-            room.add_characters(&vec![character_ref]);
+            room.add_characters(&[character_ref]);
         } else {
             println!(
                 "Character {:?} has no room {:?}",
@@ -185,9 +185,13 @@ async fn process_signing_in_input(
     realm: &mut Realm,
     session_tx: &Sender<SessionEvent>,
     log_tx: &LogSender,
-    (input, session_id, source, state): (String, u64, String, SignInState),
+    (input, session_id, source, state): (String, u64, String, &SignInState),
 ) {
-    let (new_state, output, log_messages) = process_input(&state, realm, &source, input);
+    let ProcessSignInInputResult {
+        new_state,
+        output,
+        log_messages,
+    } = process_input(state, realm, &source, input);
 
     send_session_event(session_tx, SessionEvent::SessionOutput(session_id, output)).await;
     for message in log_messages {
@@ -247,7 +251,7 @@ async fn process_signing_in_input(
             SessionState::SessionClosed(None)
         }
     } else {
-        SessionState::SigningIn(new_state)
+        SessionState::SigningIn(Box::new(new_state))
     };
 
     send_session_event(
@@ -324,16 +328,36 @@ async fn process_player_output(
 
 async fn process_session_closed(
     realm: &mut Realm,
+    session_tx: &Sender<SessionEvent>,
     log_tx: &LogSender,
     player_id: Option<GameObjectId>,
 ) {
     if let Some(player_id) = player_id {
+        let player_ref = GameObjectRef::new(GameObjectType::Player, player_id);
+        let mut should_unfollow = false;
+
         if let Some(player) = realm.player_by_id_mut(player_id) {
             player.set_session_id(None);
+
+            should_unfollow = player.group().is_some();
 
             let player_name = player.name().to_owned();
             log_command(log_tx, player_name, "(session closed)".to_owned()).await;
         }
+
+        let mut output = vec![];
+
+        if should_unfollow {
+            if let Ok(mut player_output) = actions::unfollow(realm, player_ref) {
+                output.append(&mut player_output);
+            }
+        }
+
+        if let Ok(mut player_output) = actions::leave_room(realm, player_ref) {
+            output.append(&mut player_output);
+        }
+
+        process_player_output(realm, session_tx, output).await;
     }
 }
 

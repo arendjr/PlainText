@@ -1,10 +1,11 @@
 use super::change_direction;
 use crate::{
     actions,
-    events::{AudibleMovementEvent, VisualMovementEvent},
+    events::{AudibleMovementEvent, VisualEvent, VisualMovementEvent},
     game_object::{GameObjectRef, GameObjectType},
     objects::Realm,
     player_output::PlayerOutput,
+    text_utils::capitalize,
     vector3d::Vector3D,
 };
 use std::collections::BTreeSet;
@@ -45,7 +46,24 @@ pub fn enter_room(
 
     let current_room_ref = character.current_room();
     if current_room_ref == room_ref {
-        return Ok(vec![]); // Nothing to do.
+        let character_name = character.definite_name(realm)?;
+
+        if let Some(room) = realm.room_mut(room_ref) {
+            room.add_characters(&[character_ref]);
+        }
+
+        let mut visual_event = VisualEvent::new(room_ref);
+        visual_event.set_description(
+            &format!("{} arrived.", capitalize(&character_name)),
+            &format!("You see {} arrive.", character_name),
+            "You see someone arrive.",
+        );
+        visual_event.excluded_characters.push(character_ref);
+        let visual_output = visual_event
+            .fire(realm, 1.0)
+            .ok_or_else(|| "You arrived, but nobody saw you.".to_owned())?;
+
+        return Ok(visual_output);
     }
 
     let party = character
@@ -149,6 +167,36 @@ pub fn enter_room(
         output.append(&mut actions::look_at_object(realm, character, room_ref)?);
     }
     Ok(output)
+}
+
+/// Makes the character leave the given room (on end of session).
+pub fn leave_room(
+    realm: &mut Realm,
+    character_ref: GameObjectRef,
+) -> Result<Vec<PlayerOutput>, String> {
+    let character = realm
+        .character(character_ref)
+        .ok_or("The character doesn't exist.")?;
+
+    let room_ref = character.current_room();
+    let character_name = character.definite_name(realm)?;
+
+    if let Some(room) = realm.room_mut(room_ref) {
+        room.remove_characters(&[character_ref]);
+    }
+
+    let mut visual_event = VisualEvent::new(room_ref);
+    visual_event.set_description(
+        &format!("{} left.", capitalize(&character_name)),
+        &format!("You see {} leave.", character_name),
+        "You see someone leave.",
+    );
+    visual_event.excluded_characters.push(character_ref);
+    let visual_output = visual_event
+        .fire(realm, 1.0)
+        .ok_or_else(|| "You left, but nobody saw you.".to_owned())?;
+
+    Ok(visual_output)
 }
 
 fn sound_strength_for_party(party: &[GameObjectRef]) -> f32 {

@@ -40,7 +40,10 @@ async fn send_incoming_session(
     addr: SocketAddr,
 ) {
     if let Err(error) = session_tx
-        .send(SessionEvent::IncomingWebsocketSession(websocket, addr))
+        .send(SessionEvent::IncomingWebsocketSession(
+            Box::new(websocket),
+            addr,
+        ))
         .await
     {
         println!("Failed to dispatch session: {:?}", error);

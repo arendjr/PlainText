@@ -1,15 +1,16 @@
+use super::SessionOutput as Output;
+use crate::{
+    character_stats::{CharacterStat, CharacterStats},
+    colors::Color,
+    game_object::{GameObject, Gender},
+    objects::{Class, Race, Realm},
+    text_utils::{capitalize, colorize, format_columns, highlight, split_lines},
+};
 use lazy_static::lazy_static;
 use maplit::hashmap;
 use serde_json::json;
 use std::collections::HashMap;
 use std::str::FromStr;
-
-use crate::character_stats::{CharacterStat, CharacterStats};
-use crate::colors::Color;
-use crate::game_object::{GameObject, Gender};
-use crate::objects::{Class, Race, Realm};
-use crate::sessions::SessionOutput as Output;
-use crate::text_utils::{capitalize, colorize, format_columns, highlight, split_lines};
 
 lazy_static! {
     static ref SIGN_UP_STEPS: HashMap<SignUpStep, StepImpl> = get_sign_up_steps();
@@ -89,7 +90,23 @@ struct StepImpl {
     enter: fn(&SignUpData, &Realm) -> Output,
     exit: fn(&SignUpData) -> Output,
     prompt: fn(&SignUpData) -> Output,
-    process_input: fn(&SignUpState, &Realm, String) -> (SignUpState, Output, Vec<String>),
+    process_input: fn(&SignUpState, &Realm, String) -> ProcessInputResult,
+}
+
+pub struct ProcessInputResult {
+    pub new_state: SignUpState,
+    pub output: Output,
+    pub log_messages: Vec<String>,
+}
+
+impl ProcessInputResult {
+    fn with_state(new_state: SignUpState) -> Self {
+        Self {
+            new_state,
+            output: Output::None,
+            log_messages: Vec::new(),
+        }
+    }
 }
 
 pub fn enter_sign_up_step(state: &SignUpState, realm: &Realm) -> Output {
@@ -117,10 +134,10 @@ pub fn process_sign_up_input(
     state: &SignUpState,
     realm: &Realm,
     input: String,
-) -> (SignUpState, Output, Vec<String>) {
+) -> ProcessInputResult {
     match SIGN_UP_STEPS.get(&state.step) {
         Some(step) => (step.process_input)(state, realm, input),
-        None => (state.clone(), Output::None, vec![]),
+        None => ProcessInputResult::with_state(state.clone()),
     }
 }
 
@@ -404,26 +421,22 @@ fn process_asking_user_name_confirmation_input(
     state: &SignUpState,
     _: &Realm,
     input: String,
-) -> (SignUpState, Output, Vec<String>) {
+) -> ProcessInputResult {
     let answer = input.to_lowercase();
     if answer == "yes" || answer == "y" {
-        (
-            new_state(SignUpStep::AskingPassword, state.data.clone()),
-            Output::None,
-            vec![],
-        )
+        ProcessInputResult::with_state(new_state(SignUpStep::AskingPassword, state.data.clone()))
     } else if answer == "no" || answer == "n" {
-        (
-            new_state(SignUpStep::SessionClosed, SignUpData::new()),
-            Output::Str("Okay, bye.\n"),
-            vec![],
-        )
+        ProcessInputResult {
+            new_state: new_state(SignUpStep::SessionClosed, SignUpData::new()),
+            output: Output::Str("Okay, bye.\n"),
+            log_messages: vec![],
+        }
     } else {
-        (
-            state.clone(),
-            Output::Str("Please answer with yes or no.\n"),
-            vec![],
-        )
+        ProcessInputResult {
+            new_state: state.clone(),
+            output: Output::Str("Please answer with yes or no.\n"),
+            log_messages: vec![],
+        }
     }
 }
 
@@ -431,46 +444,46 @@ fn process_asking_sign_up_password_input(
     state: &SignUpState,
     _: &Realm,
     input: String,
-) -> (SignUpState, Output, Vec<String>) {
+) -> ProcessInputResult {
     if input.len() < 6 {
-        (
-            state.clone(),
-            Output::String(colorize(
+        ProcessInputResult {
+            new_state: state.clone(),
+            output: Output::String(colorize(
                 "Please choose a password of at least 6 characters.\n",
                 Color::Red,
             )),
-            vec![],
-        )
+            log_messages: vec![],
+        }
     } else if input.to_lowercase() == state.data.user_name.to_lowercase() {
-        (
-            state.clone(),
-            Output::String(colorize(
+        ProcessInputResult {
+            new_state: state.clone(),
+            output: Output::String(colorize(
                 "Your password and your username may not be the same.\n",
                 Color::Red,
             )),
-            vec![],
-        )
+            log_messages: vec![],
+        }
     } else if input == "123456" || input == "654321" {
-        (
-            state.clone(),
-            Output::String(colorize(
+        ProcessInputResult {
+            new_state: state.clone(),
+            output: Output::String(colorize(
                 "Sorry, that password is too simple.\n",
                 Color::Red,
             )),
-            vec![],
-        )
+            log_messages: vec![],
+        }
     } else {
-        (
-            new_state(
+        ProcessInputResult {
+            new_state: new_state(
                 SignUpStep::AskingPasswordConfirmation,
                 SignUpData {
                     password: input,
                     ..state.data.clone()
                 },
             ),
-            Output::None,
-            vec![],
-        )
+            output: Output::None,
+            log_messages: vec![],
+        }
     }
 }
 
@@ -478,19 +491,19 @@ fn process_asking_sign_up_password_confirmation_input(
     state: &SignUpState,
     _: &Realm,
     input: String,
-) -> (SignUpState, Output, Vec<String>) {
+) -> ProcessInputResult {
     if state.data.password == input {
-        (
-            new_state(SignUpStep::AskingRace, state.data.clone()),
-            Output::String(colorize("Password confirmed.\n", Color::Green)),
-            vec![],
-        )
+        ProcessInputResult {
+            new_state: new_state(SignUpStep::AskingRace, state.data.clone()),
+            output: Output::String(colorize("Password confirmed.\n", Color::Green)),
+            log_messages: vec![],
+        }
     } else {
-        (
-            new_state(SignUpStep::AskingPassword, state.data.clone()),
-            Output::String(colorize("Passwords don't match.\n", Color::Red)),
-            vec![],
-        )
+        ProcessInputResult {
+            new_state: new_state(SignUpStep::AskingPassword, state.data.clone()),
+            output: Output::String(colorize("Passwords don't match.\n", Color::Red)),
+            log_messages: vec![],
+        }
     }
 }
 
@@ -498,27 +511,27 @@ fn process_asking_race_input(
     state: &SignUpState,
     realm: &Realm,
     input: String,
-) -> (SignUpState, Output, Vec<String>) {
+) -> ProcessInputResult {
     let answer = input.to_lowercase();
     if let Some(race) = realm.race_by_name(&answer) {
-        (
-            new_state(
+        ProcessInputResult {
+            new_state: new_state(
                 SignUpStep::AskingClass,
                 SignUpData {
                     race: Some(race.clone()),
                     ..state.data.clone()
                 },
             ),
-            Output::String(colorize(
+            output: Output::String(colorize(
                 &format!("\nYou have chosen to become a {}.\n", answer),
                 Color::Green,
             )),
-            vec![],
-        )
+            log_messages: vec![],
+        }
     } else if let Some(race_name) = answer.strip_prefix("info ") {
-        (
-            state.clone(),
-            if let Some(race) = realm.race_by_name(race_name) {
+        ProcessInputResult {
+            new_state: state.clone(),
+            output: if let Some(race) = realm.race_by_name(race_name) {
                 Output::String(format!(
                     "\n{}\n  {}\n",
                     highlight(&capitalize(race_name)),
@@ -535,10 +548,10 @@ fn process_asking_race_input(
                     race_name
                 ))
             },
-            vec![],
-        )
+            log_messages: vec![],
+        }
     } else {
-        (state.clone(), Output::None, vec![])
+        ProcessInputResult::with_state(state.clone())
     }
 }
 
@@ -546,7 +559,7 @@ fn process_asking_class_input(
     state: &SignUpState,
     realm: &Realm,
     input: String,
-) -> (SignUpState, Output, Vec<String>) {
+) -> ProcessInputResult {
     let answer = input.to_lowercase();
     let classes = match &state.data.race {
         Some(race) => race
@@ -558,24 +571,24 @@ fn process_asking_class_input(
     };
 
     if let Some(class) = classes.iter().find(|class| class.name() == answer) {
-        (
-            new_state(
+        ProcessInputResult {
+            new_state: new_state(
                 SignUpStep::AskingGender,
                 SignUpData {
                     class: Some((*class).clone()),
                     ..state.data.clone()
                 },
             ),
-            Output::String(colorize(
+            output: Output::String(colorize(
                 &format!("\nYou have chosen to become a {}.\n", answer),
                 Color::Green,
             )),
-            vec![],
-        )
+            log_messages: vec![],
+        }
     } else if let Some(class_name) = answer.strip_prefix("info ") {
-        (
-            state.clone(),
-            if let Some(class) = classes.iter().find(|class| class.name() == class_name) {
+        ProcessInputResult {
+            new_state: state.clone(),
+            output: if let Some(class) = classes.iter().find(|class| class.name() == class_name) {
                 Output::String(format!(
                     "\n{}\n  {}\n",
                     highlight(&capitalize(class_name)),
@@ -592,16 +605,16 @@ fn process_asking_class_input(
                     class_name
                 ))
             },
-            vec![],
-        )
+            log_messages: vec![],
+        }
     } else if answer == "back" || answer == "b" {
-        (
-            new_state(SignUpStep::AskingRace, state.data.clone()),
-            Output::None,
-            vec![],
-        )
+        ProcessInputResult {
+            new_state: new_state(SignUpStep::AskingRace, state.data.clone()),
+            output: Output::None,
+            log_messages: vec![],
+        }
     } else {
-        (state.clone(), Output::None, vec![])
+        ProcessInputResult::with_state(state.clone())
     }
 }
 
@@ -609,40 +622,40 @@ fn process_asking_gender_input(
     state: &SignUpState,
     _: &Realm,
     input: String,
-) -> (SignUpState, Output, Vec<String>) {
+) -> ProcessInputResult {
     let answer = input.to_lowercase();
     if answer == "male" || answer == "m" {
-        (
-            new_state(
+        ProcessInputResult {
+            new_state: new_state(
                 SignUpStep::AskingExtraStats,
                 SignUpData {
                     gender: Gender::Male,
                     ..state.data.clone()
                 },
             ),
-            Output::String(colorize("\nYou have chosen to be male.\n", Color::Green)),
-            vec![],
-        )
+            output: Output::String(colorize("\nYou have chosen to be male.\n", Color::Green)),
+            log_messages: vec![],
+        }
     } else if answer == "female" || answer == "f" {
-        (
-            new_state(
+        ProcessInputResult {
+            new_state: new_state(
                 SignUpStep::AskingExtraStats,
                 SignUpData {
                     gender: Gender::Female,
                     ..state.data.clone()
                 },
             ),
-            Output::String(colorize("\nYou have chosen to be female.\n", Color::Green)),
-            vec![],
-        )
+            output: Output::String(colorize("\nYou have chosen to be female.\n", Color::Green)),
+            log_messages: vec![],
+        }
     } else if answer == "back" || answer == "b" {
-        (
-            new_state(SignUpStep::AskingClass, state.data.clone()),
-            Output::None,
-            vec![],
-        )
+        ProcessInputResult {
+            new_state: new_state(SignUpStep::AskingClass, state.data.clone()),
+            output: Output::None,
+            log_messages: vec![],
+        }
     } else {
-        (state.clone(), Output::None, vec![])
+        ProcessInputResult::with_state(state.clone())
     }
 }
 
@@ -650,12 +663,12 @@ fn process_asking_extra_stats_input(
     state: &SignUpState,
     _: &Realm,
     input: String,
-) -> (SignUpState, Output, Vec<String>) {
+) -> ProcessInputResult {
     let answer = input.to_lowercase();
     if answer == "info stats" {
-        (
-            state.clone(),
-            Output::Str(
+        ProcessInputResult {
+            new_state: state.clone(),
+            output: Output::Str(
                 "\n\
                 Your character has several attributes, each of which will have a value assigned. \
                 Collectively, we call these your character stats. Here is an overview:\n\
@@ -683,14 +696,14 @@ fn process_asking_extra_stats_input(
                   Faith determines the magical defense power. It also decreases the chance that\n\
                   a spell will fail when cast.\n",
             ),
-            vec![],
-        )
+            log_messages: vec![],
+        }
     } else if answer == "back" || answer == "b" {
-        (
-            new_state(SignUpStep::AskingGender, state.data.clone()),
-            Output::None,
-            vec![],
-        )
+        ProcessInputResult {
+            new_state: new_state(SignUpStep::AskingGender, state.data.clone()),
+            output: Output::None,
+            log_messages: vec![],
+        }
     } else {
         let (mut height, mut weight, mut stats, stats_suggestion) = get_base_stats(&state.data);
         let is_barbarian = state.data.class.as_ref().map(|class| class.name()) == Some("barbarian");
@@ -700,7 +713,7 @@ fn process_asking_extra_stats_input(
         } else {
             let expected_num_attributes = if is_barbarian { 5 } else { 6 };
             if answer.split(' ').count() != expected_num_attributes {
-                return (state.clone(), Output::None, vec![]);
+                return ProcessInputResult::with_state(state.clone());
             }
             let mut attributes = answer.split(' ');
             CharacterStats::from_stats(
@@ -718,14 +731,14 @@ fn process_asking_extra_stats_input(
         };
 
         if user_stats.total() != 9 {
-            return (
-                state.clone(),
-                Output::String(colorize(
+            return ProcessInputResult {
+                new_state: state.clone(),
+                output: Output::String(colorize(
                     "\nThe total of attributes should be 9.\n",
                     Color::Red,
                 )),
-                vec![],
-            );
+                log_messages: vec![],
+            };
         }
 
         stats = stats + &user_stats;
@@ -733,8 +746,8 @@ fn process_asking_extra_stats_input(
             - (user_stats.get(CharacterStat::Dexterity) as f32) / 2.0;
         weight += user_stats.get(CharacterStat::Strength) as f32;
 
-        (
-            new_state(
+        ProcessInputResult {
+            new_state: new_state(
                 SignUpStep::AskingSignUpConfirmation,
                 SignUpData {
                     gold: 100,
@@ -744,12 +757,12 @@ fn process_asking_extra_stats_input(
                     ..state.data.clone()
                 },
             ),
-            Output::String(colorize(
+            output: Output::String(colorize(
                 "\nYour character stats have been recorded.\n",
                 Color::Green,
             )),
-            vec![],
-        )
+            log_messages: vec![],
+        }
     }
 }
 
@@ -757,39 +770,39 @@ fn process_asking_sign_up_confirmation_input(
     state: &SignUpState,
     realm: &Realm,
     input: String,
-) -> (SignUpState, Output, Vec<String>) {
+) -> ProcessInputResult {
     let answer = input.to_lowercase();
     if realm.player_by_name(&state.data.user_name).is_some() {
-        (
-            new_state(SignUpStep::SessionClosed, SignUpData::new()),
-            Output::Str(
+        ProcessInputResult {
+            new_state: new_state(SignUpStep::SessionClosed, SignUpData::new()),
+            output: Output::Str(
                 "Uh-oh, it appears someone has claimed your character name while \
                 you were creating yours. I'm terribly sorry, but it appears you \
                 will have to start over.\n",
             ),
-            vec![],
-        )
+            log_messages: vec![],
+        }
     } else if answer == "yes" || answer == "y" {
-        (
-            new_state(SignUpStep::SignedUp, state.data.clone()),
-            Output::String(format!(
+        ProcessInputResult {
+            new_state: new_state(SignUpStep::SignedUp, state.data.clone()),
+            output: Output::String(format!(
                 "\nWelcome to {}, {}.\n",
                 realm.name(),
                 state.data.user_name
             )),
-            vec![],
-        )
+            log_messages: vec![],
+        }
     } else if answer == "no" || answer == "n" || answer == "back" || answer == "b" {
-        (
-            new_state(SignUpStep::AskingExtraStats, state.data.clone()),
-            Output::None,
-            vec![],
-        )
+        ProcessInputResult {
+            new_state: new_state(SignUpStep::AskingExtraStats, state.data.clone()),
+            output: Output::None,
+            log_messages: vec![],
+        }
     } else {
-        (
-            state.clone(),
-            Output::Str("Please answer with yes or no.\n"),
-            vec![],
-        )
+        ProcessInputResult {
+            new_state: state.clone(),
+            output: Output::Str("Please answer with yes or no.\n"),
+            log_messages: vec![],
+        }
     }
 }

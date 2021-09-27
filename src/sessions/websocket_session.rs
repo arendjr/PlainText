@@ -17,17 +17,17 @@ struct Prompt {
 pub struct WebSocketSession {
     pub id: u64,
     addr: SocketAddr,
-    tx: SplitSink<WebSocket, Message>,
+    tx: SplitSink<Box<WebSocket>, Message>,
     state: SessionState,
 }
 
 impl WebSocketSession {
-    pub fn new(id: u64, tx: SplitSink<WebSocket, Message>, addr: SocketAddr) -> Self {
+    pub fn new(id: u64, tx: SplitSink<Box<WebSocket>, Message>, addr: SocketAddr) -> Self {
         Self {
             id,
             addr,
             tx,
-            state: SessionState::SigningIn(SignInState::new()),
+            state: SessionState::SigningIn(Box::new(SignInState::new())),
         }
     }
 }
@@ -79,7 +79,7 @@ impl Session for WebSocketSession {
     }
 }
 
-async fn send_message(tx: &mut SplitSink<WebSocket, Message>, message: Message) {
+async fn send_message(tx: &mut SplitSink<Box<WebSocket>, Message>, message: Message) {
     if let Err(error) = tx.send(message).await {
         println!("Could not send data over socket: {:?}", error);
     }

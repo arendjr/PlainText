@@ -15,7 +15,7 @@ pub struct SessionInputEvent {
 #[derive(Debug)]
 pub enum SessionEvent {
     IncomingTelnetSession(TcpStream, SocketAddr),
-    IncomingWebsocketSession(WebSocket, SocketAddr),
+    IncomingWebsocketSession(Box<WebSocket>, SocketAddr),
     SessionOutput(u64, SessionOutput),
     SessionUpdate(u64, SessionState),
 }

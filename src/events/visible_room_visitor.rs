@@ -150,8 +150,12 @@ fn notify_characters(
             .filter_map(|origin| realm.room(origin))
             .any(|origin| {
                 let event_direction = origin.position() - room.position();
-                let angle = character.direction().angle(&event_direction);
-                angle <= TAU / 8.0
+                if event_direction.is_default() {
+                    true // Assume everyone at the origin can see what is going on.
+                } else {
+                    let angle = character.direction().angle(&event_direction);
+                    angle <= TAU / 8.0
+                }
             })
         {
             continue;
