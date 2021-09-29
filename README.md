@@ -76,4 +76,4 @@ License
 
 This software is licensed under AGPLv3.
 
-For details, see LICENSE.AGPL.txt.
+For details, see [LICENSE](https://github.com/arendjr/PlainText/blob/main/LICENSE).
