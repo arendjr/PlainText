@@ -129,7 +129,7 @@ pub trait GameObject {
     ///
     /// The clarity with which the object is being observed is indicated through the strength,
     /// where 1.0 represents a full clear view, while 0.0 means the object has become invisible.
-    fn name_at_strength(&self, realm: &Realm, strength: f32) -> String {
+    fn name_at_strength(&self, _: &Realm, strength: f32) -> String {
         if strength >= 1.0 {
             self.name().to_owned()
         } else {

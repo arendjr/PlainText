@@ -1,7 +1,7 @@
 use super::CommandHelpers;
 use crate::{
     actions,
-    game_object::{Character, GameObject, GameObjectRef},
+    game_object::{GameObject, GameObjectRef},
     objects::Realm,
     player_output::PlayerOutput,
 };
@@ -20,7 +20,7 @@ pub fn lose(
 
     let _ = processor.take_word().unwrap(); // alias
 
-    let (player, room) = realm.player_and_room_res(player_ref)?;
+    let (player, room) = realm.character_and_room_res(player_ref)?;
     let group = player
         .group()
         .and_then(|group| realm.group(group))

@@ -1,5 +1,6 @@
 mod admin;
 mod api;
+mod close_command;
 mod command_executor;
 mod command_helpers;
 mod command_interpreter;
@@ -11,6 +12,7 @@ mod help_command;
 mod inventory_command;
 mod look_command;
 mod lose_command;
+mod open_command;
 
 pub use command_executor::CommandExecutor;
 use command_helpers::CommandHelpers;
@@ -23,6 +25,7 @@ pub enum CommandType {
     ApiObjectSet,
     ApiObjectsList,
     ApiPropertySet,
+    Close(&'static str),
     EnterRoom(&'static str),
     Follow(&'static str),
     Go(&'static str),
@@ -30,6 +33,7 @@ pub enum CommandType {
     Inventory(&'static str),
     Look(&'static str),
     Lose(&'static str),
+    Open(&'static str),
 }
 
 impl CommandType {
@@ -41,6 +45,7 @@ impl CommandType {
             ApiObjectSet => "",
             ApiObjectsList => "",
             ApiPropertySet => "",
+            Close(description) => description,
             EnterRoom(description) => description,
             Follow(description) => description,
             Go(description) => description,
@@ -48,6 +53,7 @@ impl CommandType {
             Inventory(description) => description,
             Look(description) => description,
             Lose(description) => description,
+            Open(description) => description,
         }
     }
 }

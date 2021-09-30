@@ -156,7 +156,7 @@ impl CommandLineProcessor {
 
     pub fn skip_connecting_word(&mut self, word: &str) {
         if let Some(first_word) = self.words.front() {
-            if first_word == word {
+            if first_word == word && self.words.len() >= 2 {
                 self.words.pop_front();
             }
         }

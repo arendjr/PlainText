@@ -1,6 +1,7 @@
 use super::{
     admin::enter_room,
     api::{objects_list, property_set},
+    close_command::close,
     command_helpers::CommandHelpers,
     command_interpreter::{interpret_command, InterpretationError},
     command_line_processor::CommandLineProcessor,
@@ -11,6 +12,7 @@ use super::{
     inventory_command::inventory,
     look_command::look,
     lose_command::lose,
+    open_command::open,
     CommandType,
 };
 use crate::{
@@ -56,6 +58,7 @@ impl CommandExecutor {
                     CommandType::ApiObjectSet => wrap_api_request(object_set),
                     CommandType::ApiObjectsList => wrap_api_request(objects_list),
                     CommandType::ApiPropertySet => wrap_api_request(property_set),
+                    CommandType::Close(_) => wrap_command(close),
                     CommandType::EnterRoom(_) => wrap_admin_command(enter_room),
                     CommandType::Follow(_) => wrap_command(follow),
                     CommandType::Go(_) => wrap_command(go),
@@ -63,6 +66,7 @@ impl CommandExecutor {
                     CommandType::Inventory(_) => wrap_command(inventory),
                     CommandType::Look(_) => wrap_command(look),
                     CommandType::Lose(_) => wrap_command(lose),
+                    CommandType::Open(_) => wrap_command(open),
                 };
                 command_fn(realm, player_ref, command_helpers)
             }
@@ -87,6 +91,14 @@ impl CommandExecutor {
         registry.register("api-object-set", CommandType::ApiObjectSet);
         registry.register("api-objects-list", CommandType::ApiObjectsList);
         registry.register("api-property-set", CommandType::ApiPropertySet);
+        registry.register(
+            "close",
+            CommandType::Close(
+                "Close an exit, typically a door or a window.\n\
+                \n\
+                Example: *close door*",
+            ),
+        );
         registry.register(
             "enter",
             CommandType::Go(
@@ -160,6 +172,15 @@ impl CommandExecutor {
                 You can always remove yourself from a group using simply *lose*.\n\
                 \n\
                 Examples: *lose mia*, *lose*",
+            ),
+        );
+        registry.register(
+            "open",
+            CommandType::Open(
+                "Open an exit, typically a door or a window. Note that doors may \
+                automatically close after a while.\n\
+                \n\
+                Example: *open door*",
             ),
         );
 

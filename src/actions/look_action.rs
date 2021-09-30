@@ -22,7 +22,7 @@ pub fn look_in_direction(
     player_ref: GameObjectRef,
     direction: &Vector3D,
 ) -> Result<Vec<PlayerOutput>, String> {
-    let (player, room) = realm.player_and_room_res(player_ref)?;
+    let (player, room) = realm.character_and_room_res(player_ref)?;
 
     /*TODO: binoculars are fun!
     let strength = room.event_multiplier(EventType::Visual);
@@ -93,7 +93,7 @@ pub fn look_at_object(
 ///
 /// Assumes the player is currently in the same room.
 fn look_at_item(realm: &Realm, player_ref: GameObjectRef, item: &Item) -> Result<String, String> {
-    let (_, room) = realm.player_and_room_res(player_ref)?;
+    let (_, room) = realm.character_and_room_res(player_ref)?;
 
     let mut lines = Vec::new();
 
@@ -150,7 +150,7 @@ fn look_at_portal(
     player_ref: GameObjectRef,
     portal: &Portal,
 ) -> Result<String, String> {
-    let (player, room) = realm.player_and_room_res(player_ref)?;
+    let (player, room) = realm.character_and_room_res(player_ref)?;
 
     let mut lines = Vec::new();
 

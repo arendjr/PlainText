@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::vector3d::Vector3D;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -25,12 +27,27 @@ impl RelativeDirection {
     pub fn from_string(direction: &str) -> Option<Self> {
         match direction {
             "ahead" => Some(Self::Ahead),
+            "back" => Some(Self::Behind),
             "behind" => Some(Self::Behind),
+            "forward" => Some(Self::Ahead),
             "left" => Some(Self::Left),
             "right" => Some(Self::Right),
             "up" => Some(Self::Up),
             "down" => Some(Self::Down),
             _ => None,
         }
+    }
+}
+
+impl Display for RelativeDirection {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(match self {
+            Self::Ahead => "ahead",
+            Self::Behind => "behind",
+            Self::Left => "left",
+            Self::Right => "right",
+            Self::Up => "up",
+            Self::Down => "down",
+        })
     }
 }

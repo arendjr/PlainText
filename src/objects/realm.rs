@@ -73,6 +73,17 @@ impl Realm {
             .ok_or("That character is no longer there.")
     }
 
+    pub fn character_and_room_res(
+        &self,
+        object_ref: GameObjectRef,
+    ) -> Result<(&dyn Character, &objects::Room), &'static str> {
+        let character = self.character_res(object_ref)?;
+        let room = self
+            .room(character.current_room())
+            .ok_or("You have slipped between dimensions.")?;
+        Ok((character, room))
+    }
+
     pub fn class(&self, object_ref: GameObjectRef) -> Option<&objects::Class> {
         self.objects
             .get(&object_ref)
@@ -201,21 +212,16 @@ impl Realm {
             .ok_or("Your account has been deactivated.")
     }
 
-    pub fn player_and_room_res(
-        &self,
-        object_ref: GameObjectRef,
-    ) -> Result<(&objects::Player, &objects::Room), &'static str> {
-        let player = self.player_res(object_ref)?;
-        let room = self
-            .room(player.current_room())
-            .ok_or("You have slipped between dimensions.")?;
-        Ok((player, room))
-    }
-
     pub fn portal(&self, object_ref: GameObjectRef) -> Option<&objects::Portal> {
         self.objects
             .get(&object_ref)
             .and_then(|object| object.as_portal())
+    }
+
+    pub fn portal_mut(&mut self, object_ref: GameObjectRef) -> Option<&mut objects::Portal> {
+        self.objects
+            .get_mut(&object_ref)
+            .and_then(|object| object.as_portal_mut())
     }
 
     pub fn race(&self, object_ref: GameObjectRef) -> Option<&objects::Race> {

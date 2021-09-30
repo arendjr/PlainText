@@ -1,6 +1,6 @@
 use crate::actions;
 use crate::direction_utils::{direction_by_abbreviation, is_direction, vector_for_direction};
-use crate::game_object::{Character, GameObjectRef};
+use crate::game_object::GameObjectRef;
 use crate::objects::Realm;
 use crate::player_output::PlayerOutput;
 use crate::relative_direction::RelativeDirection;
@@ -14,7 +14,7 @@ pub fn look(
     player_ref: GameObjectRef,
     helpers: CommandHelpers,
 ) -> Result<Vec<PlayerOutput>, String> {
-    let (player, room) = realm.player_and_room_res(player_ref)?;
+    let (player, room) = realm.character_and_room_res(player_ref)?;
 
     let processor = helpers.command_line_processor;
 

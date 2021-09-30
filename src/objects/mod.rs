@@ -13,7 +13,7 @@ pub use group::Group;
 pub use item::{Item, ItemFlags};
 pub use npc::Npc;
 pub use player::Player;
-pub use portal::Portal;
+pub use portal::{Portal, PortalFlags};
 pub use race::Race;
 pub use realm::Realm;
 pub use room::{Room, RoomFlags};
