@@ -1,5 +1,5 @@
-use crate::game_object::GameObjectRef;
-use crate::objects::Realm;
+use crate::entity::EntityRef;
+use crate::entity::Realm;
 use crate::player_output::PlayerOutput;
 use crate::text_utils::{format_columns, highlight, process_highlights, split_lines};
 
@@ -9,7 +9,7 @@ use super::CommandHelpers;
 /// Shows in-game help.
 pub fn help(
     realm: &mut Realm,
-    player_ref: GameObjectRef,
+    player_ref: EntityRef,
     helpers: CommandHelpers,
 ) -> Result<Vec<PlayerOutput>, String> {
     let processor = helpers.command_line_processor;
@@ -133,8 +133,8 @@ fn show_admin_help(command_name: &str, admin_registry: &CommandRegistry) -> Opti
             many modifications are not reversible. Now, trusting you will do the right thing, \
             here as some tips for you:\n\
             \n\
-            When referring to an object, you can use *#<id>* rather than referring to them by \
-            name. For example, *set-prop #35 description This is the object with ID 35.*.\n\
+            When referring to an entity, you can use *#<id>* rather than referring to them by \
+            name. For example, *set-prop #35 description This is the entity with ID 35.*.\n\
             \n\
             Similarly, you can always use the word *room* to refer to the current room you are \
             in. But, to make editing of rooms even easier, you can use *@<property>* as a \

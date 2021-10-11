@@ -1,21 +1,20 @@
-use crate::game_object::GameObjectId;
-use crate::sessions::SessionOutput;
+use crate::{entity::EntityId, sessions::SessionOutput};
 
 pub struct PlayerOutput {
-    pub player_id: GameObjectId,
+    pub player_id: EntityId,
     pub output: SessionOutput,
 }
 
 impl PlayerOutput {
-    pub fn new(player_id: GameObjectId, output: SessionOutput) -> Self {
+    pub fn new(player_id: EntityId, output: SessionOutput) -> Self {
         Self { player_id, output }
     }
 
-    pub fn new_from_str(player_id: GameObjectId, output: &'static str) -> Self {
+    pub fn new_from_str(player_id: EntityId, output: &'static str) -> Self {
         Self::new(player_id, SessionOutput::Str(output))
     }
 
-    pub fn new_from_string(player_id: GameObjectId, output: String) -> Self {
+    pub fn new_from_string(player_id: EntityId, output: String) -> Self {
         Self::new(player_id, SessionOutput::String(output))
     }
 }

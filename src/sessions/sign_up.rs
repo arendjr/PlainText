@@ -2,15 +2,13 @@ use super::SessionOutput as Output;
 use crate::{
     character_stats::{CharacterStat, CharacterStats},
     colors::Color,
-    game_object::{GameObject, Gender},
-    objects::{Class, Race, Realm},
+    entity::{Class, Entity, Gender, Race, Realm},
     text_utils::{capitalize, colorize, format_columns, highlight, split_lines},
 };
 use lazy_static::lazy_static;
 use maplit::hashmap;
 use serde_json::json;
-use std::collections::HashMap;
-use std::str::FromStr;
+use std::{collections::HashMap, str::FromStr};
 
 lazy_static! {
     static ref SIGN_UP_STEPS: HashMap<SignUpStep, StepImpl> = get_sign_up_steps();
@@ -273,9 +271,9 @@ fn enter_class(data: &SignUpData, realm: &Realm) -> Output {
             Some(race) => format_columns(
                 race.classes()
                     .iter()
-                    .filter_map(|object_ref| realm
-                        .object(*object_ref)
-                        .map(|object| highlight(&capitalize(object.name()))))
+                    .filter_map(|entity_ref| realm
+                        .entity(*entity_ref)
+                        .map(|entity| highlight(&capitalize(entity.name()))))
                     .collect(),
             ),
             None => "(cannot determine classes without race)".to_owned(),

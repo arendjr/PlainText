@@ -1,17 +1,14 @@
+use super::{session_output::SessionOutput, sign_in::SignInState};
+use crate::entity::EntityId;
 use async_trait::async_trait;
 use core::fmt::Debug;
 use tokio::io::Result;
 
-use crate::game_object::GameObjectId;
-
-use super::session_output::SessionOutput;
-use super::sign_in::SignInState;
-
 #[derive(Clone, Debug)]
 pub enum SessionState {
-    SessionClosed(Option<GameObjectId>),
+    SessionClosed(Option<EntityId>),
     SigningIn(Box<SignInState>),
-    SignedIn(GameObjectId),
+    SignedIn(EntityId),
 }
 
 #[async_trait]

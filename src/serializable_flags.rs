@@ -44,6 +44,10 @@ macro_rules! serializable_flags {
                 }
                 Ok($BitFlags { bits })
             }
+
+            pub fn is_default(&self) -> bool {
+                self.bits == 0
+            }
         }
 
         impl<'de> serde::de::Visitor<'de> for $BitFlags {

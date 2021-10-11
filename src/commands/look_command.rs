@@ -1,17 +1,16 @@
 use crate::actions;
 use crate::direction_utils::{direction_by_abbreviation, is_direction, vector_for_direction};
-use crate::game_object::GameObjectRef;
-use crate::objects::Realm;
+use crate::entity::EntityRef;
+use crate::entity::Realm;
 use crate::player_output::PlayerOutput;
 use crate::relative_direction::RelativeDirection;
 
-use super::inventory_command::inventory;
-use super::{CommandHelpers, CommandLineProcessor};
+use super::{inventory_command::inventory, CommandHelpers, CommandLineProcessor};
 
 /// Makes the character look at *something*.
 pub fn look(
     realm: &mut Realm,
-    player_ref: GameObjectRef,
+    player_ref: EntityRef,
     helpers: CommandHelpers,
 ) -> Result<Vec<PlayerOutput>, String> {
     let (player, room) = realm.character_and_room_res(player_ref)?;
@@ -21,7 +20,7 @@ pub fn look(
     let alias = processor.take_word().unwrap();
     if alias.starts_with('l') {
         if !processor.has_words_left() {
-            return actions::look_at_object(realm, player_ref, player.current_room());
+            return actions::look_at_entity(realm, player_ref, player.current_room());
         }
 
         processor.skip_connecting_word("at");
@@ -38,7 +37,7 @@ pub fn look(
         );
     }
 
-    let description = processor.take_object_description().ok_or_else(|| {
+    let description = processor.take_entity_description().ok_or_else(|| {
         if alias == "examine" {
             "Examine what?".to_owned()
         } else {
@@ -47,10 +46,10 @@ pub fn look(
     })?;
 
     if processor.peek_rest() == "in inventory" {
-        let object_ref = processor
-            .object_by_description(realm, player.inventory(), description)
+        let entity_ref = processor
+            .entity_by_description(realm, player.inventory(), description)
             .ok_or("You don't have that.")?;
-        return actions::look_at_object(realm, player_ref, object_ref);
+        return actions::look_at_entity(realm, player_ref, entity_ref);
     }
 
     let pool = [
@@ -62,21 +61,21 @@ pub fn look(
     .concat();
 
     let target = description.name.as_ref();
-    let maybe_object = processor
-        .object_by_description(realm, &pool, description.clone())
-        .and_then(|object_ref| realm.object(object_ref));
-    let output = match maybe_object {
-        Some(object) => {
+    let maybe_entity = processor
+        .entity_by_description(realm, &pool, description.clone())
+        .and_then(|entity_ref| realm.entity(entity_ref));
+    let output = match maybe_entity {
+        Some(entity) => {
             let mut output = Vec::<PlayerOutput>::new();
             if is_direction(target) {
                 push_output_string!(output, player_ref, format!("You look {}.\n", target));
             } else if let Some(direction) = direction_by_abbreviation(target) {
                 push_output_string!(output, player_ref, format!("You look {}.\n", direction));
             }
-            output.append(&mut actions::look_at_object(
+            output.append(&mut actions::look_at_entity(
                 realm,
                 player_ref,
-                object.object_ref(),
+                entity.entity_ref(),
             )?);
             output
         }

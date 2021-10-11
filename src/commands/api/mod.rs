@@ -1,27 +1,26 @@
+use self::api_request_processor::ApiReply;
 use crate::commands::CommandHelpers;
-use crate::game_object::GameObjectRef;
-use crate::objects::Realm;
+use crate::entity::EntityRef;
+use crate::entity::Realm;
 use crate::player_output::PlayerOutput;
 use crate::sessions::SessionOutput;
 
 mod api_request_processor;
-mod object_create_command;
-mod object_delete_command;
-mod object_set_command;
-mod objects_list_command;
+mod entity_create_command;
+mod entity_delete_command;
+mod entity_list_command;
+mod entity_set_command;
 mod property_set_command;
 
-pub use object_create_command::object_create;
-pub use object_delete_command::object_delete;
-pub use object_set_command::object_set;
-pub use objects_list_command::objects_list;
+pub use entity_create_command::entity_create;
+pub use entity_delete_command::entity_delete;
+pub use entity_list_command::entity_list;
+pub use entity_set_command::entity_set;
 pub use property_set_command::property_set;
-
-use self::api_request_processor::ApiReply;
 
 pub fn wrap_api_request<F>(
     f: F,
-) -> Box<dyn Fn(&mut Realm, GameObjectRef, CommandHelpers) -> Vec<PlayerOutput>>
+) -> Box<dyn Fn(&mut Realm, EntityRef, CommandHelpers) -> Vec<PlayerOutput>>
 where
     F: Fn(&mut Realm, CommandHelpers) -> Result<ApiReply, ApiReply> + 'static,
 {

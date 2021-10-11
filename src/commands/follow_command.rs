@@ -1,10 +1,14 @@
 use super::CommandHelpers;
-use crate::{actions, game_object::GameObjectRef, objects::Realm, player_output::PlayerOutput};
+use crate::{
+    actions,
+    entity::{EntityRef, Realm},
+    player_output::PlayerOutput,
+};
 
 /// Start following another character and become a group with them.
 pub fn follow(
     realm: &mut Realm,
-    player_ref: GameObjectRef,
+    player_ref: EntityRef,
     helpers: CommandHelpers,
 ) -> Result<Vec<PlayerOutput>, String> {
     let processor = helpers.command_line_processor;
@@ -13,7 +17,7 @@ pub fn follow(
 
     let (_, room) = realm.character_and_room_res(player_ref)?;
     let leader_ref = processor
-        .take_object(realm, room.characters())
+        .take_entity(realm, room.characters())
         .ok_or("Follow whom?")?;
 
     actions::follow(realm, player_ref, leader_ref)

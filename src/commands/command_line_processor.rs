@@ -1,17 +1,17 @@
+use crate::{
+    entity::{EntityRef, Realm},
+    number_utils::numeric_position,
+};
 use std::collections::VecDeque;
 
-use crate::game_object::{Character, GameObjectRef};
-use crate::number_utils::numeric_position;
-use crate::objects::Realm;
-
 #[derive(Clone, Debug)]
-pub struct ObjectDescription {
+pub struct EntityDescription {
     pub name: String,
     pub position: u16,
-    pub container: Option<Box<ObjectDescription>>,
+    pub container: Option<Box<EntityDescription>>,
 }
 
-impl ObjectDescription {
+impl EntityDescription {
     pub fn new(position: u16, name: String) -> Self {
         Self {
             name,
@@ -22,7 +22,7 @@ impl ObjectDescription {
 }
 
 pub struct CommandLineProcessor {
-    player_ref: GameObjectRef,
+    player_ref: EntityRef,
     words: VecDeque<String>,
 }
 
@@ -30,16 +30,22 @@ impl CommandLineProcessor {
     fn description_predicate<'a>(
         &self,
         realm: &'a Realm,
-        description: ObjectDescription,
-    ) -> Box<dyn FnMut(&&GameObjectRef) -> bool + 'a> {
-        let player = unwrap_or_return_value!(realm.player(self.player_ref), Box::new(|_| false));
+        description: EntityDescription,
+    ) -> Box<dyn FnMut(&&EntityRef) -> bool + 'a> {
+        let character = match realm.character(self.player_ref) {
+            Some(character) => character,
+            None => return Box::new(|_| false),
+        };
 
-        Box::new(move |object_ref| {
-            let object = unwrap_or_return_value!(realm.object(**object_ref), false);
-            let name = if let Some(portal) = object.as_portal() {
-                portal.name_from_room(player.current_room())
+        Box::new(move |entity_ref| {
+            let entity = match realm.entity(**entity_ref) {
+                Some(entity) => entity,
+                None => return false,
+            };
+            let name = if let Some(portal) = entity.as_portal() {
+                portal.name_from_room(character.current_room())
             } else {
-                object.name()
+                entity.name()
             }
             .to_lowercase();
 
@@ -52,11 +58,57 @@ impl CommandLineProcessor {
         })
     }
 
+    pub fn entities_by_description(
+        &self,
+        realm: &Realm,
+        pool: &[EntityRef],
+        description: EntityDescription,
+    ) -> Vec<EntityRef> {
+        let position = description.position;
+        let entities: Vec<EntityRef> = if position == 0 && description.name == "all" {
+            pool.iter().copied().collect()
+        } else {
+            pool.iter()
+                .filter(self.description_predicate(realm, description))
+                .copied()
+                .collect()
+        };
+
+        if position > 0 {
+            if position <= entities.len() as u16 {
+                vec![entities[position as usize - 1]]
+            } else {
+                vec![]
+            }
+        } else {
+            entities
+        }
+    }
+
+    pub fn entity_by_description(
+        &self,
+        realm: &Realm,
+        pool: &[EntityRef],
+        description: EntityDescription,
+    ) -> Option<EntityRef> {
+        if description.position > 0 {
+            let index = description.position as usize - 1;
+            pool.iter()
+                .filter(self.description_predicate(realm, description))
+                .nth(index)
+                .copied()
+        } else {
+            pool.iter()
+                .find(self.description_predicate(realm, description))
+                .copied()
+        }
+    }
+
     pub fn has_words_left(&self) -> bool {
         !self.words.is_empty()
     }
 
-    pub fn new(player_ref: GameObjectRef, command_line: &str) -> Self {
+    pub fn new(player_ref: EntityRef, command_line: &str) -> Self {
         let mut words = VecDeque::new();
         let mut current_word = String::new();
         let mut is_quoted = false;
@@ -90,52 +142,6 @@ impl CommandLineProcessor {
         self.words.len()
     }
 
-    pub fn object_by_description(
-        &self,
-        realm: &Realm,
-        pool: &[GameObjectRef],
-        description: ObjectDescription,
-    ) -> Option<GameObjectRef> {
-        if description.position > 0 {
-            let index = description.position as usize - 1;
-            pool.iter()
-                .filter(self.description_predicate(realm, description))
-                .nth(index)
-                .copied()
-        } else {
-            pool.iter()
-                .find(self.description_predicate(realm, description))
-                .copied()
-        }
-    }
-
-    pub fn objects_by_description(
-        &self,
-        realm: &Realm,
-        pool: &[GameObjectRef],
-        description: ObjectDescription,
-    ) -> Vec<GameObjectRef> {
-        let position = description.position;
-        let objects: Vec<GameObjectRef> = if position == 0 && description.name == "all" {
-            pool.iter().copied().collect()
-        } else {
-            pool.iter()
-                .filter(self.description_predicate(realm, description))
-                .copied()
-                .collect()
-        };
-
-        if position > 0 {
-            if position <= objects.len() as u16 {
-                vec![objects[position as usize - 1]]
-            } else {
-                vec![]
-            }
-        } else {
-            objects
-        }
-    }
-
     pub fn peek_rest(&self) -> String {
         self.words.iter().fold(String::new(), |mut rest, word| {
             if !rest.is_empty() {
@@ -166,7 +172,15 @@ impl CommandLineProcessor {
         self.words.pop_front();
     }
 
-    pub fn take_object_description(&mut self) -> Option<ObjectDescription> {
+    pub fn take_entities(&mut self, realm: &Realm, pool: &[EntityRef]) -> Vec<EntityRef> {
+        if let Some(description) = self.take_entity_description() {
+            self.entities_by_description(realm, pool, description)
+        } else {
+            vec![]
+        }
+    }
+
+    pub fn take_entity_description(&mut self) -> Option<EntityDescription> {
         self.skip_connecting_word("the");
 
         let mut name = self.take_word()?.to_lowercase();
@@ -188,22 +202,14 @@ impl CommandLineProcessor {
             }
         }
 
-        Some(ObjectDescription::new(position, name))
+        Some(EntityDescription::new(position, name))
     }
 
-    pub fn take_object(&mut self, realm: &Realm, pool: &[GameObjectRef]) -> Option<GameObjectRef> {
-        if let Some(description) = self.take_object_description() {
-            self.object_by_description(realm, pool, description)
+    pub fn take_entity(&mut self, realm: &Realm, pool: &[EntityRef]) -> Option<EntityRef> {
+        if let Some(description) = self.take_entity_description() {
+            self.entity_by_description(realm, pool, description)
         } else {
             None
-        }
-    }
-
-    pub fn take_objects(&mut self, realm: &Realm, pool: &[GameObjectRef]) -> Vec<GameObjectRef> {
-        if let Some(description) = self.take_object_description() {
-            self.objects_by_description(realm, pool, description)
-        } else {
-            vec![]
         }
     }
 
@@ -224,13 +230,13 @@ impl CommandLineProcessor {
 
 #[cfg(test)]
 mod tests {
-    use crate::game_object::{GameObjectRef, GameObjectType};
+    use crate::entity::{EntityRef, EntityType};
 
     use super::CommandLineProcessor;
 
     #[test]
     fn split_words() {
-        let player_ref = GameObjectRef(GameObjectType::Player, 1);
+        let player_ref = EntityRef(EntityType::Player, 1);
 
         let mut p1 = CommandLineProcessor::new(player_ref, "look  north");
         assert_eq!(&p1.take_word().unwrap(), "look");

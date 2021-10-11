@@ -1,11 +1,10 @@
-use crate::{game_object::GameObjectRef, objects::Realm, player_output::PlayerOutput};
-
 use super::{event::Event, visible_room_visitor};
+use crate::{entity::EntityRef, entity::Realm, player_output::PlayerOutput};
 
 /// A generic, visual event that can get triggered for any number of reasons.
 pub struct VisualEvent {
     /// Where did the visual event originate?
-    origin: GameObjectRef,
+    origin: EntityRef,
 
     /// A description of the visual event.
     description: String,
@@ -15,7 +14,7 @@ pub struct VisualEvent {
     very_distant_description: String,
 
     /// Anyone who should not be notified of this event.
-    pub excluded_characters: Vec<GameObjectRef>,
+    pub excluded_characters: Vec<EntityRef>,
 }
 
 impl VisualEvent {
@@ -24,7 +23,7 @@ impl VisualEvent {
         visible_room_visitor::visit_rooms(realm, self, strength)
     }
 
-    pub fn new(origin: GameObjectRef) -> Self {
+    pub fn new(origin: EntityRef) -> Self {
         Self {
             origin,
             description: String::new(),
@@ -51,8 +50,8 @@ impl Event for VisualEvent {
         &self,
         _: &Realm,
         strength: f32,
-        _: GameObjectRef,
-        _: GameObjectRef,
+        _: EntityRef,
+        _: EntityRef,
     ) -> Option<String> {
         Some(if strength > 0.9 {
             self.description.clone()
@@ -63,11 +62,11 @@ impl Event for VisualEvent {
         })
     }
 
-    fn excluded_characters(&self) -> &[GameObjectRef] {
+    fn excluded_characters(&self) -> &[EntityRef] {
         &self.excluded_characters
     }
 
-    fn origins(&self) -> Vec<GameObjectRef> {
+    fn origins(&self) -> Vec<EntityRef> {
         vec![self.origin]
     }
 }

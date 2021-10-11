@@ -1,6 +1,5 @@
 use crate::{
-    game_object::{GameObject, GameObjectType},
-    objects::{Realm, Room},
+    entity::{Entity, EntityType, Realm, Room},
     player_output::PlayerOutput,
 };
 
@@ -58,7 +57,7 @@ fn visit_room<'a>(realm: &'a Realm, room: &Room, strength: f32) -> Option<Vec<(&
             _ => continue,
         };
 
-        if let Some(opposite_room) = realm.room(portal.opposite_of(room.object_ref())) {
+        if let Some(opposite_room) = realm.room(portal.opposite_of(room.entity_ref())) {
             let distance = (opposite_room.position() - room.position()).len();
             let distance_multiplier = 1.0 / (distance as f32 / 3.0);
             let propagated_strength =
@@ -94,9 +93,9 @@ fn notify_characters(
             realm,
             strength,
             *character,
-            room.object_ref(),
+            room.entity_ref(),
         )?;
-        if character.object_type() == GameObjectType::Player {
+        if character.entity_type() == EntityType::Player {
             message.push('\n');
             output.push(PlayerOutput::new_from_string(character.id(), message));
         }

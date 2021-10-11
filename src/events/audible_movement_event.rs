@@ -1,8 +1,10 @@
 use std::f64::consts::TAU;
 
 use crate::{
-    direction_utils::direction_for_vector, game_object::GameObjectRef, objects::Realm,
-    player_output::PlayerOutput, vector3d::Vector3D,
+    direction_utils::direction_for_vector,
+    entity::{EntityRef, Realm},
+    player_output::PlayerOutput,
+    vector3d::Vector3D,
 };
 
 use super::{event::Event, sound_room_visitor};
@@ -13,9 +15,9 @@ const THREE_EIGHT_TAU: f64 = 3.0 * ONE_EIGHT_TAU;
 /// An audible event that gets triggered when someone or something moves to another room.
 pub struct AudibleMovementEvent {
     /// Where are they moving from?
-    origin: GameObjectRef,
+    origin: EntityRef,
     /// Where are they moving to?
-    destination: GameObjectRef,
+    destination: EntityRef,
 
     pub direction: Vector3D,
 
@@ -34,7 +36,7 @@ pub struct AudibleMovementEvent {
     very_distant_description: String,
 
     /// Anyone who should not be notified of this event.
-    pub excluded_characters: Vec<GameObjectRef>,
+    pub excluded_characters: Vec<EntityRef>,
 }
 
 impl AudibleMovementEvent {
@@ -43,7 +45,7 @@ impl AudibleMovementEvent {
         sound_room_visitor::visit_rooms(realm, self, strength)
     }
 
-    pub fn new(origin: GameObjectRef, destination: GameObjectRef) -> Self {
+    pub fn new(origin: EntityRef, destination: EntityRef) -> Self {
         Self {
             origin,
             destination,
@@ -85,8 +87,8 @@ impl Event for AudibleMovementEvent {
         &self,
         realm: &Realm,
         strength: f32,
-        character: GameObjectRef,
-        room: GameObjectRef,
+        character: EntityRef,
+        room: EntityRef,
     ) -> Option<String> {
         Some(if room == self.origin {
             format!("You hear {} {} away.", self.description, self.continuous)
@@ -148,11 +150,11 @@ impl Event for AudibleMovementEvent {
         })
     }
 
-    fn excluded_characters(&self) -> &[GameObjectRef] {
+    fn excluded_characters(&self) -> &[EntityRef] {
         &self.excluded_characters
     }
 
-    fn origins(&self) -> Vec<GameObjectRef> {
+    fn origins(&self) -> Vec<EntityRef> {
         vec![self.origin, self.destination]
     }
 }

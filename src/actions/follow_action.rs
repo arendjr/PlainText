@@ -1,32 +1,32 @@
 use crate::{
     actions,
-    game_object::{GameObject, GameObjectRef},
-    objects::Realm,
+    entity::{Entity, EntityRef, EntityType, Realm},
     player_output::PlayerOutput,
     sessions::SessionOutput,
-    text_utils::capitalize,
+    text_utils::{capitalize, definite_character_name},
 };
 
 /// Start following another character.
 pub fn follow(
     realm: &mut Realm,
-    follower_ref: GameObjectRef,
-    leader_ref: GameObjectRef,
+    follower_ref: EntityRef,
+    leader_ref: EntityRef,
 ) -> Result<Vec<PlayerOutput>, String> {
     if follower_ref == leader_ref {
         return Err("You cannot follow yourself.".into());
     }
 
     let leader = realm.character_res(leader_ref)?;
-    let follower = realm.character_res(follower_ref)?;
+    let leader_name = definite_character_name(realm, leader_ref)?;
 
     // If players can follow NPCs this easily, it would be no challenge:
-    if follower.is_player() && !leader.is_player() {
-        return Err(format!(
-            "You cannot follow {}.",
-            leader.definite_name(realm)?
-        ));
+    if follower_ref.entity_type() == EntityType::Player
+        && leader_ref.entity_type() != EntityType::Player
+    {
+        return Err(format!("You cannot follow {}.", leader_name));
     }
+
+    let follower = realm.character_res(follower_ref)?;
 
     let mut output = vec![];
     let maybe_existing_group = leader.group();
@@ -36,12 +36,12 @@ pub fn follow(
         .and_then(|group_ref| realm.group(group_ref))
     {
         if group.leader() == leader_ref {
-            return Err(format!("You are already following {}.", leader.name()));
+            return Err(format!("You are already following {}.", leader_name));
         }
         if group.followers().contains(&leader_ref) {
             return Err(format!(
                 "You are already in the same group as {}.",
-                leader.name()
+                leader_name
             ));
         }
 
@@ -72,34 +72,32 @@ pub fn follow(
 
 fn create_follow_output(
     realm: &Realm,
-    group_ref: GameObjectRef,
-    leader_ref: GameObjectRef,
-    follower_ref: GameObjectRef,
+    group_ref: EntityRef,
+    leader_ref: EntityRef,
+    follower_ref: EntityRef,
 ) -> Result<Vec<PlayerOutput>, String> {
     let group = realm.group(group_ref).ok_or("Unknown group")?;
-    let leader = realm.character_res(leader_ref)?;
-    let follower = realm.character_res(follower_ref)?;
+    let leader_name = definite_character_name(realm, leader_ref)?;
+    let follower_name = definite_character_name(realm, follower_ref)?;
 
     let mut output = vec![];
-    let follower_name = follower.definite_name(realm)?;
 
     if group.followers().len() == 1 {
         output.push(PlayerOutput::new_from_string(
-            follower.id(),
-            format!("You start following {}.\n", leader.name()),
+            follower_ref.id(),
+            format!("You start following {}.\n", leader_name),
         ));
         output.push(PlayerOutput::new_from_string(
-            leader.id(),
+            leader_ref.id(),
             format!("{} started following you.\n", capitalize(&follower_name)),
         ));
     } else {
-        let group_leader = realm.character_res(group.leader())?;
+        let group_leader_name = definite_character_name(realm, group.leader())?;
         output.push(PlayerOutput::new_from_string(
-            follower.id(),
+            follower_ref.id(),
             format!(
                 "You joined the group of {}, led by {}.\n",
-                leader.name(),
-                group_leader.name()
+                leader_name, group_leader_name
             ),
         ));
         output.append(&mut group.send_all(SessionOutput::String(format!(
@@ -112,10 +110,7 @@ fn create_follow_output(
 }
 
 /// Stop following anyone else.
-pub fn unfollow(
-    realm: &mut Realm,
-    follower_ref: GameObjectRef,
-) -> Result<Vec<PlayerOutput>, String> {
+pub fn unfollow(realm: &mut Realm, follower_ref: EntityRef) -> Result<Vec<PlayerOutput>, String> {
     let follower = realm
         .character(follower_ref)
         .ok_or("Your account has been deactivated.")?;
@@ -124,7 +119,7 @@ pub fn unfollow(
         .and_then(|group| realm.group(group))
         .ok_or("You're not in any group.")?;
 
-    let group_ref = group.object_ref();
+    let group_ref = group.entity_ref();
     let leader_ref = group.leader();
 
     if leader_ref == follower_ref {
@@ -149,36 +144,36 @@ pub fn unfollow(
 
 fn create_unfollow_output(
     realm: &Realm,
-    group_ref: GameObjectRef,
-    leader_ref: GameObjectRef,
-    follower_ref: GameObjectRef,
+    group_ref: EntityRef,
+    leader_ref: EntityRef,
+    follower_ref: EntityRef,
 ) -> Result<Vec<PlayerOutput>, String> {
     let group = realm.group(group_ref).ok_or("Unknown group")?;
-    let leader = realm.character_res(leader_ref)?;
-    let follower = realm.character_res(follower_ref)?;
+    let leader_name = definite_character_name(realm, leader_ref)?;
+    let follower_name = definite_character_name(realm, follower_ref)?;
 
     let mut output = vec![];
 
     if group.followers().is_empty() {
         output.push(PlayerOutput::new_from_string(
-            follower.id(),
-            format!("You stopped following {}.\n", leader.definite_name(realm)?),
+            follower_ref.id(),
+            format!("You stopped following {}.\n", leader_name),
         ));
         output.push(PlayerOutput::new_from_string(
-            leader.id(),
+            leader_ref.id(),
             format!(
                 "{} has stopped following you.\n",
-                capitalize(&follower.definite_name(realm)?)
+                capitalize(&follower_name)
             ),
         ));
     } else {
         output.push(PlayerOutput::new_from_str(
-            follower.id(),
+            follower_ref.id(),
             "You left the group.\n",
         ));
         output.append(&mut group.send_all(SessionOutput::String(format!(
             "{} left the group.",
-            capitalize(&follower.definite_name(realm)?)
+            capitalize(&follower_name)
         ))));
     }
 

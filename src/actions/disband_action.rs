@@ -1,35 +1,34 @@
-use crate::{game_object::GameObjectRef, objects::Realm, player_output::PlayerOutput};
+use crate::{
+    entity::{EntityRef, Realm},
+    player_output::PlayerOutput,
+    text_utils::definite_character_name,
+};
 
 /// Disband the entire group (only the leader should do this).
-pub fn disband(realm: &mut Realm, group_ref: GameObjectRef) -> Result<Vec<PlayerOutput>, String> {
+pub fn disband(realm: &mut Realm, group_ref: EntityRef) -> Result<Vec<PlayerOutput>, String> {
     let group = realm.group(group_ref).ok_or("You're not in any group")?;
-    let leader = group.leader();
+    let leader_ref = group.leader();
     let followers = group.followers().iter().copied().collect::<Vec<_>>();
 
-    let mut output = vec![];
+    let mut output = vec![PlayerOutput::new_from_str(
+        leader_ref.id(),
+        "You disbanded the group.\n",
+    )];
 
-    if let Some(leader) = realm.character(leader) {
-        output.push(PlayerOutput::new_from_str(
-            leader.id(),
-            "You disbanded the group.\n",
-        ));
+    let leader_name = definite_character_name(realm, leader_ref)?;
 
-        let leader_name = leader.definite_name(realm)?;
-        let leader_ref = leader.object_ref();
-
-        for follower in followers {
-            if let Some(follower) = realm.character_mut(follower) {
-                follower.unset_group();
-                output.push(PlayerOutput::new_from_string(
-                    follower.id(),
-                    format!("{} has disbanded the group.\n", leader_name),
-                ));
-            }
+    for follower_ref in followers {
+        if let Some(follower) = realm.character_mut(follower_ref) {
+            follower.unset_group();
+            output.push(PlayerOutput::new_from_string(
+                follower_ref.id(),
+                format!("{} has disbanded the group.\n", leader_name),
+            ));
         }
+    }
 
-        if let Some(leader) = realm.character_mut(leader_ref) {
-            leader.unset_group();
-        }
+    if let Some(leader) = realm.character_mut(leader_ref) {
+        leader.unset_group();
     }
 
     realm.unset(group_ref);

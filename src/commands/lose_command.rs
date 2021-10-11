@@ -1,8 +1,7 @@
 use super::CommandHelpers;
 use crate::{
     actions,
-    game_object::{GameObject, GameObjectRef},
-    objects::Realm,
+    entity::{Entity, EntityRef, Realm},
     player_output::PlayerOutput,
 };
 
@@ -13,7 +12,7 @@ use crate::{
 /// Examples: `lose mia`, `lose`
 pub fn lose(
     realm: &mut Realm,
-    player_ref: GameObjectRef,
+    player_ref: EntityRef,
     helpers: CommandHelpers,
 ) -> Result<Vec<PlayerOutput>, String> {
     let processor = helpers.command_line_processor;
@@ -25,7 +24,7 @@ pub fn lose(
         .group()
         .and_then(|group| realm.group(group))
         .ok_or("You're not in any group.")?;
-    let group_ref = group.object_ref();
+    let group_ref = group.entity_ref();
 
     if processor.has_words_left() {
         if player_ref != group.leader() {
@@ -36,7 +35,7 @@ pub fn lose(
             return actions::disband(realm, group_ref);
         }
 
-        match processor.take_object(realm, room.characters()) {
+        match processor.take_entity(realm, room.characters()) {
             Some(character) => actions::lose(realm, character),
             None => Err("Lose whom?".into()),
         }

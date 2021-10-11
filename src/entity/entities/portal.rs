@@ -1,12 +1,13 @@
 #![allow(non_upper_case_globals)]
 
+use crate::{
+    entity::{Entity, EntityId, EntityRef, EntityType, Openable, Realm},
+    entity_copy_prop, entity_string_prop,
+    events::{EventMultiplierMap, EventType},
+    point3d::Point3D,
+    serializable_flags,
+};
 use serde::{Deserialize, Serialize};
-use std::fmt;
-
-use crate::events::{EventMultiplierMap, EventType};
-use crate::game_object::{GameObject, GameObjectId, GameObjectRef, GameObjectType};
-use crate::objects::Realm;
-use crate::point3d::Point3D;
 
 serializable_flags! {
     pub struct PortalFlags: u32 {
@@ -22,34 +23,43 @@ serializable_flags! {
         const CanHearThroughIfOpen  = 0b0000001000000000;
         const CanShootThroughIfOpen = 0b0000010000000000;
         const CanPassThroughIfOpen  = 0b0000100000000000;
-        const IsOpen                = 0b0001000000000000;
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Portal {
-    id: GameObjectId,
+    #[serde(skip)]
+    id: EntityId,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
     description: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
     description2: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
     destination: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
     destination2: String,
+    #[serde(default, skip_serializing_if = "EventMultiplierMap::is_default")]
     event_multipliers: EventMultiplierMap,
+    #[serde(default, skip_serializing_if = "PortalFlags::is_default")]
     flags: PortalFlags,
     name: String,
     name2: String,
+    #[serde(skip)]
     needs_sync: bool,
-    room: GameObjectRef,
-    room2: GameObjectRef,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    openable: Option<Openable>,
+    room: EntityRef,
+    room2: EntityRef,
 }
 
 impl Portal {
-    game_object_string_prop!(pub, description2, set_description2);
-    game_object_string_prop!(pub, destination, set_destination);
-    game_object_string_prop!(pub, destination2, set_destination2);
-    game_object_copy_prop!(pub, flags, set_flags, PortalFlags);
-    game_object_string_prop!(pub, name2, set_name2);
-    game_object_copy_prop!(pub, room, set_room, GameObjectRef);
-    game_object_copy_prop!(pub, room2, set_room2, GameObjectRef);
+    entity_string_prop!(pub, description2, set_description2);
+    entity_string_prop!(pub, destination, set_destination);
+    entity_string_prop!(pub, destination2, set_destination2);
+    entity_string_prop!(pub, name2, set_name2);
+    entity_copy_prop!(pub, room, set_room, EntityRef);
+    entity_copy_prop!(pub, room2, set_room2, EntityRef);
 
     pub fn can_hear_through(&self) -> bool {
         if self.is_open() {
@@ -64,7 +74,7 @@ impl Portal {
             || self.has_flags(PortalFlags::CanOpenFromSide2)
     }
 
-    pub fn can_open_from_room(&self, room: GameObjectRef) -> bool {
+    pub fn can_open_from_room(&self, room: EntityRef) -> bool {
         if room == self.room2 {
             self.has_flags(PortalFlags::CanOpenFromSide2)
         } else {
@@ -88,7 +98,7 @@ impl Portal {
         }
     }
 
-    pub fn destination_from_room(&self, room: GameObjectRef) -> &str {
+    pub fn destination_from_room(&self, room: EntityRef) -> &str {
         if room == self.room2 {
             &self.destination2
         } else {
@@ -104,27 +114,14 @@ impl Portal {
         self.flags & flags == flags
     }
 
-    pub fn hydrate(id: GameObjectId, json: &str) -> Result<Box<dyn GameObject>, String> {
-        match serde_json::from_str::<PortalDto>(json) {
-            Ok(portal_dto) => Ok(Box::new(Self {
-                id,
-                description: portal_dto.description.unwrap_or_default(),
-                description2: portal_dto.description2.unwrap_or_default(),
-                destination: portal_dto.destination.unwrap_or_default(),
-                destination2: portal_dto.destination2.unwrap_or_default(),
-                event_multipliers: portal_dto.eventMultipliers.unwrap_or_default(),
-                flags: portal_dto.flags,
-                name: portal_dto.name,
-                name2: portal_dto.name2,
-                needs_sync: false,
-                room: portal_dto.room,
-                room2: portal_dto.room2,
-            })),
-            Err(error) => Err(format!("parse error: {}", error)),
-        }
+    pub fn hydrate(id: EntityId, json: &str) -> Result<Box<dyn Entity>, String> {
+        let mut dto = serde_json::from_str::<Portal>(json)
+            .map_err(|error| format!("parse error: {}", error))?;
+        dto.id = id;
+        Ok(Box::new(dto))
     }
 
-    pub fn is_hidden_from_room(&self, room: GameObjectRef) -> bool {
+    pub fn is_hidden_from_room(&self, room: EntityRef) -> bool {
         self.has_flags(if room == self.room2 {
             PortalFlags::IsHiddenFromSide2
         } else {
@@ -133,10 +130,13 @@ impl Portal {
     }
 
     pub fn is_open(&self) -> bool {
-        self.has_flags(PortalFlags::IsOpen)
+        self.openable
+            .as_ref()
+            .map(|openable| openable.is_open())
+            .unwrap_or(false)
     }
 
-    pub fn name_from_room(&self, room: GameObjectRef) -> &str {
+    pub fn name_from_room(&self, room: EntityRef) -> &str {
         if room == self.room2 && !self.name2.is_empty() {
             &self.name2
         } else {
@@ -146,7 +146,7 @@ impl Portal {
 
     /// Returns a minimal description of the portal composed of the portal's name and its
     /// destination.
-    pub fn name_with_destination_from_room(&self, room: GameObjectRef) -> String {
+    pub fn name_with_destination_from_room(&self, room: EntityRef) -> String {
         let name = self.name_from_room(room);
         let destination = self.destination_from_room(room);
         if destination.is_empty() {
@@ -160,7 +160,7 @@ impl Portal {
         }
     }
 
-    pub fn opposite_of(&self, room: GameObjectRef) -> GameObjectRef {
+    pub fn opposite_of(&self, room: EntityRef) -> EntityRef {
         if room == self.room2 {
             self.room
         } else {
@@ -183,23 +183,44 @@ impl Portal {
             z: (position1.z + position2.z) / 2,
         }
     }
-}
 
-impl fmt::Display for Portal {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Portal({}, {}, {})", self.id, self.name, self.name2)
+    pub fn set_flags(&mut self, flags: PortalFlags) {
+        self.flags = flags;
+        self.needs_sync = true;
+
+        if self.can_open() {
+            if self.openable.is_none() {
+                self.openable = Some(Openable::new());
+            }
+        } else if let Some(openable) = self.openable.as_mut() {
+            if openable.auto_close_message().is_empty() && openable.auto_close_timeout().is_none() {
+                self.openable = None;
+            } else {
+                openable.set_open(false);
+            }
+        }
+    }
+
+    pub fn set_open(&mut self, is_open: bool) {
+        if let Some(openable) = self.openable.as_mut() {
+            openable.set_open(is_open);
+        } else if is_open {
+            let mut openable = Openable::new();
+            openable.set_open(is_open);
+            self.openable = Some(openable);
+        }
     }
 }
 
-impl GameObject for Portal {
-    game_object_string_prop!(name, set_name);
-    game_object_string_prop!(description, set_description);
+impl Entity for Portal {
+    entity_string_prop!(name, set_name);
+    entity_string_prop!(description, set_description);
 
-    fn as_object(&self) -> Option<&dyn GameObject> {
+    fn as_entity(&self) -> Option<&dyn Entity> {
         Some(self)
     }
 
-    fn as_object_mut(&mut self) -> Option<&mut dyn GameObject> {
+    fn as_entity_mut(&mut self) -> Option<&mut dyn Entity> {
         Some(self)
     }
 
@@ -211,58 +232,41 @@ impl GameObject for Portal {
         Some(self)
     }
 
-    fn dehydrate(&self) -> serde_json::Value {
-        serde_json::to_value(PortalDto {
-            description: Some(self.description.clone()),
-            description2: if self.description2.is_empty() {
-                None
-            } else {
-                Some(self.description2.clone())
-            },
-            destination: if self.destination.is_empty() {
-                None
-            } else {
-                Some(self.destination.clone())
-            },
-            destination2: if self.destination2.is_empty() {
-                None
-            } else {
-                Some(self.destination2.clone())
-            },
-            eventMultipliers: if self.event_multipliers == EventMultiplierMap::default() {
-                None
-            } else {
-                Some(self.event_multipliers.clone())
-            },
-            flags: self.flags,
-            name: self.name.clone(),
-            name2: self.name2.clone(),
-            room: self.room,
-            room2: self.room2,
-        })
-        .unwrap_or_else(|error| {
+    fn dehydrate(&self) -> String {
+        serde_json::to_string_pretty(self).unwrap_or_else(|error| {
             panic!(
-                "Failed to serialize object {:?}: {:?}",
-                self.object_ref(),
+                "Failed to serialize entity {:?}: {:?}",
+                self.entity_ref(),
                 error
             )
         })
     }
 
-    fn id(&self) -> GameObjectId {
+    fn entity_ref(&self) -> EntityRef {
+        EntityRef::new(EntityType::Portal, self.id)
+    }
+
+    fn id(&self) -> EntityId {
         self.id
     }
 
     fn needs_sync(&self) -> bool {
         self.needs_sync
-    }
-
-    fn object_type(&self) -> GameObjectType {
-        GameObjectType::Portal
+            || self
+                .openable
+                .as_ref()
+                .map(|openable| openable.needs_sync())
+                .unwrap_or(false)
     }
 
     fn set_needs_sync(&mut self, needs_sync: bool) {
         self.needs_sync = needs_sync;
+
+        if !needs_sync {
+            if let Some(openable) = self.openable.as_mut() {
+                openable.set_needs_sync(needs_sync);
+            }
+        }
     }
 
     fn set_property(&mut self, prop_name: &str, value: &str) -> Result<(), String> {
@@ -274,30 +278,17 @@ impl GameObject for Portal {
             "flags" => self.set_flags(PortalFlags::from_str(value)?),
             "name" => self.set_name(value.to_owned()),
             "name2" => self.set_name2(value.to_owned()),
-            "room" => self.set_room(GameObjectRef::from_str(value)?),
-            "room2" => self.set_room2(GameObjectRef::from_str(value)?),
-            _ => return Err(format!("No property named \"{}\"", prop_name)),
+            "room" => self.set_room(EntityRef::from_str(value)?),
+            "room2" => self.set_room2(EntityRef::from_str(value)?),
+            _ => match self.openable.as_mut() {
+                Some(openable) => openable.set_property(prop_name, value),
+                None => Err(format!("No property named \"{}\"", prop_name)),
+            }?,
         }
         Ok(())
     }
-}
 
-#[allow(non_snake_case)]
-#[derive(Deserialize, Serialize)]
-struct PortalDto {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    description: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    description2: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    destination: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    destination2: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    eventMultipliers: Option<EventMultiplierMap>,
-    flags: PortalFlags,
-    name: String,
-    name2: String,
-    room: GameObjectRef,
-    room2: GameObjectRef,
+    fn to_json_value(&self) -> serde_json::Result<serde_json::Value> {
+        serde_json::to_value(self)
+    }
 }

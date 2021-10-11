@@ -1,14 +1,14 @@
-use crate::actions;
-use crate::game_object::{GameObjectRef, GameObjectType};
-use crate::objects::Realm;
-use crate::player_output::PlayerOutput;
-
 use super::CommandHelpers;
+use crate::{
+    actions,
+    entity::{EntityRef, EntityType, Realm},
+    player_output::PlayerOutput,
+};
 
 /// Enters a room without the need for there to be an exit to the room.
 pub fn enter_room(
     realm: &mut Realm,
-    player_ref: GameObjectRef,
+    player_ref: EntityRef,
     helpers: CommandHelpers,
 ) -> Result<Vec<PlayerOutput>, String> {
     let processor = helpers.command_line_processor;
@@ -19,7 +19,7 @@ pub fn enter_room(
         .strip_prefix('#')
         .and_then(|room_id| room_id.parse::<u32>().ok())
         .ok_or("Provide a room ID preceded by #.")?;
-    let room_ref = GameObjectRef::new(GameObjectType::Room, room_id);
+    let room_ref = EntityRef::new(EntityType::Room, room_id);
 
     actions::enter_room(realm, player_ref, room_ref)
 }

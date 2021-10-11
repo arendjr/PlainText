@@ -4,6 +4,8 @@ use std::fmt;
 
 use super::event_types::EventType;
 
+const DEFAULT_MULTIPLIERS: [f32; EventType::NUM_EVENT_TYPES] = [1.0; EventType::NUM_EVENT_TYPES];
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct MultiplierMap {
     multipliers: [f32; EventType::NUM_EVENT_TYPES],
@@ -14,9 +16,13 @@ impl MultiplierMap {
         self.multipliers[event_type as usize]
     }
 
+    pub fn is_default(&self) -> bool {
+        self.multipliers == DEFAULT_MULTIPLIERS
+    }
+
     pub fn new() -> Self {
         Self {
-            multipliers: [1.0; EventType::NUM_EVENT_TYPES],
+            multipliers: DEFAULT_MULTIPLIERS,
         }
     }
 

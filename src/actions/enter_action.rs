@@ -1,11 +1,10 @@
 use super::change_direction;
 use crate::{
     actions,
+    entity::{EntityRef, EntityType, Realm},
     events::{AudibleMovementEvent, VisualEvent, VisualMovementEvent},
-    game_object::{GameObjectRef, GameObjectType},
-    objects::Realm,
     player_output::PlayerOutput,
-    text_utils::capitalize,
+    text_utils::{capitalize, definite_character_name},
     vector3d::Vector3D,
 };
 use std::collections::BTreeSet;
@@ -13,9 +12,9 @@ use std::collections::BTreeSet;
 /// Makes the character enter the given portal.
 pub fn enter_portal(
     realm: &mut Realm,
-    character_ref: GameObjectRef,
-    portal_ref: GameObjectRef,
-    from_room_ref: GameObjectRef,
+    character_ref: EntityRef,
+    portal_ref: EntityRef,
+    from_room_ref: EntityRef,
 ) -> Result<Vec<PlayerOutput>, String> {
     let portal = realm
         .portal(portal_ref)
@@ -37,17 +36,17 @@ pub fn enter_portal(
 /// Makes the character enter the given room.
 pub fn enter_room(
     realm: &mut Realm,
-    character_ref: GameObjectRef,
-    room_ref: GameObjectRef,
+    character_ref: EntityRef,
+    room_ref: EntityRef,
 ) -> Result<Vec<PlayerOutput>, String> {
     let character = realm
         .character(character_ref)
         .ok_or("The character doesn't exist.")?;
 
+    let character_name = definite_character_name(realm, character_ref)?;
+
     let current_room_ref = character.current_room();
     if current_room_ref == room_ref {
-        let character_name = character.definite_name(realm)?;
-
         if let Some(room) = realm.room_mut(room_ref) {
             room.add_characters(&[character_ref]);
         }
@@ -93,8 +92,6 @@ pub fn enter_room(
         character_ref
     };
 
-    let character_name = character.name().to_owned();
-
     for character in party.iter() {
         if let Some(character) = realm.character_mut(*character) {
             character.set_current_room(room_ref);
@@ -134,7 +131,7 @@ pub fn enter_room(
 
     let visual_witnesses = visual_output
         .iter()
-        .map(|output| GameObjectRef(GameObjectType::Player, output.player_id))
+        .map(|output| EntityRef(EntityType::Player, output.player_id))
         .collect::<BTreeSet<_>>();
 
     let mut sound_event = AudibleMovementEvent::new(current_room_ref, room_ref);
@@ -164,7 +161,7 @@ pub fn enter_room(
             ));
         }
 
-        output.append(&mut actions::look_at_object(realm, character, room_ref)?);
+        output.append(&mut actions::look_at_entity(realm, character, room_ref)?);
     }
     Ok(output)
 }
@@ -172,14 +169,14 @@ pub fn enter_room(
 /// Makes the character leave the given room (on end of session).
 pub fn leave_room(
     realm: &mut Realm,
-    character_ref: GameObjectRef,
+    character_ref: EntityRef,
 ) -> Result<Vec<PlayerOutput>, String> {
     let character = realm
         .character(character_ref)
         .ok_or("The character doesn't exist.")?;
 
     let room_ref = character.current_room();
-    let character_name = character.definite_name(realm)?;
+    let character_name = definite_character_name(realm, character_ref)?;
 
     if let Some(room) = realm.room_mut(room_ref) {
         room.remove_characters(&[character_ref]);
@@ -199,7 +196,7 @@ pub fn leave_room(
     Ok(visual_output)
 }
 
-fn sound_strength_for_party(party: &[GameObjectRef]) -> f32 {
+fn sound_strength_for_party(party: &[EntityRef]) -> f32 {
     let mut strength = 0.0;
     for (i, _) in party.iter().enumerate() {
         let mut added_strength = 1.0 - 0.2 * i as f32;

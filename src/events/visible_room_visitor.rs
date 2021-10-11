@@ -1,11 +1,9 @@
-use std::f64::consts::TAU;
-
 use crate::{
-    game_object::GameObject,
-    objects::{Realm, Room, RoomFlags},
+    entity::{Entity, EntityType, Realm, Room, RoomFlags},
     player_output::PlayerOutput,
     vector3d::Vector3D,
 };
+use std::f64::consts::TAU;
 
 use super::{event::Event, EventType};
 
@@ -66,7 +64,7 @@ fn visit_room<'a>(
             _ => continue,
         };
 
-        if let Some(opposite_room) = realm.room(portal.opposite_of(room.object_ref())) {
+        if let Some(opposite_room) = realm.room(portal.opposite_of(room.entity_ref())) {
             if is_within_sight(realm, event, room, opposite_room) {
                 let propagated_strength = strength * portal.event_multiplier(EventType::Visual);
                 if propagated_strength >= 0.1 {
@@ -86,7 +84,7 @@ fn is_within_sight(
     target_room: &Room,
 ) -> bool {
     let origins = event.origins();
-    if origins.contains(&source_room.object_ref()) {
+    if origins.contains(&source_room.entity_ref()) {
         return true;
     }
 
@@ -137,13 +135,13 @@ fn notify_characters(
 
     let mut output = vec![];
 
-    for character in room.characters() {
-        if event.excluded_characters().contains(character) {
+    for character_ref in room.characters() {
+        if event.excluded_characters().contains(character_ref) {
             continue;
         }
 
         // Make sure the character is actually looking in the direction of the event:
-        let character = realm.character(*character)?;
+        let character = realm.character(*character_ref)?;
         if !event
             .origins()
             .into_iter()
@@ -164,12 +162,12 @@ fn notify_characters(
         let mut message = event.description_for_strength_and_character_in_room(
             realm,
             strength,
-            character.object_ref(),
-            room.object_ref(),
+            *character_ref,
+            room.entity_ref(),
         )?;
-        if let Some(player) = character.as_player() {
+        if character_ref.entity_type() == EntityType::Player {
             message.push('\n');
-            output.push(PlayerOutput::new_from_string(player.id(), message));
+            output.push(PlayerOutput::new_from_string(character_ref.id(), message));
         }
     }
 

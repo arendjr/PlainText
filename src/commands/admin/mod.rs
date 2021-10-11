@@ -1,7 +1,8 @@
-use crate::commands::CommandHelpers;
-use crate::game_object::GameObjectRef;
-use crate::objects::Realm;
-use crate::player_output::PlayerOutput;
+use crate::{
+    commands::CommandHelpers,
+    entity::{EntityRef, Realm},
+    player_output::PlayerOutput,
+};
 
 mod enter_room_command;
 
@@ -9,9 +10,9 @@ pub use enter_room_command::enter_room;
 
 pub fn wrap_admin_command<F>(
     f: F,
-) -> Box<dyn Fn(&mut Realm, GameObjectRef, CommandHelpers) -> Vec<PlayerOutput>>
+) -> Box<dyn Fn(&mut Realm, EntityRef, CommandHelpers) -> Vec<PlayerOutput>>
 where
-    F: Fn(&mut Realm, GameObjectRef, CommandHelpers) -> Result<Vec<PlayerOutput>, String> + 'static,
+    F: Fn(&mut Realm, EntityRef, CommandHelpers) -> Result<Vec<PlayerOutput>, String> + 'static,
 {
     Box::new(
         move |realm, player_ref, helpers| match realm.player(player_ref) {

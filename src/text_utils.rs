@@ -1,11 +1,11 @@
+use crate::{
+    colors::Color,
+    entity::{Entity, EntityRef, EntityType, ItemFlags, Realm},
+    number_utils::{written_number, written_position},
+};
 use lazy_static::lazy_static;
 use regex::{Captures, Regex};
 use std::{borrow::Borrow, cmp::Ordering};
-
-use crate::colors::Color;
-use crate::game_object::{GameObject, GameObjectRef, GameObjectType};
-use crate::number_utils::{written_number, written_position};
-use crate::objects::{ItemFlags, Realm};
 
 const COLOR_MAP: [&str; 16] = [
     "37;1", "37", "30;1", "30", "31;1", "31", "33;1", "33", "32;1", "32", "36;1", "36", "34;1",
@@ -24,50 +24,47 @@ pub fn colorize(string: &str, color: Color) -> String {
     format!("\x1B[{}m{}\x1B[0m", COLOR_MAP[color as usize], string)
 }
 
-fn count_objects<'a>(
-    realm: &'a Realm,
-    object_refs: &[GameObjectRef],
-) -> Vec<(&'a dyn GameObject, u16)> {
-    let mut objects_with_counts = Vec::<(&dyn GameObject, u16)>::new();
-    for object in object_refs
+fn count_entities<'a>(realm: &'a Realm, entity_refs: &[EntityRef]) -> Vec<(&'a dyn Entity, u16)> {
+    let mut entities_with_counts = Vec::<(&dyn Entity, u16)>::new();
+    for entity in entity_refs
         .iter()
-        .filter_map(|object_ref| realm.object(*object_ref))
+        .filter_map(|entity_ref| realm.entity(*entity_ref))
     {
-        if let Some(object_with_count) = objects_with_counts
+        if let Some(entity_with_count) = entities_with_counts
             .iter_mut()
-            .find(|(other, _)| other.name() == object.name())
+            .find(|(other, _)| other.name() == entity.name())
         {
-            object_with_count.1 += 1;
+            entity_with_count.1 += 1;
         } else {
-            objects_with_counts.push((object, 1));
+            entities_with_counts.push((entity, 1));
         }
     }
 
-    objects_with_counts
+    entities_with_counts
 }
 
-fn count_and_sort_objects<'a>(
+fn count_and_sort_entities<'a>(
     realm: &'a Realm,
-    object_refs: &[GameObjectRef],
-) -> Vec<(&'a dyn GameObject, u16)> {
-    let mut objects_with_counts = count_objects(realm, object_refs);
+    entity_refs: &[EntityRef],
+) -> Vec<(&'a dyn Entity, u16)> {
+    let mut entities_with_counts = count_entities(realm, entity_refs);
 
     // Players go before everything else, but after that we sort by count:
-    objects_with_counts.sort_by(|(object1, count1), (object2, count2)| {
-        if object1.object_type() == GameObjectType::Player {
-            if object2.object_type() == GameObjectType::Player {
+    entities_with_counts.sort_by(|(entity1, count1), (entity2, count2)| {
+        if entity1.entity_type() == EntityType::Player {
+            if entity2.entity_type() == EntityType::Player {
                 count1.cmp(count2)
             } else {
                 Ordering::Less
             }
-        } else if object2.object_type() == GameObjectType::Player {
+        } else if entity2.entity_type() == EntityType::Player {
             Ordering::Greater
         } else {
             count1.cmp(count2)
         }
     });
 
-    objects_with_counts
+    entities_with_counts
 }
 
 pub fn definite_article_from_noun(noun: String) -> &'static str {
@@ -78,19 +75,27 @@ pub fn definite_article_from_noun(noun: String) -> &'static str {
     }
 }
 
+pub fn definite_character_name(
+    realm: &Realm,
+    character_ref: EntityRef,
+) -> Result<String, &'static str> {
+    let (_, room) = realm.character_and_room_res(character_ref)?;
+    definite_name(realm, character_ref, room.characters())
+}
+
 pub fn definite_name(
     realm: &Realm,
-    subject: GameObjectRef,
-    pool: &[GameObjectRef],
+    subject: EntityRef,
+    pool: &[EntityRef],
 ) -> Result<String, &'static str> {
-    let subject = realm.object_res(subject)?;
+    let subject = realm.entity_res(subject)?;
     if subject.indefinite_article().is_empty() {
         Ok(subject.name().to_owned())
     } else {
         let mut position = 0;
         let mut total = 0;
         for other in pool {
-            let other = realm.object_res(*other)?;
+            let other = realm.entity_res(*other)?;
             if other.name() == subject.name() {
                 total += 1;
 
@@ -108,8 +113,8 @@ pub fn definite_name(
     }
 }
 
-pub fn describe_items(realm: &Realm, item_refs: &[GameObjectRef]) -> Vec<String> {
-    count_and_sort_objects(realm, item_refs)
+pub fn describe_items(realm: &Realm, item_refs: &[EntityRef]) -> Vec<String> {
+    count_and_sort_entities(realm, item_refs)
         .iter()
         .map(|(item, count)| {
             if *count > 1 {
@@ -121,42 +126,42 @@ pub fn describe_items(realm: &Realm, item_refs: &[GameObjectRef]) -> Vec<String>
         .collect()
 }
 
-pub fn describe_objects_from_room(
+pub fn describe_entities_from_room(
     realm: &Realm,
-    object_refs: &[GameObjectRef],
-    room_ref: GameObjectRef,
+    entity_refs: &[EntityRef],
+    room_ref: EntityRef,
 ) -> Vec<String> {
-    count_and_sort_objects(realm, object_refs)
+    count_and_sort_entities(realm, entity_refs)
         .iter()
-        .map(|(object, count)| {
+        .map(|(entity, count)| {
             if *count > 1 {
-                format!("{} {}", written_number(*count), object.plural_form())
-            } else if let Some(portal) = object.as_portal() {
+                format!("{} {}", written_number(*count), entity.plural_form())
+            } else if let Some(portal) = entity.as_portal() {
                 portal.name_with_destination_from_room(room_ref)
             } else {
-                object.indefinite_name()
+                entity.indefinite_name()
             }
         })
         .collect()
 }
 
-pub fn describe_objects_with_definite_articles(
+pub fn describe_entities_with_definite_articles(
     realm: &Realm,
-    object_refs: &[GameObjectRef],
+    entity_refs: &[EntityRef],
 ) -> Vec<String> {
-    count_and_sort_objects(realm, object_refs)
+    count_and_sort_entities(realm, entity_refs)
         .iter()
-        .map(|(object, count)| {
+        .map(|(entity, count)| {
             if *count > 1 {
-                format!("{} {}", written_number(*count), object.plural_form())
+                format!("{} {}", written_number(*count), entity.plural_form())
             } else {
-                format!("the {}", object.name())
+                format!("the {}", entity.name())
             }
         })
         .collect()
 }
 
-pub fn first_item_is_plural(realm: &Realm, item_refs: &[GameObjectRef]) -> bool {
+pub fn first_item_is_plural(realm: &Realm, item_refs: &[EntityRef]) -> bool {
     match item_refs.first().and_then(|item_ref| realm.item(*item_ref)) {
         Some(item) => {
             if item.has_flags(ItemFlags::ImpliedPlural) {

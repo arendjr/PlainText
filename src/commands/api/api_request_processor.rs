@@ -1,7 +1,6 @@
+use crate::{commands::command_helpers::CommandHelpers, entity::EntityRef};
 use serde::Serialize;
 use serde_json::json;
-
-use crate::{commands::command_helpers::CommandHelpers, game_object::GameObjectRef};
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -53,11 +52,11 @@ impl<'a, 'b> ApiRequestProcessor<'a, 'b> {
         self.reply(json!({"success": true}))
     }
 
-    pub fn take_object_ref(&mut self) -> Result<GameObjectRef, ApiReply> {
+    pub fn take_entity_ref(&mut self) -> Result<EntityRef, ApiReply> {
         self.take_optional_word()
-            .ok_or_else(|| ApiReply::new_error(&self.request_id, 400, "No object ref given"))
+            .ok_or_else(|| ApiReply::new_error(&self.request_id, 400, "No entity ref given"))
             .and_then(|word| {
-                GameObjectRef::from_str(&word).map_err(|error| self.error_reply(400, &error))
+                EntityRef::from_str(&word).map_err(|error| self.error_reply(400, &error))
             })
     }
 

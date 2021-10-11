@@ -1,14 +1,14 @@
-use crate::game_object::{Character, GameObject, GameObjectRef};
-use crate::objects::Realm;
-use crate::player_output::PlayerOutput;
-use crate::text_utils::{describe_items, format_weight, join_sentence};
-
 use super::CommandHelpers;
+use crate::{
+    entity::{Entity, EntityRef, Realm},
+    player_output::PlayerOutput,
+    text_utils::{describe_items, format_weight, join_sentence},
+};
 
 /// Inspects the character's inventory.
 pub fn inventory(
     realm: &mut Realm,
-    player_ref: GameObjectRef,
+    player_ref: EntityRef,
     helpers: CommandHelpers,
 ) -> Result<Vec<PlayerOutput>, String> {
     let player = realm.player_res(player_ref)?;
@@ -16,7 +16,7 @@ pub fn inventory(
     let processor = helpers.command_line_processor;
     processor.skip_word(); // alias
 
-    let inventory = player.inventory();
+    let inventory = player.character().inventory();
     let weight = inventory.iter().fold(0.0, |weight, &item_ref| {
         weight
             + if let Some(item) = realm.item(item_ref) {
@@ -32,8 +32,7 @@ pub fn inventory(
             "You carry {}.\n",
             join_sentence(&describe_items(realm, inventory))
         )
-    } else if let Some(item) =
-        GameObjectRef::only(inventory).and_then(|item_ref| realm.item(item_ref))
+    } else if let Some(item) = EntityRef::only(inventory).and_then(|item_ref| realm.item(item_ref))
     {
         format!(
             "You carry {}, weighing {}.\n",
@@ -48,10 +47,11 @@ pub fn inventory(
         )
     };
 
-    let carried_gold_string = if player.gold() == 0 {
+    let gold = player.character().gold();
+    let carried_gold_string = if gold == 0 {
         "You don't have any gold.\n".to_owned()
     } else {
-        format!("You've got ${} worth of gold.\n", player.gold())
+        format!("You've got ${} worth of gold.\n", gold)
     };
 
     Ok(vec![PlayerOutput::new_from_string(

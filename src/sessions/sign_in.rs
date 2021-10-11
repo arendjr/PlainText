@@ -6,8 +6,7 @@ use super::{
     ProcessSignUpInputResult, SessionOutput as Output,
 };
 use crate::{
-    game_object::GameObject,
-    objects::{Player, Realm},
+    entity::{Entity, Player, Realm},
     text_utils::is_letter,
 };
 use lazy_static::lazy_static;

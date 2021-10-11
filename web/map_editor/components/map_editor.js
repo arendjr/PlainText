@@ -54,11 +54,11 @@ export function MapEditor() {
     const selectedRoom = rooms.get(selectedRoomId);
 
     useEffect(async () => {
-        const rooms = await sendApiCall("objects-list room");
+        const rooms = await sendApiCall("entity-list room");
         console.log("Got rooms");
         setRooms(rooms);
 
-        const portals = await sendApiCall("objects-list portal");
+        const portals = await sendApiCall("entity-list portal");
         console.log("Got portals");
         setPortals(portals);
 
@@ -105,7 +105,7 @@ export function MapEditor() {
                 position: portal.room2.position,
             };
             const room2Ref = await sendApiCall(
-                `object-create room ${JSON.stringify(newRoom)}`
+                `entity-create room ${JSON.stringify(newRoom)}`
             );
 
             addRoom(newRoom);
@@ -113,7 +113,7 @@ export function MapEditor() {
         }
 
         const portalRef = await sendApiCall(
-            `object-create portal ${JSON.stringify(portal)}`
+            `entity-create portal ${JSON.stringify(portal)}`
         );
 
         addPortal(portal);
@@ -140,7 +140,7 @@ export function MapEditor() {
             );
         }
 
-        sendApiCall(`object-delete ${deletingPortal}`);
+        sendApiCall(`entity-delete ${deletingPortal}`);
         removePortal(portal.id);
         setDeletingPortal(null);
         setEditingPortal(null);
@@ -209,7 +209,7 @@ export function MapEditor() {
     const savePortal = async portal => {
         if (portal.id) {
             await sendApiCall(
-                `object-set portal:${portal.id} ${JSON.stringify(portal)}`
+                `entity-set portal:${portal.id} ${JSON.stringify(portal)}`
             );
             updatePortal(portal);
         } else {

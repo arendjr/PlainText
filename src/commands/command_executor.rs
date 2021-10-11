@@ -1,6 +1,6 @@
 use super::{
     admin::enter_room,
-    api::{objects_list, property_set},
+    api::{entity_list, property_set},
     close_command::close,
     command_helpers::CommandHelpers,
     command_interpreter::{interpret_command, InterpretationError},
@@ -17,9 +17,8 @@ use super::{
 };
 use crate::{
     commands::admin::wrap_admin_command,
-    commands::api::{object_create, object_delete, object_set, wrap_api_request},
-    game_object::GameObjectRef,
-    objects::Realm,
+    commands::api::{entity_create, entity_delete, entity_set, wrap_api_request},
+    entity::{EntityRef, Realm},
     player_output::PlayerOutput,
     LogSender,
 };
@@ -33,7 +32,7 @@ impl CommandExecutor {
     pub fn execute_command(
         &self,
         realm: &mut Realm,
-        player_ref: GameObjectRef,
+        player_ref: EntityRef,
         _: &LogSender,
         command_line: String,
     ) -> Vec<PlayerOutput> {
@@ -53,10 +52,10 @@ impl CommandExecutor {
                     command_registry: &self.command_registry,
                 };
                 let command_fn = match command_type {
-                    CommandType::ApiObjectCreate => wrap_api_request(object_create),
-                    CommandType::ApiObjectDelete => wrap_api_request(object_delete),
-                    CommandType::ApiObjectSet => wrap_api_request(object_set),
-                    CommandType::ApiObjectsList => wrap_api_request(objects_list),
+                    CommandType::ApiEntityCreate => wrap_api_request(entity_create),
+                    CommandType::ApiEntityDelete => wrap_api_request(entity_delete),
+                    CommandType::ApiEntityList => wrap_api_request(entity_list),
+                    CommandType::ApiEntitySet => wrap_api_request(entity_set),
                     CommandType::ApiPropertySet => wrap_api_request(property_set),
                     CommandType::Close(_) => wrap_command(close),
                     CommandType::EnterRoom(_) => wrap_admin_command(enter_room),
@@ -86,10 +85,10 @@ impl CommandExecutor {
 
     pub fn new() -> Self {
         let mut registry = CommandRegistry::new();
-        registry.register("api-object-create", CommandType::ApiObjectCreate);
-        registry.register("api-object-delete", CommandType::ApiObjectDelete);
-        registry.register("api-object-set", CommandType::ApiObjectSet);
-        registry.register("api-objects-list", CommandType::ApiObjectsList);
+        registry.register("api-entity-create", CommandType::ApiEntityCreate);
+        registry.register("api-entity-delete", CommandType::ApiEntityDelete);
+        registry.register("api-entity-list", CommandType::ApiEntityList);
+        registry.register("api-entity-set", CommandType::ApiEntitySet);
         registry.register("api-property-set", CommandType::ApiPropertySet);
         registry.register(
             "close",
@@ -206,9 +205,9 @@ impl CommandExecutor {
 
 pub fn wrap_command<F>(
     f: F,
-) -> Box<dyn Fn(&mut Realm, GameObjectRef, CommandHelpers) -> Vec<PlayerOutput>>
+) -> Box<dyn Fn(&mut Realm, EntityRef, CommandHelpers) -> Vec<PlayerOutput>>
 where
-    F: Fn(&mut Realm, GameObjectRef, CommandHelpers) -> Result<Vec<PlayerOutput>, String> + 'static,
+    F: Fn(&mut Realm, EntityRef, CommandHelpers) -> Result<Vec<PlayerOutput>, String> + 'static,
 {
     Box::new(
         move |realm, player_ref, helpers| match f(realm, player_ref, helpers) {

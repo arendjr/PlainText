@@ -20,10 +20,10 @@ use command_line_processor::CommandLineProcessor;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum CommandType {
-    ApiObjectCreate,
-    ApiObjectDelete,
-    ApiObjectSet,
-    ApiObjectsList,
+    ApiEntityCreate,
+    ApiEntityDelete,
+    ApiEntityList,
+    ApiEntitySet,
     ApiPropertySet,
     Close(&'static str),
     EnterRoom(&'static str),
@@ -40,10 +40,10 @@ impl CommandType {
     pub fn description(&self) -> &'static str {
         use CommandType::*;
         match self {
-            ApiObjectCreate => "",
-            ApiObjectDelete => "",
-            ApiObjectSet => "",
-            ApiObjectsList => "",
+            ApiEntityCreate => "",
+            ApiEntityDelete => "",
+            ApiEntityList => "",
+            ApiEntitySet => "",
             ApiPropertySet => "",
             Close(description) => description,
             EnterRoom(description) => description,

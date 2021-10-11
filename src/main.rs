@@ -8,25 +8,7 @@ mod player_output;
 #[macro_use]
 mod serializable_flags;
 #[macro_use]
-mod game_object;
-
-macro_rules! unwrap_or_continue {
-    ($expr:expr) => {
-        match $expr {
-            Some(value) => value,
-            None => continue,
-        }
-    };
-}
-
-macro_rules! unwrap_or_return_value {
-    ($expr:expr, $ret:expr) => {
-        match $expr {
-            Some(value) => value,
-            None => return $ret,
-        }
-    };
-}
+mod entity;
 
 mod actions;
 mod character_stats;
@@ -36,7 +18,6 @@ mod direction_utils;
 mod events;
 mod logs;
 mod number_utils;
-mod objects;
 mod persistence_handler;
 mod point3d;
 mod relative_direction;
@@ -48,11 +29,10 @@ mod vector_utils;
 mod vision_utils;
 mod web_server;
 
-use actions::{enter_room, look_at_object};
+use actions::{enter_room, look_at_entity};
 use commands::CommandExecutor;
-use game_object::{hydrate, Character, GameObject, GameObjectId, GameObjectRef, GameObjectType};
+use entity::{hydrate, Entity, EntityId, EntityRef, EntityType, Realm};
 use logs::{log_command, log_session_event, LogMessage, LogSender};
-use objects::Realm;
 use persistence_handler::PersistenceRequest;
 use player_output::PlayerOutput;
 use sessions::{
@@ -139,20 +119,20 @@ fn load_data(data_dir: &str) -> Result<Realm, io::Error> {
         .collect::<Result<Vec<_>, io::Error>>()?;
     let mut character_refs = Vec::new();
     for (file_name, path) in entries {
-        if let Some(object_ref) = GameObjectRef::from_file_name(&file_name) {
+        if let Some(entity_ref) = EntityRef::from_file_name(&file_name) {
             let content = fs::read_to_string(&path)?;
-            match hydrate(object_ref, &content) {
-                Ok(object) => {
-                    if object.as_npc().is_some() {
-                        character_refs.push(object_ref);
+            match hydrate(entity_ref, &content) {
+                Ok(entity) => {
+                    if entity.as_npc().is_some() {
+                        character_refs.push(entity_ref);
                     }
 
-                    realm.set(object_ref, object);
+                    realm.set(entity_ref, entity);
                 }
                 Err(message) => println!(
                     "error loading {} {}: {}",
-                    object_ref.object_type(),
-                    object_ref.id(),
+                    entity_ref.entity_type(),
+                    entity_ref.id(),
                     message
                 ),
             }
@@ -165,7 +145,7 @@ fn load_data(data_dir: &str) -> Result<Realm, io::Error> {
 
 // Characters get injected on load, so that rooms don't need to be re-persisted every time a
 // character moves from one room to another.
-fn inject_characters_into_rooms(realm: &mut Realm, character_refs: Vec<GameObjectRef>) {
+fn inject_characters_into_rooms(realm: &mut Realm, character_refs: Vec<EntityRef>) {
     for character_ref in character_refs {
         let maybe_current_room = realm
             .character(character_ref)
@@ -223,15 +203,15 @@ async fn process_signing_in_input(
                 .await;
             }
 
-            let player_ref = player.object_ref();
-            let current_room = player.current_room();
+            let player_ref = player.entity_ref();
+            let current_room = player.character().current_room();
             player.set_session_id(Some(session_id));
 
             log_command(log_tx, user_name.to_owned(), "(signed in)".to_owned()).await;
 
             let output = match enter_room(realm, player_ref, current_room) {
                 Ok(mut output) => {
-                    if let Ok(mut more) = look_at_object(realm, player_ref, current_room) {
+                    if let Ok(mut more) = look_at_entity(realm, player_ref, current_room) {
                         output.append(&mut more);
                     }
                     output
@@ -266,11 +246,11 @@ async fn process_signed_in_input(
     command_executor: &CommandExecutor,
     session_tx: &Sender<SessionEvent>,
     log_tx: &LogSender,
-    (input, session_id, source, player_id): (String, u64, String, GameObjectId),
+    (input, session_id, source, player_id): (String, u64, String, EntityId),
 ) {
     if let Some(player) = realm.player_by_id(player_id) {
         log_command(log_tx, player.name().to_owned(), input.clone()).await;
-        let player_ref = player.object_ref();
+        let player_ref = player.entity_ref();
         let player_output = command_executor.execute_command(realm, player_ref, log_tx, input);
         process_player_output(realm, session_tx, player_output).await;
     } else {
@@ -313,10 +293,10 @@ async fn process_player_output(
                         output => output.with(SessionOutput::Prompt(SessionPromptInfo {
                             name: player.name().to_owned(),
                             is_admin: player.is_admin(),
-                            hp: player.hp(),
-                            max_hp: player.stats().max_hp(),
-                            mp: player.mp(),
-                            max_mp: player.stats().max_mp(),
+                            hp: player.character().hp(),
+                            max_hp: player.character().stats().max_hp(),
+                            mp: player.character().mp(),
+                            max_mp: player.character().stats().max_mp(),
                         })),
                     },
                 ),
@@ -330,16 +310,16 @@ async fn process_session_closed(
     realm: &mut Realm,
     session_tx: &Sender<SessionEvent>,
     log_tx: &LogSender,
-    player_id: Option<GameObjectId>,
+    player_id: Option<EntityId>,
 ) {
     if let Some(player_id) = player_id {
-        let player_ref = GameObjectRef::new(GameObjectType::Player, player_id);
+        let player_ref = EntityRef::new(EntityType::Player, player_id);
         let mut should_unfollow = false;
 
         if let Some(player) = realm.player_by_id_mut(player_id) {
             player.set_session_id(None);
 
-            should_unfollow = player.group().is_some();
+            should_unfollow = player.character().group().is_some();
 
             let player_name = player.name().to_owned();
             log_command(log_tx, player_name, "(session closed)".to_owned()).await;
