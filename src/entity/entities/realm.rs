@@ -174,6 +174,19 @@ impl Realm {
             .map(|(_, entity)| entity.deref())
     }
 
+    pub fn openable(&self, entity_ref: EntityRef) -> Option<&Openable> {
+        self.entities
+            .get(&entity_ref)
+            .and_then(|entity| entity.as_openable())
+    }
+
+    pub fn openable_mut(&mut self, entity_ref: EntityRef) -> Option<&mut Openable> {
+        self.request_persistence(entity_ref);
+        self.entities
+            .get_mut(&entity_ref)
+            .and_then(|entity| entity.as_openable_mut())
+    }
+
     pub fn player(&self, entity_ref: EntityRef) -> Option<&entities::Player> {
         self.entities
             .get(&entity_ref)

@@ -77,6 +77,14 @@ pub trait Entity {
         None
     }
 
+    fn as_openable(&self) -> Option<&Openable> {
+        None
+    }
+
+    fn as_openable_mut(&mut self) -> Option<&mut Openable> {
+        None
+    }
+
     fn as_player(&self) -> Option<&entities::Player> {
         None
     }

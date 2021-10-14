@@ -1,4 +1,7 @@
+use std::time::Duration;
+
 use crate::{
+    actionable_events::{ActionDispatcher, ActionableEvent},
     entity::{Entity, EntityRef, Realm},
     player_output::PlayerOutput,
     text_utils::{capitalize, definite_character_name},
@@ -7,6 +10,7 @@ use crate::{
 /// Opens a portal.
 pub fn open(
     realm: &mut Realm,
+    action_dispatcher: &ActionDispatcher,
     character_ref: EntityRef,
     portal_ref: EntityRef,
 ) -> Result<Vec<PlayerOutput>, String> {
@@ -37,8 +41,20 @@ pub fn open(
         }
     }
 
-    if let Some(portal) = realm.portal_mut(portal_ref) {
-        portal.set_open(true);
+    if let Some(openable) = realm.openable_mut(portal_ref) {
+        openable.set_open(true);
+    }
+
+    if let Some(openable) = realm.openable(portal_ref) {
+        if let Some(timeout) = openable.auto_close_timeout() {
+            action_dispatcher.dispatch_after(
+                ActionableEvent::AutoClose {
+                    entity_ref: portal_ref,
+                    message: openable.auto_close_message().to_owned(),
+                },
+                Duration::from_millis(timeout.get() as u64),
+            )
+        }
     }
 
     Ok(output)

@@ -22,5 +22,5 @@ pub fn open(
         .take_entity(realm, room.portals())
         .ok_or("Open what?")?;
 
-    actions::open(realm, player_ref, portal_ref)
+    actions::open(realm, helpers.action_dispatcher, player_ref, portal_ref)
 }

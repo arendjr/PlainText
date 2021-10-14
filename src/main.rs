@@ -10,6 +10,7 @@ mod serializable_flags;
 #[macro_use]
 mod entity;
 
+mod actionable_events;
 mod actions;
 mod character_stats;
 mod colors;
@@ -40,6 +41,8 @@ use sessions::{
     SessionPromptInfo, SessionState, SignInState,
 };
 
+use crate::actionable_events::ActionableEvent;
+
 #[tokio::main]
 async fn main() {
     let data_dir = env::var("PT_DATA_DIR").unwrap_or_else(|_| "data/".to_owned());
@@ -59,6 +62,7 @@ async fn main() {
         Err(error) => panic!("Failed to load data from \"{}\": {}", data_dir, error),
     };
 
+    let (action_tx, mut action_rx) = channel::<ActionableEvent>(64);
     let (input_tx, mut input_rx) = channel::<SessionInputEvent>(64);
     let (persist_tx, persist_rx) = channel::<PersistenceRequest>(64);
     let (session_tx, session_rx) = channel::<SessionEvent>(64);
@@ -71,32 +75,42 @@ async fn main() {
     telnet_server::serve(telnet_port, session_tx.clone());
     web_server::serve(realm.name().to_owned(), http_port, session_tx.clone());
 
-    let command_executor = CommandExecutor::new();
-    while let Some(SessionInputEvent {
-        input,
-        session_id,
-        session_state,
-        source,
-    }) = input_rx.recv().await
-    {
-        match session_state {
-            SessionState::SigningIn(state) => {
-                let input_ev = (input, session_id, source, state.as_ref());
-                process_signing_in_input(&mut realm, &session_tx, &log_tx, input_ev).await;
+    let command_executor = CommandExecutor::new(action_tx.clone());
+    loop {
+        tokio::select! {
+            Some(SessionInputEvent {
+                input,
+                session_id,
+                session_state,
+                source,
+            }) = input_rx.recv() => {
+                match session_state {
+                    SessionState::SigningIn(state) => {
+                        let input_ev = (input, session_id, source, state.as_ref());
+                        process_signing_in_input(&mut realm, &session_tx, &log_tx, input_ev).await;
+                    }
+                    SessionState::SignedIn(player_id) => {
+                        let input_ev = (input, session_id, source, player_id);
+                        process_signed_in_input(
+                            &mut realm,
+                            &command_executor,
+                            &session_tx,
+                            &log_tx,
+                            input_ev,
+                        )
+                        .await;
+                    }
+                    SessionState::SessionClosed(player_id) => {
+                        process_session_closed(&mut realm, &session_tx, &log_tx, player_id).await;
+                    }
+                }
             }
-            SessionState::SignedIn(player_id) => {
-                let input_ev = (input, session_id, source, player_id);
-                process_signed_in_input(
-                    &mut realm,
-                    &command_executor,
-                    &session_tx,
-                    &log_tx,
-                    input_ev,
-                )
-                .await;
+            Some(event) = action_rx.recv() => {
+                let player_output = event.process(&mut realm);
+                process_player_output(&realm, &session_tx, player_output).await;
             }
-            SessionState::SessionClosed(player_id) => {
-                process_session_closed(&mut realm, &session_tx, &log_tx, player_id).await;
+            else => {
+                break;
             }
         }
 

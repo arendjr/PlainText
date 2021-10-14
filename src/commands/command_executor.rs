@@ -1,3 +1,5 @@
+use tokio::sync::mpsc::Sender;
+
 use super::{
     admin::enter_room,
     api::{entity_list, property_set},
@@ -16,6 +18,7 @@ use super::{
     CommandType,
 };
 use crate::{
+    actionable_events::{ActionDispatcher, ActionableEvent},
     commands::admin::wrap_admin_command,
     commands::api::{entity_create, entity_delete, entity_set, wrap_api_request},
     entity::{EntityRef, Realm},
@@ -24,6 +27,7 @@ use crate::{
 };
 
 pub struct CommandExecutor {
+    action_dispatcher: ActionDispatcher,
     admin_command_registry: CommandRegistry,
     command_registry: CommandRegistry,
 }
@@ -47,6 +51,7 @@ impl CommandExecutor {
         }) {
             Ok(command_type) => {
                 let command_helpers = CommandHelpers {
+                    action_dispatcher: &self.action_dispatcher,
                     admin_command_registry: &self.admin_command_registry,
                     command_line_processor: &mut processor,
                     command_registry: &self.command_registry,
@@ -83,7 +88,7 @@ impl CommandExecutor {
         }
     }
 
-    pub fn new() -> Self {
+    pub fn new(action_tx: Sender<ActionableEvent>) -> Self {
         let mut registry = CommandRegistry::new();
         registry.register("api-entity-create", CommandType::ApiEntityCreate);
         registry.register("api-entity-delete", CommandType::ApiEntityDelete);
@@ -197,6 +202,7 @@ impl CommandExecutor {
         };
 
         Self {
+            action_dispatcher: ActionDispatcher::new(action_tx),
             admin_command_registry: admin_registry,
             command_registry: registry,
         }
@@ -214,9 +220,7 @@ where
             Ok(output) => output,
             Err(mut message) => {
                 message.push('\n');
-                let mut output: Vec<PlayerOutput> = Vec::new();
-                push_output_string!(output, player_ref, message);
-                output
+                vec![PlayerOutput::new_from_string(player_ref.id(), message)]
             }
         },
     )

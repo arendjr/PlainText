@@ -115,10 +115,13 @@ impl Portal {
     }
 
     pub fn hydrate(id: EntityId, json: &str) -> Result<Box<dyn Entity>, String> {
-        let mut dto = serde_json::from_str::<Portal>(json)
+        let mut portal = serde_json::from_str::<Portal>(json)
             .map_err(|error| format!("parse error: {}", error))?;
-        dto.id = id;
-        Ok(Box::new(dto))
+        portal.id = id;
+        if portal.can_open() && portal.openable.is_none() {
+            portal.openable = Some(Openable::new());
+        }
+        Ok(Box::new(portal))
     }
 
     pub fn is_hidden_from_room(&self, room: EntityRef) -> bool {
@@ -222,6 +225,14 @@ impl Entity for Portal {
 
     fn as_entity_mut(&mut self) -> Option<&mut dyn Entity> {
         Some(self)
+    }
+
+    fn as_openable(&self) -> Option<&Openable> {
+        self.openable.as_ref()
+    }
+
+    fn as_openable_mut(&mut self) -> Option<&mut Openable> {
+        self.openable.as_mut()
     }
 
     fn as_portal(&self) -> Option<&Self> {
