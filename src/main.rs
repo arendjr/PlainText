@@ -1,5 +1,6 @@
 #![allow(non_upper_case_globals)]
 
+use actionable_events::ActionDispatcher;
 use std::{collections::BTreeMap, env, fs, io};
 use tokio::sync::mpsc::{channel, Sender};
 
@@ -75,6 +76,7 @@ async fn main() {
     telnet_server::serve(telnet_port, session_tx.clone());
     web_server::serve(realm.name().to_owned(), http_port, session_tx.clone());
 
+    let action_dispatcher = ActionDispatcher::new(action_tx.clone());
     let command_executor = CommandExecutor::new(action_tx.clone());
     loop {
         tokio::select! {
@@ -87,7 +89,14 @@ async fn main() {
                 match session_state {
                     SessionState::SigningIn(state) => {
                         let input_ev = (input, session_id, source, state.as_ref());
-                        process_signing_in_input(&mut realm, &session_tx, &log_tx, input_ev).await;
+                        process_signing_in_input(
+                            &mut realm,
+                            &action_dispatcher,
+                            &session_tx,
+                            &log_tx,
+                            input_ev
+                        )
+                        .await;
                     }
                     SessionState::SignedIn(player_id) => {
                         let input_ev = (input, session_id, source, player_id);
@@ -177,6 +186,7 @@ fn inject_characters_into_rooms(realm: &mut Realm, character_refs: Vec<EntityRef
 
 async fn process_signing_in_input(
     realm: &mut Realm,
+    action_dispatcher: &ActionDispatcher,
     session_tx: &Sender<SessionEvent>,
     log_tx: &LogSender,
     (input, session_id, source, state): (String, u64, String, &SignInState),
@@ -223,7 +233,7 @@ async fn process_signing_in_input(
 
             log_command(log_tx, user_name.to_owned(), "(signed in)".to_owned()).await;
 
-            let output = match enter_room(realm, player_ref, current_room) {
+            let output = match enter_room(realm, action_dispatcher, player_ref, current_room) {
                 Ok(mut output) => {
                     if let Ok(mut more) = look_at_entity(realm, player_ref, current_room) {
                         output.append(&mut more);

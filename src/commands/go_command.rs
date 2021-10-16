@@ -44,7 +44,13 @@ pub fn go(
     }?;
 
     let room_ref = room.entity_ref();
-    actions::enter_portal(realm, player_ref, portal_ref, room_ref)
+    actions::enter_portal(
+        realm,
+        helpers.action_dispatcher,
+        player_ref,
+        portal_ref,
+        room_ref,
+    )
 }
 
 pub fn get_portal_in_direction(

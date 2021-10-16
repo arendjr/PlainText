@@ -2,6 +2,7 @@ use crate::{entity::EntityPersistence, entity_copy_prop, entity_string_prop};
 use serde::{Deserialize, Serialize};
 use std::num::NonZeroU32;
 
+/// Component that tracks state of entities that can be opened and closed.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Openable {

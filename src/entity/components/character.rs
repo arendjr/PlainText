@@ -3,13 +3,17 @@ use crate::entity::{Entity, EntityRef};
 use crate::sessions::SignUpData;
 use crate::vector3d::Vector3D;
 use crate::{entity_copy_prop, entity_ref_prop};
+use futures::future::AbortHandle;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+/// Component that is shared across entities representing characters (players and NPCs).
+#[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Character {
     #[serde(skip_serializing_if = "Option::is_none")]
     class: Option<EntityRef>,
+    #[serde(skip)]
+    current_action: CharacterAction,
     current_room: EntityRef,
     #[serde(default)]
     direction: Vector3D,
@@ -26,12 +30,34 @@ pub struct Character {
     #[serde(skip)]
     needs_sync: bool,
     race: EntityRef,
+    #[serde(skip)]
+    reset_action_abort_handle: Option<AbortHandle>,
     stats: CharacterStats,
     weight: f32,
 }
 
 impl Character {
     entity_copy_prop!(pub, class, set_class, Option<EntityRef>);
+
+    pub fn current_action(&self) -> CharacterAction {
+        self.current_action
+    }
+
+    pub fn reset_action(&mut self) {
+        self.current_action = CharacterAction::Idle;
+        self.reset_action_abort_handle = None;
+    }
+
+    pub fn set_action(&mut self, action: CharacterAction, reset_abort_handle: AbortHandle) {
+        self.current_action = action;
+
+        if let Some(abort_handle) = self.reset_action_abort_handle.as_mut() {
+            abort_handle.abort();
+        }
+
+        self.reset_action_abort_handle = Some(reset_abort_handle);
+    }
+
     entity_copy_prop!(pub, current_room, set_current_room, EntityRef);
 
     entity_ref_prop!(pub, direction, set_direction, Vector3D);
@@ -71,6 +97,7 @@ impl Character {
         let race = sign_up_data.race.clone().unwrap();
         Self {
             class: sign_up_data.class.as_ref().map(|class| class.entity_ref()),
+            current_action: CharacterAction::default(),
             current_room: race.starting_room(),
             direction: Vector3D::new(0, 0, 0),
             gender: sign_up_data.gender,
@@ -82,6 +109,7 @@ impl Character {
             mp: sign_up_data.stats.max_mp(),
             needs_sync: true,
             race: race.entity_ref(),
+            reset_action_abort_handle: None,
             stats: sign_up_data.stats.clone(),
             weight: sign_up_data.weight,
         }
@@ -105,6 +133,20 @@ impl Character {
             _ => return Err(format!("No property named \"{}\"", prop_name)),
         }
         Ok(())
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum CharacterAction {
+    Idle,
+    Walking,
+    Running,
+    Fighting,
+}
+
+impl Default for CharacterAction {
+    fn default() -> Self {
+        Self::Idle
     }
 }
 

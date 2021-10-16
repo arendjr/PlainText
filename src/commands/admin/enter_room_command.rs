@@ -21,5 +21,5 @@ pub fn enter_room(
         .ok_or("Provide a room ID preceded by #.")?;
     let room_ref = EntityRef::new(EntityType::Room, room_id);
 
-    actions::enter_room(realm, player_ref, room_ref)
+    actions::enter_room(realm, helpers.action_dispatcher, player_ref, room_ref)
 }

@@ -1,17 +1,19 @@
 use super::change_direction;
 use crate::{
+    actionable_events::ActionDispatcher,
     actions,
-    entity::{EntityRef, EntityType, Realm},
+    entity::{CharacterAction, EntityRef, EntityType, Realm},
     events::{AudibleMovementEvent, VisualEvent, VisualMovementEvent},
     player_output::PlayerOutput,
     text_utils::{capitalize, definite_character_name},
     vector3d::Vector3D,
 };
-use std::collections::BTreeSet;
+use std::{collections::BTreeSet, time::Duration};
 
 /// Makes the character enter the given portal.
 pub fn enter_portal(
     realm: &mut Realm,
+    action_dispatcher: &ActionDispatcher,
     character_ref: EntityRef,
     portal_ref: EntityRef,
     from_room_ref: EntityRef,
@@ -30,12 +32,13 @@ pub fn enter_portal(
     }
 
     let target_room_ref = portal.opposite_of(from_room_ref);
-    enter_room(realm, character_ref, target_room_ref)
+    enter_room(realm, action_dispatcher, character_ref, target_room_ref)
 }
 
 /// Makes the character enter the given room.
 pub fn enter_room(
     realm: &mut Realm,
+    action_dispatcher: &ActionDispatcher,
     character_ref: EntityRef,
     room_ref: EntityRef,
 ) -> Result<Vec<PlayerOutput>, String> {
@@ -75,11 +78,14 @@ pub fn enter_room(
         .map(|followers| {
             let mut party = vec![character_ref];
             for follower in followers {
-                let is_in_same_room = realm
+                let can_follow = realm
                     .character(*follower)
-                    .map(|follower| follower.current_room() == current_room_ref)
+                    .map(|follower| {
+                        follower.current_room() == current_room_ref
+                            && follower.current_action() != CharacterAction::Fighting
+                    })
                     .unwrap_or(false);
-                if is_in_same_room {
+                if can_follow {
                     party.push(*follower);
                 }
             }
@@ -92,11 +98,33 @@ pub fn enter_room(
         character_ref
     };
 
-    for character in party.iter() {
-        if let Some(character) = realm.character_mut(*character) {
+    let new_character_action = if character.current_action() == CharacterAction::Idle {
+        CharacterAction::Walking
+    } else {
+        CharacterAction::Running
+    };
+
+    for character_ref in party.iter() {
+        if let Some(character) = realm.character_mut(*character_ref) {
             character.set_current_room(room_ref);
-        }
+        };
+
+        actions::set_character_action(
+            realm,
+            action_dispatcher,
+            *character_ref,
+            new_character_action,
+            Duration::from_millis(4000),
+        );
     }
+
+    let (simple_present, continuous) = match (new_character_action, party.len()) {
+        (CharacterAction::Walking, 1) => ("walks", "is walking"),
+        (CharacterAction::Walking, _) => ("walk", "are walking"),
+        (CharacterAction::Running, 1) => ("runs", "is running"),
+        (CharacterAction::Running, _) => ("run", "are running"),
+        _ => unreachable!(),
+    };
 
     let direction = match (realm.room(current_room_ref), realm.room(room_ref)) {
         (Some(current_room), Some(new_room)) => {
@@ -119,11 +147,7 @@ pub fn enter_room(
 
     let mut visual_event = VisualMovementEvent::new(visual_subject, current_room_ref, room_ref);
     visual_event.direction = direction.clone();
-    if party.len() == 1 {
-        visual_event.set_verb("walks", "is walking");
-    } else {
-        visual_event.set_verb("walk", "are walking");
-    }
+    visual_event.set_verb(simple_present, continuous);
     visual_event.excluded_characters = party.clone();
     let visual_output = visual_event
         .fire(realm, 1.0)
@@ -136,19 +160,26 @@ pub fn enter_room(
 
     let mut sound_event = AudibleMovementEvent::new(current_room_ref, room_ref);
     sound_event.direction = direction;
+    sound_event.set_verb(simple_present, continuous);
     if party.len() == 1 {
-        sound_event.set_verb("walks", "is walking");
         sound_event.set_description(&character_name, "someone", "someone");
     } else {
-        sound_event.set_verb("walk", "are walking");
         sound_event.set_description("some people", "people", "people");
     }
     sound_event.excluded_characters = party.clone();
     sound_event
         .excluded_characters
         .append(&mut visual_witnesses.into_iter().collect::<Vec<_>>());
+    let sound_strength = sound_strength_for_party(&party);
     let mut sound_output = sound_event
-        .fire(realm, sound_strength_for_party(&party))
+        .fire(
+            realm,
+            if new_character_action == CharacterAction::Running {
+                3.0 * sound_strength
+            } else {
+                sound_strength
+            },
+        )
         .ok_or_else(|| "You walked, but nobody heard you.".to_owned())?;
 
     let mut output = visual_output;

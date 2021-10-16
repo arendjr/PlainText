@@ -14,7 +14,7 @@ use maplit::hashmap;
 use serde_json::json;
 use std::collections::HashMap;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug)]
 pub struct SignInState {
     step: SignInStep,
     data: SignInData,
@@ -67,7 +67,7 @@ enum SignInStep {
     SignedIn,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug)]
 struct SignInData {
     player: Option<Player>,
     sign_up_state: Option<SignUpState>,
@@ -115,7 +115,7 @@ pub fn process_input(
             } = (step.process_input)(state, realm, source, input);
             if let Some(new_step) = SIGN_IN_STEPS.get(&new_state.step) {
                 let prompt_output = (new_step.prompt)(&new_state.data);
-                let outputs = if new_state == *state {
+                let outputs = if new_state.step == state.step {
                     vec![output, prompt_output]
                 } else {
                     let exit_output = (step.exit)(&new_state.data);

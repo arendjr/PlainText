@@ -2,46 +2,22 @@ use crate::{
     entity::{EntityRef, PortalFlags, Realm},
     player_output::PlayerOutput,
 };
-use std::time::Duration;
-use tokio::{sync::mpsc::Sender, time::sleep};
 
-pub struct ActionDispatcher {
-    action_tx: Sender<ActionableEvent>,
-}
+mod action_dispatcher;
 
-impl ActionDispatcher {
-    pub fn new(action_tx: Sender<ActionableEvent>) -> Self {
-        Self { action_tx }
-    }
-
-    pub fn dispatch_after(&self, action: ActionableEvent, delay: Duration) {
-        let action_tx = self.action_tx.clone();
-        tokio::spawn(async move {
-            sleep(delay).await;
-
-            action_tx
-                .send(action)
-                .await
-                .expect("Failed to dispatch action");
-        });
-    }
-}
+pub use action_dispatcher::ActionDispatcher;
 
 #[derive(Debug)]
 pub enum ActionableEvent {
-    AutoClose {
-        entity_ref: EntityRef,
-        message: String,
-    },
+    AutoClose { entity: EntityRef, message: String },
+    ResetAction { character: EntityRef },
 }
 
 impl ActionableEvent {
     pub fn process(&self, realm: &mut Realm) -> Vec<PlayerOutput> {
         match self {
-            Self::AutoClose {
-                entity_ref,
-                message,
-            } => process_auto_close(realm, *entity_ref, message),
+            Self::AutoClose { entity, message } => process_auto_close(realm, *entity, message),
+            Self::ResetAction { character } => process_reset_action(realm, *character),
         }
     }
 }
@@ -86,4 +62,12 @@ fn process_auto_close(
     }
 
     output
+}
+
+fn process_reset_action(realm: &mut Realm, character_ref: EntityRef) -> Vec<PlayerOutput> {
+    if let Some(character) = realm.character_mut(character_ref) {
+        character.reset_action();
+    }
+
+    Vec::new()
 }

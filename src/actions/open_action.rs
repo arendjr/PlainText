@@ -1,11 +1,10 @@
-use std::time::Duration;
-
 use crate::{
     actionable_events::{ActionDispatcher, ActionableEvent},
     entity::{Entity, EntityRef, Realm},
     player_output::PlayerOutput,
     text_utils::{capitalize, definite_character_name},
 };
+use std::time::Duration;
 
 /// Opens a portal.
 pub fn open(
@@ -70,7 +69,7 @@ pub fn open(
         if let Some(timeout) = openable.auto_close_timeout() {
             action_dispatcher.dispatch_after(
                 ActionableEvent::AutoClose {
-                    entity_ref: portal_ref,
+                    entity: portal_ref,
                     message: openable.auto_close_message().to_owned(),
                 },
                 Duration::from_millis(timeout.get() as u64),

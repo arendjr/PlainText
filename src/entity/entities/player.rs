@@ -6,7 +6,7 @@ use crate::{
 use pbkdf2::{pbkdf2_check, pbkdf2_simple};
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Player {
     #[serde(skip)]
