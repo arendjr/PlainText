@@ -13,6 +13,8 @@ pub struct Openable {
     is_open: bool,
     #[serde(skip)]
     needs_sync: bool,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    required_key: String,
 }
 
 impl Openable {
@@ -24,6 +26,7 @@ impl Openable {
         Option<NonZeroU32>
     );
     entity_copy_prop!(pub, is_open, set_open, bool, EntityPersistence::DontSync);
+    entity_string_prop!(pub, required_key, set_required_key);
 
     pub fn needs_sync(&self) -> bool {
         self.needs_sync
@@ -39,6 +42,7 @@ impl Openable {
             auto_close_timeout: None,
             is_open: false,
             needs_sync: false,
+            required_key: String::new(),
         }
     }
 

@@ -105,8 +105,10 @@ impl Entity for Npc {
     fn indefinite_name(&self) -> String {
         if self.has_flags(NpcFlags::AlwaysUseDefiniteArticle) {
             format!("the {}", self.name())
+        } else if self.indefinite_article().is_empty() {
+            self.name().to_owned()
         } else {
-            Entity::indefinite_name(self)
+            format!("{} {}", self.indefinite_article(), self.name())
         }
     }
 

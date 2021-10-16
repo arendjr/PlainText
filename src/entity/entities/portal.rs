@@ -48,7 +48,7 @@ pub struct Portal {
     #[serde(skip)]
     needs_sync: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
-    openable: Option<Openable>,
+    openable: Option<Box<Openable>>,
     room: EntityRef,
     room2: EntityRef,
 }
@@ -119,7 +119,7 @@ impl Portal {
             .map_err(|error| format!("parse error: {}", error))?;
         portal.id = id;
         if portal.can_open() && portal.openable.is_none() {
-            portal.openable = Some(Openable::new());
+            portal.openable = Some(Box::new(Openable::new()));
         }
         Ok(Box::new(portal))
     }
@@ -193,7 +193,7 @@ impl Portal {
 
         if self.can_open() {
             if self.openable.is_none() {
-                self.openable = Some(Openable::new());
+                self.openable = Some(Box::new(Openable::new()));
             }
         } else if let Some(openable) = self.openable.as_mut() {
             if openable.auto_close_message().is_empty() && openable.auto_close_timeout().is_none() {
@@ -210,7 +210,7 @@ impl Portal {
         } else if is_open {
             let mut openable = Openable::new();
             openable.set_open(is_open);
-            self.openable = Some(openable);
+            self.openable = Some(Box::new(openable));
         }
     }
 }
@@ -228,11 +228,11 @@ impl Entity for Portal {
     }
 
     fn as_openable(&self) -> Option<&Openable> {
-        self.openable.as_ref()
+        self.openable.as_ref().map(Box::as_ref)
     }
 
     fn as_openable_mut(&mut self) -> Option<&mut Openable> {
-        self.openable.as_mut()
+        self.openable.as_mut().map(Box::as_mut)
     }
 
     fn as_portal(&self) -> Option<&Self> {

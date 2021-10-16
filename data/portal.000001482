@@ -1,9 +1,11 @@
 {
   "name": "door",
   "description": "A heavy wooden door. It makes you curious as to what's behind it.",
-  "triggers": { "onInit": "(function() {\n    this.open = false;\n})", "onOpen": "(function() {\n    this.setTimeout(function() {\n        this.open = false;\n    }, 30000);\n})" },
   "name2": "door",
   "room": "room:36",
   "room2": "room:40",
-  "flags": "CanOpenFromSide1|CanOpenFromSide2|CanSeeThroughIfOpen|CanHearThroughIfOpen|CanShootThroughIfOpen|CanPassThroughIfOpen"
+  "flags": "CanOpenFromSide1|CanOpenFromSide2|CanSeeThroughIfOpen|CanHearThroughIfOpen|CanShootThroughIfOpen|CanPassThroughIfOpen",
+  "openable": {
+    "autoCloseTimeout": 30000
+  }
 }

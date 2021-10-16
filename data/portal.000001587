@@ -5,5 +5,9 @@
   "destination": "the gate tower",
   "room": "room:65",
   "room2": "room:1586",
-  "flags": "IsHiddenFromSide1|CanOpenFromSide1|CanOpenFromSide2|CanSeeThroughIfOpen|CanHearThroughIfOpen|CanShootThroughIfOpen|CanPassThroughIfOpen"
+  "flags": "IsHiddenFromSide1|CanOpenFromSide1|CanOpenFromSide2|CanSeeThroughIfOpen|CanHearThroughIfOpen|CanShootThroughIfOpen|CanPassThroughIfOpen",
+  "openable": {
+    "autoCloseTimeout": 30000,
+    "requiredKey": "south gate tower key"
+  }
 }

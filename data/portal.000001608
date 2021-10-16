@@ -1,9 +1,12 @@
 {
   "name": "door",
-  "triggers": { "onInit": "(function() {\n    this.open = false;    \n})", "onOpen": "(function(activator) {\n    if (activator.inventory.named(\"east gate tower key\")) {\n        activator.send(\"You use the key to the east gate tower.\");\n    } else {\n        activator.send(\"The door is locked.\");\n        return false;\n    }\n    \n    this.setTimeout(function() {\n        this.open = false;\n    }, 30000);\n})" },
   "name2": "door",
   "destination": "the gate tower",
   "room": "room:125",
   "room2": "room:1606",
-  "flags": "IsHiddenFromSide1|CanOpenFromSide1|CanOpenFromSide2|CanSeeThroughIfOpen|CanHearThroughIfOpen|CanShootThroughIfOpen|CanPassThroughIfOpen"
+  "flags": "IsHiddenFromSide1|CanOpenFromSide1|CanOpenFromSide2|CanSeeThroughIfOpen|CanHearThroughIfOpen|CanShootThroughIfOpen|CanPassThroughIfOpen",
+  "openable": {
+    "autoCloseTimeout": 30000,
+    "requiredKey": "east gate tower key"
+  }
 }

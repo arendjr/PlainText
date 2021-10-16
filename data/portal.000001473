@@ -3,9 +3,6 @@
   "flags": "CanOpenFromSide1|CanOpenFromSide2|CanSeeThroughIfOpen|CanHearThroughIfOpen|CanShootThroughIfOpen|CanPassThroughIfOpen",
   "name": "door",
   "name2": "door",
-  "openable": {
-    "isOpen": true
-  },
   "room": "room:14",
   "room2": "room:17"
 }

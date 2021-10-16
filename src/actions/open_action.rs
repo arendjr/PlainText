@@ -14,7 +14,7 @@ pub fn open(
     character_ref: EntityRef,
     portal_ref: EntityRef,
 ) -> Result<Vec<PlayerOutput>, String> {
-    let (_, room) = realm.character_and_room_res(character_ref)?;
+    let (character, room) = realm.character_and_room_res(character_ref)?;
     let portal = realm.portal(portal_ref).ok_or("That exit doesn't exist.")?;
 
     if !portal.can_open_from_room(room.entity_ref()) {
@@ -26,10 +26,31 @@ pub fn open(
         return Err(format!("The {} is already open.", name));
     }
 
-    let mut output = vec![PlayerOutput::new_from_string(
-        character_ref.id(),
-        format!("You open the {}.\n", name),
-    )];
+    let mut output = vec![];
+
+    if let Some(openable) = portal.as_openable() {
+        let required_key = openable.required_key();
+        if required_key.is_empty() {
+            output.push(PlayerOutput::new_from_string(
+                character_ref.id(),
+                format!("You open the {}.\n", name),
+            ));
+        } else if character
+            .inventory()
+            .iter()
+            .any(|item| match realm.item(*item) {
+                Some(item) => item.name() == required_key,
+                _ => false,
+            })
+        {
+            output.push(PlayerOutput::new_from_string(
+                character_ref.id(),
+                format!("You use the {} and open the {}.\n", required_key, name),
+            ));
+        } else {
+            return Err(format!("The {} is locked.", name));
+        }
+    }
 
     let character_name = capitalize(&definite_character_name(realm, character_ref)?);
     for character in room.characters() {
