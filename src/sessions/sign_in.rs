@@ -115,7 +115,9 @@ pub fn process_input(
             } = (step.process_input)(state, realm, source, input);
             if let Some(new_step) = SIGN_IN_STEPS.get(&new_state.step) {
                 let prompt_output = (new_step.prompt)(&new_state.data);
-                let outputs = if new_state.step == state.step {
+                let outputs = if new_state.step == state.step
+                    && new_state.data.sign_up_state == state.data.sign_up_state
+                {
                     vec![output, prompt_output]
                 } else {
                     let exit_output = (step.exit)(&new_state.data);
