@@ -2,7 +2,7 @@ use super::CommandHelpers;
 use crate::{
     entity::{Entity, EntityRef, Realm},
     player_output::PlayerOutput,
-    text_utils::{describe_items, format_weight, join_sentence},
+    utils::{describe_items, format_weight, join_sentence},
 };
 
 /// Inspects the character's inventory.
@@ -16,7 +16,7 @@ pub fn inventory(
     let processor = helpers.command_line_processor;
     processor.skip_word(); // alias
 
-    let inventory = player.character().inventory();
+    let inventory = player.character.inventory();
     let weight = inventory.iter().fold(0.0, |weight, &item_ref| {
         weight
             + if let Some(item) = realm.item(item_ref) {
@@ -47,7 +47,7 @@ pub fn inventory(
         )
     };
 
-    let gold = player.character().gold();
+    let gold = player.character.gold();
     let carried_gold_string = if gold == 0 {
         "You don't have any gold.\n".to_owned()
     } else {

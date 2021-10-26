@@ -3,7 +3,7 @@ use crate::{
     entity::{Entity, EntityRef, EntityType, Realm},
     player_output::PlayerOutput,
     sessions::SessionOutput,
-    text_utils::{capitalize, definite_character_name},
+    utils::{capitalize, definite_character_name},
 };
 
 /// Start following another character.

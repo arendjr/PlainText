@@ -4,8 +4,7 @@ use crate::{
     entity::{Entity, EntityRef, Realm},
     player_output::PlayerOutput,
     relative_direction::RelativeDirection,
-    text_utils::{describe_entities_from_room, join_sentence},
-    vision_utils::visible_portals_from_position,
+    utils::{describe_entities_from_room, join_sentence, visible_portals_from_position},
 };
 
 /// Makes the character travel to another room.

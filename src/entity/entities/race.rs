@@ -8,16 +8,28 @@ use serde::{Deserialize, Serialize};
 pub struct Race {
     #[serde(skip)]
     id: EntityId,
+
     adjective: String,
+
     classes: Vec<EntityRef>,
+
     description: String,
+
     height: f32,
+
     name: String,
+
     #[serde(skip)]
     needs_sync: bool,
+
+    player_selectable: bool,
+
     starting_room: EntityRef,
+
     stats: CharacterStats,
+
     stats_suggestion: CharacterStats,
+
     weight: f32,
 }
 
@@ -25,6 +37,7 @@ impl Race {
     entity_string_prop!(pub, adjective, set_adjective);
     entity_ref_prop!(pub, classes, set_classes, Vec<EntityRef>);
     entity_copy_prop!(pub, height, set_height, f32);
+    entity_copy_prop!(pub, player_selectable, set_player_selectable, bool);
     entity_copy_prop!(pub, starting_room, set_starting_room, EntityRef);
     entity_ref_prop!(pub, stats, set_stats, CharacterStats);
     entity_ref_prop!(pub, stats_suggestion, set_stats_suggestion, CharacterStats);
@@ -51,14 +64,6 @@ impl Entity for Race {
     }
 
     fn as_race_mut(&mut self) -> Option<&mut Self> {
-        Some(self)
-    }
-
-    fn as_entity(&self) -> Option<&dyn Entity> {
-        Some(self)
-    }
-
-    fn as_entity_mut(&mut self) -> Option<&mut dyn Entity> {
         Some(self)
     }
 
@@ -95,6 +100,7 @@ impl Entity for Race {
             "description" => self.set_description(value.to_owned()),
             "height" => self.set_height(value.parse().map_err(|error| format!("{:?}", error))?),
             "name" => self.set_name(value.to_owned()),
+            "playerSelectable" => self.set_player_selectable(value == "true"),
             "startingRoom" => self.set_starting_room(EntityRef::from_str(value)?),
             "stats" => self.set_stats(CharacterStats::from_str(value)?),
             "statsSuggestion" => self.set_stats_suggestion(CharacterStats::from_str(value)?),

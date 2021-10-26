@@ -1,10 +1,11 @@
 use std::f64::consts::TAU;
 
 use crate::{
-    direction_utils::{direction_for_vector, is_direction},
     entity::{Entity, EntityRef, EntityType, Gender, Realm},
     player_output::PlayerOutput,
-    text_utils::{capitalize, definite_character_name, join_sentence},
+    utils::{
+        capitalize, definite_character_name, direction_for_vector, is_direction, join_sentence,
+    },
     vector3d::Vector3D,
 };
 

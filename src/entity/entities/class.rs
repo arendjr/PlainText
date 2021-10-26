@@ -43,14 +43,6 @@ impl Entity for Class {
         Some(self)
     }
 
-    fn as_entity(&self) -> Option<&dyn Entity> {
-        Some(self)
-    }
-
-    fn as_entity_mut(&mut self) -> Option<&mut dyn Entity> {
-        Some(self)
-    }
-
     fn dehydrate(&self) -> String {
         serde_json::to_string_pretty(self).unwrap_or_else(|error| {
             panic!(

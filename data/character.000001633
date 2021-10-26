@@ -1,31 +1,30 @@
 {
-  "character": {
-    "currentRoom": "room:1599",
-    "direction": [
-      70,
-      -70,
-      0
-    ],
-    "gender": "male",
-    "gold": 0,
-    "height": 180.0,
-    "hp": 60,
-    "inventory": [
-      "item:1629"
-    ],
-    "mp": 0,
-    "race": "race:2",
-    "stats": [
-      30,
-      30,
-      30,
-      30,
-      20,
-      20
-    ],
-    "weight": 90.0
-  },
+  "behavior": "guard",
+  "currentRoom": "room:1599",
+  "direction": [
+    70,
+    -70,
+    0
+  ],
+  "gender": "male",
+  "gold": 0,
+  "height": 180.0,
+  "hp": 60,
   "indefiniteArticle": "a",
+  "inventory": [
+    "item:1629"
+  ],
+  "mp": 0,
   "name": "city guard",
-  "plural": "city guards"
+  "plural": "city guards",
+  "race": "race:2",
+  "stats": [
+    30,
+    30,
+    30,
+    30,
+    20,
+    20
+  ],
+  "weight": 90.0
 }

@@ -7,9 +7,11 @@ use core::panic;
 use lazy_static::__Deref;
 use serde::{Deserialize, Serialize};
 use std::{
+    cell::RefCell,
     cmp,
     collections::{HashMap, HashSet},
     hash::{Hash, Hasher},
+    rc::Rc,
 };
 
 impl Eq for dyn Entity {}
@@ -30,30 +32,59 @@ impl PartialEq for dyn Entity {
 #[derive(Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Realm {
+    #[serde(skip)]
+    actors: HashMap<EntityRef, Rc<RefCell<dyn Actor>>>,
+
     date_time: u64,
+
     #[serde(default, skip_serializing_if = "String::is_empty")]
     description: String,
+
     #[serde(skip)]
     entities: HashMap<EntityRef, Box<dyn Entity>>,
+
     #[serde(skip)]
     entities_to_be_removed: HashSet<EntityRef>,
+
     #[serde(skip)]
     entities_to_be_synced: HashSet<EntityRef>,
+
     #[serde(skip)]
     id: EntityId,
+
     name: String,
+
     #[serde(skip)]
     needs_sync: bool,
+
     #[serde(skip)]
     next_id: EntityId,
+
     #[serde(skip)]
     players_by_name: HashMap<String, EntityId>,
+
     #[serde(skip)]
-    races_by_name: HashMap<String, EntityId>,
+    races_by_name: HashMap<String, EntityRef>,
 }
 
 impl Realm {
     entity_copy_prop!(pub, date_time, set_date_time, u64);
+
+    pub fn actor(&mut self, entity_ref: EntityRef) -> Option<Rc<RefCell<dyn Actor>>> {
+        self.actors.get(&entity_ref).map(Rc::clone)
+    }
+
+    pub fn actor_state(&self, entity_ref: EntityRef) -> Option<&ActorState> {
+        self.entities
+            .get(&entity_ref)
+            .and_then(|entity| entity.as_actor_state())
+    }
+
+    pub fn actor_state_mut(&mut self, entity_ref: EntityRef) -> Option<&mut ActorState> {
+        self.entities
+            .get_mut(&entity_ref)
+            .and_then(|entity| entity.as_actor_state_mut())
+    }
 
     pub fn add_player(&mut self, sign_up_data: &SignUpData) {
         let player_ref = EntityRef(EntityType::Player, self.next_id);
@@ -113,6 +144,32 @@ impl Realm {
         group_ref
     }
 
+    pub fn entity(&self, entity_ref: EntityRef) -> Option<&dyn Entity> {
+        self.entities.get(&entity_ref).map(Box::deref)
+    }
+
+    pub fn entity_mut(&mut self, entity_ref: EntityRef) -> Option<&mut Box<dyn Entity>> {
+        self.request_persistence(entity_ref);
+        self.entities.get_mut(&entity_ref)
+    }
+
+    pub fn entity_res(&self, entity_ref: EntityRef) -> Result<&dyn Entity, &'static str> {
+        self.entities
+            .get(&entity_ref)
+            .map(|entity| entity.deref())
+            .ok_or("Unknown entity.")
+    }
+
+    pub fn entities_of_type(
+        &self,
+        entity_type: EntityType,
+    ) -> impl Iterator<Item = &dyn Entity> + '_ {
+        self.entities
+            .iter()
+            .filter(move |(entity_ref, _)| entity_ref.entity_type() == entity_type)
+            .map(|(_, entity)| entity.deref())
+    }
+
     pub fn group(&self, entity_ref: EntityRef) -> Option<&entities::Group> {
         self.entities
             .get(&entity_ref)
@@ -146,32 +203,17 @@ impl Realm {
         id
     }
 
-    pub fn entity(&self, entity_ref: EntityRef) -> Option<&dyn Entity> {
-        self.entities.get(&entity_ref).map(|entity| entity.deref())
+    pub fn npc(&self, entity_ref: EntityRef) -> Option<&entities::Npc> {
+        self.entities
+            .get(&entity_ref)
+            .and_then(|entity| entity.as_npc())
     }
 
-    pub fn entity_mut(&mut self, entity_ref: EntityRef) -> Option<&mut dyn Entity> {
+    pub fn npc_mut(&mut self, entity_ref: EntityRef) -> Option<&mut entities::Npc> {
         self.request_persistence(entity_ref);
         self.entities
             .get_mut(&entity_ref)
-            .and_then(|entity| entity.as_entity_mut())
-    }
-
-    pub fn entity_res(&self, entity_ref: EntityRef) -> Result<&dyn Entity, &'static str> {
-        self.entities
-            .get(&entity_ref)
-            .map(|entity| entity.deref())
-            .ok_or("Unknown entity.")
-    }
-
-    pub fn entities_of_type(
-        &self,
-        entity_type: EntityType,
-    ) -> impl Iterator<Item = &dyn Entity> + '_ {
-        self.entities
-            .iter()
-            .filter(move |(entity_ref, _)| entity_ref.entity_type() == entity_type)
-            .map(|(_, entity)| entity.deref())
+            .and_then(|entity| entity.as_npc_mut())
     }
 
     pub fn openable(&self, entity_ref: EntityRef) -> Option<&Openable> {
@@ -248,15 +290,33 @@ impl Realm {
     pub fn race_by_name(&self, name: &str) -> Option<&entities::Race> {
         self.races_by_name
             .get(name)
-            .and_then(|id| self.race(EntityRef(EntityType::Race, *id)))
+            .and_then(|entity_ref| self.race(*entity_ref))
     }
 
-    pub fn race_names(&self) -> Vec<&str> {
-        self.races_by_name.keys().map(String::as_ref).collect()
+    pub fn race_names(&self) -> impl Iterator<Item = &str> {
+        self.races_by_name
+            .iter()
+            .filter_map(move |(name, race_ref)| match self.race(*race_ref) {
+                Some(race) if race.player_selectable() => Some(name.as_ref()),
+                _ => None,
+            })
     }
 
     pub fn request_persistence(&mut self, entity_ref: EntityRef) {
         self.entities_to_be_synced.insert(entity_ref);
+    }
+
+    pub fn respawnable(&self, entity_ref: EntityRef) -> Option<&Respawnable> {
+        self.entities
+            .get(&entity_ref)
+            .and_then(|entity| entity.as_respawnable())
+    }
+
+    pub fn respawnable_mut(&mut self, entity_ref: EntityRef) -> Option<&mut Respawnable> {
+        self.request_persistence(entity_ref);
+        self.entities
+            .get_mut(&entity_ref)
+            .and_then(|entity| entity.as_respawnable_mut())
     }
 
     pub fn room(&self, entity_ref: EntityRef) -> Option<&entities::Room> {
@@ -273,13 +333,19 @@ impl Realm {
     }
 
     pub fn set(&mut self, entity_ref: EntityRef, entity: Box<dyn Entity>) {
+        if let Some(behavior) = entity.as_npc().and_then(|npc| npc.behavior()) {
+            self.actors
+                .insert(entity_ref, behavior.new_actor(entity_ref));
+        }
+
         if let Some(player) = entity.as_player() {
             self.players_by_name
                 .insert(player.name().to_owned(), player.id());
         }
 
         if let Some(race) = entity.as_race() {
-            self.races_by_name.insert(race.name().to_owned(), race.id());
+            self.races_by_name
+                .insert(race.name().to_owned(), race.entity_ref());
         }
 
         if entity.needs_sync() {
@@ -289,6 +355,19 @@ impl Realm {
         self.entities.insert(entity_ref, entity);
 
         self.next_id = cmp::max(self.next_id, entity_ref.id() + 1);
+    }
+
+    pub fn stats_item(&self, entity_ref: EntityRef) -> Option<&StatsItem> {
+        self.entities
+            .get(&entity_ref)
+            .and_then(|entity| entity.as_stats_item())
+    }
+
+    pub fn stats_item_mut(&mut self, entity_ref: EntityRef) -> Option<&mut StatsItem> {
+        self.request_persistence(entity_ref);
+        self.entities
+            .get_mut(&entity_ref)
+            .and_then(|entity| entity.as_stats_item_mut())
     }
 
     pub fn take_persistence_requests(&mut self) -> Vec<PersistenceRequest> {
@@ -330,14 +409,6 @@ impl Realm {
 impl Entity for Realm {
     entity_string_prop!(name, set_name);
     entity_string_prop!(description, set_description);
-
-    fn as_entity(&self) -> Option<&dyn Entity> {
-        Some(self)
-    }
-
-    fn as_entity_mut(&mut self) -> Option<&mut dyn Entity> {
-        Some(self)
-    }
 
     fn as_realm(&self) -> Option<&Self> {
         Some(self)

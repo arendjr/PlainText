@@ -1,28 +1,26 @@
 {
-  "character": {
-    "currentRoom": "room:1638",
-    "direction": [
-      0,
-      0,
-      0
-    ],
-    "gender": "male",
-    "gold": 0,
-    "height": 0.0,
-    "hp": 16,
-    "mp": 0,
-    "race": "race:2",
-    "stats": [
-      8,
-      8,
-      8,
-      8,
-      8,
-      8
-    ],
-    "weight": 0.0
-  },
+  "currentRoom": "room:1638",
+  "direction": [
+    0,
+    0,
+    0
+  ],
+  "gender": "male",
+  "gold": 0,
+  "height": 0.0,
+  "hp": 16,
   "indefiniteArticle": "a",
+  "mp": 0,
   "name": "man wearing a sigil with a black water drop",
-  "plural": "men wearing a sigil with a black water drop"
+  "plural": "men wearing a sigil with a black water drop",
+  "race": "race:2",
+  "stats": [
+    8,
+    8,
+    8,
+    8,
+    8,
+    8
+  ],
+  "weight": 0.0
 }

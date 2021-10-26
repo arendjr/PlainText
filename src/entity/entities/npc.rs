@@ -1,5 +1,8 @@
 use crate::{
-    entity::{Character, Entity, EntityId, EntityRef, EntityType},
+    entity::{
+        ActorState, Behavior, Character, Entity, EntityId, EntityRef, EntityType, Respawnable,
+        StatsItem,
+    },
     entity_copy_prop, entity_string_prop,
 };
 use serde::{Deserialize, Serialize};
@@ -10,36 +13,59 @@ serializable_flags! {
     }
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Npc {
     #[serde(skip)]
     id: EntityId,
-    character: Character,
+
+    #[serde(skip)]
+    pub actor_state: ActorState,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    behavior: Option<Behavior>,
+
+    #[serde(flatten)]
+    pub character: Character,
+
     #[serde(default, skip_serializing_if = "String::is_empty")]
     description: String,
+
     #[serde(default, skip_serializing_if = "NpcFlags::is_default")]
     flags: NpcFlags,
+
     #[serde(default, skip_serializing_if = "String::is_empty")]
     indefinite_article: String,
+
     name: String,
+
     #[serde(skip)]
     needs_sync: bool,
+
     #[serde(default, rename = "plural", skip_serializing_if = "String::is_empty")]
     plural_form: String,
+
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    respawnable: Option<Box<Respawnable>>,
+
+    #[serde(flatten)]
+    stats_item: StatsItem,
 }
 
 impl Npc {
+    entity_copy_prop!(pub, behavior, set_behavior, Option<Behavior>);
+
     entity_copy_prop!(pub, flags, set_flags, NpcFlags);
 
     pub fn has_flags(&self, flags: NpcFlags) -> bool {
         self.flags & flags == flags
     }
 
-    pub fn hydrate(id: EntityId, json: &str) -> Result<Box<dyn Entity>, String> {
+    pub fn hydrate<'a>(id: EntityId, json: &str) -> Result<Box<dyn Entity + 'a>, String> {
         let mut npc =
             serde_json::from_str::<Npc>(json).map_err(|error| format!("parse error: {}", error))?;
         npc.id = id;
+
         Ok(Box::new(npc))
     }
 
@@ -55,6 +81,14 @@ impl Npc {
 impl Entity for Npc {
     entity_string_prop!(name, set_name);
     entity_string_prop!(description, set_description);
+
+    fn as_actor_state(&self) -> Option<&ActorState> {
+        Some(&self.actor_state)
+    }
+
+    fn as_actor_state_mut(&mut self) -> Option<&mut ActorState> {
+        Some(&mut self.actor_state)
+    }
 
     fn as_character(&self) -> Option<&Character> {
         Some(&self.character)
@@ -72,12 +106,20 @@ impl Entity for Npc {
         Some(self)
     }
 
-    fn as_entity(&self) -> Option<&dyn Entity> {
-        Some(self)
+    fn as_respawnable(&self) -> Option<&Respawnable> {
+        self.respawnable.as_ref().map(Box::as_ref)
     }
 
-    fn as_entity_mut(&mut self) -> Option<&mut dyn Entity> {
-        Some(self)
+    fn as_respawnable_mut(&mut self) -> Option<&mut Respawnable> {
+        self.respawnable.as_mut().map(Box::as_mut)
+    }
+
+    fn as_stats_item(&self) -> Option<&StatsItem> {
+        Some(&self.stats_item)
+    }
+
+    fn as_stats_item_mut(&mut self) -> Option<&mut StatsItem> {
+        Some(&mut self.stats_item)
     }
 
     fn dehydrate(&self) -> String {
@@ -113,7 +155,14 @@ impl Entity for Npc {
     }
 
     fn needs_sync(&self) -> bool {
-        self.needs_sync || self.character.needs_sync()
+        self.needs_sync
+            || self.character.needs_sync()
+            || self
+                .respawnable
+                .as_ref()
+                .map(|respawnable| respawnable.needs_sync())
+                .unwrap_or(false)
+            || self.stats_item.needs_sync()
     }
 
     fn plural_form(&self) -> &str {
@@ -125,6 +174,10 @@ impl Entity for Npc {
 
         if !needs_sync {
             self.character.set_needs_sync(needs_sync);
+            if let Some(respawnable) = self.respawnable.as_mut() {
+                respawnable.set_needs_sync(needs_sync);
+            }
+            self.stats_item.set_needs_sync(needs_sync);
         }
     }
 
@@ -135,7 +188,17 @@ impl Entity for Npc {
             "indefiniteArticle" => self.set_indefinite_article(value.to_owned()),
             "name" => self.set_name(value.to_owned()),
             "pluralForm" => self.set_plural_form(value.to_owned()),
-            _ => return self.character.set_property(prop_name, value),
+            _ => {
+                return self
+                    .actor_state
+                    .set_property(prop_name, value)
+                    .or_else(|_| self.character.set_property(prop_name, value))
+                    .or_else(|_| self.stats_item.set_property(prop_name, value))
+                    .or_else(|_| match self.respawnable.as_mut() {
+                        Some(respawnable) => respawnable.set_property(prop_name, value),
+                        None => Err(format!("No property named \"{}\"", prop_name)),
+                    })
+            }
         }
         Ok(())
     }

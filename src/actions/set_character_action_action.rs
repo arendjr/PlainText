@@ -13,12 +13,8 @@ pub fn set_character_action(
     duration: Duration,
 ) {
     if let Some(character) = realm.character_mut(character_ref) {
-        let reset_abort_handle = action_dispatcher.dispatch_cancelable_after(
-            ActionableEvent::ResetAction {
-                character: character_ref,
-            },
-            duration,
-        );
+        let reset_abort_handle = action_dispatcher
+            .dispatch_cancelable_after(ActionableEvent::ResetAction(character_ref), duration);
 
         character.set_action(action, reset_abort_handle);
     }

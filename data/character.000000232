@@ -1,32 +1,30 @@
 {
-  "character": {
-    "currentRoom": "room:110",
-    "direction": [
-      -99,
-      0,
-      9
-    ],
-    "gender": "female",
-    "gold": 0,
-    "height": 0.0,
-    "hp": 14,
-    "inventory": [
-      "item:1582"
-    ],
-    "mp": 7,
-    "race": "race:2",
-    "stats": [
-      7,
-      8,
-      7,
-      7,
-      7,
-      7
-    ],
-    "weight": 0.0
-  },
+  "currentRoom": "room:110",
   "description": "She's carrying a bucket full of water.",
+  "direction": [
+    -99,
+    0,
+    9
+  ],
+  "gender": "female",
+  "gold": 0,
+  "height": 0.0,
+  "hp": 14,
   "indefiniteArticle": "a",
+  "inventory": [
+    "item:1582"
+  ],
+  "mp": 7,
   "name": "housewife",
-  "plural": "housewives"
+  "plural": "housewives",
+  "race": "race:2",
+  "stats": [
+    7,
+    8,
+    7,
+    7,
+    7,
+    7
+  ],
+  "weight": 0.0
 }

@@ -1,7 +1,6 @@
-use crate::direction_utils::{direction_by_abbreviation, is_direction};
-
 use super::command_registry::{CommandRegistry, LookupError};
 use super::{CommandLineProcessor, CommandType};
+use crate::utils::{direction_by_abbreviation, is_direction};
 
 #[allow(clippy::enum_variant_names)]
 pub enum InterpretationError {

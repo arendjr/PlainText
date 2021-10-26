@@ -1,27 +1,25 @@
 {
-  "character": {
-    "currentRoom": "room:36",
-    "direction": [
-      100,
-      0,
-      0
-    ],
-    "gender": "male",
-    "gold": 35,
-    "height": 185.0,
-    "hp": 80,
-    "mp": 0,
-    "race": "race:2",
-    "stats": [
-      40,
-      40,
-      40,
-      40,
-      20,
-      20
-    ],
-    "weight": 90.0
-  },
+  "currentRoom": "room:36",
+  "direction": [
+    100,
+    0,
+    0
+  ],
+  "gender": "male",
+  "gold": 35,
+  "height": 185.0,
+  "hp": 80,
+  "mp": 0,
   "name": "Earl",
-  "plural": "Earls"
+  "plural": "Earls",
+  "race": "race:2",
+  "stats": [
+    40,
+    40,
+    40,
+    40,
+    20,
+    20
+  ],
+  "weight": 90.0
 }

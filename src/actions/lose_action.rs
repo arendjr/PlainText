@@ -2,7 +2,7 @@ use crate::{
     actions,
     entity::{Entity, EntityRef, Realm},
     player_output::PlayerOutput,
-    text_utils::{capitalize, definite_character_name},
+    utils::{capitalize, definite_character_name},
 };
 
 /// Cut a character loose from the group (only the leader should do this).

@@ -1,9 +1,9 @@
 use crate::actions;
-use crate::direction_utils::{direction_by_abbreviation, is_direction, vector_for_direction};
 use crate::entity::EntityRef;
 use crate::entity::Realm;
 use crate::player_output::PlayerOutput;
 use crate::relative_direction::RelativeDirection;
+use crate::utils::{direction_by_abbreviation, is_direction, vector_for_direction};
 
 use super::{inventory_command::inventory, CommandHelpers, CommandLineProcessor};
 

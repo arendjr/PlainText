@@ -80,14 +80,6 @@ impl Entity for Group {
         Some(self)
     }
 
-    fn as_entity(&self) -> Option<&dyn Entity> {
-        Some(self)
-    }
-
-    fn as_entity_mut(&mut self) -> Option<&mut dyn Entity> {
-        Some(self)
-    }
-
     fn dehydrate(&self) -> String {
         panic!("Groups don't support serialization")
     }

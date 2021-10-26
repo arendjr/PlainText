@@ -10,6 +10,7 @@ mod follow_command;
 mod go_command;
 mod help_command;
 mod inventory_command;
+mod kill_command;
 mod look_command;
 mod lose_command;
 mod open_command;
@@ -31,6 +32,7 @@ pub enum CommandType {
     Go(&'static str),
     Help(&'static str),
     Inventory(&'static str),
+    Kill(&'static str),
     Look(&'static str),
     Lose(&'static str),
     Open(&'static str),
@@ -51,6 +53,7 @@ impl CommandType {
             Go(description) => description,
             Help(description) => description,
             Inventory(description) => description,
+            Kill(description) => description,
             Look(description) => description,
             Lose(description) => description,
             Open(description) => description,

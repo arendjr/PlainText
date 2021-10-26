@@ -1,29 +1,27 @@
 {
-  "character": {
-    "currentRoom": "room:176",
-    "direction": [
-      0,
-      -100,
-      0
-    ],
-    "gender": "male",
-    "gold": 0,
-    "height": 0.0,
-    "hp": 3,
-    "mp": 10,
-    "race": "race:2",
-    "stats": [
-      30,
-      30,
-      20,
-      20,
-      10,
-      10
-    ],
-    "weight": 0.0
-  },
+  "currentRoom": "room:176",
   "description": "He looks like a tough fella.",
+  "direction": [
+    0,
+    -100,
+    0
+  ],
+  "gender": "male",
+  "gold": 0,
+  "height": 0.0,
+  "hp": 3,
   "indefiniteArticle": "a",
+  "mp": 10,
   "name": "drunken worker",
-  "plural": "drunken workers"
+  "plural": "drunken workers",
+  "race": "race:2",
+  "stats": [
+    30,
+    30,
+    20,
+    20,
+    10,
+    10
+  ],
+  "weight": 0.0
 }

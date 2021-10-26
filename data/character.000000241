@@ -1,28 +1,26 @@
 {
-  "character": {
-    "currentRoom": "room:81",
-    "direction": [
-      0,
-      0,
-      0
-    ],
-    "gender": "male",
-    "gold": 0,
-    "height": 6357110.0,
-    "hp": 22,
-    "mp": 6,
-    "race": "race:2",
-    "stats": [
-      18,
-      18,
-      11,
-      9,
-      6,
-      6
-    ],
-    "weight": 0.0
-  },
+  "currentRoom": "room:81",
   "description": "He's the blacksmith's son. He still appears youthful, but also strong for his age. He greats you with a wide smile and appears eager to demonstrate any of the weapons in order to make a sale.",
+  "direction": [
+    0,
+    0,
+    0
+  ],
+  "gender": "male",
+  "gold": 0,
+  "height": 6357110.0,
+  "hp": 22,
+  "mp": 6,
   "name": "Jake",
-  "plural": "Jakes"
+  "plural": "Jakes",
+  "race": "race:2",
+  "stats": [
+    18,
+    18,
+    11,
+    9,
+    6,
+    6
+  ],
+  "weight": 0.0
 }

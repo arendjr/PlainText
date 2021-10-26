@@ -7,7 +7,7 @@ use super::{
 };
 use crate::{
     entity::{Entity, Player, Realm},
-    text_utils::is_letter,
+    utils::is_letter,
 };
 use lazy_static::lazy_static;
 use maplit::hashmap;

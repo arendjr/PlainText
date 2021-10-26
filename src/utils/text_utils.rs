@@ -1,7 +1,7 @@
+use super::number_utils::{written_number, written_position};
 use crate::{
     colors::Color,
-    entity::{Entity, EntityRef, EntityType, ItemFlags, Realm},
-    number_utils::{written_number, written_position},
+    entity::{Entity, EntityRef, EntityType, Gender, ItemFlags, Realm},
 };
 use lazy_static::lazy_static;
 use regex::{Captures, Regex};
@@ -240,6 +240,20 @@ where
     join_fancy(list, ", ", " and ")
 }
 
+pub fn object_pronoun(realm: &Realm, character_ref: EntityRef) -> &'static str {
+    match realm.character(character_ref) {
+        Some(character) => match realm.race(character.race()) {
+            Some(race) if race.name() == "animal" => "it",
+            _ => match character.gender() {
+                Gender::Female => "her",
+                Gender::Male => "him",
+                Gender::Unspecified => "them",
+            },
+        },
+        None => "them",
+    }
+}
+
 pub fn plural_from_noun(noun: &str) -> String {
     if noun.ends_with('y') && !noun.chars().nth_back(1).map(is_vowel).unwrap_or(true) {
         format!("{}ies", substring(noun, 0, -1))
@@ -257,6 +271,20 @@ pub fn plural_from_noun(noun: &str) -> String {
         noun.to_owned()
     } else {
         format!("{}s", noun)
+    }
+}
+
+pub fn possessive_adjective(realm: &Realm, character_ref: EntityRef) -> &'static str {
+    match realm.character(character_ref) {
+        Some(character) => match realm.race(character.race()) {
+            Some(race) if race.name() == "animal" => "its",
+            _ => match character.gender() {
+                Gender::Female => "her",
+                Gender::Male => "his",
+                Gender::Unspecified => "their",
+            },
+        },
+        None => "their",
     }
 }
 
@@ -320,10 +348,24 @@ pub fn split_lines(string: &str, max_line_len: usize) -> Vec<String> {
     lines
 }
 
-fn substring(string: &str, start: i32, end: i32) -> &str {
+pub fn subject_pronoun(realm: &Realm, character_ref: EntityRef) -> &'static str {
+    match realm.character(character_ref) {
+        Some(character) => match realm.race(character.race()) {
+            Some(race) if race.name() == "animal" => "it",
+            _ => match character.gender() {
+                Gender::Female => "she",
+                Gender::Male => "he",
+                Gender::Unspecified => "they",
+            },
+        },
+        None => "they",
+    }
+}
+
+pub fn substring(string: &str, start: i32, end: i32) -> &str {
     &string[(start as usize)..if end > 0 {
-        (end - start) as usize
+        (end) as usize
     } else {
-        ((string.len() as i32) - end - start) as usize
+        ((string.len() as i32) + end) as usize
     }]
 }

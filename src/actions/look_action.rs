@@ -1,18 +1,15 @@
 use crate::{
     colors::Color,
-    direction_utils::compare_exit_names,
     entity::{Character, Entity, EntityRef, EntityType, Item, Portal, Realm, Room, RoomFlags},
     player_output::PlayerOutput,
-    text_utils::{
-        colorize, describe_entities_from_room, describe_items, first_item_is_plural, join_sentence,
+    utils::{
+        angle_between_xy_vectors, colorize, compare_exit_names, describe_characters_relative_to,
+        describe_entities_from_room, describe_items, description_for_position,
+        first_item_is_plural, group_items_by_position, group_portals_by_position, join_sentence,
+        visible_characters_through_portals_from_position, visible_items_from_position,
+        visible_portals_from_position,
     },
     vector3d::Vector3D,
-    vector_utils::angle_between_xy_vectors,
-    vision_utils::{
-        describe_characters_relative_to, description_for_position, group_items_by_position,
-        group_portals_by_position, visible_characters_through_portals_from_position,
-        visible_items_from_position, visible_portals_from_position,
-    },
 };
 use std::{f64::consts::PI, iter::FromIterator};
 
@@ -217,7 +214,7 @@ fn look_at_room(realm: &Realm, player_ref: EntityRef, room: &Room) -> Result<Str
         )
     };
 
-    let items_description = create_items_description(realm, player.character(), room);
+    let items_description = create_items_description(realm, &player.character, room);
     if !items_description.is_empty() {
         if !text.ends_with(' ') && !text.ends_with('\n') {
             text.push(' ');
@@ -226,7 +223,7 @@ fn look_at_room(realm: &Realm, player_ref: EntityRef, room: &Room) -> Result<Str
     }
 
     if let Some(characters_description) =
-        create_distant_characters_description(realm, player.character(), room)
+        create_distant_characters_description(realm, &player.character, room)
     {
         if !text.ends_with(' ') && !text.ends_with('\n') {
             text.push(' ');

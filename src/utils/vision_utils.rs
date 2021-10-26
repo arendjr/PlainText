@@ -1,9 +1,8 @@
+use super::{direction_utils::is_direction, vector_utils::angle_between_xy_vectors};
 use crate::{
-    direction_utils::is_direction,
     entity::{Character, Entity, EntityRef, ItemFlags, Portal, Realm, Room, RoomFlags},
     events::EventType,
     vector3d::Vector3D,
-    vector_utils::angle_between_xy_vectors,
 };
 use std::{
     cmp::Ordering,

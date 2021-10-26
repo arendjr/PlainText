@@ -61,8 +61,8 @@ impl EntityType {
 pub struct EntityRef(pub EntityType, pub EntityId);
 
 impl EntityRef {
-    pub fn new(entity_type: EntityType, id: EntityId) -> Self {
-        Self(entity_type, id)
+    pub fn entity_type(&self) -> EntityType {
+        self.0
     }
 
     pub fn from_file_name(file_name: &OsString) -> Option<Self> {
@@ -98,8 +98,8 @@ impl EntityRef {
         self.1
     }
 
-    pub fn entity_type(&self) -> EntityType {
-        self.0
+    pub fn new(entity_type: EntityType, id: EntityId) -> Self {
+        Self(entity_type, id)
     }
 
     /// Returns the only entity ref from a vector, if the vector only has a single item.

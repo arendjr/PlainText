@@ -66,6 +66,10 @@ impl Room {
         self.set_characters(ref_union(&self.characters, characters))
     }
 
+    pub fn add_items(&mut self, items: &[EntityRef]) {
+        self.set_items(ref_union(&self.items, items))
+    }
+
     pub fn event_multiplier(&self, event_type: EventType) -> f32 {
         self.event_multipliers.get(event_type)
     }
@@ -89,14 +93,6 @@ impl Room {
 impl Entity for Room {
     entity_string_prop!(name, set_name);
     entity_string_prop!(description, set_description);
-
-    fn as_entity(&self) -> Option<&dyn Entity> {
-        Some(self)
-    }
-
-    fn as_entity_mut(&mut self) -> Option<&mut dyn Entity> {
-        Some(self)
-    }
 
     fn as_room(&self) -> Option<&Self> {
         Some(self)

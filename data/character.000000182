@@ -1,29 +1,27 @@
 {
-  "character": {
-    "currentRoom": "room:85",
-    "direction": [
-      0,
-      0,
-      0
-    ],
-    "gender": "female",
-    "gold": 0,
-    "height": 170.0,
-    "hp": 14,
-    "mp": 7,
-    "race": "race:2",
-    "stats": [
-      10,
-      10,
-      7,
-      10,
-      7,
-      7
-    ],
-    "weight": 70.0
-  },
+  "currentRoom": "room:85",
   "description": "She's a strong and beautiful woman, even though she makes no attempt at being pretty. She's wearing simple worker's clothes that appear to have some white stains from flour.",
+  "direction": [
+    0,
+    0,
+    0
+  ],
+  "gender": "female",
+  "gold": 0,
+  "height": 170.0,
+  "hp": 14,
   "indefiniteArticle": "the",
+  "mp": 7,
   "name": "baker's wife",
-  "plural": "baker's wives"
+  "plural": "baker's wives",
+  "race": "race:2",
+  "stats": [
+    10,
+    10,
+    7,
+    10,
+    7,
+    7
+  ],
+  "weight": 70.0
 }

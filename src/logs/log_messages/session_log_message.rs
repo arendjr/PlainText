@@ -2,22 +2,23 @@ use super::LogMessage;
 
 #[derive(Debug)]
 pub struct SessionLogMessage {
-    source: String,
     message: String,
 }
 
 impl SessionLogMessage {
     pub fn new(source: String, message: String) -> Self {
-        Self { source, message }
+        Self {
+            message: format!("{:16} {}", source, message),
+        }
     }
 }
 
 impl LogMessage for SessionLogMessage {
-    fn get_log(&self) -> String {
-        "sessions".to_owned()
+    fn get_log(&self) -> &str {
+        "sessions"
     }
 
-    fn get_message(&self) -> String {
-        format!("{:16} {}", self.source, self.message)
+    fn get_message(&self) -> &str {
+        &self.message
     }
 }

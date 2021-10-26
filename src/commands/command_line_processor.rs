@@ -1,6 +1,6 @@
 use crate::{
     entity::{EntityRef, Realm},
-    number_utils::numeric_position,
+    utils::numeric_position,
 };
 use std::collections::VecDeque;
 

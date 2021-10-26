@@ -85,7 +85,9 @@ fn notify_characters(
     let mut output = vec![];
 
     for character in room.characters() {
-        if event.excluded_characters().contains(character) {
+        if event.excluded_characters().contains(character)
+            || character.entity_type() != EntityType::Player
+        {
             continue;
         }
 
@@ -95,10 +97,8 @@ fn notify_characters(
             *character,
             room.entity_ref(),
         )?;
-        if character.entity_type() == EntityType::Player {
-            message.push('\n');
-            output.push(PlayerOutput::new_from_string(character.id(), message));
-        }
+        message.push('\n');
+        output.push(PlayerOutput::new_from_string(character.id(), message));
     }
 
     Some(output)

@@ -27,13 +27,13 @@ pub fn create_log_handler(log_dir: String, mut log_rx: Receiver<Box<dyn LogMessa
                     }
 
                     let log = log_message.get_log();
-                    let mut file = if let Some(file) = log_files.get(&log) {
+                    let mut file = if let Some(file) = log_files.get(log) {
                         file
                     } else {
-                        match create_log_file(&log_dir, &log, &day) {
+                        match create_log_file(&log_dir, log, &day) {
                             Ok(file) => {
-                                log_files.insert(log.clone(), file);
-                                log_files.get(&log).unwrap()
+                                log_files.insert(log.to_owned(), file);
+                                log_files.get(log).unwrap()
                             }
                             Err(error) => {
                                 println!("Could not create log file: {:?}", error);

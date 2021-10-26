@@ -8,12 +8,16 @@ use std::num::NonZeroU32;
 pub struct Openable {
     #[serde(default, skip_serializing_if = "String::is_empty")]
     auto_close_message: String,
+
     #[serde(default, skip_serializing_if = "Option::is_none")]
     auto_close_timeout: Option<NonZeroU32>,
+
     #[serde(skip)]
     is_open: bool,
+
     #[serde(skip)]
     needs_sync: bool,
+
     #[serde(default, skip_serializing_if = "String::is_empty")]
     required_key: String,
 }

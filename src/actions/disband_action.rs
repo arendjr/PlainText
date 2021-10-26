@@ -1,7 +1,7 @@
 use crate::{
     entity::{EntityRef, Realm},
     player_output::PlayerOutput,
-    text_utils::definite_character_name,
+    utils::definite_character_name,
 };
 
 /// Disband the entire group (only the leader should do this).

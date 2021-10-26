@@ -3,7 +3,7 @@ use crate::{
     character_stats::{CharacterStat, CharacterStats},
     colors::Color,
     entity::{Class, Entity, Gender, Race, Realm},
-    text_utils::{capitalize, colorize, format_columns, highlight, split_lines},
+    utils::{capitalize, colorize, format_columns, highlight, split_lines},
 };
 use lazy_static::lazy_static;
 use maplit::hashmap;
@@ -246,7 +246,6 @@ fn enter_race(_: &SignUpData, realm: &Realm) -> Output {
         format_columns(
             realm
                 .race_names()
-                .iter()
                 .map(|name| highlight(&capitalize(name)))
                 .collect(),
         )

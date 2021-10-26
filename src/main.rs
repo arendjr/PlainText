@@ -3,6 +3,7 @@
 use actionable_events::ActionDispatcher;
 use std::{collections::BTreeMap, env, fs, io};
 use tokio::sync::mpsc::{channel, Sender};
+use utils::total_stats;
 
 #[macro_use]
 mod player_output;
@@ -16,19 +17,15 @@ mod actions;
 mod character_stats;
 mod colors;
 mod commands;
-mod direction_utils;
 mod events;
 mod logs;
-mod number_utils;
 mod persistence_handler;
 mod point3d;
 mod relative_direction;
 mod sessions;
 mod telnet_server;
-mod text_utils;
+mod utils;
 mod vector3d;
-mod vector_utils;
-mod vision_utils;
 mod web_server;
 
 use actions::{enter_room, look_at_entity};
@@ -42,7 +39,7 @@ use sessions::{
     SessionPromptInfo, SessionState, SignInState,
 };
 
-use crate::actionable_events::ActionableEvent;
+use crate::{actionable_events::ActionableEvent, logs::log_error};
 
 #[tokio::main]
 async fn main() {
@@ -115,8 +112,15 @@ async fn main() {
                 }
             }
             Some(event) = action_rx.recv() => {
-                let player_output = event.process(&mut realm);
-                process_player_output(&realm, &session_tx, player_output).await;
+                match event.process(&mut realm, &action_dispatcher) {
+                    Ok(player_output) =>
+                        process_player_output(&realm, &session_tx, player_output).await,
+                    Err(message) =>
+                        log_error(
+                            &log_tx,
+                            format!("Error processing event {:?}: {}", event, message),
+                        ).await
+                }
             }
             else => {
                 break;
@@ -228,7 +232,7 @@ async fn process_signing_in_input(
             }
 
             let player_ref = player.entity_ref();
-            let current_room = player.character().current_room();
+            let current_room = player.character.current_room();
             player.set_session_id(Some(session_id));
 
             log_command(log_tx, user_name.to_owned(), "(signed in)".to_owned()).await;
@@ -314,14 +318,17 @@ async fn process_player_output(
                     session_id,
                     match output {
                         SessionOutput::Json(json) => SessionOutput::Json(json),
-                        output => output.with(SessionOutput::Prompt(SessionPromptInfo {
-                            name: player.name().to_owned(),
-                            is_admin: player.is_admin(),
-                            hp: player.character().hp(),
-                            max_hp: player.character().stats().max_hp(),
-                            mp: player.character().mp(),
-                            max_mp: player.character().stats().max_mp(),
-                        })),
+                        output => {
+                            let stats = total_stats(realm, player.entity_ref());
+                            output.with(SessionOutput::Prompt(SessionPromptInfo {
+                                name: player.name().to_owned(),
+                                is_admin: player.is_admin(),
+                                hp: player.character.hp(),
+                                max_hp: stats.max_hp(),
+                                mp: player.character.mp(),
+                                max_mp: stats.max_mp(),
+                            }))
+                        }
                     },
                 ),
             )
@@ -343,7 +350,7 @@ async fn process_session_closed(
         if let Some(player) = realm.player_by_id_mut(player_id) {
             player.set_session_id(None);
 
-            should_unfollow = player.character().group().is_some();
+            should_unfollow = player.character.group().is_some();
 
             let player_name = player.name().to_owned();
             log_command(log_tx, player_name, "(session closed)".to_owned()).await;

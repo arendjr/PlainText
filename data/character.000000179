@@ -1,28 +1,26 @@
 {
-  "character": {
-    "currentRoom": "room:176",
-    "direction": [
-      0,
-      0,
-      0
-    ],
-    "gender": "male",
-    "gold": 0,
-    "height": 0.0,
-    "hp": 51,
-    "mp": 10,
-    "race": "race:2",
-    "stats": [
-      40,
-      40,
-      30,
-      30,
-      10,
-      10
-    ],
-    "weight": 0.0
-  },
+  "currentRoom": "room:176",
   "description": "O'Malley is busy pouring out drinks.",
+  "direction": [
+    0,
+    0,
+    0
+  ],
+  "gender": "male",
+  "gold": 0,
+  "height": 0.0,
+  "hp": 51,
+  "mp": 10,
   "name": "O'Malley",
-  "plural": "O'Malleys"
+  "plural": "O'Malleys",
+  "race": "race:2",
+  "stats": [
+    40,
+    40,
+    30,
+    30,
+    10,
+    10
+  ],
+  "weight": 0.0
 }

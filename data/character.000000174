@@ -1,28 +1,26 @@
 {
-  "character": {
-    "currentRoom": "room:169",
-    "direction": [
-      0,
-      0,
-      0
-    ],
-    "gender": "female",
-    "gold": 0,
-    "height": 0.0,
-    "hp": 20,
-    "mp": 0,
-    "race": "race:2",
-    "stats": [
-      5,
-      10,
-      10,
-      10,
-      20,
-      30
-    ],
-    "weight": 0.0
-  },
+  "currentRoom": "room:169",
   "description": "She's a beautiful woman with long black hair. Judging by her skin and eyes, she's from a far eastern country.",
+  "direction": [
+    0,
+    0,
+    0
+  ],
+  "gender": "female",
+  "gold": 0,
+  "height": 0.0,
+  "hp": 20,
+  "mp": 0,
   "name": "Lady Xu",
-  "plural": "Lady Xus"
+  "plural": "Lady Xus",
+  "race": "race:2",
+  "stats": [
+    5,
+    10,
+    10,
+    10,
+    20,
+    30
+  ],
+  "weight": 0.0
 }

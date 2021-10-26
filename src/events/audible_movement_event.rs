@@ -1,9 +1,9 @@
 use std::f64::consts::TAU;
 
 use crate::{
-    direction_utils::direction_for_vector,
     entity::{EntityRef, Realm},
     player_output::PlayerOutput,
+    utils::direction_for_vector,
     vector3d::Vector3D,
 };
 

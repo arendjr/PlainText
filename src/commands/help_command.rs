@@ -1,7 +1,7 @@
 use crate::entity::EntityRef;
 use crate::entity::Realm;
 use crate::player_output::PlayerOutput;
-use crate::text_utils::{format_columns, highlight, process_highlights, split_lines};
+use crate::utils::{format_columns, highlight, process_highlights, split_lines};
 
 use super::command_registry::CommandRegistry;
 use super::CommandHelpers;

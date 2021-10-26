@@ -1,5 +1,5 @@
 use crate::{
-    entity::{Character, Entity, EntityId, EntityPersistence, EntityRef, EntityType},
+    entity::{Character, Entity, EntityId, EntityPersistence, EntityRef, EntityType, StatsItem},
     entity_copy_prop, entity_string_prop,
     sessions::SignUpData,
 };
@@ -11,16 +11,27 @@ use serde::{Deserialize, Serialize};
 pub struct Player {
     #[serde(skip)]
     id: EntityId,
-    character: Character,
+
+    #[serde(flatten)]
+    pub character: Character,
+
     description: String,
+
     #[serde(default)]
     is_admin: bool,
+
     name: String,
+
     #[serde(skip)]
     needs_sync: bool,
+
     password: String,
+
     #[serde(skip)]
     session_id: Option<u64>,
+
+    #[serde(flatten)]
+    stats_item: StatsItem,
 }
 
 impl Player {
@@ -32,10 +43,6 @@ impl Player {
         Option<u64>,
         EntityPersistence::DontSync
     );
-
-    pub fn character(&self) -> &Character {
-        &self.character
-    }
 
     pub fn hydrate(id: EntityId, json: &str) -> Result<Box<dyn Entity>, String> {
         let mut player = serde_json::from_str::<Player>(json)
@@ -62,6 +69,7 @@ impl Player {
                 Err(error) => panic!("Cannot create password hash: {:?}", error),
             },
             session_id: None,
+            stats_item: StatsItem::from_stats(sign_up_data.stats.clone()),
         }
     }
 
@@ -86,14 +94,6 @@ impl Entity for Player {
 
     fn as_character_mut(&mut self) -> Option<&mut Character> {
         Some(&mut self.character)
-    }
-
-    fn as_entity(&self) -> Option<&dyn Entity> {
-        Some(self)
-    }
-
-    fn as_entity_mut(&mut self) -> Option<&mut dyn Entity> {
-        Some(self)
     }
 
     fn as_player(&self) -> Option<&Self> {
@@ -123,7 +123,7 @@ impl Entity for Player {
     }
 
     fn needs_sync(&self) -> bool {
-        self.needs_sync || self.character.needs_sync()
+        self.needs_sync || self.character.needs_sync() || self.stats_item.needs_sync()
     }
 
     fn set_needs_sync(&mut self, needs_sync: bool) {
@@ -131,6 +131,7 @@ impl Entity for Player {
 
         if !needs_sync {
             self.character.set_needs_sync(needs_sync);
+            self.stats_item.set_needs_sync(needs_sync);
         }
     }
 
@@ -140,7 +141,12 @@ impl Entity for Player {
             "isAdmin" => self.set_is_admin(value == "true"),
             "name" => self.set_name(value.to_owned()),
             "password" => self.set_password(value),
-            _ => return self.character.set_property(prop_name, value),
+            _ => {
+                return self
+                    .character
+                    .set_property(prop_name, value)
+                    .or_else(|_| self.stats_item.set_property(prop_name, value))
+            }
         }
         Ok(())
     }

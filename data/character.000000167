@@ -1,29 +1,27 @@
 {
-  "character": {
-    "currentRoom": "room:95",
-    "direction": [
-      -100,
-      0,
-      0
-    ],
-    "gender": "male",
-    "gold": 0,
-    "height": 30.0,
-    "hp": 8,
-    "mp": 0,
-    "race": "race:198",
-    "stats": [
-      3,
-      60,
-      4,
-      2,
-      0,
-      0
-    ],
-    "weight": 8.0
-  },
+  "currentRoom": "room:95",
   "description": "The cat has a nice brown-greyish fur with black stripes over its back and head.",
+  "direction": [
+    -100,
+    0,
+    0
+  ],
+  "gender": "male",
+  "gold": 0,
+  "height": 30.0,
+  "hp": 8,
   "indefiniteArticle": "a",
+  "mp": 0,
   "name": "cat",
-  "plural": "cats"
+  "plural": "cats",
+  "race": "race:198",
+  "stats": [
+    3,
+    60,
+    4,
+    2,
+    0,
+    0
+  ],
+  "weight": 8.0
 }

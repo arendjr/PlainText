@@ -1,28 +1,26 @@
 {
-  "character": {
-    "currentRoom": "room:77",
-    "direction": [
-      100,
-      0,
-      0
-    ],
-    "gender": "male",
-    "gold": 7,
-    "height": 0.0,
-    "hp": 1,
-    "mp": 0,
-    "race": "race:2",
-    "stats": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-    ],
-    "weight": 0.0
-  },
+  "currentRoom": "room:77",
+  "direction": [
+    100,
+    0,
+    0
+  ],
+  "gender": "male",
+  "gold": 7,
+  "height": 0.0,
+  "hp": 1,
   "indefiniteArticle": "a",
+  "mp": 0,
   "name": "shopper",
-  "plural": "shoppers"
+  "plural": "shoppers",
+  "race": "race:2",
+  "stats": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "weight": 0.0
 }

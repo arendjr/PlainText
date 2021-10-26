@@ -1,6 +1,5 @@
+use crate::utils::process_highlights;
 use serde::Serialize;
-
-use crate::text_utils::process_highlights;
 
 #[derive(Clone, Debug, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]

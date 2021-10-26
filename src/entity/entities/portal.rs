@@ -219,14 +219,6 @@ impl Entity for Portal {
     entity_string_prop!(name, set_name);
     entity_string_prop!(description, set_description);
 
-    fn as_entity(&self) -> Option<&dyn Entity> {
-        Some(self)
-    }
-
-    fn as_entity_mut(&mut self) -> Option<&mut dyn Entity> {
-        Some(self)
-    }
-
     fn as_openable(&self) -> Option<&Openable> {
         self.openable.as_ref().map(Box::as_ref)
     }

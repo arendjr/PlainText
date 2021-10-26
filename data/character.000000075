@@ -1,28 +1,26 @@
 {
-  "character": {
-    "currentRoom": "room:65",
-    "direction": [
-      0,
-      0,
-      0
-    ],
-    "gender": "male",
-    "gold": 0,
-    "height": 0.0,
-    "hp": 22,
-    "mp": 11,
-    "race": "race:2",
-    "stats": [
-      12,
-      11,
-      11,
-      11,
-      11,
-      11
-    ],
-    "weight": 0.0
-  },
+  "currentRoom": "room:65",
+  "direction": [
+    0,
+    0,
+    0
+  ],
+  "gender": "male",
+  "gold": 0,
+  "height": 0.0,
+  "hp": 22,
   "indefiniteArticle": "a",
+  "mp": 11,
   "name": "beggar",
-  "plural": "beggars"
+  "plural": "beggars",
+  "race": "race:2",
+  "stats": [
+    12,
+    11,
+    11,
+    11,
+    11,
+    11
+  ],
+  "weight": 0.0
 }

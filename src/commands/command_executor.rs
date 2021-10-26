@@ -12,6 +12,7 @@ use super::{
     go_command::go,
     help_command::help,
     inventory_command::inventory,
+    kill_command::kill,
     look_command::look,
     lose_command::lose,
     open_command::open,
@@ -68,6 +69,7 @@ impl CommandExecutor {
                     CommandType::Go(_) => wrap_command(go),
                     CommandType::Help(_) => wrap_command(help),
                     CommandType::Inventory(_) => wrap_command(inventory),
+                    CommandType::Kill(_) => wrap_command(kill),
                     CommandType::Look(_) => wrap_command(look),
                     CommandType::Lose(_) => wrap_command(lose),
                     CommandType::Open(_) => wrap_command(open),
@@ -95,6 +97,14 @@ impl CommandExecutor {
         registry.register("api-entity-list", CommandType::ApiEntityList);
         registry.register("api-entity-set", CommandType::ApiEntitySet);
         registry.register("api-property-set", CommandType::ApiPropertySet);
+        registry.register(
+            "attack",
+            CommandType::Kill(
+                "Attack another character.\n\
+                \n\
+                Examples: *kill joe*, *attack earl*",
+            ),
+        );
         registry.register(
             "close",
             CommandType::Close(
@@ -150,6 +160,14 @@ impl CommandExecutor {
                 "Inspect your inventory.\n\
                 \n\
                 Examples: *inventory*, *look in inventory*.",
+            ),
+        );
+        registry.register(
+            "kill",
+            CommandType::Kill(
+                "Attack another character.\n\
+                \n\
+                Examples: *kill joe*, *attack earl*",
             ),
         );
         registry.register(

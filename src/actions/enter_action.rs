@@ -5,10 +5,38 @@ use crate::{
     entity::{CharacterAction, EntityRef, EntityType, Realm},
     events::{AudibleMovementEvent, VisualEvent, VisualMovementEvent},
     player_output::PlayerOutput,
-    text_utils::{capitalize, definite_character_name},
+    utils::{capitalize, definite_character_name},
     vector3d::Vector3D,
 };
 use std::{collections::BTreeSet, time::Duration};
+
+/// Makes the character enter the room they are already in
+/// (triggered on player sign-in and when NPCs spawn).
+pub fn enter_current_room(
+    realm: &mut Realm,
+    character_ref: EntityRef,
+) -> Result<Vec<PlayerOutput>, String> {
+    let character = realm.character_res(character_ref)?;
+    let character_name = definite_character_name(realm, character_ref)?;
+    let room_ref = character.current_room();
+
+    if let Some(room) = realm.room_mut(room_ref) {
+        room.add_characters(&[character_ref]);
+    }
+
+    let mut visual_event = VisualEvent::new(room_ref);
+    visual_event.set_description(
+        &format!("{} arrived.", capitalize(&character_name)),
+        &format!("You see {} arrive.", character_name),
+        "You see someone arrive.",
+    );
+    visual_event.excluded_characters.push(character_ref);
+    let visual_output = visual_event
+        .fire(realm, 1.0)
+        .ok_or_else(|| "You arrived, but nobody saw you.".to_owned())?;
+
+    return Ok(visual_output);
+}
 
 /// Makes the character enter the given portal.
 pub fn enter_portal(
@@ -42,30 +70,12 @@ pub fn enter_room(
     character_ref: EntityRef,
     room_ref: EntityRef,
 ) -> Result<Vec<PlayerOutput>, String> {
-    let character = realm
-        .character(character_ref)
-        .ok_or("The character doesn't exist.")?;
-
+    let character = realm.character_res(character_ref)?;
     let character_name = definite_character_name(realm, character_ref)?;
 
     let current_room_ref = character.current_room();
     if current_room_ref == room_ref {
-        if let Some(room) = realm.room_mut(room_ref) {
-            room.add_characters(&[character_ref]);
-        }
-
-        let mut visual_event = VisualEvent::new(room_ref);
-        visual_event.set_description(
-            &format!("{} arrived.", capitalize(&character_name)),
-            &format!("You see {} arrive.", character_name),
-            "You see someone arrive.",
-        );
-        visual_event.excluded_characters.push(character_ref);
-        let visual_output = visual_event
-            .fire(realm, 1.0)
-            .ok_or_else(|| "You arrived, but nobody saw you.".to_owned())?;
-
-        return Ok(visual_output);
+        return enter_current_room(realm, character_ref);
     }
 
     let party = character
@@ -82,7 +92,7 @@ pub fn enter_room(
                     .character(*follower)
                     .map(|follower| {
                         follower.current_room() == current_room_ref
-                            && follower.current_action() != CharacterAction::Fighting
+                            && follower.current_action().can_follow_others()
                     })
                     .unwrap_or(false);
                 if can_follow {
@@ -114,7 +124,7 @@ pub fn enter_room(
             action_dispatcher,
             *character_ref,
             new_character_action,
-            Duration::from_millis(4000),
+            Duration::from_secs(4),
         );
     }
 

@@ -21,11 +21,11 @@ pub trait Entity {
         ""
     }
 
-    fn as_actor(&self) -> Option<&dyn Actor> {
+    fn as_actor_state(&self) -> Option<&ActorState> {
         None
     }
 
-    fn as_actor_mut(&mut self) -> Option<&mut dyn Actor> {
+    fn as_actor_state_mut(&mut self) -> Option<&mut ActorState> {
         None
     }
 
@@ -42,14 +42,6 @@ pub trait Entity {
     }
 
     fn as_class_mut(&mut self) -> Option<&mut entities::Class> {
-        None
-    }
-
-    fn as_entity(&self) -> Option<&dyn Entity> {
-        None
-    }
-
-    fn as_entity_mut(&mut self) -> Option<&mut dyn Entity> {
         None
     }
 
@@ -113,11 +105,27 @@ pub trait Entity {
         None
     }
 
+    fn as_respawnable(&self) -> Option<&Respawnable> {
+        None
+    }
+
+    fn as_respawnable_mut(&mut self) -> Option<&mut Respawnable> {
+        None
+    }
+
     fn as_room(&self) -> Option<&entities::Room> {
         None
     }
 
     fn as_room_mut(&mut self) -> Option<&mut entities::Room> {
+        None
+    }
+
+    fn as_stats_item(&self) -> Option<&StatsItem> {
+        None
+    }
+
+    fn as_stats_item_mut(&mut self) -> Option<&mut StatsItem> {
         None
     }
 
