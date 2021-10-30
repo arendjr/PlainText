@@ -1,7 +1,7 @@
-use super::Actor;
+use super::{Actor, Behavior};
 use crate::{
     actionable_events::{ActionDispatcher, ActionableEvent},
-    actions,
+    actions::{self, ActionOutput},
     entity::{CharacterAction, EntityRef, EntityType, Realm},
     player_output::PlayerOutput,
 };
@@ -18,19 +18,26 @@ impl Guard {
 }
 
 impl Actor for Guard {
-    fn on_active(&self, realm: &mut Realm, dispatcher: &ActionDispatcher) -> Vec<PlayerOutput> {
-        if let Some(guard) = realm.npc(self.entity_ref) {
-            for enemy_ref in guard.actor_state.enemies.iter() {
-                if let Some(enemy) = realm.character(*enemy_ref) {
+    fn on_active(&self, realm: &mut Realm, dispatcher: &ActionDispatcher) -> ActionOutput {
+        let enemy_in_same_room = realm.npc(self.entity_ref).and_then(|guard| {
+            guard
+                .actor_state
+                .enemies
+                .iter()
+                .filter_map(|enemy_ref| realm.character(*enemy_ref).map(|enemy| (enemy_ref, enemy)))
+                .find_map(|(enemy_ref, enemy)| {
                     if enemy.current_room() == guard.character.current_room() {
-                        return actions::kill(realm, dispatcher, self.entity_ref, *enemy_ref)
-                            .unwrap_or_default();
+                        Some(*enemy_ref)
+                    } else {
+                        None
                     }
-                }
-            }
+                })
+        });
+        if let Some(enemy_ref) = enemy_in_same_room {
+            return actions::kill(realm, dispatcher, self.entity_ref, enemy_ref);
         }
 
-        Vec::new()
+        Ok(Vec::new())
     }
 
     fn on_attack(
@@ -38,7 +45,7 @@ impl Actor for Guard {
         realm: &mut Realm,
         dispatcher: &ActionDispatcher,
         attacker: EntityRef,
-    ) -> Vec<PlayerOutput> {
+    ) -> ActionOutput {
         if let Some(actor_state) = realm.actor_state_mut(self.entity_ref) {
             actor_state.enemies.insert(attacker);
         }
@@ -48,7 +55,7 @@ impl Actor for Guard {
             Duration::from_millis(200),
         );
 
-        Vec::new()
+        Ok(Vec::new())
     }
 
     fn on_character_attacked(
@@ -57,21 +64,23 @@ impl Actor for Guard {
         dispatcher: &ActionDispatcher,
         attacker_ref: EntityRef,
         _defendent: EntityRef,
-    ) -> Vec<PlayerOutput> {
-        if let Some(attacker) = realm.entity(attacker_ref) {
-            if attacker.name() != "city guard" {
-                if let Some(actor_state) = realm.actor_state_mut(self.entity_ref) {
-                    actor_state.enemies.insert(attacker_ref);
-                }
-
-                dispatcher.dispatch_after(
-                    ActionableEvent::ActivateActor(self.entity_ref),
-                    Duration::from_millis(600),
-                );
+    ) -> ActionOutput {
+        if !realm
+            .npc(attacker_ref)
+            .map(|npc| matches!(npc.behavior(), Some(Behavior::Guard)))
+            .unwrap_or_default()
+        {
+            if let Some(actor_state) = realm.actor_state_mut(self.entity_ref) {
+                actor_state.enemies.insert(attacker_ref);
             }
+
+            dispatcher.dispatch_after(
+                ActionableEvent::ActivateActor(self.entity_ref),
+                Duration::from_millis(600),
+            );
         }
 
-        Vec::new()
+        Ok(Vec::new())
     }
 
     fn on_character_died(
@@ -80,12 +89,12 @@ impl Actor for Guard {
         _dispatcher: &ActionDispatcher,
         casualty: EntityRef,
         _: Option<EntityRef>,
-    ) -> Vec<PlayerOutput> {
+    ) -> ActionOutput {
         if let Some(actor_state) = realm.actor_state_mut(self.entity_ref) {
             actor_state.enemies.remove(&casualty);
         }
 
-        Vec::new()
+        Ok(Vec::new())
     }
 
     fn on_character_entered(
@@ -93,13 +102,13 @@ impl Actor for Guard {
         _realm: &mut Realm,
         dispatcher: &ActionDispatcher,
         _character: EntityRef,
-    ) -> Vec<PlayerOutput> {
+    ) -> ActionOutput {
         dispatcher.dispatch_after(
             ActionableEvent::ActivateActor(self.entity_ref),
             Duration::from_millis(300),
         );
 
-        Vec::new()
+        Ok(Vec::new())
     }
 
     fn on_die(
@@ -107,35 +116,36 @@ impl Actor for Guard {
         realm: &mut Realm,
         _dispatcher: &ActionDispatcher,
         _attacker: Option<EntityRef>,
-    ) -> Vec<PlayerOutput> {
+    ) -> ActionOutput {
         if let Some(actor_state) = realm.actor_state_mut(self.entity_ref) {
             actor_state.enemies.clear();
         }
 
-        Vec::new()
+        Ok(Vec::new())
     }
 
-    fn on_spawn(&self, realm: &mut Realm, _dispatcher: &ActionDispatcher) -> Vec<PlayerOutput> {
-        if let Some(guard) = realm.character_mut(self.entity_ref) {
-            guard.set_indefinite_action(CharacterAction::Guarding {
-                target: EntityRef(EntityType::Portal, 1507),
-            });
-        }
+    fn on_spawn(&self, realm: &mut Realm, _dispatcher: &ActionDispatcher) -> ActionOutput {
+        let guard = realm
+            .character_mut(self.entity_ref)
+            .ok_or("No such character")?;
+        guard.set_indefinite_action(CharacterAction::Guarding {
+            target: EntityRef(EntityType::Portal, 1507),
+        });
 
-        Vec::new()
+        Ok(Vec::new())
     }
 
     fn on_talk(
         &self,
         _realm: &mut Realm,
         _dispatcher: &ActionDispatcher,
-        talker: EntityRef,
+        speaker: EntityRef,
         _message: &str,
-    ) -> Vec<PlayerOutput> {
-        vec![PlayerOutput::new_from_str(
-            talker.id(),
+    ) -> ActionOutput {
+        Ok(vec![PlayerOutput::new_from_str(
+            speaker.id(),
             "The guard looks at you and shrugs.\n",
-        )]
+        )])
     }
 }
 

@@ -1,18 +1,14 @@
-use crate::actions;
-use crate::entity::EntityRef;
-use crate::entity::Realm;
-use crate::player_output::PlayerOutput;
-use crate::relative_direction::RelativeDirection;
-use crate::utils::{direction_by_abbreviation, is_direction, vector_for_direction};
-
 use super::{inventory_command::inventory, CommandHelpers, CommandLineProcessor};
+use crate::{
+    actions::{self, ActionOutput},
+    entity::{EntityRef, Realm},
+    player_output::PlayerOutput,
+    relative_direction::RelativeDirection,
+    utils::{direction_by_abbreviation, is_direction, vector_for_direction},
+};
 
 /// Makes the character look at *something*.
-pub fn look(
-    realm: &mut Realm,
-    player_ref: EntityRef,
-    helpers: CommandHelpers,
-) -> Result<Vec<PlayerOutput>, String> {
+pub fn look(realm: &mut Realm, player_ref: EntityRef, helpers: CommandHelpers) -> ActionOutput {
     let (player, room) = realm.character_and_room_res(player_ref)?;
 
     let processor = helpers.command_line_processor;

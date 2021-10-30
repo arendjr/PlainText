@@ -1,8 +1,7 @@
 use super::CommandHelpers;
 use crate::{
-    actions,
+    actions::{self, ActionOutput},
     entity::{Entity, EntityRef, Realm},
-    player_output::PlayerOutput,
 };
 
 /// Remove yourself or someone else from a group. If you are a group
@@ -10,11 +9,7 @@ use crate::{
 /// You can always remove yourself from a group using simply *lose*.
 ///
 /// Examples: `lose mia`, `lose`
-pub fn lose(
-    realm: &mut Realm,
-    player_ref: EntityRef,
-    helpers: CommandHelpers,
-) -> Result<Vec<PlayerOutput>, String> {
+pub fn lose(realm: &mut Realm, player_ref: EntityRef, helpers: CommandHelpers) -> ActionOutput {
     let processor = helpers.command_line_processor;
 
     let _ = processor.take_word().unwrap(); // alias

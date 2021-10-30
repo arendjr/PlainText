@@ -23,16 +23,28 @@ serializable_flags! {
 pub struct Item {
     #[serde(skip)]
     id: EntityId,
+
     cost: f32,
+
+    #[serde(default, skip_serializing_if = "String::is_empty")]
     description: String,
+
     #[serde(default, skip_serializing_if = "ItemFlags::is_default")]
     flags: ItemFlags,
+
     #[serde(default, skip_serializing_if = "String::is_empty")]
     indefinite_article: String,
+
     name: String,
+
     #[serde(skip)]
     needs_sync: bool,
+
+    #[serde(default, rename = "plural", skip_serializing_if = "String::is_empty")]
+    plural_form: String,
+
     position: Point3D,
+
     weight: f32,
 }
 
@@ -57,8 +69,29 @@ impl Item {
         Ok(Box::new(item))
     }
 
+    pub fn new(id: EntityId, name: String) -> Self {
+        Self {
+            cost: 0.0,
+            description: String::new(),
+            flags: ItemFlags::empty(),
+            id,
+            indefinite_article: String::new(),
+            name,
+            needs_sync: false,
+            plural_form: String::new(),
+            position: Point3D::default(),
+            weight: 0.0,
+        }
+    }
+
     pub fn set_indefinite_article(&mut self, indefinite_article: String) {
         self.indefinite_article = indefinite_article;
+        self.set_needs_sync(true);
+    }
+
+    pub fn set_plural_form(&mut self, plural_form: String) {
+        self.plural_form = plural_form;
+        self.set_needs_sync(true);
     }
 }
 
@@ -108,6 +141,10 @@ impl Entity for Item {
 
     fn needs_sync(&self) -> bool {
         self.needs_sync
+    }
+
+    fn plural_form(&self) -> &str {
+        &self.plural_form
     }
 
     fn set_needs_sync(&mut self, needs_sync: bool) {

@@ -1,3 +1,4 @@
+use super::ActionOutput;
 use crate::{
     actionable_events::{ActionDispatcher, ActionableEvent},
     actions,
@@ -14,14 +15,18 @@ pub fn die(
     dispatcher: &ActionDispatcher,
     character_ref: EntityRef,
     maybe_attacker_ref: Option<EntityRef>,
-) -> Result<Vec<PlayerOutput>, String> {
+) -> ActionOutput {
     let mut output = vec![PlayerOutput::new_from_string(
         character_ref.id(),
         colorize("You died.\n", Color::Red),
     )];
 
     if let Some(actor) = realm.actor(character_ref) {
-        output.append(&mut actor.borrow().on_die(realm, dispatcher, maybe_attacker_ref));
+        output.append(
+            &mut actor
+                .borrow()
+                .on_die(realm, dispatcher, maybe_attacker_ref)?,
+        );
     }
 
     let (character, room) = realm.character_and_room_res(character_ref)?;
@@ -69,9 +74,12 @@ pub fn die(
 
     for other in others {
         if let Some(actor) = realm.actor(other) {
-            actor
-                .borrow()
-                .on_character_died(realm, dispatcher, character_ref, maybe_attacker_ref);
+            actor.borrow().on_character_died(
+                realm,
+                dispatcher,
+                character_ref,
+                maybe_attacker_ref,
+            )?;
         }
     }
 
@@ -103,18 +111,7 @@ pub fn die(
             starting_room,
         )?);
     } else if let Some(respawnable) = realm.respawnable(character_ref) {
-        let min_respawn_time = respawnable.min_respawn_time();
-        let max_respawn_time = respawnable.max_respawn_time();
-        let respawn_time = if min_respawn_time >= max_respawn_time {
-            min_respawn_time
-        } else {
-            let min_respawn_time = min_respawn_time.as_millis() as u64;
-            let max_respawn_time = max_respawn_time.as_millis() as u64;
-            let randomized_respawn_time =
-                min_respawn_time + rand::random::<u64>() % (max_respawn_time - min_respawn_time);
-            Duration::from_millis(randomized_respawn_time)
-        };
-
+        let respawn_time = respawnable.random_respawn_time();
         dispatcher.dispatch_after(ActionableEvent::SpawnNpc(character_ref), respawn_time);
     } else {
         realm.unset(character_ref);

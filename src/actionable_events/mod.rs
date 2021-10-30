@@ -1,5 +1,5 @@
 use crate::{
-    actions,
+    actions::{self, ActionOutput},
     entity::{CharacterAction, EntityRef, PortalFlags, Realm},
     player_output::PlayerOutput,
     utils::total_stats,
@@ -37,7 +37,7 @@ fn process_activate_actor(
     entity_ref: EntityRef,
 ) -> Result<Vec<PlayerOutput>, String> {
     if let Some(actor) = realm.actor(entity_ref) {
-        Ok(actor.borrow().on_active(realm, dispatcher))
+        actor.borrow().on_active(realm, dispatcher)
     } else {
         Err(format!("Actor doesn't exist: {}", entity_ref))
     }
@@ -89,13 +89,13 @@ fn process_reset_action(
     realm: &mut Realm,
     dispatcher: &ActionDispatcher,
     character_ref: EntityRef,
-) -> Result<Vec<PlayerOutput>, String> {
+) -> ActionOutput {
     if let Some(character) = realm.character_mut(character_ref) {
         character.set_indefinite_action(CharacterAction::Idle);
     }
 
     if let Some(actor) = realm.actor(character_ref) {
-        Ok(actor.borrow().on_active(realm, dispatcher))
+        actor.borrow().on_active(realm, dispatcher)
     } else {
         Ok(Vec::new())
     }
@@ -105,7 +105,7 @@ fn process_spawn_npc(
     realm: &mut Realm,
     dispatcher: &ActionDispatcher,
     character_ref: EntityRef,
-) -> Result<Vec<PlayerOutput>, String> {
+) -> ActionOutput {
     let stats = total_stats(realm, character_ref);
     if let Some(character) = realm.character_mut(character_ref) {
         character.set_hp(stats.max_hp());
@@ -115,7 +115,7 @@ fn process_spawn_npc(
     let mut output = actions::enter_current_room(realm, character_ref)?;
 
     if let Some(actor) = realm.actor(character_ref) {
-        output.append(&mut actor.borrow().on_spawn(realm, dispatcher));
+        output.append(&mut actor.borrow().on_spawn(realm, dispatcher)?);
     }
 
     Ok(output)

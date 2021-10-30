@@ -1,18 +1,13 @@
 use super::CommandHelpers;
 use crate::{
-    actions,
+    actions::{self, ActionOutput},
     entity::{EntityRef, Realm},
-    player_output::PlayerOutput,
 };
 
 /// Closes an exit.
 ///
 /// Example: `close door`
-pub fn close(
-    realm: &mut Realm,
-    player_ref: EntityRef,
-    helpers: CommandHelpers,
-) -> Result<Vec<PlayerOutput>, String> {
+pub fn close(realm: &mut Realm, player_ref: EntityRef, helpers: CommandHelpers) -> ActionOutput {
     let processor = helpers.command_line_processor;
 
     let _ = processor.take_word().unwrap(); // alias

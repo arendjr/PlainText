@@ -197,6 +197,13 @@ impl Realm {
             .and_then(|entity| entity.as_item())
     }
 
+    pub fn item_mut(&mut self, entity_ref: EntityRef) -> Option<&mut entities::Item> {
+        self.request_persistence(entity_ref);
+        self.entities
+            .get_mut(&entity_ref)
+            .and_then(|entity| entity.as_item_mut())
+    }
+
     pub fn next_id(&mut self) -> EntityId {
         let id = self.next_id;
         self.next_id += 1;

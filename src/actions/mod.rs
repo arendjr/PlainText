@@ -1,3 +1,5 @@
+use crate::player_output::PlayerOutput;
+
 mod change_direction_action;
 mod die_action;
 mod disband_action;
@@ -8,6 +10,7 @@ mod look_action;
 mod lose_action;
 mod open_action;
 mod set_character_action_action;
+mod shout_action;
 mod stun_action;
 
 pub use change_direction_action::change_direction;
@@ -20,4 +23,7 @@ pub use look_action::{look_at_entity, look_in_direction};
 pub use lose_action::lose;
 pub use open_action::{close, open};
 pub use set_character_action_action::set_character_action;
+pub use shout_action::shout;
 pub use stun_action::stun;
+
+pub type ActionOutput = Result<Vec<PlayerOutput>, String>;

@@ -16,6 +16,7 @@ use super::{
     look_command::look,
     lose_command::lose,
     open_command::open,
+    shout_command::shout,
     CommandType,
 };
 use crate::{
@@ -73,6 +74,7 @@ impl CommandExecutor {
                     CommandType::Look(_) => wrap_command(look),
                     CommandType::Lose(_) => wrap_command(lose),
                     CommandType::Open(_) => wrap_command(open),
+                    CommandType::Shout(_) => wrap_command(shout),
                 };
                 command_fn(realm, player_ref, command_helpers)
             }
@@ -203,6 +205,15 @@ impl CommandExecutor {
                 automatically close after a while.\n\
                 \n\
                 Example: *open door*",
+            ),
+        );
+        registry.register(
+            "shout",
+            CommandType::Shout(
+                "Shout something. If you want to be heard over greater distance, you \
+                should shout.\n\
+                \n\
+                Examples: *shout Anyone there?*",
             ),
         );
 

@@ -1,18 +1,13 @@
 use super::CommandHelpers;
 use crate::{
-    actions,
+    actions::{self, ActionOutput},
     entity::{Entity, EntityRef, Realm},
-    player_output::PlayerOutput,
     relative_direction::RelativeDirection,
     utils::{describe_entities_from_room, join_sentence, visible_portals_from_position},
 };
 
 /// Makes the character travel to another room.
-pub fn go(
-    realm: &mut Realm,
-    player_ref: EntityRef,
-    helpers: CommandHelpers,
-) -> Result<Vec<PlayerOutput>, String> {
+pub fn go(realm: &mut Realm, player_ref: EntityRef, helpers: CommandHelpers) -> ActionOutput {
     let processor = helpers.command_line_processor;
 
     let alias = processor.take_word().unwrap();

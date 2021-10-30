@@ -1,3 +1,4 @@
+use crate::actions::ActionOutput;
 use crate::entity::EntityRef;
 use crate::entity::Realm;
 use crate::player_output::PlayerOutput;
@@ -7,11 +8,7 @@ use super::command_registry::CommandRegistry;
 use super::CommandHelpers;
 
 /// Shows in-game help.
-pub fn help(
-    realm: &mut Realm,
-    player_ref: EntityRef,
-    helpers: CommandHelpers,
-) -> Result<Vec<PlayerOutput>, String> {
+pub fn help(realm: &mut Realm, player_ref: EntityRef, helpers: CommandHelpers) -> ActionOutput {
     let processor = helpers.command_line_processor;
     processor.take_word(); // alias
 

@@ -1,4 +1,4 @@
-use super::change_direction;
+use super::{change_direction, ActionOutput};
 use crate::{
     actionable_events::ActionDispatcher,
     actions,
@@ -12,10 +12,7 @@ use std::{collections::BTreeSet, time::Duration};
 
 /// Makes the character enter the room they are already in
 /// (triggered on player sign-in and when NPCs spawn).
-pub fn enter_current_room(
-    realm: &mut Realm,
-    character_ref: EntityRef,
-) -> Result<Vec<PlayerOutput>, String> {
+pub fn enter_current_room(realm: &mut Realm, character_ref: EntityRef) -> ActionOutput {
     let character = realm.character_res(character_ref)?;
     let character_name = definite_character_name(realm, character_ref)?;
     let room_ref = character.current_room();
@@ -35,7 +32,7 @@ pub fn enter_current_room(
         .fire(realm, 1.0)
         .ok_or_else(|| "You arrived, but nobody saw you.".to_owned())?;
 
-    return Ok(visual_output);
+    Ok(visual_output)
 }
 
 /// Makes the character enter the given portal.
@@ -45,7 +42,7 @@ pub fn enter_portal(
     character_ref: EntityRef,
     portal_ref: EntityRef,
     from_room_ref: EntityRef,
-) -> Result<Vec<PlayerOutput>, String> {
+) -> ActionOutput {
     let portal = realm
         .portal(portal_ref)
         .ok_or("That portal doesn't exist.")?;
@@ -69,7 +66,7 @@ pub fn enter_room(
     action_dispatcher: &ActionDispatcher,
     character_ref: EntityRef,
     room_ref: EntityRef,
-) -> Result<Vec<PlayerOutput>, String> {
+) -> ActionOutput {
     let character = realm.character_res(character_ref)?;
     let character_name = definite_character_name(realm, character_ref)?;
 

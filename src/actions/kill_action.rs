@@ -1,3 +1,4 @@
+use super::ActionOutput;
 use crate::{
     actionable_events::ActionDispatcher,
     actions,
@@ -18,7 +19,7 @@ pub fn kill(
     dispatcher: &ActionDispatcher,
     attacker_ref: EntityRef,
     defendant_ref: EntityRef,
-) -> Result<Vec<PlayerOutput>, String> {
+) -> ActionOutput {
     let (attacker, room) = realm.character_and_room_res(attacker_ref)?;
     let defendant = realm.character_res(defendant_ref)?;
 
@@ -38,7 +39,7 @@ pub fn kill(
     let mut output = Vec::new();
 
     if let Some(actor) = realm.actor(defendant_ref) {
-        output.append(&mut actor.borrow().on_attack(realm, dispatcher, attacker_ref));
+        output.append(&mut actor.borrow().on_attack(realm, dispatcher, attacker_ref)?);
     }
 
     output.append(&mut do_combat(
@@ -56,7 +57,7 @@ pub fn kill(
                     dispatcher,
                     attacker_ref,
                     defendant_ref,
-                ));
+                )?);
             }
         }
     }
@@ -80,7 +81,7 @@ fn do_combat(
     action_dispatcher: &ActionDispatcher,
     attacker_ref: EntityRef,
     defendant_ref: EntityRef,
-) -> Result<Vec<PlayerOutput>, String> {
+) -> ActionOutput {
     use CharacterStat::*;
 
     let attacker_stats = total_stats(realm, attacker_ref);

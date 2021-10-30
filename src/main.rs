@@ -55,7 +55,7 @@ async fn main() {
         .parse()
         .unwrap_or(8080);
 
-    let mut realm = match load_data(&data_dir) {
+    let (mut realm, character_refs) = match load_data(&data_dir) {
         Ok(realm) => realm,
         Err(error) => panic!("Failed to load data from \"{}\": {}", data_dir, error),
     };
@@ -74,6 +74,14 @@ async fn main() {
     web_server::serve(realm.name().to_owned(), http_port, session_tx.clone());
 
     let action_dispatcher = ActionDispatcher::new(action_tx.clone());
+    for character_ref in character_refs {
+        if let Some(actor) = realm.actor(character_ref) {
+            if let Err(error) = actor.borrow().on_spawn(&mut realm, &action_dispatcher) {
+                println!("Error spawning character {}: {}", character_ref, error);
+            }
+        }
+    }
+
     let command_executor = CommandExecutor::new(action_tx.clone());
     loop {
         tokio::select! {
@@ -136,7 +144,7 @@ async fn main() {
     }
 }
 
-fn load_data(data_dir: &str) -> Result<Realm, io::Error> {
+fn load_data(data_dir: &str) -> Result<(Realm, Vec<EntityRef>), io::Error> {
     let content = fs::read_to_string(&format!("{}/realm.000000000", data_dir))?;
     let mut realm = Realm::hydrate(0, &content)
         .unwrap_or_else(|message| panic!("Failed to load realm: {}", message));
@@ -166,19 +174,19 @@ fn load_data(data_dir: &str) -> Result<Realm, io::Error> {
         }
     }
 
-    inject_characters_into_rooms(&mut realm, character_refs);
-    Ok(realm)
+    inject_characters_into_rooms(&mut realm, &character_refs);
+    Ok((realm, character_refs))
 }
 
 // Characters get injected on load, so that rooms don't need to be re-persisted every time a
 // character moves from one room to another.
-fn inject_characters_into_rooms(realm: &mut Realm, character_refs: Vec<EntityRef>) {
+fn inject_characters_into_rooms(realm: &mut Realm, character_refs: &[EntityRef]) {
     for character_ref in character_refs {
         let maybe_current_room = realm
-            .character(character_ref)
+            .character(*character_ref)
             .map(|character| character.current_room());
         if let Some(room) = maybe_current_room.and_then(|room_ref| realm.room_mut(room_ref)) {
-            room.add_characters(&[character_ref]);
+            room.add_characters(&[*character_ref]);
         } else {
             println!(
                 "Character {:?} has no room {:?}",

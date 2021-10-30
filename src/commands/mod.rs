@@ -14,6 +14,7 @@ mod kill_command;
 mod look_command;
 mod lose_command;
 mod open_command;
+mod shout_command;
 
 pub use command_executor::CommandExecutor;
 use command_helpers::CommandHelpers;
@@ -36,6 +37,7 @@ pub enum CommandType {
     Look(&'static str),
     Lose(&'static str),
     Open(&'static str),
+    Shout(&'static str),
 }
 
 impl CommandType {
@@ -57,6 +59,7 @@ impl CommandType {
             Look(description) => description,
             Lose(description) => description,
             Open(description) => description,
+            Shout(description) => description,
         }
     }
 }

@@ -212,6 +212,14 @@ pub fn is_letter(character: char) -> bool {
     ('a'..='z').contains(&character) || ('A'..='Z').contains(&character)
 }
 
+pub fn is_number(character: char) -> bool {
+    ('0'..='9').contains(&character)
+}
+
+pub fn is_letter_or_number(character: char) -> bool {
+    is_letter(character) || is_number(character)
+}
+
 pub fn is_vowel(character: char) -> bool {
     character == 'a' || character == 'e' || character == 'i' || character == 'o' || character == 'u'
 }

@@ -6,12 +6,10 @@ use crate::{
     utils::{capitalize, definite_character_name},
 };
 
+use super::ActionOutput;
+
 /// Start following another character.
-pub fn follow(
-    realm: &mut Realm,
-    follower_ref: EntityRef,
-    leader_ref: EntityRef,
-) -> Result<Vec<PlayerOutput>, String> {
+pub fn follow(realm: &mut Realm, follower_ref: EntityRef, leader_ref: EntityRef) -> ActionOutput {
     if follower_ref == leader_ref {
         return Err("You cannot follow yourself.".into());
     }
@@ -75,7 +73,7 @@ fn create_follow_output(
     group_ref: EntityRef,
     leader_ref: EntityRef,
     follower_ref: EntityRef,
-) -> Result<Vec<PlayerOutput>, String> {
+) -> ActionOutput {
     let group = realm.group(group_ref).ok_or("Unknown group")?;
     let leader_name = definite_character_name(realm, leader_ref)?;
     let follower_name = definite_character_name(realm, follower_ref)?;
@@ -110,7 +108,7 @@ fn create_follow_output(
 }
 
 /// Stop following anyone else.
-pub fn unfollow(realm: &mut Realm, follower_ref: EntityRef) -> Result<Vec<PlayerOutput>, String> {
+pub fn unfollow(realm: &mut Realm, follower_ref: EntityRef) -> ActionOutput {
     let follower = realm
         .character(follower_ref)
         .ok_or("Your account has been deactivated.")?;
@@ -147,7 +145,7 @@ fn create_unfollow_output(
     group_ref: EntityRef,
     leader_ref: EntityRef,
     follower_ref: EntityRef,
-) -> Result<Vec<PlayerOutput>, String> {
+) -> ActionOutput {
     let group = realm.group(group_ref).ok_or("Unknown group")?;
     let leader_name = definite_character_name(realm, leader_ref)?;
     let follower_name = definite_character_name(realm, follower_ref)?;

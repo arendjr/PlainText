@@ -28,6 +28,19 @@ impl Respawnable {
         self.needs_sync = needs_sync;
     }
 
+    /// Returns a randomized respawn time between `min_respawn_time()` and `max_respawn_time()`.
+    pub fn random_respawn_time(&self) -> Duration {
+        if self.min_respawn_time >= self.max_respawn_time {
+            self.min_respawn_time
+        } else {
+            let min_respawn_time = self.min_respawn_time.as_millis() as u64;
+            let max_respawn_time = self.max_respawn_time.as_millis() as u64;
+            let randomized_respawn_time =
+                min_respawn_time + rand::random::<u64>() % (max_respawn_time - min_respawn_time);
+            Duration::from_millis(randomized_respawn_time)
+        }
+    }
+
     entity_copy_prop!(pub, spawning_room, set_spawning_room, EntityRef);
 
     pub fn set_property(&mut self, prop_name: &str, value: &str) -> Result<(), String> {

@@ -1,5 +1,6 @@
 use super::CommandHelpers;
 use crate::{
+    actions::ActionOutput,
     entity::{Entity, EntityRef, Realm},
     player_output::PlayerOutput,
     utils::{describe_items, format_weight, join_sentence},
@@ -10,7 +11,7 @@ pub fn inventory(
     realm: &mut Realm,
     player_ref: EntityRef,
     helpers: CommandHelpers,
-) -> Result<Vec<PlayerOutput>, String> {
+) -> ActionOutput {
     let player = realm.player_res(player_ref)?;
 
     let processor = helpers.command_line_processor;
