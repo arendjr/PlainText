@@ -216,6 +216,7 @@ impl Actor for Housewife {
     fn on_spawn(&self, realm: &mut Realm, dispatcher: &ActionDispatcher) -> ActionOutput {
         let housewife = realm.npc_mut(self.entity_ref).ok_or("No such character")?;
         housewife.actor_state.enemies.clear();
+        housewife.actor_state.clear_misc();
         housewife
             .character
             .set_current_room(EntityRef::new(EntityType::Room, 132));

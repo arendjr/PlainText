@@ -1,23 +1,25 @@
 {
-  "currentRoom": "room:110",
-  "description": "She's carrying a bucket full of water.",
+  "behavior": "housewife",
+  "currentRoom": "room:132",
   "direction": [
-    -99,
+    100,
     0,
-    9
+    0
   ],
   "gender": "female",
   "gold": 0,
   "height": 0.0,
   "hp": 14,
-  "indefiniteArticle": "a",
   "inventory": [
     "item:1582"
   ],
   "mp": 7,
+  "race": "race:2",
+  "weight": 0.0,
+  "description": "She's carrying an empty basket.",
+  "indefiniteArticle": "a",
   "name": "housewife",
   "plural": "housewives",
-  "race": "race:2",
   "stats": [
     7,
     8,
@@ -25,6 +27,5 @@
     7,
     7,
     7
-  ],
-  "weight": 0.0
+  ]
 }

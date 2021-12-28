@@ -16,6 +16,10 @@ pub struct ActorState {
 }
 
 impl ActorState {
+    pub fn clear_misc(&mut self) {
+        self.misc.clear();
+    }
+
     pub fn get_misc_bool(&self, prop_name: &str) -> bool {
         self.misc
             .get(prop_name)
@@ -24,14 +28,6 @@ impl ActorState {
                 _ => false,
             })
             .unwrap_or(false)
-    }
-
-    pub fn new() -> Self {
-        Self {
-            abort_handle: None,
-            enemies: BTreeSet::new(),
-            misc: BTreeMap::new(),
-        }
     }
 
     pub fn set_misc_bool(&mut self, prop_name: &str, value: bool) {

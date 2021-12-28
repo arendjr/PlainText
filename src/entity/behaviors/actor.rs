@@ -5,11 +5,18 @@ use crate::{
 };
 
 pub trait Actor: std::fmt::Debug {
+    /// Returns whether the actor's `on_active()` callback should be invoked when the actor becomes
+    /// idle after performing an action.
+    fn activate_on_idle(&self) -> bool {
+        false
+    }
+
     /// Activates an actor.
     ///
     /// Actors are responsible for scheduling their own activation based on any of the other
     /// triggers in this trait. The only time `on_active()` is called automatically is when
-    /// the actor becomes idle again after performing some other action.
+    /// `activate_on_idle()` returns `true` and the actor becomes idle again after performing
+    /// some other action.
     fn on_active(&self, _realm: &mut Realm, _dispatcher: &ActionDispatcher) -> ActionOutput {
         Ok(Vec::new())
     }

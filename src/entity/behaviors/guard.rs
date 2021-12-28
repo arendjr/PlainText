@@ -18,6 +18,10 @@ impl Guard {
 }
 
 impl Actor for Guard {
+    fn activate_on_idle(&self) -> bool {
+        true
+    }
+
     fn on_active(&self, realm: &mut Realm, dispatcher: &ActionDispatcher) -> ActionOutput {
         let enemy_in_same_room = realm.npc(self.entity_ref).and_then(|guard| {
             guard

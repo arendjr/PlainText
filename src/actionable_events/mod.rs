@@ -95,10 +95,13 @@ fn process_reset_action(
     }
 
     if let Some(actor) = realm.actor(character_ref) {
-        actor.borrow().on_active(realm, dispatcher)
-    } else {
-        Ok(Vec::new())
+        let actor = actor.borrow();
+        if actor.activate_on_idle() {
+            return actor.on_active(realm, dispatcher);
+        }
     }
+
+    Ok(Vec::new())
 }
 
 fn process_spawn_npc(
